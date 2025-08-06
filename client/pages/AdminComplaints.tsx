@@ -137,10 +137,10 @@ const AdminComplaints: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterState>({
     search: '',
-    ward: '',
-    type: '',
-    status: '',
-    priority: '',
+    ward: 'all',
+    type: 'all',
+    status: 'all',
+    priority: 'all',
     assignedTo: '',
     dateFrom: '',
     dateTo: '',
