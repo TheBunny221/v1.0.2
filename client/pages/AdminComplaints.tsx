@@ -188,14 +188,14 @@ const AdminComplaints: React.FC = () => {
 
   const filteredComplaints = complaints.filter(complaint => {
     return (
-      (!filters.search || 
+      (!filters.search ||
         complaint.id.toLowerCase().includes(filters.search.toLowerCase()) ||
         complaint.submittedBy.toLowerCase().includes(filters.search.toLowerCase()) ||
         complaint.type.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.ward || complaint.ward === filters.ward) &&
-      (!filters.type || complaint.type === filters.type) &&
-      (!filters.status || complaint.status === filters.status) &&
-      (!filters.priority || complaint.priority === filters.priority) &&
+      (!filters.ward || filters.ward === 'all' || complaint.ward === filters.ward) &&
+      (!filters.type || filters.type === 'all' || complaint.type === filters.type) &&
+      (!filters.status || filters.status === 'all' || complaint.status === filters.status) &&
+      (!filters.priority || filters.priority === 'all' || complaint.priority === filters.priority) &&
       (!filters.assignedTo || complaint.assignedTo.includes(filters.assignedTo))
     );
   });
