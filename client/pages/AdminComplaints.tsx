@@ -275,7 +275,7 @@ const AdminComplaints: React.FC = () => {
                   <SelectValue placeholder="All wards" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Wards</SelectItem>
+                  <SelectItem value="all">All Wards</SelectItem>
                   {wards.map(ward => (
                     <SelectItem key={ward} value={ward}>{ward}</SelectItem>
                   ))}
@@ -290,7 +290,7 @@ const AdminComplaints: React.FC = () => {
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   {complaintTypes.map(type => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
                   ))}
@@ -305,7 +305,7 @@ const AdminComplaints: React.FC = () => {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="registered">Registered</SelectItem>
                   <SelectItem value="assigned">Assigned</SelectItem>
                   <SelectItem value="in-progress">In Progress</SelectItem>
@@ -322,7 +322,7 @@ const AdminComplaints: React.FC = () => {
                   <SelectValue placeholder="All priorities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Priorities</SelectItem>
+                  <SelectItem value="all">All Priorities</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
