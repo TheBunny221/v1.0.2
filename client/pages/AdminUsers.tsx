@@ -323,7 +323,7 @@ const AdminUsers: React.FC = () => {
                       <SelectValue placeholder="All roles" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Roles</SelectItem>
+                      <SelectItem value="all">All Roles</SelectItem>
                       <SelectItem value="citizen">Citizen</SelectItem>
                       <SelectItem value="ward-officer">Ward Officer</SelectItem>
                       <SelectItem value="maintenance">Maintenance</SelectItem>
@@ -339,7 +339,7 @@ const AdminUsers: React.FC = () => {
                       <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Statuses</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="inactive">Inactive</SelectItem>
                       <SelectItem value="blocked">Blocked</SelectItem>
