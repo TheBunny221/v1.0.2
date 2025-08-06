@@ -28,6 +28,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Role Switcher */}
+          <Route path="/roles" element={<Layout><RoleSwitcher /></Layout>} />
+
           {/* Citizen Routes */}
           <Route path="/" element={<Layout userRole="citizen"><Index /></Layout>} />
           <Route path="/my-complaints" element={<Layout userRole="citizen"><MyComplaints /></Layout>} />
