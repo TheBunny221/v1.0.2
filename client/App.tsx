@@ -46,15 +46,15 @@ const App = () => (
           <Route path="/admin/users" element={<Layout userRole="admin"><AdminUsers /></Layout>} />
           <Route path="/admin/reports" element={<Layout userRole="admin"><AdminReports /></Layout>} />
 
-          {/* Ward Officer Routes - Placeholders */}
-          <Route path="/ward" element={<Layout userRole="ward-officer"><AdminDashboard /></Layout>} />
+          {/* Ward Officer Routes */}
+          <Route path="/ward" element={<Layout userRole="ward-officer"><WardDashboard /></Layout>} />
           <Route path="/ward/review" element={<Layout userRole="ward-officer"><AdminComplaints /></Layout>} />
           <Route path="/ward/forward" element={<Layout userRole="ward-officer"><AdminComplaints /></Layout>} />
 
-          {/* Maintenance Team Routes - Placeholders */}
-          <Route path="/maintenance" element={<Layout userRole="maintenance"><AdminComplaints /></Layout>} />
-          <Route path="/maintenance/update" element={<Layout userRole="maintenance"><AdminComplaints /></Layout>} />
-          <Route path="/maintenance/sla" element={<Layout userRole="maintenance"><AdminComplaints /></Layout>} />
+          {/* Maintenance Team Routes */}
+          <Route path="/maintenance" element={<Layout userRole="maintenance"><MaintenanceDashboard /></Layout>} />
+          <Route path="/maintenance/update" element={<Layout userRole="maintenance"><MaintenanceDashboard /></Layout>} />
+          <Route path="/maintenance/sla" element={<Layout userRole="maintenance"><MaintenanceDashboard /></Layout>} />
 
           {/* Catch-all route */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
