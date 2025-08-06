@@ -127,9 +127,9 @@ const AdminUsers: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterState>({
     search: '',
-    role: '',
-    status: '',
-    ward: '',
+    role: 'all',
+    status: 'all',
+    ward: 'all',
   });
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
