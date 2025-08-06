@@ -355,7 +355,7 @@ const AdminComplaints: React.FC = () => {
               <Button 
                 variant="outline" 
                 onClick={() => setFilters({
-                  search: '', ward: '', type: '', status: '', priority: '', assignedTo: '', dateFrom: '', dateTo: ''
+                  search: '', ward: 'all', type: 'all', status: 'all', priority: 'all', assignedTo: '', dateFrom: '', dateTo: ''
                 })}
               >
                 Clear Filters
