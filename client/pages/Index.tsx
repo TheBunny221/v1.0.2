@@ -88,10 +88,17 @@ const ComplaintRegistration: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Register New Complaint</h1>
-        <p className="text-muted-foreground">
-          Submit your complaint and track its progress through our system
-        </p>
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Register New Complaint</h1>
+            <p className="text-muted-foreground">
+              Submit your complaint and track its progress through our system
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/roles">Switch Role</Link>
+          </Button>
+        </div>
       </div>
 
       <Card>
