@@ -168,13 +168,13 @@ const AdminUsers: React.FC = () => {
 
   const filteredUsers = users.filter(user => {
     return (
-      (!filters.search || 
+      (!filters.search ||
         user.name.toLowerCase().includes(filters.search.toLowerCase()) ||
         user.email.toLowerCase().includes(filters.search.toLowerCase()) ||
         user.id.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.role || user.role === filters.role) &&
-      (!filters.status || user.status === filters.status) &&
-      (!filters.ward || user.ward === filters.ward)
+      (!filters.role || filters.role === 'all' || user.role === filters.role) &&
+      (!filters.status || filters.status === 'all' || user.status === filters.status) &&
+      (!filters.ward || filters.ward === 'all' || user.ward === filters.ward)
     );
   });
 
