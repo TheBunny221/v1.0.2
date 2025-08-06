@@ -350,7 +350,7 @@ const AdminUsers: React.FC = () => {
                 <div className="flex items-end">
                   <Button 
                     variant="outline" 
-                    onClick={() => setFilters({ search: '', role: '', status: '', ward: '' })}
+                    onClick={() => setFilters({ search: '', role: 'all', status: 'all', ward: 'all' })}
                   >
                     Clear Filters
                   </Button>
