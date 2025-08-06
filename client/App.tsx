@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminComplaints from "./pages/AdminComplaints";
 import AdminUsers from "./pages/AdminUsers";
 import AdminReports from "./pages/AdminReports";
+import WardDashboard from "./pages/WardDashboard";
+import MaintenanceDashboard from "./pages/MaintenanceDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
