@@ -70,11 +70,49 @@ const ComplaintRegistration: React.FC = () => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Form submitted:', { formData, files, captcha });
-    // Here you would typically send the data to your API
-    alert('Complaint registered successfully! Complaint ID: CMP-2024-001');
+
+    if (captcha !== captchaValue) {
+      dispatch(addNotification({
+        type: 'error',
+        title: 'Invalid CAPTCHA',
+        message: 'Please enter the correct CAPTCHA code',
+      }));
+      return;
+    }
+
+    try {
+      const complaintData = {
+        mobile: formData.mobile,
+        email: formData.email,
+        problemType: formData.problemType,
+        ward: formData.ward,
+        area: formData.area,
+        location: formData.location,
+        address: formData.address,
+        description: formData.description,
+        files,
+        captcha,
+      };
+
+      const result = await dispatch(submitComplaint(complaintData)).unwrap();
+
+      dispatch(addNotification({
+        type: 'success',
+        title: 'Complaint Submitted',
+        message: `Complaint registered successfully! ID: ${result.id}`,
+      }));
+
+      // Reset form
+      resetForm();
+    } catch (error) {
+      dispatch(addNotification({
+        type: 'error',
+        title: 'Submission Failed',
+        message: error instanceof Error ? error.message : 'Failed to submit complaint',
+      }));
+    }
   };
 
   const resetForm = () => {
