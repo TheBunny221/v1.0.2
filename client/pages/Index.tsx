@@ -346,8 +346,8 @@ const ComplaintRegistration: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex space-x-4 pt-4">
-              <Button type="submit" className="flex-1 md:flex-none">
-                Submit Complaint
+              <Button type="submit" className="flex-1 md:flex-none" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
               </Button>
               <Button type="button" variant="outline" onClick={resetForm}>
                 Reset Form
