@@ -102,7 +102,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => dispatch(toggleSidebar())}
               className="lg:hidden"
             >
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
