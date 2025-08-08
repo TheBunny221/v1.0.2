@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   const getNavigationItems = () => {
-    switch (userRole) {
+    switch (effectiveUserRole) {
       case 'citizen':
         return [
           { path: '/', label: 'Register Complaint', icon: FileText },
