@@ -219,21 +219,21 @@ const ComplaintRegistration: React.FC = () => {
             {/* Location Details */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="area">Area / Society *</Label>
+                <Label htmlFor="area">{translations.complaints.area} *</Label>
                 <Input
                   id="area"
                   value={formData.area}
                   onChange={(e) => handleInputChange('area', e.target.value)}
-                  placeholder="Type at least 5 characters to search..."
+                  placeholder={translations.forms.minCharacters}
                   required
                 />
                 <p className="text-sm text-muted-foreground">
-                  Start typing your area or society name (minimum 5 characters)
+                  {translations.forms.minCharacters}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{translations.complaints.location}</Label>
                 <div className="flex space-x-2">
                   <Input
                     id="location"
@@ -249,7 +249,7 @@ const ComplaintRegistration: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Residential Address</Label>
+                <Label htmlFor="address">{translations.complaints.address}</Label>
                 <Textarea
                   id="address"
                   value={formData.address}
