@@ -29,10 +29,12 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+  <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AppInitializer />
+        <Toaster />
+        <Sonner />
       <BrowserRouter>
         <Routes>
           {/* Role Switcher */}
@@ -44,6 +46,10 @@ const App = () => (
           <Route path="/reopen-complaint" element={<Layout userRole="citizen"><ReopenComplaint /></Layout>} />
           <Route path="/track-status" element={<Layout userRole="citizen"><TrackStatus /></Layout>} />
           <Route path="/feedback" element={<Layout userRole="citizen"><Feedback /></Layout>} />
+
+          {/* Common Routes */}
+          <Route path="/profile" element={<Layout><Profile /></Layout>} />
+          <Route path="/settings" element={<Layout><Settings /></Layout>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<Layout userRole="admin"><AdminDashboard /></Layout>} />
@@ -64,9 +70,10 @@ const App = () => (
           {/* Catch-all route */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </Provider>
 );
 
 createRoot(document.getElementById("root")!).render(<App />);
