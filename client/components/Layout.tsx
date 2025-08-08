@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import {
@@ -117,7 +118,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole = 'citizen' }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem>English</DropdownMenuItem>
-                <DropdownMenuItem>हिन्दी</DropdownMenuItem>
+                <DropdownMenuItem>ह��न्दी</DropdownMenuItem>
                 <DropdownMenuItem>മലയാളം</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
