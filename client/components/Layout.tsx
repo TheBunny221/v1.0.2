@@ -123,7 +123,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  EN
+                  {currentLanguage.toUpperCase()}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
