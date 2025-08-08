@@ -22,6 +22,8 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminReports from "./pages/AdminReports";
 import WardDashboard from "./pages/WardDashboard";
 import MaintenanceDashboard from "./pages/MaintenanceDashboard";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
