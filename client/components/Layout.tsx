@@ -86,7 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
   const getRoleLabel = () => {
     switch (effectiveUserRole) {
       case 'citizen': return 'Citizen Portal';
-      case 'admin': return 'Admin Dashboard';
+      case 'admin': return 'Admin ' + translations.nav.dashboard;
       case 'ward-officer': return 'Ward Officer Portal';
       case 'maintenance': return 'Maintenance Team';
       default: return 'Portal';
@@ -129,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
               <DropdownMenuContent>
                 <DropdownMenuItem>English</DropdownMenuItem>
                 <DropdownMenuItem>ह��न्दी</DropdownMenuItem>
-                <DropdownMenuItem>മലയാളം</DropdownMenuItem>
+                <DropdownMenuItem>��ലയാളം</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
