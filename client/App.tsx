@@ -209,4 +209,16 @@ const App = () => (
   </Provider>
 );
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Get the root element
+const rootElement = document.getElementById("root")!;
+
+// Check if we already have a root attached to this element
+if (!rootElement._reactRoot) {
+  const root = createRoot(rootElement);
+  // Store the root reference to prevent multiple createRoot calls
+  (rootElement as any)._reactRoot = root;
+  root.render(<App />);
+} else {
+  // If root already exists, just re-render
+  (rootElement as any)._reactRoot.render(<App />);
+}
