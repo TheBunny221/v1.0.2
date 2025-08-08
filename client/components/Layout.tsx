@@ -28,17 +28,24 @@ import {
   MessageSquare,
 } from 'lucide-react';
 
-type UserRole = 'citizen' | 'admin' | 'ward-officer' | 'maintenance';
+import type { UserRole } from '@/store/slices/authSlice';
 
 interface LayoutProps {
   children: React.ReactNode;
   userRole?: UserRole;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, userRole = 'citizen' }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifications] = useState(3);
+const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
+  const dispatch = useAppDispatch();
   const location = useLocation();
+
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { translations, currentLanguage } = useAppSelector((state) => state.language);
+  const { sidebarOpen, notifications } = useAppSelector((state) => state.ui);
+
+  // Use authenticated user's role if available, otherwise fall back to prop
+  const effectiveUserRole = user?.role || userRole || 'citizen';
+  const unreadNotifications = notifications.filter(n => !n.read).length;
 
   const getNavigationItems = () => {
     switch (userRole) {
