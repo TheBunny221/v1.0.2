@@ -185,10 +185,10 @@ const ComplaintRegistration: React.FC = () => {
             {/* Problem Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="problem-type">Problem Type *</Label>
+                <Label htmlFor="problem-type">{translations.complaints.complaintType} *</Label>
                 <Select value={formData.problemType} onValueChange={(value) => handleInputChange('problemType', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select problem type" />
+                    <SelectValue placeholder={`Select ${translations.complaints.complaintType.toLowerCase()}`} />
                   </SelectTrigger>
                   <SelectContent>
                     {problemTypes.map((type) => (
@@ -200,10 +200,10 @@ const ComplaintRegistration: React.FC = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ward">Ward *</Label>
+                <Label htmlFor="ward">{translations.complaints.ward} *</Label>
                 <Select value={formData.ward} onValueChange={(value) => handleInputChange('ward', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your ward" />
+                    <SelectValue placeholder={`Select your ${translations.complaints.ward.toLowerCase()}`} />
                   </SelectTrigger>
                   <SelectContent>
                     {wards.map((ward) => (
