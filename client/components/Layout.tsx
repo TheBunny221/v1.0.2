@@ -127,9 +127,15 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>English</DropdownMenuItem>
-                <DropdownMenuItem>ह��न्दी</DropdownMenuItem>
-                <DropdownMenuItem>��ലയാളം</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => dispatch(setLanguage('en'))}>
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => dispatch(setLanguage('hi'))}>
+                  हिन्दी
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => dispatch(setLanguage('ml'))}>
+                  മലയാളം
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
