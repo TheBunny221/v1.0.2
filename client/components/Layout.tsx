@@ -190,7 +190,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
                         ? 'bg-accent text-accent-foreground'
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     }`}
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() => dispatch(setSidebarOpen(false))}
                   >
                     <Icon className="h-5 w-5 mr-3" />
                     {item.label}
@@ -205,7 +205,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
         {sidebarOpen && (
           <div
             className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => dispatch(setSidebarOpen(false))}
           />
         )}
 
