@@ -19,6 +19,10 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Upload, RefreshCw } from 'lucide-react';
 
 const ComplaintRegistration: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { isSubmitting } = useAppSelector((state) => state.complaints);
+  const { translations } = useAppSelector((state) => state.language);
+
   const [formData, setFormData] = useState({
     mobile: '',
     email: '',
