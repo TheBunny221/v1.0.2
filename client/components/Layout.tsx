@@ -51,28 +51,28 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
     switch (effectiveUserRole) {
       case 'citizen':
         return [
-          { path: '/', label: 'Register Complaint', icon: FileText },
-          { path: '/my-complaints', label: 'My Complaints', icon: MessageSquare },
-          { path: '/reopen-complaint', label: 'Reopen Complaint', icon: Clock },
-          { path: '/track-status', label: 'Track Status', icon: MapPin },
-          { path: '/feedback', label: 'Feedback', icon: MessageSquare },
+          { path: '/', label: translations.complaints.registerComplaint, icon: FileText },
+          { path: '/my-complaints', label: translations.complaints.myComplaints, icon: MessageSquare },
+          { path: '/reopen-complaint', label: translations.complaints.reopenComplaint, icon: Clock },
+          { path: '/track-status', label: translations.complaints.trackStatus, icon: MapPin },
+          { path: '/feedback', label: translations.complaints.feedback, icon: MessageSquare },
         ];
       case 'admin':
         return [
-          { path: '/admin', label: 'Dashboard', icon: BarChart3 },
-          { path: '/admin/complaints', label: 'Complaint Management', icon: FileText },
-          { path: '/admin/users', label: 'User Management', icon: Users },
-          { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
+          { path: '/admin', label: translations.nav.dashboard, icon: BarChart3 },
+          { path: '/admin/complaints', label: translations.nav.complaints + ' Management', icon: FileText },
+          { path: '/admin/users', label: translations.nav.users + ' Management', icon: Users },
+          { path: '/admin/reports', label: translations.nav.reports, icon: BarChart3 },
         ];
       case 'ward-officer':
         return [
-          { path: '/ward', label: 'My Zone Dashboard', icon: BarChart3 },
-          { path: '/ward/review', label: 'Complaint Review', icon: FileText },
+          { path: '/ward', label: 'My Zone ' + translations.nav.dashboard, icon: BarChart3 },
+          { path: '/ward/review', label: translations.nav.complaints + ' Review', icon: FileText },
           { path: '/ward/forward', label: 'Forwarding Panel', icon: MapPin },
         ];
       case 'maintenance':
         return [
-          { path: '/maintenance', label: 'Assigned Complaints', icon: FileText },
+          { path: '/maintenance', label: 'Assigned ' + translations.nav.complaints, icon: FileText },
           { path: '/maintenance/update', label: 'Update Status', icon: Wrench },
           { path: '/maintenance/sla', label: 'SLA Tracking', icon: Clock },
         ];
