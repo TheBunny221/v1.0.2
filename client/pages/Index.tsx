@@ -262,12 +262,12 @@ const ComplaintRegistration: React.FC = () => {
 
             {/* Complaint Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Complaint Description *</Label>
+              <Label htmlFor="description">{translations.forms.complaintDescription} *</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Describe your complaint in detail..."
+                placeholder={`Describe your ${translations.complaints.description.toLowerCase()} in detail...`}
                 rows={4}
                 required
               />
@@ -275,7 +275,7 @@ const ComplaintRegistration: React.FC = () => {
 
             {/* File Uploads */}
             <div className="space-y-4">
-              <Label>Optional Uploads</Label>
+              <Label>{translations.forms.optionalUploads}</Label>
               <div className="border-2 border-dashed border-border rounded-lg p-6">
                 <div className="text-center">
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
@@ -292,7 +292,7 @@ const ComplaintRegistration: React.FC = () => {
                   />
                   <Label htmlFor="file-upload" className="cursor-pointer">
                     <Button type="button" variant="outline" asChild>
-                      <span>Choose Files</span>
+                      <span>{translations.common.upload} Files</span>
                     </Button>
                   </Label>
                 </div>
