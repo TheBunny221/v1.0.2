@@ -38,15 +38,15 @@ const ComplaintRegistration: React.FC = () => {
   const [captchaValue] = useState('A3X7M'); // Mock captcha
 
   const problemTypes = [
-    'Water Supply Issues',
-    'Electricity Problems',
-    'Road & Infrastructure',
-    'Garbage Collection',
-    'Street Lighting',
-    'Sewerage Issues',
-    'Public Health',
-    'Traffic & Transportation',
-    'Others',
+    { key: 'waterSupply', label: translations.complaints.waterSupply },
+    { key: 'electricity', label: translations.complaints.electricity },
+    { key: 'roadRepair', label: translations.complaints.roadRepair },
+    { key: 'garbageCollection', label: translations.complaints.garbageCollection },
+    { key: 'streetLighting', label: translations.complaints.streetLighting },
+    { key: 'sewerage', label: translations.complaints.sewerage },
+    { key: 'publicHealth', label: translations.complaints.publicHealth },
+    { key: 'traffic', label: translations.complaints.traffic },
+    { key: 'others', label: translations.complaints.others },
   ];
 
   const wards = [
