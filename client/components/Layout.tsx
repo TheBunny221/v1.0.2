@@ -84,7 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
   const navigationItems = getNavigationItems();
 
   const getRoleLabel = () => {
-    switch (userRole) {
+    switch (effectiveUserRole) {
       case 'citizen': return 'Citizen Portal';
       case 'admin': return 'Admin Dashboard';
       case 'ward-officer': return 'Ward Officer Portal';
