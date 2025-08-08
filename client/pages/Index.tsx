@@ -192,8 +192,8 @@ const ComplaintRegistration: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {problemTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
+                      <SelectItem key={type.key} value={type.label}>
+                        {type.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
