@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -19,12 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { updateUserPreferences } from '@/store/slices/authSlice';
-import { setLanguage } from '@/store/slices/languageSlice';
-import { setTheme, addNotification } from '@/store/slices/uiSlice';
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { updateUserPreferences } from "@/store/slices/authSlice";
+import { setLanguage } from "@/store/slices/languageSlice";
+import { setTheme, addNotification } from "@/store/slices/uiSlice";
 import {
   Settings as SettingsIcon,
   Globe,
@@ -41,35 +41,41 @@ import {
   Smartphone,
   Mail,
   MessageSquare,
-} from 'lucide-react';
+} from "lucide-react";
 
 const Settings: React.FC = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { currentLanguage, translations } = useAppSelector((state) => state.language);
+  const { currentLanguage, translations } = useAppSelector(
+    (state) => state.language,
+  );
   const { theme } = useAppSelector((state) => state.ui);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleLanguageChange = (language: 'en' | 'hi' | 'ml') => {
+  const handleLanguageChange = (language: "en" | "hi" | "ml") => {
     dispatch(setLanguage(language));
     if (user) {
       dispatch(updateUserPreferences({ language }));
     }
-    dispatch(addNotification({
-      type: 'success',
-      title: translations.common.success,
-      message: 'Language updated successfully',
-    }));
+    dispatch(
+      addNotification({
+        type: "success",
+        title: translations.common.success,
+        message: "Language updated successfully",
+      }),
+    );
   };
 
-  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+  const handleThemeChange = (newTheme: "light" | "dark") => {
     dispatch(setTheme(newTheme));
-    dispatch(addNotification({
-      type: 'info',
-      title: 'Theme Updated',
-      message: `Switched to ${newTheme} mode`,
-    }));
+    dispatch(
+      addNotification({
+        type: "info",
+        title: "Theme Updated",
+        message: `Switched to ${newTheme} mode`,
+      }),
+    );
   };
 
   const handleNotificationChange = (key: string, value: boolean) => {
@@ -88,30 +94,35 @@ const Settings: React.FC = () => {
     };
 
     const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `citizen-connect-data-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `citizen-connect-data-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    dispatch(addNotification({
-      type: 'success',
-      title: translations.common.success,
-      message: 'Data exported successfully',
-    }));
+    dispatch(
+      addNotification({
+        type: "success",
+        title: translations.common.success,
+        message: "Data exported successfully",
+      }),
+    );
   };
 
   const deleteAccount = () => {
     // Mock account deletion
-    dispatch(addNotification({
-      type: 'info',
-      title: 'Account Deletion',
-      message: 'Account deletion request submitted. You will receive a confirmation email.',
-    }));
+    dispatch(
+      addNotification({
+        type: "info",
+        title: "Account Deletion",
+        message:
+          "Account deletion request submitted. You will receive a confirmation email.",
+      }),
+    );
     setShowDeleteDialog(false);
   };
 
@@ -129,9 +140,15 @@ const Settings: React.FC = () => {
 
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">{translations.settings.generalSettings}</TabsTrigger>
-          <TabsTrigger value="notifications">{translations.settings.notificationSettings}</TabsTrigger>
-          <TabsTrigger value="privacy">{translations.settings.privacySettings}</TabsTrigger>
+          <TabsTrigger value="general">
+            {translations.settings.generalSettings}
+          </TabsTrigger>
+          <TabsTrigger value="notifications">
+            {translations.settings.notificationSettings}
+          </TabsTrigger>
+          <TabsTrigger value="privacy">
+            {translations.settings.privacySettings}
+          </TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
         </TabsList>
 
@@ -147,12 +164,17 @@ const Settings: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <Label className="text-base font-medium">{translations.settings.language}</Label>
+                  <Label className="text-base font-medium">
+                    {translations.settings.language}
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     Choose your preferred language for the interface
                   </p>
                 </div>
-                <Select value={currentLanguage} onValueChange={handleLanguageChange}>
+                <Select
+                  value={currentLanguage}
+                  onValueChange={handleLanguageChange}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue />
                   </SelectTrigger>
@@ -177,7 +199,9 @@ const Settings: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <Label className="text-base font-medium">{translations.settings.darkMode}</Label>
+                  <Label className="text-base font-medium">
+                    {translations.settings.darkMode}
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     Switch between light and dark themes
                   </p>
@@ -185,8 +209,10 @@ const Settings: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <Sun className="h-4 w-4" />
                   <Switch
-                    checked={theme === 'dark'}
-                    onCheckedChange={(checked) => handleThemeChange(checked ? 'dark' : 'light')}
+                    checked={theme === "dark"}
+                    onCheckedChange={(checked) =>
+                      handleThemeChange(checked ? "dark" : "light")
+                    }
                   />
                   <Moon className="h-4 w-4" />
                 </div>
@@ -205,7 +231,9 @@ const Settings: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <Label className="text-base font-medium">{translations.settings.soundEffects}</Label>
+                  <Label className="text-base font-medium">
+                    {translations.settings.soundEffects}
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     Enable sound effects for notifications and actions
                   </p>
@@ -239,7 +267,9 @@ const Settings: React.FC = () => {
                   </div>
                   <Switch
                     checked={user?.preferences.emailAlerts || false}
-                    onCheckedChange={(checked) => handleNotificationChange('emailAlerts', checked)}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("emailAlerts", checked)
+                    }
                   />
                 </div>
 
@@ -268,7 +298,9 @@ const Settings: React.FC = () => {
                   </div>
                   <Switch
                     checked={user?.preferences.notifications || false}
-                    onCheckedChange={(checked) => handleNotificationChange('notifications', checked)}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("notifications", checked)
+                    }
                   />
                 </div>
               </div>
@@ -278,15 +310,34 @@ const Settings: React.FC = () => {
                 <h4 className="font-medium">Notification Types</h4>
                 <div className="space-y-3">
                   {[
-                    { label: 'Complaint Status Updates', description: 'When your complaint status changes' },
-                    { label: 'Assignment Notifications', description: 'When complaints are assigned to you' },
-                    { label: 'SLA Deadline Alerts', description: 'Reminders about approaching deadlines' },
-                    { label: 'System Maintenance', description: 'Important system updates and maintenance' },
+                    {
+                      label: "Complaint Status Updates",
+                      description: "When your complaint status changes",
+                    },
+                    {
+                      label: "Assignment Notifications",
+                      description: "When complaints are assigned to you",
+                    },
+                    {
+                      label: "SLA Deadline Alerts",
+                      description: "Reminders about approaching deadlines",
+                    },
+                    {
+                      label: "System Maintenance",
+                      description: "Important system updates and maintenance",
+                    },
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
                       <div className="space-y-1">
-                        <Label className="text-sm font-medium">{item.label}</Label>
-                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                        <Label className="text-sm font-medium">
+                          {item.label}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {item.description}
+                        </p>
                       </div>
                       <Switch defaultChecked={index < 2} />
                     </div>
@@ -309,7 +360,9 @@ const Settings: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">Profile Visibility</Label>
+                    <Label className="text-base font-medium">
+                      Profile Visibility
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Control who can see your profile information
                     </p>
@@ -328,7 +381,9 @@ const Settings: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">Activity Tracking</Label>
+                    <Label className="text-base font-medium">
+                      Activity Tracking
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Allow the system to track your activity for analytics
                     </p>
@@ -338,7 +393,9 @@ const Settings: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">Location Services</Label>
+                    <Label className="text-base font-medium">
+                      Location Services
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Enable location services for better complaint tracking
                     </p>
@@ -360,7 +417,9 @@ const Settings: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div>
-                  <Label className="text-base font-medium">Data Retention Period</Label>
+                  <Label className="text-base font-medium">
+                    Data Retention Period
+                  </Label>
                   <p className="text-sm text-muted-foreground mb-2">
                     How long should we keep your data after account closure
                   </p>
@@ -372,13 +431,19 @@ const Settings: React.FC = () => {
                       <SelectItem value="30days">30 Days</SelectItem>
                       <SelectItem value="6months">6 Months</SelectItem>
                       <SelectItem value="1year">1 Year</SelectItem>
-                      <SelectItem value="permanent">Keep Permanently</SelectItem>
+                      <SelectItem value="permanent">
+                        Keep Permanently
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="flex space-x-2">
-                  <Button variant="outline" onClick={exportData} className="flex-1">
+                  <Button
+                    variant="outline"
+                    onClick={exportData}
+                    className="flex-1"
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     {translations.common.export} My Data
                   </Button>
@@ -402,7 +467,9 @@ const Settings: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">Developer Mode</Label>
+                    <Label className="text-base font-medium">
+                      Developer Mode
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Enable advanced features and debugging options
                     </p>
@@ -412,7 +479,9 @@ const Settings: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">Beta Features</Label>
+                    <Label className="text-base font-medium">
+                      Beta Features
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Get early access to experimental features
                     </p>
@@ -461,11 +530,15 @@ const Settings: React.FC = () => {
                     {translations.settings.accountDeletion}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Permanently delete your account and all associated data. This action cannot be undone.
+                    Permanently delete your account and all associated data.
+                    This action cannot be undone.
                   </p>
                 </div>
 
-                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <Dialog
+                  open={showDeleteDialog}
+                  onOpenChange={setShowDeleteDialog}
+                >
                   <DialogTrigger asChild>
                     <Button variant="destructive">Delete Account</Button>
                   </DialogTrigger>
@@ -473,8 +546,9 @@ const Settings: React.FC = () => {
                     <DialogHeader>
                       <DialogTitle>Are you absolutely sure?</DialogTitle>
                       <DialogDescription>
-                        This action cannot be undone. This will permanently delete your account
-                        and remove all your data from our servers, including:
+                        This action cannot be undone. This will permanently
+                        delete your account and remove all your data from our
+                        servers, including:
                         <ul className="mt-2 ml-4 list-disc">
                           <li>Profile information</li>
                           <li>Complaint history</li>
@@ -484,7 +558,10 @@ const Settings: React.FC = () => {
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowDeleteDialog(false)}
+                      >
                         Cancel
                       </Button>
                       <Button variant="destructive" onClick={deleteAccount}>

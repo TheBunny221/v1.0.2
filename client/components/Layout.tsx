@@ -1,17 +1,17 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { logout } from '@/store/slices/authSlice';
-import { setLanguage } from '@/store/slices/languageSlice';
-import { toggleSidebar, setSidebarOpen } from '@/store/slices/uiSlice';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { logout } from "@/store/slices/authSlice";
+import { setLanguage } from "@/store/slices/languageSlice";
+import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+} from "./ui/dropdown-menu";
 import {
   Bell,
   User,
@@ -26,9 +26,9 @@ import {
   Wrench,
   Clock,
   MessageSquare,
-} from 'lucide-react';
+} from "lucide-react";
 
-import type { UserRole } from '@/store/slices/authSlice';
+import type { UserRole } from "@/store/slices/authSlice";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,41 +40,91 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
   const location = useLocation();
 
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const { translations, currentLanguage } = useAppSelector((state) => state.language);
+  const { translations, currentLanguage } = useAppSelector(
+    (state) => state.language,
+  );
   const { sidebarOpen, notifications } = useAppSelector((state) => state.ui);
 
   // Use authenticated user's role if available, otherwise fall back to prop
-  const effectiveUserRole = user?.role || userRole || 'citizen';
-  const unreadNotifications = notifications.filter(n => !n.read).length;
+  const effectiveUserRole = user?.role || userRole || "citizen";
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   const getNavigationItems = () => {
     switch (effectiveUserRole) {
-      case 'citizen':
+      case "citizen":
         return [
-          { path: '/', label: translations.complaints.registerComplaint, icon: FileText },
-          { path: '/my-complaints', label: translations.complaints.myComplaints, icon: MessageSquare },
-          { path: '/reopen-complaint', label: translations.complaints.reopenComplaint, icon: Clock },
-          { path: '/track-status', label: translations.complaints.trackStatus, icon: MapPin },
-          { path: '/feedback', label: translations.complaints.feedback, icon: MessageSquare },
+          {
+            path: "/",
+            label: translations.complaints.registerComplaint,
+            icon: FileText,
+          },
+          {
+            path: "/my-complaints",
+            label: translations.complaints.myComplaints,
+            icon: MessageSquare,
+          },
+          {
+            path: "/reopen-complaint",
+            label: translations.complaints.reopenComplaint,
+            icon: Clock,
+          },
+          {
+            path: "/track-status",
+            label: translations.complaints.trackStatus,
+            icon: MapPin,
+          },
+          {
+            path: "/feedback",
+            label: translations.complaints.feedback,
+            icon: MessageSquare,
+          },
         ];
-      case 'admin':
+      case "admin":
         return [
-          { path: '/admin', label: translations.nav.dashboard, icon: BarChart3 },
-          { path: '/admin/complaints', label: translations.nav.complaints + ' Management', icon: FileText },
-          { path: '/admin/users', label: translations.nav.users + ' Management', icon: Users },
-          { path: '/admin/reports', label: translations.nav.reports, icon: BarChart3 },
+          {
+            path: "/admin",
+            label: translations.nav.dashboard,
+            icon: BarChart3,
+          },
+          {
+            path: "/admin/complaints",
+            label: translations.nav.complaints + " Management",
+            icon: FileText,
+          },
+          {
+            path: "/admin/users",
+            label: translations.nav.users + " Management",
+            icon: Users,
+          },
+          {
+            path: "/admin/reports",
+            label: translations.nav.reports,
+            icon: BarChart3,
+          },
         ];
-      case 'ward-officer':
+      case "ward-officer":
         return [
-          { path: '/ward', label: 'My Zone ' + translations.nav.dashboard, icon: BarChart3 },
-          { path: '/ward/review', label: translations.nav.complaints + ' Review', icon: FileText },
-          { path: '/ward/forward', label: 'Forwarding Panel', icon: MapPin },
+          {
+            path: "/ward",
+            label: "My Zone " + translations.nav.dashboard,
+            icon: BarChart3,
+          },
+          {
+            path: "/ward/review",
+            label: translations.nav.complaints + " Review",
+            icon: FileText,
+          },
+          { path: "/ward/forward", label: "Forwarding Panel", icon: MapPin },
         ];
-      case 'maintenance':
+      case "maintenance":
         return [
-          { path: '/maintenance', label: 'Assigned ' + translations.nav.complaints, icon: FileText },
-          { path: '/maintenance/update', label: 'Update Status', icon: Wrench },
-          { path: '/maintenance/sla', label: 'SLA Tracking', icon: Clock },
+          {
+            path: "/maintenance",
+            label: "Assigned " + translations.nav.complaints,
+            icon: FileText,
+          },
+          { path: "/maintenance/update", label: "Update Status", icon: Wrench },
+          { path: "/maintenance/sla", label: "SLA Tracking", icon: Clock },
         ];
       default:
         return [];
@@ -85,11 +135,16 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
 
   const getRoleLabel = () => {
     switch (effectiveUserRole) {
-      case 'citizen': return 'Citizen Portal';
-      case 'admin': return 'Admin ' + translations.nav.dashboard;
-      case 'ward-officer': return 'Ward Officer Portal';
-      case 'maintenance': return 'Maintenance Team';
-      default: return 'Portal';
+      case "citizen":
+        return "Citizen Portal";
+      case "admin":
+        return "Admin " + translations.nav.dashboard;
+      case "ward-officer":
+        return "Ward Officer Portal";
+      case "maintenance":
+        return "Maintenance Team";
+      default:
+        return "Portal";
     }
   };
 
@@ -105,15 +160,23 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
               onClick={() => dispatch(toggleSidebar())}
               className="lg:hidden"
             >
-              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {sidebarOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
             <Link to="/" className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <FileText className="h-5 w-5 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-semibold text-foreground">CitizenConnect</h1>
-                <p className="text-sm text-muted-foreground">{getRoleLabel()}</p>
+                <h1 className="text-xl font-semibold text-foreground">
+                  CitizenConnect
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {getRoleLabel()}
+                </p>
               </div>
             </Link>
           </div>
@@ -127,13 +190,13 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => dispatch(setLanguage('en'))}>
+                <DropdownMenuItem onClick={() => dispatch(setLanguage("en"))}>
                   English
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => dispatch(setLanguage('hi'))}>
+                <DropdownMenuItem onClick={() => dispatch(setLanguage("hi"))}>
                   हिन्दी
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => dispatch(setLanguage('ml'))}>
+                <DropdownMenuItem onClick={() => dispatch(setLanguage("ml"))}>
                   മലയാളം
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -181,7 +244,9 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:block`}>
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:block`}
+        >
           <div className="flex flex-col h-full pt-16 lg:pt-0">
             <nav className="flex-1 px-4 py-4 space-y-1">
               {navigationItems.map((item) => {
@@ -193,8 +258,8 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
                     to={item.path}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       isActive
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     }`}
                     onClick={() => dispatch(setSidebarOpen(false))}
                   >
@@ -217,9 +282,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
 
         {/* Main Content */}
         <main className="flex-1 lg:pl-0">
-          <div className="p-4 lg:p-6">
-            {children}
-          </div>
+          <div className="p-4 lg:p-6">{children}</div>
         </main>
       </div>
     </div>

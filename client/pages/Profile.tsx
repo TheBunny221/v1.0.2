@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { updateProfile, updateUserPreferences } from '@/store/slices/authSlice';
-import { addNotification } from '@/store/slices/uiSlice';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { updateProfile, updateUserPreferences } from "@/store/slices/authSlice";
+import { addNotification } from "@/store/slices/uiSlice";
 import {
   User,
   Mail,
@@ -31,7 +31,7 @@ import {
   Bell,
   Lock,
   Globe,
-} from 'lucide-react';
+} from "lucide-react";
 
 const Profile: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -39,17 +39,17 @@ const Profile: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    ward: user?.ward || '',
-    department: user?.department || '',
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    ward: user?.ward || "",
+    department: user?.department || "",
   });
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const [showPasswords, setShowPasswords] = useState({
@@ -59,55 +59,63 @@ const Profile: React.FC = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState("personal");
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData(prev => ({ ...prev, [field]: value }));
+    setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSaveProfile = async () => {
     try {
       await dispatch(updateProfile(formData)).unwrap();
-      dispatch(addNotification({
-        type: 'success',
-        title: translations.common.success,
-        message: translations.profile.profileUpdated,
-      }));
+      dispatch(
+        addNotification({
+          type: "success",
+          title: translations.common.success,
+          message: translations.profile.profileUpdated,
+        }),
+      );
       setIsEditing(false);
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        title: translations.common.error,
-        message: error instanceof Error ? error.message : 'Update failed',
-      }));
+      dispatch(
+        addNotification({
+          type: "error",
+          title: translations.common.error,
+          message: error instanceof Error ? error.message : "Update failed",
+        }),
+      );
     }
   };
 
   const handleChangePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      dispatch(addNotification({
-        type: 'error',
-        title: translations.common.error,
-        message: translations.profile.passwordMismatch,
-      }));
+      dispatch(
+        addNotification({
+          type: "error",
+          title: translations.common.error,
+          message: translations.profile.passwordMismatch,
+        }),
+      );
       return;
     }
 
     // Mock password change
-    dispatch(addNotification({
-      type: 'success',
-      title: translations.common.success,
-      message: translations.profile.passwordChanged,
-    }));
+    dispatch(
+      addNotification({
+        type: "success",
+        title: translations.common.success,
+        message: translations.profile.passwordChanged,
+      }),
+    );
 
     setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     });
   };
 
@@ -117,22 +125,33 @@ const Profile: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-800';
-      case 'ward-officer': return 'bg-blue-100 text-blue-800';
-      case 'maintenance': return 'bg-green-100 text-green-800';
-      case 'citizen': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "admin":
+        return "bg-purple-100 text-purple-800";
+      case "ward-officer":
+        return "bg-blue-100 text-blue-800";
+      case "maintenance":
+        return "bg-green-100 text-green-800";
+      case "citizen":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Please login to view your profile</p>
+        <p className="text-muted-foreground">
+          Please login to view your profile
+        </p>
       </div>
     );
   }
@@ -151,9 +170,13 @@ const Profile: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="personal">{translations.profile.personalInformation}</TabsTrigger>
+          <TabsTrigger value="personal">
+            {translations.profile.personalInformation}
+          </TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="preferences">{translations.profile.preferences}</TabsTrigger>
+          <TabsTrigger value="preferences">
+            {translations.profile.preferences}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="space-y-6">
@@ -185,7 +208,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold">{user.name}</h3>
                   <Badge className={getRoleColor(user.role)}>
-                    {user.role.replace('-', ' ').toUpperCase()}
+                    {user.role.replace("-", " ").toUpperCase()}
                   </Badge>
                   {user.ward && (
                     <p className="text-sm text-muted-foreground flex items-center">
@@ -209,7 +232,7 @@ const Profile: React.FC = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
                     disabled={!isEditing}
                   />
                 </div>
@@ -222,7 +245,9 @@ const Profile: React.FC = () => {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
                       disabled={!isEditing}
                       className="pl-10"
                     />
@@ -236,7 +261,9 @@ const Profile: React.FC = () => {
                     <Input
                       id="phone"
                       value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("phone", e.target.value)
+                      }
                       disabled={!isEditing}
                       className="pl-10"
                     />
@@ -246,7 +273,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <Label>Role</Label>
                   <Input
-                    value={user.role.replace('-', ' ').toUpperCase()}
+                    value={user.role.replace("-", " ").toUpperCase()}
                     disabled
                     className="bg-muted"
                   />
@@ -258,8 +285,10 @@ const Profile: React.FC = () => {
                     <Input
                       id="ward"
                       value={formData.ward}
-                      onChange={(e) => handleInputChange('ward', e.target.value)}
-                      disabled={!isEditing || user.role !== 'ward-officer'}
+                      onChange={(e) =>
+                        handleInputChange("ward", e.target.value)
+                      }
+                      disabled={!isEditing || user.role !== "ward-officer"}
                     />
                   </div>
                 )}
@@ -270,8 +299,10 @@ const Profile: React.FC = () => {
                     <Input
                       id="department"
                       value={formData.department}
-                      onChange={(e) => handleInputChange('department', e.target.value)}
-                      disabled={!isEditing || user.role !== 'maintenance'}
+                      onChange={(e) =>
+                        handleInputChange("department", e.target.value)
+                      }
+                      disabled={!isEditing || user.role !== "maintenance"}
                     />
                   </div>
                 )}
@@ -289,8 +320,8 @@ const Profile: React.FC = () => {
                           name: user.name,
                           email: user.email,
                           phone: user.phone,
-                          ward: user.ward || '',
-                          department: user.department || '',
+                          ward: user.ward || "",
+                          department: user.department || "",
                         });
                       }}
                     >
@@ -321,13 +352,17 @@ const Profile: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">{translations.profile.currentPassword}</Label>
+                <Label htmlFor="currentPassword">
+                  {translations.profile.currentPassword}
+                </Label>
                 <div className="relative">
                   <Input
                     id="currentPassword"
-                    type={showPasswords.current ? 'text' : 'password'}
+                    type={showPasswords.current ? "text" : "password"}
                     value={passwordData.currentPassword}
-                    onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                    onChange={(e) =>
+                      handlePasswordChange("currentPassword", e.target.value)
+                    }
                     placeholder="Enter current password"
                   />
                   <Button
@@ -335,21 +370,34 @@ const Profile: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        current: !prev.current,
+                      }))
+                    }
                   >
-                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.current ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">{translations.profile.newPassword}</Label>
+                <Label htmlFor="newPassword">
+                  {translations.profile.newPassword}
+                </Label>
                 <div className="relative">
                   <Input
                     id="newPassword"
-                    type={showPasswords.new ? 'text' : 'password'}
+                    type={showPasswords.new ? "text" : "password"}
                     value={passwordData.newPassword}
-                    onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                    onChange={(e) =>
+                      handlePasswordChange("newPassword", e.target.value)
+                    }
                     placeholder="Enter new password"
                   />
                   <Button
@@ -357,21 +405,31 @@ const Profile: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
+                    }
                   >
-                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.new ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{translations.profile.confirmPassword}</Label>
+                <Label htmlFor="confirmPassword">
+                  {translations.profile.confirmPassword}
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    type={showPasswords.confirm ? 'text' : 'password'}
+                    type={showPasswords.confirm ? "text" : "password"}
                     value={passwordData.confirmPassword}
-                    onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                    onChange={(e) =>
+                      handlePasswordChange("confirmPassword", e.target.value)
+                    }
                     placeholder="Confirm new password"
                   />
                   <Button
@@ -379,9 +437,18 @@ const Profile: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        confirm: !prev.confirm,
+                      }))
+                    }
                   >
-                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.confirm ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -405,27 +472,35 @@ const Profile: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">{translations.settings.notifications}</Label>
+                    <Label className="text-base font-medium">
+                      {translations.settings.notifications}
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Receive notifications about complaint updates
                     </p>
                   </div>
                   <Switch
                     checked={user.preferences.notifications}
-                    onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
+                    onCheckedChange={(checked) =>
+                      handlePreferenceChange("notifications", checked)
+                    }
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base font-medium">{translations.settings.emailAlerts}</Label>
+                    <Label className="text-base font-medium">
+                      {translations.settings.emailAlerts}
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Get email notifications for important updates
                     </p>
                   </div>
                   <Switch
                     checked={user.preferences.emailAlerts}
-                    onCheckedChange={(checked) => handlePreferenceChange('emailAlerts', checked)}
+                    onCheckedChange={(checked) =>
+                      handlePreferenceChange("emailAlerts", checked)
+                    }
                   />
                 </div>
 
@@ -436,7 +511,9 @@ const Profile: React.FC = () => {
                   </Label>
                   <Select
                     value={user.preferences.language}
-                    onValueChange={(value) => handlePreferenceChange('language', value)}
+                    onValueChange={(value) =>
+                      handlePreferenceChange("language", value)
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />

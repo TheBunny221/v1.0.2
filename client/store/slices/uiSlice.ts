@@ -1,11 +1,11 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface UIState {
   sidebarOpen: boolean;
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   notifications: Array<{
     id: string;
-    type: 'success' | 'error' | 'warning' | 'info';
+    type: "success" | "error" | "warning" | "info";
     title: string;
     message: string;
     timestamp: number;
@@ -17,14 +17,14 @@ export interface UIState {
 
 const initialState: UIState = {
   sidebarOpen: false,
-  theme: 'light',
+  theme: "light",
   notifications: [],
   isOnline: navigator.onLine,
   pageLoading: false,
 };
 
 const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
     toggleSidebar: (state) => {
@@ -33,15 +33,18 @@ const uiSlice = createSlice({
     setSidebarOpen: (state, action: PayloadAction<boolean>) => {
       state.sidebarOpen = action.payload;
     },
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
+    setTheme: (state, action: PayloadAction<"light" | "dark">) => {
       state.theme = action.payload;
-      localStorage.setItem('theme', action.payload);
+      localStorage.setItem("theme", action.payload);
     },
-    addNotification: (state, action: PayloadAction<{
-      type: 'success' | 'error' | 'warning' | 'info';
-      title: string;
-      message: string;
-    }>) => {
+    addNotification: (
+      state,
+      action: PayloadAction<{
+        type: "success" | "error" | "warning" | "info";
+        title: string;
+        message: string;
+      }>,
+    ) => {
       const notification = {
         id: Date.now().toString(),
         ...action.payload,
@@ -49,25 +52,29 @@ const uiSlice = createSlice({
         read: false,
       };
       state.notifications.unshift(notification);
-      
+
       // Keep only last 50 notifications
       if (state.notifications.length > 50) {
         state.notifications = state.notifications.slice(0, 50);
       }
     },
     markNotificationAsRead: (state, action: PayloadAction<string>) => {
-      const notification = state.notifications.find(n => n.id === action.payload);
+      const notification = state.notifications.find(
+        (n) => n.id === action.payload,
+      );
       if (notification) {
         notification.read = true;
       }
     },
     markAllNotificationsAsRead: (state) => {
-      state.notifications.forEach(notification => {
+      state.notifications.forEach((notification) => {
         notification.read = true;
       });
     },
     removeNotification: (state, action: PayloadAction<string>) => {
-      state.notifications = state.notifications.filter(n => n.id !== action.payload);
+      state.notifications = state.notifications.filter(
+        (n) => n.id !== action.payload,
+      );
     },
     clearAllNotifications: (state) => {
       state.notifications = [];
@@ -79,13 +86,15 @@ const uiSlice = createSlice({
       state.pageLoading = action.payload;
     },
     initializeTheme: (state) => {
-      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
+      const savedTheme = localStorage.getItem("theme") as "light" | "dark";
       if (savedTheme) {
         state.theme = savedTheme;
       } else {
         // Check system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        state.theme = prefersDark ? 'dark' : 'light';
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        state.theme = prefersDark ? "dark" : "light";
       }
     },
   },

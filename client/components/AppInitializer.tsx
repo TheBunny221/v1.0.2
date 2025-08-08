@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { useAppDispatch } from '@/store/hooks';
-import { loginWithToken } from '@/store/slices/authSlice';
-import { initializeLanguage } from '@/store/slices/languageSlice';
-import { initializeTheme, setOnlineStatus } from '@/store/slices/uiSlice';
+import { useEffect } from "react";
+import { useAppDispatch } from "@/store/hooks";
+import { loginWithToken } from "@/store/slices/authSlice";
+import { initializeLanguage } from "@/store/slices/languageSlice";
+import { initializeTheme, setOnlineStatus } from "@/store/slices/uiSlice";
 
 const AppInitializer: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -15,7 +15,7 @@ const AppInitializer: React.FC = () => {
     dispatch(initializeLanguage());
 
     // Check for existing token and login automatically
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       dispatch(loginWithToken(token));
     }
@@ -24,12 +24,12 @@ const AppInitializer: React.FC = () => {
     const handleOnline = () => dispatch(setOnlineStatus(true));
     const handleOffline = () => dispatch(setOnlineStatus(false));
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [dispatch]);
 

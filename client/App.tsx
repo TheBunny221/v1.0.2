@@ -35,41 +35,174 @@ const App = () => (
         <AppInitializer />
         <Toaster />
         <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Role Switcher */}
-          <Route path="/roles" element={<Layout><RoleSwitcher /></Layout>} />
+        <BrowserRouter>
+          <Routes>
+            {/* Role Switcher */}
+            <Route
+              path="/roles"
+              element={
+                <Layout>
+                  <RoleSwitcher />
+                </Layout>
+              }
+            />
 
-          {/* Citizen Routes */}
-          <Route path="/" element={<Layout userRole="citizen"><Index /></Layout>} />
-          <Route path="/my-complaints" element={<Layout userRole="citizen"><MyComplaints /></Layout>} />
-          <Route path="/reopen-complaint" element={<Layout userRole="citizen"><ReopenComplaint /></Layout>} />
-          <Route path="/track-status" element={<Layout userRole="citizen"><TrackStatus /></Layout>} />
-          <Route path="/feedback" element={<Layout userRole="citizen"><Feedback /></Layout>} />
+            {/* Citizen Routes */}
+            <Route
+              path="/"
+              element={
+                <Layout userRole="citizen">
+                  <Index />
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-complaints"
+              element={
+                <Layout userRole="citizen">
+                  <MyComplaints />
+                </Layout>
+              }
+            />
+            <Route
+              path="/reopen-complaint"
+              element={
+                <Layout userRole="citizen">
+                  <ReopenComplaint />
+                </Layout>
+              }
+            />
+            <Route
+              path="/track-status"
+              element={
+                <Layout userRole="citizen">
+                  <TrackStatus />
+                </Layout>
+              }
+            />
+            <Route
+              path="/feedback"
+              element={
+                <Layout userRole="citizen">
+                  <Feedback />
+                </Layout>
+              }
+            />
 
-          {/* Common Routes */}
-          <Route path="/profile" element={<Layout><Profile /></Layout>} />
-          <Route path="/settings" element={<Layout><Settings /></Layout>} />
+            {/* Common Routes */}
+            <Route
+              path="/profile"
+              element={
+                <Layout>
+                  <Profile />
+                </Layout>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <Layout>
+                  <Settings />
+                </Layout>
+              }
+            />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<Layout userRole="admin"><AdminDashboard /></Layout>} />
-          <Route path="/admin/complaints" element={<Layout userRole="admin"><AdminComplaints /></Layout>} />
-          <Route path="/admin/users" element={<Layout userRole="admin"><AdminUsers /></Layout>} />
-          <Route path="/admin/reports" element={<Layout userRole="admin"><AdminReports /></Layout>} />
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <Layout userRole="admin">
+                  <AdminDashboard />
+                </Layout>
+              }
+            />
+            <Route
+              path="/admin/complaints"
+              element={
+                <Layout userRole="admin">
+                  <AdminComplaints />
+                </Layout>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <Layout userRole="admin">
+                  <AdminUsers />
+                </Layout>
+              }
+            />
+            <Route
+              path="/admin/reports"
+              element={
+                <Layout userRole="admin">
+                  <AdminReports />
+                </Layout>
+              }
+            />
 
-          {/* Ward Officer Routes */}
-          <Route path="/ward" element={<Layout userRole="ward-officer"><WardDashboard /></Layout>} />
-          <Route path="/ward/review" element={<Layout userRole="ward-officer"><AdminComplaints /></Layout>} />
-          <Route path="/ward/forward" element={<Layout userRole="ward-officer"><AdminComplaints /></Layout>} />
+            {/* Ward Officer Routes */}
+            <Route
+              path="/ward"
+              element={
+                <Layout userRole="ward-officer">
+                  <WardDashboard />
+                </Layout>
+              }
+            />
+            <Route
+              path="/ward/review"
+              element={
+                <Layout userRole="ward-officer">
+                  <AdminComplaints />
+                </Layout>
+              }
+            />
+            <Route
+              path="/ward/forward"
+              element={
+                <Layout userRole="ward-officer">
+                  <AdminComplaints />
+                </Layout>
+              }
+            />
 
-          {/* Maintenance Team Routes */}
-          <Route path="/maintenance" element={<Layout userRole="maintenance"><MaintenanceDashboard /></Layout>} />
-          <Route path="/maintenance/update" element={<Layout userRole="maintenance"><MaintenanceDashboard /></Layout>} />
-          <Route path="/maintenance/sla" element={<Layout userRole="maintenance"><MaintenanceDashboard /></Layout>} />
+            {/* Maintenance Team Routes */}
+            <Route
+              path="/maintenance"
+              element={
+                <Layout userRole="maintenance">
+                  <MaintenanceDashboard />
+                </Layout>
+              }
+            />
+            <Route
+              path="/maintenance/update"
+              element={
+                <Layout userRole="maintenance">
+                  <MaintenanceDashboard />
+                </Layout>
+              }
+            />
+            <Route
+              path="/maintenance/sla"
+              element={
+                <Layout userRole="maintenance">
+                  <MaintenanceDashboard />
+                </Layout>
+              }
+            />
 
-          {/* Catch-all route */}
-          <Route path="*" element={<Layout><NotFound /></Layout>} />
-        </Routes>
+            {/* Catch-all route */}
+            <Route
+              path="*"
+              element={
+                <Layout>
+                  <NotFound />
+                </Layout>
+              }
+            />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

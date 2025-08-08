@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
-export type UserRole = 'citizen' | 'admin' | 'ward-officer' | 'maintenance';
+export type UserRole = "citizen" | "admin" | "ward-officer" | "maintenance";
 
 export interface User {
   id: string;
@@ -12,7 +12,7 @@ export interface User {
   department?: string;
   avatar?: string;
   preferences: {
-    language: 'en' | 'hi' | 'ml';
+    language: "en" | "hi" | "ml";
     notifications: boolean;
     emailAlerts: boolean;
   };
@@ -29,7 +29,7 @@ export interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem("token"),
   isAuthenticated: false,
   isLoading: false,
   error: null,
@@ -41,47 +41,51 @@ const decodeToken = (token: string): { user: User; exp: number } | null => {
   try {
     // Mock token structure for demo
     const mockUsers: Record<string, User> = {
-      'admin-token': {
-        id: 'admin-001',
-        name: 'Admin User',
-        email: 'admin@city.gov',
-        phone: '+91 9876543210',
-        role: 'admin',
-        preferences: { language: 'en', notifications: true, emailAlerts: true }
+      "admin-token": {
+        id: "admin-001",
+        name: "Admin User",
+        email: "admin@city.gov",
+        phone: "+91 9876543210",
+        role: "admin",
+        preferences: { language: "en", notifications: true, emailAlerts: true },
       },
-      'ward-token': {
-        id: 'ward-001',
-        name: 'Ward Officer',
-        email: 'ward@city.gov',
-        phone: '+91 9876543211',
-        role: 'ward-officer',
-        ward: 'Ward 3',
-        preferences: { language: 'en', notifications: true, emailAlerts: true }
+      "ward-token": {
+        id: "ward-001",
+        name: "Ward Officer",
+        email: "ward@city.gov",
+        phone: "+91 9876543211",
+        role: "ward-officer",
+        ward: "Ward 3",
+        preferences: { language: "en", notifications: true, emailAlerts: true },
       },
-      'maintenance-token': {
-        id: 'maint-001',
-        name: 'Maintenance Team',
-        email: 'maintenance@city.gov',
-        phone: '+91 9876543212',
-        role: 'maintenance',
-        department: 'Water & Sanitation',
-        preferences: { language: 'en', notifications: true, emailAlerts: false }
+      "maintenance-token": {
+        id: "maint-001",
+        name: "Maintenance Team",
+        email: "maintenance@city.gov",
+        phone: "+91 9876543212",
+        role: "maintenance",
+        department: "Water & Sanitation",
+        preferences: {
+          language: "en",
+          notifications: true,
+          emailAlerts: false,
+        },
       },
-      'citizen-token': {
-        id: 'citizen-001',
-        name: 'John Doe',
-        email: 'john.doe@email.com',
-        phone: '+91 9876543213',
-        role: 'citizen',
-        preferences: { language: 'en', notifications: true, emailAlerts: true }
-      }
+      "citizen-token": {
+        id: "citizen-001",
+        name: "John Doe",
+        email: "john.doe@email.com",
+        phone: "+91 9876543213",
+        role: "citizen",
+        preferences: { language: "en", notifications: true, emailAlerts: true },
+      },
     };
 
     const user = mockUsers[token];
     if (user) {
       return {
         user,
-        exp: Date.now() + 24 * 60 * 60 * 1000 // 24 hours from now
+        exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
       };
     }
     return null;
@@ -92,82 +96,91 @@ const decodeToken = (token: string): { user: User; exp: number } | null => {
 
 // Async thunks
 export const loginWithToken = createAsyncThunk(
-  'auth/loginWithToken',
+  "auth/loginWithToken",
   async (token: string, { rejectWithValue }) => {
     try {
       const decoded = decodeToken(token);
       if (!decoded) {
-        throw new Error('Invalid token');
-      }
-      
-      if (decoded.exp < Date.now()) {
-        throw new Error('Token expired');
+        throw new Error("Invalid token");
       }
 
-      localStorage.setItem('token', token);
+      if (decoded.exp < Date.now()) {
+        throw new Error("Token expired");
+      }
+
+      localStorage.setItem("token", token);
       return { user: decoded.user, token };
     } catch (error) {
-      localStorage.removeItem('token');
-      return rejectWithValue(error instanceof Error ? error.message : 'Login failed');
+      localStorage.removeItem("token");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Login failed",
+      );
     }
-  }
+  },
 );
 
 export const login = createAsyncThunk(
-  'auth/login',
-  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+  "auth/login",
+  async (
+    { email, password }: { email: string; password: string },
+    { rejectWithValue },
+  ) => {
     try {
       // Mock login - in real app, make API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+
       // Mock credentials mapping
       const mockCredentials: Record<string, string> = {
-        'admin@city.gov': 'admin-token',
-        'ward@city.gov': 'ward-token',
-        'maintenance@city.gov': 'maintenance-token',
-        'john.doe@email.com': 'citizen-token'
+        "admin@city.gov": "admin-token",
+        "ward@city.gov": "ward-token",
+        "maintenance@city.gov": "maintenance-token",
+        "john.doe@email.com": "citizen-token",
       };
 
       const token = mockCredentials[email];
-      if (!token || password !== 'password') {
-        throw new Error('Invalid credentials');
+      if (!token || password !== "password") {
+        throw new Error("Invalid credentials");
       }
 
       const decoded = decodeToken(token);
       if (!decoded) {
-        throw new Error('Authentication failed');
+        throw new Error("Authentication failed");
       }
 
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
       return { user: decoded.user, token };
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Login failed');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Login failed",
+      );
     }
-  }
+  },
 );
 
 export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
+  "auth/updateProfile",
   async (updates: Partial<User>, { getState, rejectWithValue }) => {
     try {
       // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       const state = getState() as { auth: AuthState };
       if (!state.auth.user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
       const updatedUser = { ...state.auth.user, ...updates };
       return updatedUser;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Update failed');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Update failed",
+      );
     }
-  }
+  },
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
@@ -176,7 +189,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.isGuest = false;
       state.error = null;
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
     },
     setGuest: (state, action: PayloadAction<boolean>) => {
       state.isGuest = action.payload;
@@ -189,9 +202,15 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    updateUserPreferences: (state, action: PayloadAction<Partial<User['preferences']>>) => {
+    updateUserPreferences: (
+      state,
+      action: PayloadAction<Partial<User["preferences"]>>,
+    ) => {
       if (state.user) {
-        state.user.preferences = { ...state.user.preferences, ...action.payload };
+        state.user.preferences = {
+          ...state.user.preferences,
+          ...action.payload,
+        };
       }
     },
   },
@@ -241,5 +260,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setGuest, clearError, updateUserPreferences } = authSlice.actions;
+export const { logout, setGuest, clearError, updateUserPreferences } =
+  authSlice.actions;
 export default authSlice.reducer;
