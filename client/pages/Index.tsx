@@ -135,13 +135,13 @@ const ComplaintRegistration: React.FC = () => {
       <div className="mb-6">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Register New Complaint</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{translations.complaints.registerComplaint}</h1>
             <p className="text-muted-foreground">
               Submit your complaint and track its progress through our system
             </p>
           </div>
           <Button asChild variant="outline">
-            <Link to="/roles">Switch Role</Link>
+            <Link to="/roles">{translations.nav.switchRole}</Link>
           </Button>
         </div>
       </div>
@@ -152,7 +152,7 @@ const ComplaintRegistration: React.FC = () => {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <MapPin className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span>Complaint Details</span>
+            <span>{translations.forms.problemDetails}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -160,24 +160,24 @@ const ComplaintRegistration: React.FC = () => {
             {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="mobile">Mobile Number *</Label>
+                <Label htmlFor="mobile">{translations.complaints.mobile} *</Label>
                 <Input
                   id="mobile"
                   type="tel"
                   value={formData.mobile}
                   onChange={(e) => handleInputChange('mobile', e.target.value)}
-                  placeholder="Enter your mobile number"
+                  placeholder={`Enter your ${translations.complaints.mobile.toLowerCase()}`}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email ID</Label>
+                <Label htmlFor="email">{translations.auth.email}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Enter your email address"
+                  placeholder={`Enter your ${translations.auth.email.toLowerCase()}`}
                 />
               </div>
             </div>
