@@ -327,7 +327,7 @@ const ComplaintRegistration: React.FC = () => {
 
             {/* CAPTCHA */}
             <div className="space-y-4">
-              <Label>CAPTCHA Verification *</Label>
+              <Label>{translations.forms.captchaVerification} *</Label>
               <div className="flex items-center space-x-4">
                 <div className="bg-gray-100 px-4 py-2 rounded border font-mono text-lg tracking-wider">
                   {captchaValue}
@@ -339,7 +339,7 @@ const ComplaintRegistration: React.FC = () => {
               <Input
                 value={captcha}
                 onChange={(e) => setCaptcha(e.target.value)}
-                placeholder="Enter the CAPTCHA code"
+                placeholder={translations.forms.enterCaptcha}
                 required
               />
             </div>
@@ -347,7 +347,7 @@ const ComplaintRegistration: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex space-x-4 pt-4">
               <Button type="submit" className="flex-1 md:flex-none" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
+                {isSubmitting ? translations.common.loading : translations.forms.submitComplaint}
               </Button>
               <Button type="button" variant="outline" onClick={resetForm}>
                 Reset Form
