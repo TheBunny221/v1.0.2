@@ -350,7 +350,7 @@ const ComplaintRegistration: React.FC = () => {
                 {isSubmitting ? translations.common.loading : translations.forms.submitComplaint}
               </Button>
               <Button type="button" variant="outline" onClick={resetForm}>
-                Reset Form
+                {translations.forms.resetForm}
               </Button>
             </div>
           </form>
