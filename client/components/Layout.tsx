@@ -160,7 +160,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
               onClick={() => dispatch(toggleSidebar())}
               className="lg:hidden"
             >
-              {sidebarOpen ? (
+              {isSidebarOpen ? (
                 <X className="h-5 w-5" />
               ) : (
                 <Menu className="h-5 w-5" />
