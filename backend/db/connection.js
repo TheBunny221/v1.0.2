@@ -1,15 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 
-let prisma;
+// Initialize Prisma client
+const prisma = new PrismaClient({
+  log: ['info', 'warn', 'error'],
+  errorFormat: 'pretty',
+});
 
 const connectDB = async () => {
   try {
-    // Create Prisma client instance
-    prisma = new PrismaClient({
-      log: ['query', 'info', 'warn', 'error'],
-      errorFormat: 'pretty',
-    });
-
     // Connect to database
     await prisma.$connect();
     console.log('PostgreSQL Connected successfully');
@@ -31,15 +29,16 @@ const connectDB = async () => {
 
   } catch (error) {
     console.error('Error connecting to PostgreSQL:', error);
-    process.exit(1);
+    console.error('Make sure PostgreSQL is running and DATABASE_URL is correct');
+    // Don't exit in development to allow for database setup
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
   }
 };
 
 // Get the Prisma client instance
 const getPrisma = () => {
-  if (!prisma) {
-    throw new Error('Database not initialized. Call connectDB() first.');
-  }
   return prisma;
 };
 
