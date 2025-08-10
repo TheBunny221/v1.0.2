@@ -9,6 +9,7 @@ import { AppInitializer } from "./components/AppInitializer";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 // Import minimal pages first
+import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
