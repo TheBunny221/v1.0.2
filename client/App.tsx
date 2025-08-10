@@ -1,20 +1,7 @@
 import "./global.css";
-
-import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Provider } from "react-redux";
-import { store } from "./store";
-import AppInitializer from "./components/AppInitializer";
-import Layout from "./components/Layout";
-import RoleSwitcher from "./components/RoleSwitcher";
-import Index from "./pages/Index";
+import React from "react";
 import TestComponent from "./components/TestComponent";
-import GuestComplaintForm from "../src/pages/GuestComplaintForm";
-import GuestTrackComplaint from "../src/pages/GuestTrackComplaint";
 import MyComplaints from "./pages/MyComplaints";
 import ReopenComplaint from "./pages/ReopenComplaint";
 import TrackStatus from "./pages/TrackStatus";
