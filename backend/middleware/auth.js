@@ -25,8 +25,8 @@ export const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
       
       // Get user from token
-      const user = await User.findById(decoded.id).select('-password');
-      
+      const user = await User.findById(decoded.id);
+
       if (!user) {
         return res.status(401).json({
           success: false,
@@ -89,7 +89,7 @@ export const optionalAuth = async (req, res, next) => {
       
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-        const user = await User.findById(decoded.id).select('-password');
+        const user = await User.findById(decoded.id);
         
         if (user && user.isActive) {
           req.user = user;
@@ -124,7 +124,7 @@ export const checkOwnership = (resourceIdField = 'id') => {
 
     // Check if user owns the resource
     const resourceId = req.params[resourceIdField];
-    if (resourceId && req.user._id.toString() === resourceId) {
+    if (resourceId && req.user.id === resourceId) {
       return next();
     }
 
@@ -153,9 +153,9 @@ export const checkWardAccess = async (req, res, next) => {
     }
 
     // Ward officers can only access their assigned ward
-    if (req.user.role === 'ward-officer') {
+    if (req.user.role === 'ward_officer') {
       const requestedWard = req.params.ward || req.query.ward || req.body.ward;
-      
+
       if (requestedWard && req.user.ward !== requestedWard) {
         return res.status(403).json({
           success: false,
@@ -176,7 +176,7 @@ export const rateLimitByUser = (maxRequests = 100, windowMs = 15 * 60 * 1000) =>
   const requests = new Map();
 
   return (req, res, next) => {
-    const userId = req.user ? req.user._id.toString() : req.ip;
+    const userId = req.user ? req.user.id : req.ip;
     const now = Date.now();
     const windowStart = now - windowMs;
 
