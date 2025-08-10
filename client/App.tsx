@@ -37,38 +37,37 @@ const App = () => {
         <AppInitializer>
           <BrowserRouter>
             <Routes>
-              {/* Simplified test routes */}
-              <Route path="/" element={
-                <div style={{ padding: "20px" }}>
-                  <h1>🏛️ CitizenConnect</h1>
-                  <p>Application is loading...</p>
-                  <div style={{ marginTop: "20px", background: "#f0f0f0", padding: "10px" }}>
-                    <h3>Available Routes:</h3>
-                    <ul>
-                      <li><a href="/test">Test Page</a></li>
-                      <li><a href="/layout-test">Layout Test</a></li>
-                      <li><a href="/index-test">Index Page Test</a></li>
-                    </ul>
-                  </div>
-                </div>
-              } />
-              <Route path="/test" element={
-                <div style={{ padding: "20px" }}>
-                  <h1>✅ Test Page</h1>
-                  <p>Navigation is working!</p>
-                  <a href="/">← Back to Home</a>
-                </div>
-              } />
-              <Route path="/layout-test" element={<Layout />}>
-                <Route index element={
-                  <div style={{ padding: "20px" }}>
-                    <h1>🎯 Layout Test</h1>
-                    <p>Layout component is working!</p>
-                  </div>
-                } />
+              {/* Guest Routes (no layout) */}
+              <Route path="/guest" element={<GuestComplaintForm />} />
+              <Route path="/guest/track" element={<GuestTrackComplaint />} />
+
+              {/* Main Application Routes (with layout) */}
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Index />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/complaints" element={<AdminComplaints />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+
+                {/* Ward Officer Routes */}
+                <Route path="/ward" element={<WardDashboard />} />
+
+                {/* Maintenance Team Routes */}
+                <Route path="/maintenance" element={<MaintenanceDashboard />} />
+
+                {/* User Routes */}
+                <Route path="/my-complaints" element={<MyComplaints />} />
+                <Route path="/track-status" element={<TrackStatus />} />
+                <Route path="/reopen-complaint" element={<ReopenComplaint />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/feedback" element={<Feedback />} />
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
               </Route>
-              <Route path="/index-test" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </AppInitializer>
