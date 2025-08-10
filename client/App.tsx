@@ -51,6 +51,7 @@ const App = () => {
                   </div>
                 } />
               </Route>
+              <Route path="/index-test" element={<Index />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
