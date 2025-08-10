@@ -1,151 +1,255 @@
-import mongoose from 'mongoose';
+import { getPrisma } from '../db/connection.js';
 
-const notificationSchema = new mongoose.Schema({
-  recipient: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  type: {
-    type: String,
-    enum: [
-      'complaint_registered',
-      'complaint_assigned',
-      'complaint_status_updated', 
-      'complaint_resolved',
-      'complaint_closed',
-      'complaint_reopened',
-      'sla_warning',
-      'sla_breach',
-      'feedback_request',
-      'system_announcement'
-    ],
-    required: true
-  },
-  title: {
-    type: String,
-    required: true,
-    maxlength: [200, 'Title cannot exceed 200 characters']
-  },
-  message: {
-    type: String,
-    required: true,
-    maxlength: [1000, 'Message cannot exceed 1000 characters']
-  },
-  data: {
-    complaintId: String,
-    complaintNumber: String,
-    status: String,
-    priority: String,
-    assignedTo: String,
-    url: String
-  },
-  isRead: {
-    type: Boolean,
-    default: false
-  },
-  readAt: {
-    type: Date,
-    default: null
-  },
-  channels: {
-    inApp: {
-      type: Boolean,
-      default: true
-    },
-    email: {
-      type: Boolean,
-      default: false
-    },
-    sms: {
-      type: Boolean,
-      default: false
-    },
-    push: {
-      type: Boolean,
-      default: false
-    }
-  },
-  sentAt: {
-    email: Date,
-    sms: Date,
-    push: Date
-  },
-  deliveryStatus: {
-    email: {
-      type: String,
-      enum: ['pending', 'sent', 'delivered', 'failed'],
-      default: 'pending'
-    },
-    sms: {
-      type: String,
-      enum: ['pending', 'sent', 'delivered', 'failed'],
-      default: 'pending'
-    },
-    push: {
-      type: String,
-      enum: ['pending', 'sent', 'delivered', 'failed'],
-      default: 'pending'
-    }
-  },
-  priority: {
-    type: String,
-    enum: ['low', 'normal', 'high', 'urgent'],
-    default: 'normal'
-  },
-  expiresAt: {
-    type: Date,
-    default: function() {
-      // Auto-expire notifications after 30 days
-      return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+class NotificationModel {
+  constructor() {
+    this.prisma = getPrisma();
+  }
+
+  // Create a new notification
+  async create(notificationData) {
+    try {
+      const notification = await this.prisma.notification.create({
+        data: notificationData,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            }
+          }
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      throw error;
     }
   }
-}, {
-  timestamps: true
-});
 
-// Index for performance
-notificationSchema.index({ recipient: 1, isRead: 1 });
-notificationSchema.index({ recipient: 1, createdAt: -1 });
-notificationSchema.index({ type: 1 });
-notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+  // Find notification by ID
+  async findById(id) {
+    try {
+      const notification = await this.prisma.notification.findUnique({
+        where: { id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            }
+          }
+        }
+      });
 
-// Mark as read
-notificationSchema.methods.markAsRead = function() {
-  this.isRead = true;
-  this.readAt = new Date();
-  return this.save();
-};
-
-// Static method to create notification
-notificationSchema.statics.createNotification = async function(data) {
-  try {
-    const notification = new this(data);
-    await notification.save();
-    
-    // Populate recipient for immediate use
-    await notification.populate('recipient', 'name email phone preferences');
-    
-    return notification;
-  } catch (error) {
-    throw new Error(`Failed to create notification: ${error.message}`);
-  }
-};
-
-// Static method to get unread count
-notificationSchema.statics.getUnreadCount = async function(userId) {
-  return this.countDocuments({ recipient: userId, isRead: false });
-};
-
-// Static method to mark all as read for a user
-notificationSchema.statics.markAllAsRead = async function(userId) {
-  return this.updateMany(
-    { recipient: userId, isRead: false },
-    { 
-      isRead: true, 
-      readAt: new Date() 
+      return notification;
+    } catch (error) {
+      throw error;
     }
-  );
-};
+  }
 
-export default mongoose.model('Notification', notificationSchema);
+  // Update notification
+  async update(id, updateData) {
+    try {
+      const notification = await this.prisma.notification.update({
+        where: { id },
+        data: updateData,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            }
+          }
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Delete notification
+  async delete(id) {
+    try {
+      await this.prisma.notification.delete({
+        where: { id }
+      });
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Find notifications for a user
+  async findByUserId(userId, page = 1, limit = 20, unreadOnly = false) {
+    try {
+      const skip = (page - 1) * limit;
+      const where = { userId };
+
+      if (unreadOnly) {
+        where.isRead = false;
+      }
+
+      const [notifications, total, unreadCount] = await Promise.all([
+        this.prisma.notification.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' }
+        }),
+        this.prisma.notification.count({ where }),
+        this.prisma.notification.count({
+          where: { userId, isRead: false }
+        })
+      ]);
+
+      return {
+        notifications,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        },
+        unreadCount
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Mark notification as read
+  async markAsRead(id) {
+    try {
+      const notification = await this.prisma.notification.update({
+        where: { id },
+        data: { isRead: true }
+      });
+
+      return notification;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Mark all notifications as read for a user
+  async markAllAsRead(userId) {
+    try {
+      const result = await this.prisma.notification.updateMany({
+        where: { userId, isRead: false },
+        data: { isRead: true }
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get unread count for a user
+  async getUnreadCount(userId) {
+    try {
+      const count = await this.prisma.notification.count({
+        where: { userId, isRead: false }
+      });
+
+      return count;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Create bulk notifications
+  async createBulk(notifications) {
+    try {
+      const result = await this.prisma.notification.createMany({
+        data: notifications
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Delete old notifications (cleanup)
+  async deleteOldNotifications(days = 30) {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - days);
+
+      const result = await this.prisma.notification.deleteMany({
+        where: {
+          createdAt: { lt: cutoffDate },
+          isRead: true
+        }
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Create notification for complaint events
+  async createComplaintNotification(type, complaintId, userId, additionalData = {}) {
+    try {
+      let title, message;
+
+      switch (type) {
+        case 'complaint_submitted':
+          title = 'New Complaint Submitted';
+          message = `Complaint ${additionalData.complaintId} has been submitted successfully.`;
+          break;
+        case 'complaint_assigned':
+          title = 'Complaint Assigned';
+          message = `Complaint ${additionalData.complaintId} has been assigned to you.`;
+          break;
+        case 'complaint_updated':
+          title = 'Complaint Updated';
+          message = `Complaint ${additionalData.complaintId} status has been updated to ${additionalData.status}.`;
+          break;
+        case 'complaint_resolved':
+          title = 'Complaint Resolved';
+          message = `Complaint ${additionalData.complaintId} has been resolved.`;
+          break;
+        case 'complaint_closed':
+          title = 'Complaint Closed';
+          message = `Complaint ${additionalData.complaintId} has been closed.`;
+          break;
+        case 'sla_warning':
+          title = 'SLA Warning';
+          message = `Complaint ${additionalData.complaintId} is approaching its SLA deadline.`;
+          break;
+        case 'sla_breach':
+          title = 'SLA Breach';
+          message = `Complaint ${additionalData.complaintId} has breached its SLA deadline.`;
+          break;
+        default:
+          title = 'Notification';
+          message = 'You have a new notification.';
+      }
+
+      const notification = await this.create({
+        type,
+        title,
+        message,
+        userId,
+        complaintId
+      });
+
+      return notification;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+export default new NotificationModel();
