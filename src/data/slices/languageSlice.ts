@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Translation, translations } from "../resources/translations";
+import { Translation, translations } from "../../resource/translations";
 
 export type Language = "en" | "hi" | "ml";
 
