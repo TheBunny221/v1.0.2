@@ -59,8 +59,8 @@ model Complaint {
   ward                    String
   area                    String
   address                 String?
-  latitude                Real?
-  longitude               Real?
+  latitude                Float?
+  longitude               Float?
   landmark                String?
   
   status                  String   @default("registered") // registered, assigned, in_progress, resolved, closed, reopened
