@@ -57,8 +57,8 @@ const App = () => {
               
               {/* User Routes */}
               <Route path="/my-complaints" element={<MyComplaints />} />
-              <Route path="/track" element={<TrackStatus />} />
-              <Route path="/reopen" element={<ReopenComplaint />} />
+              <Route path="/track-status" element={<TrackStatus />} />
+              <Route path="/reopen-complaint" element={<ReopenComplaint />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/feedback" element={<Feedback />} />
