@@ -49,11 +49,11 @@ export const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
   // Return loading state if translations are not yet loaded
-  if (!translations) {
+  if (!translations || !translations.nav || !translations.complaints) {
     return (
       <div className="min-h-screen bg-background">
         <div className="text-center py-8">
-          <p>Loading...</p>
+          <p>Loading translations...</p>
         </div>
       </div>
     );
