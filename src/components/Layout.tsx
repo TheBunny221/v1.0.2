@@ -102,7 +102,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
             icon: BarChart3,
           },
         ];
-      case "ward-officer":
+      case "ward_officer":
         return [
           {
             path: "/ward",
@@ -139,7 +139,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
         return "Citizen Portal";
       case "admin":
         return "Admin " + translations.nav.dashboard;
-      case "ward-officer":
+      case "ward_officer":
         return "Ward Officer Portal";
       case "maintenance":
         return "Maintenance Team";
