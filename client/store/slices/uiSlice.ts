@@ -344,6 +344,8 @@ export const {
   toggleSidebarCollapsed,
   setSidebarCollapsed,
   setTheme,
+  initializeTheme,
+  setOnlineStatus,
   showModal,
   hideModal,
   hideAllModals,
