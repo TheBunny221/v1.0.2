@@ -1,5 +1,5 @@
 import React from 'react';
-import PlaceholderPage from '@/components/PlaceholderPage';
+import PlaceholderPage from '../components/PlaceholderPage';
 import { MapPin } from 'lucide-react';
 
 const TrackStatus: React.FC = () => {
