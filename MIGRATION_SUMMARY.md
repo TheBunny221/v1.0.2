@@ -26,13 +26,13 @@ Your Citizen Connect application has been successfully migrated from MongoDB to 
 
 ### Backend Files:
 
-- `backend/db/connection.js` - PostgreSQL connection using Prisma
-- `backend/model/User.js` - User model with Prisma operations
-- `backend/model/Complaint.js` - Complaint model with relationships
-- `backend/model/Notification.js` - New notification model
-- `backend/controller/authController.js` - Updated for PostgreSQL
-- `backend/controller/complaintController.js` - Updated for PostgreSQL
-- `backend/middleware/auth.js` - Updated for new user structure
+- `server/db/connection.js` - PostgreSQL connection using Prisma
+- `server/model/User.js` - User model with Prisma operations
+- `server/model/Complaint.js` - Complaint model with relationships
+- `server/model/Notification.js` - New notification model
+- `server/controller/authController.js` - Updated for PostgreSQL
+- `server/controller/complaintController.js` - Updated for PostgreSQL
+- `server/middleware/auth.js` - Updated for new user structure
 
 ### Configuration Files:
 
