@@ -32,45 +32,47 @@ const App = () => {
   console.log("CitizenConnect App is starting with full functionality...");
 
   return (
-    <Provider store={store}>
-      <AppInitializer>
-        <BrowserRouter>
-          <Routes>
-            {/* Guest Routes (no layout) */}
-            <Route path="/guest" element={<GuestComplaintForm />} />
-            <Route path="/guest/track" element={<GuestTrackComplaint />} />
-            
-            {/* Main Application Routes (with layout) */}
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Index />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/complaints" element={<AdminComplaints />} />
-              <Route path="/admin/reports" element={<AdminReports />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              
-              {/* Ward Officer Routes */}
-              <Route path="/ward" element={<WardDashboard />} />
-              
-              {/* Maintenance Team Routes */}
-              <Route path="/maintenance" element={<MaintenanceDashboard />} />
-              
-              {/* User Routes */}
-              <Route path="/my-complaints" element={<MyComplaints />} />
-              <Route path="/track-status" element={<TrackStatus />} />
-              <Route path="/reopen-complaint" element={<ReopenComplaint />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/feedback" element={<Feedback />} />
-              
-              {/* 404 Route */}
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AppInitializer>
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <AppInitializer>
+          <BrowserRouter>
+            <Routes>
+              {/* Guest Routes (no layout) */}
+              <Route path="/guest" element={<GuestComplaintForm />} />
+              <Route path="/guest/track" element={<GuestTrackComplaint />} />
+
+              {/* Main Application Routes (with layout) */}
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Index />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/complaints" element={<AdminComplaints />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+
+                {/* Ward Officer Routes */}
+                <Route path="/ward" element={<WardDashboard />} />
+
+                {/* Maintenance Team Routes */}
+                <Route path="/maintenance" element={<MaintenanceDashboard />} />
+
+                {/* User Routes */}
+                <Route path="/my-complaints" element={<MyComplaints />} />
+                <Route path="/track-status" element={<TrackStatus />} />
+                <Route path="/reopen-complaint" element={<ReopenComplaint />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/feedback" element={<Feedback />} />
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AppInitializer>
+      </Provider>
+    </ErrorBoundary>
   );
 };
 
