@@ -245,7 +245,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:block`}
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:block`}
         >
           <div className="flex flex-col h-full pt-16 lg:pt-0">
             <nav className="flex-1 px-4 py-4 space-y-1">
@@ -273,7 +273,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
         </aside>
 
         {/* Overlay for mobile */}
-        {sidebarOpen && (
+        {isSidebarOpen && (
           <div
             className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
             onClick={() => dispatch(setSidebarOpen(false))}
