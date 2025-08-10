@@ -1,7 +1,7 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import { getPrisma } from '../db/connection.js';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { getPrisma } from "../db/connection.js";
 
 class UserModel {
   constructor() {
@@ -36,7 +36,7 @@ class UserModel {
           isEmailVerified: true,
           createdAt: true,
           updatedAt: true,
-        }
+        },
       });
 
       return user;
@@ -76,7 +76,7 @@ class UserModel {
 
       const user = await this.prisma.user.findUnique({
         where: { id },
-        select: selectFields
+        select: selectFields,
       });
 
       return user;
@@ -116,7 +116,7 @@ class UserModel {
 
       const user = await this.prisma.user.findUnique({
         where: { email },
-        select: selectFields
+        select: selectFields,
       });
 
       return user;
@@ -154,7 +154,7 @@ class UserModel {
           isEmailVerified: true,
           createdAt: true,
           updatedAt: true,
-        }
+        },
       });
 
       return user;
@@ -167,7 +167,7 @@ class UserModel {
   async delete(id) {
     try {
       await this.prisma.user.delete({
-        where: { id }
+        where: { id },
       });
       return true;
     } catch (error) {
@@ -195,9 +195,9 @@ class UserModel {
       }
       if (filters.search) {
         where.OR = [
-          { name: { contains: filters.search, mode: 'insensitive' } },
-          { email: { contains: filters.search, mode: 'insensitive' } },
-          { phone: { contains: filters.search, mode: 'insensitive' } },
+          { name: { contains: filters.search, mode: "insensitive" } },
+          { email: { contains: filters.search, mode: "insensitive" } },
+          { phone: { contains: filters.search, mode: "insensitive" } },
         ];
       }
 
@@ -224,9 +224,9 @@ class UserModel {
           },
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: "desc" },
         }),
-        this.prisma.user.count({ where })
+        this.prisma.user.count({ where }),
       ]);
 
       return {
@@ -235,8 +235,8 @@ class UserModel {
           page,
           limit,
           total,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       throw error;
@@ -256,27 +256,27 @@ class UserModel {
         email: user.email,
         role: user.role,
         ward: user.ward,
-        department: user.department
+        department: user.department,
       },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+      process.env.JWT_SECRET || "fallback-secret",
+      { expiresIn: process.env.JWT_EXPIRE || "7d" },
     );
   }
 
   // Generate password reset token
   generateResetPasswordToken() {
-    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetToken = crypto.randomBytes(20).toString("hex");
     const hashedToken = crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(resetToken)
-      .digest('hex');
-    
+      .digest("hex");
+
     const expire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     return {
       resetToken,
       resetPasswordToken: hashedToken,
-      resetPasswordExpire: expire
+      resetPasswordExpire: expire,
     };
   }
 
@@ -285,7 +285,7 @@ class UserModel {
     try {
       await this.prisma.user.update({
         where: { id },
-        data: { lastLogin: new Date() }
+        data: { lastLogin: new Date() },
       });
     } catch (error) {
       throw error;
@@ -296,15 +296,15 @@ class UserModel {
   async getStatistics() {
     try {
       const stats = await this.prisma.user.groupBy({
-        by: ['role'],
+        by: ["role"],
         _count: {
-          id: true
-        }
+          id: true,
+        },
       });
 
       const totalUsers = await this.prisma.user.count();
       const activeUsers = await this.prisma.user.count({
-        where: { isActive: true }
+        where: { isActive: true },
       });
 
       return {
@@ -313,7 +313,7 @@ class UserModel {
         byRole: stats.reduce((acc, stat) => {
           acc[stat.role] = stat._count.id;
           return acc;
-        }, {})
+        }, {}),
       };
     } catch (error) {
       throw error;

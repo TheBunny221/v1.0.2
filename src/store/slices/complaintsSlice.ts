@@ -1,9 +1,24 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
-export type ComplaintStatus = 'registered' | 'assigned' | 'in-progress' | 'resolved' | 'closed' | 'reopened';
-export type ComplaintType = 'Water_Supply' | 'Electricity' | 'Road_Repair' | 'Garbage_Collection' | 'Street_Lighting' | 'Sewerage' | 'Public_Health' | 'Traffic' | 'Others';
-export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type ComplaintStatus =
+  | "registered"
+  | "assigned"
+  | "in-progress"
+  | "resolved"
+  | "closed"
+  | "reopened";
+export type ComplaintType =
+  | "Water_Supply"
+  | "Electricity"
+  | "Road_Repair"
+  | "Garbage_Collection"
+  | "Street_Lighting"
+  | "Sewerage"
+  | "Public_Health"
+  | "Traffic"
+  | "Others";
+export type Priority = "low" | "medium" | "high" | "critical";
 
 export interface ComplaintFile {
   id: string;
@@ -18,7 +33,7 @@ export interface ComplaintFile {
 export interface ComplaintRemark {
   id: string;
   text: string;
-  type: 'status_update' | 'assignment' | 'general' | 'closure' | 'reopen';
+  type: "status_update" | "assignment" | "general" | "closure" | "reopen";
   addedAt: string;
   addedBy: {
     id: string;
@@ -72,7 +87,7 @@ export interface Complaint {
   updatedAt: string;
   files: ComplaintFile[];
   remarks: ComplaintRemark[];
-  slaStatus: 'ontime' | 'warning' | 'overdue' | 'completed';
+  slaStatus: "ontime" | "warning" | "overdue" | "completed";
   timeElapsed: string;
 }
 
@@ -137,16 +152,19 @@ const initialState: ComplaintState = {
 
 // Async thunks
 export const fetchComplaints = createAsyncThunk(
-  'complaints/fetchComplaints',
-  async (params: { page?: number; limit?: number; filters?: ComplaintFilters }, { getState, rejectWithValue }) => {
+  "complaints/fetchComplaints",
+  async (
+    params: { page?: number; limit?: number; filters?: ComplaintFilters },
+    { getState, rejectWithValue },
+  ) => {
     try {
       const state = getState() as { auth: { token: string } };
       const token = state.auth.token;
 
       const searchParams = new URLSearchParams();
-      if (params.page) searchParams.append('page', params.page.toString());
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      
+      if (params.page) searchParams.append("page", params.page.toString());
+      if (params.limit) searchParams.append("limit", params.limit.toString());
+
       if (params.filters) {
         Object.entries(params.filters).forEach(([key, value]) => {
           if (value) searchParams.append(key, value);
@@ -155,56 +173,63 @@ export const fetchComplaints = createAsyncThunk(
 
       const response = await fetch(`/api/complaints?${searchParams}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to fetch complaints');
+        return rejectWithValue(data.message || "Failed to fetch complaints");
       }
 
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const fetchMyComplaints = createAsyncThunk(
-  'complaints/fetchMyComplaints',
-  async (params: { page?: number; limit?: number; status?: ComplaintStatus }, { getState, rejectWithValue }) => {
+  "complaints/fetchMyComplaints",
+  async (
+    params: { page?: number; limit?: number; status?: ComplaintStatus },
+    { getState, rejectWithValue },
+  ) => {
     try {
       const state = getState() as { auth: { token: string } };
       const token = state.auth.token;
 
       const searchParams = new URLSearchParams();
-      if (params.page) searchParams.append('page', params.page.toString());
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.status) searchParams.append('status', params.status);
+      if (params.page) searchParams.append("page", params.page.toString());
+      if (params.limit) searchParams.append("limit", params.limit.toString());
+      if (params.status) searchParams.append("status", params.status);
 
       const response = await fetch(`/api/complaints/my?${searchParams}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to fetch my complaints');
+        return rejectWithValue(data.message || "Failed to fetch my complaints");
       }
 
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const fetchComplaintById = createAsyncThunk(
-  'complaints/fetchComplaintById',
+  "complaints/fetchComplaintById",
   async (id: string, { getState, rejectWithValue }) => {
     try {
       const state = getState() as { auth: { token: string } };
@@ -212,46 +237,57 @@ export const fetchComplaintById = createAsyncThunk(
 
       const response = await fetch(`/api/complaints/${id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to fetch complaint');
+        return rejectWithValue(data.message || "Failed to fetch complaint");
       }
 
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const createComplaint = createAsyncThunk(
-  'complaints/createComplaint',
-  async (complaintData: {
-    type: ComplaintType;
-    description: string;
-    contactInfo: { mobile: string; email?: string };
-    location: { ward: string; area: string; address?: string; coordinates?: { latitude: number; longitude: number }; landmark?: string };
-    isAnonymous?: boolean;
-  }, { getState, rejectWithValue }) => {
+  "complaints/createComplaint",
+  async (
+    complaintData: {
+      type: ComplaintType;
+      description: string;
+      contactInfo: { mobile: string; email?: string };
+      location: {
+        ward: string;
+        area: string;
+        address?: string;
+        coordinates?: { latitude: number; longitude: number };
+        landmark?: string;
+      };
+      isAnonymous?: boolean;
+    },
+    { getState, rejectWithValue },
+  ) => {
     try {
       const state = getState() as { auth: { token: string | null } };
       const token = state.auth.token;
 
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/complaints', {
-        method: 'POST',
+      const response = await fetch("/api/complaints", {
+        method: "POST",
         headers,
         body: JSON.stringify(complaintData),
       });
@@ -259,28 +295,41 @@ export const createComplaint = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to create complaint');
+        return rejectWithValue(data.message || "Failed to create complaint");
       }
 
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const updateComplaint = createAsyncThunk(
-  'complaints/updateComplaint',
-  async (params: { id: string; updates: { status?: ComplaintStatus; priority?: Priority; assignedToId?: string; remarks?: string } }, { getState, rejectWithValue }) => {
+  "complaints/updateComplaint",
+  async (
+    params: {
+      id: string;
+      updates: {
+        status?: ComplaintStatus;
+        priority?: Priority;
+        assignedToId?: string;
+        remarks?: string;
+      };
+    },
+    { getState, rejectWithValue },
+  ) => {
     try {
       const state = getState() as { auth: { token: string } };
       const token = state.auth.token;
 
       const response = await fetch(`/api/complaints/${params.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(params.updates),
       });
@@ -288,74 +337,86 @@ export const updateComplaint = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to update complaint');
+        return rejectWithValue(data.message || "Failed to update complaint");
       }
 
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const submitFeedback = createAsyncThunk(
-  'complaints/submitFeedback',
-  async (params: { id: string; rating: number; comment?: string }, { getState, rejectWithValue }) => {
+  "complaints/submitFeedback",
+  async (
+    params: { id: string; rating: number; comment?: string },
+    { getState, rejectWithValue },
+  ) => {
     try {
       const state = getState() as { auth: { token: string } };
       const token = state.auth.token;
 
       const response = await fetch(`/api/complaints/${params.id}/feedback`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ rating: params.rating, comment: params.comment }),
+        body: JSON.stringify({
+          rating: params.rating,
+          comment: params.comment,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to submit feedback');
+        return rejectWithValue(data.message || "Failed to submit feedback");
       }
 
       return { id: params.id, feedback: data.data.feedback };
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const fetchComplaintStats = createAsyncThunk(
-  'complaints/fetchStats',
+  "complaints/fetchStats",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as { auth: { token: string } };
       const token = state.auth.token;
 
-      const response = await fetch('/api/complaints/stats', {
+      const response = await fetch("/api/complaints/stats", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to fetch stats');
+        return rejectWithValue(data.message || "Failed to fetch stats");
       }
 
       return data.data.stats;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 // Complaints slice
 const complaintsSlice = createSlice({
-  name: 'complaints',
+  name: "complaints",
   initialState,
   reducers: {
     setFilters: (state, action: PayloadAction<ComplaintFilters>) => {
@@ -439,7 +500,9 @@ const complaintsSlice = createSlice({
       })
       .addCase(updateComplaint.fulfilled, (state, action) => {
         state.isSubmitting = false;
-        const index = state.complaints.findIndex(c => c.id === action.payload.id);
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
         if (index !== -1) {
           state.complaints[index] = action.payload;
         }
@@ -454,7 +517,9 @@ const complaintsSlice = createSlice({
       })
       // Submit feedback
       .addCase(submitFeedback.fulfilled, (state, action) => {
-        const index = state.complaints.findIndex(c => c.id === action.payload.id);
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
         if (index !== -1) {
           state.complaints[index] = {
             ...state.complaints[index],
@@ -479,16 +544,34 @@ const complaintsSlice = createSlice({
   },
 });
 
-export const { setFilters, clearFilters, setCurrentComplaint, clearError, resetComplaints } = complaintsSlice.actions;
+export const {
+  setFilters,
+  clearFilters,
+  setCurrentComplaint,
+  clearError,
+  resetComplaints,
+} = complaintsSlice.actions;
 export default complaintsSlice.reducer;
 
 // Selectors
-export const selectComplaints = (state: { complaints: ComplaintState }) => state.complaints.complaints;
-export const selectMyComplaints = (state: { complaints: ComplaintState }) => state.complaints.myComplaints;
-export const selectCurrentComplaint = (state: { complaints: ComplaintState }) => state.complaints.currentComplaint;
-export const selectComplaintStats = (state: { complaints: ComplaintState }) => state.complaints.stats;
-export const selectComplaintFilters = (state: { complaints: ComplaintState }) => state.complaints.filters;
-export const selectComplaintPagination = (state: { complaints: ComplaintState }) => state.complaints.pagination;
-export const selectComplaintsLoading = (state: { complaints: ComplaintState }) => state.complaints.isLoading;
-export const selectComplaintsSubmitting = (state: { complaints: ComplaintState }) => state.complaints.isSubmitting;
-export const selectComplaintsError = (state: { complaints: ComplaintState }) => state.complaints.error;
+export const selectComplaints = (state: { complaints: ComplaintState }) =>
+  state.complaints.complaints;
+export const selectMyComplaints = (state: { complaints: ComplaintState }) =>
+  state.complaints.myComplaints;
+export const selectCurrentComplaint = (state: { complaints: ComplaintState }) =>
+  state.complaints.currentComplaint;
+export const selectComplaintStats = (state: { complaints: ComplaintState }) =>
+  state.complaints.stats;
+export const selectComplaintFilters = (state: { complaints: ComplaintState }) =>
+  state.complaints.filters;
+export const selectComplaintPagination = (state: {
+  complaints: ComplaintState;
+}) => state.complaints.pagination;
+export const selectComplaintsLoading = (state: {
+  complaints: ComplaintState;
+}) => state.complaints.isLoading;
+export const selectComplaintsSubmitting = (state: {
+  complaints: ComplaintState;
+}) => state.complaints.isSubmitting;
+export const selectComplaintsError = (state: { complaints: ComplaintState }) =>
+  state.complaints.error;

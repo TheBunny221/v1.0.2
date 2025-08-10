@@ -1,4 +1,4 @@
-import { getPrisma } from '../db/connection.js';
+import { getPrisma } from "../db/connection.js";
 
 class ComplaintModel {
   constructor() {
@@ -10,11 +10,13 @@ class ComplaintModel {
     try {
       // Generate complaint ID
       const year = new Date().getFullYear();
-      const count = await this.prisma.complaint.count() + 1;
-      const complaintId = `CMP-${year}-${count.toString().padStart(3, '0')}`;
+      const count = (await this.prisma.complaint.count()) + 1;
+      const complaintId = `CMP-${year}-${count.toString().padStart(3, "0")}`;
 
       // Calculate SLA deadline based on priority
-      const slaDeadline = this.calculateSLADeadline(complaintData.priority || 'medium');
+      const slaDeadline = this.calculateSLADeadline(
+        complaintData.priority || "medium",
+      );
 
       const complaint = await this.prisma.complaint.create({
         data: {
@@ -30,7 +32,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           assignedTo: {
             select: {
@@ -39,7 +41,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           files: true,
           remarks: {
@@ -49,12 +51,12 @@ class ComplaintModel {
                   id: true,
                   name: true,
                   role: true,
-                }
-              }
+                },
+              },
             },
-            orderBy: { addedAt: 'desc' }
-          }
-        }
+            orderBy: { addedAt: "desc" },
+          },
+        },
       });
 
       return this.addVirtualFields(complaint);
@@ -76,7 +78,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           assignedTo: {
             select: {
@@ -85,7 +87,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           files: true,
           remarks: {
@@ -95,12 +97,12 @@ class ComplaintModel {
                   id: true,
                   name: true,
                   role: true,
-                }
-              }
+                },
+              },
             },
-            orderBy: { addedAt: 'desc' }
-          }
-        }
+            orderBy: { addedAt: "desc" },
+          },
+        },
       });
 
       return complaint ? this.addVirtualFields(complaint) : null;
@@ -122,7 +124,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           assignedTo: {
             select: {
@@ -131,7 +133,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           files: true,
           remarks: {
@@ -141,12 +143,12 @@ class ComplaintModel {
                   id: true,
                   name: true,
                   role: true,
-                }
-              }
+                },
+              },
             },
-            orderBy: { addedAt: 'desc' }
-          }
-        }
+            orderBy: { addedAt: "desc" },
+          },
+        },
       });
 
       return complaint ? this.addVirtualFields(complaint) : null;
@@ -169,7 +171,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           assignedTo: {
             select: {
@@ -178,7 +180,7 @@ class ComplaintModel {
               email: true,
               phone: true,
               role: true,
-            }
+            },
           },
           files: true,
           remarks: {
@@ -188,12 +190,12 @@ class ComplaintModel {
                   id: true,
                   name: true,
                   role: true,
-                }
-              }
+                },
+              },
             },
-            orderBy: { addedAt: 'desc' }
-          }
-        }
+            orderBy: { addedAt: "desc" },
+          },
+        },
       });
 
       return this.addVirtualFields(complaint);
@@ -206,7 +208,7 @@ class ComplaintModel {
   async delete(id) {
     try {
       await this.prisma.complaint.delete({
-        where: { id }
+        where: { id },
       });
       return true;
     } catch (error) {
@@ -240,9 +242,9 @@ class ComplaintModel {
       }
       if (filters.search) {
         where.OR = [
-          { complaintId: { contains: filters.search, mode: 'insensitive' } },
-          { description: { contains: filters.search, mode: 'insensitive' } },
-          { area: { contains: filters.search, mode: 'insensitive' } },
+          { complaintId: { contains: filters.search, mode: "insensitive" } },
+          { description: { contains: filters.search, mode: "insensitive" } },
+          { area: { contains: filters.search, mode: "insensitive" } },
         ];
       }
 
@@ -257,7 +259,7 @@ class ComplaintModel {
                 email: true,
                 phone: true,
                 role: true,
-              }
+              },
             },
             assignedTo: {
               select: {
@@ -266,23 +268,25 @@ class ComplaintModel {
                 email: true,
                 phone: true,
                 role: true,
-              }
+              },
             },
             _count: {
               select: {
                 files: true,
                 remarks: true,
-              }
-            }
+              },
+            },
           },
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: "desc" },
         }),
-        this.prisma.complaint.count({ where })
+        this.prisma.complaint.count({ where }),
       ]);
 
-      const complaintsWithVirtuals = complaints.map(complaint => this.addVirtualFields(complaint));
+      const complaintsWithVirtuals = complaints.map((complaint) =>
+        this.addVirtualFields(complaint),
+      );
 
       return {
         complaints: complaintsWithVirtuals,
@@ -290,8 +294,8 @@ class ComplaintModel {
           page,
           limit,
           total,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       throw error;
@@ -312,9 +316,9 @@ class ComplaintModel {
               id: true,
               name: true,
               role: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return remark;
@@ -330,7 +334,7 @@ class ComplaintModel {
         data: {
           ...fileData,
           complaintId,
-        }
+        },
       });
 
       return file;
@@ -350,31 +354,26 @@ class ComplaintModel {
         where.assignedToId = filters.assignedToId;
       }
 
-      const [
-        totalComplaints,
-        statusStats,
-        typeStats,
-        priorityStats,
-        slaStats
-      ] = await Promise.all([
-        this.prisma.complaint.count({ where }),
-        this.prisma.complaint.groupBy({
-          by: ['status'],
-          where,
-          _count: { id: true }
-        }),
-        this.prisma.complaint.groupBy({
-          by: ['type'],
-          where,
-          _count: { id: true }
-        }),
-        this.prisma.complaint.groupBy({
-          by: ['priority'],
-          where,
-          _count: { id: true }
-        }),
-        this.getSLAStatistics(where)
-      ]);
+      const [totalComplaints, statusStats, typeStats, priorityStats, slaStats] =
+        await Promise.all([
+          this.prisma.complaint.count({ where }),
+          this.prisma.complaint.groupBy({
+            by: ["status"],
+            where,
+            _count: { id: true },
+          }),
+          this.prisma.complaint.groupBy({
+            by: ["type"],
+            where,
+            _count: { id: true },
+          }),
+          this.prisma.complaint.groupBy({
+            by: ["priority"],
+            where,
+            _count: { id: true },
+          }),
+          this.getSLAStatistics(where),
+        ]);
 
       return {
         total: totalComplaints,
@@ -390,7 +389,7 @@ class ComplaintModel {
           acc[stat.priority] = stat._count.id;
           return acc;
         }, {}),
-        sla: slaStats
+        sla: slaStats,
       };
     } catch (error) {
       throw error;
@@ -403,23 +402,23 @@ class ComplaintModel {
     let hoursToAdd;
 
     switch (priority) {
-      case 'critical':
+      case "critical":
         hoursToAdd = 24; // 1 day
         break;
-      case 'high':
+      case "high":
         hoursToAdd = 48; // 2 days
         break;
-      case 'medium':
+      case "medium":
         hoursToAdd = 72; // 3 days
         break;
-      case 'low':
+      case "low":
         hoursToAdd = 120; // 5 days
         break;
       default:
         hoursToAdd = 72;
     }
 
-    return new Date(now.getTime() + (hoursToAdd * 60 * 60 * 1000));
+    return new Date(now.getTime() + hoursToAdd * 60 * 60 * 1000);
   }
 
   // Add virtual fields (SLA status, time elapsed)
@@ -427,18 +426,18 @@ class ComplaintModel {
     if (!complaint) return null;
 
     // Calculate SLA status
-    let slaStatus = 'completed';
-    if (complaint.status !== 'resolved' && complaint.status !== 'closed') {
+    let slaStatus = "completed";
+    if (complaint.status !== "resolved" && complaint.status !== "closed") {
       const now = new Date();
       const deadline = new Date(complaint.slaDeadline);
       const hoursLeft = (deadline - now) / (1000 * 60 * 60);
 
       if (hoursLeft < 0) {
-        slaStatus = 'overdue';
+        slaStatus = "overdue";
       } else if (hoursLeft < 24) {
-        slaStatus = 'warning';
+        slaStatus = "warning";
       } else {
-        slaStatus = 'ontime';
+        slaStatus = "ontime";
       }
     }
 
@@ -459,7 +458,7 @@ class ComplaintModel {
     return {
       ...complaint,
       slaStatus,
-      timeElapsed
+      timeElapsed,
     };
   }
 
@@ -467,46 +466,46 @@ class ComplaintModel {
   async getSLAStatistics(where = {}) {
     try {
       const now = new Date();
-      
+
       const [onTime, warning, overdue] = await Promise.all([
         this.prisma.complaint.count({
           where: {
             ...where,
-            status: { notIn: ['resolved', 'closed'] },
-            slaDeadline: { gte: new Date(now.getTime() + (24 * 60 * 60 * 1000)) }
-          }
+            status: { notIn: ["resolved", "closed"] },
+            slaDeadline: { gte: new Date(now.getTime() + 24 * 60 * 60 * 1000) },
+          },
         }),
         this.prisma.complaint.count({
           where: {
             ...where,
-            status: { notIn: ['resolved', 'closed'] },
-            slaDeadline: { 
+            status: { notIn: ["resolved", "closed"] },
+            slaDeadline: {
               gte: now,
-              lt: new Date(now.getTime() + (24 * 60 * 60 * 1000))
-            }
-          }
+              lt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+            },
+          },
         }),
         this.prisma.complaint.count({
           where: {
             ...where,
-            status: { notIn: ['resolved', 'closed'] },
-            slaDeadline: { lt: now }
-          }
-        })
+            status: { notIn: ["resolved", "closed"] },
+            slaDeadline: { lt: now },
+          },
+        }),
       ]);
 
       const completed = await this.prisma.complaint.count({
         where: {
           ...where,
-          status: { in: ['resolved', 'closed'] }
-        }
+          status: { in: ["resolved", "closed"] },
+        },
       });
 
       return {
         onTime,
         warning,
         overdue,
-        completed
+        completed,
       };
     } catch (error) {
       throw error;

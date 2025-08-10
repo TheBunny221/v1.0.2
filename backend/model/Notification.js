@@ -1,4 +1,4 @@
-import { getPrisma } from '../db/connection.js';
+import { getPrisma } from "../db/connection.js";
 
 class NotificationModel {
   constructor() {
@@ -17,9 +17,9 @@ class NotificationModel {
               name: true,
               email: true,
               role: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return notification;
@@ -40,9 +40,9 @@ class NotificationModel {
               name: true,
               email: true,
               role: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return notification;
@@ -64,9 +64,9 @@ class NotificationModel {
               name: true,
               email: true,
               role: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return notification;
@@ -79,7 +79,7 @@ class NotificationModel {
   async delete(id) {
     try {
       await this.prisma.notification.delete({
-        where: { id }
+        where: { id },
       });
       return true;
     } catch (error) {
@@ -102,12 +102,12 @@ class NotificationModel {
           where,
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: "desc" },
         }),
         this.prisma.notification.count({ where }),
         this.prisma.notification.count({
-          where: { userId, isRead: false }
-        })
+          where: { userId, isRead: false },
+        }),
       ]);
 
       return {
@@ -116,9 +116,9 @@ class NotificationModel {
           page,
           limit,
           total,
-          pages: Math.ceil(total / limit)
+          pages: Math.ceil(total / limit),
         },
-        unreadCount
+        unreadCount,
       };
     } catch (error) {
       throw error;
@@ -130,7 +130,7 @@ class NotificationModel {
     try {
       const notification = await this.prisma.notification.update({
         where: { id },
-        data: { isRead: true }
+        data: { isRead: true },
       });
 
       return notification;
@@ -144,7 +144,7 @@ class NotificationModel {
     try {
       const result = await this.prisma.notification.updateMany({
         where: { userId, isRead: false },
-        data: { isRead: true }
+        data: { isRead: true },
       });
 
       return result;
@@ -157,7 +157,7 @@ class NotificationModel {
   async getUnreadCount(userId) {
     try {
       const count = await this.prisma.notification.count({
-        where: { userId, isRead: false }
+        where: { userId, isRead: false },
       });
 
       return count;
@@ -170,7 +170,7 @@ class NotificationModel {
   async createBulk(notifications) {
     try {
       const result = await this.prisma.notification.createMany({
-        data: notifications
+        data: notifications,
       });
 
       return result;
@@ -188,8 +188,8 @@ class NotificationModel {
       const result = await this.prisma.notification.deleteMany({
         where: {
           createdAt: { lt: cutoffDate },
-          isRead: true
-        }
+          isRead: true,
+        },
       });
 
       return result;
@@ -199,42 +199,47 @@ class NotificationModel {
   }
 
   // Create notification for complaint events
-  async createComplaintNotification(type, complaintId, userId, additionalData = {}) {
+  async createComplaintNotification(
+    type,
+    complaintId,
+    userId,
+    additionalData = {},
+  ) {
     try {
       let title, message;
 
       switch (type) {
-        case 'complaint_submitted':
-          title = 'New Complaint Submitted';
+        case "complaint_submitted":
+          title = "New Complaint Submitted";
           message = `Complaint ${additionalData.complaintId} has been submitted successfully.`;
           break;
-        case 'complaint_assigned':
-          title = 'Complaint Assigned';
+        case "complaint_assigned":
+          title = "Complaint Assigned";
           message = `Complaint ${additionalData.complaintId} has been assigned to you.`;
           break;
-        case 'complaint_updated':
-          title = 'Complaint Updated';
+        case "complaint_updated":
+          title = "Complaint Updated";
           message = `Complaint ${additionalData.complaintId} status has been updated to ${additionalData.status}.`;
           break;
-        case 'complaint_resolved':
-          title = 'Complaint Resolved';
+        case "complaint_resolved":
+          title = "Complaint Resolved";
           message = `Complaint ${additionalData.complaintId} has been resolved.`;
           break;
-        case 'complaint_closed':
-          title = 'Complaint Closed';
+        case "complaint_closed":
+          title = "Complaint Closed";
           message = `Complaint ${additionalData.complaintId} has been closed.`;
           break;
-        case 'sla_warning':
-          title = 'SLA Warning';
+        case "sla_warning":
+          title = "SLA Warning";
           message = `Complaint ${additionalData.complaintId} is approaching its SLA deadline.`;
           break;
-        case 'sla_breach':
-          title = 'SLA Breach';
+        case "sla_breach":
+          title = "SLA Breach";
           message = `Complaint ${additionalData.complaintId} has breached its SLA deadline.`;
           break;
         default:
-          title = 'Notification';
-          message = 'You have a new notification.';
+          title = "Notification";
+          message = "You have a new notification.";
       }
 
       const notification = await this.create({
@@ -242,7 +247,7 @@ class NotificationModel {
         title,
         message,
         userId,
-        complaintId
+        complaintId,
       });
 
       return notification;

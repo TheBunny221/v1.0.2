@@ -1,14 +1,14 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 // Create transporter (configure with your email service)
 const createTransporter = () => {
   // For development, you can use a service like Ethereal Email or Mailtrap
   // For production, use services like SendGrid, AWS SES, or SMTP
-  
-  if (process.env.NODE_ENV === 'production') {
+
+  if (process.env.NODE_ENV === "production") {
     // Production email configuration
     return nodemailer.createTransporter({
-      service: process.env.EMAIL_SERVICE || 'gmail',
+      service: process.env.EMAIL_SERVICE || "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
@@ -17,11 +17,11 @@ const createTransporter = () => {
   } else {
     // Development: Use Ethereal Email for testing
     return nodemailer.createTransporter({
-      host: 'smtp.ethereal.email',
+      host: "smtp.ethereal.email",
       port: 587,
       auth: {
-        user: 'ethereal.user@ethereal.email',
-        pass: 'ethereal.pass',
+        user: "ethereal.user@ethereal.email",
+        pass: "ethereal.pass",
       },
     });
   }
@@ -31,7 +31,7 @@ const createTransporter = () => {
 const getOtpEmailTemplate = (otp, purpose) => {
   const templates = {
     complaint_submission: {
-      subject: 'Verify Your Email - CitizenConnect Complaint Submission',
+      subject: "Verify Your Email - CitizenConnect Complaint Submission",
       html: `
         <!DOCTYPE html>
         <html>
@@ -102,21 +102,26 @@ const getOtpEmailTemplate = (otp, purpose) => {
         If you didn't request this, please ignore this email.
         
         CitizenConnect Support Team
-      `
-    }
+      `,
+    },
   };
 
   return templates[purpose] || templates.complaint_submission;
 };
 
 // Send OTP email
-export const sendOtpEmail = async (email, otp, purpose = 'complaint_submission') => {
+export const sendOtpEmail = async (
+  email,
+  otp,
+  purpose = "complaint_submission",
+) => {
   try {
     const transporter = createTransporter();
     const template = getOtpEmailTemplate(otp, purpose);
-    
+
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'CitizenConnect <noreply@citizenconnect.gov>',
+      from:
+        process.env.EMAIL_FROM || "CitizenConnect <noreply@citizenconnect.gov>",
       to: email,
       subject: template.subject,
       html: template.html,
@@ -124,26 +129,25 @@ export const sendOtpEmail = async (email, otp, purpose = 'complaint_submission')
     };
 
     const info = await transporter.sendMail(mailOptions);
-    
-    console.log('OTP email sent successfully:', {
+
+    console.log("OTP email sent successfully:", {
       messageId: info.messageId,
-      email: email.replace(/(.{2})(.*)(@.*)/, '$1***$3'), // Mask email for logs
-      purpose
+      email: email.replace(/(.{2})(.*)(@.*)/, "$1***$3"), // Mask email for logs
+      purpose,
     });
 
     // In development, log the preview URL
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     }
 
     return {
       success: true,
-      messageId: info.messageId
+      messageId: info.messageId,
     };
-    
   } catch (error) {
-    console.error('Failed to send OTP email:', error);
-    throw new Error('Failed to send verification email');
+    console.error("Failed to send OTP email:", error);
+    throw new Error("Failed to send verification email");
   }
 };
 
@@ -151,9 +155,10 @@ export const sendOtpEmail = async (email, otp, purpose = 'complaint_submission')
 export const sendComplaintNotificationEmail = async (email, complaintData) => {
   try {
     const transporter = createTransporter();
-    
+
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'CitizenConnect <noreply@citizenconnect.gov>',
+      from:
+        process.env.EMAIL_FROM || "CitizenConnect <noreply@citizenconnect.gov>",
       to: email,
       subject: `Complaint Submitted Successfully - ${complaintData.complaintId}`,
       html: `
@@ -183,7 +188,7 @@ export const sendComplaintNotificationEmail = async (email, complaintData) => {
               
               <div class="info-box">
                 <p><strong>Complaint ID:</strong> ${complaintData.complaintId}</p>
-                <p><strong>Type:</strong> ${complaintData.type.replace('_', ' ')}</p>
+                <p><strong>Type:</strong> ${complaintData.type.replace("_", " ")}</p>
                 <p><strong>Ward:</strong> ${complaintData.ward}</p>
                 <p><strong>Area:</strong> ${complaintData.area}</p>
                 <p><strong>Status:</strong> ${complaintData.status}</p>
@@ -211,7 +216,7 @@ export const sendComplaintNotificationEmail = async (email, complaintData) => {
         Complaint Submitted Successfully - CitizenConnect
         
         Complaint ID: ${complaintData.complaintId}
-        Type: ${complaintData.type.replace('_', ' ')}
+        Type: ${complaintData.type.replace("_", " ")}
         Ward: ${complaintData.ward}
         Status: ${complaintData.status}
         
@@ -219,28 +224,27 @@ export const sendComplaintNotificationEmail = async (email, complaintData) => {
         You can track its progress using the Complaint ID on our website.
         
         Thank you for using CitizenConnect!
-      `
+      `,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Complaint confirmation email sent:', info.messageId);
-    
+    console.log("Complaint confirmation email sent:", info.messageId);
+
     return {
       success: true,
-      messageId: info.messageId
+      messageId: info.messageId,
     };
-    
   } catch (error) {
-    console.error('Failed to send complaint confirmation email:', error);
+    console.error("Failed to send complaint confirmation email:", error);
     // Don't throw error as this is not critical
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 };
 
 export default {
   sendOtpEmail,
-  sendComplaintNotificationEmail
+  sendComplaintNotificationEmail,
 };

@@ -5,6 +5,7 @@ This project has been migrated from MongoDB to PostgreSQL. Follow these steps to
 ## Prerequisites
 
 1. **Install PostgreSQL**: Make sure PostgreSQL is installed and running on your system
+
    - Windows: Download from https://www.postgresql.org/download/windows/
    - macOS: `brew install postgresql` or download from the official site
    - Ubuntu: `sudo apt-get install postgresql postgresql-contrib`
@@ -17,10 +18,11 @@ This project has been migrated from MongoDB to PostgreSQL. Follow these steps to
 ## Database Setup
 
 1. **Create a database**:
+
    ```bash
    # Connect to PostgreSQL as superuser
    sudo -u postgres psql
-   
+
    # Create database and user
    CREATE DATABASE citizenconnect;
    CREATE USER username WITH PASSWORD 'password';
@@ -30,20 +32,22 @@ This project has been migrated from MongoDB to PostgreSQL. Follow these steps to
 
 2. **Update environment variables**:
    Update the `DATABASE_URL` in your `.env` file:
+
    ```
    DATABASE_URL="postgresql://username:password@localhost:5432/citizenconnect"
    ```
-   
+
    Replace `username` and `password` with your actual PostgreSQL credentials.
 
 3. **Run database migrations**:
+
    ```bash
    # Generate Prisma client
    npm run db:generate
-   
+
    # Push schema to database (for development)
    npm run db:push
-   
+
    # OR create and run a migration (for production)
    npm run db:migrate
    ```
@@ -61,11 +65,13 @@ This project has been migrated from MongoDB to PostgreSQL. Follow these steps to
 The schema has been converted from MongoDB to PostgreSQL with the following changes:
 
 ### User Model Changes:
+
 - `_id` → `id` (cuid instead of ObjectId)
 - `preferences` object → separate fields (`language`, `notificationsEnabled`, `emailAlerts`)
 - Enum values use snake_case (`ward_officer` instead of `ward-officer`)
 
 ### Complaint Model Changes:
+
 - `_id` → `id` (cuid instead of ObjectId)
 - `contactInfo` object → separate fields (`contactMobile`, `contactEmail`)
 - `location` object → separate fields (`ward`, `area`, `address`, `latitude`, `longitude`, `landmark`)
@@ -73,6 +79,7 @@ The schema has been converted from MongoDB to PostgreSQL with the following chan
 - Related data moved to separate tables (`files`, `remarks`)
 
 ### New Models:
+
 - **File**: Stores complaint attachments
 - **Remark**: Stores complaint comments/updates
 - **Notification**: Stores user notifications
@@ -102,6 +109,7 @@ docker run --name postgres-citizenconnect \
 ```
 
 Then update your DATABASE_URL to:
+
 ```
 DATABASE_URL="postgresql://username:password@localhost:5432/citizenconnect"
 ```

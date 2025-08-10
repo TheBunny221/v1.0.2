@@ -15,10 +15,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { MapPin, Upload, RefreshCw, User, UserCheck, Mail, Phone } from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import {
+  MapPin,
+  Upload,
+  RefreshCw,
+  User,
+  UserCheck,
+  Mail,
+  Phone,
+} from "lucide-react";
 import OtpVerificationModal from "../components/OtpVerificationModal";
 
 const GuestComplaintForm: React.FC = () => {
@@ -28,7 +46,9 @@ const GuestComplaintForm: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { isOtpSent, isLoading } = useAppSelector((state) => state.guest);
 
-  const [activeTab, setActiveTab] = useState(isAuthenticated ? "registered" : "guest");
+  const [activeTab, setActiveTab] = useState(
+    isAuthenticated ? "registered" : "guest",
+  );
   const [showOtpModal, setShowOtpModal] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -79,18 +99,39 @@ const GuestComplaintForm: React.FC = () => {
   };
 
   const validateForm = () => {
-    if (!formData.mobile || !formData.problemType || !formData.ward || !formData.area || !formData.description) {
-      dispatch(showErrorToast("Validation Error", "Please fill in all required fields"));
+    if (
+      !formData.mobile ||
+      !formData.problemType ||
+      !formData.ward ||
+      !formData.area ||
+      !formData.description
+    ) {
+      dispatch(
+        showErrorToast(
+          "Validation Error",
+          "Please fill in all required fields",
+        ),
+      );
       return false;
     }
 
     if (activeTab === "guest" && !formData.email) {
-      dispatch(showErrorToast("Email Required", "Email is required for guest submissions"));
+      dispatch(
+        showErrorToast(
+          "Email Required",
+          "Email is required for guest submissions",
+        ),
+      );
       return false;
     }
 
     if (captcha !== captchaValue) {
-      dispatch(showErrorToast("Invalid CAPTCHA", "Please enter the correct CAPTCHA code"));
+      dispatch(
+        showErrorToast(
+          "Invalid CAPTCHA",
+          "Please enter the correct CAPTCHA code",
+        ),
+      );
       return false;
     }
 
@@ -114,10 +155,12 @@ const GuestComplaintForm: React.FC = () => {
           ward: formData.ward,
           area: formData.area,
           address: formData.address,
-          coordinates: formData.location ? {
-            latitude: 0, // You can integrate with maps API
-            longitude: 0,
-          } : undefined,
+          coordinates: formData.location
+            ? {
+                latitude: 0, // You can integrate with maps API
+                longitude: 0,
+              }
+            : undefined,
           landmark: formData.location,
         },
         isAnonymous: false,
@@ -125,17 +168,21 @@ const GuestComplaintForm: React.FC = () => {
 
       const result = await dispatch(createComplaint(complaintData)).unwrap();
 
-      dispatch(showSuccessToast(
-        "Complaint Submitted",
-        `Complaint registered successfully! ID: ${result.complaintId}`
-      ));
+      dispatch(
+        showSuccessToast(
+          "Complaint Submitted",
+          `Complaint registered successfully! ID: ${result.complaintId}`,
+        ),
+      );
 
       resetForm();
     } catch (error) {
-      dispatch(showErrorToast(
-        "Submission Failed",
-        error instanceof Error ? error.message : "Failed to submit complaint"
-      ));
+      dispatch(
+        showErrorToast(
+          "Submission Failed",
+          error instanceof Error ? error.message : "Failed to submit complaint",
+        ),
+      );
     }
   };
 
@@ -157,21 +204,27 @@ const GuestComplaintForm: React.FC = () => {
     };
 
     try {
-      await dispatch(sendOtpForGuest({
-        email: formData.email,
-        complaintData: guestComplaintData,
-      })).unwrap();
+      await dispatch(
+        sendOtpForGuest({
+          email: formData.email,
+          complaintData: guestComplaintData,
+        }),
+      ).unwrap();
 
       setShowOtpModal(true);
-      dispatch(showSuccessToast(
-        "OTP Sent",
-        `Verification code sent to ${formData.email}`
-      ));
+      dispatch(
+        showSuccessToast(
+          "OTP Sent",
+          `Verification code sent to ${formData.email}`,
+        ),
+      );
     } catch (error) {
-      dispatch(showErrorToast(
-        "Failed to Send OTP",
-        error instanceof Error ? error.message : "Please try again"
-      ));
+      dispatch(
+        showErrorToast(
+          "Failed to Send OTP",
+          error instanceof Error ? error.message : "Please try again",
+        ),
+      );
     }
   };
 
@@ -219,7 +272,11 @@ const GuestComplaintForm: React.FC = () => {
               <User className="h-4 w-4" />
               <span>Guest Submission</span>
             </TabsTrigger>
-            <TabsTrigger value="registered" className="flex items-center space-x-2" disabled={!isAuthenticated}>
+            <TabsTrigger
+              value="registered"
+              className="flex items-center space-x-2"
+              disabled={!isAuthenticated}
+            >
               <UserCheck className="h-4 w-4" />
               <span>Registered User</span>
             </TabsTrigger>
@@ -230,10 +287,14 @@ const GuestComplaintForm: React.FC = () => {
               <div className="flex items-start space-x-3">
                 <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="font-medium text-blue-900">Guest Submission Process</h3>
+                  <h3 className="font-medium text-blue-900">
+                    Guest Submission Process
+                  </h3>
                   <p className="text-sm text-blue-700 mt-1">
-                    For guest users, we'll send an OTP to your email for verification before submitting your complaint. 
-                    This ensures the authenticity of your submission and enables you to track your complaint later.
+                    For guest users, we'll send an OTP to your email for
+                    verification before submitting your complaint. This ensures
+                    the authenticity of your submission and enables you to track
+                    your complaint later.
                   </p>
                 </div>
               </div>
@@ -246,9 +307,12 @@ const GuestComplaintForm: React.FC = () => {
                 <div className="flex items-start space-x-3">
                   <UserCheck className="h-5 w-5 text-green-600 mt-0.5" />
                   <div>
-                    <h3 className="font-medium text-green-900">Welcome back, {user?.name}!</h3>
+                    <h3 className="font-medium text-green-900">
+                      Welcome back, {user?.name}!
+                    </h3>
                     <p className="text-sm text-green-700 mt-1">
-                      Your complaint will be submitted immediately and you can track it from your dashboard.
+                      Your complaint will be submitted immediately and you can
+                      track it from your dashboard.
                     </p>
                   </div>
                 </div>
@@ -258,9 +322,19 @@ const GuestComplaintForm: React.FC = () => {
                 <div className="flex items-start space-x-3">
                   <User className="h-5 w-5 text-orange-600 mt-0.5" />
                   <div>
-                    <h3 className="font-medium text-orange-900">Login Required</h3>
+                    <h3 className="font-medium text-orange-900">
+                      Login Required
+                    </h3>
                     <p className="text-sm text-orange-700 mt-1">
-                      Please <Link to="/login" className="underline font-medium">login</Link> or <Link to="/register" className="underline font-medium">register</Link> to submit complaints as a registered user.
+                      Please{" "}
+                      <Link to="/login" className="underline font-medium">
+                        login
+                      </Link>{" "}
+                      or{" "}
+                      <Link to="/register" className="underline font-medium">
+                        register
+                      </Link>{" "}
+                      to submit complaints as a registered user.
                     </p>
                   </div>
                 </div>
@@ -280,7 +354,14 @@ const GuestComplaintForm: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={activeTab === "guest" ? handleGuestSubmit : handleRegisteredUserSubmit} className="space-y-6">
+          <form
+            onSubmit={
+              activeTab === "guest"
+                ? handleGuestSubmit
+                : handleRegisteredUserSubmit
+            }
+            className="space-y-6"
+          >
             {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -300,12 +381,18 @@ const GuestComplaintForm: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center space-x-1">
                   <Mail className="h-4 w-4" />
-                  <span>{translations.auth.email} {activeTab === "guest" && "*"}</span>
+                  <span>
+                    {translations.auth.email} {activeTab === "guest" && "*"}
+                  </span>
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email || (activeTab === "registered" && user?.email) || ""}
+                  value={
+                    formData.email ||
+                    (activeTab === "registered" && user?.email) ||
+                    ""
+                  }
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   placeholder="Enter your email address"
                   required={activeTab === "guest"}
@@ -322,7 +409,9 @@ const GuestComplaintForm: React.FC = () => {
                 </Label>
                 <Select
                   value={formData.problemType}
-                  onValueChange={(value) => handleInputChange("problemType", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("problemType", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select complaint type" />
@@ -375,7 +464,9 @@ const GuestComplaintForm: React.FC = () => {
                   <Input
                     id="location"
                     value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location", e.target.value)
+                    }
                     placeholder="Nearby landmark (optional)"
                     className="flex-1"
                   />
@@ -405,7 +496,9 @@ const GuestComplaintForm: React.FC = () => {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 placeholder="Describe your complaint in detail..."
                 rows={4}
                 required
@@ -491,8 +584,10 @@ const GuestComplaintForm: React.FC = () => {
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     {activeTab === "guest" ? "Sending OTP..." : "Submitting..."}
                   </>
+                ) : activeTab === "guest" ? (
+                  "Send OTP & Submit"
                 ) : (
-                  activeTab === "guest" ? "Send OTP & Submit" : "Submit Complaint"
+                  "Submit Complaint"
                 )}
               </Button>
               <Button type="button" variant="outline" onClick={resetForm}>

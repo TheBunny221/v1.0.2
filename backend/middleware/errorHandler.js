@@ -7,11 +7,11 @@ export const errorHandler = (err, req, res, next) => {
   console.error(err);
 
   // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
+  if (err.name === "CastError") {
+    const message = "Resource not found";
     error = {
       statusCode: 404,
-      message
+      message,
     };
   }
 
@@ -21,67 +21,69 @@ export const errorHandler = (err, req, res, next) => {
     const message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
     error = {
       statusCode: 400,
-      message
+      message,
     };
   }
 
   // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message).join(', ');
+  if (err.name === "ValidationError") {
+    const message = Object.values(err.errors)
+      .map((val) => val.message)
+      .join(", ");
     error = {
       statusCode: 400,
-      message
+      message,
     };
   }
 
   // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    const message = 'Invalid token';
+  if (err.name === "JsonWebTokenError") {
+    const message = "Invalid token";
     error = {
       statusCode: 401,
-      message
+      message,
     };
   }
 
-  if (err.name === 'TokenExpiredError') {
-    const message = 'Token expired';
+  if (err.name === "TokenExpiredError") {
+    const message = "Token expired";
     error = {
       statusCode: 401,
-      message
+      message,
     };
   }
 
   // File upload errors
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    const message = 'File too large';
+  if (err.code === "LIMIT_FILE_SIZE") {
+    const message = "File too large";
     error = {
       statusCode: 400,
-      message
+      message,
     };
   }
 
-  if (err.code === 'LIMIT_FILE_COUNT') {
-    const message = 'Too many files';
+  if (err.code === "LIMIT_FILE_COUNT") {
+    const message = "Too many files";
     error = {
       statusCode: 400,
-      message
+      message,
     };
   }
 
   // Network errors
-  if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-    const message = 'Service temporarily unavailable';
+  if (err.code === "ENOTFOUND" || err.code === "ECONNREFUSED") {
+    const message = "Service temporarily unavailable";
     error = {
       statusCode: 503,
-      message
+      message,
     };
   }
 
   res.status(error.statusCode || 500).json({
     success: false,
-    message: error.message || 'Server Error',
+    message: error.message || "Server Error",
     data: null,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
 

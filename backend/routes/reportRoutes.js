@@ -1,8 +1,8 @@
-import express from 'express';
-import { protect, authorize } from '../middleware/auth.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import Complaint from '../model/Complaint.js';
-import User from '../model/User.js';
+import express from "express";
+import { protect, authorize } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import Complaint from "../model/Complaint.js";
+import User from "../model/User.js";
 
 const router = express.Router();
 
@@ -16,9 +16,9 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
   let matchStage = {};
 
   // Role-based filtering
-  if (req.user.role === 'ward-officer') {
-    matchStage['location.ward'] = req.user.ward;
-  } else if (req.user.role === 'maintenance') {
+  if (req.user.role === "ward-officer") {
+    matchStage["location.ward"] = req.user.ward;
+  } else if (req.user.role === "maintenance") {
     matchStage.assignedTo = req.user._id;
   }
 
@@ -30,51 +30,63 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
         $group: {
           _id: null,
           total: { $sum: 1 },
-          registered: { $sum: { $cond: [{ $eq: ['$status', 'registered'] }, 1, 0] } },
-          assigned: { $sum: { $cond: [{ $eq: ['$status', 'assigned'] }, 1, 0] } },
-          inProgress: { $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] } },
-          resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } },
-          closed: { $sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] } }
-        }
-      }
+          registered: {
+            $sum: { $cond: [{ $eq: ["$status", "registered"] }, 1, 0] },
+          },
+          assigned: {
+            $sum: { $cond: [{ $eq: ["$status", "assigned"] }, 1, 0] },
+          },
+          inProgress: {
+            $sum: { $cond: [{ $eq: ["$status", "in-progress"] }, 1, 0] },
+          },
+          resolved: {
+            $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] },
+          },
+          closed: { $sum: { $cond: [{ $eq: ["$status", "closed"] }, 1, 0] } },
+        },
+      },
     ]),
 
     // User statistics (admin only)
-    req.user.role === 'admin' ? User.aggregate([
-      {
-        $group: {
-          _id: '$role',
-          count: { $sum: 1 }
-        }
-      }
-    ]) : Promise.resolve([]),
+    req.user.role === "admin"
+      ? User.aggregate([
+          {
+            $group: {
+              _id: "$role",
+              count: { $sum: 1 },
+            },
+          },
+        ])
+      : Promise.resolve([]),
 
     // Today's statistics
     Complaint.aggregate([
-      { 
+      {
         $match: {
           ...matchStage,
-          createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
-        }
+          createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+        },
       },
       {
         $group: {
           _id: null,
           todayTotal: { $sum: 1 },
-          todayResolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
-        }
-      }
-    ])
+          todayResolved: {
+            $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] },
+          },
+        },
+      },
+    ]),
   ]);
 
   res.status(200).json({
     success: true,
-    message: 'Dashboard metrics retrieved successfully',
+    message: "Dashboard metrics retrieved successfully",
     data: {
       complaints: complaintStats[0] || {},
       users: userStats,
-      today: todayStats[0] || {}
-    }
+      today: todayStats[0] || {},
+    },
   });
 });
 
@@ -82,23 +94,23 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
 // @route   GET /api/reports/trends
 // @access  Private (Admin, Ward Officer)
 const getComplaintTrends = asyncHandler(async (req, res) => {
-  const { period = 'month' } = req.query;
-  
+  const { period = "month" } = req.query;
+
   let matchStage = {};
-  if (req.user.role === 'ward-officer') {
-    matchStage['location.ward'] = req.user.ward;
+  if (req.user.role === "ward-officer") {
+    matchStage["location.ward"] = req.user.ward;
   }
 
   let groupBy;
   switch (period) {
-    case 'week':
-      groupBy = { $week: '$createdAt' };
+    case "week":
+      groupBy = { $week: "$createdAt" };
       break;
-    case 'year':
-      groupBy = { $month: '$createdAt' };
+    case "year":
+      groupBy = { $month: "$createdAt" };
       break;
     default:
-      groupBy = { $dayOfMonth: '$createdAt' };
+      groupBy = { $dayOfMonth: "$createdAt" };
   }
 
   const trends = await Complaint.aggregate([
@@ -107,16 +119,16 @@ const getComplaintTrends = asyncHandler(async (req, res) => {
       $group: {
         _id: groupBy,
         total: { $sum: 1 },
-        resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
-      }
+        resolved: { $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] } },
+      },
     },
-    { $sort: { _id: 1 } }
+    { $sort: { _id: 1 } },
   ]);
 
   res.status(200).json({
     success: true,
-    message: 'Complaint trends retrieved successfully',
-    data: { trends }
+    message: "Complaint trends retrieved successfully",
+    data: { trends },
   });
 });
 
@@ -125,8 +137,8 @@ const getComplaintTrends = asyncHandler(async (req, res) => {
 // @access  Private (Admin, Ward Officer)
 const getSLAReport = asyncHandler(async (req, res) => {
   let matchStage = {};
-  if (req.user.role === 'ward-officer') {
-    matchStage['location.ward'] = req.user.ward;
+  if (req.user.role === "ward-officer") {
+    matchStage["location.ward"] = req.user.ward;
   }
 
   const slaReport = await Complaint.aggregate([
@@ -135,47 +147,53 @@ const getSLAReport = asyncHandler(async (req, res) => {
       $addFields: {
         isOverdue: {
           $and: [
-            { $in: ['$status', ['registered', 'assigned', 'in-progress']] },
-            { $lt: ['$slaDeadline', new Date()] }
-          ]
+            { $in: ["$status", ["registered", "assigned", "in-progress"]] },
+            { $lt: ["$slaDeadline", new Date()] },
+          ],
         },
         isWarning: {
           $and: [
-            { $in: ['$status', ['registered', 'assigned', 'in-progress']] },
-            { $lt: ['$slaDeadline', { $add: [new Date(), 24 * 60 * 60 * 1000] }] },
-            { $gte: ['$slaDeadline', new Date()] }
-          ]
-        }
-      }
+            { $in: ["$status", ["registered", "assigned", "in-progress"]] },
+            {
+              $lt: [
+                "$slaDeadline",
+                { $add: [new Date(), 24 * 60 * 60 * 1000] },
+              ],
+            },
+            { $gte: ["$slaDeadline", new Date()] },
+          ],
+        },
+      },
     },
     {
       $group: {
-        _id: '$priority',
+        _id: "$priority",
         total: { $sum: 1 },
-        onTime: { 
-          $sum: { 
-            $cond: [
-              { $and: ['$isOverdue', '$isWarning'] },
-              0, 1
-            ]
-          }
+        onTime: {
+          $sum: {
+            $cond: [{ $and: ["$isOverdue", "$isWarning"] }, 0, 1],
+          },
         },
-        warning: { $sum: { $cond: ['$isWarning', 1, 0] } },
-        overdue: { $sum: { $cond: ['$isOverdue', 1, 0] } }
-      }
-    }
+        warning: { $sum: { $cond: ["$isWarning", 1, 0] } },
+        overdue: { $sum: { $cond: ["$isOverdue", 1, 0] } },
+      },
+    },
   ]);
 
   res.status(200).json({
     success: true,
-    message: 'SLA report retrieved successfully',
-    data: { slaReport }
+    message: "SLA report retrieved successfully",
+    data: { slaReport },
   });
 });
 
 // Routes
-router.get('/dashboard', authorize('admin', 'ward-officer', 'maintenance'), getDashboardMetrics);
-router.get('/trends', authorize('admin', 'ward-officer'), getComplaintTrends);
-router.get('/sla', authorize('admin', 'ward-officer'), getSLAReport);
+router.get(
+  "/dashboard",
+  authorize("admin", "ward-officer", "maintenance"),
+  getDashboardMetrics,
+);
+router.get("/trends", authorize("admin", "ward-officer"), getComplaintTrends);
+router.get("/sla", authorize("admin", "ward-officer"), getSLAReport);
 
 export default router;

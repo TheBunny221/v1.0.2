@@ -32,7 +32,7 @@ import type { User } from "../store/slices/authSlice";
 
 interface LayoutProps {
   children: React.ReactNode;
-  userRole?: User['role'];
+  userRole?: User["role"];
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {

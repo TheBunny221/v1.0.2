@@ -1,9 +1,9 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
 export interface Toast {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: "success" | "error" | "warning" | "info";
   title: string;
   message: string;
   duration?: number;
@@ -15,19 +15,26 @@ export interface Toast {
 
 export interface Modal {
   id: string;
-  type: 'alert' | 'confirm' | 'custom';
+  type: "alert" | "confirm" | "custom";
   title: string;
   content: string | React.ReactNode;
   onConfirm?: () => void;
   onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export interface Notification {
   id: string;
-  type: 'complaint_submitted' | 'complaint_assigned' | 'complaint_updated' | 'complaint_resolved' | 'complaint_closed' | 'sla_warning' | 'sla_breach';
+  type:
+    | "complaint_submitted"
+    | "complaint_assigned"
+    | "complaint_updated"
+    | "complaint_resolved"
+    | "complaint_closed"
+    | "sla_warning"
+    | "sla_breach";
   title: string;
   message: string;
   isRead: boolean;
@@ -39,45 +46,45 @@ export interface UIState {
   // Loading states
   isLoading: boolean;
   loadingText?: string;
-  
+
   // Sidebar
   isSidebarOpen: boolean;
   isSidebarCollapsed: boolean;
-  
+
   // Theme
-  theme: 'light' | 'dark' | 'system';
-  
+  theme: "light" | "dark" | "system";
+
   // Modals
   modals: Modal[];
-  
+
   // Toasts
   toasts: Toast[];
-  
+
   // Notifications
   notifications: Notification[];
   unreadNotificationCount: number;
-  
+
   // Dialog states
   isDialogOpen: boolean;
   dialogData: any;
-  
+
   // Filters panel
   isFiltersOpen: boolean;
-  
+
   // Mobile states
   isMobileMenuOpen: boolean;
-  
+
   // Page states
   currentPage: string;
   breadcrumbs: Array<{ label: string; href?: string }>;
-  
+
   // Search
   globalSearchQuery: string;
   isSearchOpen: boolean;
-  
+
   // Layout
-  layout: 'default' | 'fullscreen' | 'minimal';
-  
+  layout: "default" | "fullscreen" | "minimal";
+
   // Error states
   hasError: boolean;
   errorMessage?: string;
@@ -89,7 +96,8 @@ const initialState: UIState = {
   loadingText: undefined,
   isSidebarOpen: true,
   isSidebarCollapsed: false,
-  theme: (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system',
+  theme:
+    (localStorage.getItem("theme") as "light" | "dark" | "system") || "system",
   modals: [],
   toasts: [],
   notifications: [],
@@ -98,11 +106,11 @@ const initialState: UIState = {
   dialogData: null,
   isFiltersOpen: false,
   isMobileMenuOpen: false,
-  currentPage: '',
+  currentPage: "",
   breadcrumbs: [],
-  globalSearchQuery: '',
+  globalSearchQuery: "",
   isSearchOpen: false,
-  layout: 'default',
+  layout: "default",
   hasError: false,
   errorMessage: undefined,
 };
@@ -112,15 +120,18 @@ const generateId = () => Math.random().toString(36).substr(2, 9);
 
 // UI slice
 const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
     // Loading
-    setLoading: (state, action: PayloadAction<{ isLoading: boolean; text?: string }>) => {
+    setLoading: (
+      state,
+      action: PayloadAction<{ isLoading: boolean; text?: string }>,
+    ) => {
       state.isLoading = action.payload.isLoading;
       state.loadingText = action.payload.text;
     },
-    
+
     // Sidebar
     toggleSidebar: (state) => {
       state.isSidebarOpen = !state.isSidebarOpen;
@@ -134,15 +145,15 @@ const uiSlice = createSlice({
     setSidebarCollapsed: (state, action: PayloadAction<boolean>) => {
       state.isSidebarCollapsed = action.payload;
     },
-    
+
     // Theme
-    setTheme: (state, action: PayloadAction<'light' | 'dark' | 'system'>) => {
+    setTheme: (state, action: PayloadAction<"light" | "dark" | "system">) => {
       state.theme = action.payload;
-      localStorage.setItem('theme', action.payload);
+      localStorage.setItem("theme", action.payload);
     },
-    
+
     // Modals
-    showModal: (state, action: PayloadAction<Omit<Modal, 'id'>>) => {
+    showModal: (state, action: PayloadAction<Omit<Modal, "id">>) => {
       const modal: Modal = {
         id: generateId(),
         ...action.payload,
@@ -150,14 +161,16 @@ const uiSlice = createSlice({
       state.modals.push(modal);
     },
     hideModal: (state, action: PayloadAction<string>) => {
-      state.modals = state.modals.filter(modal => modal.id !== action.payload);
+      state.modals = state.modals.filter(
+        (modal) => modal.id !== action.payload,
+      );
     },
     hideAllModals: (state) => {
       state.modals = [];
     },
-    
+
     // Toasts
-    showToast: (state, action: PayloadAction<Omit<Toast, 'id'>>) => {
+    showToast: (state, action: PayloadAction<Omit<Toast, "id">>) => {
       const toast: Toast = {
         id: generateId(),
         duration: 5000,
@@ -166,14 +179,19 @@ const uiSlice = createSlice({
       state.toasts.push(toast);
     },
     hideToast: (state, action: PayloadAction<string>) => {
-      state.toasts = state.toasts.filter(toast => toast.id !== action.payload);
+      state.toasts = state.toasts.filter(
+        (toast) => toast.id !== action.payload,
+      );
     },
     hideAllToasts: (state) => {
       state.toasts = [];
     },
-    
+
     // Notifications
-    addNotification: (state, action: PayloadAction<Omit<Notification, 'id'>>) => {
+    addNotification: (
+      state,
+      action: PayloadAction<Omit<Notification, "id">>,
+    ) => {
       const notification: Notification = {
         id: generateId(),
         ...action.payload,
@@ -185,33 +203,47 @@ const uiSlice = createSlice({
     },
     setNotifications: (state, action: PayloadAction<Notification[]>) => {
       state.notifications = action.payload;
-      state.unreadNotificationCount = action.payload.filter(n => !n.isRead).length;
+      state.unreadNotificationCount = action.payload.filter(
+        (n) => !n.isRead,
+      ).length;
     },
     markNotificationAsRead: (state, action: PayloadAction<string>) => {
-      const notification = state.notifications.find(n => n.id === action.payload);
+      const notification = state.notifications.find(
+        (n) => n.id === action.payload,
+      );
       if (notification && !notification.isRead) {
         notification.isRead = true;
-        state.unreadNotificationCount = Math.max(0, state.unreadNotificationCount - 1);
+        state.unreadNotificationCount = Math.max(
+          0,
+          state.unreadNotificationCount - 1,
+        );
       }
     },
     markAllNotificationsAsRead: (state) => {
-      state.notifications.forEach(notification => {
+      state.notifications.forEach((notification) => {
         notification.isRead = true;
       });
       state.unreadNotificationCount = 0;
     },
     removeNotification: (state, action: PayloadAction<string>) => {
-      const notification = state.notifications.find(n => n.id === action.payload);
+      const notification = state.notifications.find(
+        (n) => n.id === action.payload,
+      );
       if (notification && !notification.isRead) {
-        state.unreadNotificationCount = Math.max(0, state.unreadNotificationCount - 1);
+        state.unreadNotificationCount = Math.max(
+          0,
+          state.unreadNotificationCount - 1,
+        );
       }
-      state.notifications = state.notifications.filter(n => n.id !== action.payload);
+      state.notifications = state.notifications.filter(
+        (n) => n.id !== action.payload,
+      );
     },
     clearNotifications: (state) => {
       state.notifications = [];
       state.unreadNotificationCount = 0;
     },
-    
+
     // Dialog
     openDialog: (state, action: PayloadAction<any>) => {
       state.isDialogOpen = true;
@@ -221,7 +253,7 @@ const uiSlice = createSlice({
       state.isDialogOpen = false;
       state.dialogData = null;
     },
-    
+
     // Filters
     toggleFilters: (state) => {
       state.isFiltersOpen = !state.isFiltersOpen;
@@ -229,7 +261,7 @@ const uiSlice = createSlice({
     setFiltersOpen: (state, action: PayloadAction<boolean>) => {
       state.isFiltersOpen = action.payload;
     },
-    
+
     // Mobile menu
     toggleMobileMenu: (state) => {
       state.isMobileMenuOpen = !state.isMobileMenuOpen;
@@ -237,15 +269,18 @@ const uiSlice = createSlice({
     setMobileMenuOpen: (state, action: PayloadAction<boolean>) => {
       state.isMobileMenuOpen = action.payload;
     },
-    
+
     // Page
     setCurrentPage: (state, action: PayloadAction<string>) => {
       state.currentPage = action.payload;
     },
-    setBreadcrumbs: (state, action: PayloadAction<Array<{ label: string; href?: string }>>) => {
+    setBreadcrumbs: (
+      state,
+      action: PayloadAction<Array<{ label: string; href?: string }>>,
+    ) => {
       state.breadcrumbs = action.payload;
     },
-    
+
     // Search
     setGlobalSearchQuery: (state, action: PayloadAction<string>) => {
       state.globalSearchQuery = action.payload;
@@ -256,14 +291,20 @@ const uiSlice = createSlice({
     setSearchOpen: (state, action: PayloadAction<boolean>) => {
       state.isSearchOpen = action.payload;
     },
-    
+
     // Layout
-    setLayout: (state, action: PayloadAction<'default' | 'fullscreen' | 'minimal'>) => {
+    setLayout: (
+      state,
+      action: PayloadAction<"default" | "fullscreen" | "minimal">,
+    ) => {
       state.layout = action.payload;
     },
-    
+
     // Error
-    setError: (state, action: PayloadAction<{ hasError: boolean; message?: string }>) => {
+    setError: (
+      state,
+      action: PayloadAction<{ hasError: boolean; message?: string }>,
+    ) => {
       state.hasError = action.payload.hasError;
       state.errorMessage = action.payload.message;
     },
@@ -271,7 +312,7 @@ const uiSlice = createSlice({
       state.hasError = false;
       state.errorMessage = undefined;
     },
-    
+
     // Reset
     resetUI: () => initialState,
   },
@@ -318,47 +359,60 @@ export default uiSlice.reducer;
 // Selectors
 export const selectUI = (state: { ui: UIState }) => state.ui;
 export const selectIsLoading = (state: { ui: UIState }) => state.ui.isLoading;
-export const selectLoadingText = (state: { ui: UIState }) => state.ui.loadingText;
-export const selectIsSidebarOpen = (state: { ui: UIState }) => state.ui.isSidebarOpen;
-export const selectIsSidebarCollapsed = (state: { ui: UIState }) => state.ui.isSidebarCollapsed;
+export const selectLoadingText = (state: { ui: UIState }) =>
+  state.ui.loadingText;
+export const selectIsSidebarOpen = (state: { ui: UIState }) =>
+  state.ui.isSidebarOpen;
+export const selectIsSidebarCollapsed = (state: { ui: UIState }) =>
+  state.ui.isSidebarCollapsed;
 export const selectTheme = (state: { ui: UIState }) => state.ui.theme;
 export const selectModals = (state: { ui: UIState }) => state.ui.modals;
 export const selectToasts = (state: { ui: UIState }) => state.ui.toasts;
-export const selectNotifications = (state: { ui: UIState }) => state.ui.notifications;
-export const selectUnreadNotificationCount = (state: { ui: UIState }) => state.ui.unreadNotificationCount;
-export const selectIsDialogOpen = (state: { ui: UIState }) => state.ui.isDialogOpen;
+export const selectNotifications = (state: { ui: UIState }) =>
+  state.ui.notifications;
+export const selectUnreadNotificationCount = (state: { ui: UIState }) =>
+  state.ui.unreadNotificationCount;
+export const selectIsDialogOpen = (state: { ui: UIState }) =>
+  state.ui.isDialogOpen;
 export const selectDialogData = (state: { ui: UIState }) => state.ui.dialogData;
-export const selectIsFiltersOpen = (state: { ui: UIState }) => state.ui.isFiltersOpen;
-export const selectIsMobileMenuOpen = (state: { ui: UIState }) => state.ui.isMobileMenuOpen;
-export const selectCurrentPage = (state: { ui: UIState }) => state.ui.currentPage;
-export const selectBreadcrumbs = (state: { ui: UIState }) => state.ui.breadcrumbs;
-export const selectGlobalSearchQuery = (state: { ui: UIState }) => state.ui.globalSearchQuery;
-export const selectIsSearchOpen = (state: { ui: UIState }) => state.ui.isSearchOpen;
+export const selectIsFiltersOpen = (state: { ui: UIState }) =>
+  state.ui.isFiltersOpen;
+export const selectIsMobileMenuOpen = (state: { ui: UIState }) =>
+  state.ui.isMobileMenuOpen;
+export const selectCurrentPage = (state: { ui: UIState }) =>
+  state.ui.currentPage;
+export const selectBreadcrumbs = (state: { ui: UIState }) =>
+  state.ui.breadcrumbs;
+export const selectGlobalSearchQuery = (state: { ui: UIState }) =>
+  state.ui.globalSearchQuery;
+export const selectIsSearchOpen = (state: { ui: UIState }) =>
+  state.ui.isSearchOpen;
 export const selectLayout = (state: { ui: UIState }) => state.ui.layout;
 export const selectHasError = (state: { ui: UIState }) => state.ui.hasError;
-export const selectErrorMessage = (state: { ui: UIState }) => state.ui.errorMessage;
+export const selectErrorMessage = (state: { ui: UIState }) =>
+  state.ui.errorMessage;
 
 // Helper action creators
 export const showSuccessToast = (title: string, message: string) =>
-  showToast({ type: 'success', title, message });
+  showToast({ type: "success", title, message });
 
 export const showErrorToast = (title: string, message: string) =>
-  showToast({ type: 'error', title, message });
+  showToast({ type: "error", title, message });
 
 export const showWarningToast = (title: string, message: string) =>
-  showToast({ type: 'warning', title, message });
+  showToast({ type: "warning", title, message });
 
 export const showInfoToast = (title: string, message: string) =>
-  showToast({ type: 'info', title, message });
+  showToast({ type: "info", title, message });
 
 export const showConfirmModal = (
   title: string,
   content: string,
   onConfirm: () => void,
-  onCancel?: () => void
+  onCancel?: () => void,
 ) =>
   showModal({
-    type: 'confirm',
+    type: "confirm",
     title,
     content,
     onConfirm,
@@ -367,7 +421,7 @@ export const showConfirmModal = (
 
 export const showAlertModal = (title: string, content: string) =>
   showModal({
-    type: 'alert',
+    type: "alert",
     title,
     content,
   });

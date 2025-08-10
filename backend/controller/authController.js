@@ -1,6 +1,6 @@
-import User from '../model/User.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import crypto from 'crypto';
+import User from "../model/User.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import crypto from "crypto";
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -13,8 +13,8 @@ export const register = asyncHandler(async (req, res) => {
   if (existingUserByEmail) {
     return res.status(400).json({
       success: false,
-      message: 'User already exists with this email',
-      data: null
+      message: "User already exists with this email",
+      data: null,
     });
   }
 
@@ -24,14 +24,14 @@ export const register = asyncHandler(async (req, res) => {
     email,
     phone,
     password,
-    role: role || 'citizen'
+    role: role || "citizen",
   };
 
   // Add role-specific fields
-  if (role === 'ward_officer' && ward) {
+  if (role === "ward_officer" && ward) {
     userData.ward = ward;
   }
-  if (role === 'maintenance' && department) {
+  if (role === "maintenance" && department) {
     userData.department = department;
   }
 
@@ -42,11 +42,11 @@ export const register = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'User registered successfully',
+    message: "User registered successfully",
     data: {
       user,
-      token
-    }
+      token,
+    },
   });
 });
 
@@ -62,8 +62,8 @@ export const login = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(401).json({
       success: false,
-      message: 'Invalid credentials',
-      data: null
+      message: "Invalid credentials",
+      data: null,
     });
   }
 
@@ -71,8 +71,8 @@ export const login = asyncHandler(async (req, res) => {
   if (!user.isActive) {
     return res.status(401).json({
       success: false,
-      message: 'Account is deactivated. Please contact support.',
-      data: null
+      message: "Account is deactivated. Please contact support.",
+      data: null,
     });
   }
 
@@ -82,8 +82,8 @@ export const login = asyncHandler(async (req, res) => {
   if (!isPasswordMatch) {
     return res.status(401).json({
       success: false,
-      message: 'Invalid credentials',
-      data: null
+      message: "Invalid credentials",
+      data: null,
     });
   }
 
@@ -94,15 +94,21 @@ export const login = asyncHandler(async (req, res) => {
   const token = User.generateJWTToken(user);
 
   // Remove password from response
-  const { password: _, resetPasswordToken: __, resetPasswordExpire: ___, emailVerificationToken: ____, ...userResponse } = user;
+  const {
+    password: _,
+    resetPasswordToken: __,
+    resetPasswordExpire: ___,
+    emailVerificationToken: ____,
+    ...userResponse
+  } = user;
 
   res.status(200).json({
     success: true,
-    message: 'Login successful',
+    message: "Login successful",
     data: {
       user: userResponse,
-      token
-    }
+      token,
+    },
   });
 });
 
@@ -112,8 +118,8 @@ export const login = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Logout successful',
-    data: null
+    message: "Logout successful",
+    data: null,
   });
 });
 
@@ -123,10 +129,10 @@ export const logout = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'User details retrieved successfully',
+    message: "User details retrieved successfully",
     data: {
-      user: req.user
-    }
+      user: req.user,
+    },
   });
 });
 
@@ -134,11 +140,18 @@ export const getMe = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/profile
 // @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
-  const allowedFields = ['name', 'phone', 'language', 'notificationsEnabled', 'emailAlerts', 'avatar'];
+  const allowedFields = [
+    "name",
+    "phone",
+    "language",
+    "notificationsEnabled",
+    "emailAlerts",
+    "avatar",
+  ];
   const updates = {};
 
   // Only allow specific fields to be updated
-  Object.keys(req.body).forEach(key => {
+  Object.keys(req.body).forEach((key) => {
     if (allowedFields.includes(key)) {
       updates[key] = req.body[key];
     }
@@ -148,10 +161,10 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Profile updated successfully',
+    message: "Profile updated successfully",
     data: {
-      user
-    }
+      user,
+    },
   });
 });
 
@@ -165,13 +178,16 @@ export const changePassword = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id, true);
 
   // Check current password
-  const isCurrentPasswordCorrect = await User.comparePassword(currentPassword, user.password);
+  const isCurrentPasswordCorrect = await User.comparePassword(
+    currentPassword,
+    user.password,
+  );
 
   if (!isCurrentPasswordCorrect) {
     return res.status(400).json({
       success: false,
-      message: 'Current password is incorrect',
-      data: null
+      message: "Current password is incorrect",
+      data: null,
     });
   }
 
@@ -180,8 +196,8 @@ export const changePassword = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Password changed successfully',
-    data: null
+    message: "Password changed successfully",
+    data: null,
   });
 });
 
@@ -196,44 +212,46 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: 'User not found',
-      data: null
+      message: "User not found",
+      data: null,
     });
   }
 
   // Get reset token
-  const { resetToken, resetPasswordToken, resetPasswordExpire } = User.generateResetPasswordToken();
-  
+  const { resetToken, resetPasswordToken, resetPasswordExpire } =
+    User.generateResetPasswordToken();
+
   await User.update(user.id, {
     resetPasswordToken,
-    resetPasswordExpire
+    resetPasswordExpire,
   });
 
   // Create reset URL
-  const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+  const resetUrl = `${req.protocol}://${req.get("host")}/reset-password/${resetToken}`;
 
   try {
     // In a real application, you would send an email here
     // For now, we'll just return the token (DON'T do this in production)
-    
+
     res.status(200).json({
       success: true,
-      message: 'Password reset email sent',
+      message: "Password reset email sent",
       data: {
-        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
-        resetUrl: process.env.NODE_ENV === 'development' ? resetUrl : undefined
-      }
+        resetToken:
+          process.env.NODE_ENV === "development" ? resetToken : undefined,
+        resetUrl: process.env.NODE_ENV === "development" ? resetUrl : undefined,
+      },
     });
   } catch (error) {
     await User.update(user.id, {
       resetPasswordToken: null,
-      resetPasswordExpire: null
+      resetPasswordExpire: null,
     });
 
     return res.status(500).json({
       success: false,
-      message: 'Email could not be sent',
-      data: null
+      message: "Email could not be sent",
+      data: null,
     });
   }
 });
@@ -246,14 +264,14 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   // Get hashed token
   const resetPasswordToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(req.params.resettoken)
-    .digest('hex');
+    .digest("hex");
 
   // Find user with valid reset token
   const users = await User.findMany({
     resetPasswordToken,
-    resetPasswordExpire: { gte: new Date() }
+    resetPasswordExpire: { gte: new Date() },
   });
 
   const user = users.users[0];
@@ -261,8 +279,8 @@ export const resetPassword = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid or expired reset token',
-      data: null
+      message: "Invalid or expired reset token",
+      data: null,
     });
   }
 
@@ -270,7 +288,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
   await User.update(user.id, {
     password,
     resetPasswordToken: null,
-    resetPasswordExpire: null
+    resetPasswordExpire: null,
   });
 
   // Generate JWT token
@@ -278,11 +296,11 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Password reset successful',
+    message: "Password reset successful",
     data: {
       user,
-      token
-    }
+      token,
+    },
   });
 });
 
@@ -292,10 +310,10 @@ export const resetPassword = asyncHandler(async (req, res) => {
 export const verifyToken = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Token is valid',
+    message: "Token is valid",
     data: {
       user: req.user,
-      isValid: true
-    }
+      isValid: true,
+    },
   });
 });

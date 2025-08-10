@@ -87,6 +87,7 @@ npm run dev:server    # Backend on http://localhost:5000
 ## API Endpoints
 
 ### Authentication (`/api/auth`)
+
 - `POST /register` - User registration
 - `POST /login` - User login
 - `POST /logout` - User logout
@@ -97,6 +98,7 @@ npm run dev:server    # Backend on http://localhost:5000
 - `PUT /reset-password/:token` - Reset password
 
 ### Complaints (`/api/complaints`)
+
 - `POST /` - Create complaint (public/authenticated)
 - `GET /` - Get all complaints (role-based)
 - `GET /my` - Get user's complaints
@@ -106,12 +108,14 @@ npm run dev:server    # Backend on http://localhost:5000
 - `GET /stats` - Get complaint statistics
 
 ### Users (`/api/users`) - Admin Only
+
 - `GET /` - Get all users
 - `GET /:id` - Get user by ID
 - `PUT /:id` - Update user
 - `DELETE /:id` - Deactivate user
 
 ### Reports (`/api/reports`)
+
 - `GET /dashboard` - Dashboard metrics
 - `GET /trends` - Complaint trends
 - `GET /sla` - SLA compliance report
@@ -119,12 +123,14 @@ npm run dev:server    # Backend on http://localhost:5000
 ## User Roles & Permissions
 
 ### 1. **Citizen**
+
 - Register/login
 - Submit complaints (with/without account)
 - Track own complaints
 - Provide feedback on resolved complaints
 
 ### 2. **Admin**
+
 - Full system access
 - Manage all complaints
 - Manage users and roles
@@ -132,12 +138,14 @@ npm run dev:server    # Backend on http://localhost:5000
 - Assign complaints to staff
 
 ### 3. **Ward Officer**
+
 - Manage complaints in assigned ward
 - Review and approve complaints
 - Forward complaints to maintenance teams
 - View ward-specific analytics
 
 ### 4. **Maintenance Team**
+
 - View assigned complaints
 - Update complaint status
 - Upload before/after photos
@@ -146,6 +154,7 @@ npm run dev:server    # Backend on http://localhost:5000
 ## Features Implemented
 
 ### Frontend Features
+
 - ✅ Multi-language support (English, Hindi, Malayalam)
 - ✅ Role-based navigation and UI
 - ✅ Redux state management
@@ -155,6 +164,7 @@ npm run dev:server    # Backend on http://localhost:5000
 - ✅ File upload support
 
 ### Backend Features
+
 - ✅ JWT authentication
 - ✅ Role-based authorization
 - ✅ Input validation & sanitization
@@ -165,6 +175,7 @@ npm run dev:server    # Backend on http://localhost:5000
 - ✅ API rate limiting
 
 ### Database Models
+
 - ✅ User model with role management
 - ✅ Complaint model with status tracking
 - ✅ Notification model for alerts
@@ -182,6 +193,7 @@ npm run build
 ### 2. Environment Setup
 
 Update `.env` for production:
+
 ```env
 NODE_ENV=production
 MONGODB_URI=your-production-mongodb-uri
@@ -198,11 +210,13 @@ npm run start:prod
 ### 4. Cloud Deployment Options
 
 #### Option 1: Vercel (Frontend) + Railway (Backend)
+
 - Deploy frontend to Vercel
 - Deploy backend to Railway/Heroku
 - Use MongoDB Atlas for database
 
 #### Option 2: VPS Deployment
+
 - Use PM2 for process management
 - Set up Nginx as reverse proxy
 - Configure SSL certificates
@@ -231,24 +245,29 @@ npm test               # Run tests
 Use the following demo credentials for testing:
 
 ### Admin User
+
 - Email: `admin@city.gov`
 - Password: `Admin123!`
 
 ### Ward Officer
+
 - Email: `ward@city.gov`
 - Password: `Ward123!`
 
 ### Maintenance Team
+
 - Email: `maintenance@city.gov`
 - Password: `Maint123!`
 
 ### Citizen
+
 - Email: `citizen@email.com`
 - Password: `Citizen123!`
 
 ## Database Schema
 
 ### Users Collection
+
 ```javascript
 {
   name: String,
@@ -270,6 +289,7 @@ Use the following demo credentials for testing:
 ```
 
 ### Complaints Collection
+
 ```javascript
 {
   complaintId: String (auto-generated),
@@ -340,6 +360,7 @@ Use the following demo credentials for testing:
 ## Support
 
 For issues and questions:
+
 1. Check the logs in the console
 2. Verify environment variables
 3. Ensure MongoDB is running

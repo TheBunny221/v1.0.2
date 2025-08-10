@@ -1,13 +1,19 @@
-import Complaint from '../model/Complaint.js';
-import User from '../model/User.js';
-import Notification from '../model/Notification.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
+import Complaint from "../model/Complaint.js";
+import User from "../model/User.js";
+import Notification from "../model/Notification.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
 
 // @desc    Create new complaint
 // @route   POST /api/complaints
 // @access  Public/Private
 export const createComplaint = asyncHandler(async (req, res) => {
-  const { type, description, contactInfo, location, isAnonymous = false } = req.body;
+  const {
+    type,
+    description,
+    contactInfo,
+    location,
+    isAnonymous = false,
+  } = req.body;
 
   // Create complaint data
   const complaintData = {
@@ -22,7 +28,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     longitude: location.coordinates?.longitude || null,
     landmark: location.landmark || null,
     isAnonymous,
-    submittedById: req.user ? req.user.id : null
+    submittedById: req.user ? req.user.id : null,
   };
 
   // If user is not logged in, create as anonymous
@@ -33,27 +39,27 @@ export const createComplaint = asyncHandler(async (req, res) => {
   const complaint = await Complaint.create(complaintData);
 
   // Create notification for admins about new complaint
-  const adminUsers = await User.findMany({ role: 'admin', isActive: true });
-  
+  const adminUsers = await User.findMany({ role: "admin", isActive: true });
+
   for (const admin of adminUsers.users) {
     await Notification.createComplaintNotification(
-      'complaint_submitted',
+      "complaint_submitted",
       complaint.id,
       admin.id,
       {
         complaintId: complaint.complaintId,
         type: complaint.type,
-        ward: complaint.ward
-      }
+        ward: complaint.ward,
+      },
     );
   }
 
   res.status(201).json({
     success: true,
-    message: 'Complaint registered successfully',
+    message: "Complaint registered successfully",
     data: {
-      complaint
-    }
+      complaint,
+    },
   });
 });
 
@@ -71,16 +77,16 @@ export const getComplaints = asyncHandler(async (req, res) => {
     assignedToId,
     dateFrom,
     dateTo,
-    search
+    search,
   } = req.query;
 
   // Build filter object
   let filters = {};
 
   // Role-based filtering
-  if (req.user.role === 'ward_officer') {
+  if (req.user.role === "ward_officer") {
     filters.ward = req.user.ward;
-  } else if (req.user.role === 'maintenance') {
+  } else if (req.user.role === "maintenance") {
     filters.assignedToId = req.user.id;
   }
 
@@ -88,7 +94,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
   if (status) filters.status = status;
   if (priority) filters.priority = priority;
   if (type) filters.type = type;
-  if (ward && req.user.role === 'admin') filters.ward = ward;
+  if (ward && req.user.role === "admin") filters.ward = ward;
   if (assignedToId) filters.assignedToId = assignedToId;
 
   // Search filter
@@ -96,11 +102,15 @@ export const getComplaints = asyncHandler(async (req, res) => {
     filters.search = search;
   }
 
-  const result = await Complaint.findMany(filters, parseInt(page), parseInt(limit));
+  const result = await Complaint.findMany(
+    filters,
+    parseInt(page),
+    parseInt(limit),
+  );
 
   res.status(200).json({
     success: true,
-    message: 'Complaints retrieved successfully',
+    message: "Complaints retrieved successfully",
     data: {
       complaints: result.complaints,
       pagination: {
@@ -109,9 +119,9 @@ export const getComplaints = asyncHandler(async (req, res) => {
         totalItems: result.pagination.total,
         itemsPerPage: result.pagination.limit,
         hasNextPage: result.pagination.page < result.pagination.pages,
-        hasPrevPage: result.pagination.page > 1
-      }
-    }
+        hasPrevPage: result.pagination.page > 1,
+      },
+    },
   });
 });
 
@@ -124,32 +134,34 @@ export const getComplaintById = asyncHandler(async (req, res) => {
   if (!complaint) {
     return res.status(404).json({
       success: false,
-      message: 'Complaint not found',
-      data: null
+      message: "Complaint not found",
+      data: null,
     });
   }
 
   // Check access permissions
-  const hasAccess = 
-    req.user.role === 'admin' ||
-    (req.user.role === 'ward_officer' && complaint.ward === req.user.ward) ||
-    (req.user.role === 'maintenance' && complaint.assignedToId && complaint.assignedToId === req.user.id) ||
+  const hasAccess =
+    req.user.role === "admin" ||
+    (req.user.role === "ward_officer" && complaint.ward === req.user.ward) ||
+    (req.user.role === "maintenance" &&
+      complaint.assignedToId &&
+      complaint.assignedToId === req.user.id) ||
     (complaint.submittedById && complaint.submittedById === req.user.id);
 
   if (!hasAccess) {
     return res.status(403).json({
       success: false,
-      message: 'Not authorized to access this complaint',
-      data: null
+      message: "Not authorized to access this complaint",
+      data: null,
     });
   }
 
   res.status(200).json({
     success: true,
-    message: 'Complaint retrieved successfully',
+    message: "Complaint retrieved successfully",
     data: {
-      complaint
-    }
+      complaint,
+    },
   });
 });
 
@@ -164,22 +176,22 @@ export const updateComplaint = asyncHandler(async (req, res) => {
   if (!complaint) {
     return res.status(404).json({
       success: false,
-      message: 'Complaint not found',
-      data: null
+      message: "Complaint not found",
+      data: null,
     });
   }
 
   // Check permissions
-  const canUpdate = 
-    req.user.role === 'admin' ||
-    (req.user.role === 'ward_officer' && complaint.ward === req.user.ward) ||
+  const canUpdate =
+    req.user.role === "admin" ||
+    (req.user.role === "ward_officer" && complaint.ward === req.user.ward) ||
     (complaint.assignedToId && complaint.assignedToId === req.user.id);
 
   if (!canUpdate) {
     return res.status(403).json({
       success: false,
-      message: 'Not authorized to update this complaint',
-      data: null
+      message: "Not authorized to update this complaint",
+      data: null,
     });
   }
 
@@ -194,8 +206,8 @@ export const updateComplaint = asyncHandler(async (req, res) => {
     if (!assignee) {
       return res.status(404).json({
         success: false,
-        message: 'Assignee not found',
-        data: null
+        message: "Assignee not found",
+        data: null,
       });
     }
     updates.assignedToId = assignedToId;
@@ -205,27 +217,27 @@ export const updateComplaint = asyncHandler(async (req, res) => {
     await Complaint.addRemark(complaint.id, {
       text: `Complaint assigned to ${assignee.name}`,
       addedById: req.user.id,
-      type: 'assignment'
+      type: "assignment",
     });
 
     // Create notification for assignee
     await Notification.createComplaintNotification(
-      'complaint_assigned',
+      "complaint_assigned",
       complaint.id,
       assignedToId,
       {
         complaintId: complaint.complaintId,
         type: complaint.type,
-        ward: complaint.ward
-      }
+        ward: complaint.ward,
+      },
     );
   }
 
   // Handle status changes
   if (status) {
-    if (status === 'resolved') {
+    if (status === "resolved") {
       updates.resolvedAt = new Date();
-    } else if (status === 'closed') {
+    } else if (status === "closed") {
       updates.closedAt = new Date();
     }
 
@@ -233,20 +245,20 @@ export const updateComplaint = asyncHandler(async (req, res) => {
     await Complaint.addRemark(complaint.id, {
       text: `Status changed to ${status}`,
       addedById: req.user.id,
-      type: 'status_update'
+      type: "status_update",
     });
 
     // Create notification for complainant
     if (complaint.submittedById) {
       await Notification.createComplaintNotification(
-        'complaint_updated',
+        "complaint_updated",
         complaint.id,
         complaint.submittedById,
         {
           complaintId: complaint.complaintId,
           status,
-          type: complaint.type
-        }
+          type: complaint.type,
+        },
       );
     }
   }
@@ -256,7 +268,7 @@ export const updateComplaint = asyncHandler(async (req, res) => {
     await Complaint.addRemark(complaint.id, {
       text: remarks,
       addedById: req.user.id,
-      type: 'general'
+      type: "general",
     });
   }
 
@@ -265,10 +277,10 @@ export const updateComplaint = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Complaint updated successfully',
+    message: "Complaint updated successfully",
     data: {
-      complaint: updatedComplaint
-    }
+      complaint: updatedComplaint,
+    },
   });
 });
 
@@ -281,20 +293,24 @@ export const getMyComplaints = asyncHandler(async (req, res) => {
   let filters = { submittedById: req.user.id };
   if (status) filters.status = status;
 
-  const result = await Complaint.findMany(filters, parseInt(page), parseInt(limit));
+  const result = await Complaint.findMany(
+    filters,
+    parseInt(page),
+    parseInt(limit),
+  );
 
   res.status(200).json({
     success: true,
-    message: 'Your complaints retrieved successfully',
+    message: "Your complaints retrieved successfully",
     data: {
       complaints: result.complaints,
       pagination: {
         currentPage: result.pagination.page,
         totalPages: result.pagination.pages,
         totalItems: result.pagination.total,
-        itemsPerPage: result.pagination.limit
-      }
-    }
+        itemsPerPage: result.pagination.limit,
+      },
+    },
   });
 });
 
@@ -309,8 +325,8 @@ export const submitFeedback = asyncHandler(async (req, res) => {
   if (!complaint) {
     return res.status(404).json({
       success: false,
-      message: 'Complaint not found',
-      data: null
+      message: "Complaint not found",
+      data: null,
     });
   }
 
@@ -318,17 +334,17 @@ export const submitFeedback = asyncHandler(async (req, res) => {
   if (complaint.submittedById !== req.user.id) {
     return res.status(403).json({
       success: false,
-      message: 'Not authorized to provide feedback for this complaint',
-      data: null
+      message: "Not authorized to provide feedback for this complaint",
+      data: null,
     });
   }
 
   // Check if complaint is resolved
-  if (complaint.status !== 'resolved' && complaint.status !== 'closed') {
+  if (complaint.status !== "resolved" && complaint.status !== "closed") {
     return res.status(400).json({
       success: false,
-      message: 'Feedback can only be provided for resolved complaints',
-      data: null
+      message: "Feedback can only be provided for resolved complaints",
+      data: null,
     });
   }
 
@@ -336,19 +352,19 @@ export const submitFeedback = asyncHandler(async (req, res) => {
   const updatedComplaint = await Complaint.update(complaint.id, {
     feedbackRating: rating,
     feedbackComment: comment,
-    feedbackSubmittedAt: new Date()
+    feedbackSubmittedAt: new Date(),
   });
 
   res.status(200).json({
     success: true,
-    message: 'Feedback submitted successfully',
+    message: "Feedback submitted successfully",
     data: {
       feedback: {
         rating: updatedComplaint.feedbackRating,
         comment: updatedComplaint.feedbackComment,
-        submittedAt: updatedComplaint.feedbackSubmittedAt
-      }
-    }
+        submittedAt: updatedComplaint.feedbackSubmittedAt,
+      },
+    },
   });
 });
 
@@ -359,7 +375,7 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
   let filters = {};
 
   // Role-based filtering
-  if (req.user.role === 'ward_officer') {
+  if (req.user.role === "ward_officer") {
     filters.ward = req.user.ward;
   }
 
@@ -367,10 +383,10 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Complaint statistics retrieved successfully',
+    message: "Complaint statistics retrieved successfully",
     data: {
-      stats
-    }
+      stats,
+    },
   });
 });
 
@@ -381,8 +397,8 @@ export const uploadComplaintFiles = asyncHandler(async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({
       success: false,
-      message: 'No files uploaded',
-      data: null
+      message: "No files uploaded",
+      data: null,
     });
   }
 
@@ -391,23 +407,23 @@ export const uploadComplaintFiles = asyncHandler(async (req, res) => {
   if (!complaint) {
     return res.status(404).json({
       success: false,
-      message: 'Complaint not found',
-      data: null
+      message: "Complaint not found",
+      data: null,
     });
   }
 
   // Check permissions
-  const canUpload = 
-    req.user.role === 'admin' ||
-    (req.user.role === 'ward_officer' && complaint.ward === req.user.ward) ||
+  const canUpload =
+    req.user.role === "admin" ||
+    (req.user.role === "ward_officer" && complaint.ward === req.user.ward) ||
     (complaint.assignedToId && complaint.assignedToId === req.user.id) ||
-    (complaint.submittedById === req.user.id);
+    complaint.submittedById === req.user.id;
 
   if (!canUpload) {
     return res.status(403).json({
       success: false,
-      message: 'Not authorized to upload files for this complaint',
-      data: null
+      message: "Not authorized to upload files for this complaint",
+      data: null,
     });
   }
 
@@ -419,7 +435,7 @@ export const uploadComplaintFiles = asyncHandler(async (req, res) => {
       originalName: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
-      url: `/uploads/${file.filename}`
+      url: `/uploads/${file.filename}`,
     };
 
     const uploadedFile = await Complaint.addFile(complaint.id, fileData);
@@ -428,9 +444,9 @@ export const uploadComplaintFiles = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Files uploaded successfully',
+    message: "Files uploaded successfully",
     data: {
-      files: uploadedFiles
-    }
+      files: uploadedFiles,
+    },
   });
 });

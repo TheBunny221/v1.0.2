@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
 export interface User {
@@ -6,11 +6,11 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  role: 'citizen' | 'admin' | 'ward_officer' | 'maintenance';
+  role: "citizen" | "admin" | "ward_officer" | "maintenance";
   ward?: string;
   department?: string;
   avatar?: string;
-  language: 'en' | 'hi' | 'ml';
+  language: "en" | "hi" | "ml";
   notificationsEnabled: boolean;
   emailAlerts: boolean;
   isActive: boolean;
@@ -31,7 +31,7 @@ export interface AuthState {
 // Initial state
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem("token"),
   isLoading: false,
   isAuthenticated: false,
   error: null,
@@ -39,13 +39,16 @@ const initialState: AuthState = {
 
 // Async thunks
 export const loginUser = createAsyncThunk(
-  'auth/login',
-  async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+  "auth/login",
+  async (
+    credentials: { email: string; password: string },
+    { rejectWithValue },
+  ) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
       });
@@ -53,27 +56,35 @@ export const loginUser = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Login failed');
+        return rejectWithValue(data.message || "Login failed");
       }
 
       // Store token in localStorage
-      localStorage.setItem('token', data.data.token);
-      
+      localStorage.setItem("token", data.data.token);
+
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const registerUser = createAsyncThunk(
-  'auth/register',
-  async (userData: Omit<User, 'id' | 'isActive' | 'isEmailVerified' | 'createdAt' | 'updatedAt'> & { password: string }, { rejectWithValue }) => {
+  "auth/register",
+  async (
+    userData: Omit<
+      User,
+      "id" | "isActive" | "isEmailVerified" | "createdAt" | "updatedAt"
+    > & { password: string },
+    { rejectWithValue },
+  ) => {
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
       });
@@ -81,62 +92,66 @@ export const registerUser = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Registration failed');
+        return rejectWithValue(data.message || "Registration failed");
       }
 
       // Store token in localStorage
-      localStorage.setItem('token', data.data.token);
-      
+      localStorage.setItem("token", data.data.token);
+
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const loginWithToken = createAsyncThunk(
-  'auth/loginWithToken',
+  "auth/loginWithToken",
   async (_, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem("token");
+
     if (!token) {
-      return rejectWithValue('No token found');
+      return rejectWithValue("No token found");
     }
 
     try {
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch("/api/auth/me", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        localStorage.removeItem('token');
-        return rejectWithValue(data.message || 'Token validation failed');
+        localStorage.removeItem("token");
+        return rejectWithValue(data.message || "Token validation failed");
       }
 
       return { user: data.data.user, token };
     } catch (error) {
-      localStorage.removeItem('token');
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      localStorage.removeItem("token");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
+  "auth/updateProfile",
   async (profileData: Partial<User>, { getState, rejectWithValue }) => {
     try {
       const state = getState() as { auth: AuthState };
       const token = state.auth.token;
 
-      const response = await fetch('/api/auth/profile', {
-        method: 'PUT',
+      const response = await fetch("/api/auth/profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(profileData),
       });
@@ -144,46 +159,48 @@ export const updateProfile = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Profile update failed');
+        return rejectWithValue(data.message || "Profile update failed");
       }
 
       return data.data.user;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
     }
-  }
+  },
 );
 
 export const logout = createAsyncThunk(
-  'auth/logout',
+  "auth/logout",
   async (_, { getState }) => {
     const state = getState() as { auth: AuthState };
     const token = state.auth.token;
 
     try {
       if (token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
+        await fetch("/api/auth/logout", {
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
       }
     } catch (error) {
       // Even if logout request fails, we still want to clear local state
-      console.error('Logout request failed:', error);
+      console.error("Logout request failed:", error);
     }
 
     // Clear token from localStorage
-    localStorage.removeItem('token');
-    
+    localStorage.removeItem("token");
+
     return null;
-  }
+  },
 );
 
 // Auth slice
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -284,6 +301,8 @@ export default authSlice.reducer;
 // Selectors
 export const selectAuth = (state: { auth: AuthState }) => state.auth;
 export const selectUser = (state: { auth: AuthState }) => state.auth.user;
-export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated;
-export const selectAuthLoading = (state: { auth: AuthState }) => state.auth.isLoading;
+export const selectIsAuthenticated = (state: { auth: AuthState }) =>
+  state.auth.isAuthenticated;
+export const selectAuthLoading = (state: { auth: AuthState }) =>
+  state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;

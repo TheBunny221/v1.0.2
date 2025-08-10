@@ -1,8 +1,11 @@
-import express from 'express';
-import { protect, authorize } from '../middleware/auth.js';
-import { validateMongoId, validatePagination } from '../middleware/validation.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import User from '../model/User.js';
+import express from "express";
+import { protect, authorize } from "../middleware/auth.js";
+import {
+  validateMongoId,
+  validatePagination,
+} from "../middleware/validation.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import User from "../model/User.js";
 
 const router = express.Router();
 
@@ -21,15 +24,15 @@ const getUsers = asyncHandler(async (req, res) => {
   if (department) filter.department = department;
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } }
+      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
     ];
   }
 
   const skip = (page - 1) * limit;
 
   const users = await User.find(filter)
-    .select('-password')
+    .select("-password")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(parseInt(limit));
@@ -38,16 +41,16 @@ const getUsers = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Users retrieved successfully',
+    message: "Users retrieved successfully",
     data: {
       users,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / limit),
         totalItems: total,
-        itemsPerPage: parseInt(limit)
-      }
-    }
+        itemsPerPage: parseInt(limit),
+      },
+    },
   });
 });
 
@@ -55,20 +58,20 @@ const getUsers = asyncHandler(async (req, res) => {
 // @route   GET /api/users/:id
 // @access  Private (Admin only)
 const getUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).select('-password');
+  const user = await User.findById(req.params.id).select("-password");
 
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: 'User not found',
-      data: null
+      message: "User not found",
+      data: null,
     });
   }
 
   res.status(200).json({
     success: true,
-    message: 'User retrieved successfully',
-    data: { user }
+    message: "User retrieved successfully",
+    data: { user },
   });
 });
 
@@ -76,33 +79,40 @@ const getUserById = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/:id
 // @access  Private (Admin only)
 const updateUser = asyncHandler(async (req, res) => {
-  const allowedFields = ['name', 'phone', 'role', 'ward', 'department', 'isActive', 'preferences'];
+  const allowedFields = [
+    "name",
+    "phone",
+    "role",
+    "ward",
+    "department",
+    "isActive",
+    "preferences",
+  ];
   const updates = {};
 
-  Object.keys(req.body).forEach(key => {
+  Object.keys(req.body).forEach((key) => {
     if (allowedFields.includes(key)) {
       updates[key] = req.body[key];
     }
   });
 
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    updates,
-    { new: true, runValidators: true }
-  ).select('-password');
+  const user = await User.findByIdAndUpdate(req.params.id, updates, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
 
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: 'User not found',
-      data: null
+      message: "User not found",
+      data: null,
     });
   }
 
   res.status(200).json({
     success: true,
-    message: 'User updated successfully',
-    data: { user }
+    message: "User updated successfully",
+    data: { user },
   });
 });
 
@@ -115,8 +125,8 @@ const deleteUser = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: 'User not found',
-      data: null
+      message: "User not found",
+      data: null,
     });
   }
 
@@ -126,15 +136,15 @@ const deleteUser = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'User deactivated successfully',
-    data: null
+    message: "User deactivated successfully",
+    data: null,
   });
 });
 
 // Routes
-router.get('/', authorize('admin'), validatePagination, getUsers);
-router.get('/:id', authorize('admin'), validateMongoId, getUserById);
-router.put('/:id', authorize('admin'), validateMongoId, updateUser);
-router.delete('/:id', authorize('admin'), validateMongoId, deleteUser);
+router.get("/", authorize("admin"), validatePagination, getUsers);
+router.get("/:id", authorize("admin"), validateMongoId, getUserById);
+router.put("/:id", authorize("admin"), validateMongoId, updateUser);
+router.delete("/:id", authorize("admin"), validateMongoId, deleteUser);
 
 export default router;

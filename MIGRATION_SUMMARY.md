@@ -7,21 +7,25 @@ Your Citizen Connect application has been successfully migrated from MongoDB to 
 ## 🔄 Database Changes
 
 ### 1. **Database System**
+
 - **Before**: MongoDB with Mongoose ODM
 - **After**: PostgreSQL with Prisma ORM
 
 ### 2. **Schema Changes**
+
 - **User Model**: Converted from Mongoose schema to Prisma schema with proper types
 - **Complaint Model**: Restructured with normalized relationships
 - **New Models**: Added File, Remark, and Notification tables for better data organization
 
 ### 3. **Data Relationships**
+
 - **Before**: Embedded documents (files, remarks as arrays in complaint)
 - **After**: Proper foreign key relationships with separate tables
 
 ## 📁 Files Modified
 
 ### Backend Files:
+
 - `backend/db/connection.js` - PostgreSQL connection using Prisma
 - `backend/model/User.js` - User model with Prisma operations
 - `backend/model/Complaint.js` - Complaint model with relationships
@@ -31,6 +35,7 @@ Your Citizen Connect application has been successfully migrated from MongoDB to 
 - `backend/middleware/auth.js` - Updated for new user structure
 
 ### Configuration Files:
+
 - `prisma/schema.prisma` - Complete database schema
 - `package.json` - Updated dependencies and scripts
 - `.env` - PostgreSQL connection string
@@ -40,6 +45,7 @@ Your Citizen Connect application has been successfully migrated from MongoDB to 
 ## 🚀 Next Steps
 
 ### 1. **Database Setup**
+
 ```bash
 # Install PostgreSQL if not already installed
 # Then create database and run:
@@ -47,11 +53,13 @@ npm run db:push
 ```
 
 ### 2. **Test the Setup**
+
 ```bash
 node test-postgres.js
 ```
 
 ### 3. **Start the Application**
+
 ```bash
 npm run dev
 ```
@@ -59,11 +67,13 @@ npm run dev
 ## 🔧 New Features
 
 ### Database Operations:
+
 - **Prisma Client**: Type-safe database operations
 - **Migrations**: Proper database versioning
 - **Studio**: Visual database browser with `npm run db:studio`
 
 ### Performance Improvements:
+
 - **Indexes**: Proper database indexes for fast queries
 - **Relationships**: Efficient joins instead of manual population
 - **Type Safety**: Full TypeScript support with Prisma
@@ -71,12 +81,14 @@ npm run dev
 ## 📊 Schema Comparison
 
 ### User Model:
+
 ```diff
 - MongoDB: { _id, preferences: { language, notifications } }
 + PostgreSQL: { id, language, notificationsEnabled, emailAlerts }
 ```
 
 ### Complaint Model:
+
 ```diff
 - MongoDB: { _id, contactInfo: {}, location: {}, files: [], remarks: [] }
 + PostgreSQL: { id, contactMobile, contactEmail, ward, area, files: File[], remarks: Remark[] }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import React, { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   verifyOtpAndSubmitComplaint,
   resendOtp,
@@ -11,20 +11,20 @@ import {
   selectGuestError,
   selectIsSubmittingComplaint,
   selectSubmittedComplaintId,
-} from '../store/slices/guestSlice';
-import { showSuccessToast, showErrorToast } from '../store/slices/uiSlice';
+} from "../store/slices/guestSlice";
+import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Badge } from './ui/badge';
-import { Mail, Timer, RefreshCw, CheckCircle } from 'lucide-react';
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Badge } from "./ui/badge";
+import { Mail, Timer, RefreshCw, CheckCircle } from "lucide-react";
 
 interface OtpVerificationModalProps {
   isOpen: boolean;
@@ -38,7 +38,7 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
   email,
 }) => {
   const dispatch = useAppDispatch();
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState("");
   const [timeLeft, setTimeLeft] = useState(0);
   const [canResend, setCanResend] = useState(false);
 
@@ -75,17 +75,19 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       dispatch(clearError());
-      setOtp('');
+      setOtp("");
     }
   }, [isOpen, dispatch]);
 
   // Handle successful submission
   useEffect(() => {
     if (submittedComplaintId) {
-      dispatch(showSuccessToast(
-        'Complaint Submitted Successfully!',
-        `Your complaint has been registered with ID: ${submittedComplaintId}`
-      ));
+      dispatch(
+        showSuccessToast(
+          "Complaint Submitted Successfully!",
+          `Your complaint has been registered with ID: ${submittedComplaintId}`,
+        ),
+      );
       onClose();
     }
   }, [submittedComplaintId, dispatch, onClose]);
@@ -94,15 +96,17 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
     if (!otp || !sessionId) return;
 
     if (otp.length !== 6) {
-      dispatch(showErrorToast('Invalid OTP', 'Please enter a 6-digit OTP'));
+      dispatch(showErrorToast("Invalid OTP", "Please enter a 6-digit OTP"));
       return;
     }
 
     try {
-      await dispatch(verifyOtpAndSubmitComplaint({
-        otp,
-        sessionId,
-      })).unwrap();
+      await dispatch(
+        verifyOtpAndSubmitComplaint({
+          otp,
+          sessionId,
+        }),
+      ).unwrap();
     } catch (error) {
       // Error is handled by the slice
     }
@@ -113,8 +117,10 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
 
     try {
       await dispatch(resendOtp(sessionId)).unwrap();
-      dispatch(showSuccessToast('OTP Resent', 'A new OTP has been sent to your email'));
-      setOtp('');
+      dispatch(
+        showSuccessToast("OTP Resent", "A new OTP has been sent to your email"),
+      );
+      setOtp("");
     } catch (error) {
       // Error is handled by the slice
     }
@@ -128,11 +134,11 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleOtpChange = (value: string) => {
-    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    const numericValue = value.replace(/\D/g, "").slice(0, 6);
     setOtp(numericValue);
   };
 
@@ -145,8 +151,8 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
             <span>Email Verification</span>
           </DialogTitle>
           <DialogDescription>
-            We've sent a 6-digit OTP to <strong>{email}</strong>. 
-            Please enter it below to submit your complaint.
+            We've sent a 6-digit OTP to <strong>{email}</strong>. Please enter
+            it below to submit your complaint.
           </DialogDescription>
         </DialogHeader>
 
@@ -187,7 +193,7 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
               {isVerifying || isSubmitting ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  {isSubmitting ? 'Submitting...' : 'Verifying...'}
+                  {isSubmitting ? "Submitting..." : "Verifying..."}
                 </>
               ) : (
                 <>
