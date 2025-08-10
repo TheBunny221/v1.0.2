@@ -18,6 +18,7 @@ export interface Translation {
     logout: string;
     login: string;
     register: string;
+    switchRole: string;
   };
   common: {
     submit: string;
@@ -271,6 +272,7 @@ const translations: Record<Language, Translation> = {
       logout: "Logout",
       login: "Login",
       register: "Register",
+      switchRole: "Switch Role",
     },
     common: {
       submit: "Submit",
@@ -514,7 +516,7 @@ const translations: Record<Language, Translation> = {
     nav: {
       home: "होम",
       complaints: "शिकायतें",
-      myComplaints: "मेर��� शिकायतें",
+      myComplaints: "मेरी शिकायतें",
       trackStatus: "स्थिति ट्रैक करें",
       reports: "रिपोर्ट्���",
       users: "उपयोगकर्ता",
@@ -524,6 +526,7 @@ const translations: Record<Language, Translation> = {
       logout: "लॉगआउट",
       login: "लॉगिन",
       register: "पंजीकरण",
+      switchRole: "भूमिका बदलें",
     },
     common: {
       submit: "जमा करें",
@@ -578,7 +581,7 @@ const translations: Record<Language, Translation> = {
       submittedBy: "द्वारा प्रस्तुत",
       assignedTo: "को सौंपा गया",
       submittedOn: "प्रस्तुत किया गया",
-      resolvedOn: "���ल किया गया",
+      resolvedOn: "हल किया गया",
       deadline: "समयसीमा",
       location: "स्थान",
       ward: "वार्ड",
@@ -606,7 +609,7 @@ const translations: Record<Language, Translation> = {
         Others: "अन्य",
       },
       statuses: {
-        registered: "पंजीकृ���",
+        registered: "पंजीकृत",
         assigned: "सौंपा गया",
         in_progress: "प्रगति में",
         resolved: "हल किया गया",
@@ -667,7 +670,7 @@ const translations: Record<Language, Translation> = {
       emailVerification: "ईमेल सत्यापन",
       otpSent: "OTP भेजा गया",
       otpVerification: "OTP सत्यापन",
-      verifyAndSubmit: "सत्यापित करें और ���बमिट करें",
+      verifyAndSubmit: "सत्यापित करें और सबमिट करें",
       sendOtpAndSubmit: "OTP भेजें और सबमिट करें",
       trackComplaint: "शिक��यत ट्रैक करें",
       guestSubmissionProcess: "अतिथि सबमिशन प्रक्रिया",
@@ -681,7 +684,7 @@ const translations: Record<Language, Translation> = {
       resendOtp: "फिर से भेजें",
       otpExpires: "OTP समाप्त होता है",
       otpInstructions:
-        "हमने आपके ईमेल पर 6-अंकीय OTP भेजा है। अपनी शिकायत ���बमिट करने के लिए कृपया इसे नीचे दर्ज करें।",
+        "ह���ने आपके ईमेल पर 6-अंकीय OTP भेजा है। अपनी शिकायत ���बमिट करने के लिए कृपया इसे नीचे दर्ज करें।",
       checkEmail: "अपने ईमेल इनबॉक्स और स्पैम फ़ोल्डर की जाँच करें",
       recentComplaints: "आपकी हाल की शिकायतें",
       complaintDetails: "श��कायत विवरण",
@@ -691,11 +694,11 @@ const translations: Record<Language, Translation> = {
     forms: {
       contactInformation: "संपर्क जानकारी",
       problemDetails: "समस्या विवरण",
-      locationDetails: "स्थान विवरण",
+      locationDetails: "���्थान विवरण",
       complaintDescription: "शिकायत विवरण",
       optionalUploads: "वैकल्पिक अपलोड",
       captchaVerification: "कैप्चा सत्यापन",
-      enterCaptcha: "ऊपर दिखाया ग��ा कोड दर्ज करें",
+      enterCaptcha: "ऊपर दिखाया गया कोड दर्ज करें",
       resetForm: "फॉर्म रीसेट करें",
       submitComplaint: "शिकायत जमा करें",
       complaintSubmitted: "शिकायत सफलतापूर्वक जमा की गई!",
@@ -720,7 +723,7 @@ const translations: Record<Language, Translation> = {
       reports: "रिपोर्ट्स",
       analytics: "विश्लेषण",
       trends: "रुझान",
-      insights: "अंतर्दृष्टि",
+      insights: "अंतर्दृष्���ि",
     },
     reports: {
       complaintReports: "शिकायत रिपोर्ट",
@@ -758,7 +761,7 @@ const translations: Record<Language, Translation> = {
       errorOccurred: "एक त्रुटि हुई",
       networkError: "नेटवर्क त्रुटि हुई",
       unauthorizedAccess: "अनधिकृत पहुंच",
-      sessionExpired: "सत्��� समाप्त हो गया",
+      sessionExpired: "सत्र समाप्त हो गया",
       validationError: "सत्यापन त्रुटि",
       serverError: "सर्वर त्रुटि हुई",
     },
@@ -777,6 +780,7 @@ const translations: Record<Language, Translation> = {
       logout: "ലോഗൗട്ട്",
       login: "ലോഗിൻ",
       register: "രജിസ്റ്റർ",
+      switchRole: "റോൾ മാറ്റുക",
     },
     common: {
       submit: "സമർപ്പിക്കുക",
@@ -788,10 +792,10 @@ const translations: Record<Language, Translation> = {
       view: "കാണുക",
       search: "തിരയുക",
       filter: "ഫിൽട്ടർ",
-      loading: "ലോ���് ചെയ്യുന്നു...",
+      loading: "ലോഡ് ചെയ്യുന്നു...",
       error: "പിശക്",
       success: "വിജയം",
-      warning: "മുന്നറി��ിപ്പ്",
+      warning: "മു���്നറി��ിപ്പ്",
       info: "വിവരം",
       confirm: "സ്ഥിരീകരിക്കുക",
       yes: "അതെ",
@@ -801,7 +805,7 @@ const translations: Record<Language, Translation> = {
       page: "പേജ്",
       of: "ന്റെ",
       total: "ആകെ",
-      items: "ഇനങ്ങൾ",
+      items: "ഇന���്ങൾ",
       noData: "���ാറ്റ ലഭ്യമല്ല",
       selectAll: "എല്ലാം തിരഞ്ഞെടുക്കുക",
       clear: "മായ്ക്കുക",
@@ -825,7 +829,7 @@ const translations: Record<Language, Translation> = {
     complaints: {
       registerComplaint: "പരാതി രജിസ്റ്റർ ചെയ്യുക",
       complaintId: "പരാതി ഐഡി",
-      complaintType: "പരാത�� തരം",
+      complaintType: "പരാതി തരം",
       complaintStatus: "സ്ഥിതി",
       complaintPriority: "മുൻഗണന",
       submittedBy: "സമർപ്പിച്ചത്",
@@ -852,7 +856,7 @@ const translations: Record<Language, Translation> = {
         Electricity: "വൈദ്യുതി",
         Road_Repair: "റോഡ് അറ്റകുറ്റപ്പണി",
         Garbage_Collection: "മാലിന്യ ശേഖരണം",
-        Street_Lighting: "തെരുവ് വിളക്കുകൾ",
+        Street_Lighting: "തെരുവ് വിള���്കുകൾ",
         Sewerage: "മലിനജല സംവി��ാനം",
         Public_Health: "പൊതുജനാരോഗ്യം",
         Traffic: "ഗതാഗതം",
@@ -904,7 +908,7 @@ const translations: Record<Language, Translation> = {
       avatar: "അവതാർ",
       lastLogin: "അവസാന ലോഗിൻ",
       joinedOn: "ചേർന്ന തീയതി",
-      accountStatus: "അക്കൗണ്ട��� സ്ഥിതി",
+      accountStatus: "അക്കൗണ്ട് സ്ഥിതി",
       active: "സജീവം",
       inactive: "നിഷ്ക്രിയം",
       roles: {
@@ -925,7 +929,7 @@ const translations: Record<Language, Translation> = {
       trackComplaint: "പരാതി ട്രാക്ക് ചെയ്യുക",
       guestSubmissionProcess: "അതിഥി സമർപ്പണ പ്രക്രിയ",
       guestSubmissionDescription:
-        "അതിഥി ഉപയോക്താക്കൾക്കായി, നിങ്ങളുടെ പരാതി സമർപ്പിക്കുന്നത���ന് മുമ്പ് സ്ഥിരീകരണത്തിനായി ഞങ്ങൾ നിങ്ങളുടെ ഇമെയിലിലേക്ക് ഒരു OTP അയയ്ക്കും. ഇത് നിങ്ങളുടെ സമർപ്പണത്തിന്റെ ആധികാര���കത ഉറപ്പാക്കുകയും പിന്നീട് നിങ്ങളുടെ പരാതി ട്രാക്ക് ചെയ്യാ�� നിങ്ങളെ പ്രാപ്തമാക്കുകയും ചെയ്യുന്നു।",
+        "അതിഥി ഉപയോക്താക്കൾക്കായി, നിങ്ങളുടെ പരാതി സമർപ്പിക്കുന്നതിന് മുമ്പ് സ്ഥിരീകരണത്തിനായി ഞങ്ങൾ നിങ്ങളുടെ ഇമെ���ിലിലേക്ക് ഒരു OTP അയയ്ക്കും. ഇത് നിങ്ങളുടെ സമർപ്പണത്തിന്റെ ആധികാര���കത ഉറപ്പാക്കുകയും പിന്നീട് നിങ്ങളുടെ പരാതി ട്രാക്ക് ചെയ്യാ�� നിങ്ങളെ പ്രാപ്തമാക്കുകയും ചെയ്യുന്നു।",
       welcomeBack: "തിരികെ സ്വാഗതം",
       loginRequired: "ലോഗിൻ ആവശ്യമാണ്",
       loginRequiredDescription:
@@ -934,7 +938,7 @@ const translations: Record<Language, Translation> = {
       resendOtp: "വീണ്ടും അയയ്ക്കുക",
       otpExpires: "OTP കാലാവധി",
       otpInstructions:
-        "ഞങ്ങൾ നിങ്ങളുടെ ഇമെയിലി��േക്ക് 6-അക്ക OTP അയച്ചിട്ടുണ്ട്. നിങ്ങളുടെ പരാതി സമർപ്പിക്കാൻ ദയവായി അത് താഴെ നൽകുക.",
+        "ഞങ്ങൾ നിങ്ങളുടെ ഇമെയിലിലേക്ക് 6-അക്ക OTP അയച്ചിട്ടുണ്ട്. നിങ്ങളുടെ പരാതി സമർ���്പിക്കാൻ ദയവായി അത് താഴെ നൽകുക.",
       checkEmail: "നിങ്ങളുടെ ഇമെയിൽ ഇൻബോക്സു��� സ്പാം ഫോൾഡറും പരിശോധിക്കുക",
       recentComplaints: "നിങ്ങളുടെ സമീപകാല പരാ��ികൾ",
       complaintDetails: "പരാതിയുടെ വിശദാംശങ്ങൾ",
@@ -948,7 +952,7 @@ const translations: Record<Language, Translation> = {
       complaintDescription: "പരാതി വിവരണം",
       optionalUploads: "ഓപ്ഷണൽ അപ്ലോഡുകൾ",
       captchaVerification: "കാപ്ച സ്ഥിരീകരണം",
-      enterCaptcha: "മുകളിൽ കാണിച്ചിരിക്കുന്ന കോഡ് നൽ���ുക",
+      enterCaptcha: "മുകളിൽ കാണിച്ചിരിക്കുന്ന കോഡ് നൽകുക",
       resetForm: "ഫോം റീസെറ്റ് ചെയ്യുക",
       submitComplaint: "പരാതി സമർപ്പിക്കുക",
       complaintSubmitted: "പരാതി വിജയകരമായി സമർപ്പിച്ചു!",
@@ -1006,11 +1010,11 @@ const translations: Record<Language, Translation> = {
       emailSent: "ഇമെയിൽ വിജയകരമായി അയച്ചു",
       fileUploaded: "ഫയൽ വിജയകരമായി അപ്ലോഡ് ചെയ്തു",
       feedbackSubmitted: "ഫീഡ്ബാക്ക് വിജയകരമായി സമർപ്പിച്ചു",
-      assignmentCompleted: "അസൈൻമെന്റ് വിജയകരമായി പൂർത്തിയാക്കി",
+      assignmentCompleted: "അസൈൻമെന്റ് വി��യകരമായി പൂർത്തിയാക്കി",
       statusUpdated: "സ്ഥിതി വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു",
       errorOccurred: "ഒരു പിശക് സംഭവിച്ചു",
       networkError: "നെറ്റ്വർക്ക് പിശക് സംഭവിച്ചു",
-      unauthorizedAccess: "അനധികൃത പ്��വേശനം",
+      unauthorizedAccess: "അനധികൃത പ്��വ���ശനം",
       sessionExpired: "സെഷൻ കാലഹരണപ്പെട്ടു",
       validationError: "വാലിഡേഷൻ പിശക്",
       serverError: "സെർവർ പിശക് സംഭവിച്ചു",
