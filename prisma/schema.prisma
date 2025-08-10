@@ -1,0 +1,227 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  citizen
+  admin
+  ward_officer
+  maintenance
+}
+
+enum Language {
+  en
+  hi
+  ml
+}
+
+model User {
+  id                     String   @id @default(cuid())
+  name                   String   @db.VarChar(100)
+  email                  String   @unique @db.VarChar(255)
+  phone                  String   @db.VarChar(20)
+  password               String   @db.VarChar(255)
+  role                   UserRole @default(citizen)
+  ward                   String?  @db.VarChar(100)
+  department            String?  @db.VarChar(100)
+  avatar                String?  @db.Text
+  
+  // Preferences stored as JSON
+  language              Language @default(en)
+  notifications         Boolean  @default(true)
+  emailAlerts           Boolean  @default(true)
+  
+  isActive              Boolean  @default(true)
+  lastLogin             DateTime?
+  resetPasswordToken    String?  @db.VarChar(255)
+  resetPasswordExpire   DateTime?
+  emailVerificationToken String? @db.VarChar(255)
+  isEmailVerified       Boolean  @default(false)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relations
+  submittedComplaints   Complaint[] @relation("SubmittedBy")
+  assignedComplaints    Complaint[] @relation("AssignedTo")
+  remarks               Remark[]
+  notifications         Notification[]
+  
+  @@index([email])
+  @@index([role])
+  @@index([ward])
+  @@index([department])
+  @@map("users")
+}
+
+enum ComplaintType {
+  Water_Supply
+  Electricity
+  Road_Repair
+  Garbage_Collection
+  Street_Lighting
+  Sewerage
+  Public_Health
+  Traffic
+  Others
+}
+
+enum ComplaintStatus {
+  registered
+  assigned
+  in_progress
+  resolved
+  closed
+  reopened
+}
+
+enum Priority {
+  low
+  medium
+  high
+  critical
+}
+
+model Complaint {
+  id                      String          @id @default(cuid())
+  complaintId             String          @unique @db.VarChar(50)
+  type                    ComplaintType
+  description             String          @db.Text
+  
+  // Contact Info as separate fields for better querying
+  contactMobile           String          @db.VarChar(20)
+  contactEmail            String?         @db.VarChar(255)
+  
+  // Location
+  ward                    String          @db.VarChar(100)
+  area                    String          @db.VarChar(100)
+  address                 String?         @db.Text
+  latitude                Float?
+  longitude               Float?
+  landmark                String?         @db.VarChar(255)
+  
+  status                  ComplaintStatus @default(registered)
+  priority                Priority        @default(medium)
+  
+  submittedById           String
+  submittedBy             User            @relation("SubmittedBy", fields: [submittedById], references: [id])
+  
+  assignedToId            String?
+  assignedTo              User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignedAt              DateTime?
+  
+  slaDeadline             DateTime
+  resolvedAt              DateTime?
+  closedAt                DateTime?
+  
+  isAnonymous             Boolean         @default(false)
+  
+  // Feedback
+  feedbackRating          Int?            @db.SmallInt
+  feedbackComment         String?         @db.Text
+  feedbackSubmittedAt     DateTime?
+  
+  tags                    String[]        @db.VarChar(50)
+  category                String          @default("general") @db.VarChar(100)
+  escalationLevel         Int             @default(0) @db.SmallInt
+  estimatedResolutionTime Int             @default(72) // in hours
+  
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  
+  // Relations
+  files                   File[]
+  remarks                 Remark[]
+  
+  @@index([complaintId])
+  @@index([submittedById])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([ward])
+  @@index([type])
+  @@index([priority])
+  @@index([slaDeadline])
+  @@index([createdAt])
+  @@index([status, assignedToId])
+  @@index([ward, status])
+  @@map("complaints")
+}
+
+model File {
+  id           String    @id @default(cuid())
+  filename     String    @db.VarChar(255)
+  originalName String    @db.VarChar(255)
+  mimetype     String    @db.VarChar(100)
+  size         Int
+  url          String    @db.Text
+  uploadedAt   DateTime  @default(now())
+  
+  complaintId  String
+  complaint    Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  
+  @@index([complaintId])
+  @@map("files")
+}
+
+enum RemarkType {
+  status_update
+  assignment
+  general
+  closure
+  reopen
+}
+
+model Remark {
+  id          String     @id @default(cuid())
+  text        String     @db.Text
+  type        RemarkType @default(general)
+  addedAt     DateTime   @default(now())
+  
+  addedById   String
+  addedBy     User       @relation(fields: [addedById], references: [id])
+  
+  complaintId String
+  complaint   Complaint  @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  
+  @@index([complaintId])
+  @@index([addedById])
+  @@map("remarks")
+}
+
+enum NotificationType {
+  complaint_submitted
+  complaint_assigned
+  complaint_updated
+  complaint_resolved
+  complaint_closed
+  sla_warning
+  sla_breach
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String           @db.VarChar(255)
+  message   String           @db.Text
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Optional reference to complaint
+  complaintId String?
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
