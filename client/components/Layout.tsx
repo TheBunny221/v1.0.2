@@ -28,7 +28,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-import type { UserRole } from "@/store/slices/authSlice";
+import type { User } from "../../src/store/slices/authSlice";
 
 interface LayoutProps {
   children: React.ReactNode;
