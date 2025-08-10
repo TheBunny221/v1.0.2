@@ -5,6 +5,7 @@ A modern, responsive complaint management system for municipal services built wi
 ## 🚀 Features
 
 ### For Citizens
+
 - **Guest Complaint Submission**: Submit complaints without registration using OTP email verification
 - **Registered User Dashboard**: Full account management with complaint tracking
 - **Multi-Language Support**: Available in English, Hindi, and Malayalam
@@ -13,6 +14,7 @@ A modern, responsive complaint management system for municipal services built wi
 - **Mobile-Responsive Design**: Optimized for desktop and mobile devices
 
 ### For Municipal Officers
+
 - **Complaint Assignment**: Automatic and manual complaint assignment to appropriate officers
 - **Status Management**: Update complaint status and progress
 - **Ward-based Organization**: Ward-specific complaint management
@@ -20,6 +22,7 @@ A modern, responsive complaint management system for municipal services built wi
 - **Communication Tools**: Internal messaging and updates
 
 ### For Administrators
+
 - **Comprehensive Dashboard**: Overview of all complaints and system metrics
 - **User Management**: Manage citizens, officers, and admin accounts
 - **Reports & Analytics**: Detailed reporting with charts and insights
@@ -27,6 +30,7 @@ A modern, responsive complaint management system for municipal services built wi
 - **Performance Monitoring**: Track resolution times and efficiency metrics
 
 ### For Maintenance Teams
+
 - **Task Assignment**: Receive and manage maintenance tasks
 - **Field Updates**: Update complaint status from mobile devices
 - **Resource Management**: Track tools and materials used
@@ -35,6 +39,7 @@ A modern, responsive complaint management system for municipal services built wi
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **React 18** with TypeScript
 - **Redux Toolkit** for state management
 - **React Router v6** for navigation
@@ -45,6 +50,7 @@ A modern, responsive complaint management system for municipal services built wi
 - **Hot Module Replacement** for development
 
 ### Backend
+
 - **Node.js** with Express.js
 - **Prisma ORM** with SQLite/PostgreSQL
 - **JWT Authentication**
@@ -53,6 +59,7 @@ A modern, responsive complaint management system for municipal services built wi
 - **CORS** and security middleware
 
 ### Development & Deployment
+
 - **TypeScript** for type safety
 - **ESLint & Prettier** for code quality
 - **Git** for version control
@@ -108,6 +115,7 @@ A modern, responsive complaint management system for municipal services built wi
 ## 🚦 Getting Started
 
 ### Prerequisites
+
 - **Node.js** (v16 or higher)
 - **npm** or **yarn** package manager
 - **Git** for version control
@@ -116,42 +124,47 @@ A modern, responsive complaint management system for municipal services built wi
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd complaint-management-system
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Configuration**
    Copy `.env.example` to `.env` and configure:
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Required environment variables:
+
    ```env
    # Database
    DATABASE_URL="file:./dev.db"
-   
+
    # JWT Secret
    JWT_SECRET="your-super-secret-jwt-key"
-   
+
    # Email Configuration (for OTP)
    SMTP_HOST="smtp.gmail.com"
    SMTP_PORT=587
    SMTP_USER="your-email@gmail.com"
    SMTP_PASS="your-app-password"
-   
+
    # Application URLs
    FRONTEND_URL="http://localhost:5173"
    BACKEND_URL="http://localhost:3001"
    ```
 
 4. **Database Setup**
+
    ```bash
    npx prisma generate
    npx prisma db push
@@ -159,10 +172,11 @@ A modern, responsive complaint management system for municipal services built wi
    ```
 
 5. **Start Development Servers**
+
    ```bash
    # Start both frontend and backend
    npm run dev
-   
+
    # Or start individually
    npm run dev:client   # Frontend only (port 5173)
    npm run dev:server   # Backend only (port 3001)
@@ -176,6 +190,7 @@ A modern, responsive complaint management system for municipal services built wi
 ## 🎯 Usage Guide
 
 ### Guest Users
+
 1. Visit the homepage
 2. Fill out the complaint form
 3. Provide email for OTP verification
@@ -183,6 +198,7 @@ A modern, responsive complaint management system for municipal services built wi
 5. Receive complaint ID for tracking
 
 ### Registered Users
+
 1. Register/Login to the system
 2. Access full dashboard features
 3. Submit complaints with full tracking
@@ -190,6 +206,7 @@ A modern, responsive complaint management system for municipal services built wi
 5. Receive email notifications
 
 ### Administrators
+
 1. Login with admin credentials
 2. Access admin dashboard
 3. Manage complaints, users, and system settings
@@ -199,13 +216,17 @@ A modern, responsive complaint management system for municipal services built wi
 ## 🔧 Configuration
 
 ### Language Settings
+
 The system supports multiple languages configured in `client/store/slices/languageSlice.ts`:
+
 - English (en) - Default
 - Hindi (hi)
 - Malayalam (ml)
 
 ### Complaint Types
+
 Configurable complaint categories:
+
 - Water Supply
 - Electricity
 - Road Repair
@@ -217,22 +238,26 @@ Configurable complaint categories:
 - Others
 
 ### Ward Configuration
+
 Municipal wards are configured in the database and can be managed through the admin panel.
 
 ## 🔐 Authentication & Security
 
 ### Guest Authentication
+
 - OTP-based email verification
 - Temporary session for complaint submission
 - Secure complaint tracking with unique IDs
 
 ### User Authentication
+
 - JWT-based authentication
 - Role-based access control (RBAC)
 - Secure password hashing
 - Session management
 
 ### Security Features
+
 - CORS protection
 - Request rate limiting
 - Input validation and sanitization
@@ -242,6 +267,7 @@ Municipal wards are configured in the database and can be managed through the ad
 ## 📊 API Documentation
 
 ### Public Endpoints
+
 ```
 POST /api/guest/complaint     # Submit guest complaint
 POST /api/guest/verify-otp    # Verify OTP for guest
@@ -249,6 +275,7 @@ GET  /api/complaint/:id/track # Track complaint status
 ```
 
 ### Authenticated Endpoints
+
 ```
 POST /api/auth/login          # User login
 POST /api/auth/register       # User registration
@@ -258,6 +285,7 @@ PUT  /api/complaints/:id      # Update complaint
 ```
 
 ### Admin Endpoints
+
 ```
 GET  /api/admin/dashboard     # Admin dashboard data
 GET  /api/admin/users         # Manage users
@@ -268,17 +296,20 @@ PUT  /api/admin/complaints/:id # Admin complaint updates
 ## 🚀 Deployment
 
 ### Development
+
 ```bash
 npm run dev
 ```
 
 ### Production Build
+
 ```bash
 npm run build
 npm run preview  # Test production build locally
 ```
 
 ### Netlify Deployment
+
 1. Connect your repository to Netlify
 2. Set build command: `npm run build`
 3. Set publish directory: `dist`
@@ -286,6 +317,7 @@ npm run preview  # Test production build locally
 5. Deploy
 
 ### Docker Deployment
+
 ```bash
 docker build -t complaint-system .
 docker run -p 3000:3000 complaint-system
@@ -294,6 +326,7 @@ docker run -p 3000:3000 complaint-system
 ## 🧪 Testing
 
 ### Run Tests
+
 ```bash
 npm run test           # Run all tests
 npm run test:client    # Frontend tests only
@@ -302,7 +335,9 @@ npm run test:e2e       # End-to-end tests
 ```
 
 ### Quality Assurance
+
 The system has undergone comprehensive QA testing covering:
+
 - ✅ Frontend functionality
 - ✅ Backend API endpoints
 - ✅ Authentication flows
@@ -317,6 +352,7 @@ The system has undergone comprehensive QA testing covering:
 ## 📈 Performance Optimization
 
 ### Frontend Optimizations
+
 - Code splitting with React.lazy()
 - Image optimization and lazy loading
 - Bundle size optimization
@@ -324,6 +360,7 @@ The system has undergone comprehensive QA testing covering:
 - Memoization for expensive calculations
 
 ### Backend Optimizations
+
 - Database query optimization
 - Caching strategies
 - Request compression
@@ -333,6 +370,7 @@ The system has undergone comprehensive QA testing covering:
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -340,6 +378,7 @@ The system has undergone comprehensive QA testing covering:
 5. Submit a pull request
 
 ### Code Standards
+
 - Follow TypeScript best practices
 - Use ESLint and Prettier for code formatting
 - Write comprehensive tests
@@ -349,12 +388,14 @@ The system has undergone comprehensive QA testing covering:
 ## 📞 Support
 
 ### Documentation
+
 - [Deployment Guide](DEPLOYMENT_GUIDE.md)
 - [Guest Complaint System](GUEST_COMPLAINT_SYSTEM.md)
 - [Redux Migration Guide](REDUX_TOOLKIT_MIGRATION.md)
 - [QA Test Results](QA_TEST_RESULTS.md)
 
 ### Getting Help
+
 - Check existing documentation
 - Review QA test results
 - Create GitHub issues for bugs
