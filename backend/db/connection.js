@@ -1,36 +1,47 @@
-import mongoose from 'mongoose';
+import { PrismaClient } from '@prisma/client';
+
+let prisma;
 
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/citizenconnect';
-    
-    const conn = await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    // Create Prisma client instance
+    prisma = new PrismaClient({
+      log: ['query', 'info', 'warn', 'error'],
+      errorFormat: 'pretty',
     });
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Handle connection events
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
-    });
+    // Connect to database
+    await prisma.$connect();
+    console.log('PostgreSQL Connected successfully');
 
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
-    });
-
-    // Graceful shutdown
+    // Handle graceful shutdown
     process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed due to app termination');
+      await prisma.$disconnect();
+      console.log('PostgreSQL connection closed due to app termination');
       process.exit(0);
     });
 
+    process.on('SIGTERM', async () => {
+      await prisma.$disconnect();
+      console.log('PostgreSQL connection closed due to app termination');
+      process.exit(0);
+    });
+
+    return prisma;
+
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('Error connecting to PostgreSQL:', error);
     process.exit(1);
   }
 };
 
+// Get the Prisma client instance
+const getPrisma = () => {
+  if (!prisma) {
+    throw new Error('Database not initialized. Call connectDB() first.');
+  }
+  return prisma;
+};
+
+export { connectDB, getPrisma };
 export default connectDB;
