@@ -155,6 +155,30 @@ export interface Translation {
       maintenance: string;
     };
   };
+  guest: {
+    guestSubmission: string;
+    registeredUser: string;
+    emailVerification: string;
+    otpSent: string;
+    otpVerification: string;
+    verifyAndSubmit: string;
+    sendOtpAndSubmit: string;
+    trackComplaint: string;
+    guestSubmissionProcess: string;
+    guestSubmissionDescription: string;
+    welcomeBack: string;
+    loginRequired: string;
+    loginRequiredDescription: string;
+    enterOtp: string;
+    resendOtp: string;
+    otpExpires: string;
+    otpInstructions: string;
+    checkEmail: string;
+    recentComplaints: string;
+    complaintDetails: string;
+    nextSteps: string;
+    supportContact: string;
+  };
   dashboard: {
     overview: string;
     statistics: string;
@@ -459,7 +483,7 @@ const translations: Record<Language, Translation> = {
       page: 'पृष्ठ',
       of: 'का',
       total: 'कुल',
-      items: 'आइटम',
+      items: '��इटम',
       noData: 'कोई डेटा उपलब्ध नहीं',
       selectAll: 'सभी चुनें',
       clear: 'साफ करें',
@@ -490,7 +514,7 @@ const translations: Record<Language, Translation> = {
       assignedTo: 'को सौंपा गया',
       submittedOn: 'प्रस्तुत किया गया',
       resolvedOn: 'हल किया गया',
-      deadline: 'समयसीमा',
+      deadline: 'सम��सीमा',
       location: 'स्थान',
       ward: 'वार्ड',
       area: 'क्षेत्र',
@@ -542,7 +566,7 @@ const translations: Record<Language, Translation> = {
       register: 'पंजीकरण',
       logout: 'लॉगआउट',
       email: 'ईमेल पता',
-      password: 'पासव��्ड',
+      password: 'पासवर्ड',
       confirmPassword: 'पासवर्ड की पुष्टि',
       forgotPassword: 'पासवर्ड भूल गए',
       resetPassword: 'पासवर्ड रीसेट करें',
@@ -552,7 +576,7 @@ const translations: Record<Language, Translation> = {
       currentPassword: 'वर्तमान पासवर्ड',
       newPassword: 'नया पासवर्ड',
       fullName: 'पूरा नाम',
-      phoneNumber: 'फोन नंबर',
+      phoneNumber: 'फोन नंब���',
       role: 'भूमिका',
       ward: 'वार्ड',
       department: 'विभाग',
@@ -569,7 +593,7 @@ const translations: Record<Language, Translation> = {
         citizen: 'नागरिक',
         admin: 'प्रशासक',
         ward_officer: 'वार्ड अधिकारी',
-        maintenance: 'रखरखा��� टीम',
+        maintenance: 'रखरखाव टीम',
       },
     },
     dashboard: {
@@ -658,7 +682,7 @@ const translations: Record<Language, Translation> = {
       success: 'വിജയം',
       warning: 'മുന്നറിയിപ്പ്',
       info: 'വിവരം',
-      confirm: 'സ്ഥിരീകരിക്കുക',
+      confirm: 'സ്ഥിരീകരിക്കു���',
       yes: 'അതെ',
       no: 'ഇല്ല',
       next: 'അടുത്തത്',
@@ -717,7 +741,7 @@ const translations: Record<Language, Translation> = {
         Electricity: 'വൈദ്യുതി',
         Road_Repair: 'റോഡ് അറ്റകുറ്റപ്പണി',
         Garbage_Collection: 'മാലിന്യ ശേഖരണം',
-        Street_Lighting: 'തെരുവ് വിളക്കുകൾ',
+        Street_Lighting: 'തെരുവ് വിള���്കുകൾ',
         Sewerage: 'മലിനജല സംവിധാനം',
         Public_Health: 'പൊതുജനാരോഗ്യം',
         Traffic: 'ഗതാഗതം',
@@ -761,7 +785,7 @@ const translations: Record<Language, Translation> = {
       fullName: 'പൂർണ്ണ നാമം',
       phoneNumber: 'ഫോൺ നമ്പർ',
       role: 'റോൾ',
-      ward: 'വാർ��്',
+      ward: 'വാർഡ്',
       department: 'വകുപ്പ്',
       language: 'ഭാഷ',
       notifications: 'അറിയിപ്പുകൾ',
@@ -774,7 +798,7 @@ const translations: Record<Language, Translation> = {
       inactive: 'നിഷ്ക്രിയം',
       roles: {
         citizen: 'പൗരൻ',
-        admin: 'അഡ്മിനിസ്ട്രേറ്റർ',
+        admin: 'അഡ്മിനിസ്ട്രേറ്റ��',
         ward_officer: 'വാർഡ് ഓഫീസർ',
         maintenance: 'പരിപാലന ടീം',
       },
@@ -802,7 +826,7 @@ const translations: Record<Language, Translation> = {
       wardReports: 'വാർഡ് റിപ്പോർട്ടുകൾ',
       typeReports: 'തരം റിപ്പോർട്ടുകൾ',
       statusReports: 'സ്ഥിതി റിപ്പോർട്ടുകൾ',
-      dateRange: 'തീയതി പരിധി',
+      dateRange: 'തീയതി പരി��ി',
       from: 'മുതൽ',
       to: 'വരെ',
       generate: 'ജനറേറ്റ് ചെയ്യുക',
@@ -823,10 +847,10 @@ const translations: Record<Language, Translation> = {
       logoutSuccessful: 'ലോഗൗട്ട് വിജയകരം',
       registrationSuccessful: 'രജിസ്ട്രേഷൻ വിജയകരം',
       emailSent: 'ഇമെയിൽ വിജയകരമായി അയച്ചു',
-      fileUploaded: 'ഫയൽ വിജയകരമായി അപ്ലോഡ് ചെയ്തു',
+      fileUploaded: '���യൽ വിജയകരമായി അപ്ലോഡ് ചെയ്തു',
       feedbackSubmitted: 'ഫീഡ്ബാക്ക് വിജയകരമായി സമർപ്പിച്ചു',
       assignmentCompleted: 'അസൈൻമെന്റ് വിജയകരമായി പൂർത്തിയാക്കി',
-      statusUpdated: 'സ്ഥിതി വിജയകരമായി അപ്ഡേറ്റ് ചെയ്��ു',
+      statusUpdated: 'സ്ഥിതി വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു',
       errorOccurred: 'ഒരു പിശക് സംഭവിച്ചു',
       networkError: 'നെറ്റ്വർക്ക് പിശക് സംഭവിച്ചു',
       unauthorizedAccess: 'അനധികൃത പ്രവേശനം',
