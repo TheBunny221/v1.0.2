@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Label } from "../components/ui/label";
+import { Switch } from "../components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -19,12 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { updateUserPreferences } from "@/store/slices/authSlice";
-import { setLanguage } from "@/store/slices/languageSlice";
-import { setTheme, addNotification } from "@/store/slices/uiSlice";
+} from "../components/ui/dialog";
+import { Badge } from "../components/ui/badge";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { updateUserPreferences } from "../store/slices/authSlice";
+import { setLanguage } from "../store/slices/languageSlice";
+import { setTheme, addNotification } from "../store/slices/uiSlice";
 import {
   Settings as SettingsIcon,
   Globe,
