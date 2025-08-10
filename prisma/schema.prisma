@@ -25,25 +25,25 @@ enum Language {
 
 model User {
   id                     String   @id @default(cuid())
-  name                   String   @db.VarChar(100)
-  email                  String   @unique @db.VarChar(255)
-  phone                  String   @db.VarChar(20)
-  password               String   @db.VarChar(255)
+  name                   String
+  email                  String   @unique
+  phone                  String
+  password               String
   role                   UserRole @default(citizen)
-  ward                   String?  @db.VarChar(100)
-  department            String?  @db.VarChar(100)
-  avatar                String?  @db.Text
+  ward                   String?
+  department            String?
+  avatar                String?
   
-  // Preferences stored as JSON
+  // Preferences
   language              Language @default(en)
   notificationsEnabled  Boolean  @default(true)
   emailAlerts           Boolean  @default(true)
   
   isActive              Boolean  @default(true)
   lastLogin             DateTime?
-  resetPasswordToken    String?  @db.VarChar(255)
+  resetPasswordToken    String?
   resetPasswordExpire   DateTime?
-  emailVerificationToken String? @db.VarChar(255)
+  emailVerificationToken String?
   isEmailVerified       Boolean  @default(false)
   
   createdAt             DateTime @default(now())
@@ -55,10 +55,6 @@ model User {
   remarks               Remark[]
   notifications         Notification[]
   
-  @@index([email])
-  @@index([role])
-  @@index([ward])
-  @@index([department])
   @@map("users")
 }
 
@@ -92,27 +88,27 @@ enum Priority {
 
 model Complaint {
   id                      String          @id @default(cuid())
-  complaintId             String          @unique @db.VarChar(50)
+  complaintId             String          @unique
   type                    ComplaintType
-  description             String          @db.Text
+  description             String
   
   // Contact Info as separate fields for better querying
-  contactMobile           String          @db.VarChar(20)
-  contactEmail            String?         @db.VarChar(255)
+  contactMobile           String
+  contactEmail            String?
   
   // Location
-  ward                    String          @db.VarChar(100)
-  area                    String          @db.VarChar(100)
-  address                 String?         @db.Text
+  ward                    String
+  area                    String
+  address                 String?
   latitude                Float?
   longitude               Float?
-  landmark                String?         @db.VarChar(255)
+  landmark                String?
   
   status                  ComplaintStatus @default(registered)
   priority                Priority        @default(medium)
   
-  submittedById           String
-  submittedBy             User            @relation("SubmittedBy", fields: [submittedById], references: [id])
+  submittedById           String?
+  submittedBy             User?           @relation("SubmittedBy", fields: [submittedById], references: [id])
   
   assignedToId            String?
   assignedTo              User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
@@ -125,13 +121,13 @@ model Complaint {
   isAnonymous             Boolean         @default(false)
   
   // Feedback
-  feedbackRating          Int?            @db.SmallInt
-  feedbackComment         String?         @db.Text
+  feedbackRating          Int?
+  feedbackComment         String?
   feedbackSubmittedAt     DateTime?
   
-  tags                    String[]        @db.VarChar(50)
-  category                String          @default("general") @db.VarChar(100)
-  escalationLevel         Int             @default(0) @db.SmallInt
+  tags                    String          @default("") // Store as comma-separated string
+  category                String          @default("general")
+  escalationLevel         Int             @default(0)
   estimatedResolutionTime Int             @default(72) // in hours
   
   createdAt               DateTime        @default(now())
@@ -141,33 +137,21 @@ model Complaint {
   files                   File[]
   remarks                 Remark[]
   
-  @@index([complaintId])
-  @@index([submittedById])
-  @@index([assignedToId])
-  @@index([status])
-  @@index([ward])
-  @@index([type])
-  @@index([priority])
-  @@index([slaDeadline])
-  @@index([createdAt])
-  @@index([status, assignedToId])
-  @@index([ward, status])
   @@map("complaints")
 }
 
 model File {
   id           String    @id @default(cuid())
-  filename     String    @db.VarChar(255)
-  originalName String    @db.VarChar(255)
-  mimetype     String    @db.VarChar(100)
+  filename     String
+  originalName String
+  mimetype     String
   size         Int
-  url          String    @db.Text
+  url          String
   uploadedAt   DateTime  @default(now())
   
   complaintId  String
   complaint    Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   
-  @@index([complaintId])
   @@map("files")
 }
 
@@ -181,7 +165,7 @@ enum RemarkType {
 
 model Remark {
   id          String     @id @default(cuid())
-  text        String     @db.Text
+  text        String
   type        RemarkType @default(general)
   addedAt     DateTime   @default(now())
   
@@ -191,8 +175,6 @@ model Remark {
   complaintId String
   complaint   Complaint  @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   
-  @@index([complaintId])
-  @@index([addedById])
   @@map("remarks")
 }
 
@@ -209,8 +191,8 @@ enum NotificationType {
 model Notification {
   id        String           @id @default(cuid())
   type      NotificationType
-  title     String           @db.VarChar(255)
-  message   String           @db.Text
+  title     String
+  message   String
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
   
@@ -220,8 +202,5 @@ model Notification {
   // Optional reference to complaint
   complaintId String?
   
-  @@index([userId])
-  @@index([isRead])
-  @@index([createdAt])
   @@map("notifications")
 }
