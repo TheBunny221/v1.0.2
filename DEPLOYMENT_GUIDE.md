@@ -14,7 +14,7 @@ root/
 │   ├── assets/                  # Static Assets
 │   ├── App.tsx                  # Main App Component
 │   └── index.html               # Entry HTML
-├── backend/                     # Backend (Express.js + MongoDB)
+├── server/                      # Backend (Express.js + SQLite)
 │   ├── controller/              # API Controllers
 │   ├── model/                   # Database Models
 │   ├── routes/                  # API Routes
