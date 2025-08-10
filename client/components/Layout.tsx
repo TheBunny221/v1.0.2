@@ -34,7 +34,7 @@ interface LayoutProps {
   userRole?: User["role"];
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
+export const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   const dispatch = useAppDispatch();
   const location = useLocation();
 
