@@ -171,6 +171,44 @@ export const updateProfile = createAsyncThunk(
   },
 );
 
+export const updateUserPreferences = createAsyncThunk(
+  "auth/updateUserPreferences",
+  async (
+    preferences: Partial<Pick<User, "language" | "notificationsEnabled" | "emailAlerts">>,
+    { getState, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      const token = state.auth.token;
+
+      if (!token) {
+        return rejectWithValue("No authentication token found");
+      }
+
+      const response = await fetch("/api/auth/preferences", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(preferences),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to update preferences");
+      }
+
+      return data.data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
+    }
+  },
+);
+
 export const logout = createAsyncThunk(
   "auth/logout",
   async (_, { getState }) => {
