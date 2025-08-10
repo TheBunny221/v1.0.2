@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -31,7 +31,6 @@ import {
 import type { User } from "../store/slices/authSlice";
 
 interface LayoutProps {
-  children: React.ReactNode;
   userRole?: User["role"];
 }
 
