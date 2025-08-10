@@ -24,8 +24,8 @@ import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
 // Import guest pages
-import GuestComplaintForm from "../src/pages/GuestComplaintForm";
-import GuestTrackComplaint from "../src/pages/GuestTrackComplaint";
+import GuestComplaintForm from "./pages/GuestComplaintForm";
+import GuestTrackComplaint from "./pages/GuestTrackComplaint";
 
 const App = () => {
   console.log("CitizenConnect App is starting with full functionality...");
