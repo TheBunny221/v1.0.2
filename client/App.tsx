@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { Layout } from "./components/Layout";
 import { AppInitializer } from "./components/AppInitializer";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Import all pages
 import Index from "./pages/Index";
