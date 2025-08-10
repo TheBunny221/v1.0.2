@@ -10,32 +10,19 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-enum UserRole {
-  citizen
-  admin
-  ward_officer
-  maintenance
-}
-
-enum Language {
-  en
-  hi
-  ml
-}
-
 model User {
   id                     String   @id @default(cuid())
   name                   String
   email                  String   @unique
   phone                  String
   password               String
-  role                   UserRole @default(citizen)
+  role                   String   @default("citizen") // citizen, admin, ward_officer, maintenance
   ward                   String?
   department            String?
   avatar                String?
   
   // Preferences
-  language              Language @default(en)
+  language              String   @default("en") // en, hi, ml
   notificationsEnabled  Boolean  @default(true)
   emailAlerts           Boolean  @default(true)
   
@@ -58,38 +45,10 @@ model User {
   @@map("users")
 }
 
-enum ComplaintType {
-  Water_Supply
-  Electricity
-  Road_Repair
-  Garbage_Collection
-  Street_Lighting
-  Sewerage
-  Public_Health
-  Traffic
-  Others
-}
-
-enum ComplaintStatus {
-  registered
-  assigned
-  in_progress
-  resolved
-  closed
-  reopened
-}
-
-enum Priority {
-  low
-  medium
-  high
-  critical
-}
-
 model Complaint {
-  id                      String          @id @default(cuid())
-  complaintId             String          @unique
-  type                    ComplaintType
+  id                      String   @id @default(cuid())
+  complaintId             String   @unique
+  type                    String   // Water_Supply, Electricity, etc.
   description             String
   
   // Contact Info as separate fields for better querying
@@ -100,38 +59,38 @@ model Complaint {
   ward                    String
   area                    String
   address                 String?
-  latitude                Float?
-  longitude               Float?
+  latitude                Real?
+  longitude               Real?
   landmark                String?
   
-  status                  ComplaintStatus @default(registered)
-  priority                Priority        @default(medium)
+  status                  String   @default("registered") // registered, assigned, in_progress, resolved, closed, reopened
+  priority                String   @default("medium") // low, medium, high, critical
   
   submittedById           String?
-  submittedBy             User?           @relation("SubmittedBy", fields: [submittedById], references: [id])
+  submittedBy             User?    @relation("SubmittedBy", fields: [submittedById], references: [id])
   
   assignedToId            String?
-  assignedTo              User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignedTo              User?    @relation("AssignedTo", fields: [assignedToId], references: [id])
   assignedAt              DateTime?
   
   slaDeadline             DateTime
   resolvedAt              DateTime?
   closedAt                DateTime?
   
-  isAnonymous             Boolean         @default(false)
+  isAnonymous             Boolean  @default(false)
   
   // Feedback
   feedbackRating          Int?
   feedbackComment         String?
   feedbackSubmittedAt     DateTime?
   
-  tags                    String          @default("") // Store as comma-separated string
-  category                String          @default("general")
-  escalationLevel         Int             @default(0)
-  estimatedResolutionTime Int             @default(72) // in hours
+  tags                    String   @default("") // Store as comma-separated string
+  category                String   @default("general")
+  escalationLevel         Int      @default(0)
+  estimatedResolutionTime Int      @default(72) // in hours
   
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @updatedAt
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
   
   // Relations
   files                   File[]
@@ -155,49 +114,31 @@ model File {
   @@map("files")
 }
 
-enum RemarkType {
-  status_update
-  assignment
-  general
-  closure
-  reopen
-}
-
 model Remark {
-  id          String     @id @default(cuid())
+  id          String   @id @default(cuid())
   text        String
-  type        RemarkType @default(general)
-  addedAt     DateTime   @default(now())
+  type        String   @default("general") // status_update, assignment, general, closure, reopen
+  addedAt     DateTime @default(now())
   
   addedById   String
-  addedBy     User       @relation(fields: [addedById], references: [id])
+  addedBy     User     @relation(fields: [addedById], references: [id])
   
   complaintId String
-  complaint   Complaint  @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   
   @@map("remarks")
 }
 
-enum NotificationType {
-  complaint_submitted
-  complaint_assigned
-  complaint_updated
-  complaint_resolved
-  complaint_closed
-  sla_warning
-  sla_breach
-}
-
 model Notification {
-  id        String           @id @default(cuid())
-  type      NotificationType
+  id        String   @id @default(cuid())
+  type      String   // complaint_submitted, complaint_assigned, etc.
   title     String
   message   String
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
   
   userId    String
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Optional reference to complaint
   complaintId String?
