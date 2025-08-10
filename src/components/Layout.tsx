@@ -1,11 +1,11 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { logout } from "@/store/slices/authSlice";
-import { setLanguage } from "@/store/slices/languageSlice";
-import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
+import { logout } from "../store/slices/authSlice";
+import { setLanguage } from "../store/slices/languageSlice";
+import { toggleSidebar, setSidebarOpen } from "../store/slices/uiSlice";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,11 +28,11 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-import type { UserRole } from "@/store/slices/authSlice";
+import type { User } from "../store/slices/authSlice";
 
 interface LayoutProps {
   children: React.ReactNode;
-  userRole?: UserRole;
+  userRole?: User['role'];
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
@@ -43,11 +43,11 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
   const { translations, currentLanguage } = useAppSelector(
     (state) => state.language,
   );
-  const { sidebarOpen, notifications } = useAppSelector((state) => state.ui);
+  const { isSidebarOpen, notifications } = useAppSelector((state) => state.ui);
 
   // Use authenticated user's role if available, otherwise fall back to prop
   const effectiveUserRole = user?.role || userRole || "citizen";
-  const unreadNotifications = notifications.filter((n) => !n.read).length;
+  const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
   const getNavigationItems = () => {
     switch (effectiveUserRole) {
