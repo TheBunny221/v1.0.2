@@ -644,7 +644,7 @@ const translations: Record<Language, Translation> = {
       otpExpires: "OTP समाप्त होता है",
       otpInstructions:
         "हमने आपके ईमेल पर 6-अंकीय OTP भेजा है। अपनी शिकायत ���बमिट करने के लिए कृपया इसे नीचे दर्ज करें।",
-      checkEmail: "अपने ईमेल इनब��क्स और स्पैम फ़ोल्डर की जाँच करें",
+      checkEmail: "अपने ईमेल इनबॉक्स और स्पैम फ़ोल्डर की जाँच करें",
       recentComplaints: "आपकी हाल की शिकायतें",
       complaintDetails: "शिकायत विवरण",
       nextSteps: "अगले कदम",
@@ -669,7 +669,7 @@ const translations: Record<Language, Translation> = {
       complaintReports: "शिकायत रिपोर्ट",
       performanceReports: "प्रदर्श�� रिपोर्ट",
       slaReports: "SLA रिपोर्ट",
-      userReports: "उपयोगकर्ता ���िपोर्ट",
+      userReports: "उपयोगकर्ता रिपोर्ट",
       wardReports: "वार्ड रिपोर्ट",
       typeReports: "प्रकार रिपोर्ट",
       statusReports: "स्थिति रिपोर्ट",
@@ -691,7 +691,7 @@ const translations: Record<Language, Translation> = {
       profileUpdated: "प्रोफाइल सफलतापूर्वक अपडेट किया गया",
       passwordChanged: "पासवर्ड सफलतापूर्वक बदला गया",
       loginSuccessful: "लॉगिन सफल",
-      logoutSuccessful: "लॉगआउट सफल",
+      logoutSuccessful: "लॉगआ��ट सफल",
       registrationSuccessful: "पंजीकरण सफल",
       emailSent: "ईमेल सफलतापूर्वक भेजा गया",
       fileUploaded: "फाइल सफलतापूर्वक अपलोड की गई",
@@ -712,7 +712,7 @@ const translations: Record<Language, Translation> = {
       complaints: "പരാതികൾ",
       myComplaints: "എന്റെ പരാതികൾ",
       trackStatus: "സ്ഥിതി ട്രാക്ക് ചെയ്യുക",
-      reports: "റിപ്പോർട്ടു���ൾ",
+      reports: "റിപ്പോർട്ടുകൾ",
       users: "ഉപയോക്താക്കൾ",
       dashboard: "ഡാഷ്ബോർഡ്",
       maintenance: "പരിപാലനം",
@@ -743,7 +743,7 @@ const translations: Record<Language, Translation> = {
       previous: "മുമ്പത്തെ",
       page: "പേജ്",
       of: "ന്റെ",
-      total: "ആ��െ",
+      total: "ആകെ",
       items: "ഇനങ്ങൾ",
       noData: "ഡാറ്റ ലഭ്യമല്ല",
       selectAll: "എല്ലാം തിരഞ്ഞെടുക്കുക",
@@ -772,7 +772,7 @@ const translations: Record<Language, Translation> = {
       complaintStatus: "സ്ഥിതി",
       complaintPriority: "മുൻഗണന",
       submittedBy: "സമർപ്പിച്ചത്",
-      assignedTo: "ഏൽപ്പിച്ചത്",
+      assignedTo: "ഏൽ���്പിച്ചത്",
       submittedOn: "സമർപ്പിച്ച തീയതി",
       resolvedOn: "പരിഹരിച്ച തീയതി",
       deadline: "അവസാന തീയതി",
@@ -796,7 +796,7 @@ const translations: Record<Language, Translation> = {
         Road_Repair: "റോഡ് അറ്റകുറ്റപ്പണി",
         Garbage_Collection: "മാലിന്യ ശേഖരണം",
         Street_Lighting: "തെരുവ് വിളക്കുകൾ",
-        Sewerage: "മലിനജല സംവിധാനം",
+        Sewerage: "മലിനജല സംവി��ാനം",
         Public_Health: "പൊതുജനാരോഗ്യം",
         Traffic: "ഗതാഗതം",
         Others: "മറ്റുള്ളവ",
@@ -828,7 +828,7 @@ const translations: Record<Language, Translation> = {
       logout: "ലോഗൗട്ട്",
       email: "ഇമെയിൽ വിലാസം",
       password: "പാസ്വേഡ്",
-      confirmPassword: "പാസ്വേഡ് സ്ഥിരീകരിക്കുക",
+      confirmPassword: "പാസ്വേഡ് സ്ഥിരീക��ിക്കുക",
       forgotPassword: "പാസ്വേഡ് മറന്നോ",
       resetPassword: "പാസ്വേഡ് റീസെറ്റ് ചെയ്യുക",
       profile: "പ്രൊഫൈൽ",
@@ -868,7 +868,7 @@ const translations: Record<Language, Translation> = {
       trackComplaint: "പരാതി ട്രാക്ക് ചെയ്യുക",
       guestSubmissionProcess: "അതിഥി സമർപ്പണ പ്രക്രിയ",
       guestSubmissionDescription:
-        "അതിഥി ഉപയോക്താക്കൾക്കായി, നിങ്ങളുടെ പരാതി സമർപ്പിക്കുന്നതിന് മുമ്പ് സ്ഥിരീകരണത്തിനായി ഞങ്ങൾ നിങ്ങളുടെ ഇമെയിലിലേക്ക് ഒരു OTP അയയ്ക്കും. ഇത് നിങ്ങളുടെ സമർപ്പണത്തിന്റെ ആധികാരികത ഉറപ്പാക്കുകയും പിന്നീട് നിങ്ങളുടെ പരാതി ട്രാക്ക് ചെയ��യാൻ നിങ്ങളെ പ്രാപ്തമാക്കുകയും ചെയ്യുന്നു।",
+        "അതിഥി ഉപയോക്താക്കൾക്കായി, നിങ്ങളുടെ പരാതി സമർപ്പിക്കുന്നതിന് മുമ്പ് സ്ഥിരീകരണത്തിനായി ഞങ്ങൾ നിങ്ങളുടെ ഇമെയിലിലേക്ക് ഒരു OTP അയയ്ക്കും. ഇത് നിങ്ങളുടെ സമർപ്പണത്തിന്റെ ആധികാരികത ഉറപ്പാക്കുകയും പിന്നീട് നിങ്ങളുടെ പരാതി ട്രാക്ക് ചെയ്യാ�� നിങ്ങളെ പ്രാപ്തമാക്കുകയും ചെയ്യുന്നു।",
       welcomeBack: "തിരികെ സ്വാഗതം",
       loginRequired: "ലോഗിൻ ആവശ്യമാണ്",
       loginRequiredDescription:
@@ -879,7 +879,7 @@ const translations: Record<Language, Translation> = {
       otpInstructions:
         "ഞങ്ങൾ നിങ്ങളുടെ ഇമെയിലിലേക്ക് 6-അക്ക OTP അയച്ചിട്ടുണ്ട്. നിങ്ങളുടെ പരാതി സമർപ്പിക്കാൻ ദയവായി അത് താഴെ നൽകുക.",
       checkEmail: "നിങ്ങളുടെ ഇമെയിൽ ഇൻബോക്സും സ്പാം ഫോൾഡറും പരിശോധിക്കുക",
-      recentComplaints: "നിങ്ങളുടെ സമീപകാല ��രാതികൾ",
+      recentComplaints: "നിങ്ങളുടെ സമീപകാല പരാ��ികൾ",
       complaintDetails: "പരാതിയുടെ വിശദാംശങ്ങൾ",
       nextSteps: "അടുത്ത ഘട്ടങ്ങൾ",
       supportContact: "സഹായം വേണോ?",
@@ -988,7 +988,7 @@ const languageSlice = createSlice({
   },
 });
 
-export const { setLanguage, resetLanguage } = languageSlice.actions;
+export const { setLanguage, initializeLanguage, resetLanguage } = languageSlice.actions;
 export default languageSlice.reducer;
 
 // Selectors
