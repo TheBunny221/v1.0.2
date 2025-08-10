@@ -155,6 +155,21 @@ const uiSlice = createSlice({
       state.theme = action.payload;
       localStorage.setItem("theme", action.payload);
     },
+    initializeTheme: (state) => {
+      // Initialize theme from localStorage or system preference
+      const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null;
+      if (savedTheme) {
+        state.theme = savedTheme;
+      } else {
+        state.theme = "system";
+        localStorage.setItem("theme", "system");
+      }
+    },
+
+    // Network status
+    setOnlineStatus: (state, action: PayloadAction<boolean>) => {
+      state.isOnline = action.payload;
+    },
 
     // Modals
     showModal: (state, action: PayloadAction<Omit<Modal, "id">>) => {
