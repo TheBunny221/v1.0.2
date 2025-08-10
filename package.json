@@ -19,6 +19,11 @@
     "build:server": "vite build --config vite.config.server.ts",
     "start": "node backend/server.js",
     "start:prod": "NODE_ENV=production node backend/server.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio",
+    "db:reset": "npx prisma migrate reset",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
