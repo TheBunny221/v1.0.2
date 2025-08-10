@@ -1,10 +1,14 @@
-import { useEffect } from "react";
-import { useAppDispatch } from "@/store/hooks";
-import { loginWithToken } from "@/store/slices/authSlice";
-import { initializeLanguage } from "@/store/slices/languageSlice";
-import { initializeTheme, setOnlineStatus } from "@/store/slices/uiSlice";
+import React, { useEffect } from "react";
+import { useAppDispatch } from "../store/hooks";
+import { loginWithToken } from "../store/slices/authSlice";
+import { initializeLanguage } from "../store/slices/languageSlice";
+import { initializeTheme, setOnlineStatus } from "../store/slices/uiSlice";
 
-const AppInitializer: React.FC = () => {
+interface AppInitializerProps {
+  children: React.ReactNode;
+}
+
+export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -33,7 +37,5 @@ const AppInitializer: React.FC = () => {
     };
   }, [dispatch]);
 
-  return null; // This component doesn't render anything
+  return <>{children}</>;
 };
-
-export default AppInitializer;
