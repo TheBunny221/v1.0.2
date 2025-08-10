@@ -97,6 +97,7 @@ export interface UIState {
 const initialState: UIState = {
   isLoading: false,
   loadingText: undefined,
+  isOnline: navigator.onLine,
   isSidebarOpen: true,
   isSidebarCollapsed: false,
   theme:
