@@ -1,214 +1,408 @@
-import mongoose from 'mongoose';
+import { getPrisma } from '../db/connection.js';
 
-const fileSchema = new mongoose.Schema({
-  filename: {
-    type: String,
-    required: true
-  },
-  originalName: {
-    type: String,
-    required: true
-  },
-  mimetype: {
-    type: String,
-    required: true
-  },
-  size: {
-    type: Number,
-    required: true
-  },
-  url: {
-    type: String,
-    required: true
-  },
-  uploadedAt: {
-    type: Date,
-    default: Date.now
+class ComplaintModel {
+  constructor() {
+    this.prisma = getPrisma();
   }
-});
 
-const remarkSchema = new mongoose.Schema({
-  text: {
-    type: String,
-    required: true
-  },
-  addedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  addedAt: {
-    type: Date,
-    default: Date.now
-  },
-  type: {
-    type: String,
-    enum: ['status_update', 'assignment', 'general', 'closure', 'reopen'],
-    default: 'general'
-  }
-});
+  // Create a new complaint
+  async create(complaintData) {
+    try {
+      // Generate complaint ID
+      const year = new Date().getFullYear();
+      const count = await this.prisma.complaint.count() + 1;
+      const complaintId = `CMP-${year}-${count.toString().padStart(3, '0')}`;
 
-const complaintSchema = new mongoose.Schema({
-  complaintId: {
-    type: String,
-    unique: true,
-    required: true
-  },
-  type: {
-    type: String,
-    required: [true, 'Complaint type is required'],
-    enum: [
-      'Water Supply',
-      'Electricity', 
-      'Road Repair',
-      'Garbage Collection',
-      'Street Lighting',
-      'Sewerage',
-      'Public Health',
-      'Traffic',
-      'Others'
-    ]
-  },
-  description: {
-    type: String,
-    required: [true, 'Description is required'],
-    trim: true,
-    maxlength: [2000, 'Description cannot exceed 2000 characters']
-  },
-  submittedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  contactInfo: {
-    mobile: {
-      type: String,
-      required: [true, 'Mobile number is required'],
-      match: [/^\+?[\d\s-()]{10,}$/, 'Please enter a valid mobile number']
-    },
-    email: {
-      type: String,
-      lowercase: true,
-      trim: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+      // Calculate SLA deadline based on priority
+      const slaDeadline = this.calculateSLADeadline(complaintData.priority || 'medium');
+
+      const complaint = await this.prisma.complaint.create({
+        data: {
+          ...complaintData,
+          complaintId,
+          slaDeadline,
+        },
+        include: {
+          submittedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          files: true,
+          remarks: {
+            include: {
+              addedBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  role: true,
+                }
+              }
+            },
+            orderBy: { addedAt: 'desc' }
+          }
+        }
+      });
+
+      return this.addVirtualFields(complaint);
+    } catch (error) {
+      throw error;
     }
-  },
-  location: {
-    ward: {
-      type: String,
-      required: [true, 'Ward is required']
-    },
-    area: {
-      type: String,
-      required: [true, 'Area is required']
-    },
-    address: {
-      type: String,
-      trim: true
-    },
-    coordinates: {
-      latitude: Number,
-      longitude: Number
-    },
-    landmark: String
-  },
-  status: {
-    type: String,
-    enum: ['registered', 'assigned', 'in-progress', 'resolved', 'closed', 'reopened'],
-    default: 'registered'
-  },
-  priority: {
-    type: String,
-    enum: ['low', 'medium', 'high', 'critical'],
-    default: 'medium'
-  },
-  assignedTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-  assignedAt: {
-    type: Date,
-    default: null
-  },
-  slaDeadline: {
-    type: Date,
-    required: true
-  },
-  resolvedAt: {
-    type: Date,
-    default: null
-  },
-  closedAt: {
-    type: Date,
-    default: null
-  },
-  files: [fileSchema],
-  remarks: [remarkSchema],
-  isAnonymous: {
-    type: Boolean,
-    default: false
-  },
-  feedback: {
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5
-    },
-    comment: String,
-    submittedAt: Date
-  },
-  tags: [String],
-  category: {
-    type: String,
-    default: 'general'
-  },
-  escalationLevel: {
-    type: Number,
-    default: 0,
-    min: 0,
-    max: 3
-  },
-  estimatedResolutionTime: {
-    type: Number, // in hours
-    default: 72
   }
-}, {
-  timestamps: true
-});
 
-// Index for performance
-complaintSchema.index({ complaintId: 1 });
-complaintSchema.index({ submittedBy: 1 });
-complaintSchema.index({ assignedTo: 1 });
-complaintSchema.index({ status: 1 });
-complaintSchema.index({ 'location.ward': 1 });
-complaintSchema.index({ type: 1 });
-complaintSchema.index({ priority: 1 });
-complaintSchema.index({ slaDeadline: 1 });
-complaintSchema.index({ createdAt: -1 });
+  // Find complaint by ID
+  async findById(id) {
+    try {
+      const complaint = await this.prisma.complaint.findUnique({
+        where: { id },
+        include: {
+          submittedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          files: true,
+          remarks: {
+            include: {
+              addedBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  role: true,
+                }
+              }
+            },
+            orderBy: { addedAt: 'desc' }
+          }
+        }
+      });
 
-// Compound indexes
-complaintSchema.index({ status: 1, assignedTo: 1 });
-complaintSchema.index({ 'location.ward': 1, status: 1 });
-
-// Generate complaint ID before saving
-complaintSchema.pre('save', async function(next) {
-  if (this.isNew) {
-    const year = new Date().getFullYear();
-    const count = await this.constructor.countDocuments() + 1;
-    this.complaintId = `CMP-${year}-${count.toString().padStart(3, '0')}`;
+      return complaint ? this.addVirtualFields(complaint) : null;
+    } catch (error) {
+      throw error;
+    }
   }
-  next();
-});
 
-// Calculate SLA deadline based on priority
-complaintSchema.pre('save', function(next) {
-  if (this.isNew && !this.slaDeadline) {
+  // Find complaint by complaint ID
+  async findByComplaintId(complaintId) {
+    try {
+      const complaint = await this.prisma.complaint.findUnique({
+        where: { complaintId },
+        include: {
+          submittedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          files: true,
+          remarks: {
+            include: {
+              addedBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  role: true,
+                }
+              }
+            },
+            orderBy: { addedAt: 'desc' }
+          }
+        }
+      });
+
+      return complaint ? this.addVirtualFields(complaint) : null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Update complaint
+  async update(id, updateData) {
+    try {
+      const complaint = await this.prisma.complaint.update({
+        where: { id },
+        data: updateData,
+        include: {
+          submittedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          },
+          files: true,
+          remarks: {
+            include: {
+              addedBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  role: true,
+                }
+              }
+            },
+            orderBy: { addedAt: 'desc' }
+          }
+        }
+      });
+
+      return this.addVirtualFields(complaint);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Delete complaint
+  async delete(id) {
+    try {
+      await this.prisma.complaint.delete({
+        where: { id }
+      });
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Find many complaints with filters
+  async findMany(filters = {}, page = 1, limit = 10) {
+    try {
+      const skip = (page - 1) * limit;
+      const where = {};
+
+      if (filters.status) {
+        where.status = filters.status;
+      }
+      if (filters.type) {
+        where.type = filters.type;
+      }
+      if (filters.priority) {
+        where.priority = filters.priority;
+      }
+      if (filters.ward) {
+        where.ward = filters.ward;
+      }
+      if (filters.assignedToId) {
+        where.assignedToId = filters.assignedToId;
+      }
+      if (filters.submittedById) {
+        where.submittedById = filters.submittedById;
+      }
+      if (filters.search) {
+        where.OR = [
+          { complaintId: { contains: filters.search, mode: 'insensitive' } },
+          { description: { contains: filters.search, mode: 'insensitive' } },
+          { area: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+
+      const [complaints, total] = await Promise.all([
+        this.prisma.complaint.findMany({
+          where,
+          include: {
+            submittedBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+              }
+            },
+            assignedTo: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+              }
+            },
+            _count: {
+              select: {
+                files: true,
+                remarks: true,
+              }
+            }
+          },
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' }
+        }),
+        this.prisma.complaint.count({ where })
+      ]);
+
+      const complaintsWithVirtuals = complaints.map(complaint => this.addVirtualFields(complaint));
+
+      return {
+        complaints: complaintsWithVirtuals,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Add remark to complaint
+  async addRemark(complaintId, remarkData) {
+    try {
+      const remark = await this.prisma.remark.create({
+        data: {
+          ...remarkData,
+          complaintId,
+        },
+        include: {
+          addedBy: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+            }
+          }
+        }
+      });
+
+      return remark;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Add file to complaint
+  async addFile(complaintId, fileData) {
+    try {
+      const file = await this.prisma.file.create({
+        data: {
+          ...fileData,
+          complaintId,
+        }
+      });
+
+      return file;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get complaint statistics
+  async getStatistics(filters = {}) {
+    try {
+      const where = {};
+      if (filters.ward) {
+        where.ward = filters.ward;
+      }
+      if (filters.assignedToId) {
+        where.assignedToId = filters.assignedToId;
+      }
+
+      const [
+        totalComplaints,
+        statusStats,
+        typeStats,
+        priorityStats,
+        slaStats
+      ] = await Promise.all([
+        this.prisma.complaint.count({ where }),
+        this.prisma.complaint.groupBy({
+          by: ['status'],
+          where,
+          _count: { id: true }
+        }),
+        this.prisma.complaint.groupBy({
+          by: ['type'],
+          where,
+          _count: { id: true }
+        }),
+        this.prisma.complaint.groupBy({
+          by: ['priority'],
+          where,
+          _count: { id: true }
+        }),
+        this.getSLAStatistics(where)
+      ]);
+
+      return {
+        total: totalComplaints,
+        byStatus: statusStats.reduce((acc, stat) => {
+          acc[stat.status] = stat._count.id;
+          return acc;
+        }, {}),
+        byType: typeStats.reduce((acc, stat) => {
+          acc[stat.type] = stat._count.id;
+          return acc;
+        }, {}),
+        byPriority: priorityStats.reduce((acc, stat) => {
+          acc[stat.priority] = stat._count.id;
+          return acc;
+        }, {}),
+        sla: slaStats
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Calculate SLA deadline based on priority
+  calculateSLADeadline(priority) {
     const now = new Date();
     let hoursToAdd;
-    
-    switch (this.priority) {
+
+    switch (priority) {
       case 'critical':
         hoursToAdd = 24; // 1 day
         break;
@@ -224,48 +418,100 @@ complaintSchema.pre('save', function(next) {
       default:
         hoursToAdd = 72;
     }
-    
-    this.slaDeadline = new Date(now.getTime() + (hoursToAdd * 60 * 60 * 1000));
-  }
-  next();
-});
 
-// Virtual for SLA status
-complaintSchema.virtual('slaStatus').get(function() {
-  if (this.status === 'resolved' || this.status === 'closed') {
-    return 'completed';
+    return new Date(now.getTime() + (hoursToAdd * 60 * 60 * 1000));
   }
-  
-  const now = new Date();
-  const deadline = new Date(this.slaDeadline);
-  const hoursLeft = (deadline - now) / (1000 * 60 * 60);
-  
-  if (hoursLeft < 0) {
-    return 'overdue';
-  } else if (hoursLeft < 24) {
-    return 'warning';
-  } else {
-    return 'ontime';
+
+  // Add virtual fields (SLA status, time elapsed)
+  addVirtualFields(complaint) {
+    if (!complaint) return null;
+
+    // Calculate SLA status
+    let slaStatus = 'completed';
+    if (complaint.status !== 'resolved' && complaint.status !== 'closed') {
+      const now = new Date();
+      const deadline = new Date(complaint.slaDeadline);
+      const hoursLeft = (deadline - now) / (1000 * 60 * 60);
+
+      if (hoursLeft < 0) {
+        slaStatus = 'overdue';
+      } else if (hoursLeft < 24) {
+        slaStatus = 'warning';
+      } else {
+        slaStatus = 'ontime';
+      }
+    }
+
+    // Calculate time elapsed
+    const now = new Date();
+    const created = new Date(complaint.createdAt);
+    const diffInMs = now - created;
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    let timeElapsed;
+    if (diffInHours < 24) {
+      timeElapsed = `${diffInHours} hours`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      timeElapsed = `${diffInDays} days`;
+    }
+
+    return {
+      ...complaint,
+      slaStatus,
+      timeElapsed
+    };
   }
-});
 
-// Virtual for time elapsed
-complaintSchema.virtual('timeElapsed').get(function() {
-  const now = new Date();
-  const created = new Date(this.createdAt);
-  const diffInMs = now - created;
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-  
-  if (diffInHours < 24) {
-    return `${diffInHours} hours`;
-  } else {
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} days`;
+  // Get SLA statistics
+  async getSLAStatistics(where = {}) {
+    try {
+      const now = new Date();
+      
+      const [onTime, warning, overdue] = await Promise.all([
+        this.prisma.complaint.count({
+          where: {
+            ...where,
+            status: { notIn: ['resolved', 'closed'] },
+            slaDeadline: { gte: new Date(now.getTime() + (24 * 60 * 60 * 1000)) }
+          }
+        }),
+        this.prisma.complaint.count({
+          where: {
+            ...where,
+            status: { notIn: ['resolved', 'closed'] },
+            slaDeadline: { 
+              gte: now,
+              lt: new Date(now.getTime() + (24 * 60 * 60 * 1000))
+            }
+          }
+        }),
+        this.prisma.complaint.count({
+          where: {
+            ...where,
+            status: { notIn: ['resolved', 'closed'] },
+            slaDeadline: { lt: now }
+          }
+        })
+      ]);
+
+      const completed = await this.prisma.complaint.count({
+        where: {
+          ...where,
+          status: { in: ['resolved', 'closed'] }
+        }
+      });
+
+      return {
+        onTime,
+        warning,
+        overdue,
+        completed
+      };
+    } catch (error) {
+      throw error;
+    }
   }
-});
+}
 
-// Ensure virtual fields are serialized
-complaintSchema.set('toJSON', { virtuals: true });
-complaintSchema.set('toObject', { virtuals: true });
-
-export default mongoose.model('Complaint', complaintSchema);
+export default new ComplaintModel();
