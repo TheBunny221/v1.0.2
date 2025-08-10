@@ -49,12 +49,20 @@ const App = () => (
               }
             />
 
-            {/* Citizen Routes */}
+            {/* Guest and Citizen Routes */}
             <Route
               path="/"
               element={
                 <Layout userRole="citizen">
-                  <Index />
+                  <GuestComplaintForm />
+                </Layout>
+              }
+            />
+            <Route
+              path="/track"
+              element={
+                <Layout userRole="citizen">
+                  <GuestTrackComplaint />
                 </Layout>
               }
             />
