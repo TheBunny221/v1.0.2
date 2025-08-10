@@ -36,7 +36,7 @@ model User {
   
   // Preferences stored as JSON
   language              Language @default(en)
-  notifications         Boolean  @default(true)
+  notificationsEnabled  Boolean  @default(true)
   emailAlerts           Boolean  @default(true)
   
   isActive              Boolean  @default(true)
