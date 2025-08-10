@@ -47,6 +47,9 @@ export interface UIState {
   isLoading: boolean;
   loadingText?: string;
 
+  // Network status
+  isOnline: boolean;
+
   // Sidebar
   isSidebarOpen: boolean;
   isSidebarCollapsed: boolean;
