@@ -9,14 +9,11 @@ export const register = asyncHandler(async (req, res) => {
   const { name, email, phone, password, role, ward, department } = req.body;
 
   // Check if user already exists
-  const existingUser = await User.findOne({ 
-    $or: [{ email }, { phone }] 
-  });
-
-  if (existingUser) {
+  const existingUserByEmail = await User.findByEmail(email);
+  if (existingUserByEmail) {
     return res.status(400).json({
       success: false,
-      message: 'User already exists with this email or phone number',
+      message: 'User already exists with this email',
       data: null
     });
   }
@@ -31,7 +28,7 @@ export const register = asyncHandler(async (req, res) => {
   };
 
   // Add role-specific fields
-  if (role === 'ward-officer' && ward) {
+  if (role === 'ward_officer' && ward) {
     userData.ward = ward;
   }
   if (role === 'maintenance' && department) {
@@ -41,7 +38,7 @@ export const register = asyncHandler(async (req, res) => {
   const user = await User.create(userData);
 
   // Generate JWT token
-  const token = user.getJWTToken();
+  const token = User.generateJWTToken(user);
 
   res.status(201).json({
     success: true,
@@ -60,7 +57,7 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Find user and include password
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findByEmail(email, true);
 
   if (!user) {
     return res.status(401).json({
@@ -80,7 +77,7 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // Check password
-  const isPasswordMatch = await user.comparePassword(password);
+  const isPasswordMatch = await User.comparePassword(password, user.password);
 
   if (!isPasswordMatch) {
     return res.status(401).json({
@@ -91,20 +88,19 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // Update last login
-  user.lastLogin = new Date();
-  await user.save({ validateBeforeSave: false });
+  await User.updateLastLogin(user.id);
 
   // Generate JWT token
-  const token = user.getJWTToken();
+  const token = User.generateJWTToken(user);
 
   // Remove password from response
-  user.password = undefined;
+  const { password: _, resetPasswordToken: __, resetPasswordExpire: ___, emailVerificationToken: ____, ...userResponse } = user;
 
   res.status(200).json({
     success: true,
     message: 'Login successful',
     data: {
-      user,
+      user: userResponse,
       token
     }
   });
@@ -138,7 +134,7 @@ export const getMe = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/profile
 // @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
-  const allowedFields = ['name', 'phone', 'preferences', 'avatar'];
+  const allowedFields = ['name', 'phone', 'language', 'notifications', 'emailAlerts', 'avatar'];
   const updates = {};
 
   // Only allow specific fields to be updated
@@ -148,14 +144,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     }
   });
 
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
-    updates,
-    {
-      new: true,
-      runValidators: true
-    }
-  );
+  const user = await User.update(req.user.id, updates);
 
   res.status(200).json({
     success: true,
@@ -173,10 +162,10 @@ export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   // Get user with password
-  const user = await User.findById(req.user._id).select('+password');
+  const user = await User.findById(req.user.id, true);
 
   // Check current password
-  const isCurrentPasswordCorrect = await user.comparePassword(currentPassword);
+  const isCurrentPasswordCorrect = await User.comparePassword(currentPassword, user.password);
 
   if (!isCurrentPasswordCorrect) {
     return res.status(400).json({
@@ -187,8 +176,7 @@ export const changePassword = asyncHandler(async (req, res) => {
   }
 
   // Update password
-  user.password = newPassword;
-  await user.save();
+  await User.update(user.id, { password: newPassword });
 
   res.status(200).json({
     success: true,
@@ -203,7 +191,7 @@ export const changePassword = asyncHandler(async (req, res) => {
 export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findByEmail(email);
 
   if (!user) {
     return res.status(404).json({
@@ -214,8 +202,12 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   }
 
   // Get reset token
-  const resetToken = user.getResetPasswordToken();
-  await user.save({ validateBeforeSave: false });
+  const { resetToken, resetPasswordToken, resetPasswordExpire } = User.generateResetPasswordToken();
+  
+  await User.update(user.id, {
+    resetPasswordToken,
+    resetPasswordExpire
+  });
 
   // Create reset URL
   const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
@@ -233,9 +225,10 @@ export const forgotPassword = asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save({ validateBeforeSave: false });
+    await User.update(user.id, {
+      resetPasswordToken: null,
+      resetPasswordExpire: null
+    });
 
     return res.status(500).json({
       success: false,
@@ -257,10 +250,13 @@ export const resetPassword = asyncHandler(async (req, res) => {
     .update(req.params.resettoken)
     .digest('hex');
 
-  const user = await User.findOne({
+  // Find user with valid reset token
+  const users = await User.findMany({
     resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() }
+    resetPasswordExpire: { gte: new Date() }
   });
+
+  const user = users.users[0];
 
   if (!user) {
     return res.status(400).json({
@@ -270,14 +266,15 @@ export const resetPassword = asyncHandler(async (req, res) => {
     });
   }
 
-  // Set new password
-  user.password = password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
-  await user.save();
+  // Set new password and clear reset tokens
+  await User.update(user.id, {
+    password,
+    resetPasswordToken: null,
+    resetPasswordExpire: null
+  });
 
   // Generate JWT token
-  const token = user.getJWTToken();
+  const token = User.generateJWTToken(user);
 
   res.status(200).json({
     success: true,
