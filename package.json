@@ -38,6 +38,7 @@
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^7.0.5",
     "pg": "^8.11.3",
     "react-redux": "^9.2.0",
     "zod": "^3.23.8"

@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import guestRoutes from './routes/guestRoutes.js';
 
 // Import database connection
 import connectDB from './db/connection.js';
@@ -43,6 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/guest', guestRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
