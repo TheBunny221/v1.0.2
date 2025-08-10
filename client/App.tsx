@@ -9,10 +9,17 @@ import GuestTrackComplaint from "../src/pages/GuestTrackComplaint";
 
 const TestComponent: React.FC = () => {
   return (
-    <div style={{ padding: '20px', background: '#f0f0f0', minHeight: '100vh' }}>
+    <div style={{ padding: "20px", background: "#f0f0f0", minHeight: "100vh" }}>
       <h1>🏛️ CitizenConnect - Working!</h1>
       <p>React and Redux are now operational!</p>
-      <div style={{ background: 'white', padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "8px",
+          marginTop: "20px",
+        }}
+      >
         <h2>✅ System Status</h2>
         <ul>
           <li>✅ React is working</li>
@@ -20,11 +27,19 @@ const TestComponent: React.FC = () => {
           <li>✅ Routing enabled</li>
           <li>🔄 Guest complaint system ready</li>
         </ul>
-        <div style={{ marginTop: '20px' }}>
+        <div style={{ marginTop: "20px" }}>
           <h3>Available Routes:</h3>
           <ul>
-            <li><a href="/" style={{ color: '#2563eb' }}>/ - Guest Complaint Form</a></li>
-            <li><a href="/track" style={{ color: '#2563eb' }}>/track - Track Complaints</a></li>
+            <li>
+              <a href="/" style={{ color: "#2563eb" }}>
+                / - Guest Complaint Form
+              </a>
+            </li>
+            <li>
+              <a href="/track" style={{ color: "#2563eb" }}>
+                /track - Track Complaints
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -34,7 +49,7 @@ const TestComponent: React.FC = () => {
 
 const App = () => {
   console.log("App component is rendering with Redux...");
-  
+
   return (
     <Provider store={store}>
       <BrowserRouter>
