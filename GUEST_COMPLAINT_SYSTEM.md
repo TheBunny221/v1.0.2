@@ -47,10 +47,10 @@ Your CitizenConnect application now supports **guest complaint submissions** wit
 
 ### **Backend Implementation**
 
-- `backend/routes/guestRoutes.js` - Guest API endpoints
-- `backend/controller/guestController.js` - Guest business logic
-- `backend/utils/emailService.js` - Email and OTP services
-- `backend/middleware/validation.js` - Input validation rules
+- `server/routes/guestRoutes.js` - Guest API endpoints
+- `server/controller/guestController.js` - Guest business logic
+- `server/utils/emailService.js` - Email and OTP services
+- `server/middleware/validation.js` - Input validation rules
 
 ### **Configuration Updates**
 
@@ -78,7 +78,7 @@ POST /api/guest/track-complaint
 3. **Auto Submit** → `submit-complaint` (creates complaint + notifications)
 4. **Track Later** → `track-complaint` (secure lookup)
 
-## 🎯 User Experience
+## ��� User Experience
 
 ### **Guest Submission Process**
 
