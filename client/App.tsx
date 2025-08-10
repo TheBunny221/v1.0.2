@@ -7,6 +7,7 @@ import { store } from "./store";
 import { Layout } from "./components/Layout";
 import { AppInitializer } from "./components/AppInitializer";
 import ErrorBoundary from "./components/ErrorBoundary";
+import DebugTranslations from "./components/DebugTranslations";
 
 // Import all pages
 import Index from "./pages/Index";
