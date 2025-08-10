@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
+    "@reduxjs/toolkit": "^2.8.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
@@ -38,12 +39,11 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.11.3",
+    "react-redux": "^9.2.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.9.0",
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.0.2",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -88,6 +88,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
@@ -96,6 +97,7 @@
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
+    "nodemon": "^3.0.2",
     "postcss": "^8.5.6",
     "prettier": "^3.5.3",
     "prisma": "^5.7.1",
