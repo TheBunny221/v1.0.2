@@ -1,5 +1,5 @@
 import React from 'react';
-import PlaceholderPage from '@/components/PlaceholderPage';
+import PlaceholderPage from '../components/PlaceholderPage';
 import { Clock } from 'lucide-react';
 
 const ReopenComplaint: React.FC = () => {
