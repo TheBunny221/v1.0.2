@@ -4,62 +4,71 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import { Layout } from "./components/Layout";
+import { AppInitializer } from "./components/AppInitializer";
+
+// Import all pages
+import Index from "./pages/Index";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminComplaints from "./pages/AdminComplaints";
+import AdminReports from "./pages/AdminReports";
+import AdminUsers from "./pages/AdminUsers";
+import WardDashboard from "./pages/WardDashboard";
+import MaintenanceDashboard from "./pages/MaintenanceDashboard";
+import MyComplaints from "./pages/MyComplaints";
+import TrackStatus from "./pages/TrackStatus";
+import ReopenComplaint from "./pages/ReopenComplaint";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Feedback from "./pages/Feedback";
+import NotFound from "./pages/NotFound";
+
+// Import guest pages
 import GuestComplaintForm from "../src/pages/GuestComplaintForm";
 import GuestTrackComplaint from "../src/pages/GuestTrackComplaint";
 
-const TestComponent: React.FC = () => {
-  return (
-    <div style={{ padding: "20px", background: "#f0f0f0", minHeight: "100vh" }}>
-      <h1>🏛️ CitizenConnect - Working!</h1>
-      <p>React and Redux are now operational!</p>
-      <div
-        style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "8px",
-          marginTop: "20px",
-        }}
-      >
-        <h2>✅ System Status</h2>
-        <ul>
-          <li>✅ React is working</li>
-          <li>✅ Redux Toolkit configured</li>
-          <li>✅ Routing enabled</li>
-          <li>🔄 Guest complaint system ready</li>
-        </ul>
-        <div style={{ marginTop: "20px" }}>
-          <h3>Available Routes:</h3>
-          <ul>
-            <li>
-              <a href="/" style={{ color: "#2563eb" }}>
-                / - Guest Complaint Form
-              </a>
-            </li>
-            <li>
-              <a href="/track" style={{ color: "#2563eb" }}>
-                /track - Track Complaints
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const App = () => {
-  console.log("App component is rendering with Redux...");
+  console.log("CitizenConnect App is starting with full functionality...");
 
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<GuestComplaintForm />} />
-          <Route path="/track" element={<GuestTrackComplaint />} />
-          <Route path="/test" element={<TestComponent />} />
-          <Route path="*" element={<TestComponent />} />
-        </Routes>
-      </BrowserRouter>
+      <AppInitializer>
+        <BrowserRouter>
+          <Routes>
+            {/* Guest Routes (no layout) */}
+            <Route path="/guest" element={<GuestComplaintForm />} />
+            <Route path="/guest/track" element={<GuestTrackComplaint />} />
+            
+            {/* Main Application Routes (with layout) */}
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Index />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/complaints" element={<AdminComplaints />} />
+              <Route path="/admin/reports" element={<AdminReports />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              
+              {/* Ward Officer Routes */}
+              <Route path="/ward" element={<WardDashboard />} />
+              
+              {/* Maintenance Team Routes */}
+              <Route path="/maintenance" element={<MaintenanceDashboard />} />
+              
+              {/* User Routes */}
+              <Route path="/my-complaints" element={<MyComplaints />} />
+              <Route path="/track" element={<TrackStatus />} />
+              <Route path="/reopen" element={<ReopenComplaint />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/feedback" element={<Feedback />} />
+              
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AppInitializer>
     </Provider>
   );
 };
