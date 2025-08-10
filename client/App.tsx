@@ -31,6 +31,7 @@ const App = () => {
                     <ul>
                       <li><a href="/test">Test Page</a></li>
                       <li><a href="/layout-test">Layout Test</a></li>
+                      <li><a href="/index-test">Index Page Test</a></li>
                     </ul>
                   </div>
                 </div>
