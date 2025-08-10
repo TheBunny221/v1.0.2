@@ -23,6 +23,17 @@ const ComplaintRegistration: React.FC = () => {
   const { isSubmitting } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
 
+  // Return loading state if translations are not yet loaded
+  if (!translations) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center py-8">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const [formData, setFormData] = useState({
     mobile: "",
     email: "",
