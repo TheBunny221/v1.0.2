@@ -12,6 +12,8 @@ import AppInitializer from "./components/AppInitializer";
 import Layout from "./components/Layout";
 import RoleSwitcher from "./components/RoleSwitcher";
 import Index from "./pages/Index";
+import GuestComplaintForm from "./pages/GuestComplaintForm";
+import GuestTrackComplaint from "./pages/GuestTrackComplaint";
 import MyComplaints from "./pages/MyComplaints";
 import ReopenComplaint from "./pages/ReopenComplaint";
 import TrackStatus from "./pages/TrackStatus";
