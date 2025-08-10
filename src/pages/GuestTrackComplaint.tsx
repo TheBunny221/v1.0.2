@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../client/store/hooks";
 import {
   trackGuestComplaint,
   selectGuestComplaintIds,
-} from "../store/slices/guestSlice";
-import { showErrorToast } from "../store/slices/uiSlice";
+} from "../../client/store/slices/guestSlice";
+import { showErrorToast } from "../../client/store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
