@@ -179,6 +179,25 @@ export interface Translation {
     nextSteps: string;
     supportContact: string;
   };
+  forms: {
+    contactInformation: string;
+    problemDetails: string;
+    locationDetails: string;
+    complaintDescription: string;
+    optionalUploads: string;
+    captchaVerification: string;
+    enterCaptcha: string;
+    resetForm: string;
+    submitComplaint: string;
+    complaintSubmitted: string;
+    complaintSubmissionError: string;
+    fileUploadError: string;
+    invalidCaptcha: string;
+    requiredField: string;
+    invalidEmail: string;
+    invalidPhone: string;
+    minCharacters: string;
+  };
   dashboard: {
     overview: string;
     statistics: string;
@@ -634,7 +653,7 @@ const translations: Record<Language, Translation> = {
       trackComplaint: "शिकायत ट्रैक करें",
       guestSubmissionProcess: "अतिथि सबमिशन प्रक्रिया",
       guestSubmissionDescription:
-        "अतिथि उपयोगकर्ताओं के लिए, हम आपकी शिकायत सबमिट करने से पहले सत्यापन के लिए आपके ईमेल पर एक OTP भेजेंगे। यह आपके सबमिशन की प्रामाणिकता सुनिश्चित करता है और आपको बाद में अपनी शिकायत को ट्रैक करने में सक्षम बनाता है।",
+        "अतिथि उपयोगकर्ताओं के लिए, हम आपकी शिकायत सबमिट करने से पहले सत्यापन के लिए आपके ईमेल पर एक OTP भेजेंगे। यह आपके सब���िशन की प्रामाणिकता सुनिश्चित करता है और आपको बाद में अपनी शिकायत को ट्रैक करने में सक्षम बनाता है।",
       welcomeBack: "वापस स्वागत है",
       loginRequired: "लॉगिन आवश्यक",
       loginRequiredDescription:
@@ -671,7 +690,7 @@ const translations: Record<Language, Translation> = {
       slaReports: "SLA रिपोर्ट",
       userReports: "उपयोगकर्ता रिपोर्ट",
       wardReports: "वार्ड रिपोर्ट",
-      typeReports: "प्रकार रिपोर्ट",
+      typeReports: "प्रकार रिपो��्ट",
       statusReports: "स्थिति रिपोर्ट",
       dateRange: "दिनांक सीमा",
       from: "से",
@@ -715,7 +734,7 @@ const translations: Record<Language, Translation> = {
       reports: "റിപ്പോർട്ടുകൾ",
       users: "ഉപയോക്താക്കൾ",
       dashboard: "ഡാഷ്ബോർഡ്",
-      maintenance: "പരിപാലനം",
+      maintenance: "���രിപാലനം",
       settings: "സെറ്റിംഗുകൾ",
       logout: "ലോഗൗട്ട്",
       login: "ലോഗിൻ",
@@ -903,7 +922,7 @@ const translations: Record<Language, Translation> = {
       complaintReports: "പരാതി റിപ്പോർട്ടുകൾ",
       performanceReports: "പ്രകടന റിപ്പോർട്ടുകൾ",
       slaReports: "SLA റിപ്പോർട്ടുകൾ",
-      userReports: "ഉപയോക്താവ് റിപ്പോർട്ടുകൾ",
+      userReports: "ഉപയോക്താവ് റിപ്പോർട്ടു���ൾ",
       wardReports: "വാർഡ് റിപ്പോർട്ടുകൾ",
       typeReports: "തരം റിപ്പോർട്ടുകൾ",
       statusReports: "സ്ഥിതി റിപ്പോർട്ടുകൾ",
