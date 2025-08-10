@@ -101,7 +101,7 @@ const ComplaintRegistration: React.FC = () => {
         captcha,
       };
 
-      const result = await dispatch(submitComplaint(complaintData)).unwrap();
+      const result = await dispatch(createComplaint(complaintData)).unwrap();
 
       dispatch(
         addNotification({
