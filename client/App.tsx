@@ -8,9 +8,25 @@ import { Layout } from "./components/Layout";
 import { AppInitializer } from "./components/AppInitializer";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-// Import minimal pages first
+// Import all pages
 import Index from "./pages/Index";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminComplaints from "./pages/AdminComplaints";
+import AdminReports from "./pages/AdminReports";
+import AdminUsers from "./pages/AdminUsers";
+import WardDashboard from "./pages/WardDashboard";
+import MaintenanceDashboard from "./pages/MaintenanceDashboard";
+import MyComplaints from "./pages/MyComplaints";
+import TrackStatus from "./pages/TrackStatus";
+import ReopenComplaint from "./pages/ReopenComplaint";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
+
+// Import guest pages
+import GuestComplaintForm from "./pages/GuestComplaintForm";
+import GuestTrackComplaint from "./pages/GuestTrackComplaint";
 
 const App = () => {
   console.log("CitizenConnect App is starting with full functionality...");
