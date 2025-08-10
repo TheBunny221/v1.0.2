@@ -56,7 +56,7 @@ Your CitizenConnect application now supports **guest complaint submissions** wit
 
 - `src/store/index.ts` - Added guest slice to store
 - `src/App.tsx` - Updated routes for guest pages
-- `backend/server.js` - Registered guest routes
+- `server/server.js` - Registered guest routes
 - Language translations for EN/HI/ML
 
 ## 🔧 API Endpoints
