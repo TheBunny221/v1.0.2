@@ -201,7 +201,7 @@ const ComplaintRegistration: React.FC = () => {
                   type="tel"
                   value={formData.mobile}
                   onChange={(e) => handleInputChange("mobile", e.target.value)}
-                  placeholder={`Enter your ${translations.complaints.mobile.toLowerCase()}`}
+                  placeholder={`Enter your ${translations.complaints.mobile?.toLowerCase() || 'mobile'}`}
                   required
                 />
               </div>
@@ -212,7 +212,7 @@ const ComplaintRegistration: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder={`Enter your ${translations.auth.email.toLowerCase()}`}
+                  placeholder={`Enter your ${translations.auth.email?.toLowerCase() || 'email'}`}
                 />
               </div>
             </div>
@@ -231,7 +231,7 @@ const ComplaintRegistration: React.FC = () => {
                 >
                   <SelectTrigger>
                     <SelectValue
-                      placeholder={`Select ${translations.complaints.complaintType.toLowerCase()}`}
+                      placeholder={`Select ${translations.complaints.complaintType?.toLowerCase() || 'complaint type'}`}
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -251,7 +251,7 @@ const ComplaintRegistration: React.FC = () => {
                 >
                   <SelectTrigger>
                     <SelectValue
-                      placeholder={`Select your ${translations.complaints.ward.toLowerCase()}`}
+                      placeholder={`Select your ${translations.complaints.ward?.toLowerCase() || 'ward'}`}
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -326,7 +326,7 @@ const ComplaintRegistration: React.FC = () => {
                 onChange={(e) =>
                   handleInputChange("description", e.target.value)
                 }
-                placeholder={`Describe your ${translations.complaints.description.toLowerCase()} in detail...`}
+                placeholder={`Describe your ${translations.common.description?.toLowerCase() || 'complaint'} in detail...`}
                 rows={4}
                 required
               />
