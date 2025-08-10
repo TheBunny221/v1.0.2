@@ -40,6 +40,14 @@ const App = () => {
                   <a href="/">← Back to Home</a>
                 </div>
               } />
+              <Route path="/layout-test" element={<Layout />}>
+                <Route index element={
+                  <div style={{ padding: "20px" }}>
+                    <h1>🎯 Layout Test</h1>
+                    <p>Layout component is working!</p>
+                  </div>
+                } />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
