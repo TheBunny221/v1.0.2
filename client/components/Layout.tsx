@@ -102,7 +102,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userRole }) => {
             icon: BarChart3,
           },
         ];
-      case "ward-officer":
+      case "ward_officer":
         return [
           {
             path: "/ward",
