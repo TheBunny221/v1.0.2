@@ -48,6 +48,17 @@ export const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   const effectiveUserRole = user?.role || userRole || "citizen";
   const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
+  // Return loading state if translations are not yet loaded
+  if (!translations) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="text-center py-8">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const getNavigationItems = () => {
     switch (effectiveUserRole) {
       case "citizen":
