@@ -1,354 +1,441 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { ComplaintStatus } from "@/components/StatusChip";
+
+// Types
+export type ComplaintStatus =
+  | "registered"
+  | "assigned"
+  | "in-progress"
+  | "resolved"
+  | "closed"
+  | "reopened";
+export type ComplaintType =
+  | "Water_Supply"
+  | "Electricity"
+  | "Road_Repair"
+  | "Garbage_Collection"
+  | "Street_Lighting"
+  | "Sewerage"
+  | "Public_Health"
+  | "Traffic"
+  | "Others";
+export type Priority = "low" | "medium" | "high" | "critical";
 
 export interface ComplaintFile {
   id: string;
-  name: string;
-  type: string;
+  filename: string;
+  originalName: string;
+  mimetype: string;
   size: number;
   url: string;
+  uploadedAt: string;
+}
+
+export interface ComplaintRemark {
+  id: string;
+  text: string;
+  type: "status_update" | "assignment" | "general" | "closure" | "reopen";
+  addedAt: string;
+  addedBy: {
+    id: string;
+    name: string;
+    role: string;
+  };
 }
 
 export interface Complaint {
   id: string;
-  type: string;
+  complaintId: string;
+  type: ComplaintType;
   description: string;
-  mobile: string;
-  email?: string;
+  contactMobile: string;
+  contactEmail?: string;
   ward: string;
   area: string;
-  location?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
+  landmark?: string;
   status: ComplaintStatus;
-  priority: "low" | "medium" | "high" | "critical";
-  submittedBy: string;
-  submittedDate: string;
-  lastUpdated: string;
-  assignedTo?: string;
+  priority: Priority;
+  submittedBy: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+  };
+  assignedTo?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+  };
+  assignedAt?: string;
   slaDeadline: string;
+  resolvedAt?: string;
+  closedAt?: string;
+  isAnonymous: boolean;
+  feedbackRating?: number;
+  feedbackComment?: string;
+  feedbackSubmittedAt?: string;
+  tags: string[];
+  category: string;
+  escalationLevel: number;
+  estimatedResolutionTime: number;
+  createdAt: string;
+  updatedAt: string;
   files: ComplaintFile[];
-  remarks: string[];
-  isAnonymous?: boolean;
+  remarks: ComplaintRemark[];
+  slaStatus: "ontime" | "warning" | "overdue" | "completed";
+  timeElapsed: string;
 }
 
-export interface ComplaintFormData {
-  mobile: string;
-  email?: string;
-  problemType: string;
-  ward: string;
-  area: string;
-  location?: string;
-  address?: string;
-  description: string;
-  files: File[];
-  captcha: string;
+export interface ComplaintFilters {
+  status?: ComplaintStatus;
+  priority?: Priority;
+  type?: ComplaintType;
+  ward?: string;
+  assignedToId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
 }
 
-export interface ComplaintsState {
+export interface ComplaintStats {
+  total: number;
+  byStatus: Record<ComplaintStatus, number>;
+  byType: Record<ComplaintType, number>;
+  byPriority: Record<Priority, number>;
+  sla: {
+    onTime: number;
+    warning: number;
+    overdue: number;
+    completed: number;
+  };
+}
+
+export interface ComplaintState {
   complaints: Complaint[];
   myComplaints: Complaint[];
-  selectedComplaint: Complaint | null;
-  isLoading: boolean;
-  isSubmitting: boolean;
-  error: string | null;
-  filters: {
-    search: string;
-    ward: string;
-    type: string;
-    status: string;
-    priority: string;
-    assignedTo: string;
-    dateFrom: string;
-    dateTo: string;
-  };
+  currentComplaint: Complaint | null;
+  stats: ComplaintStats | null;
+  filters: ComplaintFilters;
   pagination: {
     page: number;
     limit: number;
     total: number;
+    pages: number;
   };
+  isLoading: boolean;
+  isSubmitting: boolean;
+  error: string | null;
 }
 
-const initialState: ComplaintsState = {
+// Initial state
+const initialState: ComplaintState = {
   complaints: [],
   myComplaints: [],
-  selectedComplaint: null,
-  isLoading: false,
-  isSubmitting: false,
-  error: null,
-  filters: {
-    search: "",
-    ward: "all",
-    type: "all",
-    status: "all",
-    priority: "all",
-    assignedTo: "",
-    dateFrom: "",
-    dateTo: "",
-  },
+  currentComplaint: null,
+  stats: null,
+  filters: {},
   pagination: {
     page: 1,
     limit: 10,
     total: 0,
+    pages: 0,
   },
-};
-
-// Generate mock complaint ID
-const generateComplaintId = (): string => {
-  const year = new Date().getFullYear();
-  const number = Math.floor(Math.random() * 1000) + 1;
-  return `CMP-${year}-${number.toString().padStart(3, "0")}`;
+  isLoading: false,
+  isSubmitting: false,
+  error: null,
 };
 
 // Async thunks
-export const submitComplaint = createAsyncThunk(
-  "complaints/submit",
-  async (formData: ComplaintFormData, { rejectWithValue }) => {
-    try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const complaint: Complaint = {
-        id: generateComplaintId(),
-        type: formData.problemType,
-        description: formData.description,
-        mobile: formData.mobile,
-        email: formData.email,
-        ward: formData.ward,
-        area: formData.area,
-        location: formData.location,
-        address: formData.address,
-        status: "registered",
-        priority: "medium",
-        submittedBy: formData.mobile,
-        submittedDate: new Date().toISOString(),
-        lastUpdated: new Date().toISOString(),
-        slaDeadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 72 hours
-        files: formData.files.map((file, index) => ({
-          id: `file-${index}`,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          url: URL.createObjectURL(file),
-        })),
-        remarks: [`Complaint registered on ${new Date().toLocaleDateString()}`],
-      };
-
-      return complaint;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to submit complaint",
-      );
-    }
-  },
-);
-
 export const fetchComplaints = createAsyncThunk(
-  "complaints/fetchAll",
+  "complaints/fetchComplaints",
   async (
-    params: {
-      page: number;
-      limit: number;
-      filters?: Partial<ComplaintsState["filters"]>;
-    },
-    { rejectWithValue },
+    params: { page?: number; limit?: number; filters?: ComplaintFilters },
+    { getState, rejectWithValue },
   ) => {
     try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
 
-      // Mock data
-      const mockComplaints: Complaint[] = [
-        {
-          id: "CMP-2024-001",
-          type: "Water Supply",
-          description:
-            "No water supply for the past 3 days in Green Valley Society.",
-          mobile: "+91 9876543210",
-          email: "john.doe@email.com",
-          ward: "Ward 1",
-          area: "Green Valley Society",
-          status: "assigned",
-          priority: "high",
-          submittedBy: "John Doe",
-          submittedDate: "2024-01-15T08:30:00Z",
-          lastUpdated: "2024-01-15T14:30:00Z",
-          assignedTo: "Mike Johnson",
-          slaDeadline: "2024-01-17T18:00:00Z",
-          files: [],
-          remarks: ["Complaint registered", "Assigned to maintenance team"],
-        },
-        {
-          id: "CMP-2024-002",
-          type: "Street Lighting",
-          description: "Street lights not working on Main Street.",
-          mobile: "+91 9876543211",
-          ward: "Ward 3",
-          area: "Main Street",
-          status: "in-progress",
-          priority: "medium",
-          submittedBy: "Jane Smith",
-          submittedDate: "2024-01-14T10:15:00Z",
-          lastUpdated: "2024-01-15T10:15:00Z",
-          assignedTo: "Sarah Wilson",
-          slaDeadline: "2024-01-19T18:00:00Z",
-          files: [],
-          remarks: ["Complaint registered", "Work in progress"],
-        },
-      ];
+      const searchParams = new URLSearchParams();
+      if (params.page) searchParams.append("page", params.page.toString());
+      if (params.limit) searchParams.append("limit", params.limit.toString());
 
-      return {
-        complaints: mockComplaints,
-        total: mockComplaints.length,
-      };
+      if (params.filters) {
+        Object.entries(params.filters).forEach(([key, value]) => {
+          if (value) searchParams.append(key, value);
+        });
+      }
+
+      const response = await fetch(`/api/complaints?${searchParams}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to fetch complaints");
+      }
+
+      return data.data;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch complaints",
+        error instanceof Error ? error.message : "Network error",
       );
     }
   },
 );
 
 export const fetchMyComplaints = createAsyncThunk(
-  "complaints/fetchMy",
-  async (userId: string, { rejectWithValue }) => {
-    try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Mock user complaints
-      const mockComplaints: Complaint[] = [
-        {
-          id: "CMP-2024-003",
-          type: "Garbage Collection",
-          description: "Garbage not collected for 3 days.",
-          mobile: "+91 9876543210",
-          email: "john.doe@email.com",
-          ward: "Ward 1",
-          area: "Green Valley Society",
-          status: "resolved",
-          priority: "medium",
-          submittedBy: "John Doe",
-          submittedDate: "2024-01-10T09:00:00Z",
-          lastUpdated: "2024-01-12T16:00:00Z",
-          assignedTo: "Cleanup Team",
-          slaDeadline: "2024-01-13T18:00:00Z",
-          files: [],
-          remarks: ["Complaint registered", "Cleanup scheduled", "Resolved"],
-        },
-      ];
-
-      return mockComplaints;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch complaints",
-      );
-    }
-  },
-);
-
-export const updateComplaintStatus = createAsyncThunk(
-  "complaints/updateStatus",
+  "complaints/fetchMyComplaints",
   async (
-    {
-      id,
-      status,
-      remarks,
-    }: { id: string; status: ComplaintStatus; remarks?: string },
-    { rejectWithValue },
+    params: { page?: number; limit?: number; status?: ComplaintStatus },
+    { getState, rejectWithValue },
   ) => {
     try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
 
-      return {
-        id,
-        status,
-        remarks,
-        lastUpdated: new Date().toISOString(),
-      };
+      const searchParams = new URLSearchParams();
+      if (params.page) searchParams.append("page", params.page.toString());
+      if (params.limit) searchParams.append("limit", params.limit.toString());
+      if (params.status) searchParams.append("status", params.status);
+
+      const response = await fetch(`/api/complaints/my?${searchParams}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to fetch my complaints");
+      }
+
+      return data.data;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update status",
+        error instanceof Error ? error.message : "Network error",
       );
     }
   },
 );
 
+export const fetchComplaintById = createAsyncThunk(
+  "complaints/fetchComplaintById",
+  async (id: string, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
+
+      const response = await fetch(`/api/complaints/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to fetch complaint");
+      }
+
+      return data.data.complaint;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
+    }
+  },
+);
+
+export const createComplaint = createAsyncThunk(
+  "complaints/createComplaint",
+  async (
+    complaintData: {
+      type: ComplaintType;
+      description: string;
+      contactInfo: { mobile: string; email?: string };
+      location: {
+        ward: string;
+        area: string;
+        address?: string;
+        coordinates?: { latitude: number; longitude: number };
+        landmark?: string;
+      };
+      isAnonymous?: boolean;
+    },
+    { getState, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as { auth: { token: string | null } };
+      const token = state.auth.token;
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch("/api/complaints", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(complaintData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to create complaint");
+      }
+
+      return data.data.complaint;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
+    }
+  },
+);
+
+export const updateComplaint = createAsyncThunk(
+  "complaints/updateComplaint",
+  async (
+    params: {
+      id: string;
+      updates: {
+        status?: ComplaintStatus;
+        priority?: Priority;
+        assignedToId?: string;
+        remarks?: string;
+      };
+    },
+    { getState, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
+
+      const response = await fetch(`/api/complaints/${params.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(params.updates),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to update complaint");
+      }
+
+      return data.data.complaint;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
+    }
+  },
+);
+
+export const submitFeedback = createAsyncThunk(
+  "complaints/submitFeedback",
+  async (
+    params: { id: string; rating: number; comment?: string },
+    { getState, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
+
+      const response = await fetch(`/api/complaints/${params.id}/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating: params.rating,
+          comment: params.comment,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to submit feedback");
+      }
+
+      return { id: params.id, feedback: data.data.feedback };
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
+    }
+  },
+);
+
+export const fetchComplaintStats = createAsyncThunk(
+  "complaints/fetchStats",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
+
+      const response = await fetch("/api/complaints/stats", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to fetch stats");
+      }
+
+      return data.data.stats;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error",
+      );
+    }
+  },
+);
+
+// Complaints slice
 const complaintsSlice = createSlice({
   name: "complaints",
   initialState,
   reducers: {
-    setSelectedComplaint: (state, action: PayloadAction<Complaint | null>) => {
-      state.selectedComplaint = action.payload;
-    },
-    updateFilters: (
-      state,
-      action: PayloadAction<Partial<ComplaintsState["filters"]>>,
-    ) => {
+    setFilters: (state, action: PayloadAction<ComplaintFilters>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
     clearFilters: (state) => {
-      state.filters = {
-        search: "",
-        ward: "all",
-        type: "all",
-        status: "all",
-        priority: "all",
-        assignedTo: "",
-        dateFrom: "",
-        dateTo: "",
-      };
+      state.filters = {};
     },
-    setPagination: (
-      state,
-      action: PayloadAction<Partial<ComplaintsState["pagination"]>>,
-    ) => {
-      state.pagination = { ...state.pagination, ...action.payload };
+    setCurrentComplaint: (state, action: PayloadAction<Complaint | null>) => {
+      state.currentComplaint = action.payload;
     },
     clearError: (state) => {
       state.error = null;
     },
-    // Optimistically update complaint in the list
-    updateComplaintInList: (
-      state,
-      action: PayloadAction<{ id: string; updates: Partial<Complaint> }>,
-    ) => {
-      const { id, updates } = action.payload;
-      const complaintIndex = state.complaints.findIndex((c) => c.id === id);
-      if (complaintIndex !== -1) {
-        state.complaints[complaintIndex] = {
-          ...state.complaints[complaintIndex],
-          ...updates,
-        };
-      }
-
-      const myComplaintIndex = state.myComplaints.findIndex((c) => c.id === id);
-      if (myComplaintIndex !== -1) {
-        state.myComplaints[myComplaintIndex] = {
-          ...state.myComplaints[myComplaintIndex],
-          ...updates,
-        };
-      }
-    },
+    resetComplaints: () => initialState,
   },
   extraReducers: (builder) => {
     builder
-      // Submit complaint
-      .addCase(submitComplaint.pending, (state) => {
-        state.isSubmitting = true;
-        state.error = null;
-      })
-      .addCase(submitComplaint.fulfilled, (state, action) => {
-        state.isSubmitting = false;
-        state.complaints.unshift(action.payload);
-        state.myComplaints.unshift(action.payload);
-        state.error = null;
-      })
-      .addCase(submitComplaint.rejected, (state, action) => {
-        state.isSubmitting = false;
-        state.error = action.payload as string;
-      })
-      // Fetch all complaints
+      // Fetch complaints
       .addCase(fetchComplaints.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -356,7 +443,7 @@ const complaintsSlice = createSlice({
       .addCase(fetchComplaints.fulfilled, (state, action) => {
         state.isLoading = false;
         state.complaints = action.payload.complaints;
-        state.pagination.total = action.payload.total;
+        state.pagination = action.payload.pagination;
         state.error = null;
       })
       .addCase(fetchComplaints.rejected, (state, action) => {
@@ -366,51 +453,125 @@ const complaintsSlice = createSlice({
       // Fetch my complaints
       .addCase(fetchMyComplaints.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(fetchMyComplaints.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.myComplaints = action.payload;
+        state.myComplaints = action.payload.complaints;
+        state.error = null;
       })
       .addCase(fetchMyComplaints.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      // Update complaint status
-      .addCase(updateComplaintStatus.fulfilled, (state, action) => {
-        const { id, status, remarks, lastUpdated } = action.payload;
-
-        // Update in complaints list
-        const complaintIndex = state.complaints.findIndex((c) => c.id === id);
-        if (complaintIndex !== -1) {
-          state.complaints[complaintIndex].status = status;
-          state.complaints[complaintIndex].lastUpdated = lastUpdated;
-          if (remarks) {
-            state.complaints[complaintIndex].remarks.push(remarks);
-          }
-        }
-
-        // Update in my complaints list
-        const myComplaintIndex = state.myComplaints.findIndex(
-          (c) => c.id === id,
+      // Fetch complaint by ID
+      .addCase(fetchComplaintById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchComplaintById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentComplaint = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchComplaintById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Create complaint
+      .addCase(createComplaint.pending, (state) => {
+        state.isSubmitting = true;
+        state.error = null;
+      })
+      .addCase(createComplaint.fulfilled, (state, action) => {
+        state.isSubmitting = false;
+        state.complaints.unshift(action.payload);
+        state.myComplaints.unshift(action.payload);
+        state.error = null;
+      })
+      .addCase(createComplaint.rejected, (state, action) => {
+        state.isSubmitting = false;
+        state.error = action.payload as string;
+      })
+      // Update complaint
+      .addCase(updateComplaint.pending, (state) => {
+        state.isSubmitting = true;
+        state.error = null;
+      })
+      .addCase(updateComplaint.fulfilled, (state, action) => {
+        state.isSubmitting = false;
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
         );
-        if (myComplaintIndex !== -1) {
-          state.myComplaints[myComplaintIndex].status = status;
-          state.myComplaints[myComplaintIndex].lastUpdated = lastUpdated;
-          if (remarks) {
-            state.myComplaints[myComplaintIndex].remarks.push(remarks);
-          }
+        if (index !== -1) {
+          state.complaints[index] = action.payload;
         }
+        if (state.currentComplaint?.id === action.payload.id) {
+          state.currentComplaint = action.payload;
+        }
+        state.error = null;
+      })
+      .addCase(updateComplaint.rejected, (state, action) => {
+        state.isSubmitting = false;
+        state.error = action.payload as string;
+      })
+      // Submit feedback
+      .addCase(submitFeedback.fulfilled, (state, action) => {
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.complaints[index] = {
+            ...state.complaints[index],
+            feedbackRating: action.payload.feedback.rating,
+            feedbackComment: action.payload.feedback.comment,
+            feedbackSubmittedAt: action.payload.feedback.submittedAt,
+          };
+        }
+        if (state.currentComplaint?.id === action.payload.id) {
+          state.currentComplaint = {
+            ...state.currentComplaint,
+            feedbackRating: action.payload.feedback.rating,
+            feedbackComment: action.payload.feedback.comment,
+            feedbackSubmittedAt: action.payload.feedback.submittedAt,
+          };
+        }
+      })
+      // Fetch stats
+      .addCase(fetchComplaintStats.fulfilled, (state, action) => {
+        state.stats = action.payload;
       });
   },
 });
 
 export const {
-  setSelectedComplaint,
-  updateFilters,
+  setFilters,
   clearFilters,
-  setPagination,
+  setCurrentComplaint,
   clearError,
-  updateComplaintInList,
+  resetComplaints,
 } = complaintsSlice.actions;
-
 export default complaintsSlice.reducer;
+
+// Selectors
+export const selectComplaints = (state: { complaints: ComplaintState }) =>
+  state.complaints.complaints;
+export const selectMyComplaints = (state: { complaints: ComplaintState }) =>
+  state.complaints.myComplaints;
+export const selectCurrentComplaint = (state: { complaints: ComplaintState }) =>
+  state.complaints.currentComplaint;
+export const selectComplaintStats = (state: { complaints: ComplaintState }) =>
+  state.complaints.stats;
+export const selectComplaintFilters = (state: { complaints: ComplaintState }) =>
+  state.complaints.filters;
+export const selectComplaintPagination = (state: {
+  complaints: ComplaintState;
+}) => state.complaints.pagination;
+export const selectComplaintsLoading = (state: {
+  complaints: ComplaintState;
+}) => state.complaints.isLoading;
+export const selectComplaintsSubmitting = (state: {
+  complaints: ComplaintState;
+}) => state.complaints.isSubmitting;
+export const selectComplaintsError = (state: { complaints: ComplaintState }) =>
+  state.complaints.error;
