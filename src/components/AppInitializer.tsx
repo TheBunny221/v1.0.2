@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useAppDispatch } from "../hooks/redux";
-import { loginWithToken } from "../data/slices/authSlice";
+import { useAppDispatch } from "../store/hooks";
+import { loginWithToken } from "../store/slices/authSlice";
 import { initializeLanguage } from "../data/slices/languageSlice";
 import { initializeTheme, setOnlineStatus } from "../data/slices/uiSlice";
 
