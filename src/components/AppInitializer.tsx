@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useAppDispatch } from "@/store/hooks";
-import { loginWithToken } from "@/store/slices/authSlice";
-import { initializeLanguage } from "@/store/slices/languageSlice";
-import { initializeTheme, setOnlineStatus } from "@/store/slices/uiSlice";
+import { useAppDispatch } from "../hooks/redux";
+import { loginWithToken } from "../data/slices/authSlice";
+import { initializeLanguage } from "../data/slices/languageSlice";
+import { initializeTheme, setOnlineStatus } from "../data/slices/uiSlice";
 
 const AppInitializer: React.FC = () => {
   const dispatch = useAppDispatch();
