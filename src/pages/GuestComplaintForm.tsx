@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { createComplaint } from "../store/slices/complaintsSlice";
-import { sendOtpForGuest, resetOtpState } from "../store/slices/guestSlice";
-import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
+import { useAppSelector, useAppDispatch } from "../../client/store/hooks";
+import { createComplaint } from "../../client/store/slices/complaintsSlice";
+import { sendOtpForGuest, resetOtpState } from "../../client/store/slices/guestSlice";
+import { showSuccessToast, showErrorToast } from "../../client/store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
