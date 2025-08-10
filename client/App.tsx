@@ -12,6 +12,7 @@ import AppInitializer from "./components/AppInitializer";
 import Layout from "./components/Layout";
 import RoleSwitcher from "./components/RoleSwitcher";
 import Index from "./pages/Index";
+import TestComponent from "./components/TestComponent";
 import GuestComplaintForm from "../src/pages/GuestComplaintForm";
 import GuestTrackComplaint from "../src/pages/GuestTrackComplaint";
 import MyComplaints from "./pages/MyComplaints";
@@ -52,11 +53,7 @@ const App = () => (
             {/* Guest and Citizen Routes */}
             <Route
               path="/"
-              element={
-                <Layout userRole="citizen">
-                  <GuestComplaintForm />
-                </Layout>
-              }
+              element={<TestComponent />}
             />
             <Route
               path="/track"
