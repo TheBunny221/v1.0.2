@@ -89,16 +89,19 @@ const ComplaintRegistration: React.FC = () => {
 
     try {
       const complaintData = {
-        mobile: formData.mobile,
-        email: formData.email,
-        problemType: formData.problemType,
-        ward: formData.ward,
-        area: formData.area,
-        location: formData.location,
-        address: formData.address,
+        type: formData.problemType as any, // Convert to ComplaintType
         description: formData.description,
-        files,
-        captcha,
+        contactInfo: {
+          mobile: formData.mobile,
+          email: formData.email || undefined,
+        },
+        location: {
+          ward: formData.ward,
+          area: formData.area,
+          address: formData.address || undefined,
+          landmark: formData.location || undefined,
+        },
+        isAnonymous: false,
       };
 
       const result = await dispatch(createComplaint(complaintData)).unwrap();
