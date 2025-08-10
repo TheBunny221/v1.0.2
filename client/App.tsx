@@ -29,6 +29,7 @@ const App = () => {
                     <h3>Available Routes:</h3>
                     <ul>
                       <li><a href="/test">Test Page</a></li>
+                      <li><a href="/layout-test">Layout Test</a></li>
                     </ul>
                   </div>
                 </div>
