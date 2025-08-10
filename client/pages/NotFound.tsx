@@ -1,5 +1,5 @@
 import React from 'react';
-import PlaceholderPage from '@/components/PlaceholderPage';
+import PlaceholderPage from '../components/PlaceholderPage';
 import { AlertTriangle } from 'lucide-react';
 
 const NotFound: React.FC = () => {
