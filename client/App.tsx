@@ -44,7 +44,12 @@ const App = () => {
 
               {/* Main Application Routes (with layout) */}
               <Route path="/" element={<Layout />}>
-                <Route index element={<Index />} />
+                <Route index element={
+                  <div>
+                    <DebugTranslations />
+                    <Index />
+                  </div>
+                } />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminDashboard />} />
