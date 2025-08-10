@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../client/store/hooks";
 import {
   verifyOtpAndSubmitComplaint,
   resendOtp,
@@ -11,8 +11,8 @@ import {
   selectGuestError,
   selectIsSubmittingComplaint,
   selectSubmittedComplaintId,
-} from "../store/slices/guestSlice";
-import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
+} from "../../client/store/slices/guestSlice";
+import { showSuccessToast, showErrorToast } from "../../client/store/slices/uiSlice";
 import {
   Dialog,
   DialogContent,
