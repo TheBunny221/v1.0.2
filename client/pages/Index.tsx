@@ -29,11 +29,11 @@ const ComplaintRegistration: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   // Return loading state if translations are not yet loaded
-  if (!translations) {
+  if (!translations || !translations.forms || !translations.complaints) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="text-center py-8">
-          <p>Loading...</p>
+          <p>Loading translations...</p>
         </div>
       </div>
     );
