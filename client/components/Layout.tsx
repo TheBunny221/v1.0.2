@@ -281,7 +281,9 @@ export const Layout: React.FC<LayoutProps> = ({ userRole }) => {
 
         {/* Main Content */}
         <main className="flex-1 lg:pl-0">
-          <div className="p-4 lg:p-6">{children}</div>
+          <div className="p-4 lg:p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
