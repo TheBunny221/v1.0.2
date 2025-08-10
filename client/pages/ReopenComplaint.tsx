@@ -1,6 +1,6 @@
-import React from 'react';
-import PlaceholderPage from '../components/PlaceholderPage';
-import { Clock } from 'lucide-react';
+import React from "react";
+import PlaceholderPage from "../components/PlaceholderPage";
+import { Clock } from "lucide-react";
 
 const ReopenComplaint: React.FC = () => {
   return (

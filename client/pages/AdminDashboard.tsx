@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import StatusChip from '@/components/StatusChip';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import StatusChip from "@/components/StatusChip";
 import {
   BarChart3,
   TrendingUp,
@@ -17,13 +17,13 @@ import {
   Calendar,
   MapPin,
   RefreshCw,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface DashboardMetric {
   title: string;
   value: string;
   change: string;
-  changeType: 'increase' | 'decrease' | 'neutral';
+  changeType: "increase" | "decrease" | "neutral";
   icon: React.ReactNode;
 }
 
@@ -39,120 +39,149 @@ interface RecentComplaint {
   type: string;
   submittedBy: string;
   ward: string;
-  status: 'registered' | 'assigned' | 'in-progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "registered" | "assigned" | "in-progress" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "critical";
   timeAgo: string;
-  slaStatus: 'ontime' | 'warning' | 'overdue';
+  slaStatus: "ontime" | "warning" | "overdue";
 }
 
 const AdminDashboard: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('today');
+  const [selectedPeriod, setSelectedPeriod] = useState("today");
 
   const metrics: DashboardMetric[] = [
     {
-      title: 'Total Complaints Today',
-      value: '127',
-      change: '+12%',
-      changeType: 'increase',
+      title: "Total Complaints Today",
+      value: "127",
+      change: "+12%",
+      changeType: "increase",
       icon: <FileText className="h-5 w-5" />,
     },
     {
-      title: 'Resolved Today',
-      value: '84',
-      change: '+8%',
-      changeType: 'increase',
+      title: "Resolved Today",
+      value: "84",
+      change: "+8%",
+      changeType: "increase",
       icon: <CheckCircle className="h-5 w-5" />,
     },
     {
-      title: 'SLA Breaches',
-      value: '15',
-      change: '-3%',
-      changeType: 'decrease',
+      title: "SLA Breaches",
+      value: "15",
+      change: "-3%",
+      changeType: "decrease",
       icon: <AlertTriangle className="h-5 w-5" />,
     },
     {
-      title: 'Active Users',
-      value: '2,341',
-      change: '+5%',
-      changeType: 'increase',
+      title: "Active Users",
+      value: "2,341",
+      change: "+5%",
+      changeType: "increase",
       icon: <Users className="h-5 w-5" />,
     },
   ];
 
   const complaintsByStatus: ComplaintByStatus[] = [
-    { status: 'Registered', count: 45, percentage: 35, color: 'bg-status-registered' },
-    { status: 'Assigned', count: 32, percentage: 25, color: 'bg-status-assigned' },
-    { status: 'In Progress', count: 28, percentage: 22, color: 'bg-status-progress' },
-    { status: 'Resolved', count: 23, percentage: 18, color: 'bg-status-resolved' },
+    {
+      status: "Registered",
+      count: 45,
+      percentage: 35,
+      color: "bg-status-registered",
+    },
+    {
+      status: "Assigned",
+      count: 32,
+      percentage: 25,
+      color: "bg-status-assigned",
+    },
+    {
+      status: "In Progress",
+      count: 28,
+      percentage: 22,
+      color: "bg-status-progress",
+    },
+    {
+      status: "Resolved",
+      count: 23,
+      percentage: 18,
+      color: "bg-status-resolved",
+    },
   ];
 
   const recentComplaints: RecentComplaint[] = [
     {
-      id: 'CMP-2024-001',
-      type: 'Water Supply',
-      submittedBy: 'John Doe',
-      ward: 'Ward 1',
-      status: 'assigned',
-      priority: 'high',
-      timeAgo: '2 hours ago',
-      slaStatus: 'ontime',
+      id: "CMP-2024-001",
+      type: "Water Supply",
+      submittedBy: "John Doe",
+      ward: "Ward 1",
+      status: "assigned",
+      priority: "high",
+      timeAgo: "2 hours ago",
+      slaStatus: "ontime",
     },
     {
-      id: 'CMP-2024-002',
-      type: 'Street Lighting',
-      submittedBy: 'Jane Smith',
-      ward: 'Ward 3',
-      status: 'in-progress',
-      priority: 'medium',
-      timeAgo: '4 hours ago',
-      slaStatus: 'warning',
+      id: "CMP-2024-002",
+      type: "Street Lighting",
+      submittedBy: "Jane Smith",
+      ward: "Ward 3",
+      status: "in-progress",
+      priority: "medium",
+      timeAgo: "4 hours ago",
+      slaStatus: "warning",
     },
     {
-      id: 'CMP-2024-003',
-      type: 'Garbage Collection',
-      submittedBy: 'Mike Johnson',
-      ward: 'Ward 2',
-      status: 'registered',
-      priority: 'critical',
-      timeAgo: '6 hours ago',
-      slaStatus: 'overdue',
+      id: "CMP-2024-003",
+      type: "Garbage Collection",
+      submittedBy: "Mike Johnson",
+      ward: "Ward 2",
+      status: "registered",
+      priority: "critical",
+      timeAgo: "6 hours ago",
+      slaStatus: "overdue",
     },
     {
-      id: 'CMP-2024-004',
-      type: 'Road Repair',
-      submittedBy: 'Sarah Wilson',
-      ward: 'Ward 4',
-      status: 'resolved',
-      priority: 'low',
-      timeAgo: '8 hours ago',
-      slaStatus: 'ontime',
+      id: "CMP-2024-004",
+      type: "Road Repair",
+      submittedBy: "Sarah Wilson",
+      ward: "Ward 4",
+      status: "resolved",
+      priority: "low",
+      timeAgo: "8 hours ago",
+      slaStatus: "ontime",
     },
   ];
 
   const wardMetrics = [
-    { ward: 'Ward 1', complaints: 23, resolved: 18, slaCompliance: 85 },
-    { ward: 'Ward 2', complaints: 31, resolved: 24, slaCompliance: 77 },
-    { ward: 'Ward 3', complaints: 19, resolved: 16, slaCompliance: 94 },
-    { ward: 'Ward 4', complaints: 27, resolved: 21, slaCompliance: 81 },
-    { ward: 'Ward 5', complaints: 34, resolved: 28, slaCompliance: 88 },
+    { ward: "Ward 1", complaints: 23, resolved: 18, slaCompliance: 85 },
+    { ward: "Ward 2", complaints: 31, resolved: 24, slaCompliance: 77 },
+    { ward: "Ward 3", complaints: 19, resolved: 16, slaCompliance: 94 },
+    { ward: "Ward 4", complaints: 27, resolved: 21, slaCompliance: 81 },
+    { ward: "Ward 5", complaints: 34, resolved: 28, slaCompliance: 88 },
   ];
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case "critical":
+        return "bg-red-500";
+      case "high":
+        return "bg-orange-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getSlaStatusColor = (status: string) => {
     switch (status) {
-      case 'ontime': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'overdue': return 'text-red-600';
-      default: return 'text-gray-600';
+      case "ontime":
+        return "text-green-600";
+      case "warning":
+        return "text-yellow-600";
+      case "overdue":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
     }
   };
 
@@ -195,11 +224,11 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-center mt-1">
                     <span
                       className={`text-xs font-medium ${
-                        metric.changeType === 'increase'
-                          ? 'text-green-600'
-                          : metric.changeType === 'decrease'
-                          ? 'text-red-600'
-                          : 'text-gray-600'
+                        metric.changeType === "increase"
+                          ? "text-green-600"
+                          : metric.changeType === "decrease"
+                            ? "text-red-600"
+                            : "text-gray-600"
                       }`}
                     >
                       {metric.change} from yesterday
@@ -291,11 +320,16 @@ const AdminDashboard: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               {recentComplaints.map((complaint, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="font-semibold">{complaint.id}</span>
-                      <Badge className={`h-2 w-2 p-0 ${getPriorityColor(complaint.priority)}`} />
+                      <Badge
+                        className={`h-2 w-2 p-0 ${getPriorityColor(complaint.priority)}`}
+                      />
                     </div>
                     <p className="text-sm text-gray-600">{complaint.type}</p>
                     <p className="text-xs text-muted-foreground">
@@ -304,7 +338,9 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="flex flex-col items-end space-y-1">
                     <StatusChip status={complaint.status} />
-                    <span className={`text-xs ${getSlaStatusColor(complaint.slaStatus)}`}>
+                    <span
+                      className={`text-xs ${getSlaStatusColor(complaint.slaStatus)}`}
+                    >
                       {complaint.timeAgo}
                     </span>
                   </div>

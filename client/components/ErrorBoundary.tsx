@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -10,7 +10,10 @@ interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -21,7 +24,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error Boundary caught an error:', error, errorInfo);
+    console.error("Error Boundary caught an error:", error, errorInfo);
     this.setState({
       error,
       errorInfo,
@@ -31,39 +34,43 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ 
-          padding: '20px', 
-          background: '#fee', 
-          color: '#900',
-          minHeight: '100vh',
-          fontFamily: 'Arial, sans-serif'
-        }}>
+        <div
+          style={{
+            padding: "20px",
+            background: "#fee",
+            color: "#900",
+            minHeight: "100vh",
+            fontFamily: "Arial, sans-serif",
+          }}
+        >
           <h1>🚨 Application Error</h1>
           <h2>Something went wrong</h2>
-          <details style={{ marginTop: '20px' }}>
+          <details style={{ marginTop: "20px" }}>
             <summary>Error Details</summary>
-            <pre style={{ 
-              background: '#fff', 
-              padding: '10px', 
-              overflow: 'auto',
-              marginTop: '10px',
-              fontSize: '12px'
-            }}>
+            <pre
+              style={{
+                background: "#fff",
+                padding: "10px",
+                overflow: "auto",
+                marginTop: "10px",
+                fontSize: "12px",
+              }}
+            >
               {this.state.error && this.state.error.toString()}
               <br />
               {this.state.errorInfo.componentStack}
             </pre>
           </details>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              background: '#900',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              marginTop: "20px",
+              padding: "10px 20px",
+              background: "#900",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
             }}
           >
             Reload Page

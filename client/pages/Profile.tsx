@@ -1,12 +1,22 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -16,7 +26,10 @@ import {
 } from "../components/ui/select";
 import { Switch } from "../components/ui/switch";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { updateProfile, updateUserPreferences } from "../store/slices/authSlice";
+import {
+  updateProfile,
+  updateUserPreferences,
+} from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
 import {
   User,

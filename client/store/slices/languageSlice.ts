@@ -988,7 +988,8 @@ const languageSlice = createSlice({
   },
 });
 
-export const { setLanguage, initializeLanguage, resetLanguage } = languageSlice.actions;
+export const { setLanguage, initializeLanguage, resetLanguage } =
+  languageSlice.actions;
 export default languageSlice.reducer;
 
 // Selectors

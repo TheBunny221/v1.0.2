@@ -174,7 +174,9 @@ export const updateProfile = createAsyncThunk(
 export const updateUserPreferences = createAsyncThunk(
   "auth/updateUserPreferences",
   async (
-    preferences: Partial<Pick<User, "language" | "notificationsEnabled" | "emailAlerts">>,
+    preferences: Partial<
+      Pick<User, "language" | "notificationsEnabled" | "emailAlerts">
+    >,
     { getState, rejectWithValue },
   ) => {
     try {

@@ -2,14 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { createComplaint } from "../store/slices/complaintsSlice";
-import {
-  sendOtpForGuest,
-  resetOtpState,
-} from "../store/slices/guestSlice";
-import {
-  showSuccessToast,
-  showErrorToast,
-} from "../store/slices/uiSlice";
+import { sendOtpForGuest, resetOtpState } from "../store/slices/guestSlice";
+import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -380,9 +374,7 @@ const GuestComplaintForm: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center space-x-1">
                   <Mail className="h-4 w-4" />
-                  <span>
-                    Email {activeTab === "guest" && "*"}
-                  </span>
+                  <span>Email {activeTab === "guest" && "*"}</span>
                 </Label>
                 <Input
                   id="email"
@@ -403,9 +395,7 @@ const GuestComplaintForm: React.FC = () => {
             {/* Problem Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="problem-type">
-                  Complaint Type *
-                </Label>
+                <Label htmlFor="problem-type">Complaint Type *</Label>
                 <Select
                   value={formData.problemType}
                   onValueChange={(value) =>
@@ -483,9 +473,7 @@ const GuestComplaintForm: React.FC = () => {
 
             {/* Complaint Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">
-                Description *
-              </Label>
+              <Label htmlFor="description">Description *</Label>
               <Textarea
                 id="description"
                 value={formData.description}

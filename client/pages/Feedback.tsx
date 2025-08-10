@@ -1,6 +1,6 @@
-import React from 'react';
-import PlaceholderPage from '../components/PlaceholderPage';
-import { MessageSquare } from 'lucide-react';
+import React from "react";
+import PlaceholderPage from "../components/PlaceholderPage";
+import { MessageSquare } from "lucide-react";
 
 const Feedback: React.FC = () => {
   return (

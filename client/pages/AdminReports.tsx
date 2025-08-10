@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Progress } from '../components/ui/progress';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Progress } from "../components/ui/progress";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+} from "../components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   BarChart3,
   Download,
@@ -22,12 +32,12 @@ import {
   Users,
   MapPin,
   Filter,
-} from 'lucide-react';
+} from "lucide-react";
 
 const AdminReports: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
-  const [selectedWard, setSelectedWard] = useState('all');
-  const [selectedType, setSelectedType] = useState('all');
+  const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedWard, setSelectedWard] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
 
   const reportMetrics = {
     totalComplaints: 1247,
@@ -38,37 +48,37 @@ const AdminReports: React.FC = () => {
   };
 
   const wardPerformance = [
-    { ward: 'Ward 1', complaints: 234, resolved: 201, slaCompliance: 85.9 },
-    { ward: 'Ward 2', complaints: 298, resolved: 267, slaCompliance: 89.6 },
-    { ward: 'Ward 3', complaints: 189, resolved: 165, slaCompliance: 87.3 },
-    { ward: 'Ward 4', complaints: 276, resolved: 241, slaCompliance: 87.3 },
-    { ward: 'Ward 5', complaints: 250, resolved: 215, slaCompliance: 86.0 },
+    { ward: "Ward 1", complaints: 234, resolved: 201, slaCompliance: 85.9 },
+    { ward: "Ward 2", complaints: 298, resolved: 267, slaCompliance: 89.6 },
+    { ward: "Ward 3", complaints: 189, resolved: 165, slaCompliance: 87.3 },
+    { ward: "Ward 4", complaints: 276, resolved: 241, slaCompliance: 87.3 },
+    { ward: "Ward 5", complaints: 250, resolved: 215, slaCompliance: 86.0 },
   ];
 
   const complaintTrends = [
-    { month: 'Jan', total: 234, resolved: 201 },
-    { month: 'Feb', total: 298, resolved: 267 },
-    { month: 'Mar', total: 189, resolved: 165 },
-    { month: 'Apr', total: 276, resolved: 241 },
-    { month: 'May', total: 250, resolved: 215 },
+    { month: "Jan", total: 234, resolved: 201 },
+    { month: "Feb", total: 298, resolved: 267 },
+    { month: "Mar", total: 189, resolved: 165 },
+    { month: "Apr", total: 276, resolved: 241 },
+    { month: "May", total: 250, resolved: 215 },
   ];
 
   const typeBreakdown = [
-    { type: 'Water Supply', count: 287, percentage: 23 },
-    { type: 'Electricity', count: 243, percentage: 19.5 },
-    { type: 'Road Repair', count: 198, percentage: 15.9 },
-    { type: 'Garbage Collection', count: 167, percentage: 13.4 },
-    { type: 'Street Lighting', count: 134, percentage: 10.7 },
-    { type: 'Others', count: 218, percentage: 17.5 },
+    { type: "Water Supply", count: 287, percentage: 23 },
+    { type: "Electricity", count: 243, percentage: 19.5 },
+    { type: "Road Repair", count: 198, percentage: 15.9 },
+    { type: "Garbage Collection", count: 167, percentage: 13.4 },
+    { type: "Street Lighting", count: 134, percentage: 10.7 },
+    { type: "Others", count: 218, percentage: 17.5 },
   ];
 
-  const exportReport = (format: 'pdf' | 'excel') => {
+  const exportReport = (format: "pdf" | "excel") => {
     console.log(`Exporting report in ${format} format...`);
     // Here you would implement the actual export functionality
   };
 
   const generateReport = () => {
-    console.log('Generating custom report with filters:', {
+    console.log("Generating custom report with filters:", {
       period: selectedPeriod,
       ward: selectedWard,
       type: selectedType,
@@ -86,11 +96,11 @@ const AdminReports: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => exportReport('excel')}>
+          <Button variant="outline" onClick={() => exportReport("excel")}>
             <Download className="h-4 w-4 mr-2" />
             Export Excel
           </Button>
-          <Button variant="outline" onClick={() => exportReport('pdf')}>
+          <Button variant="outline" onClick={() => exportReport("pdf")}>
             <Download className="h-4 w-4 mr-2" />
             Export PDF
           </Button>
@@ -177,8 +187,12 @@ const AdminReports: React.FC = () => {
             <div className="flex items-center space-x-2">
               <FileText className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Total Complaints</p>
-                <p className="text-2xl font-bold">{reportMetrics.totalComplaints.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">
+                  Total Complaints
+                </p>
+                <p className="text-2xl font-bold">
+                  {reportMetrics.totalComplaints.toLocaleString()}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -190,7 +204,9 @@ const AdminReports: React.FC = () => {
               <Clock className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Resolved</p>
-                <p className="text-2xl font-bold">{reportMetrics.resolvedComplaints.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {reportMetrics.resolvedComplaints.toLocaleString()}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -202,7 +218,9 @@ const AdminReports: React.FC = () => {
               <TrendingUp className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-muted-foreground">SLA Compliance</p>
-                <p className="text-2xl font-bold">{reportMetrics.slaCompliance}%</p>
+                <p className="text-2xl font-bold">
+                  {reportMetrics.slaCompliance}%
+                </p>
               </div>
             </div>
           </CardContent>
@@ -214,7 +232,9 @@ const AdminReports: React.FC = () => {
               <Calendar className="h-5 w-5 text-orange-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Avg Resolution</p>
-                <p className="text-2xl font-bold">{reportMetrics.avgResolutionTime}d</p>
+                <p className="text-2xl font-bold">
+                  {reportMetrics.avgResolutionTime}d
+                </p>
               </div>
             </div>
           </CardContent>
@@ -226,7 +246,9 @@ const AdminReports: React.FC = () => {
               <Users className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Satisfaction</p>
-                <p className="text-2xl font-bold">{reportMetrics.citizenSatisfaction}/5</p>
+                <p className="text-2xl font-bold">
+                  {reportMetrics.citizenSatisfaction}/5
+                </p>
               </div>
             </div>
           </CardContent>
@@ -258,8 +280,12 @@ const AdminReports: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{item.type}</span>
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm text-muted-foreground">{item.count}</span>
-                          <span className="text-sm font-medium">{item.percentage}%</span>
+                          <span className="text-sm text-muted-foreground">
+                            {item.count}
+                          </span>
+                          <span className="text-sm font-medium">
+                            {item.percentage}%
+                          </span>
                         </div>
                       </div>
                       <Progress value={item.percentage} className="h-2" />
@@ -280,15 +306,23 @@ const AdminReports: React.FC = () => {
               <CardContent>
                 <div className="space-y-4">
                   {complaintTrends.map((month, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
                       <span className="font-medium">{month.month}</span>
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
                           <div className="text-sm">Total: {month.total}</div>
-                          <div className="text-xs text-green-600">Resolved: {month.resolved}</div>
+                          <div className="text-xs text-green-600">
+                            Resolved: {month.resolved}
+                          </div>
                         </div>
                         <div className="w-20">
-                          <Progress value={(month.resolved / month.total) * 100} className="h-2" />
+                          <Progress
+                            value={(month.resolved / month.total) * 100}
+                            className="h-2"
+                          />
                         </div>
                       </div>
                     </div>
@@ -315,17 +349,28 @@ const AdminReports: React.FC = () => {
                       <span className="font-medium">{ward.ward}</span>
                       <div className="flex items-center space-x-4 text-sm">
                         <span>Total: {ward.complaints}</span>
-                        <span className="text-green-600">Resolved: {ward.resolved}</span>
-                        <span className="text-blue-600">SLA: {ward.slaCompliance}%</span>
+                        <span className="text-green-600">
+                          Resolved: {ward.resolved}
+                        </span>
+                        <span className="text-blue-600">
+                          SLA: {ward.slaCompliance}%
+                        </span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <div className="text-xs text-muted-foreground mb-1">Resolution Rate</div>
-                        <Progress value={(ward.resolved / ward.complaints) * 100} className="h-2" />
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Resolution Rate
+                        </div>
+                        <Progress
+                          value={(ward.resolved / ward.complaints) * 100}
+                          className="h-2"
+                        />
                       </div>
                       <div>
-                        <div className="text-xs text-muted-foreground mb-1">SLA Compliance</div>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          SLA Compliance
+                        </div>
                         <Progress value={ward.slaCompliance} className="h-2" />
                       </div>
                     </div>

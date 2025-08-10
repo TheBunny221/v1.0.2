@@ -157,7 +157,11 @@ const uiSlice = createSlice({
     },
     initializeTheme: (state) => {
       // Initialize theme from localStorage or system preference
-      const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null;
+      const savedTheme = localStorage.getItem("theme") as
+        | "light"
+        | "dark"
+        | "system"
+        | null;
       if (savedTheme) {
         state.theme = savedTheme;
       } else {

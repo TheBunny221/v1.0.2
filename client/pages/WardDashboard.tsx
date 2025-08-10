@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import StatusChip from '../components/StatusChip';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Progress } from "../components/ui/progress";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import StatusChip from "../components/StatusChip";
 import {
   MapPin,
   BarChart3,
@@ -15,13 +25,13 @@ import {
   CheckCircle,
   Users,
   RefreshCw,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface ZoneMetric {
   title: string;
   value: string;
   change: string;
-  changeType: 'increase' | 'decrease' | 'neutral';
+  changeType: "increase" | "decrease" | "neutral";
   icon: React.ReactNode;
 }
 
@@ -34,75 +44,81 @@ interface ComplaintSummary {
 }
 
 const WardDashboard: React.FC = () => {
-  const [selectedWard] = useState('Ward 3');
-  const [selectedPeriod, setSelectedPeriod] = useState('today');
+  const [selectedWard] = useState("Ward 3");
+  const [selectedPeriod, setSelectedPeriod] = useState("today");
 
   const zoneMetrics: ZoneMetric[] = [
     {
-      title: 'Total Complaints',
-      value: '34',
-      change: '+6%',
-      changeType: 'increase',
+      title: "Total Complaints",
+      value: "34",
+      change: "+6%",
+      changeType: "increase",
       icon: <FileText className="h-5 w-5" />,
     },
     {
-      title: 'Pending Review',
-      value: '12',
-      change: '-2%',
-      changeType: 'decrease',
+      title: "Pending Review",
+      value: "12",
+      change: "-2%",
+      changeType: "decrease",
       icon: <Clock className="h-5 w-5" />,
     },
     {
-      title: 'Resolved Today',
-      value: '8',
-      change: '+12%',
-      changeType: 'increase',
+      title: "Resolved Today",
+      value: "8",
+      change: "+12%",
+      changeType: "increase",
       icon: <CheckCircle className="h-5 w-5" />,
     },
     {
-      title: 'SLA Breaches',
-      value: '2',
-      change: 'same',
-      changeType: 'neutral',
+      title: "SLA Breaches",
+      value: "2",
+      change: "same",
+      changeType: "neutral",
       icon: <AlertTriangle className="h-5 w-5" />,
     },
   ];
 
   const complaintsByType: ComplaintSummary[] = [
-    { type: 'Water Supply', total: 12, pending: 4, resolved: 8, overdue: 1 },
-    { type: 'Street Lighting', total: 8, pending: 3, resolved: 5, overdue: 0 },
-    { type: 'Garbage Collection', total: 6, pending: 2, resolved: 4, overdue: 1 },
-    { type: 'Road Repair', total: 5, pending: 2, resolved: 3, overdue: 0 },
-    { type: 'Sewerage', total: 3, pending: 1, resolved: 2, overdue: 0 },
+    { type: "Water Supply", total: 12, pending: 4, resolved: 8, overdue: 1 },
+    { type: "Street Lighting", total: 8, pending: 3, resolved: 5, overdue: 0 },
+    {
+      type: "Garbage Collection",
+      total: 6,
+      pending: 2,
+      resolved: 4,
+      overdue: 1,
+    },
+    { type: "Road Repair", total: 5, pending: 2, resolved: 3, overdue: 0 },
+    { type: "Sewerage", total: 3, pending: 1, resolved: 2, overdue: 0 },
   ];
 
   const recentComplaints = [
     {
-      id: 'CMP-2024-045',
-      type: 'Water Supply',
-      area: 'Green Valley Society',
-      status: 'registered' as const,
-      priority: 'high' as const,
-      submittedBy: 'John Doe',
-      timeAgo: '30 mins ago',
+      id: "CMP-2024-045",
+      type: "Water Supply",
+      area: "Green Valley Society",
+      status: "registered" as const,
+      priority: "high" as const,
+      submittedBy: "John Doe",
+      timeAgo: "30 mins ago",
     },
     {
-      id: 'CMP-2024-046',
-      type: 'Street Lighting',
-      area: 'Main Street',
-      status: 'assigned' as const,
-      priority: 'medium' as const,
-      submittedBy: 'Jane Smith',
-      timeAgo: '1 hour ago',
+      id: "CMP-2024-046",
+      type: "Street Lighting",
+      area: "Main Street",
+      status: "assigned" as const,
+      priority: "medium" as const,
+      submittedBy: "Jane Smith",
+      timeAgo: "1 hour ago",
     },
     {
-      id: 'CMP-2024-047',
-      type: 'Garbage Collection',
-      area: 'Park View',
-      status: 'in-progress' as const,
-      priority: 'critical' as const,
-      submittedBy: 'Mike Johnson',
-      timeAgo: '2 hours ago',
+      id: "CMP-2024-047",
+      type: "Garbage Collection",
+      area: "Park View",
+      status: "in-progress" as const,
+      priority: "critical" as const,
+      submittedBy: "Mike Johnson",
+      timeAgo: "2 hours ago",
     },
   ];
 
@@ -114,11 +130,16 @@ const WardDashboard: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case "critical":
+        return "bg-red-500";
+      case "high":
+        return "bg-orange-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
@@ -161,11 +182,11 @@ const WardDashboard: React.FC = () => {
                   <div className="flex items-center mt-1">
                     <span
                       className={`text-xs font-medium ${
-                        metric.changeType === 'increase'
-                          ? 'text-green-600'
-                          : metric.changeType === 'decrease'
-                          ? 'text-red-600'
-                          : 'text-gray-600'
+                        metric.changeType === "increase"
+                          ? "text-green-600"
+                          : metric.changeType === "decrease"
+                            ? "text-red-600"
+                            : "text-gray-600"
                       }`}
                     >
                       {metric.change} from yesterday
@@ -196,10 +217,16 @@ const WardDashboard: React.FC = () => {
                     <span className="font-medium">{item.type}</span>
                     <div className="flex space-x-4 text-sm">
                       <span>Total: {item.total}</span>
-                      <span className="text-orange-600">Pending: {item.pending}</span>
-                      <span className="text-green-600">Resolved: {item.resolved}</span>
+                      <span className="text-orange-600">
+                        Pending: {item.pending}
+                      </span>
+                      <span className="text-green-600">
+                        Resolved: {item.resolved}
+                      </span>
                       {item.overdue > 0 && (
-                        <span className="text-red-600">Overdue: {item.overdue}</span>
+                        <span className="text-red-600">
+                          Overdue: {item.overdue}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -232,9 +259,11 @@ const WardDashboard: React.FC = () => {
                 <div className="text-3xl font-bold text-primary">
                   {slaPerformance.onTime}%
                 </div>
-                <p className="text-sm text-muted-foreground">On-time resolution</p>
+                <p className="text-sm text-muted-foreground">
+                  On-time resolution
+                </p>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -243,7 +272,7 @@ const WardDashboard: React.FC = () => {
                   </div>
                   <span className="font-medium">{slaPerformance.onTime}%</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-yellow-500 rounded-full" />
@@ -251,7 +280,7 @@ const WardDashboard: React.FC = () => {
                   </div>
                   <span className="font-medium">{slaPerformance.warning}%</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-red-500 rounded-full" />
@@ -279,11 +308,16 @@ const WardDashboard: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               {recentComplaints.map((complaint, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="font-semibold">{complaint.id}</span>
-                      <Badge className={`h-2 w-2 p-0 ${getPriorityColor(complaint.priority)}`} />
+                      <Badge
+                        className={`h-2 w-2 p-0 ${getPriorityColor(complaint.priority)}`}
+                      />
                     </div>
                     <p className="text-sm text-gray-600">{complaint.type}</p>
                     <p className="text-xs text-muted-foreground">
@@ -309,35 +343,55 @@ const WardDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-3">
-              <Button variant="outline" className="h-16 flex items-center justify-start space-x-3">
+              <Button
+                variant="outline"
+                className="h-16 flex items-center justify-start space-x-3"
+              >
                 <FileText className="h-6 w-6" />
                 <div className="text-left">
                   <div className="font-medium">Review Complaints</div>
-                  <div className="text-xs text-muted-foreground">12 pending review</div>
+                  <div className="text-xs text-muted-foreground">
+                    12 pending review
+                  </div>
                 </div>
               </Button>
-              
-              <Button variant="outline" className="h-16 flex items-center justify-start space-x-3">
+
+              <Button
+                variant="outline"
+                className="h-16 flex items-center justify-start space-x-3"
+              >
                 <Users className="h-6 w-6" />
                 <div className="text-left">
                   <div className="font-medium">Forward Complaints</div>
-                  <div className="text-xs text-muted-foreground">Assign to departments</div>
+                  <div className="text-xs text-muted-foreground">
+                    Assign to departments
+                  </div>
                 </div>
               </Button>
-              
-              <Button variant="outline" className="h-16 flex items-center justify-start space-x-3">
+
+              <Button
+                variant="outline"
+                className="h-16 flex items-center justify-start space-x-3"
+              >
                 <BarChart3 className="h-6 w-6" />
                 <div className="text-left">
                   <div className="font-medium">Generate Report</div>
-                  <div className="text-xs text-muted-foreground">Zone performance</div>
+                  <div className="text-xs text-muted-foreground">
+                    Zone performance
+                  </div>
                 </div>
               </Button>
-              
-              <Button variant="outline" className="h-16 flex items-center justify-start space-x-3">
+
+              <Button
+                variant="outline"
+                className="h-16 flex items-center justify-start space-x-3"
+              >
                 <AlertTriangle className="h-6 w-6" />
                 <div className="text-left">
                   <div className="font-medium">SLA Alerts</div>
-                  <div className="text-xs text-muted-foreground">2 approaching deadline</div>
+                  <div className="text-xs text-muted-foreground">
+                    2 approaching deadline
+                  </div>
                 </div>
               </Button>
             </div>
@@ -355,16 +409,28 @@ const WardDashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {['Green Valley Society', 'Main Street', 'Park View', 'City Center', 'Industrial Area', 'Residential Complex'].map((area, index) => (
+            {[
+              "Green Valley Society",
+              "Main Street",
+              "Park View",
+              "City Center",
+              "Industrial Area",
+              "Residential Complex",
+            ].map((area, index) => (
               <div key={index} className="p-4 border rounded-lg">
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium">{area}</h4>
-                  <Badge variant="secondary">{Math.floor(Math.random() * 10) + 1}</Badge>
+                  <Badge variant="secondary">
+                    {Math.floor(Math.random() * 10) + 1}
+                  </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {Math.floor(Math.random() * 5) + 1} active complaints
                 </div>
-                <Progress value={Math.floor(Math.random() * 100)} className="mt-2 h-1" />
+                <Progress
+                  value={Math.floor(Math.random() * 100)}
+                  className="mt-2 h-1"
+                />
               </div>
             ))}
           </div>

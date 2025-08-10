@@ -1,9 +1,19 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   Select,
   SelectContent,

@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import {
-  trackGuestComplaint,
-} from "../store/slices/guestSlice";
+import { trackGuestComplaint } from "../store/slices/guestSlice";
 import { showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -31,7 +29,9 @@ import {
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isLoading, trackedComplaint } = useAppSelector((state) => state.guest);
+  const { isLoading, trackedComplaint } = useAppSelector(
+    (state) => state.guest,
+  );
   const { translations } = useAppSelector((state) => state.language);
 
   // Return loading state if translations are not yet loaded
@@ -78,7 +78,9 @@ const GuestTrackComplaint: React.FC = () => {
       dispatch(
         showErrorToast(
           "Complaint Not Found",
-          error instanceof Error ? error.message : "Please check your details and try again",
+          error instanceof Error
+            ? error.message
+            : "Please check your details and try again",
         ),
       );
     }
@@ -86,29 +88,32 @@ const GuestTrackComplaint: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: any; icon: React.ReactNode }> = {
-      registered: { 
-        variant: "secondary", 
-        icon: <FileText className="h-3 w-3" /> 
+      registered: {
+        variant: "secondary",
+        icon: <FileText className="h-3 w-3" />,
       },
-      assigned: { 
-        variant: "default", 
-        icon: <User className="h-3 w-3" /> 
+      assigned: {
+        variant: "default",
+        icon: <User className="h-3 w-3" />,
       },
-      "in-progress": { 
-        variant: "default", 
-        icon: <Clock className="h-3 w-3" /> 
+      "in-progress": {
+        variant: "default",
+        icon: <Clock className="h-3 w-3" />,
       },
-      resolved: { 
-        variant: "default", 
-        icon: <CheckCircle2 className="h-3 w-3" /> 
+      resolved: {
+        variant: "default",
+        icon: <CheckCircle2 className="h-3 w-3" />,
       },
-      closed: { 
-        variant: "outline", 
-        icon: <Shield className="h-3 w-3" /> 
+      closed: {
+        variant: "outline",
+        icon: <Shield className="h-3 w-3" />,
       },
     };
 
-    const config = statusMap[status] || { variant: "secondary", icon: <AlertCircle className="h-3 w-3" /> };
+    const config = statusMap[status] || {
+      variant: "secondary",
+      icon: <AlertCircle className="h-3 w-3" />,
+    };
 
     return (
       <Badge variant={config.variant} className="flex items-center space-x-1">
@@ -144,7 +149,9 @@ const GuestTrackComplaint: React.FC = () => {
                 <Input
                   id="complaintId"
                   value={searchData.complaintId}
-                  onChange={(e) => handleInputChange("complaintId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("complaintId", e.target.value)
+                  }
                   placeholder="Enter your complaint ID"
                   required
                 />
@@ -161,7 +168,11 @@ const GuestTrackComplaint: React.FC = () => {
                 />
               </div>
             </div>
-            <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full md:w-auto"
+            >
               {isLoading ? (
                 <>
                   <Search className="h-4 w-4 mr-2 animate-spin" />
@@ -196,13 +207,17 @@ const GuestTrackComplaint: React.FC = () => {
                 <Label className="text-sm font-medium text-muted-foreground">
                   Complaint ID
                 </Label>
-                <p className="font-mono text-sm">{trackedComplaint.complaintId}</p>
+                <p className="font-mono text-sm">
+                  {trackedComplaint.complaintId}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">
                   Type
                 </Label>
-                <p className="capitalize">{trackedComplaint.type.replace("_", " ")}</p>
+                <p className="capitalize">
+                  {trackedComplaint.type.replace("_", " ")}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">
@@ -210,14 +225,22 @@ const GuestTrackComplaint: React.FC = () => {
                 </Label>
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p>{new Date(trackedComplaint.createdAt).toLocaleDateString()}</p>
+                  <p>
+                    {new Date(trackedComplaint.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">
                   Priority
                 </Label>
-                <Badge variant={trackedComplaint.priority === "high" ? "destructive" : "secondary"}>
+                <Badge
+                  variant={
+                    trackedComplaint.priority === "high"
+                      ? "destructive"
+                      : "secondary"
+                  }
+                >
                   {trackedComplaint.priority}
                 </Badge>
               </div>
@@ -282,42 +305,47 @@ const GuestTrackComplaint: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-muted-foreground" />
                     <span>{trackedComplaint.assignedTo.name}</span>
-                    <Badge variant="outline">{trackedComplaint.assignedTo.role}</Badge>
+                    <Badge variant="outline">
+                      {trackedComplaint.assignedTo.role}
+                    </Badge>
                   </div>
                 </div>
               </>
             )}
 
             {/* Timeline */}
-            {trackedComplaint.remarks && trackedComplaint.remarks.length > 0 && (
-              <>
-                <Separator />
-                <div>
-                  <h3 className="font-medium mb-3">Timeline</h3>
-                  <div className="space-y-3">
-                    {trackedComplaint.remarks.map((remark, index) => (
-                      <div key={index} className="flex space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm">{remark.text}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-xs text-muted-foreground">
-                              {remark.addedBy.name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">•</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(remark.addedAt).toLocaleString()}
-                            </span>
+            {trackedComplaint.remarks &&
+              trackedComplaint.remarks.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-medium mb-3">Timeline</h3>
+                    <div className="space-y-3">
+                      {trackedComplaint.remarks.map((remark, index) => (
+                        <div key={index} className="flex space-x-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm">{remark.text}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-xs text-muted-foreground">
+                                {remark.addedBy.name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                •
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(remark.addedAt).toLocaleString()}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
           </CardContent>
         </Card>
       )}
