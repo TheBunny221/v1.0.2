@@ -48,6 +48,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const AdminReports = lazy(() => import("./pages/AdminReports"));
 const AdminConfig = lazy(() => import("./pages/AdminConfig"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
+const AdminLanguages = lazy(() => import("./pages/AdminLanguages"));
 
 // Communication
 const Messages = lazy(() => import("./pages/Messages"));
