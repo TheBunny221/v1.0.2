@@ -139,13 +139,13 @@ model Complaint {
 }
 
 model StatusLog {
-  id          String          @id @default(cuid())
+  id          String   @id @default(cuid())
   complaintId String
   userId      String
-  fromStatus  ComplaintStatus?
-  toStatus    ComplaintStatus
+  fromStatus  String?  // Previous status
+  toStatus    String   // New status
   comment     String?
-  timestamp   DateTime        @default(now())
+  timestamp   DateTime @default(now())
   
   // Relations
   complaint   Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
