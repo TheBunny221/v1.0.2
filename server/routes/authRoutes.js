@@ -29,11 +29,10 @@ router.post("/login-otp", loginWithOTP);
 router.post("/verify-otp", validateOTP, verifyOTPLogin);
 router.post("/send-password-setup", sendPasswordSetup);
 router.post("/set-password/:token", setPassword);
+router.post("/logout", logout); // Logout should be accessible even with invalid tokens
 
 // Protected routes
 router.use(protect); // All routes after this middleware are protected
-
-router.post("/logout", logout);
 router.get("/me", getMe);
 router.get("/verify-token", verifyToken);
 router.put("/profile", updateProfile);
