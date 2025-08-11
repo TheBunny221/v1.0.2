@@ -120,9 +120,35 @@ const AdminConfig: React.FC = () => {
       },
     });
 
+    // Check if response is JSON
+    const contentType = response.headers.get("content-type");
+    const isJson = contentType && contentType.includes("application/json");
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "Request failed" }));
-      throw new Error(error.message || `HTTP ${response.status}`);
+      let errorMessage = `HTTP ${response.status}`;
+
+      if (isJson) {
+        try {
+          const error = await response.json();
+          errorMessage = error.message || errorMessage;
+        } catch {
+          // Failed to parse JSON error response
+        }
+      } else {
+        // Non-JSON response (likely HTML error page)
+        const text = await response.text();
+        if (text.includes("<!doctype") || text.includes("<html")) {
+          errorMessage = "Server returned an error page. Please check your authentication and try again.";
+        } else {
+          errorMessage = text.substring(0, 100) || errorMessage;
+        }
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    if (!isJson) {
+      throw new Error("Server returned non-JSON response. Expected JSON data.");
     }
 
     return response.json();
