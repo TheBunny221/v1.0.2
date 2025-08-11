@@ -163,13 +163,13 @@ const Settings: React.FC = () => {
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">
-            {translations.settings.generalSettings}
+            {translations?.settings?.generalSettings || "General Settings"}
           </TabsTrigger>
           <TabsTrigger value="notifications">
-            {translations.settings.notificationSettings}
+            {translations?.settings?.notificationSettings || "Notification Settings"}
           </TabsTrigger>
           <TabsTrigger value="privacy">
-            {translations.settings.privacySettings}
+            {translations?.settings?.privacySettings || "Privacy Settings"}
           </TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
         </TabsList>
