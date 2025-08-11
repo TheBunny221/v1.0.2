@@ -137,7 +137,12 @@ const Settings: React.FC = () => {
   };
 
   // Show loading state if translations are not loaded yet
-  if (!translations || !translations.settings || !translations.nav || !translations.common) {
+  if (
+    !translations ||
+    !translations.settings ||
+    !translations.nav ||
+    !translations.common
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -153,7 +158,9 @@ const Settings: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{translations?.nav?.settings || "Settings"}</h1>
+          <h1 className="text-3xl font-bold">
+            {translations?.nav?.settings || "Settings"}
+          </h1>
           <p className="text-muted-foreground">
             Manage your application preferences and account settings
           </p>
@@ -166,7 +173,8 @@ const Settings: React.FC = () => {
             {translations?.settings?.generalSettings || "General Settings"}
           </TabsTrigger>
           <TabsTrigger value="notifications">
-            {translations?.settings?.notificationSettings || "Notification Settings"}
+            {translations?.settings?.notificationSettings ||
+              "Notification Settings"}
           </TabsTrigger>
           <TabsTrigger value="privacy">
             {translations?.settings?.privacySettings || "Privacy Settings"}

@@ -136,8 +136,8 @@ const WardOfficerDashboard: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
         <p className="text-blue-100">
-          Manage complaints for {user?.ward?.name || "your assigned ward"} and monitor
-          team performance.
+          Manage complaints for {user?.ward?.name || "your assigned ward"} and
+          monitor team performance.
         </p>
       </div>
 

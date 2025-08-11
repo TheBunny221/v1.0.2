@@ -170,7 +170,12 @@ const Profile: React.FC = () => {
   }
 
   // Show loading state if translations are not loaded yet
-  if (!translations || !translations.profile || !translations.nav || !translations.common) {
+  if (
+    !translations ||
+    !translations.profile ||
+    !translations.nav ||
+    !translations.common
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -186,7 +191,9 @@ const Profile: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{translations?.nav?.profile || "Profile"}</h1>
+          <h1 className="text-3xl font-bold">
+            {translations?.nav?.profile || "Profile"}
+          </h1>
           <p className="text-muted-foreground">
             Manage your account information and preferences
           </p>
@@ -196,7 +203,8 @@ const Profile: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="personal">
-            {translations?.profile?.personalInformation || "Personal Information"}
+            {translations?.profile?.personalInformation ||
+              "Personal Information"}
           </TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="preferences">

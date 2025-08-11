@@ -377,7 +377,10 @@ export const logout = createAsyncThunk(
         });
       } catch (error) {
         // Silently handle logout API errors since local state is already cleared
-        console.warn("Server logout failed (local logout still successful):", error);
+        console.warn(
+          "Server logout failed (local logout still successful):",
+          error,
+        );
       }
     }
 
