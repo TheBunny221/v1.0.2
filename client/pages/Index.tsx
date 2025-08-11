@@ -297,7 +297,7 @@ const Index: React.FC = () => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="ward">Ward *</Label>
+                        <Label htmlFor="ward">{translations.complaints?.ward || "Ward"} *</Label>
                         <Select
                           value={formData.ward}
                           onValueChange={(value) => handleInputChange("ward", value)}
