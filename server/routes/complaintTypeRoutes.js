@@ -95,6 +95,20 @@ router.get("/", getComplaintTypes);
 
 /**
  * @swagger
+ * /api/complaint-types/stats:
+ *   get:
+ *     summary: Get complaint type statistics
+ *     tags: [Complaint Types]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Complaint type usage statistics
+ */
+router.get("/stats", protect, authorize("ADMINISTRATOR", "WARD_OFFICER"), getComplaintTypeStats);
+
+/**
+ * @swagger
  * /api/complaint-types/{id}:
  *   get:
  *     summary: Get complaint type by ID
@@ -112,20 +126,6 @@ router.get("/", getComplaintTypes);
  *         description: Complaint type not found
  */
 router.get("/:id", getComplaintTypeById);
-
-/**
- * @swagger
- * /api/complaint-types/stats:
- *   get:
- *     summary: Get complaint type statistics
- *     tags: [Complaint Types]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Complaint type usage statistics
- */
-router.get("/stats", protect, authorize("ADMINISTRATOR", "WARD_OFFICER"), getComplaintTypeStats);
 
 // Protected routes (require authentication)
 router.use(protect);
