@@ -155,11 +155,7 @@ const AdminConfig: React.FC = () => {
       setEditingWard(null);
       dispatch(showSuccessToast('Ward Saved', `Ward "${ward.name}" has been saved successfully.`));
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        title: 'Save Failed',
-        message: 'Failed to save ward. Please try again.',
-      }));
+      dispatch(showErrorToast('Save Failed', 'Failed to save ward. Please try again.'));
     } finally {
       setIsLoading(false);
     }
