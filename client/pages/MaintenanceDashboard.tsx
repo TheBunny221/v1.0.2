@@ -29,6 +29,7 @@ import {
   Calendar,
   Camera,
   FileText,
+  BarChart3,
   TrendingUp,
   Navigation,
   Phone,
