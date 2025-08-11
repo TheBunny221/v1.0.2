@@ -1,449 +1,522 @@
-import Complaint from "../model/Complaint.js";
-import User from "../model/User.js";
-import Notification from "../model/Notification.js";
+import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
-import { sendOtpEmail } from "../utils/emailService.js";
-import crypto from "crypto";
+import { sendEmail } from "../utils/emailService.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
-// In-memory OTP storage (use Redis in production)
-const otpStorage = new Map();
+const prisma = getPrisma();
 
-// Generate 6-digit OTP
-const generateOtp = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+// Helper function to generate JWT token
+const generateJWTToken = (user) => {
+  return jwt.sign(
+    { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      wardId: user.wardId 
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE || "7d" }
+  );
 };
 
-// Generate session ID
-const generateSessionId = () => {
-  return crypto.randomBytes(32).toString("hex");
+// Helper function to generate complaint ID
+const generateComplaintId = () => {
+  const prefix = "CSC";
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+  return `${prefix}${timestamp}${random}`;
 };
 
-// Generate verification token
-const generateVerificationToken = () => {
-  return crypto.randomBytes(32).toString("hex");
-};
-
-// @desc    Send OTP for guest complaint submission
-// @route   POST /api/guest/send-otp
+// @desc    Submit guest complaint with immediate registration
+// @route   POST /api/guest/complaint
 // @access  Public
-export const sendOtpForGuest = asyncHandler(async (req, res) => {
-  const { email, purpose = "complaint_submission" } = req.body;
-
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: "Email is required",
-      data: null,
-    });
-  }
-
-  // Generate OTP and session
-  const otp = generateOtp();
-  const sessionId = generateSessionId();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-  // Store OTP in memory (use Redis in production)
-  otpStorage.set(sessionId, {
+export const submitGuestComplaint = asyncHandler(async (req, res) => {
+  const {
+    fullName,
     email,
-    otp,
-    purpose,
-    expiresAt,
-    attempts: 0,
-    verified: false,
+    phoneNumber,
+    description,
+    type,
+    priority,
+    wardId,
+    area,
+    landmark,
+    address,
+    coordinates
+  } = req.body;
+
+  // Check if user already exists
+  let existingUser = await prisma.user.findUnique({
+    where: { email }
   });
 
-  try {
-    // Send OTP email
-    await sendOtpEmail(email, otp, purpose);
+  // Set deadline based on priority
+  const priorityHours = {
+    LOW: 72,
+    MEDIUM: 48,
+    HIGH: 24,
+    CRITICAL: 8
+  };
 
-    res.status(200).json({
-      success: true,
-      message: "OTP sent successfully",
-      data: {
-        sessionId,
-        expiresAt: expiresAt.toISOString(),
-        email: email.replace(/(.{2})(.*)(@.*)/, "$1***$3"), // Mask email for security
-      },
-    });
-  } catch (error) {
-    // Remove from storage if email failed
-    otpStorage.delete(sessionId);
+  const deadline = new Date(Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000);
 
+  // Create complaint immediately with status "REGISTERED"
+  const complaint = await prisma.complaint.create({
+    data: {
+      title: `${type} complaint`,
+      description,
+      type,
+      priority: priority || "MEDIUM",
+      status: "REGISTERED",
+      slaStatus: "ON_TIME",
+      wardId,
+      area,
+      landmark,
+      address,
+      coordinates: coordinates ? JSON.stringify(coordinates) : null,
+      contactName: fullName,
+      contactEmail: email,
+      contactPhone: phoneNumber,
+      isAnonymous: false,
+      deadline,
+      // Don't assign submittedById yet - will be set after OTP verification
+    },
+    include: {
+      ward: true
+    }
+  });
+
+  // Generate OTP
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Create OTP session for guest
+  const otpSession = await prisma.oTPSession.create({
+    data: {
+      email,
+      phoneNumber,
+      otpCode,
+      purpose: "GUEST_VERIFICATION",
+      expiresAt,
+    }
+  });
+
+  // Send OTP email
+  const emailSent = await sendEmail({
+    to: email,
+    subject: "Verify Your Complaint - Cochin Smart City",
+    text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
+    html: `
+      <h2>Complaint Registered Successfully</h2>
+      <p>Your complaint has been registered with ID: <strong>${complaint.id}</strong></p>
+      <p>To complete the verification process, please use the following OTP:</p>
+      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <p>This OTP will expire in 10 minutes.</p>
+      <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
+    `,
+  });
+
+  if (!emailSent) {
+    // If email fails, delete the complaint and OTP session
+    await prisma.complaint.delete({ where: { id: complaint.id } });
+    await prisma.oTPSession.delete({ where: { id: otpSession.id } });
+    
     return res.status(500).json({
       success: false,
-      message: "Failed to send OTP email",
-      data: null,
-    });
-  }
-});
-
-// @desc    Verify OTP for guest
-// @route   POST /api/guest/verify-otp
-// @access  Public
-export const verifyOtpForGuest = asyncHandler(async (req, res) => {
-  const { sessionId, otp } = req.body;
-
-  if (!sessionId || !otp) {
-    return res.status(400).json({
-      success: false,
-      message: "Session ID and OTP are required",
+      message: "Failed to send verification email. Please try again.",
       data: null,
     });
   }
 
-  const otpData = otpStorage.get(sessionId);
-
-  if (!otpData) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid or expired session",
-      data: null,
-    });
-  }
-
-  // Check if OTP is expired
-  if (new Date() > otpData.expiresAt) {
-    otpStorage.delete(sessionId);
-    return res.status(400).json({
-      success: false,
-      message: "OTP has expired",
-      data: null,
-    });
-  }
-
-  // Check attempts limit
-  if (otpData.attempts >= 3) {
-    otpStorage.delete(sessionId);
-    return res.status(400).json({
-      success: false,
-      message: "Maximum verification attempts exceeded",
-      data: null,
-    });
-  }
-
-  // Verify OTP
-  if (otpData.otp !== otp) {
-    otpData.attempts += 1;
-    otpStorage.set(sessionId, otpData);
-
-    return res.status(400).json({
-      success: false,
-      message: `Invalid OTP. ${3 - otpData.attempts} attempts remaining`,
-      data: null,
-    });
-  }
-
-  // OTP is valid
-  const verificationToken = generateVerificationToken();
-  otpData.verified = true;
-  otpData.verificationToken = verificationToken;
-  otpData.verifiedAt = new Date();
-  otpStorage.set(sessionId, otpData);
-
-  res.status(200).json({
+  res.status(201).json({
     success: true,
-    message: "OTP verified successfully",
+    message: "Complaint registered successfully. Please check your email for OTP verification.",
     data: {
-      verificationToken,
-      email: otpData.email,
+      complaintId: complaint.id,
+      email,
+      expiresAt,
+      sessionId: otpSession.id
     },
   });
 });
 
-// @desc    Resend OTP for guest
-// @route   POST /api/guest/resend-otp
+// @desc    Verify OTP and auto-register as citizen
+// @route   POST /api/guest/verify-otp
 // @access  Public
-export const resendOtpForGuest = asyncHandler(async (req, res) => {
-  const { sessionId } = req.body;
+export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
+  const { email, otpCode, complaintId } = req.body;
 
-  if (!sessionId) {
-    return res.status(400).json({
-      success: false,
-      message: "Session ID is required",
-      data: null,
-    });
-  }
-
-  const otpData = otpStorage.get(sessionId);
-
-  if (!otpData) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid session",
-      data: null,
-    });
-  }
-
-  // Generate new OTP
-  const otp = generateOtp();
-  const newSessionId = generateSessionId();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-  // Create new session
-  otpStorage.set(newSessionId, {
-    email: otpData.email,
-    otp,
-    purpose: otpData.purpose,
-    expiresAt,
-    attempts: 0,
-    verified: false,
+  // Find valid OTP session
+  const otpSession = await prisma.oTPSession.findFirst({
+    where: {
+      email,
+      otpCode,
+      purpose: "GUEST_VERIFICATION",
+      isVerified: false,
+      expiresAt: { gt: new Date() }
+    }
   });
 
-  // Remove old session
-  otpStorage.delete(sessionId);
+  if (!otpSession) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired OTP",
+      data: null,
+    });
+  }
 
-  try {
-    // Send new OTP email
-    await sendOtpEmail(otpData.email, otp, otpData.purpose);
+  // Find the complaint
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId },
+    include: { ward: true }
+  });
 
-    res.status(200).json({
-      success: true,
-      message: "OTP resent successfully",
+  if (!complaint) {
+    return res.status(404).json({
+      success: false,
+      message: "Complaint not found",
+      data: null,
+    });
+  }
+
+  let user;
+  let isNewUser = false;
+
+  // Check if user already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email }
+  });
+
+  if (existingUser) {
+    user = existingUser;
+  } else {
+    // Create new citizen user (auto-registration)
+    user = await prisma.user.create({
       data: {
-        sessionId: newSessionId,
-        expiresAt: expiresAt.toISOString(),
+        fullName: complaint.contactName,
+        email: complaint.contactEmail,
+        phoneNumber: complaint.contactPhone,
+        role: "CITIZEN",
+        isActive: true,
+        joinedOn: new Date(),
+        // No password set initially - user can set it later
       },
+      include: { ward: true }
     });
-  } catch (error) {
-    otpStorage.delete(newSessionId);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to resend OTP",
-      data: null,
-    });
-  }
-});
-
-// @desc    Submit guest complaint
-// @route   POST /api/guest/submit-complaint
-// @access  Public (with valid verification token)
-export const submitGuestComplaint = asyncHandler(async (req, res) => {
-  const { guestVerificationToken } = req.body;
-
-  if (!guestVerificationToken) {
-    return res.status(400).json({
-      success: false,
-      message: "Verification token is required",
-      data: null,
-    });
+    isNewUser = true;
   }
 
-  // Find and verify the token
-  let verifiedEmail = null;
-  for (const [sessionId, otpData] of otpStorage.entries()) {
-    if (
-      otpData.verificationToken === guestVerificationToken &&
-      otpData.verified
-    ) {
-      verifiedEmail = otpData.email;
-      // Clean up the OTP data after use
-      otpStorage.delete(sessionId);
-      break;
-    }
-  }
-
-  if (!verifiedEmail) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid or expired verification token",
-      data: null,
-    });
-  }
-
-  // Extract complaint data
-  const {
-    type,
-    description,
-    contactMobile,
-    contactEmail,
-    ward,
-    area,
-    address,
-    latitude,
-    longitude,
-    landmark,
-  } = req.body;
-
-  // Validate required fields
-  if (
-    !type ||
-    !description ||
-    !contactMobile ||
-    !contactEmail ||
-    !ward ||
-    !area
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing required fields",
-      data: null,
-    });
-  }
-
-  // Verify that the verified email matches the contact email
-  if (verifiedEmail !== contactEmail) {
-    return res.status(400).json({
-      success: false,
-      message: "Verification email does not match contact email",
-      data: null,
-    });
-  }
-
-  try {
-    // Create guest complaint
-    const complaintData = {
-      type,
-      description,
-      contactMobile,
-      contactEmail,
-      ward,
-      area,
-      address,
-      latitude: latitude ? parseFloat(latitude) : null,
-      longitude: longitude ? parseFloat(longitude) : null,
-      landmark,
-      submittedById: null, // Guest submission
-      isAnonymous: false,
-    };
-
-    const complaint = await Complaint.create(complaintData);
-
-    // Handle file uploads if any
-    if (req.files && req.files.length > 0) {
-      const fileData = req.files.map((file) => ({
-        filename: file.filename,
-        originalName: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        url: `/uploads/${file.filename}`,
-      }));
-
-      for (const fileInfo of fileData) {
-        await Complaint.addFile(complaint.id, fileInfo);
+  // Update complaint with user ID
+  const updatedComplaint = await prisma.complaint.update({
+    where: { id: complaintId },
+    data: {
+      submittedById: user.id,
+    },
+    include: {
+      ward: true,
+      submittedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true
+        }
       }
     }
+  });
 
-    // Send notifications to ward officers and management
-    await sendNotificationsForGuestComplaint(complaint);
+  // Mark OTP as verified
+  await prisma.oTPSession.update({
+    where: { id: otpSession.id },
+    data: {
+      isVerified: true,
+      verifiedAt: new Date(),
+      userId: user.id
+    }
+  });
 
-    res.status(201).json({
-      success: true,
-      message: "Guest complaint submitted successfully",
-      data: {
-        complaint: {
-          id: complaint.id,
-          complaintId: complaint.complaintId,
-          type: complaint.type,
-          status: complaint.status,
-          ward: complaint.ward,
-          area: complaint.area,
-          createdAt: complaint.createdAt,
-        },
-      },
+  // Create status log
+  await prisma.statusLog.create({
+    data: {
+      complaintId: complaint.id,
+      userId: user.id,
+      toStatus: "REGISTERED",
+      comment: "Complaint verified and registered",
+    }
+  });
+
+  // Generate JWT token for auto-login
+  const token = generateJWTToken(user);
+
+  // Send password setup email if this is a new user
+  if (isNewUser) {
+    const passwordSetupSent = await sendEmail({
+      to: user.email,
+      subject: "Welcome to Cochin Smart City - Set Your Password",
+      text: `Welcome! Your complaint has been verified and you have been registered as a citizen. To access your dashboard in the future, please set your password by clicking the link in this email.`,
+      html: `
+        <h2>Welcome to Cochin Smart City!</h2>
+        <p>Your complaint has been successfully verified and you have been automatically registered as a citizen.</p>
+        <p>Your complaint ID: <strong>${complaint.id}</strong></p>
+        <p>You are now logged in and can track your complaint progress.</p>
+        <p>To access your account in the future with a password, please set your password by logging in with OTP and using the "Set Password" option in your profile.</p>
+        <p>You can always login using OTP sent to your email if you don't want to set a password.</p>
+      `,
     });
-  } catch (error) {
-    console.error("Error creating guest complaint:", error);
-    res.status(500).json({
+  }
+
+  // Notify ward officers
+  const wardOfficers = await prisma.user.findMany({
+    where: {
+      role: "WARD_OFFICER",
+      wardId: complaint.wardId,
+      isActive: true
+    }
+  });
+
+  for (const officer of wardOfficers) {
+    await prisma.notification.create({
+      data: {
+        userId: officer.id,
+        complaintId: complaint.id,
+        type: "IN_APP",
+        title: "New Verified Complaint",
+        message: `A new ${complaint.type} complaint has been verified and registered in your ward.`,
+      }
+    });
+  }
+
+  // Remove password from response
+  const { password: _, ...userResponse } = user;
+
+  res.status(200).json({
+    success: true,
+    message: isNewUser ? 
+      "OTP verified! You have been registered as a citizen and are now logged in." :
+      "OTP verified! You are now logged in.",
+    data: {
+      user: userResponse,
+      token,
+      complaint: updatedComplaint,
+      isNewUser
+    },
+  });
+});
+
+// @desc    Resend OTP for guest verification
+// @route   POST /api/guest/resend-otp
+// @access  Public
+export const resendOTP = asyncHandler(async (req, res) => {
+  const { email, complaintId } = req.body;
+
+  // Find the complaint
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId }
+  });
+
+  if (!complaint || complaint.contactEmail !== email) {
+    return res.status(404).json({
       success: false,
-      message: "Failed to submit complaint",
+      message: "Complaint not found or email mismatch",
       data: null,
     });
   }
-});
 
-// @desc    Track guest complaint
-// @route   POST /api/guest/track-complaint
-// @access  Public
-export const trackGuestComplaint = asyncHandler(async (req, res) => {
-  const { complaintId, email, mobile } = req.body;
+  // Check if already verified
+  const existingVerified = await prisma.oTPSession.findFirst({
+    where: {
+      email,
+      purpose: "GUEST_VERIFICATION",
+      isVerified: true
+    }
+  });
 
-  if (!complaintId || !email || !mobile) {
+  if (existingVerified) {
     return res.status(400).json({
       success: false,
-      message: "Complaint ID, email, and mobile number are required",
+      message: "Email already verified",
       data: null,
     });
   }
 
-  try {
-    // Find complaint by ID and verify contact details
-    const complaint = await Complaint.findByComplaintId(complaintId);
-
-    if (!complaint) {
-      return res.status(404).json({
-        success: false,
-        message: "Complaint not found",
-        data: null,
-      });
+  // Invalidate existing OTP sessions
+  await prisma.oTPSession.updateMany({
+    where: {
+      email,
+      purpose: "GUEST_VERIFICATION",
+      isVerified: false
+    },
+    data: {
+      expiresAt: new Date() // Expire immediately
     }
+  });
 
-    // Verify contact details for security
-    if (
-      complaint.contactEmail !== email ||
-      complaint.contactMobile !== mobile
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Contact details do not match",
-        data: null,
-      });
+  // Generate new OTP
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Create new OTP session
+  const otpSession = await prisma.oTPSession.create({
+    data: {
+      email,
+      phoneNumber: complaint.contactPhone,
+      otpCode,
+      purpose: "GUEST_VERIFICATION",
+      expiresAt,
     }
+  });
 
-    res.status(200).json({
-      success: true,
-      message: "Complaint details retrieved successfully",
-      data: {
-        complaint,
-      },
-    });
-  } catch (error) {
-    console.error("Error tracking guest complaint:", error);
-    res.status(500).json({
+  // Send OTP email
+  const emailSent = await sendEmail({
+    to: email,
+    subject: "Verify Your Complaint - Cochin Smart City (Resent)",
+    text: `Your new verification OTP for complaint ${complaintId} is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    html: `
+      <h2>New Verification OTP</h2>
+      <p>Your new verification OTP for complaint <strong>${complaintId}</strong> is:</p>
+      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <p>This OTP will expire in 10 minutes.</p>
+    `,
+  });
+
+  if (!emailSent) {
+    return res.status(500).json({
       success: false,
-      message: "Failed to track complaint",
+      message: "Failed to send OTP. Please try again.",
       data: null,
     });
   }
+
+  res.status(200).json({
+    success: true,
+    message: "New OTP sent to your email",
+    data: {
+      email,
+      expiresAt,
+      sessionId: otpSession.id
+    },
+  });
 });
 
-// Helper function to send notifications
-const sendNotificationsForGuestComplaint = async (complaint) => {
-  try {
-    // Notify ward officers in the same ward
-    const wardOfficers = await User.findMany({
-      role: "ward_officer",
-      ward: complaint.ward,
-      isActive: true,
-    });
+// @desc    Track complaint status (public)
+// @route   GET /api/guest/track/:complaintId
+// @access  Public
+export const trackComplaint = asyncHandler(async (req, res) => {
+  const { complaintId } = req.params;
+  const { email, phoneNumber } = req.query;
 
-    // Notify admin users
-    const adminUsers = await User.findMany({
-      role: "admin",
-      isActive: true,
-    });
-
-    const allNotificationUsers = [...wardOfficers.users, ...adminUsers.users];
-
-    for (const user of allNotificationUsers) {
-      await Notification.createComplaintNotification(
-        "complaint_submitted",
-        complaint.id,
-        user.id,
-        {
-          complaintId: complaint.complaintId,
-          type: complaint.type,
-          ward: complaint.ward,
-          isGuest: true,
-        },
-      );
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId },
+    include: {
+      ward: true,
+      subZone: true,
+      statusLogs: {
+        orderBy: { timestamp: "desc" },
+        include: {
+          user: {
+            select: {
+              fullName: true,
+              role: true
+            }
+          }
+        }
+      }
     }
+  });
 
-    console.log(
-      `Notifications sent to ${allNotificationUsers.length} users for guest complaint ${complaint.complaintId}`,
-    );
-  } catch (error) {
-    console.error("Error sending notifications for guest complaint:", error);
-    // Don't fail the complaint submission if notifications fail
+  if (!complaint) {
+    return res.status(404).json({
+      success: false,
+      message: "Complaint not found",
+      data: null,
+    });
   }
-};
+
+  // Verify email or phone number
+  const isAuthorized = 
+    complaint.contactEmail === email || 
+    complaint.contactPhone === phoneNumber;
+
+  if (!isAuthorized) {
+    return res.status(403).json({
+      success: false,
+      message: "Invalid credentials for tracking this complaint",
+      data: null,
+    });
+  }
+
+  // Remove sensitive information
+  const publicComplaint = {
+    id: complaint.id,
+    title: complaint.title,
+    description: complaint.description,
+    type: complaint.type,
+    status: complaint.status,
+    priority: complaint.priority,
+    slaStatus: complaint.slaStatus,
+    submittedOn: complaint.submittedOn,
+    assignedOn: complaint.assignedOn,
+    resolvedOn: complaint.resolvedOn,
+    closedOn: complaint.closedOn,
+    deadline: complaint.deadline,
+    ward: complaint.ward,
+    area: complaint.area,
+    landmark: complaint.landmark,
+    statusLogs: complaint.statusLogs.map(log => ({
+      status: log.toStatus,
+      comment: log.comment,
+      timestamp: log.timestamp,
+      updatedBy: log.user.fullName
+    }))
+  };
+
+  res.status(200).json({
+    success: true,
+    message: "Complaint details retrieved successfully",
+    data: { complaint: publicComplaint },
+  });
+});
+
+// @desc    Get guest complaint statistics (for public dashboard)
+// @route   GET /api/guest/stats
+// @access  Public
+export const getPublicStats = asyncHandler(async (req, res) => {
+  const [
+    totalComplaints,
+    resolvedComplaints,
+    statusCounts,
+    typeCounts
+  ] = await Promise.all([
+    prisma.complaint.count(),
+    prisma.complaint.count({ where: { status: "RESOLVED" } }),
+    prisma.complaint.groupBy({
+      by: ["status"],
+      _count: { status: true }
+    }),
+    prisma.complaint.groupBy({
+      by: ["type"],
+      _count: { type: true }
+    })
+  ]);
+
+  const stats = {
+    total: totalComplaints,
+    resolved: resolvedComplaints,
+    resolutionRate: totalComplaints > 0 ? ((resolvedComplaints / totalComplaints) * 100).toFixed(1) : 0,
+    byStatus: statusCounts.reduce((acc, item) => {
+      acc[item.status] = item._count.status;
+      return acc;
+    }, {}),
+    byType: typeCounts.reduce((acc, item) => {
+      acc[item.type] = item._count.type;
+      return acc;
+    }, {})
+  };
+
+  res.status(200).json({
+    success: true,
+    message: "Public statistics retrieved successfully",
+    data: { stats },
+  });
+});
