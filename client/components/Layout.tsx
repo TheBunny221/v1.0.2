@@ -104,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
           {
             path: "/admin/users",
             label: translations.nav.users + " Management",
-            icon: UserIcons,
+            icon: Users,
           },
           {
             path: "/admin/reports",
