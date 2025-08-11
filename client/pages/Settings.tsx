@@ -137,7 +137,7 @@ const Settings: React.FC = () => {
   };
 
   // Show loading state if translations are not loaded yet
-  if (!translations) {
+  if (!translations || !translations.settings || !translations.nav || !translations.common) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
