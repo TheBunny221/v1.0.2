@@ -262,7 +262,7 @@ const Index: React.FC = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">{translations.auth?.email || "Email Address"}</Label>
                         <Input
                           id="email"
                           type="email"
