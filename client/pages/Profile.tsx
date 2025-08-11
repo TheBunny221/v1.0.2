@@ -186,7 +186,7 @@ const Profile: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{translations.nav.profile}</h1>
+          <h1 className="text-3xl font-bold">{translations?.nav?.profile || "Profile"}</h1>
           <p className="text-muted-foreground">
             Manage your account information and preferences
           </p>
