@@ -24,18 +24,19 @@ export const handleValidationErrors = (req, res, next) => {
 };
 
 // User validation rules
-export const validateUserRegistration = [
-  body("name")
+export const validateRegistration = [
+  body("fullName")
     .trim()
     .isLength({ min: 2, max: 100 })
-    .withMessage("Name must be between 2 and 100 characters"),
+    .withMessage("Full name must be between 2 and 100 characters"),
 
   body("email")
     .isEmail()
     .normalizeEmail()
     .withMessage("Please provide a valid email"),
 
-  body("phone")
+  body("phoneNumber")
+    .optional()
     .matches(/^\+?[\d\s-()]{10,}$/)
     .withMessage("Please provide a valid phone number"),
 
@@ -49,13 +50,15 @@ export const validateUserRegistration = [
 
   body("role")
     .optional()
-    .isIn(["citizen", "admin", "ward-officer", "maintenance"])
+    .isIn(["CITIZEN", "ADMINISTRATOR", "WARD_OFFICER", "MAINTENANCE_TEAM"])
     .withMessage("Invalid role"),
 
   handleValidationErrors,
 ];
 
-export const validateUserLogin = [
+export const validateUserRegistration = validateRegistration;
+
+export const validateLogin = [
   body("email")
     .isEmail()
     .normalizeEmail()
@@ -65,6 +68,8 @@ export const validateUserLogin = [
 
   handleValidationErrors,
 ];
+
+export const validateUserLogin = validateLogin;
 
 export const validateUserUpdate = [
   body("name")
@@ -293,6 +298,21 @@ export const validatePasswordChange = [
     .withMessage(
       "Password must contain at least one uppercase letter, one lowercase letter, and one number",
     ),
+
+  handleValidationErrors,
+];
+
+// OTP validation
+export const validateOTP = [
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
+
+  body("otpCode")
+    .isLength({ min: 6, max: 6 })
+    .isNumeric()
+    .withMessage("OTP must be a 6-digit number"),
 
   handleValidationErrors,
 ];
