@@ -14,7 +14,7 @@ import {
 } from "./ui/dropdown-menu";
 import {
   Bell,
-  User,
+  User as UserIcon,
   Settings,
   LogOut,
   Menu,
