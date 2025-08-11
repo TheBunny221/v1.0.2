@@ -85,10 +85,10 @@ model Complaint {
   id              String            @id @default(cuid())
   title           String?
   description     String
-  type            ComplaintType
-  status          ComplaintStatus   @default(REGISTERED)
-  priority        ComplaintPriority @default(MEDIUM)
-  slaStatus       SLAStatus         @default(ON_TIME)
+  type            String            // WATER_SUPPLY, ELECTRICITY, ROAD_REPAIR, etc.
+  status          String            @default("REGISTERED") // REGISTERED, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED, REOPENED
+  priority        String            @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  slaStatus       String            @default("ON_TIME") // ON_TIME, WARNING, OVERDUE, COMPLETED
   
   // Location Information
   wardId          String
