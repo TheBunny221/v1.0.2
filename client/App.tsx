@@ -249,6 +249,16 @@ const App: React.FC = () => {
                                 }
                               />
                               <Route
+                                path="/admin/languages"
+                                element={
+                                  <RoleBasedRoute
+                                    allowedRoles={["ADMINISTRATOR"]}
+                                  >
+                                    <AdminLanguages />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
                                 path="/admin/analytics"
                                 element={
                                   <RoleBasedRoute
