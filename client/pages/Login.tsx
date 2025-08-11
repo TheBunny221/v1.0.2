@@ -225,16 +225,25 @@ const Login: React.FC = () => {
   // Demo credentials for testing
   const demoCredentials = [
     {
-      email: "admin@cochin.gov.in",
-      password: "Admin123!",
+      email: "admin@cochinsmartcity.gov.in",
+      password: "admin123",
       role: "Administrator",
     },
     {
-      email: "ward1@cochin.gov.in",
-      password: "Ward123!",
+      email: "ward.officer@cochinsmartcity.gov.in",
+      password: "ward123",
       role: "Ward Officer",
     },
-    { email: "citizen@example.com", password: "Citizen123!", role: "Citizen" },
+    {
+      email: "maintenance@cochinsmartcity.gov.in",
+      password: "maintenance123",
+      role: "Maintenance Team",
+    },
+    {
+      email: "citizen@example.com",
+      password: "citizen123",
+      role: "Citizen"
+    },
   ];
 
   return (
