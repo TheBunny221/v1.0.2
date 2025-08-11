@@ -102,42 +102,17 @@ const App: React.FC = () => {
                               {/* Home route */}
                               <Route path="/" element={<Index />} />
 
-                              {/* Dashboard routes */}
+                              {/* Dashboard routes - Unified role-based routing */}
                               <Route
                                 path="/dashboard"
                                 element={
-                                  <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                                    <CitizenDashboard />
-                                  </RoleBasedRoute>
-                                }
-                              />
-                              <Route
-                                path="/dashboard/ward"
-                                element={
-                                  <RoleBasedRoute
-                                    allowedRoles={["WARD_OFFICER"]}
-                                  >
-                                    <WardOfficerDashboard />
-                                  </RoleBasedRoute>
-                                }
-                              />
-                              <Route
-                                path="/dashboard/maintenance"
-                                element={
-                                  <RoleBasedRoute
-                                    allowedRoles={["MAINTENANCE_TEAM"]}
-                                  >
-                                    <MaintenanceDashboard />
-                                  </RoleBasedRoute>
-                                }
-                              />
-                              <Route
-                                path="/dashboard/admin"
-                                element={
-                                  <RoleBasedRoute
-                                    allowedRoles={["ADMINISTRATOR"]}
-                                  >
-                                    <AdminDashboard />
+                                  <RoleBasedRoute allowedRoles={[
+                                    "CITIZEN",
+                                    "WARD_OFFICER",
+                                    "MAINTENANCE_TEAM",
+                                    "ADMINISTRATOR"
+                                  ]}>
+                                    <RoleBasedDashboard />
                                   </RoleBasedRoute>
                                 }
                               />
