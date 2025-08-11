@@ -24,6 +24,8 @@
     "db:generate": "npx prisma generate",
     "db:studio": "npx prisma studio",
     "db:reset": "npx prisma migrate reset",
+    "db:seed": "node prisma/seed.js",
+    "db:setup": "npx prisma generate && npx prisma db push && npm run db:seed",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
