@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from './components/ui/toaster';
 import { store } from './store';
 import ErrorBoundary from './components/ErrorBoundary';
 import AppInitializer from './components/AppInitializer';
