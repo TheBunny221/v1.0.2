@@ -11,9 +11,13 @@ const connectDB = async () => {
     // Connect to database
     await prisma.$connect();
 
-    const dbType = process.env.DATABASE_URL?.includes('postgresql') ? 'PostgreSQL' : 'SQLite';
+    const dbType = process.env.DATABASE_URL?.includes("postgresql")
+      ? "PostgreSQL"
+      : "SQLite";
     console.log(`${dbType} Connected successfully`);
-    console.log(`Database URL: ${process.env.DATABASE_URL?.replace(/\/\/.*@/, '//***:***@')}`);
+    console.log(
+      `Database URL: ${process.env.DATABASE_URL?.replace(/\/\/.*@/, "//***:***@")}`,
+    );
 
     // Handle graceful shutdown
     process.on("SIGINT", async () => {
