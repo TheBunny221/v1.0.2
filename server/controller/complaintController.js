@@ -1,71 +1,142 @@
-import Complaint from "../model/Complaint.js";
-import User from "../model/User.js";
-import Notification from "../model/Notification.js";
+import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
+import { sendEmail } from "../utils/emailService.js";
 
-// @desc    Create new complaint
+const prisma = getPrisma();
+
+// Helper function to calculate SLA status
+const calculateSLAStatus = (submittedOn, deadline, status) => {
+  if (status === "RESOLVED" || status === "CLOSED") {
+    return "COMPLETED";
+  }
+  
+  const now = new Date();
+  const daysRemaining = (deadline - now) / (1000 * 60 * 60 * 24);
+  
+  if (daysRemaining < 0) {
+    return "OVERDUE";
+  } else if (daysRemaining <= 1) {
+    return "WARNING";
+  } else {
+    return "ON_TIME";
+  }
+};
+
+// Helper function to generate complaint ID
+const generateComplaintId = () => {
+  const prefix = "CSC";
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+  return `${prefix}${timestamp}${random}`;
+};
+
+// @desc    Create a new complaint
 // @route   POST /api/complaints
-// @access  Public/Private
+// @access  Private (Citizen, Admin)
 export const createComplaint = asyncHandler(async (req, res) => {
   const {
-    type,
+    title,
     description,
-    contactInfo,
-    location,
-    isAnonymous = false,
+    type,
+    priority,
+    wardId,
+    subZoneId,
+    area,
+    landmark,
+    address,
+    coordinates,
+    contactName,
+    contactEmail,
+    contactPhone,
+    isAnonymous
   } = req.body;
 
-  // Create complaint data
-  const complaintData = {
-    type,
-    description,
-    contactMobile: contactInfo.mobile,
-    contactEmail: contactInfo.email || null,
-    ward: location.ward,
-    area: location.area,
-    address: location.address || null,
-    latitude: location.coordinates?.latitude || null,
-    longitude: location.coordinates?.longitude || null,
-    landmark: location.landmark || null,
-    isAnonymous,
-    submittedById: req.user ? req.user.id : null,
+  // Set deadline based on priority (in hours)
+  const priorityHours = {
+    LOW: 72,
+    MEDIUM: 48,
+    HIGH: 24,
+    CRITICAL: 8
   };
 
-  // If user is not logged in, create as anonymous
-  if (!req.user) {
-    complaintData.isAnonymous = true;
-  }
+  const deadline = new Date(Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000);
 
-  const complaint = await Complaint.create(complaintData);
+  const complaint = await prisma.complaint.create({
+    data: {
+      title: title || `${type} complaint`,
+      description,
+      type,
+      priority: priority || "MEDIUM",
+      status: "REGISTERED",
+      slaStatus: "ON_TIME",
+      wardId,
+      subZoneId,
+      area,
+      landmark,
+      address,
+      coordinates: coordinates ? JSON.stringify(coordinates) : null,
+      contactName: contactName || req.user.fullName,
+      contactEmail: contactEmail || req.user.email,
+      contactPhone: contactPhone || req.user.phoneNumber,
+      isAnonymous: isAnonymous || false,
+      submittedById: req.user.id,
+      deadline,
+    },
+    include: {
+      ward: true,
+      subZone: true,
+      submittedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true
+        }
+      }
+    }
+  });
 
-  // Create notification for admins about new complaint
-  const adminUsers = await User.findMany({ role: "admin", isActive: true });
+  // Create status log
+  await prisma.statusLog.create({
+    data: {
+      complaintId: complaint.id,
+      userId: req.user.id,
+      toStatus: "REGISTERED",
+      comment: "Complaint registered",
+    }
+  });
 
-  for (const admin of adminUsers.users) {
-    await Notification.createComplaintNotification(
-      "complaint_submitted",
-      complaint.id,
-      admin.id,
-      {
-        complaintId: complaint.complaintId,
-        type: complaint.type,
-        ward: complaint.ward,
-      },
-    );
+  // Send notification to ward officer if available
+  const wardOfficers = await prisma.user.findMany({
+    where: {
+      role: "WARD_OFFICER",
+      wardId: wardId,
+      isActive: true
+    }
+  });
+
+  for (const officer of wardOfficers) {
+    await prisma.notification.create({
+      data: {
+        userId: officer.id,
+        complaintId: complaint.id,
+        type: "IN_APP",
+        title: "New Complaint Registered",
+        message: `A new ${type} complaint has been registered in your ward.`,
+      }
+    });
   }
 
   res.status(201).json({
     success: true,
     message: "Complaint registered successfully",
-    data: {
-      complaint,
-    },
+    data: { complaint },
   });
 });
 
-// @desc    Get all complaints
+// @desc    Get all complaints with filters
 // @route   GET /api/complaints
-// @access  Private (Admin, Ward Officer)
+// @access  Private
 export const getComplaints = asyncHandler(async (req, res) => {
   const {
     page = 1,
@@ -73,63 +144,171 @@ export const getComplaints = asyncHandler(async (req, res) => {
     status,
     priority,
     type,
-    ward,
+    wardId,
     assignedToId,
+    submittedById,
     dateFrom,
     dateTo,
-    search,
+    search
   } = req.query;
 
-  // Build filter object
-  let filters = {};
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const filters = {};
 
   // Role-based filtering
-  if (req.user.role === "ward_officer") {
-    filters.ward = req.user.ward;
-  } else if (req.user.role === "maintenance") {
+  if (req.user.role === "CITIZEN") {
+    filters.submittedById = req.user.id;
+  } else if (req.user.role === "WARD_OFFICER") {
+    filters.wardId = req.user.wardId;
+  } else if (req.user.role === "MAINTENANCE_TEAM") {
     filters.assignedToId = req.user.id;
   }
 
-  // Apply filters
+  // Apply additional filters
   if (status) filters.status = status;
   if (priority) filters.priority = priority;
   if (type) filters.type = type;
-  if (ward && req.user.role === "admin") filters.ward = ward;
+  if (wardId && req.user.role === "ADMINISTRATOR") filters.wardId = wardId;
   if (assignedToId) filters.assignedToId = assignedToId;
+  if (submittedById && req.user.role === "ADMINISTRATOR") filters.submittedById = submittedById;
+
+  // Date range filter
+  if (dateFrom || dateTo) {
+    filters.submittedOn = {};
+    if (dateFrom) filters.submittedOn.gte = new Date(dateFrom);
+    if (dateTo) filters.submittedOn.lte = new Date(dateTo);
+  }
 
   // Search filter
   if (search) {
-    filters.search = search;
+    filters.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+      { area: { contains: search, mode: "insensitive" } },
+    ];
   }
 
-  const result = await Complaint.findMany(
-    filters,
-    parseInt(page),
-    parseInt(limit),
-  );
+  const [complaints, total] = await Promise.all([
+    prisma.complaint.findMany({
+      where: filters,
+      skip,
+      take: parseInt(limit),
+      orderBy: { submittedOn: "desc" },
+      include: {
+        ward: true,
+        subZone: true,
+        submittedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true
+          }
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true
+          }
+        },
+        attachments: true,
+        statusLogs: {
+          orderBy: { timestamp: "desc" },
+          take: 1,
+          include: {
+            user: {
+              select: {
+                fullName: true,
+                role: true
+              }
+            }
+          }
+        }
+      }
+    }),
+    prisma.complaint.count({ where: filters })
+  ]);
 
   res.status(200).json({
     success: true,
     message: "Complaints retrieved successfully",
     data: {
-      complaints: result.complaints,
+      complaints,
       pagination: {
-        currentPage: result.pagination.page,
-        totalPages: result.pagination.pages,
-        totalItems: result.pagination.total,
-        itemsPerPage: result.pagination.limit,
-        hasNextPage: result.pagination.page < result.pagination.pages,
-        hasPrevPage: result.pagination.page > 1,
-      },
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
+        hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
+        hasPrev: parseInt(page) > 1
+      }
     },
   });
 });
 
-// @desc    Get complaint by ID
+// @desc    Get single complaint
 // @route   GET /api/complaints/:id
 // @access  Private
-export const getComplaintById = asyncHandler(async (req, res) => {
-  const complaint = await Complaint.findById(req.params.id);
+export const getComplaint = asyncHandler(async (req, res) => {
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: req.params.id },
+    include: {
+      ward: true,
+      subZone: true,
+      submittedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          role: true
+        }
+      },
+      assignedTo: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          role: true
+        }
+      },
+      attachments: true,
+      statusLogs: {
+        orderBy: { timestamp: "desc" },
+        include: {
+          user: {
+            select: {
+              fullName: true,
+              role: true
+            }
+          }
+        }
+      },
+      notifications: {
+        where: { userId: req.user.id },
+        orderBy: { sentAt: "desc" }
+      },
+      messages: {
+        orderBy: { sentAt: "asc" },
+        include: {
+          sentBy: {
+            select: {
+              fullName: true,
+              role: true
+            }
+          },
+          receivedBy: {
+            select: {
+              fullName: true,
+              role: true
+            }
+          }
+        }
+      }
+    }
+  });
 
   if (!complaint) {
     return res.status(404).json({
@@ -139,16 +318,14 @@ export const getComplaintById = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check access permissions
-  const hasAccess =
-    req.user.role === "admin" ||
-    (req.user.role === "ward_officer" && complaint.ward === req.user.ward) ||
-    (req.user.role === "maintenance" &&
-      complaint.assignedToId &&
-      complaint.assignedToId === req.user.id) ||
-    (complaint.submittedById && complaint.submittedById === req.user.id);
+  // Check authorization
+  const isAuthorized = 
+    req.user.role === "ADMINISTRATOR" ||
+    complaint.submittedById === req.user.id ||
+    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" && complaint.assignedToId === req.user.id);
 
-  if (!hasAccess) {
+  if (!isAuthorized) {
     return res.status(403).json({
       success: false,
       message: "Not authorized to access this complaint",
@@ -159,19 +336,25 @@ export const getComplaintById = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Complaint retrieved successfully",
-    data: {
-      complaint,
-    },
+    data: { complaint },
   });
 });
 
-// @desc    Update complaint
-// @route   PUT /api/complaints/:id
-// @access  Private (Admin, Assigned User)
-export const updateComplaint = asyncHandler(async (req, res) => {
-  const { status, priority, assignedToId, remarks } = req.body;
+// @desc    Update complaint status
+// @route   PUT /api/complaints/:id/status
+// @access  Private (Ward Officer, Maintenance Team, Admin)
+export const updateComplaintStatus = asyncHandler(async (req, res) => {
+  const { status, comment, assignedToId } = req.body;
+  const complaintId = req.params.id;
 
-  const complaint = await Complaint.findById(req.params.id);
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId },
+    include: {
+      submittedBy: true,
+      assignedTo: true,
+      ward: true
+    }
+  });
 
   if (!complaint) {
     return res.status(404).json({
@@ -181,13 +364,13 @@ export const updateComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check permissions
-  const canUpdate =
-    req.user.role === "admin" ||
-    (req.user.role === "ward_officer" && complaint.ward === req.user.ward) ||
-    (complaint.assignedToId && complaint.assignedToId === req.user.id);
+  // Authorization check
+  const isAuthorized = 
+    req.user.role === "ADMINISTRATOR" ||
+    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" && complaint.assignedToId === req.user.id);
 
-  if (!canUpdate) {
+  if (!isAuthorized) {
     return res.status(403).json({
       success: false,
       message: "Not authorized to update this complaint",
@@ -195,132 +378,113 @@ export const updateComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Prepare updates
-  const updates = {};
-  if (status) updates.status = status;
-  if (priority) updates.priority = priority;
+  const updateData = {
+    status,
+    slaStatus: calculateSLAStatus(complaint.submittedOn, complaint.deadline, status)
+  };
 
-  // Handle assignment
-  if (assignedToId) {
-    const assignee = await User.findById(assignedToId);
-    if (!assignee) {
-      return res.status(404).json({
-        success: false,
-        message: "Assignee not found",
-        data: null,
-      });
-    }
-    updates.assignedToId = assignedToId;
-    updates.assignedAt = new Date();
-
-    // Add assignment remark
-    await Complaint.addRemark(complaint.id, {
-      text: `Complaint assigned to ${assignee.name}`,
-      addedById: req.user.id,
-      type: "assignment",
-    });
-
-    // Create notification for assignee
-    await Notification.createComplaintNotification(
-      "complaint_assigned",
-      complaint.id,
-      assignedToId,
-      {
-        complaintId: complaint.complaintId,
-        type: complaint.type,
-        ward: complaint.ward,
-      },
-    );
-  }
-
-  // Handle status changes
-  if (status) {
-    if (status === "resolved") {
-      updates.resolvedAt = new Date();
-    } else if (status === "closed") {
-      updates.closedAt = new Date();
-    }
-
-    // Add status remark
-    await Complaint.addRemark(complaint.id, {
-      text: `Status changed to ${status}`,
-      addedById: req.user.id,
-      type: "status_update",
-    });
-
-    // Create notification for complainant
-    if (complaint.submittedById) {
-      await Notification.createComplaintNotification(
-        "complaint_updated",
-        complaint.id,
-        complaint.submittedById,
-        {
-          complaintId: complaint.complaintId,
-          status,
-          type: complaint.type,
-        },
-      );
+  // Set timestamps based on status
+  if (status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
+    updateData.assignedOn = new Date();
+    if (assignedToId) {
+      updateData.assignedToId = assignedToId;
     }
   }
 
-  // Add custom remarks
-  if (remarks) {
-    await Complaint.addRemark(complaint.id, {
-      text: remarks,
-      addedById: req.user.id,
-      type: "general",
-    });
+  if (status === "RESOLVED" && complaint.status !== "RESOLVED") {
+    updateData.resolvedOn = new Date();
+    updateData.resolvedById = req.user.id;
+  }
+
+  if (status === "CLOSED" && complaint.status !== "CLOSED") {
+    updateData.closedOn = new Date();
   }
 
   // Update complaint
-  const updatedComplaint = await Complaint.update(complaint.id, updates);
-
-  res.status(200).json({
-    success: true,
-    message: "Complaint updated successfully",
-    data: {
-      complaint: updatedComplaint,
-    },
-  });
-});
-
-// @desc    Get my complaints
-// @route   GET /api/complaints/my
-// @access  Private
-export const getMyComplaints = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, status } = req.query;
-
-  let filters = { submittedById: req.user.id };
-  if (status) filters.status = status;
-
-  const result = await Complaint.findMany(
-    filters,
-    parseInt(page),
-    parseInt(limit),
-  );
-
-  res.status(200).json({
-    success: true,
-    message: "Your complaints retrieved successfully",
-    data: {
-      complaints: result.complaints,
-      pagination: {
-        currentPage: result.pagination.page,
-        totalPages: result.pagination.pages,
-        totalItems: result.pagination.total,
-        itemsPerPage: result.pagination.limit,
+  const updatedComplaint = await prisma.complaint.update({
+    where: { id: complaintId },
+    data: updateData,
+    include: {
+      ward: true,
+      subZone: true,
+      submittedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true
+        }
       },
-    },
+      assignedTo: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true
+        }
+      }
+    }
+  });
+
+  // Create status log
+  await prisma.statusLog.create({
+    data: {
+      complaintId,
+      userId: req.user.id,
+      fromStatus: complaint.status,
+      toStatus: status,
+      comment: comment || `Status updated to ${status}`,
+    }
+  });
+
+  // Send notifications
+  const notifications = [];
+
+  // Notify citizen
+  if (complaint.submittedBy) {
+    notifications.push({
+      userId: complaint.submittedBy.id,
+      complaintId,
+      type: "EMAIL",
+      title: `Complaint Status Updated`,
+      message: `Your complaint status has been updated to ${status}.`,
+    });
+  }
+
+  // Notify assigned user if different from current user
+  if (assignedToId && assignedToId !== req.user.id) {
+    notifications.push({
+      userId: assignedToId,
+      complaintId,
+      type: "IN_APP",
+      title: `New Assignment`,
+      message: `A complaint has been assigned to you.`,
+    });
+  }
+
+  if (notifications.length > 0) {
+    await prisma.notification.createMany({
+      data: notifications
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Complaint status updated successfully",
+    data: { complaint: updatedComplaint },
   });
 });
 
-// @desc    Submit feedback for resolved complaint
+// @desc    Add feedback to complaint
 // @route   POST /api/complaints/:id/feedback
-// @access  Private
-export const submitFeedback = asyncHandler(async (req, res) => {
-  const { rating, comment } = req.body;
+// @access  Private (Complaint submitter only)
+export const addComplaintFeedback = asyncHandler(async (req, res) => {
+  const { rating, citizenFeedback } = req.body;
+  const complaintId = req.params.id;
 
-  const complaint = await Complaint.findById(req.params.id);
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId }
+  });
 
   if (!complaint) {
     return res.status(404).json({
@@ -330,79 +494,210 @@ export const submitFeedback = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check if user is the complainant
+  // Only complaint submitter can add feedback
   if (complaint.submittedById !== req.user.id) {
     return res.status(403).json({
       success: false,
-      message: "Not authorized to provide feedback for this complaint",
+      message: "Not authorized to add feedback to this complaint",
       data: null,
     });
   }
 
-  // Check if complaint is resolved
-  if (complaint.status !== "resolved" && complaint.status !== "closed") {
+  // Can only add feedback if complaint is resolved or closed
+  if (!["RESOLVED", "CLOSED"].includes(complaint.status)) {
     return res.status(400).json({
       success: false,
-      message: "Feedback can only be provided for resolved complaints",
+      message: "Feedback can only be added to resolved or closed complaints",
       data: null,
     });
   }
 
-  // Update complaint with feedback
-  const updatedComplaint = await Complaint.update(complaint.id, {
-    feedbackRating: rating,
-    feedbackComment: comment,
-    feedbackSubmittedAt: new Date(),
+  const updatedComplaint = await prisma.complaint.update({
+    where: { id: complaintId },
+    data: {
+      rating: parseInt(rating),
+      citizenFeedback,
+    },
+    include: {
+      ward: true,
+      submittedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true
+        }
+      }
+    }
   });
 
   res.status(200).json({
     success: true,
-    message: "Feedback submitted successfully",
+    message: "Feedback added successfully",
+    data: { complaint: updatedComplaint },
+  });
+});
+
+// @desc    Reopen complaint
+// @route   PUT /api/complaints/:id/reopen
+// @access  Private (Admin only)
+export const reopenComplaint = asyncHandler(async (req, res) => {
+  const { comment } = req.body;
+  const complaintId = req.params.id;
+
+  if (req.user.role !== "ADMINISTRATOR") {
+    return res.status(403).json({
+      success: false,
+      message: "Only administrators can reopen complaints",
+      data: null,
+    });
+  }
+
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId }
+  });
+
+  if (!complaint) {
+    return res.status(404).json({
+      success: false,
+      message: "Complaint not found",
+      data: null,
+    });
+  }
+
+  if (complaint.status !== "CLOSED") {
+    return res.status(400).json({
+      success: false,
+      message: "Only closed complaints can be reopened",
+      data: null,
+    });
+  }
+
+  const updatedComplaint = await prisma.complaint.update({
+    where: { id: complaintId },
     data: {
-      feedback: {
-        rating: updatedComplaint.feedbackRating,
-        comment: updatedComplaint.feedbackComment,
-        submittedAt: updatedComplaint.feedbackSubmittedAt,
-      },
-    },
+      status: "REOPENED",
+      slaStatus: calculateSLAStatus(complaint.submittedOn, complaint.deadline, "REOPENED"),
+      closedOn: null,
+    }
+  });
+
+  // Create status log
+  await prisma.statusLog.create({
+    data: {
+      complaintId,
+      userId: req.user.id,
+      fromStatus: "CLOSED",
+      toStatus: "REOPENED",
+      comment: comment || "Complaint reopened by administrator",
+    }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Complaint reopened successfully",
+    data: { complaint: updatedComplaint },
   });
 });
 
 // @desc    Get complaint statistics
 // @route   GET /api/complaints/stats
-// @access  Private (Admin, Ward Officer)
+// @access  Private
 export const getComplaintStats = asyncHandler(async (req, res) => {
-  let filters = {};
+  const { wardId, dateFrom, dateTo } = req.query;
+
+  const filters = {};
 
   // Role-based filtering
-  if (req.user.role === "ward_officer") {
-    filters.ward = req.user.ward;
+  if (req.user.role === "CITIZEN") {
+    filters.submittedById = req.user.id;
+  } else if (req.user.role === "WARD_OFFICER") {
+    filters.wardId = req.user.wardId;
+  } else if (req.user.role === "MAINTENANCE_TEAM") {
+    filters.assignedToId = req.user.id;
   }
 
-  const stats = await Complaint.getStatistics(filters);
+  // Apply additional filters
+  if (wardId && req.user.role === "ADMINISTRATOR") {
+    filters.wardId = wardId;
+  }
+
+  // Date range filter
+  if (dateFrom || dateTo) {
+    filters.submittedOn = {};
+    if (dateFrom) filters.submittedOn.gte = new Date(dateFrom);
+    if (dateTo) filters.submittedOn.lte = new Date(dateTo);
+  }
+
+  const [
+    totalComplaints,
+    statusCounts,
+    priorityCounts,
+    typeCounts,
+    avgResolutionTime
+  ] = await Promise.all([
+    prisma.complaint.count({ where: filters }),
+    prisma.complaint.groupBy({
+      by: ["status"],
+      where: filters,
+      _count: { status: true }
+    }),
+    prisma.complaint.groupBy({
+      by: ["priority"],
+      where: filters,
+      _count: { priority: true }
+    }),
+    prisma.complaint.groupBy({
+      by: ["type"],
+      where: filters,
+      _count: { type: true }
+    }),
+    prisma.complaint.aggregate({
+      where: {
+        ...filters,
+        status: "RESOLVED",
+        resolvedOn: { not: null }
+      },
+      _avg: {
+        // Calculate resolution time in hours
+      }
+    })
+  ]);
+
+  const stats = {
+    total: totalComplaints,
+    byStatus: statusCounts.reduce((acc, item) => {
+      acc[item.status] = item._count.status;
+      return acc;
+    }, {}),
+    byPriority: priorityCounts.reduce((acc, item) => {
+      acc[item.priority] = item._count.priority;
+      return acc;
+    }, {}),
+    byType: typeCounts.reduce((acc, item) => {
+      acc[item.type] = item._count.type;
+      return acc;
+    }, {}),
+    avgResolutionTimeHours: 0 // This would need custom calculation
+  };
 
   res.status(200).json({
     success: true,
     message: "Complaint statistics retrieved successfully",
-    data: {
-      stats,
-    },
+    data: { stats },
   });
 });
 
-// @desc    Upload files for complaint
-// @route   POST /api/complaints/:id/files
-// @access  Private
-export const uploadComplaintFiles = asyncHandler(async (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: "No files uploaded",
-      data: null,
-    });
-  }
+// @desc    Assign complaint to user
+// @route   PUT /api/complaints/:id/assign
+// @access  Private (Ward Officer, Admin)
+export const assignComplaint = asyncHandler(async (req, res) => {
+  const { assignedToId } = req.body;
+  const complaintId = req.params.id;
 
-  const complaint = await Complaint.findById(req.params.id);
+  const complaint = await prisma.complaint.findUnique({
+    where: { id: complaintId },
+    include: { ward: true }
+  });
 
   if (!complaint) {
     return res.status(404).json({
@@ -412,41 +707,55 @@ export const uploadComplaintFiles = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check permissions
-  const canUpload =
-    req.user.role === "admin" ||
-    (req.user.role === "ward_officer" && complaint.ward === req.user.ward) ||
-    (complaint.assignedToId && complaint.assignedToId === req.user.id) ||
-    complaint.submittedById === req.user.id;
+  // Authorization check
+  const isAuthorized = 
+    req.user.role === "ADMINISTRATOR" ||
+    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId);
 
-  if (!canUpload) {
+  if (!isAuthorized) {
     return res.status(403).json({
       success: false,
-      message: "Not authorized to upload files for this complaint",
+      message: "Not authorized to assign this complaint",
       data: null,
     });
   }
 
-  const uploadedFiles = [];
+  // Verify assignee exists and is maintenance team
+  const assignee = await prisma.user.findUnique({
+    where: { id: assignedToId }
+  });
 
-  for (const file of req.files) {
-    const fileData = {
-      filename: file.filename,
-      originalName: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      url: `/uploads/${file.filename}`,
-    };
-
-    const uploadedFile = await Complaint.addFile(complaint.id, fileData);
-    uploadedFiles.push(uploadedFile);
+  if (!assignee || assignee.role !== "MAINTENANCE_TEAM") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid assignee",
+      data: null,
+    });
   }
+
+  const updatedComplaint = await prisma.complaint.update({
+    where: { id: complaintId },
+    data: {
+      assignedToId,
+      status: "ASSIGNED",
+      assignedOn: new Date(),
+    }
+  });
+
+  // Create status log
+  await prisma.statusLog.create({
+    data: {
+      complaintId,
+      userId: req.user.id,
+      fromStatus: complaint.status,
+      toStatus: "ASSIGNED",
+      comment: `Assigned to ${assignee.fullName}`,
+    }
+  });
 
   res.status(200).json({
     success: true,
-    message: "Files uploaded successfully",
-    data: {
-      files: uploadedFiles,
-    },
+    message: "Complaint assigned successfully",
+    data: { complaint: updatedComplaint },
   });
 });
