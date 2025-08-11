@@ -156,8 +156,25 @@ const AdminConfig: React.FC = () => {
 
   // Load data on component mount
   useEffect(() => {
+    // Check if user is authenticated and has admin role
+    if (!user) {
+      dispatch(
+        showErrorToast("Authentication Required", "Please log in to access this page.")
+      );
+      setDataLoading(false);
+      return;
+    }
+
+    if (user.role !== "ADMINISTRATOR") {
+      dispatch(
+        showErrorToast("Access Denied", "Administrator privileges required to access this page.")
+      );
+      setDataLoading(false);
+      return;
+    }
+
     loadAllData();
-  }, []);
+  }, [user]);
 
   const loadAllData = async () => {
     setDataLoading(true);
