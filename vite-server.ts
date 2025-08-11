@@ -32,7 +32,7 @@ export function createServer() {
   // Middleware
   app.use(
     cors({
-      origin: process.env.CLIENT_URL || "http://localhost:8080",
+      origin: process.env.CLIENT_URL || "http://localhost:3000",
       credentials: true,
     }),
   );
