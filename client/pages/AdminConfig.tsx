@@ -293,7 +293,10 @@ const AdminConfig: React.FC = () => {
       );
     } catch (error) {
       dispatch(
-        showErrorToast("Delete Failed", "Failed to delete ward. Please try again."),
+        showErrorToast(
+          "Delete Failed",
+          "Failed to delete ward. Please try again.",
+        ),
       );
     } finally {
       setIsLoading(false);
