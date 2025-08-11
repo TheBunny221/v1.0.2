@@ -92,7 +92,7 @@ const WardTasks: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Total Tasks</p>
                 <p className="text-2xl font-bold">12</p>
               </div>
-              <CheckList className="h-8 w-8 text-blue-600" />
+              <CheckSquare className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -125,7 +125,7 @@ const WardTasks: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Completed</p>
                 <p className="text-2xl font-bold text-green-600">3</p>
               </div>
-              <CheckList className="h-8 w-8 text-green-600" />
+              <CheckSquare className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
