@@ -22,7 +22,7 @@ model User {
   fullName    String
   phoneNumber String?
   password    String?
-  role        UserRole @default(CITIZEN)
+  role        String   @default("CITIZEN") // CITIZEN, WARD_OFFICER, MAINTENANCE_TEAM, ADMINISTRATOR, GUEST
   wardId      String?
   department  String?
   language    String   @default("en")
