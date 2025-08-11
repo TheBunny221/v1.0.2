@@ -540,6 +540,28 @@ const complaintsSlice = createSlice({
       // Fetch stats
       .addCase(fetchComplaintStats.fulfilled, (state, action) => {
         state.stats = action.payload;
+      })
+      // Update complaint status
+      .addCase(updateComplaintStatus.pending, (state) => {
+        state.isSubmitting = true;
+        state.error = null;
+      })
+      .addCase(updateComplaintStatus.fulfilled, (state, action) => {
+        state.isSubmitting = false;
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.complaints[index] = action.payload;
+        }
+        if (state.currentComplaint?.id === action.payload.id) {
+          state.currentComplaint = action.payload;
+        }
+        state.error = null;
+      })
+      .addCase(updateComplaintStatus.rejected, (state, action) => {
+        state.isSubmitting = false;
+        state.error = action.payload as string;
       });
   },
 });
