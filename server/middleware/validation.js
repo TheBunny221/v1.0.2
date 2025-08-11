@@ -333,28 +333,49 @@ export const validateOtpRequest = [
 ];
 
 export const validateOtpVerification = [
-  body("sessionId").notEmpty().withMessage("Session ID is required"),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
 
-  body("otp")
+  body("otpCode")
     .isLength({ min: 6, max: 6 })
     .isNumeric()
     .withMessage("OTP must be a 6-digit number"),
+
+  body("complaintId")
+    .notEmpty()
+    .withMessage("Complaint ID is required"),
 
   handleValidationErrors,
 ];
 
 export const validateGuestComplaint = [
+  body("fullName")
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Full name must be between 2 and 100 characters"),
+
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
+
+  body("phoneNumber")
+    .matches(/^\+?[\d\s-()]{10,}$/)
+    .withMessage("Please provide a valid phone number"),
+
   body("type")
     .isIn([
-      "Water_Supply",
-      "Electricity",
-      "Road_Repair",
-      "Garbage_Collection",
-      "Street_Lighting",
-      "Sewerage",
-      "Public_Health",
-      "Traffic",
-      "Others",
+      "WATER_SUPPLY",
+      "ELECTRICITY",
+      "ROAD_REPAIR",
+      "GARBAGE_COLLECTION",
+      "STREET_LIGHTING",
+      "SEWERAGE",
+      "PUBLIC_HEALTH",
+      "TRAFFIC",
+      "OTHERS",
     ])
     .withMessage("Invalid complaint type"),
 
@@ -363,16 +384,12 @@ export const validateGuestComplaint = [
     .isLength({ min: 10, max: 2000 })
     .withMessage("Description must be between 10 and 2000 characters"),
 
-  body("contactMobile")
-    .matches(/^\+?[\d\s-()]{10,}$/)
-    .withMessage("Please provide a valid mobile number"),
+  body("priority")
+    .optional()
+    .isIn(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    .withMessage("Invalid priority"),
 
-  body("contactEmail")
-    .isEmail()
-    .normalizeEmail()
-    .withMessage("Please provide a valid email"),
-
-  body("ward").notEmpty().withMessage("Ward is required"),
+  body("wardId").notEmpty().withMessage("Ward is required"),
 
   body("area")
     .trim()
@@ -385,34 +402,30 @@ export const validateGuestComplaint = [
     .isLength({ max: 500 })
     .withMessage("Address cannot exceed 500 characters"),
 
-  body("latitude")
+  body("coordinates.latitude")
     .optional()
     .isFloat({ min: -90, max: 90 })
     .withMessage("Invalid latitude"),
 
-  body("longitude")
+  body("coordinates.longitude")
     .optional()
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
-
-  body("guestVerificationToken")
-    .notEmpty()
-    .withMessage("Verification token is required"),
 
   handleValidationErrors,
 ];
 
 export const validateComplaintTracking = [
-  body("complaintId").notEmpty().withMessage("Complaint ID is required"),
-
-  body("email")
+  query("email")
+    .optional()
     .isEmail()
     .normalizeEmail()
     .withMessage("Please provide a valid email"),
 
-  body("mobile")
+  query("phoneNumber")
+    .optional()
     .matches(/^\+?[\d\s-()]{10,}$/)
-    .withMessage("Please provide a valid mobile number"),
+    .withMessage("Please provide a valid phone number"),
 
   handleValidationErrors,
 ];
