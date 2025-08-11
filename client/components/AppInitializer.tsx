@@ -39,3 +39,5 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
   return <>{children}</>;
 };
+
+export default AppInitializer;
