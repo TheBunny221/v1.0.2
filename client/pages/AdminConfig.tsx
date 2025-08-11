@@ -178,33 +178,51 @@ const AdminConfig: React.FC = () => {
 
   const loadAllData = async () => {
     setDataLoading(true);
+
     try {
-      const [wardsResponse, typesResponse, settingsResponse] = await Promise.all([
-        apiCall("/wards"),
-        apiCall("/complaint-types"),
-        apiCall("/system-config"),
-      ]);
+      // Load wards (public endpoint)
+      let wardsResponse;
+      try {
+        wardsResponse = await apiCall("/wards");
+        setWards(wardsResponse.data || []);
+      } catch (error: any) {
+        console.error("Failed to load wards:", error);
+        setWards([]);
+      }
 
-      setWards(wardsResponse.data || []);
-      setComplaintTypes(typesResponse.data || []);
-      setSystemSettings(settingsResponse.data || []);
-    } catch (error: any) {
-      console.error("Failed to load data:", error);
+      // Load complaint types (public endpoint)
+      let typesResponse;
+      try {
+        typesResponse = await apiCall("/complaint-types");
+        setComplaintTypes(typesResponse.data || []);
+      } catch (error: any) {
+        console.error("Failed to load complaint types:", error);
+        setComplaintTypes([]);
+      }
 
-      let errorMessage = "Failed to load configuration data. Please refresh the page.";
-
-      if (error.message) {
-        if (error.message.includes("Server returned an error page")) {
-          errorMessage = "Authentication required. Please log in as an administrator to access this page.";
-        } else if (error.message.includes("Unexpected token")) {
-          errorMessage = "Server configuration error. Please contact support.";
+      // Load system settings (admin-only endpoint)
+      let settingsResponse;
+      try {
+        settingsResponse = await apiCall("/system-config");
+        setSystemSettings(settingsResponse.data || []);
+      } catch (error: any) {
+        console.error("Failed to load system settings:", error);
+        if (error.message.includes("Not authorized") || error.message.includes("Authentication")) {
+          // This is expected for non-admin users, don't show error
+          setSystemSettings([]);
         } else {
-          errorMessage = `Failed to load data: ${error.message}`;
+          // Unexpected error, show it
+          dispatch(
+            showErrorToast("Settings Load Failed", `Failed to load system settings: ${error.message}`)
+          );
+          setSystemSettings([]);
         }
       }
 
+    } catch (error: any) {
+      console.error("Unexpected error during data loading:", error);
       dispatch(
-        showErrorToast("Load Failed", errorMessage)
+        showErrorToast("Load Failed", "An unexpected error occurred while loading data.")
       );
     } finally {
       setDataLoading(false);
