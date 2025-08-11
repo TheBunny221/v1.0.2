@@ -273,9 +273,9 @@ const Navigation: React.FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <div className="p-2">
-                  <h3 className="font-semibold text-sm mb-2">Notifications</h3>
+                  <h3 className="font-semibold text-sm mb-2">{translations?.auth?.notifications || "Notifications"}</h3>
                   {notifications.length === 0 ? (
-                    <p className="text-sm text-gray-500">No notifications</p>
+                    <p className="text-sm text-gray-500">{translations?.common?.noData || "No notifications"}</p>
                   ) : (
                     notifications.slice(0, 5).map((notification) => (
                       <div
