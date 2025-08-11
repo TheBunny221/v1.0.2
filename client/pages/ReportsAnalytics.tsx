@@ -17,7 +17,12 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -179,13 +184,10 @@ const ReportsAnalytics: React.FC = () => {
     try {
       // Simulate export process
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      
+
       const fileName = `complaint-report-${dateRange}.${format}`;
       dispatch(
-        showSuccessToast(
-          "Export Successful",
-          `Report exported as ${fileName}`
-        )
+        showSuccessToast("Export Successful", `Report exported as ${fileName}`),
       );
     } catch (error) {
       dispatch(showErrorToast("Export Failed", "Failed to export report"));
@@ -197,14 +199,14 @@ const ReportsAnalytics: React.FC = () => {
   const generateHeatmapData = () => {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const hours = Array.from({ length: 24 }, (_, i) => i);
-    
+
     return days.flatMap((day, dayIndex) =>
       hours.map((hour) => ({
         day: dayIndex,
         hour,
         value: Math.floor(Math.random() * 50) + 1,
         dayName: day,
-      }))
+      })),
     );
   };
 
@@ -238,7 +240,7 @@ const ReportsAnalytics: React.FC = () => {
             Comprehensive insights and performance metrics
           </p>
         </div>
-        
+
         <div className="flex space-x-2">
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-32">
@@ -251,13 +253,16 @@ const ReportsAnalytics: React.FC = () => {
               <SelectItem value="1y">Last year</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline">
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          
-          <Select value="pdf" onValueChange={(value) => exportReport(value as any)}>
+
+          <Select
+            value="pdf"
+            onValueChange={(value) => exportReport(value as any)}
+          >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Export" />
             </SelectTrigger>
@@ -274,11 +279,15 @@ const ReportsAnalytics: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Complaints</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Complaints
+            </CardTitle>
             <FileText className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.complaints.total}</div>
+            <div className="text-2xl font-bold">
+              {analyticsData.complaints.total}
+            </div>
             <p className="text-xs text-muted-foreground">
               +12% from last month
             </p>
@@ -287,26 +296,35 @@ const ReportsAnalytics: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolution Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Resolution Rate
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {((analyticsData.complaints.resolved / analyticsData.complaints.total) * 100).toFixed(1)}%
+              {(
+                (analyticsData.complaints.resolved /
+                  analyticsData.complaints.total) *
+                100
+              ).toFixed(1)}
+              %
             </div>
-            <p className="text-xs text-muted-foreground">
-              +5% improvement
-            </p>
+            <p className="text-xs text-muted-foreground">+5% improvement</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Resolution Time</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg Resolution Time
+            </CardTitle>
             <Clock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.sla.avgResolutionTime}d</div>
+            <div className="text-2xl font-bold">
+              {analyticsData.sla.avgResolutionTime}d
+            </div>
             <p className="text-xs text-muted-foreground">
               Target: {analyticsData.sla.target}d
             </p>
@@ -315,14 +333,16 @@ const ReportsAnalytics: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">SLA Compliance</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              SLA Compliance
+            </CardTitle>
             <Target className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.sla.compliance}%</div>
-            <p className="text-xs text-muted-foreground">
-              Above target (85%)
-            </p>
+            <div className="text-2xl font-bold">
+              {analyticsData.sla.compliance}%
+            </div>
+            <p className="text-xs text-muted-foreground">Above target (85%)</p>
           </CardContent>
         </Card>
       </div>
@@ -394,7 +414,10 @@ const ReportsAnalytics: React.FC = () => {
                 </ResponsiveContainer>
                 <div className="mt-4 space-y-2">
                   {analyticsData.categories.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center space-x-2">
                         <div
                           className="w-3 h-3 rounded-full"
@@ -422,7 +445,9 @@ const ReportsAnalytics: React.FC = () => {
                 {analyticsData.performance.map((metric, index) => (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{metric.metric}</span>
+                      <span className="text-sm font-medium">
+                        {metric.metric}
+                      </span>
                       <div className="flex items-center space-x-1">
                         {metric.change > 0 ? (
                           <TrendingUp className="h-3 w-3 text-green-600" />
@@ -431,7 +456,9 @@ const ReportsAnalytics: React.FC = () => {
                         )}
                         <span
                           className={`text-xs ${
-                            metric.change > 0 ? "text-green-600" : "text-red-600"
+                            metric.change > 0
+                              ? "text-green-600"
+                              : "text-red-600"
                           }`}
                         >
                           {Math.abs(metric.change)}%
@@ -512,7 +539,7 @@ const ReportsAnalytics: React.FC = () => {
                     <span>High</span>
                   </div>
                 </div>
-                
+
                 <ResponsiveContainer width="100%" height={200}>
                   <ScatterChart>
                     <XAxis
@@ -525,7 +552,9 @@ const ReportsAnalytics: React.FC = () => {
                       type="number"
                       dataKey="day"
                       domain={[0, 6]}
-                      tickFormatter={(value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][value]}
+                      tickFormatter={(value) =>
+                        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][value]
+                      }
                     />
                     <Tooltip
                       content={({ active, payload }) => {
@@ -533,7 +562,9 @@ const ReportsAnalytics: React.FC = () => {
                           const data = payload[0].payload;
                           return (
                             <div className="bg-white p-2 border rounded shadow">
-                              <p>{data.dayName} {data.hour}:00</p>
+                              <p>
+                                {data.dayName} {data.hour}:00
+                              </p>
                               <p>Complaints: {data.value}</p>
                             </div>
                           );
@@ -588,7 +619,9 @@ const ReportsAnalytics: React.FC = () => {
                   ].map((item, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{item.range}</span>
+                        <span className="text-sm font-medium">
+                          {item.range}
+                        </span>
                         <span className="text-sm text-muted-foreground">
                           {item.count} ({item.percentage}%)
                         </span>

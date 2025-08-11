@@ -128,7 +128,8 @@ const AdminLanguages: React.FC = () => {
 
   const [isAddingLanguage, setIsAddingLanguage] = useState(false);
   const [isEditingTranslation, setIsEditingTranslation] = useState(false);
-  const [selectedTranslation, setSelectedTranslation] = useState<TranslationKey | null>(null);
+  const [selectedTranslation, setSelectedTranslation] =
+    useState<TranslationKey | null>(null);
   const [newLanguage, setNewLanguage] = useState({
     code: "",
     name: "",
@@ -168,8 +169,8 @@ const AdminLanguages: React.FC = () => {
   const handleToggleLanguage = (id: string) => {
     setLanguages(
       languages.map((lang) =>
-        lang.id === id ? { ...lang, isActive: !lang.isActive } : lang
-      )
+        lang.id === id ? { ...lang, isActive: !lang.isActive } : lang,
+      ),
     );
   };
 
@@ -179,7 +180,7 @@ const AdminLanguages: React.FC = () => {
         ...lang,
         isDefault: lang.id === id,
         isActive: lang.id === id ? true : lang.isActive,
-      }))
+      })),
     );
     dispatch(showSuccessToast("Success", "Default language updated"));
   };
@@ -195,7 +196,11 @@ const AdminLanguages: React.FC = () => {
   };
 
   const handleAddTranslationKey = () => {
-    if (!newTranslationKey.key || !newTranslationKey.category || !newTranslationKey.en) {
+    if (
+      !newTranslationKey.key ||
+      !newTranslationKey.category ||
+      !newTranslationKey.en
+    ) {
       dispatch(showErrorToast("Validation Error", "All fields are required"));
       return;
     }
@@ -214,8 +219,8 @@ const AdminLanguages: React.FC = () => {
   const handleUpdateTranslation = (updatedKey: TranslationKey) => {
     setTranslationKeys(
       translationKeys.map((key) =>
-        key.key === updatedKey.key ? updatedKey : key
-      )
+        key.key === updatedKey.key ? updatedKey : key,
+      ),
     );
     setIsEditingTranslation(false);
     setSelectedTranslation(null);
@@ -240,7 +245,9 @@ const AdminLanguages: React.FC = () => {
     dispatch(showSuccessToast("Success", "Translations exported successfully"));
   };
 
-  const categories = Array.from(new Set(translationKeys.map((t) => t.category)));
+  const categories = Array.from(
+    new Set(translationKeys.map((t) => t.category)),
+  );
 
   return (
     <div className="space-y-6">
@@ -526,12 +533,16 @@ const AdminLanguages: React.FC = () => {
                   <TableCell>{translationKey.en}</TableCell>
                   <TableCell>
                     {translationKey.hi || (
-                      <span className="text-muted-foreground">Not translated</span>
+                      <span className="text-muted-foreground">
+                        Not translated
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>
                     {translationKey.ml || (
-                      <span className="text-muted-foreground">Not translated</span>
+                      <span className="text-muted-foreground">
+                        Not translated
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -554,7 +565,10 @@ const AdminLanguages: React.FC = () => {
       </Card>
 
       {/* Edit Translation Dialog */}
-      <Dialog open={isEditingTranslation} onOpenChange={setIsEditingTranslation}>
+      <Dialog
+        open={isEditingTranslation}
+        onOpenChange={setIsEditingTranslation}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Translation</DialogTitle>

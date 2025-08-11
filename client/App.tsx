@@ -273,7 +273,10 @@ const App: React.FC = () => {
                                 path="/admin/reports-analytics"
                                 element={
                                   <RoleBasedRoute
-                                    allowedRoles={["ADMINISTRATOR", "WARD_OFFICER"]}
+                                    allowedRoles={[
+                                      "ADMINISTRATOR",
+                                      "WARD_OFFICER",
+                                    ]}
                                   >
                                     <ReportsAnalytics />
                                   </RoleBasedRoute>
