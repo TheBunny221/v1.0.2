@@ -64,6 +64,10 @@ interface Ward {
   description: string;
   isActive: boolean;
   subZones: SubZone[];
+  _count?: {
+    users: number;
+    complaints: number;
+  };
 }
 
 interface SubZone {
@@ -93,187 +97,103 @@ interface SystemSetting {
 const AdminConfig: React.FC = () => {
   const dispatch = useAppDispatch();
   const { translations } = useAppSelector((state) => state.language);
+  const { user } = useAppSelector((state) => state.auth);
 
   // State management
-  const [wards, setWards] = useState<Ward[]>([
-    {
-      id: "1",
-      name: "Ward 1 - Central Zone",
-      description: "Central business district area",
-      isActive: true,
-      subZones: [
-        {
-          id: "1-1",
-          name: "MG Road",
-          wardId: "1",
-          description: "Main shopping area",
-          isActive: true,
-        },
-        {
-          id: "1-2",
-          name: "Broadway",
-          wardId: "1",
-          description: "Commercial district",
-          isActive: true,
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Ward 2 - North Zone",
-      description: "Northern residential area",
-      isActive: true,
-      subZones: [
-        {
-          id: "2-1",
-          name: "Vytilla",
-          wardId: "2",
-          description: "IT hub area",
-          isActive: true,
-        },
-        {
-          id: "2-2",
-          name: "Kadavanthra",
-          wardId: "2",
-          description: "Residential area",
-          isActive: true,
-        },
-      ],
-    },
-    {
-      id: "3",
-      name: "Ward 3 - South Zone",
-      description: "Southern coastal area",
-      isActive: true,
-      subZones: [
-        {
-          id: "3-1",
-          name: "Marine Drive",
-          wardId: "3",
-          description: "Waterfront area",
-          isActive: true,
-        },
-        {
-          id: "3-2",
-          name: "Fort Kochi",
-          wardId: "3",
-          description: "Heritage area",
-          isActive: true,
-        },
-      ],
-    },
-  ]);
-
-  const [complaintTypes, setComplaintTypes] = useState<ComplaintType[]>([
-    {
-      id: "1",
-      name: "Water Supply",
-      description: "Water supply related issues",
-      priority: "HIGH",
-      slaHours: 24,
-      isActive: true,
-    },
-    {
-      id: "2",
-      name: "Electricity",
-      description: "Electrical problems and outages",
-      priority: "CRITICAL",
-      slaHours: 12,
-      isActive: true,
-    },
-    {
-      id: "3",
-      name: "Road Repair",
-      description: "Road maintenance and repairs",
-      priority: "MEDIUM",
-      slaHours: 72,
-      isActive: true,
-    },
-    {
-      id: "4",
-      name: "Garbage Collection",
-      description: "Waste management issues",
-      priority: "MEDIUM",
-      slaHours: 48,
-      isActive: true,
-    },
-    {
-      id: "5",
-      name: "Street Lighting",
-      description: "Street light maintenance",
-      priority: "LOW",
-      slaHours: 48,
-      isActive: true,
-    },
-  ]);
-
-  const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([
-    {
-      key: "OTP_EXPIRY_MINUTES",
-      value: "5",
-      description: "OTP expiration time in minutes",
-      type: "number",
-    },
-    {
-      key: "MAX_FILE_SIZE_MB",
-      value: "10",
-      description: "Maximum file upload size in MB",
-      type: "number",
-    },
-    {
-      key: "DEFAULT_SLA_HOURS",
-      value: "48",
-      description: "Default SLA time in hours",
-      type: "number",
-    },
-    {
-      key: "ADMIN_EMAIL",
-      value: "admin@cochinsmart.gov.in",
-      description: "Administrator email address",
-      type: "string",
-    },
-    {
-      key: "SYSTEM_MAINTENANCE",
-      value: "false",
-      description: "System maintenance mode",
-      type: "boolean",
-    },
-    {
-      key: "NOTIFICATION_SETTINGS",
-      value: '{"email":true,"sms":false}',
-      description: "Notification preferences",
-      type: "json",
-    },
-  ]);
-
+  const [wards, setWards] = useState<Ward[]>([]);
+  const [complaintTypes, setComplaintTypes] = useState<ComplaintType[]>([]);
+  const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
   const [editingWard, setEditingWard] = useState<Ward | null>(null);
-  const [editingComplaintType, setEditingComplaintType] =
-    useState<ComplaintType | null>(null);
+  const [editingComplaintType, setEditingComplaintType] = useState<ComplaintType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  // API calls
+  const apiCall = async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`/api${url}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: "Request failed" }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    loadAllData();
+  }, []);
+
+  const loadAllData = async () => {
+    setDataLoading(true);
+    try {
+      const [wardsResponse, typesResponse, settingsResponse] = await Promise.all([
+        apiCall("/wards"),
+        apiCall("/complaint-types"),
+        apiCall("/system-config"),
+      ]);
+
+      setWards(wardsResponse.data || []);
+      setComplaintTypes(typesResponse.data || []);
+      setSystemSettings(settingsResponse.data || []);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      dispatch(
+        showErrorToast("Load Failed", "Failed to load configuration data. Please refresh the page.")
+      );
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   // Ward Management Functions
   const handleSaveWard = async (ward: Ward) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const wardData = {
+        name: ward.name,
+        description: ward.description,
+        isActive: ward.isActive,
+      };
 
-      if (editingWard?.id) {
-        setWards((prev) => prev.map((w) => (w.id === ward.id ? ward : w)));
+      let response;
+      if (ward.id && ward.id !== "") {
+        // Update existing ward
+        response = await apiCall(`/wards/${ward.id}`, {
+          method: "PUT",
+          body: JSON.stringify(wardData),
+        });
+        setWards((prev) =>
+          prev.map((w) => (w.id === ward.id ? { ...ward, ...response.data } : w))
+        );
       } else {
-        setWards((prev) => [...prev, { ...ward, id: Date.now().toString() }]);
+        // Create new ward
+        response = await apiCall("/wards", {
+          method: "POST",
+          body: JSON.stringify(wardData),
+        });
+        setWards((prev) => [...prev, response.data]);
       }
 
       setEditingWard(null);
       dispatch(
         showSuccessToast(
           "Ward Saved",
-          `Ward "${ward.name}" has been saved successfully.`,
-        ),
+          `Ward "${ward.name}" has been saved successfully.`
+        )
       );
-    } catch (error) {
+    } catch (error: any) {
       dispatch(
-        showErrorToast("Save Failed", "Failed to save ward. Please try again."),
+        showErrorToast("Save Failed", error.message || "Failed to save ward. Please try again.")
       );
     } finally {
       setIsLoading(false);
@@ -285,18 +205,18 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await apiCall(`/wards/${wardId}`, { method: "DELETE" });
       setWards((prev) => prev.filter((w) => w.id !== wardId));
 
       dispatch(
-        showSuccessToast("Ward Deleted", "Ward has been deleted successfully."),
+        showSuccessToast("Ward Deleted", "Ward has been deleted successfully.")
       );
-    } catch (error) {
+    } catch (error: any) {
       dispatch(
         showErrorToast(
           "Delete Failed",
-          "Failed to delete ward. Please try again.",
-        ),
+          error.message || "Failed to delete ward. Please try again."
+        )
       );
     } finally {
       setIsLoading(false);
@@ -307,34 +227,46 @@ const AdminConfig: React.FC = () => {
   const handleSaveComplaintType = async (type: ComplaintType) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const typeData = {
+        name: type.name,
+        description: type.description,
+        priority: type.priority,
+        slaHours: type.slaHours,
+        isActive: type.isActive,
+      };
 
-      if (editingComplaintType?.id) {
+      let response;
+      if (type.id && type.id !== "") {
+        // Update existing type
+        response = await apiCall(`/complaint-types/${type.id}`, {
+          method: "PUT",
+          body: JSON.stringify(typeData),
+        });
         setComplaintTypes((prev) =>
-          prev.map((t) => (t.id === type.id ? type : t)),
+          prev.map((t) => (t.id === type.id ? { ...type, ...response.data } : t))
         );
       } else {
-        setComplaintTypes((prev) => [
-          ...prev,
-          { ...type, id: Date.now().toString() },
-        ]);
+        // Create new type
+        response = await apiCall("/complaint-types", {
+          method: "POST",
+          body: JSON.stringify(typeData),
+        });
+        setComplaintTypes((prev) => [...prev, response.data]);
       }
 
       setEditingComplaintType(null);
       dispatch(
-        addNotification({
-          type: "success",
-          title: "Complaint Type Saved",
-          message: `Complaint type "${type.name}" has been saved successfully.`,
-        }),
+        showSuccessToast(
+          "Complaint Type Saved",
+          `Complaint type "${type.name}" has been saved successfully.`
+        )
       );
-    } catch (error) {
+    } catch (error: any) {
       dispatch(
-        addNotification({
-          type: "error",
-          title: "Save Failed",
-          message: "Failed to save complaint type. Please try again.",
-        }),
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save complaint type. Please try again."
+        )
       );
     } finally {
       setIsLoading(false);
@@ -347,23 +279,21 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await apiCall(`/complaint-types/${typeId}`, { method: "DELETE" });
       setComplaintTypes((prev) => prev.filter((t) => t.id !== typeId));
 
       dispatch(
-        addNotification({
-          type: "success",
-          title: "Complaint Type Deleted",
-          message: "Complaint type has been deleted successfully.",
-        }),
+        showSuccessToast(
+          "Complaint Type Deleted",
+          "Complaint type has been deleted successfully."
+        )
       );
-    } catch (error) {
+    } catch (error: any) {
       dispatch(
-        addNotification({
-          type: "error",
-          title: "Delete Failed",
-          message: "Failed to delete complaint type. Please try again.",
-        }),
+        showErrorToast(
+          "Delete Failed",
+          error.message || "Failed to delete complaint type. Please try again."
+        )
       );
     } finally {
       setIsLoading(false);
@@ -374,25 +304,27 @@ const AdminConfig: React.FC = () => {
   const handleUpdateSystemSetting = async (key: string, value: string) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await apiCall(`/system-config/${key}`, {
+        method: "PUT",
+        body: JSON.stringify({ value }),
+      });
+
       setSystemSettings((prev) =>
-        prev.map((s) => (s.key === key ? { ...s, value } : s)),
+        prev.map((s) => (s.key === key ? { ...s, value } : s))
       );
 
       dispatch(
-        addNotification({
-          type: "success",
-          title: "Setting Updated",
-          message: `System setting "${key}" has been updated.`,
-        }),
+        showSuccessToast(
+          "Setting Updated",
+          `System setting "${key}" has been updated.`
+        )
       );
-    } catch (error) {
+    } catch (error: any) {
       dispatch(
-        addNotification({
-          type: "error",
-          title: "Update Failed",
-          message: "Failed to update system setting. Please try again.",
-        }),
+        showErrorToast(
+          "Update Failed",
+          error.message || "Failed to update system setting. Please try again."
+        )
       );
     } finally {
       setIsLoading(false);
@@ -413,6 +345,15 @@ const AdminConfig: React.FC = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (dataLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading configuration data...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -539,7 +480,7 @@ const AdminConfig: React.FC = () => {
                       <TableCell>{ward.description}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {ward.subZones.length} zones
+                          {ward.subZones?.length || 0} zones
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -649,7 +590,7 @@ const AdminConfig: React.FC = () => {
                           <Select
                             value={editingComplaintType.priority}
                             onValueChange={(
-                              value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+                              value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
                             ) =>
                               setEditingComplaintType({
                                 ...editingComplaintType,
@@ -814,7 +755,7 @@ const AdminConfig: React.FC = () => {
                           onChange={(e) =>
                             handleUpdateSystemSetting(
                               setting.key,
-                              e.target.value,
+                              e.target.value
                             )
                           }
                           placeholder="Enter JSON value"
@@ -827,7 +768,7 @@ const AdminConfig: React.FC = () => {
                           onChange={(e) =>
                             handleUpdateSystemSetting(
                               setting.key,
-                              e.target.value,
+                              e.target.value
                             )
                           }
                           placeholder={`Enter ${setting.type} value`}
