@@ -1,0 +1,352 @@
+import { getPrisma } from "../db/connection.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+
+const prisma = getPrisma();
+
+// @desc    Get all system settings
+// @route   GET /api/system-config
+// @access  Private (Admin only)
+export const getSystemSettings = asyncHandler(async (req, res) => {
+  const settings = await prisma.systemConfig.findMany({
+    where: {
+      key: {
+        not: {
+          startsWith: "COMPLAINT_TYPE_",
+        },
+      },
+    },
+    orderBy: {
+      key: "asc",
+    },
+  });
+
+  // Transform data to match frontend interface
+  const transformedSettings = settings.map((setting) => {
+    let type = "string";
+    let value = setting.value;
+
+    // Determine type based on value
+    if (value === "true" || value === "false") {
+      type = "boolean";
+    } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+      type = "number";
+    } else if (value.startsWith("{") || value.startsWith("[")) {
+      type = "json";
+    }
+
+    return {
+      key: setting.key,
+      value: setting.value,
+      description: setting.description,
+      type: type,
+      isActive: setting.isActive,
+      updatedAt: setting.updatedAt,
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "System settings retrieved successfully",
+    data: transformedSettings,
+  });
+});
+
+// @desc    Get system setting by key
+// @route   GET /api/system-config/:key
+// @access  Private (Admin only)
+export const getSystemSettingByKey = asyncHandler(async (req, res) => {
+  const { key } = req.params;
+
+  const setting = await prisma.systemConfig.findUnique({
+    where: { key },
+  });
+
+  if (!setting) {
+    return res.status(404).json({
+      success: false,
+      message: "System setting not found",
+    });
+  }
+
+  let type = "string";
+  const value = setting.value;
+
+  // Determine type based on value
+  if (value === "true" || value === "false") {
+    type = "boolean";
+  } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+    type = "number";
+  } else if (value.startsWith("{") || value.startsWith("[")) {
+    type = "json";
+  }
+
+  const transformedSetting = {
+    key: setting.key,
+    value: setting.value,
+    description: setting.description,
+    type: type,
+    isActive: setting.isActive,
+    updatedAt: setting.updatedAt,
+  };
+
+  res.status(200).json({
+    success: true,
+    message: "System setting retrieved successfully",
+    data: transformedSetting,
+  });
+});
+
+// @desc    Create or update system setting
+// @route   POST /api/system-config
+// @access  Private (Admin only)
+export const createOrUpdateSystemSetting = asyncHandler(async (req, res) => {
+  const { key, value, description, type } = req.body;
+
+  if (!key || value === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: "Key and value are required",
+    });
+  }
+
+  // Validate value based on type
+  if (type === "boolean" && !["true", "false"].includes(value)) {
+    return res.status(400).json({
+      success: false,
+      message: "Boolean values must be 'true' or 'false'",
+    });
+  }
+
+  if (type === "number" && isNaN(parseFloat(value))) {
+    return res.status(400).json({
+      success: false,
+      message: "Number values must be valid numbers",
+    });
+  }
+
+  if (type === "json") {
+    try {
+      JSON.parse(value);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: "JSON values must be valid JSON",
+      });
+    }
+  }
+
+  const setting = await prisma.systemConfig.upsert({
+    where: { key },
+    update: {
+      value,
+      description: description || undefined,
+    },
+    create: {
+      key,
+      value,
+      description: description || `System setting for ${key}`,
+      isActive: true,
+    },
+  });
+
+  const transformedSetting = {
+    key: setting.key,
+    value: setting.value,
+    description: setting.description,
+    type: type || "string",
+    isActive: setting.isActive,
+    updatedAt: setting.updatedAt,
+  };
+
+  res.status(200).json({
+    success: true,
+    message: "System setting saved successfully",
+    data: transformedSetting,
+  });
+});
+
+// @desc    Update system setting
+// @route   PUT /api/system-config/:key
+// @access  Private (Admin only)
+export const updateSystemSetting = asyncHandler(async (req, res) => {
+  const { key } = req.params;
+  const { value, description, isActive } = req.body;
+
+  const existingSetting = await prisma.systemConfig.findUnique({
+    where: { key },
+  });
+
+  if (!existingSetting) {
+    return res.status(404).json({
+      success: false,
+      message: "System setting not found",
+    });
+  }
+
+  const setting = await prisma.systemConfig.update({
+    where: { key },
+    data: {
+      ...(value !== undefined && { value }),
+      ...(description !== undefined && { description }),
+      ...(isActive !== undefined && { isActive }),
+    },
+  });
+
+  let type = "string";
+  const settingValue = setting.value;
+
+  // Determine type based on value
+  if (settingValue === "true" || settingValue === "false") {
+    type = "boolean";
+  } else if (!isNaN(settingValue) && !isNaN(parseFloat(settingValue))) {
+    type = "number";
+  } else if (settingValue.startsWith("{") || settingValue.startsWith("[")) {
+    type = "json";
+  }
+
+  const transformedSetting = {
+    key: setting.key,
+    value: setting.value,
+    description: setting.description,
+    type: type,
+    isActive: setting.isActive,
+    updatedAt: setting.updatedAt,
+  };
+
+  res.status(200).json({
+    success: true,
+    message: "System setting updated successfully",
+    data: transformedSetting,
+  });
+});
+
+// @desc    Delete system setting
+// @route   DELETE /api/system-config/:key
+// @access  Private (Admin only)
+export const deleteSystemSetting = asyncHandler(async (req, res) => {
+  const { key } = req.params;
+
+  const setting = await prisma.systemConfig.findUnique({
+    where: { key },
+  });
+
+  if (!setting) {
+    return res.status(404).json({
+      success: false,
+      message: "System setting not found",
+    });
+  }
+
+  await prisma.systemConfig.delete({
+    where: { key },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "System setting deleted successfully",
+  });
+});
+
+// @desc    Reset system settings to defaults
+// @route   POST /api/system-config/reset
+// @access  Private (Admin only)
+export const resetSystemSettings = asyncHandler(async (req, res) => {
+  // Delete all non-complaint-type settings
+  await prisma.systemConfig.deleteMany({
+    where: {
+      key: {
+        not: {
+          startsWith: "COMPLAINT_TYPE_",
+        },
+      },
+    },
+  });
+
+  // Create default settings
+  const defaultSettings = [
+    {
+      key: "OTP_EXPIRY_MINUTES",
+      value: "5",
+      description: "OTP expiration time in minutes",
+    },
+    {
+      key: "MAX_FILE_SIZE_MB",
+      value: "10",
+      description: "Maximum file upload size in MB",
+    },
+    {
+      key: "DEFAULT_SLA_HOURS",
+      value: "48",
+      description: "Default SLA time in hours",
+    },
+    {
+      key: "ADMIN_EMAIL",
+      value: "admin@cochinsmart.gov.in",
+      description: "Administrator email address",
+    },
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      description: "System maintenance mode",
+    },
+    {
+      key: "NOTIFICATION_SETTINGS",
+      value: '{"email":true,"sms":false}',
+      description: "Notification preferences",
+    },
+    {
+      key: "AUTO_ASSIGN_COMPLAINTS",
+      value: "true",
+      description: "Automatically assign complaints to ward officers",
+    },
+    {
+      key: "CITIZEN_REGISTRATION_ENABLED",
+      value: "true",
+      description: "Allow citizen self-registration",
+    },
+  ];
+
+  await prisma.systemConfig.createMany({
+    data: defaultSettings.map((setting) => ({
+      ...setting,
+      isActive: true,
+    })),
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "System settings reset to defaults successfully",
+  });
+});
+
+// @desc    Get system health check
+// @route   GET /api/system-config/health
+// @access  Private (Admin only)
+export const getSystemHealth = asyncHandler(async (req, res) => {
+  const stats = {
+    totalUsers: await prisma.user.count(),
+    activeUsers: await prisma.user.count({ where: { isActive: true } }),
+    totalComplaints: await prisma.complaint.count(),
+    openComplaints: await prisma.complaint.count({
+      where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } },
+    }),
+    totalWards: await prisma.ward.count(),
+    activeWards: await prisma.ward.count({ where: { isActive: true } }),
+    systemSettings: await prisma.systemConfig.count(),
+  };
+
+  const dbStatus = "healthy"; // In a real app, you'd check database connectivity
+  const uptime = process.uptime();
+
+  res.status(200).json({
+    success: true,
+    message: "System health check completed",
+    data: {
+      status: "healthy",
+      uptime: Math.floor(uptime),
+      database: dbStatus,
+      statistics: stats,
+      timestamp: new Date().toISOString(),
+    },
+  });
+});
