@@ -5,7 +5,7 @@ import { Toaster } from './components/ui/toaster';
 import { store } from './store';
 import ErrorBoundary from './components/ErrorBoundary';
 import AppInitializer from './components/AppInitializer';
-import Layout from './components/Layout';
+import Navigation from './components/Navigation';
 import RoleBasedRoute from './components/RoleBasedRoute';
 import { Loader2 } from 'lucide-react';
 
