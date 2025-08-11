@@ -310,6 +310,35 @@ export const updateProfile = createAsyncThunk(
   },
 );
 
+// User preferences update
+export const updateUserPreferences = createAsyncThunk(
+  "auth/updateUserPreferences",
+  async (preferences: {
+    language?: string;
+    notificationsEnabled?: boolean;
+    emailAlerts?: boolean;
+  }, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      const token = state.auth.token;
+
+      const data = await apiCall("/api/auth/profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(preferences),
+      });
+
+      return data.data.user;
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Failed to update preferences"
+      });
+    }
+  },
+);
+
 // Logout
 export const logout = createAsyncThunk(
   "auth/logout",
