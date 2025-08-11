@@ -59,10 +59,21 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
     ...options,
   });
 
-  const data = await response.json();
+  // Check if response has content before trying to parse JSON
+  const contentType = response.headers.get("content-type");
+  let data = null;
+
+  if (contentType && contentType.includes("application/json")) {
+    try {
+      data = await response.json();
+    } catch (error) {
+      // If JSON parsing fails, set data to null
+      data = null;
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || `HTTP ${response.status}`);
+    throw new Error(data?.message || `HTTP ${response.status}`);
   }
 
   return data;
