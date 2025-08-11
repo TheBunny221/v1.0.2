@@ -154,6 +154,8 @@ export function createApp() {
   app.use("/api/admin", adminRoutes);
   app.use("/api/reports", reportRoutes);
   app.use("/api/uploads", uploadRoutes);
+  app.use("/api/complaint-types", complaintTypeRoutes);
+  app.use("/api/system-config", systemConfigRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
