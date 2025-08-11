@@ -12,55 +12,8 @@ datasource db {
   // provider = "postgresql"
 }
 
-// Enums
-enum UserRole {
-  CITIZEN
-  WARD_OFFICER
-  MAINTENANCE_TEAM
-  ADMINISTRATOR
-  GUEST
-}
-
-enum ComplaintStatus {
-  REGISTERED
-  ASSIGNED
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-  REOPENED
-}
-
-enum ComplaintPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum ComplaintType {
-  WATER_SUPPLY
-  ELECTRICITY
-  ROAD_REPAIR
-  GARBAGE_COLLECTION
-  STREET_LIGHTING
-  SEWERAGE
-  PUBLIC_HEALTH
-  TRAFFIC
-  OTHERS
-}
-
-enum NotificationType {
-  EMAIL
-  SMS
-  IN_APP
-}
-
-enum SLAStatus {
-  ON_TIME
-  WARNING
-  OVERDUE
-  COMPLETED
-}
+// Enums converted to String for SQLite compatibility
+// For PostgreSQL deployment, these should be converted back to proper enums
 
 // Models
 model User {
