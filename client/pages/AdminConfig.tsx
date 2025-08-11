@@ -289,11 +289,7 @@ const AdminConfig: React.FC = () => {
       setWards((prev) => prev.filter((w) => w.id !== wardId));
 
       dispatch(
-        addNotification({
-          type: "success",
-          title: "Ward Deleted",
-          message: "Ward has been deleted successfully.",
-        }),
+        showSuccessToast("Ward Deleted", "Ward has been deleted successfully."),
       );
     } catch (error) {
       dispatch(
