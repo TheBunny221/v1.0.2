@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 const Index = lazy(() => import('./pages/Index'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
+const SetPassword = lazy(() => import('./pages/SetPassword'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 
@@ -70,6 +71,7 @@ const App: React.FC = () => {
                   {/* Public routes */}
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/set-password/:token" element={<SetPassword />} />
                   <Route path="/guest/complaint" element={<GuestComplaintForm />} />
                   <Route path="/guest/track" element={<GuestTrackComplaint />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
