@@ -21,7 +21,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     // Check for existing token and login automatically
     const token = localStorage.getItem("token");
     if (token) {
-      dispatch(loginWithToken(token));
+      dispatch(loginWithToken());
     }
 
     // Setup online/offline listeners
