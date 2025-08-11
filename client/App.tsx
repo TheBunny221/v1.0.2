@@ -254,7 +254,7 @@ const App: React.FC = () => {
                 </Routes>
               </Suspense>
             </div>
-            <Toaster position="top-right" />
+            <Toaster />
           </Router>
         </AppInitializer>
       </ErrorBoundary>
