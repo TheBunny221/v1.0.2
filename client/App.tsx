@@ -74,181 +74,176 @@ const App: React.FC = () => {
                   <Route path="/guest/track" element={<GuestTrackComplaint />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
 
-                  {/* Protected routes with Layout */}
+                  {/* Protected and Public Routes */}
                   <Route
                     path="/*"
                     element={
-                      <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR', 'GUEST']}>
-                        <Layout>
-                          <Routes>
-                            {/* Home route - redirects to appropriate dashboard */}
-                            <Route path="/" element={<Index />} />
+                      <div className="min-h-screen bg-gray-50">
+                        <Navigation />
+                        <main className="pt-16">
+                          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            <Routes>
+                              {/* Home route */}
+                              <Route path="/" element={<Index />} />
 
-                            {/* Dashboard routes */}
-                            <Route
-                              path="/dashboard"
-                              element={
-                                <RoleBasedRoute allowedRoles={['CITIZEN']}>
-                                  <CitizenDashboard />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/dashboard"
-                              element={
-                                <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
-                                  <WardOfficerDashboard />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/dashboard"
-                              element={
-                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
-                                  <MaintenanceDashboard />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/dashboard"
-                              element={
-                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
-                                  <AdminDashboard />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Dashboard routes */}
+                              <Route
+                                path="/dashboard"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['CITIZEN']}>
+                                    <CitizenDashboard />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/dashboard/ward"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
+                                    <WardOfficerDashboard />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/dashboard/maintenance"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                    <MaintenanceDashboard />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/dashboard/admin"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                    <AdminDashboard />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Complaint routes */}
-                            <Route
-                              path="/complaints"
-                              element={
-                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
-                                  <ComplaintsList />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/complaints/:id"
-                              element={
-                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
-                                  <ComplaintDetails />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Complaint routes */}
+                              <Route
+                                path="/complaints"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                    <ComplaintsList />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/complaints/:id"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                    <ComplaintDetails />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Ward Officer routes */}
-                            <Route
-                              path="/tasks"
-                              element={
-                                <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
-                                  <WardTasks />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/ward"
-                              element={
-                                <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
-                                  <WardManagement />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Ward Officer routes */}
+                              <Route
+                                path="/tasks"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
+                                    <WardTasks />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/ward"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
+                                    <WardManagement />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Maintenance Team routes */}
-                            <Route
-                              path="/tasks"
-                              element={
-                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
-                                  <MaintenanceTasks />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/maintenance"
-                              element={
-                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
-                                  <MaintenanceTasks />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/tasks/:id"
-                              element={
-                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
-                                  <TaskDetails />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Maintenance Team routes */}
+                              <Route
+                                path="/maintenance"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                    <MaintenanceTasks />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/tasks/:id"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                    <TaskDetails />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Communication routes */}
-                            <Route
-                              path="/messages"
-                              element={
-                                <RoleBasedRoute allowedRoles={['WARD_OFFICER', 'MAINTENANCE_TEAM']}>
-                                  <Messages />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Communication routes */}
+                              <Route
+                                path="/messages"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['WARD_OFFICER', 'MAINTENANCE_TEAM']}>
+                                    <Messages />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Reports routes */}
-                            <Route
-                              path="/reports"
-                              element={
-                                <RoleBasedRoute allowedRoles={['WARD_OFFICER', 'ADMINISTRATOR']}>
-                                  <AdminReports />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Reports routes */}
+                              <Route
+                                path="/reports"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['WARD_OFFICER', 'ADMINISTRATOR']}>
+                                    <AdminReports />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Admin routes */}
-                            <Route
-                              path="/admin/users"
-                              element={
-                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
-                                  <AdminUsers />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/admin/config"
-                              element={
-                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
-                                  <AdminConfig />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/admin/analytics"
-                              element={
-                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
-                                  <AdminAnalytics />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Admin routes */}
+                              <Route
+                                path="/admin/users"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                    <AdminUsers />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/admin/config"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                    <AdminConfig />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/admin/analytics"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                    <AdminAnalytics />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Profile and Settings */}
-                            <Route
-                              path="/profile"
-                              element={
-                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
-                                  <Profile />
-                                </RoleBasedRoute>
-                              }
-                            />
-                            <Route
-                              path="/settings"
-                              element={
-                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
-                                  <Settings />
-                                </RoleBasedRoute>
-                              }
-                            />
+                              {/* Profile and Settings */}
+                              <Route
+                                path="/profile"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                    <Profile />
+                                  </RoleBasedRoute>
+                                }
+                              />
+                              <Route
+                                path="/settings"
+                                element={
+                                  <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                    <Settings />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
-                            {/* Catch all route */}
-                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                          </Routes>
-                        </Layout>
-                      </RoleBasedRoute>
+                              {/* Catch all route */}
+                              <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                          </div>
+                        </main>
+                      </div>
                     }
                   />
                 </Routes>
