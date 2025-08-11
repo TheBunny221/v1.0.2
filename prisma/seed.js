@@ -181,28 +181,189 @@ async function main() {
     },
   });
 
-  // Create system configuration
-  await prisma.systemConfig.upsert({
-    where: { key: "SLA_RESPONSE_TIME_HOURS" },
-    update: { value: "24" },
-    create: {
-      key: "SLA_RESPONSE_TIME_HOURS",
-      value: "24",
-      description: "Maximum response time for complaints in hours",
-      isActive: true,
+  // Create complaint types
+  const complaintTypes = [
+    {
+      key: "COMPLAINT_TYPE_WATER_SUPPLY",
+      value: JSON.stringify({
+        name: "Water Supply",
+        description: "Water supply related issues",
+        priority: "HIGH",
+        slaHours: 24,
+      }),
+      description: "Complaint type configuration for Water Supply",
     },
-  });
+    {
+      key: "COMPLAINT_TYPE_ELECTRICITY",
+      value: JSON.stringify({
+        name: "Electricity",
+        description: "Electrical problems and outages",
+        priority: "CRITICAL",
+        slaHours: 12,
+      }),
+      description: "Complaint type configuration for Electricity",
+    },
+    {
+      key: "COMPLAINT_TYPE_ROAD_REPAIR",
+      value: JSON.stringify({
+        name: "Road Repair",
+        description: "Road maintenance and repairs",
+        priority: "MEDIUM",
+        slaHours: 72,
+      }),
+      description: "Complaint type configuration for Road Repair",
+    },
+    {
+      key: "COMPLAINT_TYPE_GARBAGE_COLLECTION",
+      value: JSON.stringify({
+        name: "Garbage Collection",
+        description: "Waste management issues",
+        priority: "MEDIUM",
+        slaHours: 48,
+      }),
+      description: "Complaint type configuration for Garbage Collection",
+    },
+    {
+      key: "COMPLAINT_TYPE_STREET_LIGHTING",
+      value: JSON.stringify({
+        name: "Street Lighting",
+        description: "Street light maintenance",
+        priority: "LOW",
+        slaHours: 48,
+      }),
+      description: "Complaint type configuration for Street Lighting",
+    },
+    {
+      key: "COMPLAINT_TYPE_SEWERAGE",
+      value: JSON.stringify({
+        name: "Sewerage",
+        description: "Sewerage and drainage issues",
+        priority: "HIGH",
+        slaHours: 24,
+      }),
+      description: "Complaint type configuration for Sewerage",
+    },
+    {
+      key: "COMPLAINT_TYPE_PUBLIC_HEALTH",
+      value: JSON.stringify({
+        name: "Public Health",
+        description: "Public health and sanitation",
+        priority: "HIGH",
+        slaHours: 36,
+      }),
+      description: "Complaint type configuration for Public Health",
+    },
+    {
+      key: "COMPLAINT_TYPE_TRAFFIC",
+      value: JSON.stringify({
+        name: "Traffic",
+        description: "Traffic management issues",
+        priority: "MEDIUM",
+        slaHours: 48,
+      }),
+      description: "Complaint type configuration for Traffic",
+    },
+  ];
 
-  await prisma.systemConfig.upsert({
-    where: { key: "MAX_FILE_UPLOAD_SIZE_MB" },
-    update: { value: "10" },
-    create: {
-      key: "MAX_FILE_UPLOAD_SIZE_MB",
+  for (const type of complaintTypes) {
+    await prisma.systemConfig.upsert({
+      where: { key: type.key },
+      update: { value: type.value },
+      create: {
+        key: type.key,
+        value: type.value,
+        description: type.description,
+        isActive: true,
+      },
+    });
+  }
+
+  // Create system configuration settings
+  const systemSettings = [
+    {
+      key: "OTP_EXPIRY_MINUTES",
+      value: "5",
+      description: "OTP expiration time in minutes",
+    },
+    {
+      key: "MAX_FILE_SIZE_MB",
       value: "10",
       description: "Maximum file upload size in MB",
-      isActive: true,
     },
-  });
+    {
+      key: "DEFAULT_SLA_HOURS",
+      value: "48",
+      description: "Default SLA time in hours",
+    },
+    {
+      key: "ADMIN_EMAIL",
+      value: "admin@cochinsmart.gov.in",
+      description: "Administrator email address",
+    },
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      description: "System maintenance mode",
+    },
+    {
+      key: "NOTIFICATION_SETTINGS",
+      value: '{"email":true,"sms":false}',
+      description: "Notification preferences",
+    },
+    {
+      key: "AUTO_ASSIGN_COMPLAINTS",
+      value: "true",
+      description: "Automatically assign complaints to ward officers",
+    },
+    {
+      key: "CITIZEN_REGISTRATION_ENABLED",
+      value: "true",
+      description: "Allow citizen self-registration",
+    },
+    {
+      key: "GUEST_COMPLAINTS_ENABLED",
+      value: "true",
+      description: "Allow guest complaints without registration",
+    },
+    {
+      key: "EMAIL_NOTIFICATIONS_ENABLED",
+      value: "true",
+      description: "Enable email notifications",
+    },
+    {
+      key: "SMS_NOTIFICATIONS_ENABLED",
+      value: "false",
+      description: "Enable SMS notifications",
+    },
+    {
+      key: "APP_NAME",
+      value: "Cochin Smart City",
+      description: "Application name",
+    },
+    {
+      key: "SUPPORT_EMAIL",
+      value: "support@cochinsmart.gov.in",
+      description: "Support email address",
+    },
+    {
+      key: "SUPPORT_PHONE",
+      value: "+91-484-2345678",
+      description: "Support phone number",
+    },
+  ];
+
+  for (const setting of systemSettings) {
+    await prisma.systemConfig.upsert({
+      where: { key: setting.key },
+      update: { value: setting.value },
+      create: {
+        key: setting.key,
+        value: setting.value,
+        description: setting.description,
+        isActive: true,
+      },
+    });
+  }
 
   console.log("✅ Seed completed successfully!");
   console.log("\n📋 Demo Login Credentials:");
