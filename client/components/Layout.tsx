@@ -300,3 +300,5 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
     </div>
   );
 };
+
+export default Layout;
