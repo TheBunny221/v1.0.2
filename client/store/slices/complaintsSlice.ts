@@ -544,6 +544,41 @@ const complaintsSlice = createSlice({
   },
 });
 
+// Additional action creators
+export const updateComplaintStatus = createAsyncThunk(
+  "complaints/updateStatus",
+  async (
+    { id, status, comment }: { id: string; status: string; comment?: string },
+    { getState, rejectWithValue }
+  ) => {
+    try {
+      const state = getState() as { auth: { token: string } };
+      const token = state.auth.token;
+
+      const response = await fetch(`/api/complaints/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status, comment }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to update status");
+      }
+
+      return data.data.complaint;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Network error"
+      );
+    }
+  }
+);
+
 export const {
   setFilters,
   clearFilters,
