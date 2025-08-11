@@ -121,13 +121,13 @@ const Navigation: React.FC = () => {
       roles: ["ADMINISTRATOR"],
     },
     {
-      label: "System Config",
+      label: translations?.settings?.generalSettings || "System Config",
       path: "/admin/config",
       icon: <Database className="h-4 w-4" />,
       roles: ["ADMINISTRATOR"],
     },
     {
-      label: "Analytics",
+      label: translations?.dashboard?.analytics || "Analytics",
       path: "/admin/analytics",
       icon: <TrendingUp className="h-4 w-4" />,
       roles: ["ADMINISTRATOR"],
