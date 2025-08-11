@@ -14,13 +14,13 @@ import {
 } from "./ui/dropdown-menu";
 import {
   Bell,
-  User as UserIcon,
+  UserIcon as UserIconIcon,
   Settings,
   LogOut,
   Menu,
   X,
   FileText,
-  Users,
+  UserIcons,
   BarChart3,
   MapPin,
   Wrench,
@@ -28,10 +28,10 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-import type { User } from "../store/slices/authSlice";
+import type { UserIcon } from "../store/slices/authSlice";
 
 interface LayoutProps {
-  userRole?: User["role"];
+  userRole?: UserIcon["role"];
 }
 
 const Layout: React.FC<LayoutProps> = ({ userRole }) => {
@@ -45,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   const { isSidebarOpen, notifications } = useAppSelector((state) => state.ui);
 
   // Use authenticated user's role if available, otherwise fall back to prop
-  const effectiveUserRole = user?.role || userRole || "citizen";
+  const effectiveUserIconRole = user?.role || userRole || "citizen";
   const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
   // Return loading state if translations are not yet loaded
@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   }
 
   const getNavigationItems = () => {
-    switch (effectiveUserRole) {
+    switch (effectiveUserIconRole) {
       case "citizen":
         return [
           {
@@ -104,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
           {
             path: "/admin/users",
             label: translations.nav.users + " Management",
-            icon: Users,
+            icon: UserIcons,
           },
           {
             path: "/admin/reports",
@@ -144,7 +144,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   const navigationItems = getNavigationItems();
 
   const getRoleLabel = () => {
-    switch (effectiveUserRole) {
+    switch (effectiveUserIconRole) {
       case "citizen":
         return "Citizen Portal";
       case "admin":
@@ -222,17 +222,17 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
               )}
             </Button>
 
-            {/* User Menu */}
+            {/* UserIcon Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <User className="h-5 w-5" />
+                  <UserIcon className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <Link to="/profile" className="flex items-center">
-                    <User className="h-4 w-4 mr-2" />
+                    <UserIcon className="h-4 w-4 mr-2" />
                     {translations.nav.profile}
                   </Link>
                 </DropdownMenuItem>
