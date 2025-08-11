@@ -20,7 +20,10 @@ import {
 
 const router = express.Router();
 
-// All routes are protected
+// Public routes (no authentication required)
+router.get("/public/stats", getComplaintStats);
+
+// Protected routes (require authentication)
 router.use(protect);
 
 // Complaint management routes
