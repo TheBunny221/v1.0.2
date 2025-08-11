@@ -1,354 +1,361 @@
-import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { trackGuestComplaint } from "../store/slices/guestSlice";
-import { showErrorToast } from "../store/slices/uiSlice";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Separator } from "../components/ui/separator";
-import {
-  Search,
-  Phone,
-  Mail,
-  MapPin,
-  Calendar,
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAppDispatch } from '../store/hooks';
+import { trackGuestComplaint } from '../store/slices/guestSlice';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
+import { 
+  Search, 
+  FileText, 
+  Calendar, 
+  MapPin, 
   Clock,
+  CheckCircle,
   AlertCircle,
-  CheckCircle2,
-  FileText,
-  User,
-  Shield,
-} from "lucide-react";
+  Shield
+} from 'lucide-react';
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isLoading, trackedComplaint } = useAppSelector(
-    (state) => state.guest,
-  );
-  const { translations } = useAppSelector((state) => state.language);
+  const [complaintId, setComplaintId] = useState('');
+  const [trackingResult, setTrackingResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // Return loading state if translations are not yet loaded
-  if (!translations) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-8">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const [searchData, setSearchData] = useState({
-    complaintId: "",
-    email: "",
-  });
-
-  const handleInputChange = (field: string, value: string) => {
-    setSearchData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSearch = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!searchData.complaintId || !searchData.email) {
-      dispatch(
-        showErrorToast(
-          "Missing Information",
-          "Please provide both complaint ID and email address",
-        ),
-      );
-      return;
-    }
-
+  const handleTrack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    
     try {
-      await dispatch(
-        trackGuestComplaint({
-          complaintId: searchData.complaintId,
-          email: searchData.email,
-        }),
-      ).unwrap();
-    } catch (error) {
-      dispatch(
-        showErrorToast(
-          "Complaint Not Found",
-          error instanceof Error
-            ? error.message
-            : "Please check your details and try again",
-        ),
-      );
+      const result = await dispatch(trackGuestComplaint({ 
+        complaintId: complaintId.trim() 
+      })).unwrap();
+      setTrackingResult(result);
+    } catch (err) {
+      setError('Complaint not found. Please check your complaint ID.');
+      setTrackingResult(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { variant: any; icon: React.ReactNode }> = {
-      registered: {
-        variant: "secondary",
-        icon: <FileText className="h-3 w-3" />,
-      },
-      assigned: {
-        variant: "default",
-        icon: <User className="h-3 w-3" />,
-      },
-      "in-progress": {
-        variant: "default",
-        icon: <Clock className="h-3 w-3" />,
-      },
-      resolved: {
-        variant: "default",
-        icon: <CheckCircle2 className="h-3 w-3" />,
-      },
-      closed: {
-        variant: "outline",
-        icon: <Shield className="h-3 w-3" />,
-      },
-    };
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'REGISTERED':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'ASSIGNED':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS':
+        return 'bg-orange-100 text-orange-800';
+      case 'RESOLVED':
+        return 'bg-green-100 text-green-800';
+      case 'CLOSED':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-    const config = statusMap[status] || {
-      variant: "secondary",
-      icon: <AlertCircle className="h-3 w-3" />,
-    };
-
-    return (
-      <Badge variant={config.variant} className="flex items-center space-x-1">
-        {config.icon}
-        <span className="capitalize">{status.replace("-", " ")}</span>
-      </Badge>
-    );
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'REGISTERED':
+        return <FileText className="h-4 w-4" />;
+      case 'ASSIGNED':
+        return <AlertCircle className="h-4 w-4" />;
+      case 'IN_PROGRESS':
+        return <Clock className="h-4 w-4" />;
+      case 'RESOLVED':
+      case 'CLOSED':
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Track Guest Complaint
-        </h1>
-        <p className="text-muted-foreground">
-          Enter your complaint ID and email to track your submission status
-        </p>
-      </div>
-
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Search className="h-5 w-5" />
-            <span>Search Complaint</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="complaintId">Complaint ID</Label>
-                <Input
-                  id="complaintId"
-                  value={searchData.complaintId}
-                  onChange={(e) =>
-                    handleInputChange("complaintId", e.target.value)
-                  }
-                  placeholder="Enter your complaint ID"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={searchData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                />
-              </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <Shield className="h-12 w-12 text-blue-600 mr-3" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Track Your Complaint</h1>
+              <p className="text-gray-600">Enter your complaint ID to check status</p>
             </div>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full md:w-auto"
-            >
-              {isLoading ? (
-                <>
-                  <Search className="h-4 w-4 mr-2 animate-spin" />
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4 mr-2" />
-                  Track Complaint
-                </>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
 
-      {trackedComplaint && (
-        <Card>
+        {/* Search Form */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-5 w-5" />
-                <span>Complaint Details</span>
-              </div>
-              {getStatusBadge(trackedComplaint.status)}
-            </CardTitle>
+            <CardTitle className="text-center">Complaint Tracking</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Complaint ID
-                </Label>
-                <p className="font-mono text-sm">
-                  {trackedComplaint.complaintId}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Type
-                </Label>
-                <p className="capitalize">
-                  {trackedComplaint.type.replace("_", " ")}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Submitted On
-                </Label>
-                <div className="flex items-center space-x-1">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p>
-                    {new Date(trackedComplaint.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Priority
-                </Label>
-                <Badge
-                  variant={
-                    trackedComplaint.priority === "high"
-                      ? "destructive"
-                      : "secondary"
-                  }
-                >
-                  {trackedComplaint.priority}
-                </Badge>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Contact Information */}
-            <div>
-              <h3 className="font-medium mb-3">Contact Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{trackedComplaint.contactMobile}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{trackedComplaint.contactEmail}</span>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Location Information */}
-            <div>
-              <h3 className="font-medium mb-3">Location</h3>
-              <div className="space-y-2">
-                <div className="flex items-start space-x-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="font-medium">{trackedComplaint.area}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {trackedComplaint.ward}
-                    </p>
-                    {trackedComplaint.address && (
-                      <p className="text-sm text-muted-foreground">
-                        {trackedComplaint.address}
-                      </p>
-                    )}
+          <CardContent>
+            <form onSubmit={handleTrack} className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="complaintId">Complaint ID</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="complaintId"
+                      type="text"
+                      value={complaintId}
+                      onChange={(e) => setComplaintId(e.target.value)}
+                      placeholder="Enter your complaint ID (e.g., CMP123456)"
+                      className="pl-10"
+                      required
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Description */}
-            <div>
-              <h3 className="font-medium mb-3">Description</h3>
-              <p className="text-sm bg-muted p-3 rounded-lg">
-                {trackedComplaint.description}
-              </p>
-            </div>
-
-            {/* Assignment Information */}
-            {trackedComplaint.assignedTo && (
-              <>
-                <Separator />
-                <div>
-                  <h3 className="font-medium mb-3">Assigned To</h3>
-                  <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span>{trackedComplaint.assignedTo.name}</span>
-                    <Badge variant="outline">
-                      {trackedComplaint.assignedTo.role}
-                    </Badge>
-                  </div>
+                <div className="flex items-end">
+                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                    {isLoading ? 'Searching...' : 'Track Complaint'}
+                  </Button>
                 </div>
-              </>
-            )}
-
-            {/* Timeline */}
-            {trackedComplaint.remarks &&
-              trackedComplaint.remarks.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="font-medium mb-3">Timeline</h3>
-                    <div className="space-y-3">
-                      {trackedComplaint.remarks.map((remark, index) => (
-                        <div key={index} className="flex space-x-3">
-                          <div className="flex-shrink-0">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm">{remark.text}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span className="text-xs text-muted-foreground">
-                                {remark.addedBy.name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                •
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(remark.addedAt).toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
+              </div>
+              {error && (
+                <div className="text-red-600 text-sm mt-2">{error}</div>
               )}
+            </form>
           </CardContent>
         </Card>
-      )}
+
+        {/* Tracking Results */}
+        {trackingResult && (
+          <div className="space-y-6">
+            {/* Complaint Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Complaint Details</span>
+                  <Badge className={getStatusColor(trackingResult.status)}>
+                    {trackingResult.status.replace('_', ' ')}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium text-gray-900">Complaint ID</h3>
+                      <p className="text-gray-600">#{trackingResult.id}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Type</h3>
+                      <p className="text-gray-600">{trackingResult.type?.replace('_', ' ')}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Description</h3>
+                      <p className="text-gray-600">{trackingResult.description}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium text-gray-900 flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        Location
+                      </h3>
+                      <p className="text-gray-600">{trackingResult.area}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Submitted On
+                      </h3>
+                      <p className="text-gray-600">
+                        {new Date(trackingResult.submittedOn).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Priority</h3>
+                      <Badge variant="secondary">{trackingResult.priority}</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Status Timeline */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Status Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Registered */}
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-green-600">Complaint Registered</p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(trackingResult.submittedOn).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Your complaint has been successfully registered in our system.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Assigned */}
+                  <div className="flex items-start space-x-3">
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      ['ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                        ? 'bg-green-100'
+                        : 'bg-gray-100'
+                    }`}>
+                      <AlertCircle className={`h-4 w-4 ${
+                        ['ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                          ? 'text-green-600'
+                          : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className={`font-medium ${
+                          ['ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                            ? 'text-green-600'
+                            : 'text-gray-400'
+                        }`}>
+                          Complaint Assigned
+                        </p>
+                        {trackingResult.assignedOn && (
+                          <p className="text-sm text-gray-500">
+                            {new Date(trackingResult.assignedOn).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Assigned to the appropriate team for resolution.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* In Progress */}
+                  <div className="flex items-start space-x-3">
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                        ? 'bg-green-100'
+                        : 'bg-gray-100'
+                    }`}>
+                      <Clock className={`h-4 w-4 ${
+                        ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                          ? 'text-green-600'
+                          : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className={`font-medium ${
+                          ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                            ? 'text-green-600'
+                            : 'text-gray-400'
+                        }`}>
+                          Work in Progress
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Our team is actively working on resolving your complaint.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Resolved */}
+                  <div className="flex items-start space-x-3">
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      ['RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                        ? 'bg-green-100'
+                        : 'bg-gray-100'
+                    }`}>
+                      <CheckCircle className={`h-4 w-4 ${
+                        ['RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                          ? 'text-green-600'
+                          : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className={`font-medium ${
+                          ['RESOLVED', 'CLOSED'].includes(trackingResult.status)
+                            ? 'text-green-600'
+                            : 'text-gray-400'
+                        }`}>
+                          Complaint Resolved
+                        </p>
+                        {trackingResult.resolvedOn && (
+                          <p className="text-sm text-gray-500">
+                            {new Date(trackingResult.resolvedOn).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Your complaint has been successfully resolved.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Expected Resolution Time */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Expected Resolution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Expected Resolution Time</p>
+                    <p className="text-sm text-gray-600">
+                      Based on complaint type and priority
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-blue-600">2-5 days</p>
+                    <p className="text-sm text-gray-500">Business days</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Help Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Need Help?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-medium mb-2">Submit New Complaint</h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Have another issue? Submit a new complaint.
+                </p>
+                <Link to="/guest/complaint">
+                  <Button variant="outline">New Complaint</Button>
+                </Link>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Contact Support</h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Need assistance? Contact our support team.
+                </p>
+                <Button variant="outline">Contact Support</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
