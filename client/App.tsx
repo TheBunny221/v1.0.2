@@ -1,90 +1,265 @@
-import "./global.css";
-import { createRoot } from "react-dom/client";
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Provider } from "react-redux";
-import { store } from "./store";
-import { Layout } from "./components/Layout";
-import { AppInitializer } from "./components/AppInitializer";
-import ErrorBoundary from "./components/ErrorBoundary";
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { Toaster } from 'react-hot-toast';
+import { store } from './store';
+import ErrorBoundary from './components/ErrorBoundary';
+import AppInitializer from './components/AppInitializer';
+import Layout from './components/Layout';
+import RoleBasedRoute from './components/RoleBasedRoute';
+import { Loader2 } from 'lucide-react';
 
-// Import all pages
-import Index from "./pages/Index";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminComplaints from "./pages/AdminComplaints";
-import AdminReports from "./pages/AdminReports";
-import AdminUsers from "./pages/AdminUsers";
-import WardDashboard from "./pages/WardDashboard";
-import MaintenanceDashboard from "./pages/MaintenanceDashboard";
-import MyComplaints from "./pages/MyComplaints";
-import TrackStatus from "./pages/TrackStatus";
-import ReopenComplaint from "./pages/ReopenComplaint";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import Feedback from "./pages/Feedback";
-import NotFound from "./pages/NotFound";
+// Lazy load components for better performance
+const Index = lazy(() => import('./pages/Index'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 
-// Import guest pages
-import GuestComplaintForm from "./pages/GuestComplaintForm";
-import GuestTrackComplaint from "./pages/GuestTrackComplaint";
+// Role-specific dashboards
+const CitizenDashboard = lazy(() => import('./pages/CitizenDashboard'));
+const WardOfficerDashboard = lazy(() => import('./pages/WardOfficerDashboard'));
+const MaintenanceDashboard = lazy(() => import('./pages/MaintenanceDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
-const App = () => {
-  console.log("CitizenConnect App is starting with full functionality...");
+// Complaint management
+const ComplaintsList = lazy(() => import('./pages/ComplaintsList'));
+const ComplaintDetails = lazy(() => import('./pages/ComplaintDetails'));
+const GuestComplaintForm = lazy(() => import('./pages/GuestComplaintForm'));
+const GuestTrackComplaint = lazy(() => import('./pages/GuestTrackComplaint'));
 
+// Ward Officer pages
+const WardTasks = lazy(() => import('./pages/WardTasks'));
+const WardManagement = lazy(() => import('./pages/WardManagement'));
+
+// Maintenance Team pages
+const MaintenanceTasks = lazy(() => import('./pages/MaintenanceTasks'));
+const TaskDetails = lazy(() => import('./pages/TaskDetails'));
+
+// Admin pages
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminReports = lazy(() => import('./pages/AdminReports'));
+const AdminConfig = lazy(() => import('./pages/AdminConfig'));
+const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'));
+
+// Communication
+const Messages = lazy(() => import('./pages/Messages'));
+
+// Settings
+const Settings = lazy(() => import('./pages/Settings'));
+
+// Loading component
+const LoadingFallback: React.FC = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center space-x-2">
+      <Loader2 className="h-6 w-6 animate-spin" />
+      <span>Loading...</span>
+    </div>
+  </div>
+);
+
+const App: React.FC = () => {
   return (
-    <ErrorBoundary>
-      <Provider store={store}>
+    <Provider store={store}>
+      <ErrorBoundary>
         <AppInitializer>
-          <BrowserRouter>
-            <Routes>
-              {/* Guest Routes (no layout) */}
-              <Route path="/guest" element={<GuestComplaintForm />} />
-              <Route path="/guest/track" element={<GuestTrackComplaint />} />
+          <Router>
+            <div className="min-h-screen bg-gray-50">
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/guest/complaint" element={<GuestComplaintForm />} />
+                  <Route path="/guest/track" element={<GuestTrackComplaint />} />
+                  <Route path="/unauthorized" element={<Unauthorized />} />
 
-              {/* Main Application Routes (with layout) */}
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Index />} />
+                  {/* Protected routes with Layout */}
+                  <Route
+                    path="/*"
+                    element={
+                      <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR', 'GUEST']}>
+                        <Layout>
+                          <Routes>
+                            {/* Home route - redirects to appropriate dashboard */}
+                            <Route path="/" element={<Index />} />
 
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/complaints" element={<AdminComplaints />} />
-                <Route path="/admin/reports" element={<AdminReports />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
+                            {/* Dashboard routes */}
+                            <Route
+                              path="/dashboard"
+                              element={
+                                <RoleBasedRoute allowedRoles={['CITIZEN']}>
+                                  <CitizenDashboard />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/dashboard"
+                              element={
+                                <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
+                                  <WardOfficerDashboard />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/dashboard"
+                              element={
+                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                  <MaintenanceDashboard />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/dashboard"
+                              element={
+                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                  <AdminDashboard />
+                                </RoleBasedRoute>
+                              }
+                            />
 
-                {/* Ward Officer Routes */}
-                <Route path="/ward" element={<WardDashboard />} />
+                            {/* Complaint routes */}
+                            <Route
+                              path="/complaints"
+                              element={
+                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                  <ComplaintsList />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/complaints/:id"
+                              element={
+                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                  <ComplaintDetails />
+                                </RoleBasedRoute>
+                              }
+                            />
 
-                {/* Maintenance Team Routes */}
-                <Route path="/maintenance" element={<MaintenanceDashboard />} />
+                            {/* Ward Officer routes */}
+                            <Route
+                              path="/tasks"
+                              element={
+                                <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
+                                  <WardTasks />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/ward"
+                              element={
+                                <RoleBasedRoute allowedRoles={['WARD_OFFICER']}>
+                                  <WardManagement />
+                                </RoleBasedRoute>
+                              }
+                            />
 
-                {/* User Routes */}
-                <Route path="/my-complaints" element={<MyComplaints />} />
-                <Route path="/track-status" element={<TrackStatus />} />
-                <Route path="/reopen-complaint" element={<ReopenComplaint />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/feedback" element={<Feedback />} />
+                            {/* Maintenance Team routes */}
+                            <Route
+                              path="/tasks"
+                              element={
+                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                  <MaintenanceTasks />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/maintenance"
+                              element={
+                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                  <MaintenanceTasks />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/tasks/:id"
+                              element={
+                                <RoleBasedRoute allowedRoles={['MAINTENANCE_TEAM']}>
+                                  <TaskDetails />
+                                </RoleBasedRoute>
+                              }
+                            />
 
-                {/* 404 Route */}
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+                            {/* Communication routes */}
+                            <Route
+                              path="/messages"
+                              element={
+                                <RoleBasedRoute allowedRoles={['WARD_OFFICER', 'MAINTENANCE_TEAM']}>
+                                  <Messages />
+                                </RoleBasedRoute>
+                              }
+                            />
+
+                            {/* Reports routes */}
+                            <Route
+                              path="/reports"
+                              element={
+                                <RoleBasedRoute allowedRoles={['WARD_OFFICER', 'ADMINISTRATOR']}>
+                                  <AdminReports />
+                                </RoleBasedRoute>
+                              }
+                            />
+
+                            {/* Admin routes */}
+                            <Route
+                              path="/admin/users"
+                              element={
+                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                  <AdminUsers />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/admin/config"
+                              element={
+                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                  <AdminConfig />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/admin/analytics"
+                              element={
+                                <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
+                                  <AdminAnalytics />
+                                </RoleBasedRoute>
+                              }
+                            />
+
+                            {/* Profile and Settings */}
+                            <Route
+                              path="/profile"
+                              element={
+                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                  <Profile />
+                                </RoleBasedRoute>
+                              }
+                            />
+                            <Route
+                              path="/settings"
+                              element={
+                                <RoleBasedRoute allowedRoles={['CITIZEN', 'WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR']}>
+                                  <Settings />
+                                </RoleBasedRoute>
+                              }
+                            />
+
+                            {/* Catch all route */}
+                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                          </Routes>
+                        </Layout>
+                      </RoleBasedRoute>
+                    }
+                  />
+                </Routes>
+              </Suspense>
+            </div>
+            <Toaster position="top-right" />
+          </Router>
         </AppInitializer>
-      </Provider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </Provider>
   );
 };
 
-// Get the root element
-const rootElement = document.getElementById("root")!;
-
-// Check if we already have a root attached to this element
-if (!rootElement._reactRoot) {
-  console.log("Creating React root...");
-  const root = createRoot(rootElement);
-  (rootElement as any)._reactRoot = root;
-  root.render(<App />);
-} else {
-  console.log("React root already exists, reusing...");
-}
+export default App;
