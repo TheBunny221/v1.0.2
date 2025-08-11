@@ -3,11 +3,11 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 // Types
 export interface User {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  phone: string;
-  role: "citizen" | "admin" | "ward_officer" | "maintenance";
-  ward?: string;
+  phoneNumber: string;
+  role: "CITIZEN" | "ADMINISTRATOR" | "WARD_OFFICER" | "MAINTENANCE_TEAM" | "GUEST";
+  wardId?: string;
   department?: string;
   avatar?: string;
   language: "en" | "hi" | "ml";
