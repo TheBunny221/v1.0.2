@@ -89,7 +89,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
             icon: MessageSquare,
           },
         ];
-      case "admin":
+      case "ADMINISTRATOR":
         return [
           {
             path: "/admin",
@@ -147,7 +147,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
     switch (effectiveUserRole) {
       case "citizen":
         return "Citizen Portal";
-      case "admin":
+      case "ADMINISTRATOR":
         return "Admin " + translations.nav.dashboard;
       case "ward_officer":
         return "Ward Officer Portal";
