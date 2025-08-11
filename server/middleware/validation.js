@@ -71,7 +71,7 @@ export const validateLogin = [
 
 export const validateUserLogin = validateLogin;
 
-export const validateUserUpdate = [
+export const validateUserProfileUpdate = [
   body("name")
     .optional()
     .trim()
