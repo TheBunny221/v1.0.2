@@ -90,10 +90,29 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
     ...options,
   });
 
-  const data = await response.json();
+  // Check if response is JSON
+  const contentType = response.headers.get("content-type");
+  const isJson = contentType && contentType.includes("application/json");
+
+  let data = null;
+  if (isJson) {
+    try {
+      data = await response.json();
+    } catch (error) {
+      throw new Error("Failed to parse server response");
+    }
+  } else {
+    // Non-JSON response (likely HTML error page)
+    const text = await response.text();
+    if (text.includes("<!doctype") || text.includes("<html")) {
+      throw new Error("Authentication required. Please log in and try again.");
+    } else {
+      throw new Error("Server returned unexpected response format");
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || `HTTP ${response.status}`);
+    throw new Error(data?.message || `HTTP ${response.status}`);
   }
 
   return data.data;
