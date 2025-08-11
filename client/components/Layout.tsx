@@ -14,13 +14,13 @@ import {
 } from "./ui/dropdown-menu";
 import {
   Bell,
-  UserIcon as UserIconIcon,
+  User as UserIcon,
   Settings,
   LogOut,
   Menu,
   X,
   FileText,
-  UserIcons,
+  Users,
   BarChart3,
   MapPin,
   Wrench,
@@ -28,10 +28,10 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-import type { UserIcon } from "../store/slices/authSlice";
+import type { User } from "../store/slices/authSlice";
 
 interface LayoutProps {
-  userRole?: UserIcon["role"];
+  userRole?: User["role"];
 }
 
 const Layout: React.FC<LayoutProps> = ({ userRole }) => {
