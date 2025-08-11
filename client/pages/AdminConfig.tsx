@@ -171,10 +171,23 @@ const AdminConfig: React.FC = () => {
       setWards(wardsResponse.data || []);
       setComplaintTypes(typesResponse.data || []);
       setSystemSettings(settingsResponse.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load data:", error);
+
+      let errorMessage = "Failed to load configuration data. Please refresh the page.";
+
+      if (error.message) {
+        if (error.message.includes("Server returned an error page")) {
+          errorMessage = "Authentication required. Please log in as an administrator to access this page.";
+        } else if (error.message.includes("Unexpected token")) {
+          errorMessage = "Server configuration error. Please contact support.";
+        } else {
+          errorMessage = `Failed to load data: ${error.message}`;
+        }
+      }
+
       dispatch(
-        showErrorToast("Load Failed", "Failed to load configuration data. Please refresh the page.")
+        showErrorToast("Load Failed", errorMessage)
       );
     } finally {
       setDataLoading(false);
