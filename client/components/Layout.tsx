@@ -126,7 +126,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
           },
           { path: "/ward/forward", label: "Forwarding Panel", icon: MapPin },
         ];
-      case "maintenance":
+      case "MAINTENANCE_TEAM":
         return [
           {
             path: "/maintenance",
@@ -151,7 +151,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
         return "Admin " + translations.nav.dashboard;
       case "WARD_OFFICER":
         return "Ward Officer Portal";
-      case "maintenance":
+      case "MAINTENANCE_TEAM":
         return "Maintenance Team";
       default:
         return "Portal";
