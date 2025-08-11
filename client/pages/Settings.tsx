@@ -136,6 +136,18 @@ const Settings: React.FC = () => {
     setShowDeleteDialog(false);
   };
 
+  // Show loading state if translations are not loaded yet
+  if (!translations) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
