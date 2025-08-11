@@ -8,7 +8,7 @@ interface AppInitializerProps {
   children: React.ReactNode;
 }
 
-export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
+const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
