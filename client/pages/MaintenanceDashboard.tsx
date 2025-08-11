@@ -1,642 +1,491 @@
-import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
-import { Progress } from "../components/ui/progress";
-import StatusChip, { ComplaintStatus } from "../components/StatusChip";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { fetchComplaints, updateComplaintStatus } from '../store/slices/complaintsSlice';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Progress } from '../components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Wrench,
   Clock,
   CheckCircle,
   AlertTriangle,
-  FileText,
-  Upload,
-  Camera,
   MapPin,
-  User,
   Calendar,
-} from "lucide-react";
-
-interface AssignedComplaint {
-  id: string;
-  type: string;
-  description: string;
-  location: string;
-  ward: string;
-  submittedBy: string;
-  assignedDate: string;
-  dueDate: string;
-  status: ComplaintStatus;
-  priority: "low" | "medium" | "high" | "critical";
-  attachments: string[];
-  lastUpdate: string;
-}
+  Camera,
+  FileText,
+  TrendingUp,
+  Navigation,
+  Phone,
+  MessageSquare,
+} from 'lucide-react';
 
 const MaintenanceDashboard: React.FC = () => {
-  const [selectedComplaint, setSelectedComplaint] =
-    useState<AssignedComplaint | null>(null);
-  const [actionType, setActionType] = useState<"view" | "update" | null>(null);
-  const [newStatus, setNewStatus] = useState<ComplaintStatus>("in-progress");
-  const [updateRemarks, setUpdateRemarks] = useState("");
-  const [beforePhotos, setBeforePhotos] = useState<File[]>([]);
-  const [afterPhotos, setAfterPhotos] = useState<File[]>([]);
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
+  const { translations } = useAppSelector((state) => state.language);
 
-  const assignedComplaints: AssignedComplaint[] = [
-    {
-      id: "CMP-2024-001",
-      type: "Water Supply",
-      description:
-        "No water supply for the past 3 days in Green Valley Society. Multiple residents affected.",
-      location: "Green Valley Society, Block A",
-      ward: "Ward 1",
-      submittedBy: "John Doe (+91 9876543210)",
-      assignedDate: "2024-01-15",
-      dueDate: "2024-01-17 18:00",
-      status: "assigned",
-      priority: "high",
-      attachments: ["photo1.jpg", "video1.mp4"],
-      lastUpdate: "2024-01-15 14:30",
-    },
-    {
-      id: "CMP-2024-005",
-      type: "Street Lighting",
-      description: "Street lights not working on Main Street for past week.",
-      location: "Main Street, Near Park",
-      ward: "Ward 3",
-      submittedBy: "Jane Smith (+91 9876543211)",
-      assignedDate: "2024-01-14",
-      dueDate: "2024-01-18 18:00",
-      status: "in-progress",
-      priority: "medium",
-      attachments: ["photo2.jpg"],
-      lastUpdate: "2024-01-15 10:15",
-    },
-    {
-      id: "CMP-2024-008",
-      type: "Road Repair",
-      description: "Large pothole causing traffic issues and vehicle damage.",
-      location: "City Center Main Road",
-      ward: "Ward 4",
-      submittedBy: "Bob Johnson (+91 9876543212)",
-      assignedDate: "2024-01-13",
-      dueDate: "2024-01-19 18:00",
-      status: "in-progress",
-      priority: "critical",
-      attachments: [],
-      lastUpdate: "2024-01-14 16:45",
-    },
-  ];
+  const [dashboardStats, setDashboardStats] = useState({
+    totalTasks: 0,
+    inProgress: 0,
+    completed: 0,
+    pending: 0,
+    todayTasks: 0,
+    avgCompletionTime: 1.5,
+    efficiency: 92,
+  });
 
-  const metrics = {
-    totalAssigned: assignedComplaints.length,
-    newToday: 2,
-    inProgress: assignedComplaints.filter((c) => c.status === "in-progress")
-      .length,
-    dueToday: 1,
-    overdue: assignedComplaints.filter((c) => new Date(c.dueDate) < new Date())
-      .length,
+  useEffect(() => {
+    dispatch(fetchComplaints());
+  }, [dispatch]);
+
+  useEffect(() => {
+    // Filter tasks assigned to this maintenance team member
+    const assignedTasks = complaints.filter(c => 
+      c.assignedToId === user?.id && c.status !== 'REGISTERED'
+    );
+    
+    const totalTasks = assignedTasks.length;
+    const inProgress = assignedTasks.filter(c => c.status === 'IN_PROGRESS').length;
+    const completed = assignedTasks.filter(c => c.status === 'RESOLVED').length;
+    const pending = assignedTasks.filter(c => c.status === 'ASSIGNED').length;
+    
+    const today = new Date().toDateString();
+    const todayTasks = assignedTasks.filter(c => 
+      new Date(c.assignedOn || c.submittedOn).toDateString() === today
+    ).length;
+
+    setDashboardStats({
+      totalTasks,
+      inProgress,
+      completed,
+      pending,
+      todayTasks,
+      avgCompletionTime: 1.5, // Mock calculation
+      efficiency: 92, // Mock calculation
+    });
+  }, [complaints, user]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ASSIGNED':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS':
+        return 'bg-orange-100 text-orange-800';
+      case 'RESOLVED':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
-
-  const slaComplaints = assignedComplaints
-    .map((complaint) => {
-      const dueDate = new Date(complaint.dueDate);
-      const now = new Date();
-      const hoursLeft = Math.round(
-        (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60),
-      );
-
-      return {
-        ...complaint,
-        hoursLeft,
-        slaStatus:
-          hoursLeft < 0 ? "overdue" : hoursLeft < 24 ? "warning" : "ontime",
-      };
-    })
-    .sort((a, b) => a.hoursLeft - b.hoursLeft);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "critical":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "high":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "low":
-        return "bg-green-100 text-green-800 border-green-200";
+      case 'LOW':
+        return 'bg-green-100 text-green-800';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'HIGH':
+        return 'bg-orange-100 text-orange-800';
+      case 'CRITICAL':
+        return 'bg-red-100 text-red-800';
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getSlaStatusColor = (status: string) => {
-    switch (status) {
-      case "ontime":
-        return "text-green-600";
-      case "warning":
-        return "text-yellow-600";
-      case "overdue":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
+  const myTasks = complaints.filter(c => 
+    c.assignedToId === user?.id && c.status !== 'REGISTERED'
+  );
 
-  const handleStatusUpdate = () => {
-    console.log("Updating status:", selectedComplaint?.id, "to:", newStatus);
-    console.log("Remarks:", updateRemarks);
-    console.log("Before photos:", beforePhotos);
-    console.log("After photos:", afterPhotos);
+  const activeTasks = myTasks.filter(c => 
+    c.status === 'ASSIGNED' || c.status === 'IN_PROGRESS'
+  ).slice(0, 5);
 
-    setActionType(null);
-    setSelectedComplaint(null);
-    setNewStatus("in-progress");
-    setUpdateRemarks("");
-    setBeforePhotos([]);
-    setAfterPhotos([]);
-  };
+  const urgentTasks = myTasks.filter(c => 
+    c.priority === 'CRITICAL' || c.priority === 'HIGH'
+  ).slice(0, 3);
 
-  const handleFileUpload = (
-    files: FileList | null,
-    type: "before" | "after",
-  ) => {
-    if (!files) return;
-    const fileArray = Array.from(files);
-
-    if (type === "before") {
-      setBeforePhotos((prev) => [...prev, ...fileArray]);
-    } else {
-      setAfterPhotos((prev) => [...prev, ...fileArray]);
-    }
+  const handleStatusUpdate = (complaintId: string, newStatus: string) => {
+    dispatch(updateComplaintStatus({ id: complaintId, status: newStatus }));
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Maintenance Dashboard</h1>
-          <p className="text-muted-foreground">Water & Sanitation Department</p>
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-lg p-6 text-white">
+        <h1 className="text-2xl font-bold mb-2">
+          Maintenance Dashboard
+        </h1>
+        <p className="text-green-100">
+          Manage your assigned tasks and track field work progress.
+        </p>
+        <div className="mt-4">
+          <Button className="bg-white text-green-600 hover:bg-gray-100">
+            <Navigation className="h-4 w-4 mr-2" />
+            Start Field Work
+          </Button>
         </div>
-        <Button>
-          <Camera className="h-4 w-4 mr-2" />
-          Quick Update
-        </Button>
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Wrench className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Assigned</p>
-                <p className="text-2xl font-bold">{metrics.totalAssigned}</p>
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <Wrench className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardStats.totalTasks}</div>
+            <p className="text-xs text-muted-foreground">Assigned to you</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">New Today</p>
-                <p className="text-2xl font-bold">{metrics.newToday}</p>
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Today's Tasks</CardTitle>
+            <Calendar className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">{dashboardStats.todayTasks}</div>
+            <p className="text-xs text-muted-foreground">Scheduled for today</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold">{metrics.inProgress}</p>
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <Clock className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{dashboardStats.inProgress}</div>
+            <p className="text-xs text-muted-foreground">Currently working on</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Due Today</p>
-                <p className="text-2xl font-bold">{metrics.dueToday}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Overdue</p>
-                <p className="text-2xl font-bold">{metrics.overdue}</p>
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Efficiency</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{dashboardStats.efficiency}%</div>
+            <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="assigned" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="assigned">Assigned Complaints</TabsTrigger>
-          <TabsTrigger value="sla">SLA Tracking</TabsTrigger>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="active" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="active">Active Tasks ({activeTasks.length})</TabsTrigger>
+          <TabsTrigger value="urgent">Urgent ({urgentTasks.length})</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="tools">Tools & Reports</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="assigned" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Assigned Complaints</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Complaint ID</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {assignedComplaints.map((complaint) => (
-                    <TableRow key={complaint.id}>
-                      <TableCell className="font-medium">
-                        {complaint.id}
-                      </TableCell>
-                      <TableCell>{complaint.type}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {complaint.location}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {complaint.ward}
+        <TabsContent value="active" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Active Tasks */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Wrench className="h-5 w-5 mr-2" />
+                  Active Tasks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {activeTasks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 mx-auto text-green-400 mb-4" />
+                    <p className="text-gray-500">No active tasks</p>
+                    <p className="text-sm text-gray-400">Great job! All caught up.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {activeTasks.map((task) => (
+                      <div key={task.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-medium text-sm">
+                            {task.title || `Task #${task.id.slice(-6)}`}
+                          </h3>
+                          <div className="flex space-x-2">
+                            <Badge className={getStatusColor(task.status)}>
+                              {task.status.replace('_', ' ')}
+                            </Badge>
+                            <Badge className={getPriorityColor(task.priority)}>
+                              {task.priority}
+                            </Badge>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getPriorityColor(complaint.priority)}>
-                          {complaint.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <StatusChip status={complaint.status} />
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">{complaint.dueDate}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedComplaint(complaint);
-                                  setActionType("view");
-                                }}
-                              >
-                                View
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Complaint Details - {complaint.id}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label>Type</Label>
-                                    <p className="text-sm">{complaint.type}</p>
-                                  </div>
-                                  <div>
-                                    <Label>Priority</Label>
-                                    <Badge
-                                      className={getPriorityColor(
-                                        complaint.priority,
-                                      )}
-                                    >
-                                      {complaint.priority}
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label>Description</Label>
-                                  <p className="text-sm mt-1">
-                                    {complaint.description}
-                                  </p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label>Location</Label>
-                                    <p className="text-sm">
-                                      {complaint.location}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label>Submitted By</Label>
-                                    <p className="text-sm">
-                                      {complaint.submittedBy}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label>Assigned Date</Label>
-                                    <p className="text-sm">
-                                      {complaint.assignedDate}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label>Due Date</Label>
-                                    <p className="text-sm">
-                                      {complaint.dueDate}
-                                    </p>
-                                  </div>
-                                </div>
-                                {complaint.attachments.length > 0 && (
-                                  <div>
-                                    <Label>Attachments</Label>
-                                    <div className="flex flex-wrap gap-2 mt-1">
-                                      {complaint.attachments.map(
-                                        (file, idx) => (
-                                          <Badge key={idx} variant="secondary">
-                                            {file}
-                                          </Badge>
-                                        ),
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedComplaint(complaint);
-                                  setActionType("update");
-                                  setNewStatus(complaint.status);
-                                }}
-                              >
-                                Update
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Update Status - {complaint.id}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>New Status</Label>
-                                  <Select
-                                    value={newStatus}
-                                    onValueChange={(value) =>
-                                      setNewStatus(value as ComplaintStatus)
-                                    }
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="in-progress">
-                                        In Progress
-                                      </SelectItem>
-                                      <SelectItem value="resolved">
-                                        Resolved
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div>
-                                  <Label htmlFor="updateRemarks">
-                                    Update Remarks
-                                  </Label>
-                                  <Textarea
-                                    id="updateRemarks"
-                                    value={updateRemarks}
-                                    onChange={(e) =>
-                                      setUpdateRemarks(e.target.value)
-                                    }
-                                    placeholder="Describe the work done, materials used, etc..."
-                                    rows={3}
-                                  />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label>Before Photos</Label>
-                                    <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
-                                      <Camera className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                                      <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                          handleFileUpload(
-                                            e.target.files,
-                                            "before",
-                                          )
-                                        }
-                                        className="hidden"
-                                        id="before-upload"
-                                      />
-                                      <Label
-                                        htmlFor="before-upload"
-                                        className="cursor-pointer"
-                                      >
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="sm"
-                                          asChild
-                                        >
-                                          <span>Upload Before Photos</span>
-                                        </Button>
-                                      </Label>
-                                      {beforePhotos.length > 0 && (
-                                        <p className="text-sm mt-2">
-                                          {beforePhotos.length} file(s) selected
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <div>
-                                    <Label>After Photos</Label>
-                                    <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
-                                      <Camera className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                                      <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                          handleFileUpload(
-                                            e.target.files,
-                                            "after",
-                                          )
-                                        }
-                                        className="hidden"
-                                        id="after-upload"
-                                      />
-                                      <Label
-                                        htmlFor="after-upload"
-                                        className="cursor-pointer"
-                                      >
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="sm"
-                                          asChild
-                                        >
-                                          <span>Upload After Photos</span>
-                                        </Button>
-                                      </Label>
-                                      {afterPhotos.length > 0 && (
-                                        <p className="text-sm mt-2">
-                                          {afterPhotos.length} file(s) selected
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="flex justify-end space-x-2">
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => setActionType(null)}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button onClick={handleStatusUpdate}>
-                                    Update Status
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {task.description}
+                        </p>
+                        <div className="flex items-center text-xs text-gray-500 mb-3">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {task.area}, {task.landmark}
+                          <Calendar className="h-3 w-3 ml-3 mr-1" />
+                          Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                        <div className="flex justify-between items-center">
+                          <div className="flex space-x-2">
+                            <Button size="sm" variant="outline">
+                              <Navigation className="h-3 w-3 mr-1" />
+                              Navigate
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Phone className="h-3 w-3 mr-1" />
+                              Call Citizen
+                            </Button>
+                          </div>
+                          <div className="flex space-x-2">
+                            {task.status === 'ASSIGNED' && (
+                              <Button 
+                                size="sm"
+                                onClick={() => handleStatusUpdate(task.id, 'IN_PROGRESS')}
+                              >
+                                Start Work
+                              </Button>
+                            )}
+                            {task.status === 'IN_PROGRESS' && (
+                              <Button 
+                                size="sm"
+                                onClick={() => handleStatusUpdate(task.id, 'RESOLVED')}
+                              >
+                                Mark Complete
+                              </Button>
+                            )}
+                            <Link to={`/tasks/${task.id}`}>
+                              <Button size="sm" variant="outline">
+                                Details
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions & Progress */}
+            <div className="space-y-6">
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start">
+                    <Camera className="h-4 w-4 mr-2" />
+                    Take Work Photo
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit Report
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contact Supervisor
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Navigation className="h-4 w-4 mr-2" />
+                    View Route Map
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Progress Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Progress Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Tasks Completed</span>
+                      <span>{dashboardStats.totalTasks > 0 ? Math.round((dashboardStats.completed / dashboardStats.totalTasks) * 100) : 0}%</span>
+                    </div>
+                    <Progress 
+                      value={dashboardStats.totalTasks > 0 ? (dashboardStats.completed / dashboardStats.totalTasks) * 100 : 0} 
+                      className="h-2"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{dashboardStats.avgCompletionTime}</div>
+                    <p className="text-xs text-gray-500">Avg. Completion Time (days)</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">{dashboardStats.completed}</div>
+                    <p className="text-xs text-gray-500">Tasks Completed This Month</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="sla" className="space-y-4">
+        <TabsContent value="urgent" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5" />
-                <span>SLA Tracking</span>
+              <CardTitle className="flex items-center text-red-600">
+                <AlertTriangle className="h-5 w-5 mr-2" />
+                Urgent Tasks Requiring Immediate Attention
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {slaComplaints.map((complaint) => (
-                  <div
-                    key={complaint.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-semibold">{complaint.id}</span>
-                        <Badge className={getPriorityColor(complaint.priority)}>
-                          {complaint.priority}
-                        </Badge>
+              {urgentTasks.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="h-12 w-12 mx-auto text-green-400 mb-4" />
+                  <p className="text-gray-500">No urgent tasks! Well done!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {urgentTasks.map((task) => (
+                    <div key={task.id} className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-medium text-sm">
+                          {task.title || `Task #${task.id.slice(-6)}`}
+                        </h3>
+                        <div className="flex space-x-2">
+                          <Badge className="bg-red-100 text-red-800">
+                            {task.priority}
+                          </Badge>
+                          <Badge className={getStatusColor(task.status)}>
+                            {task.status.replace('_', ' ')}
+                          </Badge>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-600">{complaint.type}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {complaint.location}
+                      <p className="text-sm text-gray-700 mb-3">
+                        {task.description}
                       </p>
+                      <div className="flex items-center text-xs text-gray-600 mb-3">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {task.area}
+                        <Clock className="h-3 w-3 ml-3 mr-1" />
+                        Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'ASAP'}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Navigation className="h-3 w-3 mr-1" />
+                            Navigate
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Phone className="h-3 w-3 mr-1" />
+                            Emergency Contact
+                          </Button>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="destructive">
+                            Start Immediately
+                          </Button>
+                          <Link to={`/tasks/${task.id}`}>
+                            <Button size="sm" variant="outline">
+                              Details
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <StatusChip status={complaint.status} />
-                      <span
-                        className={`text-sm font-medium ${getSlaStatusColor(complaint.slaStatus)}`}
-                      >
-                        {complaint.hoursLeft >= 0
-                          ? `${complaint.hoursLeft}h left`
-                          : `${Math.abs(complaint.hoursLeft)}h overdue`}
-                      </span>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="completed" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recently Completed Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {myTasks
+                  .filter(task => task.status === 'RESOLVED')
+                  .slice(0, 10)
+                  .map((task) => (
+                    <div key={task.id} className="border rounded-lg p-4 bg-green-50">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium text-sm">
+                            {task.title || `Task #${task.id.slice(-6)}`}
+                          </h3>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Completed on {task.resolvedOn ? new Date(task.resolvedOn).toLocaleDateString() : 'Recently'}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <Link to={`/tasks/${task.id}`}>
+                            <Button size="sm" variant="outline">
+                              View Report
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="completed">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <CheckCircle className="h-12 w-12 mx-auto text-green-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                Completed Complaints
-              </h3>
-              <p className="text-muted-foreground">
-                View your completed work and performance metrics
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="tools" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Field Tools</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full justify-start">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Photo Documentation
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Navigation className="h-4 w-4 mr-2" />
+                  GPS Navigation
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Work Order Scanner
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Incident Reporting
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Reports & Analytics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" className="w-full justify-start">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Daily Work Report
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Performance Summary
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Time Tracking
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Completion Certificate
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
