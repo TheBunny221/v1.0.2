@@ -269,6 +269,16 @@ const App: React.FC = () => {
                                   </RoleBasedRoute>
                                 }
                               />
+                              <Route
+                                path="/admin/reports-analytics"
+                                element={
+                                  <RoleBasedRoute
+                                    allowedRoles={["ADMINISTRATOR", "WARD_OFFICER"]}
+                                  >
+                                    <ReportsAnalytics />
+                                  </RoleBasedRoute>
+                                }
+                              />
 
                               {/* Profile and Settings */}
                               <Route
