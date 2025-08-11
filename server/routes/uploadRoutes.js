@@ -7,7 +7,7 @@ import {
   uploadComplaintAttachment,
   getAttachment,
   deleteAttachment,
-  uploadProfilePicture
+  uploadProfilePicture,
 } from "../controller/uploadController.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
 
@@ -26,28 +26,28 @@ if (!fs.existsSync(uploadDir)) {
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     let uploadPath = uploadDir;
-    
+
     // Create subdirectories based on file type
-    if (file.fieldname === 'profilePicture') {
-      uploadPath = path.join(uploadDir, 'profiles');
-    } else if (file.fieldname === 'complaintAttachment') {
-      uploadPath = path.join(uploadDir, 'complaints');
+    if (file.fieldname === "profilePicture") {
+      uploadPath = path.join(uploadDir, "profiles");
+    } else if (file.fieldname === "complaintAttachment") {
+      uploadPath = path.join(uploadDir, "complaints");
     }
-    
+
     // Ensure directory exists
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
-    
+
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const extension = path.extname(file.originalname);
     const baseName = path.basename(file.originalname, extension);
     cb(null, `${baseName}-${uniqueSuffix}${extension}`);
-  }
+  },
 });
 
 // File filter function
@@ -55,16 +55,24 @@ const fileFilter = (req, file, cb) => {
   // Define allowed file types
   const allowedTypes = {
     profilePicture: /jpeg|jpg|png|gif/,
-    complaintAttachment: /jpeg|jpg|png|gif|pdf|doc|docx/
+    complaintAttachment: /jpeg|jpg|png|gif|pdf|doc|docx/,
   };
-  
-  const fileExtension = path.extname(file.originalname).toLowerCase().substring(1);
+
+  const fileExtension = path
+    .extname(file.originalname)
+    .toLowerCase()
+    .substring(1);
   const allowedPattern = allowedTypes[file.fieldname];
-  
+
   if (allowedPattern && allowedPattern.test(fileExtension)) {
     cb(null, true);
   } else {
-    cb(new Error(`Invalid file type for ${file.fieldname}. Allowed: ${allowedPattern}`), false);
+    cb(
+      new Error(
+        `Invalid file type for ${file.fieldname}. Allowed: ${allowedPattern}`,
+      ),
+      false,
+    );
   }
 };
 
@@ -74,7 +82,7 @@ const upload = multer({
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
   },
-  fileFilter: fileFilter
+  fileFilter: fileFilter,
 });
 
 /**
@@ -138,10 +146,11 @@ const upload = multer({
  *       400:
  *         description: Invalid file or upload error
  */
-router.post("/complaint/:complaintId/attachment", 
-  optionalAuth, 
-  upload.single('complaintAttachment'), 
-  uploadComplaintAttachment
+router.post(
+  "/complaint/:complaintId/attachment",
+  optionalAuth,
+  upload.single("complaintAttachment"),
+  uploadComplaintAttachment,
 );
 
 /**
@@ -167,10 +176,11 @@ router.post("/complaint/:complaintId/attachment",
  *       200:
  *         description: Profile picture uploaded successfully
  */
-router.post("/profile/picture", 
-  protect, 
-  upload.single('profilePicture'), 
-  uploadProfilePicture
+router.post(
+  "/profile/picture",
+  protect,
+  upload.single("profilePicture"),
+  uploadProfilePicture,
 );
 
 /**

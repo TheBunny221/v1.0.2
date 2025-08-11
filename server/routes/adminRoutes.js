@@ -10,7 +10,7 @@ import {
   getSystemStats,
   getAnalytics,
   manageRoles,
-  bulkUserActions
+  bulkUserActions,
 } from "../controller/adminController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { validateUser, validateUserUpdate } from "../middleware/validation.js";

@@ -13,19 +13,19 @@ export const getWards = asyncHandler(async (req, res) => {
       _count: {
         select: {
           users: true,
-          complaints: true
-        }
-      }
+          complaints: true,
+        },
+      },
     },
     orderBy: {
-      name: 'asc'
-    }
+      name: "asc",
+    },
   });
 
   res.status(200).json({
     success: true,
     message: "Wards retrieved successfully",
-    data: wards
+    data: wards,
   });
 });
 
@@ -44,29 +44,29 @@ export const getWardById = asyncHandler(async (req, res) => {
           id: true,
           fullName: true,
           role: true,
-          isActive: true
-        }
+          isActive: true,
+        },
       },
       _count: {
         select: {
-          complaints: true
-        }
-      }
-    }
+          complaints: true,
+        },
+      },
+    },
   });
 
   if (!ward) {
     return res.status(404).json({
       success: false,
       message: "Ward not found",
-      data: null
+      data: null,
     });
   }
 
   res.status(200).json({
     success: true,
     message: "Ward retrieved successfully",
-    data: ward
+    data: ward,
   });
 });
 
@@ -78,14 +78,14 @@ export const createWard = asyncHandler(async (req, res) => {
 
   // Check if ward with same name exists
   const existingWard = await prisma.ward.findFirst({
-    where: { name }
+    where: { name },
   });
 
   if (existingWard) {
     return res.status(400).json({
       success: false,
       message: "Ward with this name already exists",
-      data: null
+      data: null,
     });
   }
 
@@ -93,23 +93,23 @@ export const createWard = asyncHandler(async (req, res) => {
     data: {
       name,
       description,
-      isActive
+      isActive,
     },
     include: {
       subZones: true,
       _count: {
         select: {
           users: true,
-          complaints: true
-        }
-      }
-    }
+          complaints: true,
+        },
+      },
+    },
   });
 
   res.status(201).json({
     success: true,
     message: "Ward created successfully",
-    data: ward
+    data: ward,
   });
 });
 
@@ -121,31 +121,31 @@ export const updateWard = asyncHandler(async (req, res) => {
   const { name, description, isActive } = req.body;
 
   const ward = await prisma.ward.findUnique({
-    where: { id }
+    where: { id },
   });
 
   if (!ward) {
     return res.status(404).json({
       success: false,
       message: "Ward not found",
-      data: null
+      data: null,
     });
   }
 
   // Check if another ward with same name exists
   if (name && name !== ward.name) {
     const existingWard = await prisma.ward.findFirst({
-      where: { 
+      where: {
         name,
-        id: { not: id }
-      }
+        id: { not: id },
+      },
     });
 
     if (existingWard) {
       return res.status(400).json({
         success: false,
         message: "Ward with this name already exists",
-        data: null
+        data: null,
       });
     }
   }
@@ -155,23 +155,23 @@ export const updateWard = asyncHandler(async (req, res) => {
     data: {
       ...(name && { name }),
       ...(description && { description }),
-      ...(isActive !== undefined && { isActive })
+      ...(isActive !== undefined && { isActive }),
     },
     include: {
       subZones: true,
       _count: {
         select: {
           users: true,
-          complaints: true
-        }
-      }
-    }
+          complaints: true,
+        },
+      },
+    },
   });
 
   res.status(200).json({
     success: true,
     message: "Ward updated successfully",
-    data: updatedWard
+    data: updatedWard,
   });
 });
 
@@ -185,15 +185,15 @@ export const deleteWard = asyncHandler(async (req, res) => {
     where: { id },
     include: {
       users: true,
-      complaints: true
-    }
+      complaints: true,
+    },
   });
 
   if (!ward) {
     return res.status(404).json({
       success: false,
       message: "Ward not found",
-      data: null
+      data: null,
     });
   }
 
@@ -202,18 +202,18 @@ export const deleteWard = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Cannot delete ward with associated users or complaints",
-      data: null
+      data: null,
     });
   }
 
   await prisma.ward.delete({
-    where: { id }
+    where: { id },
   });
 
   res.status(200).json({
     success: true,
     message: "Ward deleted successfully",
-    data: null
+    data: null,
   });
 });
 
@@ -229,7 +229,7 @@ export const getWardComplaints = asyncHandler(async (req, res) => {
   const whereClause = {
     wardId: id,
     ...(status && { status }),
-    ...(priority && { priority })
+    ...(priority && { priority }),
   };
 
   const complaints = await prisma.complaint.findMany({
@@ -239,27 +239,27 @@ export const getWardComplaints = asyncHandler(async (req, res) => {
         select: {
           id: true,
           fullName: true,
-          email: true
-        }
+          email: true,
+        },
       },
       assignedTo: {
         select: {
           id: true,
           fullName: true,
-          role: true
-        }
+          role: true,
+        },
       },
-      attachments: true
+      attachments: true,
     },
     orderBy: {
-      createdAt: 'desc'
+      createdAt: "desc",
     },
     skip,
-    take: parseInt(limit)
+    take: parseInt(limit),
   });
 
   const total = await prisma.complaint.count({
-    where: whereClause
+    where: whereClause,
   });
 
   res.status(200).json({
@@ -271,9 +271,9 @@ export const getWardComplaints = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        pages: Math.ceil(total / parseInt(limit))
-      }
-    }
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    },
   });
 });
 
@@ -289,32 +289,32 @@ export const getWardStats = asyncHandler(async (req, res) => {
       _count: {
         select: {
           users: true,
-          complaints: true
-        }
-      }
-    }
+          complaints: true,
+        },
+      },
+    },
   });
 
   if (!stats) {
     return res.status(404).json({
       success: false,
       message: "Ward not found",
-      data: null
+      data: null,
     });
   }
 
   // Get complaint status breakdown
   const complaintStats = await prisma.complaint.groupBy({
-    by: ['status'],
+    by: ["status"],
     where: { wardId: id },
-    _count: true
+    _count: true,
   });
 
   // Get priority breakdown
   const priorityStats = await prisma.complaint.groupBy({
-    by: ['priority'],
+    by: ["priority"],
     where: { wardId: id },
-    _count: true
+    _count: true,
   });
 
   res.status(200).json({
@@ -324,8 +324,8 @@ export const getWardStats = asyncHandler(async (req, res) => {
       totalUsers: stats._count.users,
       totalComplaints: stats._count.complaints,
       complaintsByStatus: complaintStats,
-      complaintsByPriority: priorityStats
-    }
+      complaintsByPriority: priorityStats,
+    },
   });
 });
 
@@ -337,13 +337,13 @@ export const getSubZones = asyncHandler(async (req, res) => {
 
   const subZones = await prisma.subZone.findMany({
     where: { wardId: id },
-    orderBy: { name: 'asc' }
+    orderBy: { name: "asc" },
   });
 
   res.status(200).json({
     success: true,
     message: "Sub-zones retrieved successfully",
-    data: subZones
+    data: subZones,
   });
 });
 
@@ -359,14 +359,14 @@ export const createSubZone = asyncHandler(async (req, res) => {
       name,
       description,
       isActive,
-      wardId
-    }
+      wardId,
+    },
   });
 
   res.status(201).json({
     success: true,
     message: "Sub-zone created successfully",
-    data: subZone
+    data: subZone,
   });
 });
 
@@ -382,14 +382,14 @@ export const updateSubZone = asyncHandler(async (req, res) => {
     data: {
       ...(name && { name }),
       ...(description && { description }),
-      ...(isActive !== undefined && { isActive })
-    }
+      ...(isActive !== undefined && { isActive }),
+    },
   });
 
   res.status(200).json({
     success: true,
     message: "Sub-zone updated successfully",
-    data: subZone
+    data: subZone,
   });
 });
 
@@ -400,12 +400,12 @@ export const deleteSubZone = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   await prisma.subZone.delete({
-    where: { id }
+    where: { id },
   });
 
   res.status(200).json({
     success: true,
     message: "Sub-zone deleted successfully",
-    data: null
+    data: null,
   });
 });

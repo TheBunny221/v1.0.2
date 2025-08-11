@@ -10,7 +10,7 @@ import {
   getSubZones,
   createSubZone,
   updateSubZone,
-  deleteSubZone
+  deleteSubZone,
 } from "../controller/wardController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { validateWard, validateSubZone } from "../middleware/validation.js";
@@ -185,7 +185,11 @@ router.delete("/:id", authorize("ADMINISTRATOR"), deleteWard);
  *       200:
  *         description: List of complaints for the ward
  */
-router.get("/:id/complaints", authorize("WARD_OFFICER", "ADMINISTRATOR"), getWardComplaints);
+router.get(
+  "/:id/complaints",
+  authorize("WARD_OFFICER", "ADMINISTRATOR"),
+  getWardComplaints,
+);
 
 /**
  * @swagger
@@ -205,7 +209,11 @@ router.get("/:id/complaints", authorize("WARD_OFFICER", "ADMINISTRATOR"), getWar
  *       200:
  *         description: Ward statistics
  */
-router.get("/:id/stats", authorize("WARD_OFFICER", "ADMINISTRATOR"), getWardStats);
+router.get(
+  "/:id/stats",
+  authorize("WARD_OFFICER", "ADMINISTRATOR"),
+  getWardStats,
+);
 
 // SubZone routes
 /**
@@ -226,8 +234,22 @@ router.get("/:id/stats", authorize("WARD_OFFICER", "ADMINISTRATOR"), getWardStat
  */
 router.get("/:id/subzones", getSubZones);
 
-router.post("/:id/subzones", authorize("ADMINISTRATOR"), validateSubZone, createSubZone);
-router.put("/:wardId/subzones/:id", authorize("ADMINISTRATOR"), validateSubZone, updateSubZone);
-router.delete("/:wardId/subzones/:id", authorize("ADMINISTRATOR"), deleteSubZone);
+router.post(
+  "/:id/subzones",
+  authorize("ADMINISTRATOR"),
+  validateSubZone,
+  createSubZone,
+);
+router.put(
+  "/:wardId/subzones/:id",
+  authorize("ADMINISTRATOR"),
+  validateSubZone,
+  updateSubZone,
+);
+router.delete(
+  "/:wardId/subzones/:id",
+  authorize("ADMINISTRATOR"),
+  deleteSubZone,
+);
 
 export default router;

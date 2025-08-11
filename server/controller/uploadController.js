@@ -15,13 +15,13 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "No file uploaded",
-      data: null
+      data: null,
     });
   }
 
   // Check if complaint exists
   const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId }
+    where: { id: complaintId },
   });
 
   if (!complaint) {
@@ -30,7 +30,7 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
     return res.status(404).json({
       success: false,
       message: "Complaint not found",
-      data: null
+      data: null,
     });
   }
 
@@ -43,8 +43,8 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
       size: req.file.size,
       path: req.file.path,
       complaintId: complaintId,
-      uploadedBy: req.user?.id || null
-    }
+      uploadedBy: req.user?.id || null,
+    },
   });
 
   res.status(200).json({
@@ -56,8 +56,8 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
       originalName: attachment.originalName,
       mimeType: attachment.mimeType,
       size: attachment.size,
-      url: `/api/uploads/${attachment.id}`
-    }
+      url: `/api/uploads/${attachment.id}`,
+    },
   });
 });
 
@@ -69,7 +69,7 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "No file uploaded",
-      data: null
+      data: null,
     });
   }
 
@@ -77,8 +77,8 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
   const user = await prisma.user.update({
     where: { id: req.user.id },
     data: {
-      avatar: `/api/uploads/profile/${req.file.filename}`
-    }
+      avatar: `/api/uploads/profile/${req.file.filename}`,
+    },
   });
 
   res.status(200).json({
@@ -86,8 +86,8 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
     message: "Profile picture uploaded successfully",
     data: {
       filename: req.file.filename,
-      url: `/api/uploads/profile/${req.file.filename}`
-    }
+      url: `/api/uploads/profile/${req.file.filename}`,
+    },
   });
 });
 
@@ -98,14 +98,14 @@ export const getAttachment = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const attachment = await prisma.attachment.findUnique({
-    where: { id }
+    where: { id },
   });
 
   if (!attachment) {
     return res.status(404).json({
       success: false,
       message: "File not found",
-      data: null
+      data: null,
     });
   }
 
@@ -114,13 +114,16 @@ export const getAttachment = asyncHandler(async (req, res) => {
     return res.status(404).json({
       success: false,
       message: "File not found on server",
-      data: null
+      data: null,
     });
   }
 
   // Set appropriate headers
-  res.setHeader('Content-Type', attachment.mimeType);
-  res.setHeader('Content-Disposition', `inline; filename="${attachment.originalName}"`);
+  res.setHeader("Content-Type", attachment.mimeType);
+  res.setHeader(
+    "Content-Disposition",
+    `inline; filename="${attachment.originalName}"`,
+  );
 
   // Stream the file
   const fileStream = fs.createReadStream(attachment.path);
@@ -136,26 +139,28 @@ export const deleteAttachment = asyncHandler(async (req, res) => {
   const attachment = await prisma.attachment.findUnique({
     where: { id },
     include: {
-      complaint: true
-    }
+      complaint: true,
+    },
   });
 
   if (!attachment) {
     return res.status(404).json({
       success: false,
       message: "File not found",
-      data: null
+      data: null,
     });
   }
 
   // Check permissions - only complaint owner or admin can delete
-  if (req.user.role !== 'ADMINISTRATOR' && 
-      attachment.complaint.submittedById !== req.user.id &&
-      attachment.uploadedBy !== req.user.id) {
+  if (
+    req.user.role !== "ADMINISTRATOR" &&
+    attachment.complaint.submittedById !== req.user.id &&
+    attachment.uploadedBy !== req.user.id
+  ) {
     return res.status(403).json({
       success: false,
       message: "Not authorized to delete this file",
-      data: null
+      data: null,
     });
   }
 
@@ -166,13 +171,13 @@ export const deleteAttachment = asyncHandler(async (req, res) => {
 
   // Delete database record
   await prisma.attachment.delete({
-    where: { id }
+    where: { id },
   });
 
   res.status(200).json({
     success: true,
     message: "File deleted successfully",
-    data: null
+    data: null,
   });
 });
 
@@ -181,31 +186,35 @@ export const deleteAttachment = asyncHandler(async (req, res) => {
 // @access  Public
 export const getProfilePicture = asyncHandler(async (req, res) => {
   const { filename } = req.params;
-  const filePath = path.join(process.env.UPLOAD_PATH || "./uploads", "profiles", filename);
+  const filePath = path.join(
+    process.env.UPLOAD_PATH || "./uploads",
+    "profiles",
+    filename,
+  );
 
   // Check if file exists
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({
       success: false,
       message: "Profile picture not found",
-      data: null
+      data: null,
     });
   }
 
   // Determine content type based on file extension
   const ext = path.extname(filename).toLowerCase();
   const contentTypes = {
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.png': 'image/png',
-    '.gif': 'image/gif'
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
   };
 
-  const contentType = contentTypes[ext] || 'application/octet-stream';
+  const contentType = contentTypes[ext] || "application/octet-stream";
 
   // Set headers and stream file
-  res.setHeader('Content-Type', contentType);
-  res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+  res.setHeader("Content-Type", contentType);
+  res.setHeader("Cache-Control", "public, max-age=86400"); // Cache for 1 day
 
   const fileStream = fs.createReadStream(filePath);
   fileStream.pipe(res);

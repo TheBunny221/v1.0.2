@@ -284,10 +284,7 @@ export const validateUser = [
   body("role")
     .isIn(["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"])
     .withMessage("Invalid role"),
-  body("wardId")
-    .optional()
-    .isString()
-    .withMessage("Invalid ward ID"),
+  body("wardId").optional().isString().withMessage("Invalid ward ID"),
   body("department")
     .optional()
     .isLength({ max: 100 })
@@ -314,10 +311,7 @@ export const validateUserUpdate = [
     .optional()
     .isIn(["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"])
     .withMessage("Invalid role"),
-  body("wardId")
-    .optional()
-    .isString()
-    .withMessage("Invalid ward ID"),
+  body("wardId").optional().isString().withMessage("Invalid ward ID"),
   body("department")
     .optional()
     .isLength({ max: 100 })

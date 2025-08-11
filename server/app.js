@@ -38,29 +38,34 @@ const swaggerOptions = {
     info: {
       title: "Cochin Smart City API",
       version: "1.0.0",
-      description: "Comprehensive API for the Cochin Smart City Complaint Management System",
+      description:
+        "Comprehensive API for the Cochin Smart City Complaint Management System",
       contact: {
         name: "API Support",
-        email: "api-support@cochinsmartcity.gov.in"
-      }
+        email: "api-support@cochinsmartcity.gov.in",
+      },
     },
     servers: [
       {
-        url: process.env.NODE_ENV === "production" 
-          ? "https://api.cochinsmartcity.gov.in" 
-          : `http://localhost:${process.env.PORT || 4005}`,
-        description: process.env.NODE_ENV === "production" ? "Production server" : "Development server"
-      }
+        url:
+          process.env.NODE_ENV === "production"
+            ? "https://api.cochinsmartcity.gov.in"
+            : `http://localhost:${process.env.PORT || 4005}`,
+        description:
+          process.env.NODE_ENV === "production"
+            ? "Production server"
+            : "Development server",
+      },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
           type: "http",
           scheme: "bearer",
-          bearerFormat: "JWT"
-        }
-      }
-    }
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
   apis: ["./server/routes/*.js", "./server/controller/*.js"], // paths to files containing OpenAPI definitions
 };
@@ -71,17 +76,23 @@ export function createApp() {
   const app = express();
 
   // Security middleware
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:"],
-        scriptSrc: ["'self'"],
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+          ],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https:"],
+          scriptSrc: ["'self'"],
+        },
       },
-    },
-  }));
+    }),
+  );
 
   // Rate limiting
   const limiter = rateLimit({
@@ -89,25 +100,27 @@ export function createApp() {
     max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // limit each IP to 100 requests per windowMs
     message: {
       success: false,
-      message: "Too many requests from this IP, please try again later."
+      message: "Too many requests from this IP, please try again later.",
     },
     standardHeaders: true,
     legacyHeaders: false,
   });
 
-  app.use('/api/', limiter);
+  app.use("/api/", limiter);
 
   // CORS configuration
-  app.use(cors({
-    origin: process.env.CORS_ORIGIN?.split(',') || [
-      process.env.CLIENT_URL || "http://localhost:3000",
-      "http://localhost:3000",
-      "http://localhost:8080"
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-  }));
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN?.split(",") || [
+        process.env.CLIENT_URL || "http://localhost:3000",
+        "http://localhost:3000",
+        "http://localhost:8080",
+      ],
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    }),
+  );
 
   // Compression
   app.use(compression());
@@ -120,11 +133,15 @@ export function createApp() {
   app.use(requestLogger);
 
   // Swagger UI
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-    explorer: true,
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: "Cochin Smart City API Documentation"
-  }));
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(specs, {
+      explorer: true,
+      customCss: ".swagger-ui .topbar { display: none }",
+      customSiteTitle: "Cochin Smart City API Documentation",
+    }),
+  );
 
   // API Routes
   app.use("/api/auth", authRoutes);
@@ -146,14 +163,14 @@ export function createApp() {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         version: "1.0.0",
-        environment: process.env.NODE_ENV || "development"
+        environment: process.env.NODE_ENV || "development",
       },
     });
   });
 
   // API documentation endpoint
   app.get("/api/docs/json", (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader("Content-Type", "application/json");
     res.send(specs);
   });
 
@@ -163,7 +180,7 @@ export function createApp() {
       success: true,
       message: "Cochin Smart City API",
       documentation: "/api-docs",
-      health: "/api/health"
+      health: "/api/health",
     });
   });
 
@@ -172,7 +189,7 @@ export function createApp() {
     res.status(404).json({
       success: false,
       message: `API endpoint ${req.method} ${req.originalUrl} not found`,
-      data: null
+      data: null,
     });
   });
 

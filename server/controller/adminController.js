@@ -9,13 +9,13 @@ const prisma = getPrisma();
 // @route   GET /api/admin/users
 // @access  Private (Admin only)
 export const getAllUsers = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, role, ward, status = 'all' } = req.query;
+  const { page = 1, limit = 10, role, ward, status = "all" } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const whereClause = {
     ...(role && { role }),
     ...(ward && { wardId: ward }),
-    ...(status !== 'all' && { isActive: status === 'active' })
+    ...(status !== "all" && { isActive: status === "active" }),
   };
 
   const users = await prisma.user.findMany({
@@ -24,21 +24,21 @@ export const getAllUsers = asyncHandler(async (req, res) => {
       ward: {
         select: {
           id: true,
-          name: true
-        }
+          name: true,
+        },
       },
       _count: {
         select: {
           submittedComplaints: true,
-          assignedComplaints: true
-        }
-      }
+          assignedComplaints: true,
+        },
+      },
     },
     skip,
     take: parseInt(limit),
     orderBy: {
-      createdAt: 'desc'
-    }
+      createdAt: "desc",
+    },
   });
 
   const total = await prisma.user.count({ where: whereClause });
@@ -52,9 +52,9 @@ export const getAllUsers = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        pages: Math.ceil(total / parseInt(limit))
-      }
-    }
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    },
   });
 });
 
@@ -66,14 +66,14 @@ export const createUser = asyncHandler(async (req, res) => {
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (existingUser) {
     return res.status(400).json({
       success: false,
       message: "User with this email already exists",
-      data: null
+      data: null,
     });
   }
 
@@ -86,16 +86,16 @@ export const createUser = asyncHandler(async (req, res) => {
       role,
       wardId,
       department,
-      isActive: true
+      isActive: true,
     },
     include: {
       ward: {
         select: {
           id: true,
-          name: true
-        }
-      }
-    }
+          name: true,
+        },
+      },
+    },
   });
 
   // Send password setup email
@@ -108,7 +108,7 @@ export const createUser = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     message: "User created successfully. Password setup email sent.",
-    data: user
+    data: user,
   });
 });
 
@@ -117,31 +117,32 @@ export const createUser = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { fullName, email, phoneNumber, role, wardId, department, isActive } = req.body;
+  const { fullName, email, phoneNumber, role, wardId, department, isActive } =
+    req.body;
 
   const user = await prisma.user.findUnique({
-    where: { id }
+    where: { id },
   });
 
   if (!user) {
     return res.status(404).json({
       success: false,
       message: "User not found",
-      data: null
+      data: null,
     });
   }
 
   // Check if email is being changed and if it's already taken
   if (email && email !== user.email) {
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
         message: "Email already in use",
-        data: null
+        data: null,
       });
     }
   }
@@ -155,22 +156,22 @@ export const updateUser = asyncHandler(async (req, res) => {
       ...(role && { role }),
       ...(wardId && { wardId }),
       ...(department && { department }),
-      ...(isActive !== undefined && { isActive })
+      ...(isActive !== undefined && { isActive }),
     },
     include: {
       ward: {
         select: {
           id: true,
-          name: true
-        }
-      }
-    }
+          name: true,
+        },
+      },
+    },
   });
 
   res.status(200).json({
     success: true,
     message: "User updated successfully",
-    data: updatedUser
+    data: updatedUser,
   });
 });
 
@@ -184,35 +185,39 @@ export const deleteUser = asyncHandler(async (req, res) => {
     where: { id },
     include: {
       submittedComplaints: true,
-      assignedComplaints: true
-    }
+      assignedComplaints: true,
+    },
   });
 
   if (!user) {
     return res.status(404).json({
       success: false,
       message: "User not found",
-      data: null
+      data: null,
     });
   }
 
   // Prevent deleting users with active complaints
-  if (user.submittedComplaints.length > 0 || user.assignedComplaints.length > 0) {
+  if (
+    user.submittedComplaints.length > 0 ||
+    user.assignedComplaints.length > 0
+  ) {
     return res.status(400).json({
       success: false,
-      message: "Cannot delete user with associated complaints. Please reassign or resolve complaints first.",
-      data: null
+      message:
+        "Cannot delete user with associated complaints. Please reassign or resolve complaints first.",
+      data: null,
     });
   }
 
   await prisma.user.delete({
-    where: { id }
+    where: { id },
   });
 
   res.status(200).json({
     success: true,
     message: "User deleted successfully",
-    data: null
+    data: null,
   });
 });
 
@@ -224,13 +229,13 @@ export const activateUser = asyncHandler(async (req, res) => {
 
   const user = await prisma.user.update({
     where: { id },
-    data: { isActive: true }
+    data: { isActive: true },
   });
 
   res.status(200).json({
     success: true,
     message: "User activated successfully",
-    data: user
+    data: user,
   });
 });
 
@@ -242,13 +247,13 @@ export const deactivateUser = asyncHandler(async (req, res) => {
 
   const user = await prisma.user.update({
     where: { id },
-    data: { isActive: false }
+    data: { isActive: false },
   });
 
   res.status(200).json({
     success: true,
     message: "User deactivated successfully",
-    data: user
+    data: user,
   });
 });
 
@@ -262,42 +267,42 @@ export const bulkUserActions = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Invalid action or user IDs",
-      data: null
+      data: null,
     });
   }
 
   let result;
 
   switch (action) {
-    case 'activate':
+    case "activate":
       result = await prisma.user.updateMany({
         where: { id: { in: userIds } },
-        data: { isActive: true }
+        data: { isActive: true },
       });
       break;
-    case 'deactivate':
+    case "deactivate":
       result = await prisma.user.updateMany({
         where: { id: { in: userIds } },
-        data: { isActive: false }
+        data: { isActive: false },
       });
       break;
-    case 'delete':
+    case "delete":
       result = await prisma.user.deleteMany({
-        where: { id: { in: userIds } }
+        where: { id: { in: userIds } },
       });
       break;
     default:
       return res.status(400).json({
         success: false,
         message: "Invalid action",
-        data: null
+        data: null,
       });
   }
 
   res.status(200).json({
     success: true,
     message: `Bulk ${action} completed successfully`,
-    data: { affectedCount: result.count }
+    data: { affectedCount: result.count },
   });
 });
 
@@ -306,12 +311,12 @@ export const bulkUserActions = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const getUserStats = asyncHandler(async (req, res) => {
   const stats = await prisma.user.groupBy({
-    by: ['role'],
-    _count: true
+    by: ["role"],
+    _count: true,
   });
 
   const activeUsers = await prisma.user.count({
-    where: { isActive: true }
+    where: { isActive: true },
   });
 
   const totalUsers = await prisma.user.count();
@@ -323,8 +328,8 @@ export const getUserStats = asyncHandler(async (req, res) => {
       totalUsers,
       activeUsers,
       inactiveUsers: totalUsers - activeUsers,
-      usersByRole: stats
-    }
+      usersByRole: stats,
+    },
   });
 });
 
@@ -337,13 +342,15 @@ export const getSystemStats = asyncHandler(async (req, res) => {
     totalComplaints,
     totalWards,
     activeComplaints,
-    resolvedComplaints
+    resolvedComplaints,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.complaint.count(),
     prisma.ward.count(),
-    prisma.complaint.count({ where: { status: { in: ['REGISTERED', 'ASSIGNED', 'IN_PROGRESS'] } } }),
-    prisma.complaint.count({ where: { status: 'RESOLVED' } })
+    prisma.complaint.count({
+      where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } },
+    }),
+    prisma.complaint.count({ where: { status: "RESOLVED" } }),
   ]);
 
   res.status(200).json({
@@ -355,8 +362,11 @@ export const getSystemStats = asyncHandler(async (req, res) => {
       totalWards,
       activeComplaints,
       resolvedComplaints,
-      resolutionRate: totalComplaints > 0 ? (resolvedComplaints / totalComplaints * 100).toFixed(2) : 0
-    }
+      resolutionRate:
+        totalComplaints > 0
+          ? ((resolvedComplaints / totalComplaints) * 100).toFixed(2)
+          : 0,
+    },
   });
 });
 
@@ -367,34 +377,35 @@ export const getAnalytics = asyncHandler(async (req, res) => {
   const { startDate, endDate, ward } = req.query;
 
   const whereClause = {
-    ...(startDate && endDate && {
-      createdAt: {
-        gte: new Date(startDate),
-        lte: new Date(endDate)
-      }
-    }),
-    ...(ward && { wardId: ward })
+    ...(startDate &&
+      endDate && {
+        createdAt: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      }),
+    ...(ward && { wardId: ward }),
   };
 
   // Get complaints by status
   const complaintsByStatus = await prisma.complaint.groupBy({
-    by: ['status'],
+    by: ["status"],
     where: whereClause,
-    _count: true
+    _count: true,
   });
 
   // Get complaints by priority
   const complaintsByPriority = await prisma.complaint.groupBy({
-    by: ['priority'],
+    by: ["priority"],
     where: whereClause,
-    _count: true
+    _count: true,
   });
 
   // Get complaints by type
   const complaintsByType = await prisma.complaint.groupBy({
-    by: ['type'],
+    by: ["type"],
     where: whereClause,
-    _count: true
+    _count: true,
   });
 
   // Get monthly trends
@@ -416,8 +427,8 @@ export const getAnalytics = asyncHandler(async (req, res) => {
       complaintsByStatus,
       complaintsByPriority,
       complaintsByType,
-      monthlyTrends
-    }
+      monthlyTrends,
+    },
   });
 });
 
@@ -431,22 +442,22 @@ export const manageRoles = asyncHandler(async (req, res) => {
     where: { id: userId },
     data: {
       role: newRole,
-      ...(wardId && { wardId })
+      ...(wardId && { wardId }),
     },
     include: {
       ward: {
         select: {
           id: true,
-          name: true
-        }
-      }
-    }
+          name: true,
+        },
+      },
+    },
   });
 
   res.status(200).json({
     success: true,
     message: "User role updated successfully",
-    data: user
+    data: user,
   });
 });
 
