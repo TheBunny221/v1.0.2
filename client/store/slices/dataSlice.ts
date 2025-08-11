@@ -1,6 +1,10 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { hasPermission, canViewComplaint, DataFilters } from '../../utils/permissions';
-import type { UserRole } from '../../utils/permissions';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import {
+  hasPermission,
+  canViewComplaint,
+  DataFilters,
+} from "../../utils/permissions";
+import type { UserRole } from "../../utils/permissions";
 
 // Types
 interface DataState {
@@ -9,11 +13,11 @@ interface DataState {
   userComplaints: any[];
   wardComplaints: any[];
   assignedComplaints: any[];
-  
+
   // Users data
   allUsers: any[];
   wardUsers: any[];
-  
+
   // Analytics data
   analytics: {
     complaintsStats: any;
@@ -21,21 +25,21 @@ interface DataState {
     userStats: any;
     slaStats: any;
   };
-  
+
   // Loading states
   loading: {
     complaints: boolean;
     users: boolean;
     analytics: boolean;
   };
-  
+
   // Error states
   errors: {
     complaints: string | null;
     users: string | null;
     analytics: string | null;
   };
-  
+
   // Last updated timestamps
   lastUpdated: {
     complaints: number | null;
@@ -76,10 +80,10 @@ const initialState: DataState = {
 
 // Helper function for API calls
 const apiCall = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const response = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
@@ -97,24 +101,24 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 
 // Async thunks
 export const fetchAllComplaints = createAsyncThunk(
-  'data/fetchAllComplaints',
+  "data/fetchAllComplaints",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
+
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
-      const complaints = await apiCall('/api/complaints');
-      
+      const complaints = await apiCall("/api/complaints");
+
       // Filter complaints based on user permissions
       const filteredComplaints = DataFilters.filterComplaints(
         complaints,
         user.role as UserRole,
         user.id,
-        user.wardId
+        user.wardId,
       );
 
       return {
@@ -126,134 +130,141 @@ export const fetchAllComplaints = createAsyncThunk(
       };
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch complaints'
+        error instanceof Error ? error.message : "Failed to fetch complaints",
       );
     }
-  }
+  },
 );
 
 export const fetchUserComplaints = createAsyncThunk(
-  'data/fetchUserComplaints',
+  "data/fetchUserComplaints",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
+
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
       const complaints = await apiCall(`/api/complaints/user/${user.id}`);
       return complaints;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch user complaints'
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch user complaints",
       );
     }
-  }
+  },
 );
 
 export const fetchWardComplaints = createAsyncThunk(
-  'data/fetchWardComplaints',
+  "data/fetchWardComplaints",
   async (wardId: string, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
-      if (!user || !hasPermission(user.role, 'complaint:view:ward')) {
-        throw new Error('Insufficient permissions');
+
+      if (!user || !hasPermission(user.role, "complaint:view:ward")) {
+        throw new Error("Insufficient permissions");
       }
 
       const complaints = await apiCall(`/api/complaints/ward/${wardId}`);
       return complaints;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch ward complaints'
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch ward complaints",
       );
     }
-  }
+  },
 );
 
 export const fetchAssignedComplaints = createAsyncThunk(
-  'data/fetchAssignedComplaints',
+  "data/fetchAssignedComplaints",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
+
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
       const complaints = await apiCall(`/api/complaints/assigned/${user.id}`);
       return complaints;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch assigned complaints'
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch assigned complaints",
       );
     }
-  }
+  },
 );
 
 export const fetchAllUsers = createAsyncThunk(
-  'data/fetchAllUsers',
+  "data/fetchAllUsers",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
-      if (!user || !hasPermission(user.role, 'user:view:all')) {
-        throw new Error('Insufficient permissions');
+
+      if (!user || !hasPermission(user.role, "user:view:all")) {
+        throw new Error("Insufficient permissions");
       }
 
-      const users = await apiCall('/api/users');
+      const users = await apiCall("/api/users");
       return users;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch users'
+        error instanceof Error ? error.message : "Failed to fetch users",
       );
     }
-  }
+  },
 );
 
 export const fetchWardUsers = createAsyncThunk(
-  'data/fetchWardUsers',
+  "data/fetchWardUsers",
   async (wardId: string, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
-      if (!user || !hasPermission(user.role, 'ward:manage')) {
-        throw new Error('Insufficient permissions');
+
+      if (!user || !hasPermission(user.role, "ward:manage")) {
+        throw new Error("Insufficient permissions");
       }
 
       const users = await apiCall(`/api/users/ward/${wardId}`);
       return users;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch ward users'
+        error instanceof Error ? error.message : "Failed to fetch ward users",
       );
     }
-  }
+  },
 );
 
 export const fetchAnalytics = createAsyncThunk(
-  'data/fetchAnalytics',
+  "data/fetchAnalytics",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      
-      if (!user || !hasPermission(user.role, 'system:analytics')) {
-        throw new Error('Insufficient permissions');
+
+      if (!user || !hasPermission(user.role, "system:analytics")) {
+        throw new Error("Insufficient permissions");
       }
 
-      const [complaintsStats, wardStats, userStats, slaStats] = await Promise.all([
-        apiCall('/api/analytics/complaints'),
-        apiCall('/api/analytics/wards'),
-        apiCall('/api/analytics/users'),
-        apiCall('/api/analytics/sla'),
-      ]);
+      const [complaintsStats, wardStats, userStats, slaStats] =
+        await Promise.all([
+          apiCall("/api/analytics/complaints"),
+          apiCall("/api/analytics/wards"),
+          apiCall("/api/analytics/users"),
+          apiCall("/api/analytics/sla"),
+        ]);
 
       return {
         complaintsStats,
@@ -263,55 +274,61 @@ export const fetchAnalytics = createAsyncThunk(
       };
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch analytics'
+        error instanceof Error ? error.message : "Failed to fetch analytics",
       );
     }
-  }
+  },
 );
 
 // Update complaint with role-based validation
 export const updateComplaint = createAsyncThunk(
-  'data/updateComplaint',
+  "data/updateComplaint",
   async (
     { complaintId, updates }: { complaintId: string; updates: any },
-    { getState, rejectWithValue }
+    { getState, rejectWithValue },
   ) => {
     try {
       const state = getState() as any;
       const user = state.auth.user;
-      const complaint = state.data.allComplaints.find((c: any) => c.id === complaintId);
-      
+      const complaint = state.data.allComplaints.find(
+        (c: any) => c.id === complaintId,
+      );
+
       if (!user || !complaint) {
-        throw new Error('User not authenticated or complaint not found');
+        throw new Error("User not authenticated or complaint not found");
       }
 
       // Check permissions before update
-      const canModify = hasPermission(user.role, 'complaint:update:all') ||
-        (hasPermission(user.role, 'complaint:update:own') && complaint.submittedById === user.id) ||
-        (hasPermission(user.role, 'complaint:update:ward') && complaint.wardId === user.wardId) ||
-        (hasPermission(user.role, 'complaint:update:own') && complaint.assignedToId === user.id);
+      const canModify =
+        hasPermission(user.role, "complaint:update:all") ||
+        (hasPermission(user.role, "complaint:update:own") &&
+          complaint.submittedById === user.id) ||
+        (hasPermission(user.role, "complaint:update:ward") &&
+          complaint.wardId === user.wardId) ||
+        (hasPermission(user.role, "complaint:update:own") &&
+          complaint.assignedToId === user.id);
 
       if (!canModify) {
-        throw new Error('Insufficient permissions to update this complaint');
+        throw new Error("Insufficient permissions to update this complaint");
       }
 
       const updatedComplaint = await apiCall(`/api/complaints/${complaintId}`, {
-        method: 'PUT',
+        method: "PUT",
         body: JSON.stringify(updates),
       });
 
       return updatedComplaint;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to update complaint'
+        error instanceof Error ? error.message : "Failed to update complaint",
       );
     }
-  }
+  },
 );
 
 // Data slice
 const dataSlice = createSlice({
-  name: 'data',
+  name: "data",
   initialState,
   reducers: {
     clearErrors: (state) => {
@@ -321,7 +338,7 @@ const dataSlice = createSlice({
         analytics: null,
       };
     },
-    
+
     clearComplaintsCache: (state) => {
       state.allComplaints = [];
       state.userComplaints = [];
@@ -329,13 +346,13 @@ const dataSlice = createSlice({
       state.assignedComplaints = [];
       state.lastUpdated.complaints = null;
     },
-    
+
     clearUsersCache: (state) => {
       state.allUsers = [];
       state.wardUsers = [];
       state.lastUpdated.users = null;
     },
-    
+
     clearAnalyticsCache: (state) => {
       state.analytics = {
         complaintsStats: null,
@@ -347,12 +364,15 @@ const dataSlice = createSlice({
     },
 
     // Optimistic updates for better UX
-    optimisticComplaintUpdate: (state, action: PayloadAction<{ id: string; updates: any }>) => {
+    optimisticComplaintUpdate: (
+      state,
+      action: PayloadAction<{ id: string; updates: any }>,
+    ) => {
       const { id, updates } = action.payload;
-      
+
       // Update in all relevant arrays
       const updateComplaintInArray = (complaints: any[]) => {
-        const index = complaints.findIndex(c => c.id === id);
+        const index = complaints.findIndex((c) => c.id === id);
         if (index !== -1) {
           complaints[index] = { ...complaints[index], ...updates };
         }
@@ -364,7 +384,7 @@ const dataSlice = createSlice({
       updateComplaintInArray(state.assignedComplaints);
     },
   },
-  
+
   extraReducers: (builder) => {
     // Fetch all complaints
     builder
@@ -383,22 +403,19 @@ const dataSlice = createSlice({
       });
 
     // Fetch user complaints
-    builder
-      .addCase(fetchUserComplaints.fulfilled, (state, action) => {
-        state.userComplaints = action.payload;
-      });
+    builder.addCase(fetchUserComplaints.fulfilled, (state, action) => {
+      state.userComplaints = action.payload;
+    });
 
     // Fetch ward complaints
-    builder
-      .addCase(fetchWardComplaints.fulfilled, (state, action) => {
-        state.wardComplaints = action.payload;
-      });
+    builder.addCase(fetchWardComplaints.fulfilled, (state, action) => {
+      state.wardComplaints = action.payload;
+    });
 
     // Fetch assigned complaints
-    builder
-      .addCase(fetchAssignedComplaints.fulfilled, (state, action) => {
-        state.assignedComplaints = action.payload;
-      });
+    builder.addCase(fetchAssignedComplaints.fulfilled, (state, action) => {
+      state.assignedComplaints = action.payload;
+    });
 
     // Fetch all users
     builder
@@ -417,10 +434,9 @@ const dataSlice = createSlice({
       });
 
     // Fetch ward users
-    builder
-      .addCase(fetchWardUsers.fulfilled, (state, action) => {
-        state.wardUsers = action.payload;
-      });
+    builder.addCase(fetchWardUsers.fulfilled, (state, action) => {
+      state.wardUsers = action.payload;
+    });
 
     // Fetch analytics
     builder
@@ -439,22 +455,21 @@ const dataSlice = createSlice({
       });
 
     // Update complaint
-    builder
-      .addCase(updateComplaint.fulfilled, (state, action) => {
-        // Update the complaint in all relevant arrays
-        const updatedComplaint = action.payload;
-        const updateInArray = (complaints: any[]) => {
-          const index = complaints.findIndex(c => c.id === updatedComplaint.id);
-          if (index !== -1) {
-            complaints[index] = updatedComplaint;
-          }
-        };
+    builder.addCase(updateComplaint.fulfilled, (state, action) => {
+      // Update the complaint in all relevant arrays
+      const updatedComplaint = action.payload;
+      const updateInArray = (complaints: any[]) => {
+        const index = complaints.findIndex((c) => c.id === updatedComplaint.id);
+        if (index !== -1) {
+          complaints[index] = updatedComplaint;
+        }
+      };
 
-        updateInArray(state.allComplaints);
-        updateInArray(state.userComplaints);
-        updateInArray(state.wardComplaints);
-        updateInArray(state.assignedComplaints);
-      });
+      updateInArray(state.allComplaints);
+      updateInArray(state.userComplaints);
+      updateInArray(state.wardComplaints);
+      updateInArray(state.assignedComplaints);
+    });
   },
 });
 
@@ -470,20 +485,21 @@ export const {
 export const selectFilteredComplaints = (state: any) => {
   const { user } = state.auth;
   const { allComplaints } = state.data;
-  
+
   if (!user) return [];
-  
+
   return DataFilters.filterComplaints(
     allComplaints,
     user.role as UserRole,
     user.id,
-    user.wardId
+    user.wardId,
   );
 };
 
 export const selectUserComplaints = (state: any) => state.data.userComplaints;
 export const selectWardComplaints = (state: any) => state.data.wardComplaints;
-export const selectAssignedComplaints = (state: any) => state.data.assignedComplaints;
+export const selectAssignedComplaints = (state: any) =>
+  state.data.assignedComplaints;
 export const selectAllUsers = (state: any) => state.data.allUsers;
 export const selectWardUsers = (state: any) => state.data.wardUsers;
 export const selectAnalytics = (state: any) => state.data.analytics;

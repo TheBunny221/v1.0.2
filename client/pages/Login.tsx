@@ -242,7 +242,7 @@ const Login: React.FC = () => {
     {
       email: "citizen@example.com",
       password: "citizen123",
-      role: "Citizen"
+      role: "Citizen",
     },
   ];
 
