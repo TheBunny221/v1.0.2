@@ -418,14 +418,14 @@ export const setPassword = asyncHandler(async (req, res) => {
   });
 
   // Generate JWT token
-  const token = generateJWTToken(user);
+  const jwtToken = generateJWTToken(user);
 
   res.status(200).json({
     success: true,
     message: "Password set successfully",
     data: {
       user: { ...user, password: undefined },
-      token,
+      token: jwtToken,
     },
   });
 });
