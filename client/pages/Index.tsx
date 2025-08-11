@@ -249,7 +249,7 @@ const Index: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="mobile">
-                          Mobile Number *
+                          {translations.complaints?.mobile || "Mobile Number"} *
                         </Label>
                         <Input
                           id="mobile"
