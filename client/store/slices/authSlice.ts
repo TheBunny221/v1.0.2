@@ -6,7 +6,12 @@ export interface User {
   fullName: string;
   email: string;
   phoneNumber?: string;
-  role: "CITIZEN" | "ADMINISTRATOR" | "WARD_OFFICER" | "MAINTENANCE_TEAM" | "GUEST";
+  role:
+    | "CITIZEN"
+    | "ADMINISTRATOR"
+    | "WARD_OFFICER"
+    | "MAINTENANCE_TEAM"
+    | "GUEST";
   wardId?: string;
   department?: string;
   avatar?: string;
@@ -27,7 +32,7 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
-  otpStep: 'none' | 'sent' | 'verified';
+  otpStep: "none" | "sent" | "verified";
   requiresPasswordSetup: boolean;
   otpEmail?: string;
   otpExpiresAt?: string;
@@ -40,7 +45,7 @@ const initialState: AuthState = {
   isLoading: false,
   isAuthenticated: false,
   error: null,
-  otpStep: 'none',
+  otpStep: "none",
   requiresPasswordSetup: false,
 };
 
@@ -81,16 +86,17 @@ export const loginWithPassword = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Login failed";
-      
+      const errorMessage =
+        error instanceof Error ? error.message : "Login failed";
+
       // Check if password setup is required
       if (errorMessage.includes("Password not set")) {
-        return rejectWithValue({ 
-          message: errorMessage, 
-          requiresPasswordSetup: true 
+        return rejectWithValue({
+          message: errorMessage,
+          requiresPasswordSetup: true,
         });
       }
-      
+
       return rejectWithValue({ message: errorMessage });
     }
   },
@@ -99,10 +105,7 @@ export const loginWithPassword = createAsyncThunk(
 // Async thunks for OTP-based login
 export const requestOTPLogin = createAsyncThunk(
   "auth/requestOTPLogin",
-  async (
-    { email }: { email: string },
-    { rejectWithValue },
-  ) => {
+  async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
       const data = await apiCall("/api/auth/login-otp", {
         method: "POST",
@@ -112,7 +115,7 @@ export const requestOTPLogin = createAsyncThunk(
       return data.data;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Failed to send OTP"
+        message: error instanceof Error ? error.message : "Failed to send OTP",
       });
     }
   },
@@ -136,7 +139,8 @@ export const verifyOTPLogin = createAsyncThunk(
       return data.data;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "OTP verification failed"
+        message:
+          error instanceof Error ? error.message : "OTP verification failed",
       });
     }
   },
@@ -145,10 +149,7 @@ export const verifyOTPLogin = createAsyncThunk(
 // Password setup flow
 export const sendPasswordSetupEmail = createAsyncThunk(
   "auth/sendPasswordSetupEmail",
-  async (
-    { email }: { email: string },
-    { rejectWithValue },
-  ) => {
+  async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
       const data = await apiCall("/api/auth/send-password-setup", {
         method: "POST",
@@ -158,7 +159,10 @@ export const sendPasswordSetupEmail = createAsyncThunk(
       return data.data;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Failed to send password setup email"
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to send password setup email",
       });
     }
   },
@@ -182,7 +186,8 @@ export const setPassword = createAsyncThunk(
       return data.data;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Failed to set password"
+        message:
+          error instanceof Error ? error.message : "Failed to set password",
       });
     }
   },
@@ -191,7 +196,10 @@ export const setPassword = createAsyncThunk(
 export const changePassword = createAsyncThunk(
   "auth/changePassword",
   async (
-    { currentPassword, newPassword }: { currentPassword: string; newPassword: string },
+    {
+      currentPassword,
+      newPassword,
+    }: { currentPassword: string; newPassword: string },
     { getState, rejectWithValue },
   ) => {
     try {
@@ -209,7 +217,8 @@ export const changePassword = createAsyncThunk(
       return true;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Failed to change password"
+        message:
+          error instanceof Error ? error.message : "Failed to change password",
       });
     }
   },
@@ -241,7 +250,7 @@ export const registerUser = createAsyncThunk(
       return data.data;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Registration failed"
+        message: error instanceof Error ? error.message : "Registration failed",
       });
     }
   },
@@ -268,7 +277,8 @@ export const loginWithToken = createAsyncThunk(
     } catch (error) {
       localStorage.removeItem("token");
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Token validation failed"
+        message:
+          error instanceof Error ? error.message : "Token validation failed",
       });
     }
   },
@@ -293,7 +303,8 @@ export const updateProfile = createAsyncThunk(
       return data.data.user;
     } catch (error) {
       return rejectWithValue({
-        message: error instanceof Error ? error.message : "Profile update failed"
+        message:
+          error instanceof Error ? error.message : "Profile update failed",
       });
     }
   },
@@ -340,7 +351,7 @@ const authSlice = createSlice({
     },
     resetAuth: () => initialState,
     resetOTPState: (state) => {
-      state.otpStep = 'none';
+      state.otpStep = "none";
       state.otpEmail = undefined;
       state.otpExpiresAt = undefined;
       state.requiresPasswordSetup = false;
@@ -363,7 +374,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.error = null;
-        state.otpStep = 'none';
+        state.otpStep = "none";
         state.requiresPasswordSetup = false;
       })
       .addCase(loginWithPassword.rejected, (state, action) => {
@@ -372,28 +383,29 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.error = (action.payload as any)?.message || "Login failed";
-        state.requiresPasswordSetup = (action.payload as any)?.requiresPasswordSetup || false;
+        state.requiresPasswordSetup =
+          (action.payload as any)?.requiresPasswordSetup || false;
       })
-      
+
       // OTP login request
       .addCase(requestOTPLogin.pending, (state) => {
         state.isLoading = true;
         state.error = null;
-        state.otpStep = 'none';
+        state.otpStep = "none";
       })
       .addCase(requestOTPLogin.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.otpStep = 'sent';
+        state.otpStep = "sent";
         state.otpEmail = action.payload.email;
         state.otpExpiresAt = action.payload.expiresAt;
         state.error = null;
       })
       .addCase(requestOTPLogin.rejected, (state, action) => {
         state.isLoading = false;
-        state.otpStep = 'none';
+        state.otpStep = "none";
         state.error = (action.payload as any)?.message || "Failed to send OTP";
       })
-      
+
       // OTP verification
       .addCase(verifyOTPLogin.pending, (state) => {
         state.isLoading = true;
@@ -404,14 +416,15 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.otpStep = 'verified';
+        state.otpStep = "verified";
         state.error = null;
       })
       .addCase(verifyOTPLogin.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.message || "OTP verification failed";
+        state.error =
+          (action.payload as any)?.message || "OTP verification failed";
       })
-      
+
       // Password setup email
       .addCase(sendPasswordSetupEmail.pending, (state) => {
         state.isLoading = true;
@@ -423,9 +436,11 @@ const authSlice = createSlice({
       })
       .addCase(sendPasswordSetupEmail.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.message || "Failed to send password setup email";
+        state.error =
+          (action.payload as any)?.message ||
+          "Failed to send password setup email";
       })
-      
+
       // Set password
       .addCase(setPassword.pending, (state) => {
         state.isLoading = true;
@@ -441,9 +456,10 @@ const authSlice = createSlice({
       })
       .addCase(setPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.message || "Failed to set password";
+        state.error =
+          (action.payload as any)?.message || "Failed to set password";
       })
-      
+
       // Change password
       .addCase(changePassword.pending, (state) => {
         state.isLoading = true;
@@ -455,9 +471,10 @@ const authSlice = createSlice({
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.message || "Failed to change password";
+        state.error =
+          (action.payload as any)?.message || "Failed to change password";
       })
-      
+
       // Register
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
@@ -477,7 +494,7 @@ const authSlice = createSlice({
         state.token = null;
         state.error = (action.payload as any)?.message || "Registration failed";
       })
-      
+
       // Login with token
       .addCase(loginWithToken.pending, (state) => {
         state.isLoading = true;
@@ -495,9 +512,10 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
-        state.error = (action.payload as any)?.message || "Token validation failed";
+        state.error =
+          (action.payload as any)?.message || "Token validation failed";
       })
-      
+
       // Update profile
       .addCase(updateProfile.pending, (state) => {
         state.isLoading = true;
@@ -510,9 +528,10 @@ const authSlice = createSlice({
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.message || "Profile update failed";
+        state.error =
+          (action.payload as any)?.message || "Profile update failed";
       })
-      
+
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.isAuthenticated = false;
@@ -520,18 +539,18 @@ const authSlice = createSlice({
         state.token = null;
         state.isLoading = false;
         state.error = null;
-        state.otpStep = 'none';
+        state.otpStep = "none";
         state.requiresPasswordSetup = false;
       });
   },
 });
 
-export const { 
-  clearError, 
-  setError, 
-  resetAuth, 
-  resetOTPState, 
-  setRequiresPasswordSetup 
+export const {
+  clearError,
+  setError,
+  resetAuth,
+  resetOTPState,
+  setRequiresPasswordSetup,
 } = authSlice.actions;
 
 // Export common actions with backward compatibility
@@ -549,6 +568,7 @@ export const selectAuthLoading = (state: { auth: AuthState }) =>
   state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
 export const selectOTPStep = (state: { auth: AuthState }) => state.auth.otpStep;
-export const selectRequiresPasswordSetup = (state: { auth: AuthState }) => 
+export const selectRequiresPasswordSetup = (state: { auth: AuthState }) =>
   state.auth.requiresPasswordSetup;
-export const selectOTPEmail = (state: { auth: AuthState }) => state.auth.otpEmail;
+export const selectOTPEmail = (state: { auth: AuthState }) =>
+  state.auth.otpEmail;

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import {
-  setPassword,
-  clearError,
-  selectAuth,
-} from "../store/slices/authSlice";
+import { setPassword, clearError, selectAuth } from "../store/slices/authSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Eye, EyeOff, CheckCircle, AlertCircle, Shield } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
@@ -19,7 +21,7 @@ const SetPassword: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
-  
+
   const { isLoading, error, isAuthenticated } = useAppSelector(selectAuth);
 
   const [formData, setFormData] = useState({
@@ -63,7 +65,7 @@ const SetPassword: React.FC = () => {
   // Password validation
   useEffect(() => {
     const { password, confirmPassword } = formData;
-    
+
     setPasswordValidation({
       minLength: password.length >= 6,
       hasUpper: /[A-Z]/.test(password),
@@ -75,11 +77,11 @@ const SetPassword: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (error) {
       dispatch(clearError());
@@ -88,13 +90,13 @@ const SetPassword: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!token) {
       return;
     }
 
     const { password, confirmPassword } = formData;
-    
+
     // Validate passwords match
     if (password !== confirmPassword) {
       return;
@@ -107,11 +109,13 @@ const SetPassword: React.FC = () => {
     }
 
     try {
-      await dispatch(setPassword({
-        token,
-        password,
-      })).unwrap();
-      
+      await dispatch(
+        setPassword({
+          token,
+          password,
+        }),
+      ).unwrap();
+
       toast({
         title: "Password Set Successfully",
         description: "You are now logged in and can access your account.",
@@ -123,8 +127,13 @@ const SetPassword: React.FC = () => {
 
   const isFormValid = Object.values(passwordValidation).every(Boolean);
 
-  const ValidationItem: React.FC<{ isValid: boolean; text: string }> = ({ isValid, text }) => (
-    <div className={`flex items-center gap-2 text-sm ${isValid ? 'text-green-600' : 'text-gray-500'}`}>
+  const ValidationItem: React.FC<{ isValid: boolean; text: string }> = ({
+    isValid,
+    text,
+  }) => (
+    <div
+      className={`flex items-center gap-2 text-sm ${isValid ? "text-green-600" : "text-gray-500"}`}
+    >
       {isValid ? (
         <CheckCircle className="h-4 w-4" />
       ) : (
@@ -142,7 +151,9 @@ const SetPassword: React.FC = () => {
           <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto">
             <Shield className="h-8 w-8 text-blue-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Set Your Password</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Set Your Password
+          </h1>
           <p className="text-gray-600">
             Create a secure password for your Cochin Smart City account
           </p>
@@ -193,7 +204,7 @@ const SetPassword: React.FC = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
@@ -224,34 +235,36 @@ const SetPassword: React.FC = () => {
 
               {/* Password Requirements */}
               <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium text-gray-700">Password Requirements:</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Password Requirements:
+                </p>
                 <div className="space-y-1">
-                  <ValidationItem 
-                    isValid={passwordValidation.minLength} 
-                    text="At least 6 characters long" 
+                  <ValidationItem
+                    isValid={passwordValidation.minLength}
+                    text="At least 6 characters long"
                   />
-                  <ValidationItem 
-                    isValid={passwordValidation.hasUpper} 
-                    text="Contains uppercase letter" 
+                  <ValidationItem
+                    isValid={passwordValidation.hasUpper}
+                    text="Contains uppercase letter"
                   />
-                  <ValidationItem 
-                    isValid={passwordValidation.hasLower} 
-                    text="Contains lowercase letter" 
+                  <ValidationItem
+                    isValid={passwordValidation.hasLower}
+                    text="Contains lowercase letter"
                   />
-                  <ValidationItem 
-                    isValid={passwordValidation.hasNumber} 
-                    text="Contains number" 
+                  <ValidationItem
+                    isValid={passwordValidation.hasNumber}
+                    text="Contains number"
                   />
-                  <ValidationItem 
-                    isValid={passwordValidation.match} 
-                    text="Passwords match" 
+                  <ValidationItem
+                    isValid={passwordValidation.match}
+                    text="Passwords match"
                   />
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading || !isFormValid}
               >
                 {isLoading ? "Setting Password..." : "Set Password"}
@@ -261,8 +274,9 @@ const SetPassword: React.FC = () => {
             {/* Additional Info */}
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-700">
-                <strong>Security Notice:</strong> After setting your password, you'll be automatically 
-                logged in and can access your account using either password or OTP login methods.
+                <strong>Security Notice:</strong> After setting your password,
+                you'll be automatically logged in and can access your account
+                using either password or OTP login methods.
               </p>
             </div>
           </CardContent>

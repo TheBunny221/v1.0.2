@@ -1,42 +1,49 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAppDispatch } from '../store/hooks';
-import { trackGuestComplaint } from '../store/slices/guestSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Badge } from '../components/ui/badge';
-import { 
-  Search, 
-  FileText, 
-  Calendar, 
-  MapPin, 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppDispatch } from "../store/hooks";
+import { trackGuestComplaint } from "../store/slices/guestSlice";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import {
+  Search,
+  FileText,
+  Calendar,
+  MapPin,
   Clock,
   CheckCircle,
   AlertCircle,
-  Shield
-} from 'lucide-react';
+  Shield,
+} from "lucide-react";
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
-  const [complaintId, setComplaintId] = useState('');
+  const [complaintId, setComplaintId] = useState("");
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
-      const result = await dispatch(trackGuestComplaint({ 
-        complaintId: complaintId.trim() 
-      })).unwrap();
+      const result = await dispatch(
+        trackGuestComplaint({
+          complaintId: complaintId.trim(),
+        }),
+      ).unwrap();
       setTrackingResult(result);
     } catch (err) {
-      setError('Complaint not found. Please check your complaint ID.');
+      setError("Complaint not found. Please check your complaint ID.");
       setTrackingResult(null);
     } finally {
       setIsLoading(false);
@@ -45,31 +52,31 @@ const GuestTrackComplaint: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'REGISTERED':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'ASSIGNED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-orange-100 text-orange-800';
-      case 'RESOLVED':
-        return 'bg-green-100 text-green-800';
-      case 'CLOSED':
-        return 'bg-gray-100 text-gray-800';
+      case "REGISTERED":
+        return "bg-yellow-100 text-yellow-800";
+      case "ASSIGNED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "RESOLVED":
+        return "bg-green-100 text-green-800";
+      case "CLOSED":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'REGISTERED':
+      case "REGISTERED":
         return <FileText className="h-4 w-4" />;
-      case 'ASSIGNED':
+      case "ASSIGNED":
         return <AlertCircle className="h-4 w-4" />;
-      case 'IN_PROGRESS':
+      case "IN_PROGRESS":
         return <Clock className="h-4 w-4" />;
-      case 'RESOLVED':
-      case 'CLOSED':
+      case "RESOLVED":
+      case "CLOSED":
         return <CheckCircle className="h-4 w-4" />;
       default:
         return <FileText className="h-4 w-4" />;
@@ -84,8 +91,12 @@ const GuestTrackComplaint: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <Shield className="h-12 w-12 text-blue-600 mr-3" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Track Your Complaint</h1>
-              <p className="text-gray-600">Enter your complaint ID to check status</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Track Your Complaint
+              </h1>
+              <p className="text-gray-600">
+                Enter your complaint ID to check status
+              </p>
             </div>
           </div>
         </div>
@@ -114,8 +125,12 @@ const GuestTrackComplaint: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-end">
-                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                    {isLoading ? 'Searching...' : 'Track Complaint'}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto"
+                  >
+                    {isLoading ? "Searching..." : "Track Complaint"}
                   </Button>
                 </div>
               </div>
@@ -135,7 +150,7 @@ const GuestTrackComplaint: React.FC = () => {
                 <CardTitle className="flex items-center justify-between">
                   <span>Complaint Details</span>
                   <Badge className={getStatusColor(trackingResult.status)}>
-                    {trackingResult.status.replace('_', ' ')}
+                    {trackingResult.status.replace("_", " ")}
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -143,16 +158,22 @@ const GuestTrackComplaint: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-medium text-gray-900">Complaint ID</h3>
+                      <h3 className="font-medium text-gray-900">
+                        Complaint ID
+                      </h3>
                       <p className="text-gray-600">#{trackingResult.id}</p>
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">Type</h3>
-                      <p className="text-gray-600">{trackingResult.type?.replace('_', ' ')}</p>
+                      <p className="text-gray-600">
+                        {trackingResult.type?.replace("_", " ")}
+                      </p>
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">Description</h3>
-                      <p className="text-gray-600">{trackingResult.description}</p>
+                      <p className="text-gray-600">
+                        {trackingResult.description}
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -169,12 +190,16 @@ const GuestTrackComplaint: React.FC = () => {
                         Submitted On
                       </h3>
                       <p className="text-gray-600">
-                        {new Date(trackingResult.submittedOn).toLocaleDateString()}
+                        {new Date(
+                          trackingResult.submittedOn,
+                        ).toLocaleDateString()}
                       </p>
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">Priority</h3>
-                      <Badge variant="secondary">{trackingResult.priority}</Badge>
+                      <Badge variant="secondary">
+                        {trackingResult.priority}
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -195,42 +220,70 @@ const GuestTrackComplaint: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="font-medium text-green-600">Complaint Registered</p>
+                        <p className="font-medium text-green-600">
+                          Complaint Registered
+                        </p>
                         <p className="text-sm text-gray-500">
-                          {new Date(trackingResult.submittedOn).toLocaleDateString()}
+                          {new Date(
+                            trackingResult.submittedOn,
+                          ).toLocaleDateString()}
                         </p>
                       </div>
                       <p className="text-sm text-gray-600">
-                        Your complaint has been successfully registered in our system.
+                        Your complaint has been successfully registered in our
+                        system.
                       </p>
                     </div>
                   </div>
 
                   {/* Assigned */}
                   <div className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      ['ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                        ? 'bg-green-100'
-                        : 'bg-gray-100'
-                    }`}>
-                      <AlertCircle className={`h-4 w-4 ${
-                        ['ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                          ? 'text-green-600'
-                          : 'text-gray-400'
-                      }`} />
+                    <div
+                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                        [
+                          "ASSIGNED",
+                          "IN_PROGRESS",
+                          "RESOLVED",
+                          "CLOSED",
+                        ].includes(trackingResult.status)
+                          ? "bg-green-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <AlertCircle
+                        className={`h-4 w-4 ${
+                          [
+                            "ASSIGNED",
+                            "IN_PROGRESS",
+                            "RESOLVED",
+                            "CLOSED",
+                          ].includes(trackingResult.status)
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className={`font-medium ${
-                          ['ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                            ? 'text-green-600'
-                            : 'text-gray-400'
-                        }`}>
+                        <p
+                          className={`font-medium ${
+                            [
+                              "ASSIGNED",
+                              "IN_PROGRESS",
+                              "RESOLVED",
+                              "CLOSED",
+                            ].includes(trackingResult.status)
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }`}
+                        >
                           Complaint Assigned
                         </p>
                         {trackingResult.assignedOn && (
                           <p className="text-sm text-gray-500">
-                            {new Date(trackingResult.assignedOn).toLocaleDateString()}
+                            {new Date(
+                              trackingResult.assignedOn,
+                            ).toLocaleDateString()}
                           </p>
                         )}
                       </div>
@@ -242,58 +295,81 @@ const GuestTrackComplaint: React.FC = () => {
 
                   {/* In Progress */}
                   <div className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                        ? 'bg-green-100'
-                        : 'bg-gray-100'
-                    }`}>
-                      <Clock className={`h-4 w-4 ${
-                        ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                          ? 'text-green-600'
-                          : 'text-gray-400'
-                      }`} />
+                    <div
+                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                        ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                          trackingResult.status,
+                        )
+                          ? "bg-green-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <Clock
+                        className={`h-4 w-4 ${
+                          ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                            trackingResult.status,
+                          )
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className={`font-medium ${
-                          ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                            ? 'text-green-600'
-                            : 'text-gray-400'
-                        }`}>
+                        <p
+                          className={`font-medium ${
+                            ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                              trackingResult.status,
+                            )
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }`}
+                        >
                           Work in Progress
                         </p>
                       </div>
                       <p className="text-sm text-gray-600">
-                        Our team is actively working on resolving your complaint.
+                        Our team is actively working on resolving your
+                        complaint.
                       </p>
                     </div>
                   </div>
 
                   {/* Resolved */}
                   <div className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      ['RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                        ? 'bg-green-100'
-                        : 'bg-gray-100'
-                    }`}>
-                      <CheckCircle className={`h-4 w-4 ${
-                        ['RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                          ? 'text-green-600'
-                          : 'text-gray-400'
-                      }`} />
+                    <div
+                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                        ["RESOLVED", "CLOSED"].includes(trackingResult.status)
+                          ? "bg-green-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <CheckCircle
+                        className={`h-4 w-4 ${
+                          ["RESOLVED", "CLOSED"].includes(trackingResult.status)
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className={`font-medium ${
-                          ['RESOLVED', 'CLOSED'].includes(trackingResult.status)
-                            ? 'text-green-600'
-                            : 'text-gray-400'
-                        }`}>
+                        <p
+                          className={`font-medium ${
+                            ["RESOLVED", "CLOSED"].includes(
+                              trackingResult.status,
+                            )
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }`}
+                        >
                           Complaint Resolved
                         </p>
                         {trackingResult.resolvedOn && (
                           <p className="text-sm text-gray-500">
-                            {new Date(trackingResult.resolvedOn).toLocaleDateString()}
+                            {new Date(
+                              trackingResult.resolvedOn,
+                            ).toLocaleDateString()}
                           </p>
                         )}
                       </div>

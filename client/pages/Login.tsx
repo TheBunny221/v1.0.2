@@ -16,30 +16,48 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
-import { Eye, EyeOff, Mail, Lock, Shield, Clock, CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Shield,
+  Clock,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const { 
-    isLoading, 
-    error, 
-    isAuthenticated,
-  } = useAppSelector(selectAuth);
-  
+
+  const { isLoading, error, isAuthenticated } = useAppSelector(selectAuth);
+
   const otpStep = useAppSelector(selectOTPStep);
   const requiresPasswordSetup = useAppSelector(selectRequiresPasswordSetup);
   const otpEmail = useAppSelector(selectOTPEmail);
 
   // Form states
-  const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password');
+  const [loginMethod, setLoginMethod] = useState<"password" | "otp">(
+    "password",
+  );
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -74,11 +92,11 @@ const Login: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (error) {
       dispatch(clearError());
@@ -87,17 +105,19 @@ const Login: React.FC = () => {
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       return;
     }
 
     try {
-      await dispatch(loginWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })).unwrap();
-      
+      await dispatch(
+        loginWithPassword({
+          email: formData.email,
+          password: formData.password,
+        }),
+      ).unwrap();
+
       toast({
         title: "Login Successful",
         description: "Welcome back!",
@@ -109,16 +129,18 @@ const Login: React.FC = () => {
 
   const handleOTPRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email) {
       return;
     }
 
     try {
-      await dispatch(requestOTPLogin({
-        email: formData.email,
-      })).unwrap();
-      
+      await dispatch(
+        requestOTPLogin({
+          email: formData.email,
+        }),
+      ).unwrap();
+
       setOtpTimer(600); // 10 minutes
       toast({
         title: "OTP Sent",
@@ -131,17 +153,19 @@ const Login: React.FC = () => {
 
   const handleOTPVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.otpCode) {
       return;
     }
 
     try {
-      await dispatch(verifyOTPLogin({
-        email: formData.email,
-        otpCode: formData.otpCode,
-      })).unwrap();
-      
+      await dispatch(
+        verifyOTPLogin({
+          email: formData.email,
+          otpCode: formData.otpCode,
+        }),
+      ).unwrap();
+
       toast({
         title: "Login Successful",
         description: "OTP verified successfully!",
@@ -153,10 +177,12 @@ const Login: React.FC = () => {
 
   const handleResendOTP = async () => {
     try {
-      await dispatch(requestOTPLogin({
-        email: formData.email,
-      })).unwrap();
-      
+      await dispatch(
+        requestOTPLogin({
+          email: formData.email,
+        }),
+      ).unwrap();
+
       setOtpTimer(600);
       toast({
         title: "OTP Resent",
@@ -169,10 +195,12 @@ const Login: React.FC = () => {
 
   const handlePasswordSetupRequest = async () => {
     try {
-      await dispatch(sendPasswordSetupEmail({
-        email: formData.email,
-      })).unwrap();
-      
+      await dispatch(
+        sendPasswordSetupEmail({
+          email: formData.email,
+        }),
+      ).unwrap();
+
       toast({
         title: "Password Setup Email Sent",
         description: "Please check your email for the password setup link.",
@@ -184,20 +212,28 @@ const Login: React.FC = () => {
 
   const resetToEmailInput = () => {
     dispatch(resetOTPState());
-    setFormData(prev => ({ ...prev, otpCode: "" }));
+    setFormData((prev) => ({ ...prev, otpCode: "" }));
     setOtpTimer(0);
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Demo credentials for testing
   const demoCredentials = [
-    { email: "admin@cochin.gov.in", password: "Admin123!", role: "Administrator" },
-    { email: "ward1@cochin.gov.in", password: "Ward123!", role: "Ward Officer" },
+    {
+      email: "admin@cochin.gov.in",
+      password: "Admin123!",
+      role: "Administrator",
+    },
+    {
+      email: "ward1@cochin.gov.in",
+      password: "Ward123!",
+      role: "Ward Officer",
+    },
     { email: "citizen@example.com", password: "Citizen123!", role: "Citizen" },
   ];
 
@@ -206,7 +242,9 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Cochin Smart City</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Cochin Smart City
+          </h1>
           <p className="text-gray-600">E-Governance Portal</p>
         </div>
 
@@ -237,7 +275,7 @@ const Login: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLoginMethod('otp')}
+                        onClick={() => setLoginMethod("otp")}
                         className="text-amber-700 border-amber-300"
                       >
                         Login with OTP
@@ -257,9 +295,17 @@ const Login: React.FC = () => {
               </Alert>
             )}
 
-            <Tabs value={loginMethod} onValueChange={(value) => setLoginMethod(value as 'password' | 'otp')}>
+            <Tabs
+              value={loginMethod}
+              onValueChange={(value) =>
+                setLoginMethod(value as "password" | "otp")
+              }
+            >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="password" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="password"
+                  className="flex items-center gap-2"
+                >
                   <Lock className="h-4 w-4" />
                   Password
                 </TabsTrigger>
@@ -284,7 +330,7 @@ const Login: React.FC = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
@@ -313,10 +359,12 @@ const Login: React.FC = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading || !formData.email || !formData.password}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={
+                      isLoading || !formData.email || !formData.password
+                    }
                   >
                     {isLoading ? "Signing In..." : "Sign In"}
                   </Button>
@@ -325,7 +373,7 @@ const Login: React.FC = () => {
 
               {/* OTP Login Tab */}
               <TabsContent value="otp" className="space-y-4">
-                {otpStep === 'none' && (
+                {otpStep === "none" && (
                   <form onSubmit={handleOTPRequest} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="otp-email">Email Address</Label>
@@ -340,9 +388,9 @@ const Login: React.FC = () => {
                       />
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
+                    <Button
+                      type="submit"
+                      className="w-full"
                       disabled={isLoading || !formData.email}
                     >
                       {isLoading ? "Sending OTP..." : "Send OTP"}
@@ -350,7 +398,7 @@ const Login: React.FC = () => {
                   </form>
                 )}
 
-                {otpStep === 'sent' && (
+                {otpStep === "sent" && (
                   <div className="space-y-4">
                     <div className="text-center space-y-2">
                       <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mx-auto">
@@ -358,12 +406,16 @@ const Login: React.FC = () => {
                       </div>
                       <h3 className="font-semibold">OTP Sent</h3>
                       <p className="text-sm text-gray-600">
-                        We've sent a 6-digit code to<br />
+                        We've sent a 6-digit code to
+                        <br />
                         <strong>{otpEmail}</strong>
                       </p>
                     </div>
 
-                    <form onSubmit={handleOTPVerification} className="space-y-4">
+                    <form
+                      onSubmit={handleOTPVerification}
+                      className="space-y-4"
+                    >
                       <div className="space-y-2">
                         <Label htmlFor="otpCode">Enter OTP Code</Label>
                         <Input
@@ -379,9 +431,9 @@ const Login: React.FC = () => {
                         />
                       </div>
 
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
+                      <Button
+                        type="submit"
+                        className="w-full"
                         disabled={isLoading || formData.otpCode.length !== 6}
                       >
                         {isLoading ? "Verifying..." : "Verify OTP"}
@@ -405,7 +457,7 @@ const Login: React.FC = () => {
                           Resend OTP
                         </Button>
                       )}
-                      
+
                       <Button
                         variant="ghost"
                         size="sm"
@@ -419,14 +471,18 @@ const Login: React.FC = () => {
                   </div>
                 )}
 
-                {otpStep === 'verified' && (
+                {otpStep === "verified" && (
                   <div className="text-center space-y-4">
                     <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
                       <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-green-800">Login Successful!</h3>
-                      <p className="text-sm text-gray-600">Redirecting to dashboard...</p>
+                      <h3 className="font-semibold text-green-800">
+                        Login Successful!
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Redirecting to dashboard...
+                      </p>
                     </div>
                   </div>
                 )}
@@ -443,7 +499,10 @@ const Login: React.FC = () => {
               </p>
               <p className="text-sm text-gray-600">
                 Guest user?{" "}
-                <Link to="/guest/complaint" className="text-blue-600 hover:underline">
+                <Link
+                  to="/guest/complaint"
+                  className="text-blue-600 hover:underline"
+                >
                   Submit complaint
                 </Link>
               </p>
@@ -452,21 +511,24 @@ const Login: React.FC = () => {
         </Card>
 
         {/* Demo Credentials */}
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === "development" && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Demo Credentials</CardTitle>
-              <CardDescription>
-                For testing purposes only
-              </CardDescription>
+              <CardDescription>For testing purposes only</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {demoCredentials.map((cred, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="space-y-1">
                       <div className="text-sm font-medium">{cred.email}</div>
-                      <div className="text-xs text-gray-500">{cred.password}</div>
+                      <div className="text-xs text-gray-500">
+                        {cred.password}
+                      </div>
                     </div>
                     <Badge variant="outline">{cred.role}</Badge>
                   </div>

@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Textarea } from '../components/ui/textarea';
-import { Label } from '../components/ui/label';
-import { 
+import React, { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import {
   ArrowLeft,
-  MapPin, 
-  Calendar, 
+  MapPin,
+  Calendar,
   Clock,
   Camera,
   Navigation,
@@ -18,72 +23,73 @@ import {
   User,
   Wrench,
   FileText,
-  Upload
-} from 'lucide-react';
+  Upload,
+} from "lucide-react";
 
 const TaskDetails: React.FC = () => {
   const { id } = useParams();
-  const [workNote, setWorkNote] = useState('');
-  const [completionNote, setCompletionNote] = useState('');
+  const [workNote, setWorkNote] = useState("");
+  const [completionNote, setCompletionNote] = useState("");
 
   // Mock task data
   const task = {
-    id: id || '1',
-    title: 'Water Pipeline Repair',
-    description: 'Main water pipeline burst at MG Road junction affecting water supply to 200+ households in the area. Requires immediate attention and repair.',
-    location: 'MG Road, Near Metro Station',
-    coordinates: '9.9312, 76.2673',
-    priority: 'HIGH',
-    status: 'IN_PROGRESS',
-    estimatedTime: '4 hours',
-    dueDate: '2024-01-15',
-    assignedDate: '2024-01-14',
-    submittedBy: 'Ward Officer - Central Zone',
-    contactPhone: '+91 9876543210',
-    materials: ['PVC Pipes (6 inch)', 'Pipe Joints', 'Sealant', 'Sand'],
-    tools: ['Excavator', 'Welding Equipment', 'Safety Gear'],
+    id: id || "1",
+    title: "Water Pipeline Repair",
+    description:
+      "Main water pipeline burst at MG Road junction affecting water supply to 200+ households in the area. Requires immediate attention and repair.",
+    location: "MG Road, Near Metro Station",
+    coordinates: "9.9312, 76.2673",
+    priority: "HIGH",
+    status: "IN_PROGRESS",
+    estimatedTime: "4 hours",
+    dueDate: "2024-01-15",
+    assignedDate: "2024-01-14",
+    submittedBy: "Ward Officer - Central Zone",
+    contactPhone: "+91 9876543210",
+    materials: ["PVC Pipes (6 inch)", "Pipe Joints", "Sealant", "Sand"],
+    tools: ["Excavator", "Welding Equipment", "Safety Gear"],
     workLog: [
       {
-        time: '09:00 AM',
-        note: 'Arrived at site, assessed damage',
-        photo: false
+        time: "09:00 AM",
+        note: "Arrived at site, assessed damage",
+        photo: false,
       },
       {
-        time: '09:30 AM', 
-        note: 'Started excavation work',
-        photo: true
+        time: "09:30 AM",
+        note: "Started excavation work",
+        photo: true,
       },
       {
-        time: '11:00 AM',
-        note: 'Identified leak source, preparing for repair',
-        photo: true
-      }
-    ]
+        time: "11:00 AM",
+        note: "Identified leak source, preparing for repair",
+        photo: true,
+      },
+    ],
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'bg-red-100 text-red-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
+      case "HIGH":
+        return "bg-red-100 text-red-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "LOW":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ASSIGNED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-orange-100 text-orange-800';
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
+      case "ASSIGNED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "COMPLETED":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -99,18 +105,18 @@ const TaskDetails: React.FC = () => {
                 Back to Tasks
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Task #{task.id}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Task #{task.id}
+            </h1>
           </div>
           <div className="flex items-center space-x-4">
             <Badge className={getStatusColor(task.status)}>
-              {task.status.replace('_', ' ')}
+              {task.status.replace("_", " ")}
             </Badge>
             <Badge className={getPriorityColor(task.priority)}>
               {task.priority} Priority
             </Badge>
-            <span className="text-sm text-gray-500">
-              Due: {task.dueDate}
-            </span>
+            <span className="text-sm text-gray-500">Due: {task.dueDate}</span>
           </div>
         </div>
         <div className="flex space-x-2">
@@ -160,9 +166,13 @@ const TaskDetails: React.FC = () => {
                     Timeline
                   </h3>
                   <div className="space-y-1 text-sm">
-                    <p className="text-gray-600">Assigned: {task.assignedDate}</p>
+                    <p className="text-gray-600">
+                      Assigned: {task.assignedDate}
+                    </p>
                     <p className="text-gray-600">Due: {task.dueDate}</p>
-                    <p className="text-gray-600">Est. Time: {task.estimatedTime}</p>
+                    <p className="text-gray-600">
+                      Est. Time: {task.estimatedTime}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -180,7 +190,10 @@ const TaskDetails: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 {task.workLog.map((log, index) => (
-                  <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div
+                    key={index}
+                    className="border-l-4 border-blue-500 pl-4 py-2"
+                  >
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium">{log.time}</p>
@@ -195,7 +208,7 @@ const TaskDetails: React.FC = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Add New Log Entry */}
               <div className="mt-6 pt-4 border-t">
                 <Label htmlFor="workNote">Add Work Update</Label>
@@ -223,7 +236,7 @@ const TaskDetails: React.FC = () => {
           </Card>
 
           {/* Completion Form */}
-          {task.status === 'IN_PROGRESS' && (
+          {task.status === "IN_PROGRESS" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -292,7 +305,10 @@ const TaskDetails: React.FC = () => {
             <CardContent>
               <div className="space-y-2">
                 {task.materials.map((material, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm">{material}</span>
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   </div>
@@ -309,7 +325,10 @@ const TaskDetails: React.FC = () => {
             <CardContent>
               <div className="space-y-2">
                 {task.tools.map((tool, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm">{tool}</span>
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   </div>

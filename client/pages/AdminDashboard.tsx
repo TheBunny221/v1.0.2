@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { fetchComplaints } from '../store/slices/complaintsSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { fetchComplaints } from "../store/slices/complaintsSlice";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Progress } from "../components/ui/progress";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -20,7 +30,7 @@ import {
   Cell,
   LineChart,
   Line,
-} from 'recharts';
+} from "recharts";
 import {
   Shield,
   Users,
@@ -38,7 +48,7 @@ import {
   MessageSquare,
   Activity,
   Target,
-} from 'lucide-react';
+} from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -65,16 +75,18 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     // Calculate system statistics
     const totalComplaints = complaints.length;
-    const activeComplaints = complaints.filter(c => 
-      ['REGISTERED', 'ASSIGNED', 'IN_PROGRESS'].includes(c.status)
+    const activeComplaints = complaints.filter((c) =>
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(c.status),
     ).length;
-    const resolvedComplaints = complaints.filter(c => c.status === 'RESOLVED').length;
-    const overdue = complaints.filter(c => {
+    const resolvedComplaints = complaints.filter(
+      (c) => c.status === "RESOLVED",
+    ).length;
+    const overdue = complaints.filter((c) => {
       if (!c.deadline) return false;
-      return new Date(c.deadline) < new Date() && c.status !== 'RESOLVED';
+      return new Date(c.deadline) < new Date() && c.status !== "RESOLVED";
     }).length;
 
-    setSystemStats(prev => ({
+    setSystemStats((prev) => ({
       ...prev,
       totalComplaints,
       activeComplaints,
@@ -85,48 +97,73 @@ const AdminDashboard: React.FC = () => {
 
   // Mock data for charts
   const complaintTrends = [
-    { month: 'Jan', complaints: 45, resolved: 40 },
-    { month: 'Feb', complaints: 52, resolved: 48 },
-    { month: 'Mar', complaints: 61, resolved: 55 },
-    { month: 'Apr', complaints: 38, resolved: 42 },
-    { month: 'May', complaints: 67, resolved: 61 },
-    { month: 'Jun', complaints: 74, resolved: 69 },
+    { month: "Jan", complaints: 45, resolved: 40 },
+    { month: "Feb", complaints: 52, resolved: 48 },
+    { month: "Mar", complaints: 61, resolved: 55 },
+    { month: "Apr", complaints: 38, resolved: 42 },
+    { month: "May", complaints: 67, resolved: 61 },
+    { month: "Jun", complaints: 74, resolved: 69 },
   ];
 
   const complaintsByType = [
-    { name: 'Water Supply', value: 35, color: '#3B82F6' },
-    { name: 'Electricity', value: 28, color: '#EF4444' },
-    { name: 'Road Repair', value: 22, color: '#10B981' },
-    { name: 'Garbage', value: 15, color: '#F59E0B' },
+    { name: "Water Supply", value: 35, color: "#3B82F6" },
+    { name: "Electricity", value: 28, color: "#EF4444" },
+    { name: "Road Repair", value: 22, color: "#10B981" },
+    { name: "Garbage", value: 15, color: "#F59E0B" },
   ];
 
   const wardPerformance = [
-    { ward: 'Ward 1', complaints: 45, resolved: 42, sla: 93 },
-    { ward: 'Ward 2', complaints: 38, resolved: 35, sla: 92 },
-    { ward: 'Ward 3', complaints: 52, resolved: 46, sla: 88 },
-    { ward: 'Ward 4', complaints: 29, resolved: 28, sla: 97 },
-    { ward: 'Ward 5', complaints: 41, resolved: 37, sla: 90 },
+    { ward: "Ward 1", complaints: 45, resolved: 42, sla: 93 },
+    { ward: "Ward 2", complaints: 38, resolved: 35, sla: 92 },
+    { ward: "Ward 3", complaints: 52, resolved: 46, sla: 88 },
+    { ward: "Ward 4", complaints: 29, resolved: 28, sla: 97 },
+    { ward: "Ward 5", complaints: 41, resolved: 37, sla: 90 },
   ];
 
   const recentActivity = [
-    { id: 1, type: 'complaint', message: 'New complaint registered in Ward 3', time: '2 mins ago' },
-    { id: 2, type: 'resolution', message: 'Water supply issue resolved in Ward 1', time: '15 mins ago' },
-    { id: 3, type: 'assignment', message: 'Complaint assigned to maintenance team', time: '1 hour ago' },
-    { id: 4, type: 'user', message: 'New ward officer registered', time: '2 hours ago' },
-    { id: 5, type: 'alert', message: 'SLA breach alert for Ward 3', time: '3 hours ago' },
+    {
+      id: 1,
+      type: "complaint",
+      message: "New complaint registered in Ward 3",
+      time: "2 mins ago",
+    },
+    {
+      id: 2,
+      type: "resolution",
+      message: "Water supply issue resolved in Ward 1",
+      time: "15 mins ago",
+    },
+    {
+      id: 3,
+      type: "assignment",
+      message: "Complaint assigned to maintenance team",
+      time: "1 hour ago",
+    },
+    {
+      id: 4,
+      type: "user",
+      message: "New ward officer registered",
+      time: "2 hours ago",
+    },
+    {
+      id: 5,
+      type: "alert",
+      message: "SLA breach alert for Ward 3",
+      time: "3 hours ago",
+    },
   ];
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'complaint':
+      case "complaint":
         return <FileText className="h-4 w-4 text-blue-600" />;
-      case 'resolution':
+      case "resolution":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'assignment':
+      case "assignment":
         return <UserCheck className="h-4 w-4 text-orange-600" />;
-      case 'user':
+      case "user":
         return <Users className="h-4 w-4 text-purple-600" />;
-      case 'alert':
+      case "alert":
         return <AlertTriangle className="h-4 w-4 text-red-600" />;
       default:
         return <Activity className="h-4 w-4 text-gray-600" />;
@@ -141,26 +178,35 @@ const AdminDashboard: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2">Administrator Dashboard</h1>
             <p className="text-purple-100">
-              Complete system overview and management controls for Cochin Smart City
+              Complete system overview and management controls for Cochin Smart
+              City
             </p>
           </div>
           <Shield className="h-16 w-16 text-purple-200" />
         </div>
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{systemStats.totalComplaints}</div>
+            <div className="text-2xl font-bold">
+              {systemStats.totalComplaints}
+            </div>
             <div className="text-sm text-purple-200">Total Complaints</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{systemStats.wardOfficers + systemStats.maintenanceTeam}</div>
+            <div className="text-2xl font-bold">
+              {systemStats.wardOfficers + systemStats.maintenanceTeam}
+            </div>
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{systemStats.slaCompliance}%</div>
+            <div className="text-2xl font-bold">
+              {systemStats.slaCompliance}%
+            </div>
             <div className="text-sm text-purple-200">SLA Compliance</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{systemStats.citizenSatisfaction}/5</div>
+            <div className="text-2xl font-bold">
+              {systemStats.citizenSatisfaction}/5
+            </div>
             <div className="text-sm text-purple-200">Satisfaction</div>
           </div>
         </div>
@@ -170,11 +216,15 @@ const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Complaints</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Complaints
+            </CardTitle>
             <FileText className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{systemStats.activeComplaints}</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {systemStats.activeComplaints}
+            </div>
             <p className="text-xs text-muted-foreground">Pending resolution</p>
           </CardContent>
         </Card>
@@ -185,7 +235,9 @@ const AdminDashboard: React.FC = () => {
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{systemStats.overdue}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {systemStats.overdue}
+            </div>
             <p className="text-xs text-muted-foreground">Past deadline</p>
           </CardContent>
         </Card>
@@ -196,18 +248,27 @@ const AdminDashboard: React.FC = () => {
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{systemStats.wardOfficers + systemStats.maintenanceTeam}</div>
-            <p className="text-xs text-muted-foreground">{systemStats.wardOfficers} officers, {systemStats.maintenanceTeam} maintenance</p>
+            <div className="text-2xl font-bold text-blue-600">
+              {systemStats.wardOfficers + systemStats.maintenanceTeam}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {systemStats.wardOfficers} officers, {systemStats.maintenanceTeam}{" "}
+              maintenance
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Resolution</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg Resolution
+            </CardTitle>
             <Clock className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{systemStats.avgResolutionTime}d</div>
+            <div className="text-2xl font-bold text-green-600">
+              {systemStats.avgResolutionTime}d
+            </div>
             <p className="text-xs text-muted-foreground">Target: 3 days</p>
           </CardContent>
         </Card>
@@ -237,8 +298,18 @@ const AdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="complaints" stroke="#3B82F6" strokeWidth={2} />
-                    <Line type="monotone" dataKey="resolved" stroke="#10B981" strokeWidth={2} />
+                    <Line
+                      type="monotone"
+                      dataKey="complaints"
+                      stroke="#3B82F6"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="resolved"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -271,8 +342,13 @@ const AdminDashboard: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 mt-4">
                   {complaintsByType.map((item, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                      <span className="text-sm">{item.name} ({item.value}%)</span>
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                      <span className="text-sm">
+                        {item.name} ({item.value}%)
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -291,7 +367,10 @@ const AdminDashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={activity.id}
+                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
                     {getActivityIcon(activity.type)}
                     <div className="flex-1">
                       <p className="text-sm font-medium">{activity.message}</p>
@@ -336,7 +415,9 @@ const AdminDashboard: React.FC = () => {
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">{ward.ward}</span>
-                        <span className="text-sm text-gray-600">{ward.sla}%</span>
+                        <span className="text-sm text-gray-600">
+                          {ward.sla}%
+                        </span>
                       </div>
                       <Progress value={ward.sla} className="h-2" />
                     </div>
@@ -412,7 +493,8 @@ const AdminDashboard: React.FC = () => {
                 <Link to="/admin/users" className="block">
                   <Button className="w-full justify-start">
                     <Users className="h-4 w-4 mr-2" />
-                    Manage Users ({systemStats.wardOfficers + systemStats.maintenanceTeam})
+                    Manage Users (
+                    {systemStats.wardOfficers + systemStats.maintenanceTeam})
                   </Button>
                 </Link>
                 <Link to="/admin/users?role=WARD_OFFICER" className="block">
@@ -490,19 +572,27 @@ const AdminDashboard: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Database Status</span>
-                    <Badge className="bg-green-100 text-green-800">Healthy</Badge>
+                    <Badge className="bg-green-100 text-green-800">
+                      Healthy
+                    </Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Email Service</span>
-                    <Badge className="bg-green-100 text-green-800">Operational</Badge>
+                    <Badge className="bg-green-100 text-green-800">
+                      Operational
+                    </Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">File Storage</span>
-                    <Badge className="bg-yellow-100 text-yellow-800">85% Used</Badge>
+                    <Badge className="bg-yellow-100 text-yellow-800">
+                      85% Used
+                    </Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">API Response</span>
-                    <Badge className="bg-green-100 text-green-800">Fast (120ms)</Badge>
+                    <Badge className="bg-green-100 text-green-800">
+                      Fast (120ms)
+                    </Badge>
                   </div>
                 </div>
               </CardContent>

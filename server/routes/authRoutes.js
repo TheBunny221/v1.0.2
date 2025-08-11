@@ -13,7 +13,12 @@ import {
   verifyToken,
 } from "../controller/authController.js";
 import { protect } from "../middleware/auth.js";
-import { validateRegistration, validateLogin, validateOTP, validatePasswordChange } from "../middleware/validation.js";
+import {
+  validateRegistration,
+  validateLogin,
+  validateOTP,
+  validatePasswordChange,
+} from "../middleware/validation.js";
 
 const router = express.Router();
 

@@ -33,7 +33,9 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || "Cochin Smart City <noreply@cochinsmartcity.gov.in>",
+      from:
+        process.env.EMAIL_FROM ||
+        "Cochin Smart City <noreply@cochinsmartcity.gov.in>",
       to,
       subject,
       text,
@@ -55,10 +57,15 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 };
 
 // Send OTP email
-export const sendOTPEmail = async (email, otpCode, purpose = "verification") => {
-  const subject = purpose === "login" ? 
-    "Login OTP - Cochin Smart City" : 
-    "Verification OTP - Cochin Smart City";
+export const sendOTPEmail = async (
+  email,
+  otpCode,
+  purpose = "verification",
+) => {
+  const subject =
+    purpose === "login"
+      ? "Login OTP - Cochin Smart City"
+      : "Verification OTP - Cochin Smart City";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -73,9 +80,10 @@ export const sendOTPEmail = async (email, otpCode, purpose = "verification") => 
         </h2>
         
         <p style="color: #666; font-size: 16px; line-height: 1.5;">
-          ${purpose === "login" ? 
-            "You have requested to login to your account. Please use the following OTP:" :
-            "Please use the following OTP to verify your email address:"
+          ${
+            purpose === "login"
+              ? "You have requested to login to your account. Please use the following OTP:"
+              : "Please use the following OTP to verify your email address:"
           }
         </p>
         
@@ -89,11 +97,15 @@ export const sendOTPEmail = async (email, otpCode, purpose = "verification") => 
           This OTP will expire in <strong>10 minutes</strong>. Please do not share this OTP with anyone.
         </p>
         
-        ${purpose !== "login" ? `
+        ${
+          purpose !== "login"
+            ? `
           <p style="color: #666; font-size: 14px; margin-top: 20px;">
             After verification, you will be automatically registered and can access your citizen dashboard.
           </p>
-        ` : ""}
+        `
+            : ""
+        }
       </div>
       
       <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
@@ -107,7 +119,7 @@ export const sendOTPEmail = async (email, otpCode, purpose = "verification") => 
     to: email,
     subject,
     text: `Your ${purpose} OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
-    html
+    html,
   });
 };
 
@@ -164,19 +176,25 @@ export const sendPasswordSetupEmail = async (email, fullName, resetUrl) => {
     to: email,
     subject: "Set Your Password - Cochin Smart City",
     text: `Hello ${fullName}, Please set your password for Cochin Smart City E-Governance Portal by clicking this link: ${resetUrl}. This link will expire in 10 minutes.`,
-    html
+    html,
   });
 };
 
 // Send complaint status update email
-export const sendComplaintStatusEmail = async (email, fullName, complaintId, status, comment) => {
+export const sendComplaintStatusEmail = async (
+  email,
+  fullName,
+  complaintId,
+  status,
+  comment,
+) => {
   const statusMessages = {
     REGISTERED: "Your complaint has been registered successfully.",
     ASSIGNED: "Your complaint has been assigned to our maintenance team.",
     IN_PROGRESS: "Work on your complaint is currently in progress.",
     RESOLVED: "Your complaint has been resolved successfully.",
     CLOSED: "Your complaint has been closed.",
-    REOPENED: "Your complaint has been reopened for further action."
+    REOPENED: "Your complaint has been reopened for further action.",
   };
 
   const html = `
@@ -222,7 +240,7 @@ export const sendComplaintStatusEmail = async (email, fullName, complaintId, sta
     to: email,
     subject: `Complaint ${complaintId} - Status Updated to ${status}`,
     text: `Hello ${fullName}, Your complaint ${complaintId} status has been updated to ${status}. ${statusMessages[status] || ""} ${comment ? `Additional details: ${comment}` : ""}`,
-    html
+    html,
   });
 };
 
@@ -286,7 +304,7 @@ export const sendWelcomeEmail = async (email, fullName, complaintId) => {
     to: email,
     subject: "Welcome to Cochin Smart City - Account Created",
     text: `Hello ${fullName}, Welcome to Cochin Smart City E-Governance Portal! Your complaint ${complaintId} has been verified and you have been registered as a citizen. You can now access your dashboard and track your complaint progress.`,
-    html
+    html,
   });
 };
 
@@ -295,5 +313,5 @@ export default {
   sendOTPEmail,
   sendPasswordSetupEmail,
   sendComplaintStatusEmail,
-  sendWelcomeEmail
+  sendWelcomeEmail,
 };

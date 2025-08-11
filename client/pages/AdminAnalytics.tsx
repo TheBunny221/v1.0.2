@@ -1,9 +1,19 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Progress } from '../components/ui/progress';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { Progress } from "../components/ui/progress";
 import {
   BarChart,
   Bar,
@@ -19,7 +29,7 @@ import {
   Line,
   AreaChart,
   Area,
-} from 'recharts';
+} from "recharts";
 import {
   TrendingUp,
   BarChart3,
@@ -29,47 +39,82 @@ import {
   MapPin,
   Calendar,
   Download,
-  RefreshCw
-} from 'lucide-react';
+  RefreshCw,
+} from "lucide-react";
 
 const AdminAnalytics: React.FC = () => {
   // Mock data for charts
   const complaintTrends = [
-    { month: 'Jan', complaints: 45, resolved: 40, satisfaction: 4.2 },
-    { month: 'Feb', complaints: 52, resolved: 48, satisfaction: 4.1 },
-    { month: 'Mar', complaints: 61, resolved: 55, satisfaction: 4.3 },
-    { month: 'Apr', complaints: 38, resolved: 42, satisfaction: 4.5 },
-    { month: 'May', complaints: 67, resolved: 61, satisfaction: 4.2 },
-    { month: 'Jun', complaints: 74, resolved: 69, satisfaction: 4.4 },
+    { month: "Jan", complaints: 45, resolved: 40, satisfaction: 4.2 },
+    { month: "Feb", complaints: 52, resolved: 48, satisfaction: 4.1 },
+    { month: "Mar", complaints: 61, resolved: 55, satisfaction: 4.3 },
+    { month: "Apr", complaints: 38, resolved: 42, satisfaction: 4.5 },
+    { month: "May", complaints: 67, resolved: 61, satisfaction: 4.2 },
+    { month: "Jun", complaints: 74, resolved: 69, satisfaction: 4.4 },
   ];
 
   const wardPerformance = [
-    { ward: 'Ward 1', complaints: 45, resolved: 42, efficiency: 93, avgTime: 2.1 },
-    { ward: 'Ward 2', complaints: 38, resolved: 35, efficiency: 92, avgTime: 2.3 },
-    { ward: 'Ward 3', complaints: 52, resolved: 46, efficiency: 88, avgTime: 2.8 },
-    { ward: 'Ward 4', complaints: 29, resolved: 28, efficiency: 97, avgTime: 1.9 },
-    { ward: 'Ward 5', complaints: 41, resolved: 37, efficiency: 90, avgTime: 2.5 },
+    {
+      ward: "Ward 1",
+      complaints: 45,
+      resolved: 42,
+      efficiency: 93,
+      avgTime: 2.1,
+    },
+    {
+      ward: "Ward 2",
+      complaints: 38,
+      resolved: 35,
+      efficiency: 92,
+      avgTime: 2.3,
+    },
+    {
+      ward: "Ward 3",
+      complaints: 52,
+      resolved: 46,
+      efficiency: 88,
+      avgTime: 2.8,
+    },
+    {
+      ward: "Ward 4",
+      complaints: 29,
+      resolved: 28,
+      efficiency: 97,
+      avgTime: 1.9,
+    },
+    {
+      ward: "Ward 5",
+      complaints: 41,
+      resolved: 37,
+      efficiency: 90,
+      avgTime: 2.5,
+    },
   ];
 
   const complaintTypes = [
-    { name: 'Water Supply', value: 35, color: '#3B82F6', resolved: 32 },
-    { name: 'Electricity', value: 28, color: '#EF4444', resolved: 25 },
-    { name: 'Road Repair', value: 22, color: '#10B981', resolved: 20 },
-    { name: 'Garbage', value: 15, color: '#F59E0B', resolved: 14 },
+    { name: "Water Supply", value: 35, color: "#3B82F6", resolved: 32 },
+    { name: "Electricity", value: 28, color: "#EF4444", resolved: 25 },
+    { name: "Road Repair", value: 22, color: "#10B981", resolved: 20 },
+    { name: "Garbage", value: 15, color: "#F59E0B", resolved: 14 },
   ];
 
   const resolutionTimes = [
-    { timeRange: '< 1 day', count: 45, percentage: 35 },
-    { timeRange: '1-3 days', count: 52, percentage: 40 },
-    { timeRange: '3-7 days', count: 25, percentage: 20 },
-    { timeRange: '> 7 days', count: 8, percentage: 5 },
+    { timeRange: "< 1 day", count: 45, percentage: 35 },
+    { timeRange: "1-3 days", count: 52, percentage: 40 },
+    { timeRange: "3-7 days", count: 25, percentage: 20 },
+    { timeRange: "> 7 days", count: 8, percentage: 5 },
   ];
 
   const teamEfficiency = [
-    { team: 'Electrical', efficiency: 95, workload: 18, satisfaction: 4.6 },
-    { team: 'Water Works', efficiency: 92, workload: 22, satisfaction: 4.3 },
-    { team: 'Road Maintenance', efficiency: 88, workload: 15, satisfaction: 4.1 },
-    { team: 'Sanitation', efficiency: 97, workload: 12, satisfaction: 4.7 },
+    { team: "Electrical", efficiency: 95, workload: 18, satisfaction: 4.6 },
+    { team: "Water Works", efficiency: 92, workload: 22, satisfaction: 4.3 },
+    {
+      team: "Road Maintenance",
+      efficiency: 88,
+      workload: 15,
+      satisfaction: 4.1,
+    },
+    { team: "Sanitation", efficiency: 97, workload: 12, satisfaction: 4.7 },
   ];
 
   return (
@@ -98,7 +143,9 @@ const AdminAnalytics: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Complaints</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Complaints
+                </p>
                 <p className="text-2xl font-bold">1,247</p>
                 <p className="text-xs text-green-600">↑ 12% from last month</p>
               </div>
@@ -110,7 +157,9 @@ const AdminAnalytics: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Resolution Rate</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Resolution Rate
+                </p>
                 <p className="text-2xl font-bold">92.3%</p>
                 <p className="text-xs text-green-600">↑ 3% from last month</p>
               </div>
@@ -122,7 +171,9 @@ const AdminAnalytics: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Resolution</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Avg Resolution
+                </p>
                 <p className="text-2xl font-bold">2.3 days</p>
                 <p className="text-xs text-green-600">↓ 0.5 days improved</p>
               </div>
@@ -134,7 +185,9 @@ const AdminAnalytics: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Satisfaction</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Satisfaction
+                </p>
                 <p className="text-2xl font-bold">4.3/5</p>
                 <p className="text-xs text-green-600">↑ 0.2 points</p>
               </div>
@@ -167,8 +220,22 @@ const AdminAnalytics: React.FC = () => {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Area type="monotone" dataKey="complaints" stackId="1" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.6} />
-                    <Area type="monotone" dataKey="resolved" stackId="2" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
+                    <Area
+                      type="monotone"
+                      dataKey="complaints"
+                      stackId="1"
+                      stroke="#3B82F6"
+                      fill="#3B82F6"
+                      fillOpacity={0.6}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="resolved"
+                      stackId="2"
+                      stroke="#10B981"
+                      fill="#10B981"
+                      fillOpacity={0.6}
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -186,7 +253,12 @@ const AdminAnalytics: React.FC = () => {
                     <XAxis dataKey="month" />
                     <YAxis domain={[3.5, 5]} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="satisfaction" stroke="#F59E0B" strokeWidth={3} />
+                    <Line
+                      type="monotone"
+                      dataKey="satisfaction"
+                      stroke="#F59E0B"
+                      strokeWidth={3}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -201,11 +273,18 @@ const AdminAnalytics: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 {resolutionTimes.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center space-x-4 flex-1">
-                      <span className="text-sm font-medium w-20">{item.timeRange}</span>
+                      <span className="text-sm font-medium w-20">
+                        {item.timeRange}
+                      </span>
                       <Progress value={item.percentage} className="flex-1" />
-                      <span className="text-sm text-gray-600 w-16 text-right">{item.count} cases</span>
+                      <span className="text-sm text-gray-600 w-16 text-right">
+                        {item.count} cases
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -245,20 +324,28 @@ const AdminAnalytics: React.FC = () => {
                     <div key={index} className="border rounded-lg p-4">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="font-medium">{ward.ward}</h3>
-                        <Badge className={`${
-                          ward.efficiency >= 95 ? 'bg-green-100 text-green-800' :
-                          ward.efficiency >= 90 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <Badge
+                          className={`${
+                            ward.efficiency >= 95
+                              ? "bg-green-100 text-green-800"
+                              : ward.efficiency >= 90
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                          }`}
+                        >
                           {ward.efficiency}%
                         </Badge>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         <div>
-                          <p className="text-gray-600">Total: {ward.complaints}</p>
+                          <p className="text-gray-600">
+                            Total: {ward.complaints}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Resolved: {ward.resolved}</p>
+                          <p className="text-gray-600">
+                            Resolved: {ward.resolved}
+                          </p>
                         </div>
                         <div>
                           <p className="text-gray-600">Avg: {ward.avgTime}d</p>
@@ -301,7 +388,10 @@ const AdminAnalytics: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 mt-4">
                   {complaintTypes.map((item, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
                       <span className="text-sm">{item.name}</span>
                     </div>
                   ))}
@@ -321,10 +411,14 @@ const AdminAnalytics: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">{type.name}</span>
                         <span className="text-sm text-gray-600">
-                          {type.resolved}/{type.value} ({Math.round((type.resolved / type.value) * 100)}%)
+                          {type.resolved}/{type.value} (
+                          {Math.round((type.resolved / type.value) * 100)}%)
                         </span>
                       </div>
-                      <Progress value={(type.resolved / type.value) * 100} className="h-2" />
+                      <Progress
+                        value={(type.resolved / type.value) * 100}
+                        className="h-2"
+                      />
                     </div>
                   ))}
                 </div>

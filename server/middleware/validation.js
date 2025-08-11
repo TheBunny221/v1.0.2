@@ -366,9 +366,7 @@ export const validateOtpVerification = [
     .isNumeric()
     .withMessage("OTP must be a 6-digit number"),
 
-  body("complaintId")
-    .notEmpty()
-    .withMessage("Complaint ID is required"),
+  body("complaintId").notEmpty().withMessage("Complaint ID is required"),
 
   handleValidationErrors,
 ];

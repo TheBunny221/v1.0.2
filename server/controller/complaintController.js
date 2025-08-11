@@ -9,10 +9,10 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
   if (status === "RESOLVED" || status === "CLOSED") {
     return "COMPLETED";
   }
-  
+
   const now = new Date();
   const daysRemaining = (deadline - now) / (1000 * 60 * 60 * 24);
-  
+
   if (daysRemaining < 0) {
     return "OVERDUE";
   } else if (daysRemaining <= 1) {
@@ -26,7 +26,9 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
 const generateComplaintId = () => {
   const prefix = "CSC";
   const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+  const random = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, "0");
   return `${prefix}${timestamp}${random}`;
 };
 
@@ -48,7 +50,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     contactName,
     contactEmail,
     contactPhone,
-    isAnonymous
+    isAnonymous,
   } = req.body;
 
   // Set deadline based on priority (in hours)
@@ -56,10 +58,12 @@ export const createComplaint = asyncHandler(async (req, res) => {
     LOW: 72,
     MEDIUM: 48,
     HIGH: 24,
-    CRITICAL: 8
+    CRITICAL: 8,
   };
 
-  const deadline = new Date(Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000);
+  const deadline = new Date(
+    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
+  );
 
   const complaint = await prisma.complaint.create({
     data: {
@@ -90,10 +94,10 @@ export const createComplaint = asyncHandler(async (req, res) => {
           id: true,
           fullName: true,
           email: true,
-          phoneNumber: true
-        }
-      }
-    }
+          phoneNumber: true,
+        },
+      },
+    },
   });
 
   // Create status log
@@ -103,7 +107,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
       userId: req.user.id,
       toStatus: "REGISTERED",
       comment: "Complaint registered",
-    }
+    },
   });
 
   // Send notification to ward officer if available
@@ -111,8 +115,8 @@ export const createComplaint = asyncHandler(async (req, res) => {
     where: {
       role: "WARD_OFFICER",
       wardId: wardId,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
   for (const officer of wardOfficers) {
@@ -123,7 +127,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
         type: "IN_APP",
         title: "New Complaint Registered",
         message: `A new ${type} complaint has been registered in your ward.`,
-      }
+      },
     });
   }
 
@@ -149,7 +153,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
     submittedById,
     dateFrom,
     dateTo,
-    search
+    search,
   } = req.query;
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -170,7 +174,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
   if (type) filters.type = type;
   if (wardId && req.user.role === "ADMINISTRATOR") filters.wardId = wardId;
   if (assignedToId) filters.assignedToId = assignedToId;
-  if (submittedById && req.user.role === "ADMINISTRATOR") filters.submittedById = submittedById;
+  if (submittedById && req.user.role === "ADMINISTRATOR")
+    filters.submittedById = submittedById;
 
   // Date range filter
   if (dateFrom || dateTo) {
@@ -202,16 +207,16 @@ export const getComplaints = asyncHandler(async (req, res) => {
             id: true,
             fullName: true,
             email: true,
-            phoneNumber: true
-          }
+            phoneNumber: true,
+          },
         },
         assignedTo: {
           select: {
             id: true,
             fullName: true,
             email: true,
-            phoneNumber: true
-          }
+            phoneNumber: true,
+          },
         },
         attachments: true,
         statusLogs: {
@@ -221,14 +226,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
             user: {
               select: {
                 fullName: true,
-                role: true
-              }
-            }
-          }
-        }
-      }
+                role: true,
+              },
+            },
+          },
+        },
+      },
     }),
-    prisma.complaint.count({ where: filters })
+    prisma.complaint.count({ where: filters }),
   ]);
 
   res.status(200).json({
@@ -241,8 +246,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
         totalPages: Math.ceil(total / parseInt(limit)),
         totalItems: total,
         hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
-        hasPrev: parseInt(page) > 1
-      }
+        hasPrev: parseInt(page) > 1,
+      },
     },
   });
 });
@@ -262,8 +267,8 @@ export const getComplaint = asyncHandler(async (req, res) => {
           fullName: true,
           email: true,
           phoneNumber: true,
-          role: true
-        }
+          role: true,
+        },
       },
       assignedTo: {
         select: {
@@ -271,8 +276,8 @@ export const getComplaint = asyncHandler(async (req, res) => {
           fullName: true,
           email: true,
           phoneNumber: true,
-          role: true
-        }
+          role: true,
+        },
       },
       attachments: true,
       statusLogs: {
@@ -281,14 +286,14 @@ export const getComplaint = asyncHandler(async (req, res) => {
           user: {
             select: {
               fullName: true,
-              role: true
-            }
-          }
-        }
+              role: true,
+            },
+          },
+        },
       },
       notifications: {
         where: { userId: req.user.id },
-        orderBy: { sentAt: "desc" }
+        orderBy: { sentAt: "desc" },
       },
       messages: {
         orderBy: { sentAt: "asc" },
@@ -296,18 +301,18 @@ export const getComplaint = asyncHandler(async (req, res) => {
           sentBy: {
             select: {
               fullName: true,
-              role: true
-            }
+              role: true,
+            },
           },
           receivedBy: {
             select: {
               fullName: true,
-              role: true
-            }
-          }
-        }
-      }
-    }
+              role: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!complaint) {
@@ -319,11 +324,13 @@ export const getComplaint = asyncHandler(async (req, res) => {
   }
 
   // Check authorization
-  const isAuthorized = 
+  const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
     complaint.submittedById === req.user.id ||
-    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId) ||
-    (req.user.role === "MAINTENANCE_TEAM" && complaint.assignedToId === req.user.id);
+    (req.user.role === "WARD_OFFICER" &&
+      complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" &&
+      complaint.assignedToId === req.user.id);
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -352,8 +359,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     include: {
       submittedBy: true,
       assignedTo: true,
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   if (!complaint) {
@@ -365,10 +372,12 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   }
 
   // Authorization check
-  const isAuthorized = 
+  const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
-    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId) ||
-    (req.user.role === "MAINTENANCE_TEAM" && complaint.assignedToId === req.user.id);
+    (req.user.role === "WARD_OFFICER" &&
+      complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" &&
+      complaint.assignedToId === req.user.id);
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -380,7 +389,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
 
   const updateData = {
     status,
-    slaStatus: calculateSLAStatus(complaint.submittedOn, complaint.deadline, status)
+    slaStatus: calculateSLAStatus(
+      complaint.submittedOn,
+      complaint.deadline,
+      status,
+    ),
   };
 
   // Set timestamps based on status
@@ -412,18 +425,18 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
           id: true,
           fullName: true,
           email: true,
-          phoneNumber: true
-        }
+          phoneNumber: true,
+        },
       },
       assignedTo: {
         select: {
           id: true,
           fullName: true,
           email: true,
-          phoneNumber: true
-        }
-      }
-    }
+          phoneNumber: true,
+        },
+      },
+    },
   });
 
   // Create status log
@@ -434,7 +447,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       fromStatus: complaint.status,
       toStatus: status,
       comment: comment || `Status updated to ${status}`,
-    }
+    },
   });
 
   // Send notifications
@@ -464,7 +477,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
 
   if (notifications.length > 0) {
     await prisma.notification.createMany({
-      data: notifications
+      data: notifications,
     });
   }
 
@@ -483,7 +496,7 @@ export const addComplaintFeedback = asyncHandler(async (req, res) => {
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId }
+    where: { id: complaintId },
   });
 
   if (!complaint) {
@@ -524,10 +537,10 @@ export const addComplaintFeedback = asyncHandler(async (req, res) => {
         select: {
           id: true,
           fullName: true,
-          email: true
-        }
-      }
-    }
+          email: true,
+        },
+      },
+    },
   });
 
   res.status(200).json({
@@ -553,7 +566,7 @@ export const reopenComplaint = asyncHandler(async (req, res) => {
   }
 
   const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId }
+    where: { id: complaintId },
   });
 
   if (!complaint) {
@@ -576,9 +589,13 @@ export const reopenComplaint = asyncHandler(async (req, res) => {
     where: { id: complaintId },
     data: {
       status: "REOPENED",
-      slaStatus: calculateSLAStatus(complaint.submittedOn, complaint.deadline, "REOPENED"),
+      slaStatus: calculateSLAStatus(
+        complaint.submittedOn,
+        complaint.deadline,
+        "REOPENED",
+      ),
       closedOn: null,
-    }
+    },
   });
 
   // Create status log
@@ -589,7 +606,7 @@ export const reopenComplaint = asyncHandler(async (req, res) => {
       fromStatus: "CLOSED",
       toStatus: "REOPENED",
       comment: comment || "Complaint reopened by administrator",
-    }
+    },
   });
 
   res.status(200).json({
@@ -633,34 +650,34 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
     statusCounts,
     priorityCounts,
     typeCounts,
-    avgResolutionTime
+    avgResolutionTime,
   ] = await Promise.all([
     prisma.complaint.count({ where: filters }),
     prisma.complaint.groupBy({
       by: ["status"],
       where: filters,
-      _count: { status: true }
+      _count: { status: true },
     }),
     prisma.complaint.groupBy({
       by: ["priority"],
       where: filters,
-      _count: { priority: true }
+      _count: { priority: true },
     }),
     prisma.complaint.groupBy({
       by: ["type"],
       where: filters,
-      _count: { type: true }
+      _count: { type: true },
     }),
     prisma.complaint.aggregate({
       where: {
         ...filters,
         status: "RESOLVED",
-        resolvedOn: { not: null }
+        resolvedOn: { not: null },
       },
       _avg: {
         // Calculate resolution time in hours
-      }
-    })
+      },
+    }),
   ]);
 
   const stats = {
@@ -677,7 +694,7 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
       acc[item.type] = item._count.type;
       return acc;
     }, {}),
-    avgResolutionTimeHours: 0 // This would need custom calculation
+    avgResolutionTimeHours: 0, // This would need custom calculation
   };
 
   res.status(200).json({
@@ -696,7 +713,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
 
   const complaint = await prisma.complaint.findUnique({
     where: { id: complaintId },
-    include: { ward: true }
+    include: { ward: true },
   });
 
   if (!complaint) {
@@ -708,7 +725,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
   }
 
   // Authorization check
-  const isAuthorized = 
+  const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
     (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId);
 
@@ -722,7 +739,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
 
   // Verify assignee exists and is maintenance team
   const assignee = await prisma.user.findUnique({
-    where: { id: assignedToId }
+    where: { id: assignedToId },
   });
 
   if (!assignee || assignee.role !== "MAINTENANCE_TEAM") {
@@ -739,7 +756,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
       assignedToId,
       status: "ASSIGNED",
       assignedOn: new Date(),
-    }
+    },
   });
 
   // Create status log
@@ -750,7 +767,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
       fromStatus: complaint.status,
       toStatus: "ASSIGNED",
       comment: `Assigned to ${assignee.fullName}`,
-    }
+    },
   });
 
   res.status(200).json({

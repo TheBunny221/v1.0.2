@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchComplaints } from '../store/slices/complaintsSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Badge } from '../components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '../components/ui/select';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchComplaints } from "../store/slices/complaintsSlice";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Badge } from "../components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import {
   Table,
   TableBody,
@@ -20,17 +25,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table';
-import { 
-  FileText, 
-  Search, 
-  Filter, 
-  Plus, 
-  Calendar, 
+} from "../components/ui/table";
+import {
+  FileText,
+  Search,
+  Filter,
+  Plus,
+  Calendar,
   MapPin,
   Eye,
-  Edit
-} from 'lucide-react';
+  Edit,
+} from "lucide-react";
 
 const ComplaintsList: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -38,9 +43,9 @@ const ComplaintsList: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   useEffect(() => {
     dispatch(fetchComplaints());
@@ -48,43 +53,46 @@ const ComplaintsList: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'REGISTERED':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'ASSIGNED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-orange-100 text-orange-800';
-      case 'RESOLVED':
-        return 'bg-green-100 text-green-800';
-      case 'CLOSED':
-        return 'bg-gray-100 text-gray-800';
+      case "REGISTERED":
+        return "bg-yellow-100 text-yellow-800";
+      case "ASSIGNED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "RESOLVED":
+        return "bg-green-100 text-green-800";
+      case "CLOSED":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800';
-      case 'CRITICAL':
-        return 'bg-red-100 text-red-800';
+      case "LOW":
+        return "bg-green-100 text-green-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "HIGH":
+        return "bg-orange-100 text-orange-800";
+      case "CRITICAL":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const filteredComplaints = complaints.filter(complaint => {
-    const matchesSearch = complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         complaint.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || complaint.priority === priorityFilter;
-    
+  const filteredComplaints = complaints.filter((complaint) => {
+    const matchesSearch =
+      complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      complaint.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || complaint.status === statusFilter;
+    const matchesPriority =
+      priorityFilter === "all" || complaint.priority === priorityFilter;
+
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
@@ -96,7 +104,7 @@ const ComplaintsList: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Complaints</h1>
           <p className="text-gray-600">Manage and track all complaints</p>
         </div>
-        {user?.role === 'CITIZEN' && (
+        {user?.role === "CITIZEN" && (
           <Link to="/">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -198,7 +206,7 @@ const ComplaintsList: React.FC = () => {
                       <div className="max-w-xs">
                         <p className="truncate">{complaint.description}</p>
                         <p className="text-sm text-gray-500">
-                          {complaint.type.replace('_', ' ')}
+                          {complaint.type.replace("_", " ")}
                         </p>
                       </div>
                     </TableCell>
@@ -210,7 +218,7 @@ const ComplaintsList: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(complaint.status)}>
-                        {complaint.status.replace('_', ' ')}
+                        {complaint.status.replace("_", " ")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -231,7 +239,8 @@ const ComplaintsList: React.FC = () => {
                             <Eye className="h-3 w-3" />
                           </Button>
                         </Link>
-                        {(user?.role === 'WARD_OFFICER' || user?.role === 'ADMINISTRATOR') && (
+                        {(user?.role === "WARD_OFFICER" ||
+                          user?.role === "ADMINISTRATOR") && (
                           <Button size="sm" variant="outline">
                             <Edit className="h-3 w-3" />
                           </Button>

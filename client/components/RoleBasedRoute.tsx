@@ -1,8 +1,13 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../store/hooks';
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
 
-export type UserRole = 'CITIZEN' | 'WARD_OFFICER' | 'MAINTENANCE_TEAM' | 'ADMINISTRATOR' | 'GUEST';
+export type UserRole =
+  | "CITIZEN"
+  | "WARD_OFFICER"
+  | "MAINTENANCE_TEAM"
+  | "ADMINISTRATOR"
+  | "GUEST";
 
 interface RoleBasedRouteProps {
   children: React.ReactNode;
@@ -10,10 +15,10 @@ interface RoleBasedRouteProps {
   fallbackPath?: string;
 }
 
-const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({ 
-  children, 
-  allowedRoles, 
-  fallbackPath = '/login' 
+const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
+  children,
+  allowedRoles,
+  fallbackPath = "/login",
 }) => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const location = useLocation();

@@ -1,70 +1,75 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { 
-  CheckList, 
-  Calendar, 
-  User, 
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import {
+  CheckList,
+  Calendar,
+  User,
   MapPin,
   Clock,
-  AlertTriangle
-} from 'lucide-react';
+  AlertTriangle,
+} from "lucide-react";
 
 const WardTasks: React.FC = () => {
   const mockTasks = [
     {
-      id: '1',
-      title: 'Water Supply Issue - MG Road',
-      priority: 'HIGH',
-      status: 'PENDING',
-      assignedTo: 'Maintenance Team A',
-      dueDate: '2024-01-15',
-      location: 'MG Road, Ward 1'
+      id: "1",
+      title: "Water Supply Issue - MG Road",
+      priority: "HIGH",
+      status: "PENDING",
+      assignedTo: "Maintenance Team A",
+      dueDate: "2024-01-15",
+      location: "MG Road, Ward 1",
     },
     {
-      id: '2',
-      title: 'Street Light Repair - Broadway',
-      priority: 'MEDIUM',
-      status: 'IN_PROGRESS',
-      assignedTo: 'Electrical Team',
-      dueDate: '2024-01-16',
-      location: 'Broadway, Ward 1'
+      id: "2",
+      title: "Street Light Repair - Broadway",
+      priority: "MEDIUM",
+      status: "IN_PROGRESS",
+      assignedTo: "Electrical Team",
+      dueDate: "2024-01-16",
+      location: "Broadway, Ward 1",
     },
     {
-      id: '3',
-      title: 'Road Pothole Repair - Marine Drive',
-      priority: 'LOW',
-      status: 'COMPLETED',
-      assignedTo: 'Road Maintenance',
-      dueDate: '2024-01-10',
-      location: 'Marine Drive, Ward 3'
-    }
+      id: "3",
+      title: "Road Pothole Repair - Marine Drive",
+      priority: "LOW",
+      status: "COMPLETED",
+      assignedTo: "Road Maintenance",
+      dueDate: "2024-01-10",
+      location: "Marine Drive, Ward 3",
+    },
   ];
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'bg-red-100 text-red-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
+      case "HIGH":
+        return "bg-red-100 text-red-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "LOW":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'IN_PROGRESS':
-        return 'bg-blue-100 text-blue-800';
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800";
+      case "IN_PROGRESS":
+        return "bg-blue-100 text-blue-800";
+      case "COMPLETED":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -73,7 +78,9 @@ const WardTasks: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Ward Tasks</h1>
-        <p className="text-gray-600">Manage and track tasks assigned to your ward</p>
+        <p className="text-gray-600">
+          Manage and track tasks assigned to your ward
+        </p>
       </div>
 
       {/* Summary Cards */}
@@ -132,7 +139,10 @@ const WardTasks: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             {mockTasks.map((task) => (
-              <div key={task.id} className="border rounded-lg p-4 hover:bg-gray-50">
+              <div
+                key={task.id}
+                className="border rounded-lg p-4 hover:bg-gray-50"
+              >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium">{task.title}</h3>
                   <div className="flex space-x-2">
@@ -162,9 +172,7 @@ const WardTasks: React.FC = () => {
                   <Button variant="outline" size="sm">
                     View Details
                   </Button>
-                  <Button size="sm">
-                    Update Status
-                  </Button>
+                  <Button size="sm">Update Status</Button>
                 </div>
               </div>
             ))}

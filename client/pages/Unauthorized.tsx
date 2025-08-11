@@ -1,8 +1,13 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Shield, AlertTriangle, Home, LogIn } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Shield, AlertTriangle, Home, LogIn } from "lucide-react";
 
 const Unauthorized: React.FC = () => {
   return (
@@ -16,9 +21,10 @@ const Unauthorized: React.FC = () => {
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">
-            You don't have permission to access this page. Please contact your administrator if you believe this is an error.
+            You don't have permission to access this page. Please contact your
+            administrator if you believe this is an error.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/">
               <Button variant="outline" className="w-full sm:w-auto">

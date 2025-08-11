@@ -1,12 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { fetchComplaints, updateComplaintStatus } from '../store/slices/complaintsSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import {
+  fetchComplaints,
+  updateComplaintStatus,
+} from "../store/slices/complaintsSlice";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Progress } from "../components/ui/progress";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   Wrench,
   Clock,
@@ -20,7 +33,7 @@ import {
   Navigation,
   Phone,
   MessageSquare,
-} from 'lucide-react';
+} from "lucide-react";
 
 const MaintenanceDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -44,18 +57,22 @@ const MaintenanceDashboard: React.FC = () => {
 
   useEffect(() => {
     // Filter tasks assigned to this maintenance team member
-    const assignedTasks = complaints.filter(c => 
-      c.assignedToId === user?.id && c.status !== 'REGISTERED'
+    const assignedTasks = complaints.filter(
+      (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
     );
-    
+
     const totalTasks = assignedTasks.length;
-    const inProgress = assignedTasks.filter(c => c.status === 'IN_PROGRESS').length;
-    const completed = assignedTasks.filter(c => c.status === 'RESOLVED').length;
-    const pending = assignedTasks.filter(c => c.status === 'ASSIGNED').length;
-    
+    const inProgress = assignedTasks.filter(
+      (c) => c.status === "IN_PROGRESS",
+    ).length;
+    const completed = assignedTasks.filter(
+      (c) => c.status === "RESOLVED",
+    ).length;
+    const pending = assignedTasks.filter((c) => c.status === "ASSIGNED").length;
+
     const today = new Date().toDateString();
-    const todayTasks = assignedTasks.filter(c => 
-      new Date(c.assignedOn || c.submittedOn).toDateString() === today
+    const todayTasks = assignedTasks.filter(
+      (c) => new Date(c.assignedOn || c.submittedOn).toDateString() === today,
     ).length;
 
     setDashboardStats({
@@ -71,43 +88,43 @@ const MaintenanceDashboard: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ASSIGNED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-orange-100 text-orange-800';
-      case 'RESOLVED':
-        return 'bg-green-100 text-green-800';
+      case "ASSIGNED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "RESOLVED":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800';
-      case 'CRITICAL':
-        return 'bg-red-100 text-red-800';
+      case "LOW":
+        return "bg-green-100 text-green-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "HIGH":
+        return "bg-orange-100 text-orange-800";
+      case "CRITICAL":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const myTasks = complaints.filter(c => 
-    c.assignedToId === user?.id && c.status !== 'REGISTERED'
+  const myTasks = complaints.filter(
+    (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
   );
 
-  const activeTasks = myTasks.filter(c => 
-    c.status === 'ASSIGNED' || c.status === 'IN_PROGRESS'
-  ).slice(0, 5);
+  const activeTasks = myTasks
+    .filter((c) => c.status === "ASSIGNED" || c.status === "IN_PROGRESS")
+    .slice(0, 5);
 
-  const urgentTasks = myTasks.filter(c => 
-    c.priority === 'CRITICAL' || c.priority === 'HIGH'
-  ).slice(0, 3);
+  const urgentTasks = myTasks
+    .filter((c) => c.priority === "CRITICAL" || c.priority === "HIGH")
+    .slice(0, 3);
 
   const handleStatusUpdate = (complaintId: string, newStatus: string) => {
     dispatch(updateComplaintStatus({ id: complaintId, status: newStatus }));
@@ -117,9 +134,7 @@ const MaintenanceDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">
-          Maintenance Dashboard
-        </h1>
+        <h1 className="text-2xl font-bold mb-2">Maintenance Dashboard</h1>
         <p className="text-green-100">
           Manage your assigned tasks and track field work progress.
         </p>
@@ -139,7 +154,9 @@ const MaintenanceDashboard: React.FC = () => {
             <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats.totalTasks}</div>
+            <div className="text-2xl font-bold">
+              {dashboardStats.totalTasks}
+            </div>
             <p className="text-xs text-muted-foreground">Assigned to you</p>
           </CardContent>
         </Card>
@@ -150,7 +167,9 @@ const MaintenanceDashboard: React.FC = () => {
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{dashboardStats.todayTasks}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {dashboardStats.todayTasks}
+            </div>
             <p className="text-xs text-muted-foreground">Scheduled for today</p>
           </CardContent>
         </Card>
@@ -161,8 +180,12 @@ const MaintenanceDashboard: React.FC = () => {
             <Clock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{dashboardStats.inProgress}</div>
-            <p className="text-xs text-muted-foreground">Currently working on</p>
+            <div className="text-2xl font-bold text-orange-600">
+              {dashboardStats.inProgress}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Currently working on
+            </p>
           </CardContent>
         </Card>
 
@@ -172,7 +195,9 @@ const MaintenanceDashboard: React.FC = () => {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{dashboardStats.efficiency}%</div>
+            <div className="text-2xl font-bold text-green-600">
+              {dashboardStats.efficiency}%
+            </div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -181,8 +206,12 @@ const MaintenanceDashboard: React.FC = () => {
       {/* Main Content Tabs */}
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="active">Active Tasks ({activeTasks.length})</TabsTrigger>
-          <TabsTrigger value="urgent">Urgent ({urgentTasks.length})</TabsTrigger>
+          <TabsTrigger value="active">
+            Active Tasks ({activeTasks.length})
+          </TabsTrigger>
+          <TabsTrigger value="urgent">
+            Urgent ({urgentTasks.length})
+          </TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="tools">Tools & Reports</TabsTrigger>
         </TabsList>
@@ -202,19 +231,24 @@ const MaintenanceDashboard: React.FC = () => {
                   <div className="text-center py-8">
                     <CheckCircle className="h-12 w-12 mx-auto text-green-400 mb-4" />
                     <p className="text-gray-500">No active tasks</p>
-                    <p className="text-sm text-gray-400">Great job! All caught up.</p>
+                    <p className="text-sm text-gray-400">
+                      Great job! All caught up.
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {activeTasks.map((task) => (
-                      <div key={task.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                      <div
+                        key={task.id}
+                        className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      >
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="font-medium text-sm">
                             {task.title || `Task #${task.id.slice(-6)}`}
                           </h3>
                           <div className="flex space-x-2">
                             <Badge className={getStatusColor(task.status)}>
-                              {task.status.replace('_', ' ')}
+                              {task.status.replace("_", " ")}
                             </Badge>
                             <Badge className={getPriorityColor(task.priority)}>
                               {task.priority}
@@ -228,7 +262,10 @@ const MaintenanceDashboard: React.FC = () => {
                           <MapPin className="h-3 w-3 mr-1" />
                           {task.area}, {task.landmark}
                           <Calendar className="h-3 w-3 ml-3 mr-1" />
-                          Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
+                          Due:{" "}
+                          {task.deadline
+                            ? new Date(task.deadline).toLocaleDateString()
+                            : "No deadline"}
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="flex space-x-2">
@@ -242,18 +279,22 @@ const MaintenanceDashboard: React.FC = () => {
                             </Button>
                           </div>
                           <div className="flex space-x-2">
-                            {task.status === 'ASSIGNED' && (
-                              <Button 
+                            {task.status === "ASSIGNED" && (
+                              <Button
                                 size="sm"
-                                onClick={() => handleStatusUpdate(task.id, 'IN_PROGRESS')}
+                                onClick={() =>
+                                  handleStatusUpdate(task.id, "IN_PROGRESS")
+                                }
                               >
                                 Start Work
                               </Button>
                             )}
-                            {task.status === 'IN_PROGRESS' && (
-                              <Button 
+                            {task.status === "IN_PROGRESS" && (
+                              <Button
                                 size="sm"
-                                onClick={() => handleStatusUpdate(task.id, 'RESOLVED')}
+                                onClick={() =>
+                                  handleStatusUpdate(task.id, "RESOLVED")
+                                }
                               >
                                 Mark Complete
                               </Button>
@@ -308,20 +349,43 @@ const MaintenanceDashboard: React.FC = () => {
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Tasks Completed</span>
-                      <span>{dashboardStats.totalTasks > 0 ? Math.round((dashboardStats.completed / dashboardStats.totalTasks) * 100) : 0}%</span>
+                      <span>
+                        {dashboardStats.totalTasks > 0
+                          ? Math.round(
+                              (dashboardStats.completed /
+                                dashboardStats.totalTasks) *
+                                100,
+                            )
+                          : 0}
+                        %
+                      </span>
                     </div>
-                    <Progress 
-                      value={dashboardStats.totalTasks > 0 ? (dashboardStats.completed / dashboardStats.totalTasks) * 100 : 0} 
+                    <Progress
+                      value={
+                        dashboardStats.totalTasks > 0
+                          ? (dashboardStats.completed /
+                              dashboardStats.totalTasks) *
+                            100
+                          : 0
+                      }
                       className="h-2"
                     />
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{dashboardStats.avgCompletionTime}</div>
-                    <p className="text-xs text-gray-500">Avg. Completion Time (days)</p>
+                    <div className="text-2xl font-bold text-green-600">
+                      {dashboardStats.avgCompletionTime}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Avg. Completion Time (days)
+                    </p>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{dashboardStats.completed}</div>
-                    <p className="text-xs text-gray-500">Tasks Completed This Month</p>
+                    <div className="text-lg font-bold text-blue-600">
+                      {dashboardStats.completed}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Tasks Completed This Month
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -346,7 +410,10 @@ const MaintenanceDashboard: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {urgentTasks.map((task) => (
-                    <div key={task.id} className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4">
+                    <div
+                      key={task.id}
+                      className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4"
+                    >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium text-sm">
                           {task.title || `Task #${task.id.slice(-6)}`}
@@ -356,7 +423,7 @@ const MaintenanceDashboard: React.FC = () => {
                             {task.priority}
                           </Badge>
                           <Badge className={getStatusColor(task.status)}>
-                            {task.status.replace('_', ' ')}
+                            {task.status.replace("_", " ")}
                           </Badge>
                         </div>
                       </div>
@@ -367,7 +434,10 @@ const MaintenanceDashboard: React.FC = () => {
                         <MapPin className="h-3 w-3 mr-1" />
                         {task.area}
                         <Clock className="h-3 w-3 ml-3 mr-1" />
-                        Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'ASAP'}
+                        Due:{" "}
+                        {task.deadline
+                          ? new Date(task.deadline).toLocaleDateString()
+                          : "ASAP"}
                       </div>
                       <div className="flex justify-between items-center">
                         <div className="flex space-x-2">
@@ -407,17 +477,23 @@ const MaintenanceDashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 {myTasks
-                  .filter(task => task.status === 'RESOLVED')
+                  .filter((task) => task.status === "RESOLVED")
                   .slice(0, 10)
                   .map((task) => (
-                    <div key={task.id} className="border rounded-lg p-4 bg-green-50">
+                    <div
+                      key={task.id}
+                      className="border rounded-lg p-4 bg-green-50"
+                    >
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium text-sm">
                             {task.title || `Task #${task.id.slice(-6)}`}
                           </h3>
                           <p className="text-xs text-gray-600 mt-1">
-                            Completed on {task.resolvedOn ? new Date(task.resolvedOn).toLocaleDateString() : 'Recently'}
+                            Completed on{" "}
+                            {task.resolvedOn
+                              ? new Date(task.resolvedOn).toLocaleDateString()
+                              : "Recently"}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">

@@ -27,17 +27,23 @@ router.use(protect);
 router
   .route("/")
   .get(validatePagination, validateComplaintFilters, getComplaints)
-  .post(authorize("CITIZEN", "ADMINISTRATOR"), validateComplaintCreation, createComplaint);
+  .post(
+    authorize("CITIZEN", "ADMINISTRATOR"),
+    validateComplaintCreation,
+    createComplaint,
+  );
 
 router.get("/stats", getComplaintStats);
 
-router
-  .route("/:id")
-  .get(getComplaint);
+router.route("/:id").get(getComplaint);
 
 router
   .route("/:id/status")
-  .put(authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"), validateComplaintUpdate, updateComplaintStatus);
+  .put(
+    authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"),
+    validateComplaintUpdate,
+    updateComplaintStatus,
+  );
 
 router
   .route("/:id/assign")
@@ -47,8 +53,6 @@ router
   .route("/:id/feedback")
   .post(authorize("CITIZEN"), validateComplaintFeedback, addComplaintFeedback);
 
-router
-  .route("/:id/reopen")
-  .put(authorize("ADMINISTRATOR"), reopenComplaint);
+router.route("/:id/reopen").put(authorize("ADMINISTRATOR"), reopenComplaint);
 
 export default router;

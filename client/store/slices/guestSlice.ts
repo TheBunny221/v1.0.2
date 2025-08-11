@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
 export interface GuestComplaintData {
@@ -41,7 +41,7 @@ export interface GuestState {
   otpSent: boolean;
   otpExpiry: Date | null;
   complaintData: GuestComplaintData | null;
-  submissionStep: 'form' | 'otp' | 'success';
+  submissionStep: "form" | "otp" | "success";
   error: string | null;
   userEmail: string | null;
   newUserRegistered: boolean;
@@ -57,7 +57,7 @@ const initialState: GuestState = {
   otpSent: false,
   otpExpiry: null,
   complaintData: null,
-  submissionStep: 'form',
+  submissionStep: "form",
   error: null,
   userEmail: null,
   newUserRegistered: false,
@@ -85,7 +85,7 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 
 // Async thunks
 export const submitGuestComplaint = createAsyncThunk(
-  'guest/submitComplaint',
+  "guest/submitComplaint",
   async (complaintData: GuestComplaintData, { rejectWithValue }) => {
     try {
       // For now, we'll send as JSON. File uploads can be added later
@@ -95,7 +95,7 @@ export const submitGuestComplaint = createAsyncThunk(
         phoneNumber: complaintData.phoneNumber,
         type: complaintData.type,
         description: complaintData.description,
-        priority: complaintData.priority || 'MEDIUM',
+        priority: complaintData.priority || "MEDIUM",
         wardId: complaintData.wardId,
         area: complaintData.area,
         landmark: complaintData.landmark,
@@ -103,103 +103,126 @@ export const submitGuestComplaint = createAsyncThunk(
         coordinates: complaintData.coordinates,
       };
 
-      const data = await apiCall('/api/guest/complaint', {
-        method: 'POST',
+      const data = await apiCall("/api/guest/complaint", {
+        method: "POST",
         body: JSON.stringify(payload),
       });
 
       return data.data as GuestComplaintResponse;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to submit complaint');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to submit complaint",
+      );
     }
-  }
+  },
 );
 
 export const verifyOTPAndRegister = createAsyncThunk(
-  'guest/verifyOTPAndRegister',
+  "guest/verifyOTPAndRegister",
   async (
-    { email, otpCode, complaintId }: { email: string; otpCode: string; complaintId: string }, 
-    { rejectWithValue }
+    {
+      email,
+      otpCode,
+      complaintId,
+    }: { email: string; otpCode: string; complaintId: string },
+    { rejectWithValue },
   ) => {
     try {
-      const data = await apiCall('/api/guest/verify-otp', {
-        method: 'POST',
+      const data = await apiCall("/api/guest/verify-otp", {
+        method: "POST",
         body: JSON.stringify({ email, otpCode, complaintId }),
       });
 
       // Store token in localStorage for auto-login
       if (data.data.token) {
-        localStorage.setItem('token', data.data.token);
+        localStorage.setItem("token", data.data.token);
       }
 
       return data.data as OTPVerificationResponse;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'OTP verification failed');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "OTP verification failed",
+      );
     }
-  }
+  },
 );
 
 export const resendOTP = createAsyncThunk(
-  'guest/resendOTP',
-  async ({ email, complaintId }: { email: string; complaintId: string }, { rejectWithValue }) => {
+  "guest/resendOTP",
+  async (
+    { email, complaintId }: { email: string; complaintId: string },
+    { rejectWithValue },
+  ) => {
     try {
-      const data = await apiCall('/api/guest/resend-otp', {
-        method: 'POST',
+      const data = await apiCall("/api/guest/resend-otp", {
+        method: "POST",
         body: JSON.stringify({ email, complaintId }),
       });
 
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to resend OTP');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to resend OTP",
+      );
     }
-  }
+  },
 );
 
 export const trackGuestComplaint = createAsyncThunk(
-  'guest/trackComplaint',
+  "guest/trackComplaint",
   async (
-    { complaintId, email, phoneNumber }: { 
-      complaintId: string; 
-      email?: string; 
-      phoneNumber?: string; 
-    }, 
-    { rejectWithValue }
+    {
+      complaintId,
+      email,
+      phoneNumber,
+    }: {
+      complaintId: string;
+      email?: string;
+      phoneNumber?: string;
+    },
+    { rejectWithValue },
   ) => {
     try {
       const params = new URLSearchParams();
-      if (email) params.append('email', email);
-      if (phoneNumber) params.append('phoneNumber', phoneNumber);
+      if (email) params.append("email", email);
+      if (phoneNumber) params.append("phoneNumber", phoneNumber);
 
-      const data = await apiCall(`/api/guest/track/${complaintId}?${params.toString()}`);
+      const data = await apiCall(
+        `/api/guest/track/${complaintId}?${params.toString()}`,
+      );
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to track complaint');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to track complaint",
+      );
     }
-  }
+  },
 );
 
 export const getPublicStats = createAsyncThunk(
-  'guest/getPublicStats',
+  "guest/getPublicStats",
   async (_, { rejectWithValue }) => {
     try {
-      const data = await apiCall('/api/guest/stats');
+      const data = await apiCall("/api/guest/stats");
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to load statistics');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to load statistics",
+      );
     }
-  }
+  },
 );
 
 // Slice
 const guestSlice = createSlice({
-  name: 'guest',
+  name: "guest",
   initialState,
   reducers: {
     clearGuestData: (state) => {
       state.complaintId = null;
       state.sessionId = null;
       state.complaintData = null;
-      state.submissionStep = 'form';
+      state.submissionStep = "form";
       state.otpSent = false;
       state.otpExpiry = null;
       state.error = null;
@@ -207,13 +230,19 @@ const guestSlice = createSlice({
       state.newUserRegistered = false;
       state.trackingData = null;
     },
-    setSubmissionStep: (state, action: PayloadAction<'form' | 'otp' | 'success'>) => {
+    setSubmissionStep: (
+      state,
+      action: PayloadAction<"form" | "otp" | "success">,
+    ) => {
       state.submissionStep = action.payload;
     },
     clearError: (state) => {
       state.error = null;
     },
-    updateComplaintData: (state, action: PayloadAction<Partial<GuestComplaintData>>) => {
+    updateComplaintData: (
+      state,
+      action: PayloadAction<Partial<GuestComplaintData>>,
+    ) => {
       if (state.complaintData) {
         state.complaintData = { ...state.complaintData, ...action.payload };
       } else {
@@ -223,7 +252,7 @@ const guestSlice = createSlice({
     resetOTPState: (state) => {
       state.otpSent = false;
       state.otpExpiry = null;
-      state.submissionStep = 'form';
+      state.submissionStep = "form";
     },
   },
   extraReducers: (builder) => {
@@ -240,14 +269,14 @@ const guestSlice = createSlice({
         state.userEmail = action.payload.email;
         state.otpSent = true;
         state.otpExpiry = new Date(action.payload.expiresAt);
-        state.submissionStep = 'otp';
+        state.submissionStep = "otp";
         state.error = null;
       })
       .addCase(submitGuestComplaint.rejected, (state, action) => {
         state.isSubmitting = false;
         state.error = action.payload as string;
       })
-      
+
       // Verify OTP and Auto-Register
       .addCase(verifyOTPAndRegister.pending, (state) => {
         state.isVerifying = true;
@@ -255,10 +284,10 @@ const guestSlice = createSlice({
       })
       .addCase(verifyOTPAndRegister.fulfilled, (state, action) => {
         state.isVerifying = false;
-        state.submissionStep = 'success';
+        state.submissionStep = "success";
         state.newUserRegistered = action.payload.isNewUser;
         state.error = null;
-        
+
         // Clear guest data as user is now registered and logged in
         // The auth slice will handle the user state
       })
@@ -266,7 +295,7 @@ const guestSlice = createSlice({
         state.isVerifying = false;
         state.error = action.payload as string;
       })
-      
+
       // Resend OTP
       .addCase(resendOTP.pending, (state) => {
         state.error = null;
@@ -279,7 +308,7 @@ const guestSlice = createSlice({
       .addCase(resendOTP.rejected, (state, action) => {
         state.error = action.payload as string;
       })
-      
+
       // Track Guest Complaint
       .addCase(trackGuestComplaint.pending, (state) => {
         state.error = null;
@@ -291,7 +320,7 @@ const guestSlice = createSlice({
       .addCase(trackGuestComplaint.rejected, (state, action) => {
         state.error = action.payload as string;
       })
-      
+
       // Get Public Stats
       .addCase(getPublicStats.pending, (state) => {
         state.error = null;
@@ -318,12 +347,21 @@ export default guestSlice.reducer;
 
 // Selectors
 export const selectGuestState = (state: { guest: GuestState }) => state.guest;
-export const selectIsSubmitting = (state: { guest: GuestState }) => state.guest.isSubmitting;
-export const selectIsVerifying = (state: { guest: GuestState }) => state.guest.isVerifying;
-export const selectOTPSent = (state: { guest: GuestState }) => state.guest.otpSent;
-export const selectSubmissionStep = (state: { guest: GuestState }) => state.guest.submissionStep;
-export const selectGuestError = (state: { guest: GuestState }) => state.guest.error;
-export const selectComplaintId = (state: { guest: GuestState }) => state.guest.complaintId;
-export const selectUserEmail = (state: { guest: GuestState }) => state.guest.userEmail;
-export const selectNewUserRegistered = (state: { guest: GuestState }) => state.guest.newUserRegistered;
-export const selectTrackingData = (state: { guest: GuestState }) => state.guest.trackingData;
+export const selectIsSubmitting = (state: { guest: GuestState }) =>
+  state.guest.isSubmitting;
+export const selectIsVerifying = (state: { guest: GuestState }) =>
+  state.guest.isVerifying;
+export const selectOTPSent = (state: { guest: GuestState }) =>
+  state.guest.otpSent;
+export const selectSubmissionStep = (state: { guest: GuestState }) =>
+  state.guest.submissionStep;
+export const selectGuestError = (state: { guest: GuestState }) =>
+  state.guest.error;
+export const selectComplaintId = (state: { guest: GuestState }) =>
+  state.guest.complaintId;
+export const selectUserEmail = (state: { guest: GuestState }) =>
+  state.guest.userEmail;
+export const selectNewUserRegistered = (state: { guest: GuestState }) =>
+  state.guest.newUserRegistered;
+export const selectTrackingData = (state: { guest: GuestState }) =>
+  state.guest.trackingData;

@@ -16,23 +16,35 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Textarea } from "../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
-import { 
-  FileText, 
-  Mail, 
-  CheckCircle, 
-  Clock, 
-  User, 
-  MapPin, 
-  ArrowLeft, 
+import {
+  FileText,
+  Mail,
+  CheckCircle,
+  Clock,
+  User,
+  MapPin,
+  ArrowLeft,
   ArrowRight,
   Loader2,
   UserPlus,
-  Shield
+  Shield,
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
@@ -70,13 +82,9 @@ const GuestComplaintForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { 
-    isSubmitting, 
-    isVerifying, 
-    error, 
-    otpExpiry 
-  } = useAppSelector(selectGuestState);
-  
+  const { isSubmitting, isVerifying, error, otpExpiry } =
+    useAppSelector(selectGuestState);
+
   const submissionStep = useAppSelector(selectSubmissionStep);
   const complaintId = useAppSelector(selectComplaintId);
   const userEmail = useAppSelector(selectUserEmail);
@@ -97,7 +105,10 @@ const GuestComplaintForm: React.FC = () => {
   });
 
   const [otpTimer, setOtpTimer] = useState(0);
-  const [currentLocation, setCurrentLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   // Clear error and guest data when component mounts
   useEffect(() => {
@@ -133,29 +144,31 @@ const GuestComplaintForm: React.FC = () => {
         },
         (error) => {
           console.log("Location access denied or unavailable");
-        }
+        },
       );
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     if (error) {
       dispatch(clearError());
     }
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     if (error) {
       dispatch(clearError());
     }
@@ -175,17 +188,20 @@ const GuestComplaintForm: React.FC = () => {
       area: formData.area,
       landmark: formData.landmark,
       address: formData.address,
-      coordinates: currentLocation ? {
-        latitude: currentLocation.lat,
-        longitude: currentLocation.lng,
-      } : undefined,
+      coordinates: currentLocation
+        ? {
+            latitude: currentLocation.lat,
+            longitude: currentLocation.lng,
+          }
+        : undefined,
     };
 
     try {
       await dispatch(submitGuestComplaint(complaintData)).unwrap();
       toast({
         title: "Complaint Submitted",
-        description: "Please check your email for the OTP to complete verification.",
+        description:
+          "Please check your email for the OTP to complete verification.",
       });
     } catch (error: any) {
       // Error is handled by the reducer
@@ -200,11 +216,13 @@ const GuestComplaintForm: React.FC = () => {
     }
 
     try {
-      await dispatch(verifyOTPAndRegister({
-        email: userEmail,
-        otpCode: formData.otpCode,
-        complaintId,
-      })).unwrap();
+      await dispatch(
+        verifyOTPAndRegister({
+          email: userEmail,
+          otpCode: formData.otpCode,
+          complaintId,
+        }),
+      ).unwrap();
 
       // Success message will be shown in the success step
     } catch (error: any) {
@@ -218,10 +236,12 @@ const GuestComplaintForm: React.FC = () => {
     }
 
     try {
-      await dispatch(resendOTP({
-        email: userEmail,
-        complaintId,
-      })).unwrap();
+      await dispatch(
+        resendOTP({
+          email: userEmail,
+          complaintId,
+        }),
+      ).unwrap();
 
       toast({
         title: "OTP Resent",
@@ -252,7 +272,7 @@ const GuestComplaintForm: React.FC = () => {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const goToDashboard = () => {
@@ -264,13 +284,17 @@ const GuestComplaintForm: React.FC = () => {
   };
 
   // Render different steps
-  if (submissionStep === 'otp') {
+  if (submissionStep === "otp") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900">Verify Your Email</h1>
-            <p className="text-gray-600">Complete your complaint registration</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Verify Your Email
+            </h1>
+            <p className="text-gray-600">
+              Complete your complaint registration
+            </p>
           </div>
 
           <Card>
@@ -280,7 +304,8 @@ const GuestComplaintForm: React.FC = () => {
               </div>
               <CardTitle>OTP Sent</CardTitle>
               <CardDescription>
-                We've sent a 6-digit code to<br />
+                We've sent a 6-digit code to
+                <br />
                 <strong>{userEmail}</strong>
               </CardDescription>
             </CardHeader>
@@ -309,9 +334,9 @@ const GuestComplaintForm: React.FC = () => {
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
+                <Button
+                  type="submit"
+                  className="w-full"
                   disabled={isVerifying || formData.otpCode.length !== 6}
                 >
                   {isVerifying ? (
@@ -341,7 +366,7 @@ const GuestComplaintForm: React.FC = () => {
                     Resend OTP
                   </Button>
                 )}
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -358,7 +383,8 @@ const GuestComplaintForm: React.FC = () => {
                   <strong>Complaint ID:</strong> {complaintId}
                 </p>
                 <p className="text-sm text-blue-700 mt-1">
-                  After verification, you'll be automatically registered as a citizen and can track your complaint.
+                  After verification, you'll be automatically registered as a
+                  citizen and can track your complaint.
                 </p>
               </div>
             </CardContent>
@@ -368,7 +394,7 @@ const GuestComplaintForm: React.FC = () => {
     );
   }
 
-  if (submissionStep === 'success') {
+  if (submissionStep === "success") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 px-4">
         <div className="w-full max-w-md space-y-6">
@@ -382,16 +408,17 @@ const GuestComplaintForm: React.FC = () => {
                     <CheckCircle className="h-8 w-8 text-green-600" />
                   )}
                 </div>
-                
+
                 <div>
                   <h2 className="text-2xl font-bold text-green-800">
-                    {newUserRegistered ? "Welcome to Cochin Smart City!" : "Verification Successful!"}
+                    {newUserRegistered
+                      ? "Welcome to Cochin Smart City!"
+                      : "Verification Successful!"}
                   </h2>
                   <p className="text-green-700 mt-2">
-                    {newUserRegistered ? 
-                      "Your complaint has been verified and you've been registered as a citizen." :
-                      "Your complaint has been verified and you're now logged in."
-                    }
+                    {newUserRegistered
+                      ? "Your complaint has been verified and you've been registered as a citizen."
+                      : "Your complaint has been verified and you're now logged in."}
                   </p>
                 </div>
 
@@ -400,7 +427,8 @@ const GuestComplaintForm: React.FC = () => {
                     <strong>Complaint ID:</strong> {complaintId}
                   </p>
                   <p className="text-sm text-gray-700 mt-1">
-                    You can now track your complaint progress from your dashboard.
+                    You can now track your complaint progress from your
+                    dashboard.
                   </p>
                 </div>
 
@@ -408,8 +436,9 @@ const GuestComplaintForm: React.FC = () => {
                   <Alert className="border-amber-200 bg-amber-50">
                     <Shield className="h-4 w-4" />
                     <AlertDescription className="text-amber-700">
-                      <strong>Security Tip:</strong> Set a password in your profile settings for easier future logins, 
-                      or continue using OTP login.
+                      <strong>Security Tip:</strong> Set a password in your
+                      profile settings for easier future logins, or continue
+                      using OTP login.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -418,10 +447,10 @@ const GuestComplaintForm: React.FC = () => {
                   <Button onClick={goToDashboard} className="w-full">
                     Go to Dashboard
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    onClick={handleStartOver} 
+
+                  <Button
+                    variant="outline"
+                    onClick={handleStartOver}
                     className="w-full"
                   >
                     Submit Another Complaint
@@ -441,7 +470,9 @@ const GuestComplaintForm: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Submit a Complaint</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Submit a Complaint
+          </h1>
           <p className="text-gray-600">
             Report civic issues and get them resolved quickly
           </p>
@@ -454,7 +485,8 @@ const GuestComplaintForm: React.FC = () => {
               Complaint Details
             </CardTitle>
             <CardDescription>
-              Your complaint will be registered immediately and you'll receive an OTP for verification.
+              Your complaint will be registered immediately and you'll receive
+              an OTP for verification.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -473,7 +505,7 @@ const GuestComplaintForm: React.FC = () => {
                   <User className="h-5 w-5" />
                   Personal Information
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name *</Label>
@@ -486,7 +518,7 @@ const GuestComplaintForm: React.FC = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address *</Label>
                     <Input
@@ -518,13 +550,15 @@ const GuestComplaintForm: React.FC = () => {
               {/* Complaint Details */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Complaint Information</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Complaint Type *</Label>
-                    <Select 
-                      value={formData.type} 
-                      onValueChange={(value) => handleSelectChange('type', value)}
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value) =>
+                        handleSelectChange("type", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select complaint type" />
@@ -541,18 +575,25 @@ const GuestComplaintForm: React.FC = () => {
 
                   <div className="space-y-2">
                     <Label>Priority</Label>
-                    <Select 
-                      value={formData.priority} 
-                      onValueChange={(value) => handleSelectChange('priority', value)}
+                    <Select
+                      value={formData.priority}
+                      onValueChange={(value) =>
+                        handleSelectChange("priority", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {PRIORITIES.map((priority) => (
-                          <SelectItem key={priority.value} value={priority.value}>
+                          <SelectItem
+                            key={priority.value}
+                            value={priority.value}
+                          >
                             <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${priority.color}`} />
+                              <div
+                                className={`w-2 h-2 rounded-full ${priority.color}`}
+                              />
                               {priority.label}
                             </div>
                           </SelectItem>
@@ -582,13 +623,15 @@ const GuestComplaintForm: React.FC = () => {
                   <MapPin className="h-5 w-5" />
                   Location Information
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Ward *</Label>
-                    <Select 
-                      value={formData.wardId} 
-                      onValueChange={(value) => handleSelectChange('wardId', value)}
+                    <Select
+                      value={formData.wardId}
+                      onValueChange={(value) =>
+                        handleSelectChange("wardId", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select ward" />
@@ -643,7 +686,8 @@ const GuestComplaintForm: React.FC = () => {
                 {currentLocation && (
                   <div className="p-3 bg-green-50 rounded-lg">
                     <p className="text-sm text-green-700">
-                      📍 Location detected and will be included with your complaint
+                      📍 Location detected and will be included with your
+                      complaint
                     </p>
                   </div>
                 )}
@@ -659,8 +703,8 @@ const GuestComplaintForm: React.FC = () => {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isSubmitting}
                   className="flex-1"
                 >
@@ -681,11 +725,15 @@ const GuestComplaintForm: React.FC = () => {
 
             {/* Additional Info */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-2">What happens next?</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">
+                What happens next?
+              </h4>
               <ol className="text-sm text-gray-600 space-y-1">
                 <li>1. Your complaint will be registered immediately</li>
                 <li>2. You'll receive an OTP via email for verification</li>
-                <li>3. After verification, you'll be registered as a citizen</li>
+                <li>
+                  3. After verification, you'll be registered as a citizen
+                </li>
                 <li>4. You can then track your complaint progress</li>
               </ol>
             </div>
@@ -693,7 +741,7 @@ const GuestComplaintForm: React.FC = () => {
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
-                <button 
+                <button
                   onClick={goToLogin}
                   className="text-blue-600 hover:underline"
                 >

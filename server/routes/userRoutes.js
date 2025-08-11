@@ -47,12 +47,8 @@ router
   .delete(deleteUser);
 
 // Ward management (admin only)
-router
-  .route("/wards")
-  .post(createWard);
+router.route("/wards").post(createWard);
 
-router
-  .route("/wards/:id")
-  .put(updateWard);
+router.route("/wards/:id").put(updateWard);
 
 export default router;

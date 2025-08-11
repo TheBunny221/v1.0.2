@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Badge } from '../components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '../components/ui/select';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Badge } from "../components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import {
   Table,
   TableBody,
@@ -17,113 +22,114 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table';
-import { 
-  Users, 
-  Search, 
-  Plus, 
-  Edit, 
+} from "../components/ui/table";
+import {
+  Users,
+  Search,
+  Plus,
+  Edit,
   Trash2,
   UserCheck,
   Shield,
-  Settings
-} from 'lucide-react';
+  Settings,
+} from "lucide-react";
 
 const AdminUsers: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
 
   const mockUsers = [
     {
-      id: '1',
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      phoneNumber: '+91 9876543210',
-      role: 'CITIZEN',
-      ward: 'Ward 1',
+      id: "1",
+      fullName: "John Doe",
+      email: "john.doe@example.com",
+      phoneNumber: "+91 9876543210",
+      role: "CITIZEN",
+      ward: "Ward 1",
       isActive: true,
-      lastLogin: '2024-01-10',
-      joinedOn: '2023-06-15'
+      lastLogin: "2024-01-10",
+      joinedOn: "2023-06-15",
     },
     {
-      id: '2',
-      fullName: 'Sarah Wilson',
-      email: 'sarah.wilson@ward2.gov.in',
-      phoneNumber: '+91 9876543211',
-      role: 'WARD_OFFICER',
-      ward: 'Ward 2',
+      id: "2",
+      fullName: "Sarah Wilson",
+      email: "sarah.wilson@ward2.gov.in",
+      phoneNumber: "+91 9876543211",
+      role: "WARD_OFFICER",
+      ward: "Ward 2",
       isActive: true,
-      lastLogin: '2024-01-09',
-      joinedOn: '2023-03-20'
+      lastLogin: "2024-01-09",
+      joinedOn: "2023-03-20",
     },
     {
-      id: '3',
-      fullName: 'Mike Johnson',
-      email: 'mike.johnson@maintenance.gov.in',
-      phoneNumber: '+91 9876543212',
-      role: 'MAINTENANCE_TEAM',
-      ward: 'Ward 1',
+      id: "3",
+      fullName: "Mike Johnson",
+      email: "mike.johnson@maintenance.gov.in",
+      phoneNumber: "+91 9876543212",
+      role: "MAINTENANCE_TEAM",
+      ward: "Ward 1",
       isActive: true,
-      lastLogin: '2024-01-08',
-      joinedOn: '2023-01-10'
+      lastLogin: "2024-01-08",
+      joinedOn: "2023-01-10",
     },
     {
-      id: '4',
-      fullName: 'Admin User',
-      email: 'admin@cochinsmart.gov.in',
-      phoneNumber: '+91 9876543213',
-      role: 'ADMINISTRATOR',
-      ward: 'All Wards',
+      id: "4",
+      fullName: "Admin User",
+      email: "admin@cochinsmart.gov.in",
+      phoneNumber: "+91 9876543213",
+      role: "ADMINISTRATOR",
+      ward: "All Wards",
       isActive: true,
-      lastLogin: '2024-01-11',
-      joinedOn: '2022-12-01'
-    }
+      lastLogin: "2024-01-11",
+      joinedOn: "2022-12-01",
+    },
   ];
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'ADMINISTRATOR':
-        return 'bg-red-100 text-red-800';
-      case 'WARD_OFFICER':
-        return 'bg-blue-100 text-blue-800';
-      case 'MAINTENANCE_TEAM':
-        return 'bg-green-100 text-green-800';
-      case 'CITIZEN':
-        return 'bg-gray-100 text-gray-800';
+      case "ADMINISTRATOR":
+        return "bg-red-100 text-red-800";
+      case "WARD_OFFICER":
+        return "bg-blue-100 text-blue-800";
+      case "MAINTENANCE_TEAM":
+        return "bg-green-100 text-green-800";
+      case "CITIZEN":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'ADMINISTRATOR':
+      case "ADMINISTRATOR":
         return <Shield className="h-4 w-4" />;
-      case 'WARD_OFFICER':
+      case "WARD_OFFICER":
         return <UserCheck className="h-4 w-4" />;
-      case 'MAINTENANCE_TEAM':
+      case "MAINTENANCE_TEAM":
         return <Settings className="h-4 w-4" />;
-      case 'CITIZEN':
+      case "CITIZEN":
         return <Users className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
     }
   };
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+  const filteredUsers = mockUsers.filter((user) => {
+    const matchesSearch =
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === "all" || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
   const userStats = {
     total: mockUsers.length,
-    citizens: mockUsers.filter(u => u.role === 'CITIZEN').length,
-    wardOfficers: mockUsers.filter(u => u.role === 'WARD_OFFICER').length,
-    maintenance: mockUsers.filter(u => u.role === 'MAINTENANCE_TEAM').length,
-    admins: mockUsers.filter(u => u.role === 'ADMINISTRATOR').length,
-    active: mockUsers.filter(u => u.isActive).length
+    citizens: mockUsers.filter((u) => u.role === "CITIZEN").length,
+    wardOfficers: mockUsers.filter((u) => u.role === "WARD_OFFICER").length,
+    maintenance: mockUsers.filter((u) => u.role === "MAINTENANCE_TEAM").length,
+    admins: mockUsers.filter((u) => u.role === "ADMINISTRATOR").length,
+    active: mockUsers.filter((u) => u.isActive).length,
   };
 
   return (
@@ -168,7 +174,9 @@ const AdminUsers: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Ward Officers</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Ward Officers
+                </p>
                 <p className="text-2xl font-bold">{userStats.wardOfficers}</p>
               </div>
               <UserCheck className="h-8 w-8 text-blue-600" />
@@ -191,7 +199,9 @@ const AdminUsers: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-green-600">{userStats.active}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {userStats.active}
+                </p>
               </div>
               <UserCheck className="h-8 w-8 text-green-600" />
             </div>
@@ -220,13 +230,13 @@ const AdminUsers: React.FC = () => {
                 <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="CITIZEN">Citizens</SelectItem>
                 <SelectItem value="WARD_OFFICER">Ward Officers</SelectItem>
-                <SelectItem value="MAINTENANCE_TEAM">Maintenance Team</SelectItem>
+                <SelectItem value="MAINTENANCE_TEAM">
+                  Maintenance Team
+                </SelectItem>
                 <SelectItem value="ADMINISTRATOR">Administrators</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
-              Reset Filters
-            </Button>
+            <Button variant="outline">Reset Filters</Button>
           </div>
         </CardContent>
       </Card>
@@ -258,27 +268,39 @@ const AdminUsers: React.FC = () => {
                     <div>
                       <p className="font-medium">{user.fullName}</p>
                       <p className="text-sm text-gray-500">{user.email}</p>
-                      <p className="text-sm text-gray-500">{user.phoneNumber}</p>
+                      <p className="text-sm text-gray-500">
+                        {user.phoneNumber}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge className={getRoleColor(user.role)}>
                       <span className="flex items-center">
                         {getRoleIcon(user.role)}
-                        <span className="ml-1">{user.role.replace('_', ' ')}</span>
+                        <span className="ml-1">
+                          {user.role.replace("_", " ")}
+                        </span>
                       </span>
                     </Badge>
                   </TableCell>
                   <TableCell>{user.ward}</TableCell>
                   <TableCell>
-                    <Badge className={user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                      {user.isActive ? 'Active' : 'Inactive'}
+                    <Badge
+                      className={
+                        user.isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }
+                    >
+                      {user.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div>
                       <p className="text-sm">{user.lastLogin}</p>
-                      <p className="text-xs text-gray-500">Joined: {user.joinedOn}</p>
+                      <p className="text-xs text-gray-500">
+                        Joined: {user.joinedOn}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>

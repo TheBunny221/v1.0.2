@@ -10,14 +10,14 @@ const prisma = getPrisma();
 // Helper function to generate JWT token
 const generateJWTToken = (user) => {
   return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
+    {
+      id: user.id,
+      email: user.email,
       role: user.role,
-      wardId: user.wardId 
+      wardId: user.wardId,
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || "7d" }
+    { expiresIn: process.env.JWT_EXPIRE || "7d" },
   );
 };
 
@@ -36,11 +36,12 @@ const comparePassword = async (enteredPassword, hashedPassword) => {
 // @route   POST /api/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res) => {
-  const { fullName, email, phoneNumber, password, role, wardId, department } = req.body;
+  const { fullName, email, phoneNumber, password, role, wardId, department } =
+    req.body;
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (existingUser) {
@@ -77,8 +78,8 @@ export const register = asyncHandler(async (req, res) => {
   const user = await prisma.user.create({
     data: userData,
     include: {
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   // Generate JWT token
@@ -107,8 +108,8 @@ export const login = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { email },
     include: {
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   if (!user) {
@@ -151,7 +152,7 @@ export const login = asyncHandler(async (req, res) => {
   // Update last login
   await prisma.user.update({
     where: { id: user.id },
-    data: { lastLogin: new Date() }
+    data: { lastLogin: new Date() },
   });
 
   // Generate JWT token
@@ -179,7 +180,7 @@ export const loginWithOTP = asyncHandler(async (req, res) => {
   // Find user
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { ward: true }
+    include: { ward: true },
   });
 
   if (!user) {
@@ -210,7 +211,7 @@ export const loginWithOTP = asyncHandler(async (req, res) => {
       otpCode,
       purpose: "LOGIN",
       expiresAt,
-    }
+    },
   });
 
   // Send OTP email
@@ -252,13 +253,13 @@ export const verifyOTPLogin = asyncHandler(async (req, res) => {
       otpCode,
       purpose: "LOGIN",
       isVerified: false,
-      expiresAt: { gt: new Date() }
+      expiresAt: { gt: new Date() },
     },
     include: {
       user: {
-        include: { ward: true }
-      }
-    }
+        include: { ward: true },
+      },
+    },
   });
 
   if (!otpSession) {
@@ -274,14 +275,14 @@ export const verifyOTPLogin = asyncHandler(async (req, res) => {
     where: { id: otpSession.id },
     data: {
       isVerified: true,
-      verifiedAt: new Date()
-    }
+      verifiedAt: new Date(),
+    },
   });
 
   // Update user last login
   await prisma.user.update({
     where: { id: otpSession.user.id },
-    data: { lastLogin: new Date() }
+    data: { lastLogin: new Date() },
   });
 
   // Generate JWT token
@@ -307,7 +308,7 @@ export const sendPasswordSetup = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   const user = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (!user) {
@@ -332,9 +333,9 @@ export const sendPasswordSetup = asyncHandler(async (req, res) => {
       // Store as JSON in password field temporarily
       password: JSON.stringify({
         resetPasswordToken,
-        resetPasswordExpire: resetPasswordExpire.toISOString()
-      })
-    }
+        resetPasswordExpire: resetPasswordExpire.toISOString(),
+      }),
+    },
   });
 
   // Create reset URL
@@ -381,17 +382,19 @@ export const setPassword = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
     where: {
       password: {
-        contains: resetPasswordToken
-      }
-    }
+        contains: resetPasswordToken,
+      },
+    },
   });
 
-  const user = users.find(u => {
+  const user = users.find((u) => {
     try {
       if (!u.password) return false;
       const resetData = JSON.parse(u.password);
-      return resetData.resetPasswordToken === resetPasswordToken && 
-             new Date(resetData.resetPasswordExpire) > new Date();
+      return (
+        resetData.resetPasswordToken === resetPasswordToken &&
+        new Date(resetData.resetPasswordExpire) > new Date()
+      );
     } catch {
       return false;
     }
@@ -411,7 +414,7 @@ export const setPassword = asyncHandler(async (req, res) => {
   // Update user with new password
   await prisma.user.update({
     where: { id: user.id },
-    data: { password: hashedPassword }
+    data: { password: hashedPassword },
   });
 
   // Generate JWT token
@@ -434,7 +437,7 @@ export const getMe = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
     include: {
-      ward: true
+      ward: true,
     },
     select: {
       id: true,
@@ -449,8 +452,8 @@ export const getMe = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   res.status(200).json({
@@ -464,12 +467,7 @@ export const getMe = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/profile
 // @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
-  const allowedFields = [
-    "fullName",
-    "phoneNumber",
-    "language",
-    "avatar",
-  ];
+  const allowedFields = ["fullName", "phoneNumber", "language", "avatar"];
   const updates = {};
 
   // Only allow specific fields to be updated
@@ -496,8 +494,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   res.status(200).json({
@@ -515,7 +513,7 @@ export const changePassword = asyncHandler(async (req, res) => {
 
   // Get user with password
   const user = await prisma.user.findUnique({
-    where: { id: req.user.id }
+    where: { id: req.user.id },
   });
 
   if (!user.password) {
@@ -546,7 +544,7 @@ export const changePassword = asyncHandler(async (req, res) => {
   // Update password
   await prisma.user.update({
     where: { id: user.id },
-    data: { password: hashedPassword }
+    data: { password: hashedPassword },
   });
 
   res.status(200).json({

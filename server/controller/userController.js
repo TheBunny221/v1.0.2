@@ -16,14 +16,7 @@ const hashPassword = async (password) => {
 // @route   GET /api/users
 // @access  Private (Admin)
 export const getUsers = asyncHandler(async (req, res) => {
-  const {
-    page = 1,
-    limit = 10,
-    role,
-    wardId,
-    isActive,
-    search
-  } = req.query;
+  const { page = 1, limit = 10, role, wardId, isActive, search } = req.query;
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const filters = {};
@@ -53,9 +46,9 @@ export const getUsers = asyncHandler(async (req, res) => {
         _count: {
           select: {
             submittedComplaints: true,
-            assignedComplaints: true
-          }
-        }
+            assignedComplaints: true,
+          },
+        },
       },
       select: {
         id: true,
@@ -71,10 +64,10 @@ export const getUsers = asyncHandler(async (req, res) => {
         lastLogin: true,
         joinedOn: true,
         ward: true,
-        _count: true
-      }
+        _count: true,
+      },
     }),
-    prisma.user.count({ where: filters })
+    prisma.user.count({ where: filters }),
   ]);
 
   res.status(200).json({
@@ -87,8 +80,8 @@ export const getUsers = asyncHandler(async (req, res) => {
         totalPages: Math.ceil(total / parseInt(limit)),
         totalItems: total,
         hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
-        hasPrev: parseInt(page) > 1
-      }
+        hasPrev: parseInt(page) > 1,
+      },
     },
   });
 });
@@ -109,8 +102,8 @@ export const getUser = asyncHandler(async (req, res) => {
           title: true,
           status: true,
           type: true,
-          submittedOn: true
-        }
+          submittedOn: true,
+        },
       },
       assignedComplaints: {
         orderBy: { assignedOn: "desc" },
@@ -120,16 +113,16 @@ export const getUser = asyncHandler(async (req, res) => {
           title: true,
           status: true,
           type: true,
-          assignedOn: true
-        }
+          assignedOn: true,
+        },
       },
       _count: {
         select: {
           submittedComplaints: true,
           assignedComplaints: true,
-          notifications: true
-        }
-      }
+          notifications: true,
+        },
+      },
     },
     select: {
       id: true,
@@ -147,8 +140,8 @@ export const getUser = asyncHandler(async (req, res) => {
       ward: true,
       submittedComplaints: true,
       assignedComplaints: true,
-      _count: true
-    }
+      _count: true,
+    },
   });
 
   if (!user) {
@@ -170,19 +163,12 @@ export const getUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Private (Admin)
 export const createUser = asyncHandler(async (req, res) => {
-  const {
-    fullName,
-    email,
-    phoneNumber,
-    role,
-    wardId,
-    department,
-    password
-  } = req.body;
+  const { fullName, email, phoneNumber, role, wardId, department, password } =
+    req.body;
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (existingUser) {
@@ -243,8 +229,8 @@ export const createUser = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   // Send verification email for ward officers and maintenance team
@@ -263,9 +249,9 @@ export const createUser = asyncHandler(async (req, res) => {
         password: JSON.stringify({
           resetPasswordToken,
           resetPasswordExpire: resetPasswordExpire.toISOString(),
-          isVerificationToken: true
-        })
-      }
+          isVerificationToken: true,
+        }),
+      },
     });
 
     const resetUrl = `${process.env.CLIENT_URL}/verify-account/${resetToken}`;
@@ -277,7 +263,7 @@ export const createUser = asyncHandler(async (req, res) => {
       html: `
         <h2>Account Created - Verification Required</h2>
         <p>Hello ${user.fullName},</p>
-        <p>Your account has been created for Cochin Smart City E-Governance Portal as a ${role.replace('_', ' ').toLowerCase()}.</p>
+        <p>Your account has been created for Cochin Smart City E-Governance Portal as a ${role.replace("_", " ").toLowerCase()}.</p>
         <p>Please click the link below to verify your account and set your password:</p>
         <a href="${resetUrl}" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Account</a>
         <p>This link will expire in 24 hours.</p>
@@ -298,9 +284,9 @@ export const createUser = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: sendVerificationEmail ? 
-      "User created successfully. Verification email sent." :
-      "User created successfully",
+    message: sendVerificationEmail
+      ? "User created successfully. Verification email sent."
+      : "User created successfully",
     data: { user },
   });
 });
@@ -317,7 +303,7 @@ export const updateUser = asyncHandler(async (req, res) => {
     "wardId",
     "department",
     "isActive",
-    "language"
+    "language",
   ];
 
   const updates = {};
@@ -344,8 +330,8 @@ export const updateUser = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   res.status(200).json({
@@ -363,7 +349,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
   // Check if user exists
   const user = await prisma.user.findUnique({
-    where: { id: userId }
+    where: { id: userId },
   });
 
   if (!user) {
@@ -377,7 +363,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
   // Don't allow deleting the last admin
   if (user.role === "ADMINISTRATOR") {
     const adminCount = await prisma.user.count({
-      where: { role: "ADMINISTRATOR", isActive: true }
+      where: { role: "ADMINISTRATOR", isActive: true },
     });
 
     if (adminCount <= 1) {
@@ -392,7 +378,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
   // Soft delete (deactivate) instead of hard delete to preserve data integrity
   await prisma.user.update({
     where: { id: userId },
-    data: { isActive: false }
+    data: { isActive: false },
   });
 
   res.status(200).json({
@@ -406,26 +392,22 @@ export const deleteUser = asyncHandler(async (req, res) => {
 // @route   GET /api/users/stats
 // @access  Private (Admin)
 export const getUserStats = asyncHandler(async (req, res) => {
-  const [
-    totalUsers,
-    activeUsers,
-    roleDistribution,
-    recentRegistrations
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { isActive: true } }),
-    prisma.user.groupBy({
-      by: ["role"],
-      _count: { role: true }
-    }),
-    prisma.user.count({
-      where: {
-        joinedOn: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
-        }
-      }
-    })
-  ]);
+  const [totalUsers, activeUsers, roleDistribution, recentRegistrations] =
+    await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.user.groupBy({
+        by: ["role"],
+        _count: { role: true },
+      }),
+      prisma.user.count({
+        where: {
+          joinedOn: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+          },
+        },
+      }),
+    ]);
 
   const stats = {
     total: totalUsers,
@@ -435,7 +417,7 @@ export const getUserStats = asyncHandler(async (req, res) => {
     byRole: roleDistribution.reduce((acc, item) => {
       acc[item.role] = item._count.role;
       return acc;
-    }, {})
+    }, {}),
   };
 
   res.status(200).json({
@@ -462,18 +444,20 @@ export const verifyAccount = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
     where: {
       password: {
-        contains: resetPasswordToken
-      }
-    }
+        contains: resetPasswordToken,
+      },
+    },
   });
 
-  const user = users.find(u => {
+  const user = users.find((u) => {
     try {
       if (!u.password) return false;
       const resetData = JSON.parse(u.password);
-      return resetData.resetPasswordToken === resetPasswordToken && 
-             new Date(resetData.resetPasswordExpire) > new Date() &&
-             resetData.isVerificationToken === true;
+      return (
+        resetData.resetPasswordToken === resetPasswordToken &&
+        new Date(resetData.resetPasswordExpire) > new Date() &&
+        resetData.isVerificationToken === true
+      );
     } catch {
       return false;
     }
@@ -493,9 +477,9 @@ export const verifyAccount = asyncHandler(async (req, res) => {
   // Update user with new password and activate account
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
-    data: { 
+    data: {
       password: hashedPassword,
-      isActive: true
+      isActive: true,
     },
     include: { ward: true },
     select: {
@@ -511,8 +495,8 @@ export const verifyAccount = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   res.status(200).json({
@@ -532,8 +516,8 @@ export const getWards = asyncHandler(async (req, res) => {
     select: {
       id: true,
       name: true,
-      description: true
-    }
+      description: true,
+    },
   });
 
   res.status(200).json({
@@ -550,7 +534,7 @@ export const createWard = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
 
   const existingWard = await prisma.ward.findUnique({
-    where: { name }
+    where: { name },
   });
 
   if (existingWard) {
@@ -565,8 +549,8 @@ export const createWard = asyncHandler(async (req, res) => {
     data: {
       name,
       description,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
   res.status(201).json({
@@ -588,8 +572,8 @@ export const updateWard = asyncHandler(async (req, res) => {
     data: {
       name,
       description,
-      isActive
-    }
+      isActive,
+    },
   });
 
   res.status(200).json({

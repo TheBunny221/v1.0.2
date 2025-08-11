@@ -46,8 +46,8 @@ export const protect = asyncHandler(async (req, res, next) => {
         isActive: true,
         lastLogin: true,
         joinedOn: true,
-        ward: true
-      }
+        ward: true,
+      },
     });
 
     if (!user) {
@@ -121,8 +121,8 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
           isActive: true,
           lastLogin: true,
           joinedOn: true,
-          ward: true
-        }
+          ward: true,
+        },
       });
 
       if (user && user.isActive) {

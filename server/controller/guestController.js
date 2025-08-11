@@ -9,14 +9,14 @@ const prisma = getPrisma();
 // Helper function to generate JWT token
 const generateJWTToken = (user) => {
   return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
+    {
+      id: user.id,
+      email: user.email,
       role: user.role,
-      wardId: user.wardId 
+      wardId: user.wardId,
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || "7d" }
+    { expiresIn: process.env.JWT_EXPIRE || "7d" },
   );
 };
 
@@ -24,7 +24,9 @@ const generateJWTToken = (user) => {
 const generateComplaintId = () => {
   const prefix = "CSC";
   const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+  const random = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, "0");
   return `${prefix}${timestamp}${random}`;
 };
 
@@ -43,12 +45,12 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     area,
     landmark,
     address,
-    coordinates
+    coordinates,
   } = req.body;
 
   // Check if user already exists
   let existingUser = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   // Set deadline based on priority
@@ -56,10 +58,12 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     LOW: 72,
     MEDIUM: 48,
     HIGH: 24,
-    CRITICAL: 8
+    CRITICAL: 8,
   };
 
-  const deadline = new Date(Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000);
+  const deadline = new Date(
+    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
+  );
 
   // Create complaint immediately with status "REGISTERED"
   const complaint = await prisma.complaint.create({
@@ -83,8 +87,8 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       // Don't assign submittedById yet - will be set after OTP verification
     },
     include: {
-      ward: true
-    }
+      ward: true,
+    },
   });
 
   // Generate OTP
@@ -99,7 +103,7 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       otpCode,
       purpose: "GUEST_VERIFICATION",
       expiresAt,
-    }
+    },
   });
 
   // Send OTP email
@@ -121,7 +125,7 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     // If email fails, delete the complaint and OTP session
     await prisma.complaint.delete({ where: { id: complaint.id } });
     await prisma.oTPSession.delete({ where: { id: otpSession.id } });
-    
+
     return res.status(500).json({
       success: false,
       message: "Failed to send verification email. Please try again.",
@@ -131,12 +135,13 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: "Complaint registered successfully. Please check your email for OTP verification.",
+    message:
+      "Complaint registered successfully. Please check your email for OTP verification.",
     data: {
       complaintId: complaint.id,
       email,
       expiresAt,
-      sessionId: otpSession.id
+      sessionId: otpSession.id,
     },
   });
 });
@@ -154,8 +159,8 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
       otpCode,
       purpose: "GUEST_VERIFICATION",
       isVerified: false,
-      expiresAt: { gt: new Date() }
-    }
+      expiresAt: { gt: new Date() },
+    },
   });
 
   if (!otpSession) {
@@ -169,7 +174,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
   // Find the complaint
   const complaint = await prisma.complaint.findUnique({
     where: { id: complaintId },
-    include: { ward: true }
+    include: { ward: true },
   });
 
   if (!complaint) {
@@ -185,7 +190,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (existingUser) {
@@ -202,7 +207,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
         joinedOn: new Date(),
         // No password set initially - user can set it later
       },
-      include: { ward: true }
+      include: { ward: true },
     });
     isNewUser = true;
   }
@@ -220,10 +225,10 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
           id: true,
           fullName: true,
           email: true,
-          phoneNumber: true
-        }
-      }
-    }
+          phoneNumber: true,
+        },
+      },
+    },
   });
 
   // Mark OTP as verified
@@ -232,8 +237,8 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     data: {
       isVerified: true,
       verifiedAt: new Date(),
-      userId: user.id
-    }
+      userId: user.id,
+    },
   });
 
   // Create status log
@@ -243,7 +248,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
       userId: user.id,
       toStatus: "REGISTERED",
       comment: "Complaint verified and registered",
-    }
+    },
   });
 
   // Generate JWT token for auto-login
@@ -271,8 +276,8 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     where: {
       role: "WARD_OFFICER",
       wardId: complaint.wardId,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
   for (const officer of wardOfficers) {
@@ -283,7 +288,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
         type: "IN_APP",
         title: "New Verified Complaint",
         message: `A new ${complaint.type} complaint has been verified and registered in your ward.`,
-      }
+      },
     });
   }
 
@@ -292,14 +297,14 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: isNewUser ? 
-      "OTP verified! You have been registered as a citizen and are now logged in." :
-      "OTP verified! You are now logged in.",
+    message: isNewUser
+      ? "OTP verified! You have been registered as a citizen and are now logged in."
+      : "OTP verified! You are now logged in.",
     data: {
       user: userResponse,
       token,
       complaint: updatedComplaint,
-      isNewUser
+      isNewUser,
     },
   });
 });
@@ -312,7 +317,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
 
   // Find the complaint
   const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId }
+    where: { id: complaintId },
   });
 
   if (!complaint || complaint.contactEmail !== email) {
@@ -328,8 +333,8 @@ export const resendOTP = asyncHandler(async (req, res) => {
     where: {
       email,
       purpose: "GUEST_VERIFICATION",
-      isVerified: true
-    }
+      isVerified: true,
+    },
   });
 
   if (existingVerified) {
@@ -345,11 +350,11 @@ export const resendOTP = asyncHandler(async (req, res) => {
     where: {
       email,
       purpose: "GUEST_VERIFICATION",
-      isVerified: false
+      isVerified: false,
     },
     data: {
-      expiresAt: new Date() // Expire immediately
-    }
+      expiresAt: new Date(), // Expire immediately
+    },
   });
 
   // Generate new OTP
@@ -364,7 +369,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
       otpCode,
       purpose: "GUEST_VERIFICATION",
       expiresAt,
-    }
+    },
   });
 
   // Send OTP email
@@ -394,7 +399,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
     data: {
       email,
       expiresAt,
-      sessionId: otpSession.id
+      sessionId: otpSession.id,
     },
   });
 });
@@ -417,12 +422,12 @@ export const trackComplaint = asyncHandler(async (req, res) => {
           user: {
             select: {
               fullName: true,
-              role: true
-            }
-          }
-        }
-      }
-    }
+              role: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!complaint) {
@@ -434,9 +439,8 @@ export const trackComplaint = asyncHandler(async (req, res) => {
   }
 
   // Verify email or phone number
-  const isAuthorized = 
-    complaint.contactEmail === email || 
-    complaint.contactPhone === phoneNumber;
+  const isAuthorized =
+    complaint.contactEmail === email || complaint.contactPhone === phoneNumber;
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -463,12 +467,12 @@ export const trackComplaint = asyncHandler(async (req, res) => {
     ward: complaint.ward,
     area: complaint.area,
     landmark: complaint.landmark,
-    statusLogs: complaint.statusLogs.map(log => ({
+    statusLogs: complaint.statusLogs.map((log) => ({
       status: log.toStatus,
       comment: log.comment,
       timestamp: log.timestamp,
-      updatedBy: log.user.fullName
-    }))
+      updatedBy: log.user.fullName,
+    })),
   };
 
   res.status(200).json({
@@ -482,28 +486,27 @@ export const trackComplaint = asyncHandler(async (req, res) => {
 // @route   GET /api/guest/stats
 // @access  Public
 export const getPublicStats = asyncHandler(async (req, res) => {
-  const [
-    totalComplaints,
-    resolvedComplaints,
-    statusCounts,
-    typeCounts
-  ] = await Promise.all([
-    prisma.complaint.count(),
-    prisma.complaint.count({ where: { status: "RESOLVED" } }),
-    prisma.complaint.groupBy({
-      by: ["status"],
-      _count: { status: true }
-    }),
-    prisma.complaint.groupBy({
-      by: ["type"],
-      _count: { type: true }
-    })
-  ]);
+  const [totalComplaints, resolvedComplaints, statusCounts, typeCounts] =
+    await Promise.all([
+      prisma.complaint.count(),
+      prisma.complaint.count({ where: { status: "RESOLVED" } }),
+      prisma.complaint.groupBy({
+        by: ["status"],
+        _count: { status: true },
+      }),
+      prisma.complaint.groupBy({
+        by: ["type"],
+        _count: { type: true },
+      }),
+    ]);
 
   const stats = {
     total: totalComplaints,
     resolved: resolvedComplaints,
-    resolutionRate: totalComplaints > 0 ? ((resolvedComplaints / totalComplaints) * 100).toFixed(1) : 0,
+    resolutionRate:
+      totalComplaints > 0
+        ? ((resolvedComplaints / totalComplaints) * 100).toFixed(1)
+        : 0,
     byStatus: statusCounts.reduce((acc, item) => {
       acc[item.status] = item._count.status;
       return acc;
@@ -511,7 +514,7 @@ export const getPublicStats = asyncHandler(async (req, res) => {
     byType: typeCounts.reduce((acc, item) => {
       acc[item.type] = item._count.type;
       return acc;
-    }, {})
+    }, {}),
   };
 
   res.status(200).json({

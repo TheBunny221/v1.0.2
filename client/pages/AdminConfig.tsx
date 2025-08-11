@@ -1,27 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { showSuccessToast, showErrorToast } from '../store/slices/uiSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import React, { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { Badge } from "../components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from "../components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../components/ui/dialog';
+} from "../components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -29,7 +39,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table';
+} from "../components/ui/table";
 import {
   Settings,
   MapPin,
@@ -46,7 +56,7 @@ import {
   Globe,
   Shield,
   AlertTriangle,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Ward {
   id: string;
@@ -68,7 +78,7 @@ interface ComplaintType {
   id: string;
   name: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   slaHours: number;
   isActive: boolean;
 }
@@ -77,7 +87,7 @@ interface SystemSetting {
   key: string;
   value: string;
   description: string;
-  type: 'string' | 'number' | 'boolean' | 'json';
+  type: "string" | "number" | "boolean" | "json";
 }
 
 const AdminConfig: React.FC = () => {
@@ -87,56 +97,158 @@ const AdminConfig: React.FC = () => {
   // State management
   const [wards, setWards] = useState<Ward[]>([
     {
-      id: '1',
-      name: 'Ward 1 - Central Zone',
-      description: 'Central business district area',
+      id: "1",
+      name: "Ward 1 - Central Zone",
+      description: "Central business district area",
       isActive: true,
       subZones: [
-        { id: '1-1', name: 'MG Road', wardId: '1', description: 'Main shopping area', isActive: true },
-        { id: '1-2', name: 'Broadway', wardId: '1', description: 'Commercial district', isActive: true },
-      ]
+        {
+          id: "1-1",
+          name: "MG Road",
+          wardId: "1",
+          description: "Main shopping area",
+          isActive: true,
+        },
+        {
+          id: "1-2",
+          name: "Broadway",
+          wardId: "1",
+          description: "Commercial district",
+          isActive: true,
+        },
+      ],
     },
     {
-      id: '2',
-      name: 'Ward 2 - North Zone',
-      description: 'Northern residential area',
+      id: "2",
+      name: "Ward 2 - North Zone",
+      description: "Northern residential area",
       isActive: true,
       subZones: [
-        { id: '2-1', name: 'Vytilla', wardId: '2', description: 'IT hub area', isActive: true },
-        { id: '2-2', name: 'Kadavanthra', wardId: '2', description: 'Residential area', isActive: true },
-      ]
+        {
+          id: "2-1",
+          name: "Vytilla",
+          wardId: "2",
+          description: "IT hub area",
+          isActive: true,
+        },
+        {
+          id: "2-2",
+          name: "Kadavanthra",
+          wardId: "2",
+          description: "Residential area",
+          isActive: true,
+        },
+      ],
     },
     {
-      id: '3',
-      name: 'Ward 3 - South Zone',
-      description: 'Southern coastal area',
+      id: "3",
+      name: "Ward 3 - South Zone",
+      description: "Southern coastal area",
       isActive: true,
       subZones: [
-        { id: '3-1', name: 'Marine Drive', wardId: '3', description: 'Waterfront area', isActive: true },
-        { id: '3-2', name: 'Fort Kochi', wardId: '3', description: 'Heritage area', isActive: true },
-      ]
+        {
+          id: "3-1",
+          name: "Marine Drive",
+          wardId: "3",
+          description: "Waterfront area",
+          isActive: true,
+        },
+        {
+          id: "3-2",
+          name: "Fort Kochi",
+          wardId: "3",
+          description: "Heritage area",
+          isActive: true,
+        },
+      ],
     },
   ]);
 
   const [complaintTypes, setComplaintTypes] = useState<ComplaintType[]>([
-    { id: '1', name: 'Water Supply', description: 'Water supply related issues', priority: 'HIGH', slaHours: 24, isActive: true },
-    { id: '2', name: 'Electricity', description: 'Electrical problems and outages', priority: 'CRITICAL', slaHours: 12, isActive: true },
-    { id: '3', name: 'Road Repair', description: 'Road maintenance and repairs', priority: 'MEDIUM', slaHours: 72, isActive: true },
-    { id: '4', name: 'Garbage Collection', description: 'Waste management issues', priority: 'MEDIUM', slaHours: 48, isActive: true },
-    { id: '5', name: 'Street Lighting', description: 'Street light maintenance', priority: 'LOW', slaHours: 48, isActive: true },
+    {
+      id: "1",
+      name: "Water Supply",
+      description: "Water supply related issues",
+      priority: "HIGH",
+      slaHours: 24,
+      isActive: true,
+    },
+    {
+      id: "2",
+      name: "Electricity",
+      description: "Electrical problems and outages",
+      priority: "CRITICAL",
+      slaHours: 12,
+      isActive: true,
+    },
+    {
+      id: "3",
+      name: "Road Repair",
+      description: "Road maintenance and repairs",
+      priority: "MEDIUM",
+      slaHours: 72,
+      isActive: true,
+    },
+    {
+      id: "4",
+      name: "Garbage Collection",
+      description: "Waste management issues",
+      priority: "MEDIUM",
+      slaHours: 48,
+      isActive: true,
+    },
+    {
+      id: "5",
+      name: "Street Lighting",
+      description: "Street light maintenance",
+      priority: "LOW",
+      slaHours: 48,
+      isActive: true,
+    },
   ]);
 
   const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([
-    { key: 'OTP_EXPIRY_MINUTES', value: '5', description: 'OTP expiration time in minutes', type: 'number' },
-    { key: 'MAX_FILE_SIZE_MB', value: '10', description: 'Maximum file upload size in MB', type: 'number' },
-    { key: 'DEFAULT_SLA_HOURS', value: '48', description: 'Default SLA time in hours', type: 'number' },
-    { key: 'ADMIN_EMAIL', value: 'admin@cochinsmart.gov.in', description: 'Administrator email address', type: 'string' },
-    { key: 'SYSTEM_MAINTENANCE', value: 'false', description: 'System maintenance mode', type: 'boolean' },
-    { key: 'NOTIFICATION_SETTINGS', value: '{"email":true,"sms":false}', description: 'Notification preferences', type: 'json' },
+    {
+      key: "OTP_EXPIRY_MINUTES",
+      value: "5",
+      description: "OTP expiration time in minutes",
+      type: "number",
+    },
+    {
+      key: "MAX_FILE_SIZE_MB",
+      value: "10",
+      description: "Maximum file upload size in MB",
+      type: "number",
+    },
+    {
+      key: "DEFAULT_SLA_HOURS",
+      value: "48",
+      description: "Default SLA time in hours",
+      type: "number",
+    },
+    {
+      key: "ADMIN_EMAIL",
+      value: "admin@cochinsmart.gov.in",
+      description: "Administrator email address",
+      type: "string",
+    },
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      description: "System maintenance mode",
+      type: "boolean",
+    },
+    {
+      key: "NOTIFICATION_SETTINGS",
+      value: '{"email":true,"sms":false}',
+      description: "Notification preferences",
+      type: "json",
+    },
   ]);
 
   const [editingWard, setEditingWard] = useState<Ward | null>(null);
-  const [editingComplaintType, setEditingComplaintType] = useState<ComplaintType | null>(null);
+  const [editingComplaintType, setEditingComplaintType] =
+    useState<ComplaintType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Ward Management Functions
@@ -144,42 +256,53 @@ const AdminConfig: React.FC = () => {
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (editingWard?.id) {
-        setWards(prev => prev.map(w => w.id === ward.id ? ward : w));
+        setWards((prev) => prev.map((w) => (w.id === ward.id ? ward : w)));
       } else {
-        setWards(prev => [...prev, { ...ward, id: Date.now().toString() }]);
+        setWards((prev) => [...prev, { ...ward, id: Date.now().toString() }]);
       }
-      
+
       setEditingWard(null);
-      dispatch(showSuccessToast('Ward Saved', `Ward "${ward.name}" has been saved successfully.`));
+      dispatch(
+        showSuccessToast(
+          "Ward Saved",
+          `Ward "${ward.name}" has been saved successfully.`,
+        ),
+      );
     } catch (error) {
-      dispatch(showErrorToast('Save Failed', 'Failed to save ward. Please try again.'));
+      dispatch(
+        showErrorToast("Save Failed", "Failed to save ward. Please try again."),
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeleteWard = async (wardId: string) => {
-    if (!confirm('Are you sure you want to delete this ward?')) return;
-    
+    if (!confirm("Are you sure you want to delete this ward?")) return;
+
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setWards(prev => prev.filter(w => w.id !== wardId));
-      
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Ward Deleted',
-        message: 'Ward has been deleted successfully.',
-      }));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setWards((prev) => prev.filter((w) => w.id !== wardId));
+
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "Ward Deleted",
+          message: "Ward has been deleted successfully.",
+        }),
+      );
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        title: 'Delete Failed',
-        message: 'Failed to delete ward. Please try again.',
-      }));
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Delete Failed",
+          message: "Failed to delete ward. Please try again.",
+        }),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -189,50 +312,64 @@ const AdminConfig: React.FC = () => {
   const handleSaveComplaintType = async (type: ComplaintType) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (editingComplaintType?.id) {
-        setComplaintTypes(prev => prev.map(t => t.id === type.id ? type : t));
+        setComplaintTypes((prev) =>
+          prev.map((t) => (t.id === type.id ? type : t)),
+        );
       } else {
-        setComplaintTypes(prev => [...prev, { ...type, id: Date.now().toString() }]);
+        setComplaintTypes((prev) => [
+          ...prev,
+          { ...type, id: Date.now().toString() },
+        ]);
       }
-      
+
       setEditingComplaintType(null);
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Complaint Type Saved',
-        message: `Complaint type "${type.name}" has been saved successfully.`,
-      }));
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "Complaint Type Saved",
+          message: `Complaint type "${type.name}" has been saved successfully.`,
+        }),
+      );
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        title: 'Save Failed',
-        message: 'Failed to save complaint type. Please try again.',
-      }));
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Save Failed",
+          message: "Failed to save complaint type. Please try again.",
+        }),
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeleteComplaintType = async (typeId: string) => {
-    if (!confirm('Are you sure you want to delete this complaint type?')) return;
-    
+    if (!confirm("Are you sure you want to delete this complaint type?"))
+      return;
+
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setComplaintTypes(prev => prev.filter(t => t.id !== typeId));
-      
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Complaint Type Deleted',
-        message: 'Complaint type has been deleted successfully.',
-      }));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setComplaintTypes((prev) => prev.filter((t) => t.id !== typeId));
+
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "Complaint Type Deleted",
+          message: "Complaint type has been deleted successfully.",
+        }),
+      );
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        title: 'Delete Failed',
-        message: 'Failed to delete complaint type. Please try again.',
-      }));
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Delete Failed",
+          message: "Failed to delete complaint type. Please try again.",
+        }),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -242,20 +379,26 @@ const AdminConfig: React.FC = () => {
   const handleUpdateSystemSetting = async (key: string, value: string) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setSystemSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
-      
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Setting Updated',
-        message: `System setting "${key}" has been updated.`,
-      }));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setSystemSettings((prev) =>
+        prev.map((s) => (s.key === key ? { ...s, value } : s)),
+      );
+
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "Setting Updated",
+          message: `System setting "${key}" has been updated.`,
+        }),
+      );
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        title: 'Update Failed',
-        message: 'Failed to update system setting. Please try again.',
-      }));
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Update Failed",
+          message: "Failed to update system setting. Please try again.",
+        }),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -263,16 +406,16 @@ const AdminConfig: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800';
-      case 'CRITICAL':
-        return 'bg-red-100 text-red-800';
+      case "LOW":
+        return "bg-green-100 text-green-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "HIGH":
+        return "bg-orange-100 text-orange-800";
+      case "CRITICAL":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -282,7 +425,8 @@ const AdminConfig: React.FC = () => {
       <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-6 text-white">
         <h1 className="text-3xl font-bold mb-2">System Configuration</h1>
         <p className="text-gray-300">
-          Manage wards, complaint types, system settings, and administrative controls
+          Manage wards, complaint types, system settings, and administrative
+          controls
         </p>
       </div>
 
@@ -306,7 +450,17 @@ const AdminConfig: React.FC = () => {
                 </CardTitle>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button onClick={() => setEditingWard({ id: '', name: '', description: '', isActive: true, subZones: [] })}>
+                    <Button
+                      onClick={() =>
+                        setEditingWard({
+                          id: "",
+                          name: "",
+                          description: "",
+                          isActive: true,
+                          subZones: [],
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Ward
                     </Button>
@@ -314,7 +468,7 @@ const AdminConfig: React.FC = () => {
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>
-                        {editingWard?.id ? 'Edit Ward' : 'Add New Ward'}
+                        {editingWard?.id ? "Edit Ward" : "Add New Ward"}
                       </DialogTitle>
                     </DialogHeader>
                     {editingWard && (
@@ -324,7 +478,12 @@ const AdminConfig: React.FC = () => {
                           <Input
                             id="wardName"
                             value={editingWard.name}
-                            onChange={(e) => setEditingWard({ ...editingWard, name: e.target.value })}
+                            onChange={(e) =>
+                              setEditingWard({
+                                ...editingWard,
+                                name: e.target.value,
+                              })
+                            }
                             placeholder="Enter ward name"
                           />
                         </div>
@@ -333,19 +492,31 @@ const AdminConfig: React.FC = () => {
                           <Textarea
                             id="wardDescription"
                             value={editingWard.description}
-                            onChange={(e) => setEditingWard({ ...editingWard, description: e.target.value })}
+                            onChange={(e) =>
+                              setEditingWard({
+                                ...editingWard,
+                                description: e.target.value,
+                              })
+                            }
                             placeholder="Enter ward description"
                           />
                         </div>
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setEditingWard(null)}>
+                          <Button
+                            variant="outline"
+                            onClick={() => setEditingWard(null)}
+                          >
                             Cancel
                           </Button>
-                          <Button 
+                          <Button
                             onClick={() => handleSaveWard(editingWard)}
                             disabled={isLoading || !editingWard.name}
                           >
-                            {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                            {isLoading ? (
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
                             Save
                           </Button>
                         </div>
@@ -372,11 +543,19 @@ const AdminConfig: React.FC = () => {
                       <TableCell className="font-medium">{ward.name}</TableCell>
                       <TableCell>{ward.description}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{ward.subZones.length} zones</Badge>
+                        <Badge variant="secondary">
+                          {ward.subZones.length} zones
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={ward.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                          {ward.isActive ? 'Active' : 'Inactive'}
+                        <Badge
+                          className={
+                            ward.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }
+                        >
+                          {ward.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -416,14 +595,18 @@ const AdminConfig: React.FC = () => {
                 </CardTitle>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button onClick={() => setEditingComplaintType({ 
-                      id: '', 
-                      name: '', 
-                      description: '', 
-                      priority: 'MEDIUM', 
-                      slaHours: 48, 
-                      isActive: true 
-                    })}>
+                    <Button
+                      onClick={() =>
+                        setEditingComplaintType({
+                          id: "",
+                          name: "",
+                          description: "",
+                          priority: "MEDIUM",
+                          slaHours: 48,
+                          isActive: true,
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Type
                     </Button>
@@ -431,7 +614,9 @@ const AdminConfig: React.FC = () => {
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>
-                        {editingComplaintType?.id ? 'Edit Complaint Type' : 'Add New Complaint Type'}
+                        {editingComplaintType?.id
+                          ? "Edit Complaint Type"
+                          : "Add New Complaint Type"}
                       </DialogTitle>
                     </DialogHeader>
                     {editingComplaintType && (
@@ -441,7 +626,12 @@ const AdminConfig: React.FC = () => {
                           <Input
                             id="typeName"
                             value={editingComplaintType.name}
-                            onChange={(e) => setEditingComplaintType({ ...editingComplaintType, name: e.target.value })}
+                            onChange={(e) =>
+                              setEditingComplaintType({
+                                ...editingComplaintType,
+                                name: e.target.value,
+                              })
+                            }
                             placeholder="Enter complaint type name"
                           />
                         </div>
@@ -450,7 +640,12 @@ const AdminConfig: React.FC = () => {
                           <Textarea
                             id="typeDescription"
                             value={editingComplaintType.description}
-                            onChange={(e) => setEditingComplaintType({ ...editingComplaintType, description: e.target.value })}
+                            onChange={(e) =>
+                              setEditingComplaintType({
+                                ...editingComplaintType,
+                                description: e.target.value,
+                              })
+                            }
                             placeholder="Enter type description"
                           />
                         </div>
@@ -458,8 +653,13 @@ const AdminConfig: React.FC = () => {
                           <Label htmlFor="priority">Priority</Label>
                           <Select
                             value={editingComplaintType.priority}
-                            onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL') => 
-                              setEditingComplaintType({ ...editingComplaintType, priority: value })
+                            onValueChange={(
+                              value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+                            ) =>
+                              setEditingComplaintType({
+                                ...editingComplaintType,
+                                priority: value,
+                              })
                             }
                           >
                             <SelectTrigger>
@@ -479,19 +679,33 @@ const AdminConfig: React.FC = () => {
                             id="slaHours"
                             type="number"
                             value={editingComplaintType.slaHours}
-                            onChange={(e) => setEditingComplaintType({ ...editingComplaintType, slaHours: parseInt(e.target.value) })}
+                            onChange={(e) =>
+                              setEditingComplaintType({
+                                ...editingComplaintType,
+                                slaHours: parseInt(e.target.value),
+                              })
+                            }
                             placeholder="Enter SLA hours"
                           />
                         </div>
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setEditingComplaintType(null)}>
+                          <Button
+                            variant="outline"
+                            onClick={() => setEditingComplaintType(null)}
+                          >
                             Cancel
                           </Button>
-                          <Button 
-                            onClick={() => handleSaveComplaintType(editingComplaintType)}
+                          <Button
+                            onClick={() =>
+                              handleSaveComplaintType(editingComplaintType)
+                            }
                             disabled={isLoading || !editingComplaintType.name}
                           >
-                            {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                            {isLoading ? (
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
                             Save
                           </Button>
                         </div>
@@ -525,8 +739,14 @@ const AdminConfig: React.FC = () => {
                       </TableCell>
                       <TableCell>{type.slaHours}h</TableCell>
                       <TableCell>
-                        <Badge className={type.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                          {type.isActive ? 'Active' : 'Inactive'}
+                        <Badge
+                          className={
+                            type.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }
+                        >
+                          {type.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -571,15 +791,19 @@ const AdminConfig: React.FC = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="font-medium">{setting.key}</h3>
-                        <p className="text-sm text-gray-600">{setting.description}</p>
+                        <p className="text-sm text-gray-600">
+                          {setting.description}
+                        </p>
                       </div>
                       <Badge variant="secondary">{setting.type}</Badge>
                     </div>
                     <div className="mt-3">
-                      {setting.type === 'boolean' ? (
+                      {setting.type === "boolean" ? (
                         <Select
                           value={setting.value}
-                          onValueChange={(value) => handleUpdateSystemSetting(setting.key, value)}
+                          onValueChange={(value) =>
+                            handleUpdateSystemSetting(setting.key, value)
+                          }
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />
@@ -589,18 +813,28 @@ const AdminConfig: React.FC = () => {
                             <SelectItem value="false">False</SelectItem>
                           </SelectContent>
                         </Select>
-                      ) : setting.type === 'json' ? (
+                      ) : setting.type === "json" ? (
                         <Textarea
                           value={setting.value}
-                          onChange={(e) => handleUpdateSystemSetting(setting.key, e.target.value)}
+                          onChange={(e) =>
+                            handleUpdateSystemSetting(
+                              setting.key,
+                              e.target.value,
+                            )
+                          }
                           placeholder="Enter JSON value"
                           rows={3}
                         />
                       ) : (
                         <Input
-                          type={setting.type === 'number' ? 'number' : 'text'}
+                          type={setting.type === "number" ? "number" : "text"}
                           value={setting.value}
-                          onChange={(e) => handleUpdateSystemSetting(setting.key, e.target.value)}
+                          onChange={(e) =>
+                            handleUpdateSystemSetting(
+                              setting.key,
+                              e.target.value,
+                            )
+                          }
                           placeholder={`Enter ${setting.type} value`}
                           className="max-w-md"
                         />

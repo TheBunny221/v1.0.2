@@ -1,27 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchComplaintById, updateComplaintStatus } from '../store/slices/complaintsSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Textarea } from '../components/ui/textarea';
-import { Label } from '../components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { 
-  FileText, 
-  Calendar, 
-  MapPin, 
-  User, 
-  Phone, 
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import {
+  fetchComplaintById,
+  updateComplaintStatus,
+} from "../store/slices/complaintsSlice";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import {
+  FileText,
+  Calendar,
+  MapPin,
+  User,
+  Phone,
   Mail,
   Clock,
   CheckCircle,
   ArrowLeft,
   MessageSquare,
   Image,
-  Download
-} from 'lucide-react';
+  Download,
+} from "lucide-react";
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,13 +43,13 @@ const ComplaintDetails: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
-  const [statusComment, setStatusComment] = useState('');
+  const [statusComment, setStatusComment] = useState("");
   const [complaint, setComplaint] = useState<any>(null);
 
   useEffect(() => {
     if (id) {
       // Find complaint from store or fetch if needed
-      const foundComplaint = complaints.find(c => c.id === id);
+      const foundComplaint = complaints.find((c) => c.id === id);
       if (foundComplaint) {
         setComplaint(foundComplaint);
       } else {
@@ -48,44 +61,46 @@ const ComplaintDetails: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'REGISTERED':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'ASSIGNED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-orange-100 text-orange-800';
-      case 'RESOLVED':
-        return 'bg-green-100 text-green-800';
-      case 'CLOSED':
-        return 'bg-gray-100 text-gray-800';
+      case "REGISTERED":
+        return "bg-yellow-100 text-yellow-800";
+      case "ASSIGNED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "RESOLVED":
+        return "bg-green-100 text-green-800";
+      case "CLOSED":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800';
-      case 'CRITICAL':
-        return 'bg-red-100 text-red-800';
+      case "LOW":
+        return "bg-green-100 text-green-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "HIGH":
+        return "bg-orange-100 text-orange-800";
+      case "CRITICAL":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const handleStatusUpdate = (newStatus: string) => {
     if (id) {
-      dispatch(updateComplaintStatus({ 
-        id, 
-        status: newStatus, 
-        comment: statusComment 
-      }));
-      setStatusComment('');
+      dispatch(
+        updateComplaintStatus({
+          id,
+          status: newStatus,
+          comment: statusComment,
+        }),
+      );
+      setStatusComment("");
     }
   };
 
@@ -113,8 +128,12 @@ const ComplaintDetails: React.FC = () => {
     return (
       <div className="text-center py-12">
         <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Complaint Not Found</h2>
-        <p className="text-gray-600 mb-4">The complaint you're looking for doesn't exist.</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Complaint Not Found
+        </h2>
+        <p className="text-gray-600 mb-4">
+          The complaint you're looking for doesn't exist.
+        </p>
         <Link to="/complaints">
           <Button>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -143,7 +162,7 @@ const ComplaintDetails: React.FC = () => {
           </div>
           <div className="flex items-center space-x-4">
             <Badge className={getStatusColor(complaint.status)}>
-              {complaint.status.replace('_', ' ')}
+              {complaint.status.replace("_", " ")}
             </Badge>
             <Badge className={getPriorityColor(complaint.priority)}>
               {complaint.priority} Priority
@@ -170,7 +189,9 @@ const ComplaintDetails: React.FC = () => {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-medium mb-2">Type</h3>
-                <p className="text-gray-600">{complaint.type.replace('_', ' ')}</p>
+                <p className="text-gray-600">
+                  {complaint.type.replace("_", " ")}
+                </p>
               </div>
               <div>
                 <h3 className="font-medium mb-2">Description</h3>
@@ -184,7 +205,9 @@ const ComplaintDetails: React.FC = () => {
                   </h3>
                   <p className="text-gray-600">{complaint.area}</p>
                   {complaint.landmark && (
-                    <p className="text-sm text-gray-500">Near: {complaint.landmark}</p>
+                    <p className="text-sm text-gray-500">
+                      Near: {complaint.landmark}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -194,16 +217,19 @@ const ComplaintDetails: React.FC = () => {
                   </h3>
                   <div className="space-y-1 text-sm">
                     <p className="text-gray-600">
-                      Submitted: {new Date(complaint.submittedOn).toLocaleString()}
+                      Submitted:{" "}
+                      {new Date(complaint.submittedOn).toLocaleString()}
                     </p>
                     {complaint.assignedOn && (
                       <p className="text-gray-600">
-                        Assigned: {new Date(complaint.assignedOn).toLocaleString()}
+                        Assigned:{" "}
+                        {new Date(complaint.assignedOn).toLocaleString()}
                       </p>
                     )}
                     {complaint.resolvedOn && (
                       <p className="text-gray-600">
-                        Resolved: {new Date(complaint.resolvedOn).toLocaleString()}
+                        Resolved:{" "}
+                        {new Date(complaint.resolvedOn).toLocaleString()}
                       </p>
                     )}
                   </div>
@@ -227,20 +253,24 @@ const ComplaintDetails: React.FC = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium">Complaint Registered</p>
-                      <p className="text-sm text-gray-600">Your complaint has been successfully registered.</p>
+                      <p className="text-sm text-gray-600">
+                        Your complaint has been successfully registered.
+                      </p>
                     </div>
                     <span className="text-xs text-gray-500">
                       {new Date(complaint.submittedOn).toLocaleString()}
                     </span>
                   </div>
                 </div>
-                
+
                 {complaint.assignedOn && (
                   <div className="border-l-4 border-yellow-500 pl-4 py-2">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium">Complaint Assigned</p>
-                        <p className="text-sm text-gray-600">Assigned to maintenance team for resolution.</p>
+                        <p className="text-sm text-gray-600">
+                          Assigned to maintenance team for resolution.
+                        </p>
                       </div>
                       <span className="text-xs text-gray-500">
                         {new Date(complaint.assignedOn).toLocaleString()}
@@ -248,13 +278,15 @@ const ComplaintDetails: React.FC = () => {
                     </div>
                   </div>
                 )}
-                
-                {complaint.status === 'IN_PROGRESS' && (
+
+                {complaint.status === "IN_PROGRESS" && (
                   <div className="border-l-4 border-orange-500 pl-4 py-2">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium">Work in Progress</p>
-                        <p className="text-sm text-gray-600">Our team is working on resolving this issue.</p>
+                        <p className="text-sm text-gray-600">
+                          Our team is working on resolving this issue.
+                        </p>
                       </div>
                       <span className="text-xs text-gray-500">2 hours ago</span>
                     </div>
@@ -265,7 +297,9 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Status Update Form (for authorized users) */}
-          {(user?.role === 'WARD_OFFICER' || user?.role === 'MAINTENANCE_TEAM' || user?.role === 'ADMINISTRATOR') && (
+          {(user?.role === "WARD_OFFICER" ||
+            user?.role === "MAINTENANCE_TEAM" ||
+            user?.role === "ADMINISTRATOR") && (
             <Card>
               <CardHeader>
                 <CardTitle>Update Status</CardTitle>
@@ -282,26 +316,30 @@ const ComplaintDetails: React.FC = () => {
                   />
                 </div>
                 <div className="flex space-x-2">
-                  {complaint.status === 'REGISTERED' && user?.role === 'WARD_OFFICER' && (
-                    <Button onClick={() => handleStatusUpdate('ASSIGNED')}>
-                      Assign
-                    </Button>
-                  )}
-                  {complaint.status === 'ASSIGNED' && user?.role === 'MAINTENANCE_TEAM' && (
-                    <Button onClick={() => handleStatusUpdate('IN_PROGRESS')}>
-                      Start Work
-                    </Button>
-                  )}
-                  {complaint.status === 'IN_PROGRESS' && user?.role === 'MAINTENANCE_TEAM' && (
-                    <Button onClick={() => handleStatusUpdate('RESOLVED')}>
-                      Mark Resolved
-                    </Button>
-                  )}
-                  {complaint.status === 'RESOLVED' && user?.role === 'WARD_OFFICER' && (
-                    <Button onClick={() => handleStatusUpdate('CLOSED')}>
-                      Close Complaint
-                    </Button>
-                  )}
+                  {complaint.status === "REGISTERED" &&
+                    user?.role === "WARD_OFFICER" && (
+                      <Button onClick={() => handleStatusUpdate("ASSIGNED")}>
+                        Assign
+                      </Button>
+                    )}
+                  {complaint.status === "ASSIGNED" &&
+                    user?.role === "MAINTENANCE_TEAM" && (
+                      <Button onClick={() => handleStatusUpdate("IN_PROGRESS")}>
+                        Start Work
+                      </Button>
+                    )}
+                  {complaint.status === "IN_PROGRESS" &&
+                    user?.role === "MAINTENANCE_TEAM" && (
+                      <Button onClick={() => handleStatusUpdate("RESOLVED")}>
+                        Mark Resolved
+                      </Button>
+                    )}
+                  {complaint.status === "RESOLVED" &&
+                    user?.role === "WARD_OFFICER" && (
+                      <Button onClick={() => handleStatusUpdate("CLOSED")}>
+                        Close Complaint
+                      </Button>
+                    )}
                 </div>
               </CardContent>
             </Card>

@@ -73,7 +73,7 @@ export interface Complaint {
   status: ComplaintStatus;
   priority: Priority;
   slaStatus: "ON_TIME" | "WARNING" | "OVERDUE" | "COMPLETED";
-  
+
   // Location Information
   wardId: string;
   subZoneId?: string;
@@ -81,31 +81,31 @@ export interface Complaint {
   landmark?: string;
   address?: string;
   coordinates?: string; // JSON string for lat/lng
-  
+
   // Contact Information
   contactName?: string;
   contactEmail?: string;
   contactPhone: string;
   isAnonymous: boolean;
-  
+
   // Assignment and Tracking
   submittedById?: string;
   assignedToId?: string;
   resolvedById?: string;
-  
+
   // Timestamps
   submittedOn: string;
   assignedOn?: string;
   resolvedOn?: string;
   closedOn?: string;
   deadline?: string;
-  
+
   // Additional Information
   remarks?: string;
   citizenFeedback?: string;
   rating?: number; // 1-5 rating
   tags?: string; // JSON array of tags
-  
+
   // Relations
   ward?: Ward;
   subZone?: SubZone;
@@ -186,16 +186,19 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 // Async thunks
 export const fetchComplaints = createAsyncThunk(
   "complaints/fetchComplaints",
-  async (params: {
-    page?: number;
-    limit?: number;
-    status?: ComplaintStatus;
-    type?: ComplaintType;
-    priority?: Priority;
-    wardId?: string;
-    assignedToId?: string;
-    search?: string;
-  } = {}, { rejectWithValue }) => {
+  async (
+    params: {
+      page?: number;
+      limit?: number;
+      status?: ComplaintStatus;
+      type?: ComplaintType;
+      priority?: Priority;
+      wardId?: string;
+      assignedToId?: string;
+      search?: string;
+    } = {},
+    { rejectWithValue },
+  ) => {
     try {
       const queryParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -205,9 +208,11 @@ export const fetchComplaints = createAsyncThunk(
       const data = await apiCall(`/api/complaints?${queryParams.toString()}`);
       return data.data;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to fetch complaints");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch complaints",
+      );
     }
-  }
+  },
 );
 
 export const fetchComplaint = createAsyncThunk(
@@ -217,29 +222,34 @@ export const fetchComplaint = createAsyncThunk(
       const data = await apiCall(`/api/complaints/${id}`);
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to fetch complaint");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch complaint",
+      );
     }
-  }
+  },
 );
 
 export const createComplaint = createAsyncThunk(
   "complaints/createComplaint",
-  async (complaintData: {
-    title?: string;
-    description: string;
-    type: ComplaintType;
-    priority?: Priority;
-    wardId: string;
-    subZoneId?: string;
-    area: string;
-    landmark?: string;
-    address?: string;
-    coordinates?: { latitude: number; longitude: number };
-    contactName?: string;
-    contactEmail?: string;
-    contactPhone?: string;
-    isAnonymous?: boolean;
-  }, { rejectWithValue }) => {
+  async (
+    complaintData: {
+      title?: string;
+      description: string;
+      type: ComplaintType;
+      priority?: Priority;
+      wardId: string;
+      subZoneId?: string;
+      area: string;
+      landmark?: string;
+      address?: string;
+      coordinates?: { latitude: number; longitude: number };
+      contactName?: string;
+      contactEmail?: string;
+      contactPhone?: string;
+      isAnonymous?: boolean;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const data = await apiCall("/api/complaints", {
         method: "POST",
@@ -247,19 +257,24 @@ export const createComplaint = createAsyncThunk(
       });
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to create complaint");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to create complaint",
+      );
     }
-  }
+  },
 );
 
 export const updateComplaintStatus = createAsyncThunk(
   "complaints/updateStatus",
-  async (params: {
-    id: string;
-    status: ComplaintStatus;
-    comment?: string;
-    assignedToId?: string;
-  }, { rejectWithValue }) => {
+  async (
+    params: {
+      id: string;
+      status: ComplaintStatus;
+      comment?: string;
+      assignedToId?: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const data = await apiCall(`/api/complaints/${params.id}/status`, {
         method: "PUT",
@@ -271,17 +286,24 @@ export const updateComplaintStatus = createAsyncThunk(
       });
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to update complaint status");
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : "Failed to update complaint status",
+      );
     }
-  }
+  },
 );
 
 export const assignComplaint = createAsyncThunk(
   "complaints/assignComplaint",
-  async (params: {
-    id: string;
-    assignedToId: string;
-  }, { rejectWithValue }) => {
+  async (
+    params: {
+      id: string;
+      assignedToId: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const data = await apiCall(`/api/complaints/${params.id}/assign`, {
         method: "PUT",
@@ -289,18 +311,23 @@ export const assignComplaint = createAsyncThunk(
       });
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to assign complaint");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to assign complaint",
+      );
     }
-  }
+  },
 );
 
 export const addComplaintFeedback = createAsyncThunk(
   "complaints/addFeedback",
-  async (params: {
-    id: string;
-    rating: number;
-    citizenFeedback: string;
-  }, { rejectWithValue }) => {
+  async (
+    params: {
+      id: string;
+      rating: number;
+      citizenFeedback: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const data = await apiCall(`/api/complaints/${params.id}/feedback`, {
         method: "POST",
@@ -311,17 +338,22 @@ export const addComplaintFeedback = createAsyncThunk(
       });
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to add feedback");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to add feedback",
+      );
     }
-  }
+  },
 );
 
 export const reopenComplaint = createAsyncThunk(
   "complaints/reopenComplaint",
-  async (params: {
-    id: string;
-    comment?: string;
-  }, { rejectWithValue }) => {
+  async (
+    params: {
+      id: string;
+      comment?: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const data = await apiCall(`/api/complaints/${params.id}/reopen`, {
         method: "PUT",
@@ -329,30 +361,39 @@ export const reopenComplaint = createAsyncThunk(
       });
       return data.data.complaint;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to reopen complaint");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to reopen complaint",
+      );
     }
-  }
+  },
 );
 
 export const fetchComplaintStats = createAsyncThunk(
   "complaints/fetchStats",
-  async (params: {
-    wardId?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  } = {}, { rejectWithValue }) => {
+  async (
+    params: {
+      wardId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    } = {},
+    { rejectWithValue },
+  ) => {
     try {
       const queryParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         if (value) queryParams.append(key, value);
       });
 
-      const data = await apiCall(`/api/complaints/stats?${queryParams.toString()}`);
+      const data = await apiCall(
+        `/api/complaints/stats?${queryParams.toString()}`,
+      );
       return data.data.stats;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to fetch statistics");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch statistics",
+      );
     }
-  }
+  },
 );
 
 // Slice
@@ -363,7 +404,10 @@ const complaintsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setFilters: (state, action: PayloadAction<Partial<ComplaintsState["filters"]>>) => {
+    setFilters: (
+      state,
+      action: PayloadAction<Partial<ComplaintsState["filters"]>>,
+    ) => {
       state.filters = { ...state.filters, ...action.payload };
     },
     clearFilters: (state) => {
@@ -393,7 +437,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Fetch single complaint
       .addCase(fetchComplaint.pending, (state) => {
         state.isLoading = true;
@@ -408,7 +452,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Create complaint
       .addCase(createComplaint.pending, (state) => {
         state.isLoading = true;
@@ -423,7 +467,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Update complaint status
       .addCase(updateComplaintStatus.pending, (state) => {
         state.isLoading = true;
@@ -431,7 +475,9 @@ const complaintsSlice = createSlice({
       })
       .addCase(updateComplaintStatus.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.complaints.findIndex(c => c.id === action.payload.id);
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
         if (index !== -1) {
           state.complaints[index] = action.payload;
         }
@@ -444,7 +490,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Assign complaint
       .addCase(assignComplaint.pending, (state) => {
         state.isLoading = true;
@@ -452,7 +498,9 @@ const complaintsSlice = createSlice({
       })
       .addCase(assignComplaint.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.complaints.findIndex(c => c.id === action.payload.id);
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
         if (index !== -1) {
           state.complaints[index] = action.payload;
         }
@@ -465,7 +513,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Add feedback
       .addCase(addComplaintFeedback.pending, (state) => {
         state.isLoading = true;
@@ -473,7 +521,9 @@ const complaintsSlice = createSlice({
       })
       .addCase(addComplaintFeedback.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.complaints.findIndex(c => c.id === action.payload.id);
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
         if (index !== -1) {
           state.complaints[index] = action.payload;
         }
@@ -486,7 +536,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Reopen complaint
       .addCase(reopenComplaint.pending, (state) => {
         state.isLoading = true;
@@ -494,7 +544,9 @@ const complaintsSlice = createSlice({
       })
       .addCase(reopenComplaint.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.complaints.findIndex(c => c.id === action.payload.id);
+        const index = state.complaints.findIndex(
+          (c) => c.id === action.payload.id,
+        );
         if (index !== -1) {
           state.complaints[index] = action.payload;
         }
@@ -507,7 +559,7 @@ const complaintsSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Fetch statistics
       .addCase(fetchComplaintStats.pending, (state) => {
         state.error = null;
@@ -533,10 +585,21 @@ export const {
 export default complaintsSlice.reducer;
 
 // Selectors
-export const selectComplaints = (state: { complaints: ComplaintsState }) => state.complaints.complaints;
-export const selectCurrentComplaint = (state: { complaints: ComplaintsState }) => state.complaints.currentComplaint;
-export const selectComplaintsLoading = (state: { complaints: ComplaintsState }) => state.complaints.isLoading;
-export const selectComplaintsError = (state: { complaints: ComplaintsState }) => state.complaints.error;
-export const selectComplaintsFilters = (state: { complaints: ComplaintsState }) => state.complaints.filters;
-export const selectComplaintsPagination = (state: { complaints: ComplaintsState }) => state.complaints.pagination;
-export const selectComplaintsStats = (state: { complaints: ComplaintsState }) => state.complaints.statistics;
+export const selectComplaints = (state: { complaints: ComplaintsState }) =>
+  state.complaints.complaints;
+export const selectCurrentComplaint = (state: {
+  complaints: ComplaintsState;
+}) => state.complaints.currentComplaint;
+export const selectComplaintsLoading = (state: {
+  complaints: ComplaintsState;
+}) => state.complaints.isLoading;
+export const selectComplaintsError = (state: { complaints: ComplaintsState }) =>
+  state.complaints.error;
+export const selectComplaintsFilters = (state: {
+  complaints: ComplaintsState;
+}) => state.complaints.filters;
+export const selectComplaintsPagination = (state: {
+  complaints: ComplaintsState;
+}) => state.complaints.pagination;
+export const selectComplaintsStats = (state: { complaints: ComplaintsState }) =>
+  state.complaints.statistics;
