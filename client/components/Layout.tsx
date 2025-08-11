@@ -45,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   const { isSidebarOpen, notifications } = useAppSelector((state) => state.ui);
 
   // Use authenticated user's role if available, otherwise fall back to prop
-  const effectiveUserIconRole = user?.role || userRole || "citizen";
+  const effectiveUserRole = user?.role || userRole || "citizen";
   const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
   // Return loading state if translations are not yet loaded
