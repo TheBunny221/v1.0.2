@@ -556,7 +556,7 @@ export const changePassword = asyncHandler(async (req, res) => {
 
 // @desc    Logout user
 // @route   POST /api/auth/logout
-// @access  Private
+// @access  Public
 export const logout = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
