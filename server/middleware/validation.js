@@ -105,15 +105,15 @@ export const validateUserUpdate = [
 export const validateComplaintCreation = [
   body("type")
     .isIn([
-      "Water Supply",
-      "Electricity",
-      "Road Repair",
-      "Garbage Collection",
-      "Street Lighting",
-      "Sewerage",
-      "Public Health",
-      "Traffic",
-      "Others",
+      "WATER_SUPPLY",
+      "ELECTRICITY",
+      "ROAD_REPAIR",
+      "GARBAGE_COLLECTION",
+      "STREET_LIGHTING",
+      "SEWERAGE",
+      "PUBLIC_HEALTH",
+      "TRAFFIC",
+      "OTHERS",
     ])
     .withMessage("Invalid complaint type"),
 
@@ -122,35 +122,41 @@ export const validateComplaintCreation = [
     .isLength({ min: 10, max: 2000 })
     .withMessage("Description must be between 10 and 2000 characters"),
 
-  body("contactInfo.mobile")
-    .matches(/^\+?[\d\s-()]{10,}$/)
-    .withMessage("Please provide a valid mobile number"),
+  body("priority")
+    .optional()
+    .isIn(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    .withMessage("Invalid priority"),
 
-  body("contactInfo.email")
+  body("contactPhone")
+    .optional()
+    .matches(/^\+?[\d\s-()]{10,}$/)
+    .withMessage("Please provide a valid phone number"),
+
+  body("contactEmail")
     .optional()
     .isEmail()
     .normalizeEmail()
     .withMessage("Please provide a valid email"),
 
-  body("location.ward").notEmpty().withMessage("Ward is required"),
+  body("wardId").notEmpty().withMessage("Ward is required"),
 
-  body("location.area")
+  body("area")
     .trim()
     .isLength({ min: 2, max: 200 })
     .withMessage("Area must be between 2 and 200 characters"),
 
-  body("location.address")
+  body("address")
     .optional()
     .trim()
     .isLength({ max: 500 })
     .withMessage("Address cannot exceed 500 characters"),
 
-  body("location.coordinates.latitude")
+  body("coordinates.latitude")
     .optional()
     .isFloat({ min: -90, max: 90 })
     .withMessage("Invalid latitude"),
 
-  body("location.coordinates.longitude")
+  body("coordinates.longitude")
     .optional()
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
@@ -162,21 +168,27 @@ export const validateComplaintUpdate = [
   body("status")
     .optional()
     .isIn([
-      "registered",
-      "assigned",
-      "in-progress",
-      "resolved",
-      "closed",
-      "reopened",
+      "REGISTERED",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "RESOLVED",
+      "CLOSED",
+      "REOPENED",
     ])
     .withMessage("Invalid status"),
 
   body("priority")
     .optional()
-    .isIn(["low", "medium", "high", "critical"])
+    .isIn(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
     .withMessage("Invalid priority"),
 
-  body("assignedTo").optional().isMongoId().withMessage("Invalid user ID"),
+  body("assignedToId").optional().isString().withMessage("Invalid user ID"),
+
+  body("comment")
+    .optional()
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage("Comment cannot exceed 1000 characters"),
 
   handleValidationErrors,
 ];
@@ -221,45 +233,50 @@ export const validateComplaintFilters = [
   query("status")
     .optional()
     .isIn([
-      "registered",
-      "assigned",
-      "in-progress",
-      "resolved",
-      "closed",
-      "reopened",
+      "REGISTERED",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "RESOLVED",
+      "CLOSED",
+      "REOPENED",
     ])
     .withMessage("Invalid status filter"),
 
   query("priority")
     .optional()
-    .isIn(["low", "medium", "high", "critical"])
+    .isIn(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
     .withMessage("Invalid priority filter"),
 
   query("type")
     .optional()
     .isIn([
-      "Water Supply",
-      "Electricity",
-      "Road Repair",
-      "Garbage Collection",
-      "Street Lighting",
-      "Sewerage",
-      "Public Health",
-      "Traffic",
-      "Others",
+      "WATER_SUPPLY",
+      "ELECTRICITY",
+      "ROAD_REPAIR",
+      "GARBAGE_COLLECTION",
+      "STREET_LIGHTING",
+      "SEWERAGE",
+      "PUBLIC_HEALTH",
+      "TRAFFIC",
+      "OTHERS",
     ])
     .withMessage("Invalid type filter"),
 
-  query("ward")
+  query("wardId")
     .optional()
     .trim()
     .isLength({ min: 1 })
     .withMessage("Ward filter cannot be empty"),
 
-  query("assignedTo")
+  query("assignedToId")
     .optional()
-    .isMongoId()
+    .isString()
     .withMessage("Invalid assignedTo filter"),
+
+  query("submittedById")
+    .optional()
+    .isString()
+    .withMessage("Invalid submittedBy filter"),
 
   query("dateFrom")
     .optional()
@@ -267,6 +284,12 @@ export const validateComplaintFilters = [
     .withMessage("Invalid dateFrom format"),
 
   query("dateTo").optional().isISO8601().withMessage("Invalid dateTo format"),
+
+  query("search")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Search term must be between 1 and 100 characters"),
 
   handleValidationErrors,
 ];
