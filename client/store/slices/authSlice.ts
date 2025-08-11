@@ -561,6 +561,22 @@ const authSlice = createSlice({
           (action.payload as any)?.message || "Profile update failed";
       })
 
+      // Update user preferences
+      .addCase(updateUserPreferences.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserPreferences.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateUserPreferences.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          (action.payload as any)?.message || "Failed to update preferences";
+      })
+
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.isAuthenticated = false;
