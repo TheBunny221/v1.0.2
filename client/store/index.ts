@@ -4,6 +4,7 @@ import complaintsSlice from "./slices/complaintsSlice";
 import languageSlice from "./slices/languageSlice";
 import uiSlice from "./slices/uiSlice";
 import guestSlice from "./slices/guestSlice";
+import dataSlice from "./slices/dataSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     language: languageSlice,
     ui: uiSlice,
     guest: guestSlice,
+    data: dataSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
