@@ -55,7 +55,7 @@ const Profile: React.FC = () => {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    ward: user?.ward || "",
+    ward: user?.ward?.name || "",
     department: user?.department || "",
   });
 
