@@ -1,250 +1,299 @@
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
-// Create transporter (configure with your email service)
+dotenv.config();
+
+// Create transporter
 const createTransporter = () => {
-  // For development, you can use a service like Ethereal Email or Mailtrap
-  // For production, use services like SendGrid, AWS SES, or SMTP
-
   if (process.env.NODE_ENV === "production") {
     // Production email configuration
     return nodemailer.createTransporter({
       service: process.env.EMAIL_SERVICE || "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: process.env.EMAIL_PASS,
       },
     });
   } else {
-    // Development: Use Ethereal Email for testing
+    // Development configuration (using ethereal email for testing)
     return nodemailer.createTransporter({
       host: "smtp.ethereal.email",
       port: 587,
       auth: {
-        user: "ethereal.user@ethereal.email",
-        pass: "ethereal.pass",
+        user: process.env.ETHEREAL_USER || "ethereal.user@ethereal.email",
+        pass: process.env.ETHEREAL_PASS || "ethereal.pass",
       },
     });
   }
 };
 
-// Email templates
-const getOtpEmailTemplate = (otp, purpose) => {
-  const templates = {
-    complaint_submission: {
-      subject: "Verify Your Email - CitizenConnect Complaint Submission",
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Email Verification - CitizenConnect</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-            .otp-box { background: white; border: 2px solid #2563eb; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
-            .otp-code { font-size: 32px; font-weight: bold; color: #2563eb; letter-spacing: 8px; font-family: monospace; }
-            .warning { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>🏛️ CitizenConnect</h1>
-              <p>Email Verification for Complaint Submission</p>
-            </div>
-            <div class="content">
-              <h2>Verify Your Email Address</h2>
-              <p>Thank you for submitting a complaint through CitizenConnect. To complete your submission, please verify your email address using the OTP below:</p>
-              
-              <div class="otp-box">
-                <p style="margin: 0; font-size: 16px; color: #6b7280;">Your Verification Code</p>
-                <div class="otp-code">${otp}</div>
-                <p style="margin: 0; font-size: 14px; color: #6b7280;">Valid for 10 minutes</p>
-              </div>
-              
-              <div class="warning">
-                <p><strong>⚠️ Important:</strong></p>
-                <ul style="margin: 10px 0;">
-                  <li>This OTP is valid for 10 minutes only</li>
-                  <li>Do not share this code with anyone</li>
-                  <li>If you didn't request this, please ignore this email</li>
-                </ul>
-              </div>
-              
-              <p>Once verified, your complaint will be registered and assigned to the appropriate department for resolution.</p>
-              
-              <h3>What happens next?</h3>
-              <ol>
-                <li><strong>Verification:</strong> Enter the OTP to complete submission</li>
-                <li><strong>Registration:</strong> Your complaint gets a unique ID</li>
-                <li><strong>Assignment:</strong> Relevant department receives notification</li>
-                <li><strong>Tracking:</strong> Use your complaint ID to track progress</li>
-              </ol>
-            </div>
-            <div class="footer">
-              <p>This is an automated email from CitizenConnect. Please do not reply to this email.</p>
-              <p>For support, contact: support@citizenconnect.gov | +91 1800-XXX-XXXX</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `,
-      text: `
-        CitizenConnect - Email Verification
-        
-        Your OTP for complaint submission: ${otp}
-        
-        This OTP is valid for 10 minutes. Please enter it on the website to complete your complaint submission.
-        
-        If you didn't request this, please ignore this email.
-        
-        CitizenConnect Support Team
-      `,
-    },
-  };
-
-  return templates[purpose] || templates.complaint_submission;
-};
-
-// Send OTP email
-export const sendOtpEmail = async (
-  email,
-  otp,
-  purpose = "complaint_submission",
-) => {
+// Send email function
+export const sendEmail = async ({ to, subject, text, html }) => {
   try {
     const transporter = createTransporter();
-    const template = getOtpEmailTemplate(otp, purpose);
 
     const mailOptions = {
-      from:
-        process.env.EMAIL_FROM || "CitizenConnect <noreply@citizenconnect.gov>",
-      to: email,
-      subject: template.subject,
-      html: template.html,
-      text: template.text,
+      from: process.env.EMAIL_FROM || "Cochin Smart City <noreply@cochinsmartcity.gov.in>",
+      to,
+      subject,
+      text,
+      html,
     };
 
     const info = await transporter.sendMail(mailOptions);
 
-    console.log("OTP email sent successfully:", {
-      messageId: info.messageId,
-      email: email.replace(/(.{2})(.*)(@.*)/, "$1***$3"), // Mask email for logs
-      purpose,
-    });
-
-    // In development, log the preview URL
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Message sent: %s", info.messageId);
       console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     }
 
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
+    return true;
   } catch (error) {
-    console.error("Failed to send OTP email:", error);
-    throw new Error("Failed to send verification email");
+    console.error("Email sending failed:", error);
+    return false;
   }
 };
 
-// Send complaint notification email
-export const sendComplaintNotificationEmail = async (email, complaintData) => {
-  try {
-    const transporter = createTransporter();
+// Send OTP email
+export const sendOTPEmail = async (email, otpCode, purpose = "verification") => {
+  const subject = purpose === "login" ? 
+    "Login OTP - Cochin Smart City" : 
+    "Verification OTP - Cochin Smart City";
 
-    const mailOptions = {
-      from:
-        process.env.EMAIL_FROM || "CitizenConnect <noreply@citizenconnect.gov>",
-      to: email,
-      subject: `Complaint Submitted Successfully - ${complaintData.complaintId}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Complaint Confirmation - CitizenConnect</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-            .info-box { background: white; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>✅ Complaint Submitted Successfully</h1>
-              <p>CitizenConnect</p>
-            </div>
-            <div class="content">
-              <h2>Thank you for your submission!</h2>
-              <p>Your complaint has been successfully registered in our system. Here are the details:</p>
-              
-              <div class="info-box">
-                <p><strong>Complaint ID:</strong> ${complaintData.complaintId}</p>
-                <p><strong>Type:</strong> ${complaintData.type.replace("_", " ")}</p>
-                <p><strong>Ward:</strong> ${complaintData.ward}</p>
-                <p><strong>Area:</strong> ${complaintData.area}</p>
-                <p><strong>Status:</strong> ${complaintData.status}</p>
-                <p><strong>Submitted:</strong> ${new Date().toLocaleDateString()}</p>
-              </div>
-              
-              <h3>Next Steps:</h3>
-              <ol>
-                <li>Your complaint will be reviewed and assigned to the appropriate department</li>
-                <li>You will receive updates via email as the status changes</li>
-                <li>You can track progress using your Complaint ID</li>
-              </ol>
-              
-              <p><strong>Track your complaint:</strong> Visit our website and use the "Track Complaint" feature with your Complaint ID.</p>
-            </div>
-            <div class="footer">
-              <p>CitizenConnect - Making governance accessible to all</p>
-              <p>For support: support@citizenconnect.gov | +91 1800-XXX-XXXX</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `,
-      text: `
-        Complaint Submitted Successfully - CitizenConnect
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Cochin Smart City</h1>
+        <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
+      </div>
+      
+      <div style="padding: 30px; background: #f9f9f9;">
+        <h2 style="color: #333; margin-bottom: 20px;">
+          ${purpose === "login" ? "Login" : "Verification"} OTP
+        </h2>
         
-        Complaint ID: ${complaintData.complaintId}
-        Type: ${complaintData.type.replace("_", " ")}
-        Ward: ${complaintData.ward}
-        Status: ${complaintData.status}
+        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          ${purpose === "login" ? 
+            "You have requested to login to your account. Please use the following OTP:" :
+            "Please use the following OTP to verify your email address:"
+          }
+        </p>
         
-        Your complaint has been registered and will be processed soon.
-        You can track its progress using the Complaint ID on our website.
+        <div style="background: white; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; border: 2px dashed #667eea;">
+          <h1 style="color: #667eea; font-size: 32px; letter-spacing: 8px; margin: 0; font-family: monospace;">
+            ${otpCode}
+          </h1>
+        </div>
         
-        Thank you for using CitizenConnect!
-      `,
-    };
+        <p style="color: #666; font-size: 14px;">
+          This OTP will expire in <strong>10 minutes</strong>. Please do not share this OTP with anyone.
+        </p>
+        
+        ${purpose !== "login" ? `
+          <p style="color: #666; font-size: 14px; margin-top: 20px;">
+            After verification, you will be automatically registered and can access your citizen dashboard.
+          </p>
+        ` : ""}
+      </div>
+      
+      <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
+      </div>
+    </div>
+  `;
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Complaint confirmation email sent:", info.messageId);
+  return await sendEmail({
+    to: email,
+    subject,
+    text: `Your ${purpose} OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    html
+  });
+};
 
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    console.error("Failed to send complaint confirmation email:", error);
-    // Don't throw error as this is not critical
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
+// Send password setup email
+export const sendPasswordSetupEmail = async (email, fullName, resetUrl) => {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Cochin Smart City</h1>
+        <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
+      </div>
+      
+      <div style="padding: 30px; background: #f9f9f9;">
+        <h2 style="color: #333; margin-bottom: 20px;">Set Your Password</h2>
+        
+        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          Hello ${fullName},
+        </p>
+        
+        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          Welcome to Cochin Smart City E-Governance Portal! Your account has been created successfully.
+          To secure your account and enable password-based login, please set your password by clicking the button below:
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+            Set Your Password
+          </a>
+        </div>
+        
+        <p style="color: #666; font-size: 14px;">
+          If the button doesn't work, copy and paste this link in your browser:
+          <br>
+          <a href="${resetUrl}" style="color: #667eea; word-break: break-all;">${resetUrl}</a>
+        </p>
+        
+        <p style="color: #666; font-size: 14px; margin-top: 20px;">
+          This link will expire in <strong>10 minutes</strong> for security reasons.
+        </p>
+        
+        <p style="color: #666; font-size: 14px; margin-top: 20px;">
+          Note: You can always login using OTP sent to your email if you prefer not to set a password.
+        </p>
+      </div>
+      
+      <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return await sendEmail({
+    to: email,
+    subject: "Set Your Password - Cochin Smart City",
+    text: `Hello ${fullName}, Please set your password for Cochin Smart City E-Governance Portal by clicking this link: ${resetUrl}. This link will expire in 10 minutes.`,
+    html
+  });
+};
+
+// Send complaint status update email
+export const sendComplaintStatusEmail = async (email, fullName, complaintId, status, comment) => {
+  const statusMessages = {
+    REGISTERED: "Your complaint has been registered successfully.",
+    ASSIGNED: "Your complaint has been assigned to our maintenance team.",
+    IN_PROGRESS: "Work on your complaint is currently in progress.",
+    RESOLVED: "Your complaint has been resolved successfully.",
+    CLOSED: "Your complaint has been closed.",
+    REOPENED: "Your complaint has been reopened for further action."
+  };
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Cochin Smart City</h1>
+        <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
+      </div>
+      
+      <div style="padding: 30px; background: #f9f9f9;">
+        <h2 style="color: #333; margin-bottom: 20px;">Complaint Status Update</h2>
+        
+        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          Hello ${fullName},
+        </p>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+          <p style="margin: 0 0 10px 0; color: #333;">
+            <strong>Complaint ID:</strong> ${complaintId}
+          </p>
+          <p style="margin: 0 0 10px 0; color: #333;">
+            <strong>Status:</strong> <span style="color: #667eea; font-weight: bold;">${status}</span>
+          </p>
+          <p style="margin: 0; color: #666;">
+            ${statusMessages[status] || "Your complaint status has been updated."}
+          </p>
+          ${comment ? `<p style="margin: 15px 0 0 0; color: #666;"><strong>Additional Details:</strong> ${comment}</p>` : ""}
+        </div>
+        
+        <p style="color: #666; font-size: 14px;">
+          You can track your complaint anytime by logging into your citizen dashboard or using our public tracking system.
+        </p>
+      </div>
+      
+      <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return await sendEmail({
+    to: email,
+    subject: `Complaint ${complaintId} - Status Updated to ${status}`,
+    text: `Hello ${fullName}, Your complaint ${complaintId} status has been updated to ${status}. ${statusMessages[status] || ""} ${comment ? `Additional details: ${comment}` : ""}`,
+    html
+  });
+};
+
+// Send welcome email for new citizen
+export const sendWelcomeEmail = async (email, fullName, complaintId) => {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Welcome to Cochin Smart City!</h1>
+        <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
+      </div>
+      
+      <div style="padding: 30px; background: #f9f9f9;">
+        <h2 style="color: #333; margin-bottom: 20px;">Account Created Successfully</h2>
+        
+        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          Hello ${fullName},
+        </p>
+        
+        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          Welcome to Cochin Smart City E-Governance Portal! Your complaint has been verified and you have been automatically registered as a citizen.
+        </p>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4ade80;">
+          <p style="margin: 0 0 10px 0; color: #333;">
+            <strong>Your Complaint ID:</strong> ${complaintId}
+          </p>
+          <p style="margin: 0; color: #666;">
+            You are now logged in and can track your complaint progress from your citizen dashboard.
+          </p>
+        </div>
+        
+        <h3 style="color: #333; margin: 30px 0 15px 0;">What you can do now:</h3>
+        <ul style="color: #666; line-height: 1.8;">
+          <li>Track your current complaint progress</li>
+          <li>Submit new complaints easily</li>
+          <li>Receive real-time updates on complaint status</li>
+          <li>Provide feedback on resolved complaints</li>
+          <li>Access your citizen dashboard anytime</li>
+        </ul>
+        
+        <h3 style="color: #333; margin: 30px 0 15px 0;">Login Options:</h3>
+        <ul style="color: #666; line-height: 1.8;">
+          <li><strong>OTP Login:</strong> Always available - we'll send you an OTP via email</li>
+          <li><strong>Password Login:</strong> Set a password from your profile settings for quick access</li>
+        </ul>
+        
+        <p style="color: #666; font-size: 14px; margin-top: 30px;">
+          Thank you for choosing Cochin Smart City E-Governance Portal for your civic needs.
+        </p>
+      </div>
+      
+      <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return await sendEmail({
+    to: email,
+    subject: "Welcome to Cochin Smart City - Account Created",
+    text: `Hello ${fullName}, Welcome to Cochin Smart City E-Governance Portal! Your complaint ${complaintId} has been verified and you have been registered as a citizen. You can now access your dashboard and track your complaint progress.`,
+    html
+  });
 };
 
 export default {
-  sendOtpEmail,
-  sendComplaintNotificationEmail,
+  sendEmail,
+  sendOTPEmail,
+  sendPasswordSetupEmail,
+  sendComplaintStatusEmail,
+  sendWelcomeEmail
 };
