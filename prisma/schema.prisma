@@ -6,8 +6,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+  // For production, uncomment the line below and comment sqlite above:
+  // provider = "postgresql"
 }
 
 // Enums
