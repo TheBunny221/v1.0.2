@@ -342,7 +342,7 @@ const Navigation: React.FC = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/profile" className="flex items-center">
                     <User className="h-4 w-4 mr-2" />
-                    Profile
+                    {translations?.nav?.profile || "Profile"}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
