@@ -38,6 +38,9 @@ export interface Translation {
     settings: string;
     logout: string;
     switchRole: string;
+    myComplaints: string;
+    trackStatus: string;
+    reopenComplaint: string;
   };
 
   // Authentication
@@ -527,7 +530,7 @@ export const hindiTranslations: Translation = {
     unauthorized: "आप इस संसाधन तक पहुंचने के लिए अधिकृत नहीं हैं।",
     forbidden: "पहुंच निषिद्ध।",
     validationError: "कृपया अपना इनपुट जांचें और पुनः प्रयास करें।",
-    sessionExpired: "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
+    sessionExpired: "आपका सत���र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     operationSuccess: "ऑपरेशन सफलतापूर्वक पूरा हुआ।",
     operationFailed: "ऑपरेशन असफल। कृपया पुनः प���रयास करें।",
   },
@@ -556,7 +559,7 @@ export const malayalamTranslations: Translation = {
     next: "അടുത്തത്",
     previous: "മുമ്പത്തെ",
     refresh: "പുതുക്കുക",
-    export: "എക്സ്പോർട്ട്",
+    export: "��ക്സ്പോർട്ട്",
     download: "ഡൗൺലോഡ്",
     upload: "അപ്ലോഡ്",
   },
@@ -582,7 +585,7 @@ export const malayalamTranslations: Translation = {
     loginError: "ലോഗിൻ പരാജയപ്പെട്ടു",
     invalidCredentials: "തെറ്റായ ഇമെയിൽ അല്ലെങ്കിൽ പാസ്‌വേഡ്",
     sessionExpired: "സെഷൻ കാലഹരണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
-    guestMode: "അതിഥി മോഡ്",
+    guestMode: "അതിഥി ��ോഡ്",
     continueAsGuest: "അതിഥിയായി തുടരുക",
   },
   complaints: {
@@ -666,7 +669,7 @@ export const malayalamTranslations: Translation = {
     generalSettings: "സാധാരണ ക്രമീകരണങ്ങൾ",
     languageSettings: "ഭാഷാ ക്രമീകരണങ്ങൾ",
     notificationSettings: "അറിയിപ്പ് ക്രമീകരണങ്ങൾ",
-    privacySettings: "സ്വകാര്യത ക്രമീകരണങ്ങൾ",
+    privacySettings: "സ്വക���ര്യത ക്രമീകരണങ്ങൾ",
     language: "ഭാഷ",
     notifications: "അറിയിപ്പുകൾ",
     emailAlerts: "ഇമെയിൽ അലേർട്ടുകൾ",
@@ -686,7 +689,7 @@ export const malayalamTranslations: Translation = {
     recentComplaints: "അടുത്തകാല പരാതികൾ",
     wardPerformance: "വാർഡ് പ്രകടനം",
     quickActions: "വേഗത്തിലുള്ള പ്രവർത്തനങ്ങൾ",
-    overallCompliance: "മൊത്തത്തിലുള്ള അനുസരണ നിരക്ക്",
+    overallCompliance: "മൊത്തത്തിലുള്ള അനുസരണ നിരക��ക്",
     onTime: "സമയത്ത്",
     warning: "മുന്നറിയിപ്പ്",
     overdue: "കാലഹരണപ്പെട്ട",
