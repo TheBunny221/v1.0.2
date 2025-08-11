@@ -2,68 +2,53 @@ import express from "express";
 import {
   createComplaint,
   getComplaints,
-  getComplaintById,
-  updateComplaint,
-  getMyComplaints,
-  submitFeedback,
+  getComplaint,
+  updateComplaintStatus,
+  addComplaintFeedback,
+  reopenComplaint,
   getComplaintStats,
+  assignComplaint,
 } from "../controller/complaintController.js";
-import {
-  protect,
-  optionalAuth,
-  authorize,
-  checkWardAccess,
-} from "../middleware/auth.js";
+import { protect, authorize } from "../middleware/auth.js";
 import {
   validateComplaintCreation,
   validateComplaintUpdate,
   validateComplaintFeedback,
-  validateMongoId,
   validatePagination,
   validateComplaintFilters,
 } from "../middleware/validation.js";
 
 const router = express.Router();
 
-// Public/Optional auth routes
-router.post("/", optionalAuth, validateComplaintCreation, createComplaint);
-
-// Protected routes
+// All routes are protected
 router.use(protect);
 
-// Get complaints (role-based access)
-router.get(
-  "/",
-  authorize("admin", "ward-officer", "maintenance"),
-  validatePagination,
-  validateComplaintFilters,
-  getComplaints,
-);
+// Complaint management routes
+router
+  .route("/")
+  .get(validatePagination, validateComplaintFilters, getComplaints)
+  .post(authorize("CITIZEN", "ADMINISTRATOR"), validateComplaintCreation, createComplaint);
 
-// Get complaint statistics
-router.get("/stats", authorize("admin", "ward-officer"), getComplaintStats);
+router.get("/stats", getComplaintStats);
 
-// Get my complaints (for citizens)
-router.get("/my", validatePagination, getMyComplaints);
+router
+  .route("/:id")
+  .get(getComplaint);
 
-// Get complaint by ID
-router.get("/:id", validateMongoId, getComplaintById);
+router
+  .route("/:id/status")
+  .put(authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"), validateComplaintUpdate, updateComplaintStatus);
 
-// Update complaint
-router.put(
-  "/:id",
-  validateMongoId,
-  validateComplaintUpdate,
-  authorize("admin", "ward-officer", "maintenance"),
-  updateComplaint,
-);
+router
+  .route("/:id/assign")
+  .put(authorize("WARD_OFFICER", "ADMINISTRATOR"), assignComplaint);
 
-// Submit feedback
-router.post(
-  "/:id/feedback",
-  validateMongoId,
-  validateComplaintFeedback,
-  submitFeedback,
-);
+router
+  .route("/:id/feedback")
+  .post(authorize("CITIZEN"), validateComplaintFeedback, addComplaintFeedback);
+
+router
+  .route("/:id/reopen")
+  .put(authorize("ADMINISTRATOR"), reopenComplaint);
 
 export default router;
