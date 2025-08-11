@@ -350,6 +350,10 @@ const authSlice = createSlice({
 });
 
 export const { clearError, setError, resetAuth } = authSlice.actions;
+
+// Export login and register for component usage
+export const login = loginUser;
+export const register = registerUser;
 export default authSlice.reducer;
 
 // Selectors
