@@ -196,7 +196,7 @@ const Profile: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="personal">
-            {translations.profile.personalInformation}
+            {translations?.profile?.personalInformation || "Personal Information"}
           </TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="preferences">
