@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
   }
 
   const getNavigationItems = () => {
-    switch (effectiveUserIconRole) {
+    switch (effectiveUserRole) {
       case "citizen":
         return [
           {
