@@ -5,19 +5,20 @@ export interface User {
   id: string;
   fullName: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   role: "CITIZEN" | "ADMINISTRATOR" | "WARD_OFFICER" | "MAINTENANCE_TEAM" | "GUEST";
   wardId?: string;
   department?: string;
   avatar?: string;
-  language: "en" | "hi" | "ml";
-  notificationsEnabled: boolean;
-  emailAlerts: boolean;
+  language?: string;
   isActive: boolean;
   lastLogin?: string;
-  isEmailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  joinedOn: string;
+  ward?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
 }
 
 export interface AuthState {
@@ -26,6 +27,10 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  otpStep: 'none' | 'sent' | 'verified';
+  requiresPasswordSetup: boolean;
+  otpEmail?: string;
+  otpExpiresAt?: string;
 }
 
 // Initial state
@@ -35,111 +40,241 @@ const initialState: AuthState = {
   isLoading: false,
   isAuthenticated: false,
   error: null,
+  otpStep: 'none',
+  requiresPasswordSetup: false,
 };
 
-// Async thunks
-export const loginUser = createAsyncThunk(
-  "auth/login",
+// Helper function to make API calls
+const apiCall = async (url: string, options: RequestInit = {}) => {
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || `HTTP ${response.status}`);
+  }
+
+  return data;
+};
+
+// Async thunks for password-based login
+export const loginWithPassword = createAsyncThunk(
+  "auth/loginWithPassword",
   async (
     credentials: { email: string; password: string },
     { rejectWithValue },
   ) => {
     try {
-      const response = await fetch("/api/auth/login", {
+      const data = await apiCall("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(credentials),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        return rejectWithValue(data.message || "Login failed");
-      }
-
       // Store token in localStorage
       localStorage.setItem("token", data.data.token);
 
       return data.data;
     } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Network error",
-      );
+      const errorMessage = error instanceof Error ? error.message : "Login failed";
+      
+      // Check if password setup is required
+      if (errorMessage.includes("Password not set")) {
+        return rejectWithValue({ 
+          message: errorMessage, 
+          requiresPasswordSetup: true 
+        });
+      }
+      
+      return rejectWithValue({ message: errorMessage });
     }
   },
 );
 
-export const registerUser = createAsyncThunk(
-  "auth/register",
+// Async thunks for OTP-based login
+export const requestOTPLogin = createAsyncThunk(
+  "auth/requestOTPLogin",
   async (
-    userData: Omit<
-      User,
-      "id" | "isActive" | "isEmailVerified" | "createdAt" | "updatedAt"
-    > & { password: string },
+    { email }: { email: string },
     { rejectWithValue },
   ) => {
     try {
-      const response = await fetch("/api/auth/register", {
+      const data = await apiCall("/api/auth/login-otp", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Failed to send OTP"
+      });
+    }
+  },
+);
 
-      if (!response.ok) {
-        return rejectWithValue(data.message || "Registration failed");
-      }
+export const verifyOTPLogin = createAsyncThunk(
+  "auth/verifyOTPLogin",
+  async (
+    { email, otpCode }: { email: string; otpCode: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall("/api/auth/verify-otp", {
+        method: "POST",
+        body: JSON.stringify({ email, otpCode }),
+      });
 
       // Store token in localStorage
       localStorage.setItem("token", data.data.token);
 
       return data.data;
     } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Network error",
-      );
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "OTP verification failed"
+      });
     }
   },
 );
 
+// Password setup flow
+export const sendPasswordSetupEmail = createAsyncThunk(
+  "auth/sendPasswordSetupEmail",
+  async (
+    { email }: { email: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall("/api/auth/send-password-setup", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Failed to send password setup email"
+      });
+    }
+  },
+);
+
+export const setPassword = createAsyncThunk(
+  "auth/setPassword",
+  async (
+    { token, password }: { token: string; password: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall(`/api/auth/set-password/${token}`, {
+        method: "POST",
+        body: JSON.stringify({ password }),
+      });
+
+      // Store token in localStorage
+      localStorage.setItem("token", data.data.token);
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Failed to set password"
+      });
+    }
+  },
+);
+
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (
+    { currentPassword, newPassword }: { currentPassword: string; newPassword: string },
+    { getState, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      const token = state.auth.token;
+
+      await apiCall("/api/auth/change-password", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      return true;
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Failed to change password"
+      });
+    }
+  },
+);
+
+// Registration
+export const registerUser = createAsyncThunk(
+  "auth/register",
+  async (
+    userData: {
+      fullName: string;
+      email: string;
+      phoneNumber?: string;
+      password: string;
+      role?: string;
+      wardId?: string;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(userData),
+      });
+
+      // Store token in localStorage
+      localStorage.setItem("token", data.data.token);
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Registration failed"
+      });
+    }
+  },
+);
+
+// Token-based authentication
 export const loginWithToken = createAsyncThunk(
   "auth/loginWithToken",
   async (_, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      return rejectWithValue("No token found");
+      return rejectWithValue({ message: "No token found" });
     }
 
     try {
-      const response = await fetch("/api/auth/me", {
+      const data = await apiCall("/api/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        localStorage.removeItem("token");
-        return rejectWithValue(data.message || "Token validation failed");
-      }
-
       return { user: data.data.user, token };
     } catch (error) {
       localStorage.removeItem("token");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Network error",
-      );
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Token validation failed"
+      });
     }
   },
 );
 
+// Profile management
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
   async (profileData: Partial<User>, { getState, rejectWithValue }) => {
@@ -147,70 +282,24 @@ export const updateProfile = createAsyncThunk(
       const state = getState() as { auth: AuthState };
       const token = state.auth.token;
 
-      const response = await fetch("/api/auth/profile", {
+      const data = await apiCall("/api/auth/profile", {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(profileData),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        return rejectWithValue(data.message || "Profile update failed");
-      }
-
       return data.data.user;
     } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Network error",
-      );
-    }
-  },
-);
-
-export const updateUserPreferences = createAsyncThunk(
-  "auth/updateUserPreferences",
-  async (
-    preferences: Partial<
-      Pick<User, "language" | "notificationsEnabled" | "emailAlerts">
-    >,
-    { getState, rejectWithValue },
-  ) => {
-    try {
-      const state = getState() as { auth: AuthState };
-      const token = state.auth.token;
-
-      if (!token) {
-        return rejectWithValue("No authentication token found");
-      }
-
-      const response = await fetch("/api/auth/preferences", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(preferences),
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Profile update failed"
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return rejectWithValue(data.message || "Failed to update preferences");
-      }
-
-      return data.data.user;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Network error",
-      );
     }
   },
 );
 
+// Logout
 export const logout = createAsyncThunk(
   "auth/logout",
   async (_, { getState }) => {
@@ -219,7 +308,7 @@ export const logout = createAsyncThunk(
 
     try {
       if (token) {
-        await fetch("/api/auth/logout", {
+        await apiCall("/api/auth/logout", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -250,28 +339,125 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
     resetAuth: () => initialState,
+    resetOTPState: (state) => {
+      state.otpStep = 'none';
+      state.otpEmail = undefined;
+      state.otpExpiresAt = undefined;
+      state.requiresPasswordSetup = false;
+    },
+    setRequiresPasswordSetup: (state, action: PayloadAction<boolean>) => {
+      state.requiresPasswordSetup = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Login
-      .addCase(loginUser.pending, (state) => {
+      // Password-based login
+      .addCase(loginWithPassword.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.requiresPasswordSetup = false;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(loginWithPassword.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.error = null;
+        state.otpStep = 'none';
+        state.requiresPasswordSetup = false;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(loginWithPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
-        state.error = action.payload as string;
+        state.error = (action.payload as any)?.message || "Login failed";
+        state.requiresPasswordSetup = (action.payload as any)?.requiresPasswordSetup || false;
       })
+      
+      // OTP login request
+      .addCase(requestOTPLogin.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.otpStep = 'none';
+      })
+      .addCase(requestOTPLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.otpStep = 'sent';
+        state.otpEmail = action.payload.email;
+        state.otpExpiresAt = action.payload.expiresAt;
+        state.error = null;
+      })
+      .addCase(requestOTPLogin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.otpStep = 'none';
+        state.error = (action.payload as any)?.message || "Failed to send OTP";
+      })
+      
+      // OTP verification
+      .addCase(verifyOTPLogin.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyOTPLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.otpStep = 'verified';
+        state.error = null;
+      })
+      .addCase(verifyOTPLogin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as any)?.message || "OTP verification failed";
+      })
+      
+      // Password setup email
+      .addCase(sendPasswordSetupEmail.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(sendPasswordSetupEmail.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(sendPasswordSetupEmail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as any)?.message || "Failed to send password setup email";
+      })
+      
+      // Set password
+      .addCase(setPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(setPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.requiresPasswordSetup = false;
+        state.error = null;
+      })
+      .addCase(setPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as any)?.message || "Failed to set password";
+      })
+      
+      // Change password
+      .addCase(changePassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as any)?.message || "Failed to change password";
+      })
+      
       // Register
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
@@ -289,8 +475,9 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
-        state.error = action.payload as string;
+        state.error = (action.payload as any)?.message || "Registration failed";
       })
+      
       // Login with token
       .addCase(loginWithToken.pending, (state) => {
         state.isLoading = true;
@@ -308,8 +495,9 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
-        state.error = action.payload as string;
+        state.error = (action.payload as any)?.message || "Token validation failed";
       })
+      
       // Update profile
       .addCase(updateProfile.pending, (state) => {
         state.isLoading = true;
@@ -322,22 +510,9 @@ const authSlice = createSlice({
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = (action.payload as any)?.message || "Profile update failed";
       })
-      // Update user preferences
-      .addCase(updateUserPreferences.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateUserPreferences.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload;
-        state.error = null;
-      })
-      .addCase(updateUserPreferences.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      })
+      
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.isAuthenticated = false;
@@ -345,15 +520,24 @@ const authSlice = createSlice({
         state.token = null;
         state.isLoading = false;
         state.error = null;
+        state.otpStep = 'none';
+        state.requiresPasswordSetup = false;
       });
   },
 });
 
-export const { clearError, setError, resetAuth } = authSlice.actions;
+export const { 
+  clearError, 
+  setError, 
+  resetAuth, 
+  resetOTPState, 
+  setRequiresPasswordSetup 
+} = authSlice.actions;
 
-// Export login and register for component usage
-export const login = loginUser;
+// Export common actions with backward compatibility
+export const login = loginWithPassword;
 export const register = registerUser;
+
 export default authSlice.reducer;
 
 // Selectors
@@ -364,3 +548,7 @@ export const selectIsAuthenticated = (state: { auth: AuthState }) =>
 export const selectAuthLoading = (state: { auth: AuthState }) =>
   state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
+export const selectOTPStep = (state: { auth: AuthState }) => state.auth.otpStep;
+export const selectRequiresPasswordSetup = (state: { auth: AuthState }) => 
+  state.auth.requiresPasswordSetup;
+export const selectOTPEmail = (state: { auth: AuthState }) => state.auth.otpEmail;
