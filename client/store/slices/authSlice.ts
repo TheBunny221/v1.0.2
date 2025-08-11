@@ -363,22 +363,23 @@ export const logout = createAsyncThunk(
     const state = getState() as { auth: AuthState };
     const token = state.auth.token;
 
-    try {
-      if (token) {
+    // Always clear local state first
+    localStorage.removeItem("token");
+
+    // Try to notify server, but don't fail if it doesn't work
+    if (token) {
+      try {
         await apiCall("/api/auth/logout", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+      } catch (error) {
+        // Silently handle logout API errors since local state is already cleared
+        console.warn("Server logout failed (local logout still successful):", error);
       }
-    } catch (error) {
-      // Even if logout request fails, we still want to clear local state
-      console.error("Logout request failed:", error);
     }
-
-    // Clear token from localStorage
-    localStorage.removeItem("token");
 
     return null;
   },
