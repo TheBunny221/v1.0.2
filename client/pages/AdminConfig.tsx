@@ -402,6 +402,30 @@ const AdminConfig: React.FC = () => {
     }
   };
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+          <p className="text-gray-600">Please log in to access the system configuration.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== "ADMINISTRATOR") {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+          <p className="text-gray-600">Administrator privileges required to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (dataLoading) {
     return (
       <div className="flex items-center justify-center h-64">
