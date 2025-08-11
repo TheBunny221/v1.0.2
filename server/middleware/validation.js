@@ -229,6 +229,106 @@ export const validatePagination = [
   handleValidationErrors,
 ];
 
+// Ward validation
+export const validateWard = [
+  body("name")
+    .notEmpty()
+    .withMessage("Ward name is required")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Ward name must be between 2 and 100 characters"),
+  body("description")
+    .notEmpty()
+    .withMessage("Ward description is required")
+    .isLength({ min: 10, max: 500 })
+    .withMessage("Description must be between 10 and 500 characters"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean"),
+  handleValidationErrors,
+];
+
+// SubZone validation
+export const validateSubZone = [
+  body("name")
+    .notEmpty()
+    .withMessage("Sub-zone name is required")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Sub-zone name must be between 2 and 100 characters"),
+  body("description")
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean"),
+  handleValidationErrors,
+];
+
+// User creation validation (Admin)
+export const validateUser = [
+  body("fullName")
+    .notEmpty()
+    .withMessage("Full name is required")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Name must be between 2 and 100 characters"),
+  body("email")
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .normalizeEmail(),
+  body("phoneNumber")
+    .optional()
+    .isMobilePhone()
+    .withMessage("Please enter a valid phone number"),
+  body("role")
+    .isIn(["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"])
+    .withMessage("Invalid role"),
+  body("wardId")
+    .optional()
+    .isString()
+    .withMessage("Invalid ward ID"),
+  body("department")
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage("Department name too long"),
+  handleValidationErrors,
+];
+
+// User update validation (Admin)
+export const validateUserUpdate = [
+  body("fullName")
+    .optional()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Name must be between 2 and 100 characters"),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .normalizeEmail(),
+  body("phoneNumber")
+    .optional()
+    .isMobilePhone()
+    .withMessage("Please enter a valid phone number"),
+  body("role")
+    .optional()
+    .isIn(["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"])
+    .withMessage("Invalid role"),
+  body("wardId")
+    .optional()
+    .isString()
+    .withMessage("Invalid ward ID"),
+  body("department")
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage("Department name too long"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean"),
+  handleValidationErrors,
+];
+
 export const validateComplaintFilters = [
   query("status")
     .optional()
