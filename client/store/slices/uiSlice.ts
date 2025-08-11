@@ -34,7 +34,11 @@ export interface Notification {
     | "complaint_resolved"
     | "complaint_closed"
     | "sla_warning"
-    | "sla_breach";
+    | "sla_breach"
+    | "success"
+    | "error"
+    | "warning"
+    | "info";
   title: string;
   message: string;
   isRead: boolean;
