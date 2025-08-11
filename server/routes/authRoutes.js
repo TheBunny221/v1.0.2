@@ -2,37 +2,36 @@ import express from "express";
 import {
   register,
   login,
+  loginWithOTP,
+  verifyOTPLogin,
+  sendPasswordSetup,
+  setPassword,
   logout,
   getMe,
   updateProfile,
   changePassword,
-  forgotPassword,
-  resetPassword,
   verifyToken,
 } from "../controller/authController.js";
 import { protect } from "../middleware/auth.js";
-import {
-  validateUserRegistration,
-  validateUserLogin,
-  validateUserUpdate,
-  validatePasswordChange,
-  validatePasswordReset,
-} from "../middleware/validation.js";
+import { validateRegistration, validateLogin, validateOTP, validatePasswordChange } from "../middleware/validation.js";
 
 const router = express.Router();
 
 // Public routes
-router.post("/register", validateUserRegistration, register);
-router.post("/login", validateUserLogin, login);
-router.post("/forgot-password", forgotPassword);
-router.put("/reset-password/:resettoken", validatePasswordReset, resetPassword);
+router.post("/register", validateRegistration, register);
+router.post("/login", validateLogin, login);
+router.post("/login-otp", loginWithOTP);
+router.post("/verify-otp", validateOTP, verifyOTPLogin);
+router.post("/send-password-setup", sendPasswordSetup);
+router.post("/set-password/:token", setPassword);
 
 // Protected routes
-router.use(protect);
+router.use(protect); // All routes after this middleware are protected
+
 router.post("/logout", logout);
 router.get("/me", getMe);
 router.get("/verify-token", verifyToken);
-router.put("/profile", validateUserUpdate, updateProfile);
+router.put("/profile", updateProfile);
 router.put("/change-password", validatePasswordChange, changePassword);
 
 export default router;
