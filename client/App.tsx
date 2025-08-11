@@ -12,6 +12,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import Navigation from "./components/Navigation";
 import RoleBasedRoute from "./components/RoleBasedRoute";
+import RoleBasedDashboard from "./components/RoleBasedDashboard";
 import { Loader2 } from "lucide-react";
 
 // Lazy load components for better performance
