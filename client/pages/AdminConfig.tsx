@@ -111,6 +111,9 @@ const AdminConfig: React.FC = () => {
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("token");
+
+    console.log(`[AdminConfig] Making API call to: ${url}`);
+
     const response = await fetch(`/api${url}`, {
       ...options,
       headers: {
@@ -124,6 +127,13 @@ const AdminConfig: React.FC = () => {
     const contentType = response.headers.get("content-type");
     const isJson = contentType && contentType.includes("application/json");
 
+    console.log(`[AdminConfig] Response for ${url}:`, {
+      status: response.status,
+      statusText: response.statusText,
+      contentType,
+      isJson
+    });
+
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}`;
 
@@ -131,12 +141,15 @@ const AdminConfig: React.FC = () => {
         try {
           const error = await response.json();
           errorMessage = error.message || errorMessage;
+          console.log(`[AdminConfig] Error response for ${url}:`, error);
         } catch {
           // Failed to parse JSON error response
+          console.log(`[AdminConfig] Failed to parse JSON error response for ${url}`);
         }
       } else {
         // Non-JSON response (likely HTML error page)
         const text = await response.text();
+        console.log(`[AdminConfig] Non-JSON error response for ${url}:`, text.substring(0, 200));
         if (text.includes("<!doctype") || text.includes("<html")) {
           errorMessage = "Server returned an error page. Please check your authentication and try again.";
         } else {
@@ -148,10 +161,18 @@ const AdminConfig: React.FC = () => {
     }
 
     if (!isJson) {
+      const text = await response.text();
+      console.log(`[AdminConfig] Non-JSON success response for ${url}:`, text.substring(0, 200));
       throw new Error("Server returned non-JSON response. Expected JSON data.");
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(`[AdminConfig] Success response for ${url}:`, {
+      success: data?.success,
+      dataLength: Array.isArray(data?.data) ? data.data.length : typeof data?.data
+    });
+
+    return data;
   };
 
   // Load data on component mount
