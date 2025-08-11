@@ -153,11 +153,7 @@ const AdminConfig: React.FC = () => {
       }
       
       setEditingWard(null);
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Ward Saved',
-        message: `Ward "${ward.name}" has been saved successfully.`,
-      }));
+      dispatch(showSuccessToast('Ward Saved', `Ward "${ward.name}" has been saved successfully.`));
     } catch (error) {
       dispatch(addNotification({
         type: 'error',
