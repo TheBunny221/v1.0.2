@@ -34,6 +34,7 @@ const Register: React.FC = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const { handleApiError } = useApiErrorHandler();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // API hooks
