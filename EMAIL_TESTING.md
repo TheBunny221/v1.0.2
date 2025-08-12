@@ -26,6 +26,7 @@ ETHEREAL_PASS="TW6wxYXSnmjatt3sxc"
 ### Email Service Features
 
 The email service supports:
+
 - ✅ **Basic email sending** with HTML and text content
 - ✅ **OTP emails** for authentication and verification
 - ✅ **Password setup emails** for new users
@@ -40,6 +41,7 @@ The email service supports:
 The application includes test endpoints for email testing:
 
 #### Test Basic Email
+
 ```bash
 POST http://localhost:4005/api/test/test-email
 Content-Type: application/json
@@ -52,6 +54,7 @@ Content-Type: application/json
 ```
 
 #### Test OTP Email
+
 ```bash
 POST http://localhost:4005/api/test/test-email
 Content-Type: application/json
@@ -63,6 +66,7 @@ Content-Type: application/json
 ```
 
 #### Check Email Configuration
+
 ```bash
 GET http://localhost:4005/api/test/email-config
 ```
@@ -93,21 +97,25 @@ When emails are sent in development mode, you'll see console output like:
 ## Email Types Supported
 
 ### 1. OTP Verification Email
+
 - **Purpose**: Email verification and login
 - **Triggers**: User registration, login with email
 - **Content**: Stylized OTP code with expiration time
 
 ### 2. Password Setup Email
+
 - **Purpose**: Setting up account password
 - **Triggers**: Account creation by admin
 - **Content**: Secure link to set password
 
 ### 3. Complaint Status Email
+
 - **Purpose**: Notification of complaint progress
 - **Triggers**: Admin updates complaint status
 - **Content**: Status update with complaint details
 
 ### 4. Welcome Email
+
 - **Purpose**: Welcome new citizens
 - **Triggers**: Guest complaint verification
 - **Content**: Account creation confirmation and features overview
@@ -115,6 +123,7 @@ When emails are sent in development mode, you'll see console output like:
 ## Email Templates
 
 All emails use a consistent design with:
+
 - **Header**: Gradient background with Cochin Smart City branding
 - **Content**: Clean, responsive HTML layout
 - **Footer**: Disclaimer and contact information
@@ -125,11 +134,13 @@ All emails use a consistent design with:
 ### Common Issues and Solutions
 
 1. **Emails not sending**
+
    - Check server logs for email transporter creation messages
    - Verify environment variables are loaded correctly
    - Ensure Ethereal credentials are valid
 
 2. **Preview URLs not showing**
+
    - Check if running in development mode
    - Verify nodemailer version supports getTestMessageUrl()
 

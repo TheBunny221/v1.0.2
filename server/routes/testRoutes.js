@@ -34,8 +34,12 @@ router.post("/test-email", async (req, res) => {
       result = await sendEmail({
         to,
         subject: subject || "Test Email from Cochin Smart City",
-        text: text || "This is a test email from the Cochin Smart City E-Governance Portal.",
-        html: html || `
+        text:
+          text ||
+          "This is a test email from the Cochin Smart City E-Governance Portal.",
+        html:
+          html ||
+          `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
               <h1 style="color: white; margin: 0;">Test Email</h1>

@@ -18,7 +18,10 @@ const createTransporter = () => {
     });
   } else {
     // Development email configuration using Ethereal
-    console.log("Email transporter created for development:", process.env.EMAIL_SERVICE);
+    console.log(
+      "Email transporter created for development:",
+      process.env.EMAIL_SERVICE,
+    );
     return nodemailer.createTransport({
       host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
       port: parseInt(process.env.EMAIL_PORT) || 587,
@@ -64,7 +67,11 @@ export const sendEmail = async ({ to, subject, text, html }) => {
       }
     }
 
-    return { success: true, messageId: info.messageId, previewUrl: nodemailer.getTestMessageUrl(info) };
+    return {
+      success: true,
+      messageId: info.messageId,
+      previewUrl: nodemailer.getTestMessageUrl(info),
+    };
   } catch (error) {
     console.error("Email sending failed:", error);
     return false;

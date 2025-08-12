@@ -66,8 +66,11 @@ const CitizenDashboard: React.FC = () => {
     { skip: !isAuthenticated || !user },
   );
 
-  const { data: statsResponse, isLoading: statsLoading, refetch: refetchStats } =
-    useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
+  const {
+    data: statsResponse,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
   const complaints = complaintsResponse?.data || [];
   const isLoading = complaintsLoading;
@@ -87,7 +90,9 @@ const CitizenDashboard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState(
     searchParams.get("status") || "all",
   );
-  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "all");
+  const [typeFilter, setTypeFilter] = useState(
+    searchParams.get("type") || "all",
+  );
   const [sortBy, setSortBy] = useState(
     searchParams.get("sort") || "submittedOn",
   );
@@ -106,7 +111,8 @@ const CitizenDashboard: React.FC = () => {
     // Update URL params to trigger re-fetch
     const params = new URLSearchParams();
     if (searchTerm) params.set("search", searchTerm);
-    if (statusFilter && statusFilter !== "all") params.set("status", statusFilter);
+    if (statusFilter && statusFilter !== "all")
+      params.set("status", statusFilter);
     if (typeFilter && typeFilter !== "all") params.set("type", typeFilter);
     if (sortBy) params.set("sort", sortBy);
     if (sortOrder) params.set("order", sortOrder);
@@ -423,7 +429,9 @@ const CitizenDashboard: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              {(searchTerm || (statusFilter && statusFilter !== "all") || (typeFilter && typeFilter !== "all")) && (
+              {(searchTerm ||
+                (statusFilter && statusFilter !== "all") ||
+                (typeFilter && typeFilter !== "all")) && (
                 <Button variant="ghost" onClick={clearAllFilters}>
                   <Filter className="h-4 w-4 mr-2" />
                   Clear Filters

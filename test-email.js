@@ -7,7 +7,7 @@ dotenv.config();
 async function testEmailService() {
   console.log("🧪 Testing Email Service Integration");
   console.log("================================");
-  
+
   console.log("📧 Current Email Configuration:");
   console.log("Host:", process.env.EMAIL_SERVICE);
   console.log("Port:", process.env.EMAIL_PORT);
@@ -32,7 +32,7 @@ async function testEmailService() {
             <p><strong>Sent at:</strong> ${new Date().toLocaleString()}</p>
           </div>
         </div>
-      `
+      `,
     });
 
     if (basicEmailResult && basicEmailResult.success) {
@@ -46,9 +46,13 @@ async function testEmailService() {
 
     console.log("");
     console.log("2️⃣ Testing OTP Email...");
-    
-    const otpResult = await sendOTPEmail("test@example.com", "123456", "verification");
-    
+
+    const otpResult = await sendOTPEmail(
+      "test@example.com",
+      "123456",
+      "verification",
+    );
+
     if (otpResult && otpResult.success) {
       console.log("✅ OTP email sent successfully!");
       if (otpResult.previewUrl) {
@@ -57,14 +61,15 @@ async function testEmailService() {
     } else {
       console.log("❌ OTP email failed");
     }
-
   } catch (error) {
     console.error("❌ Email test failed:", error.message);
   }
 
   console.log("");
   console.log("🎉 Email service test completed!");
-  console.log("💡 Check the Ethereal preview URLs above to see the sent emails");
+  console.log(
+    "💡 Check the Ethereal preview URLs above to see the sent emails",
+  );
 }
 
 // Run the test

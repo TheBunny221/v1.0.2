@@ -55,7 +55,9 @@ const baseQueryWithReauth: BaseQueryFn<
 
     // Set error in auth slice for global error handling
     if (result.error.status && result.error.status >= 500) {
-      api.dispatch(setError("A server error occurred. Please try again later."));
+      api.dispatch(
+        setError("A server error occurred. Please try again later."),
+      );
     }
   }
 
