@@ -25,6 +25,15 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
+  // Handle response properly to avoid body consumption issues
+  responseHandler: async (response) => {
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  },
 });
 
 // Enhanced base query with 401 auto-logout handling
