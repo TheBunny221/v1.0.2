@@ -435,6 +435,16 @@ export const validateOTP = [
   handleValidationErrors,
 ];
 
+// OTP request validation (for login/registration)
+export const validateOTPRequest = [
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
+
+  handleValidationErrors,
+];
+
 // Guest validation rules
 export const validateOtpRequest = [
   body("email")
