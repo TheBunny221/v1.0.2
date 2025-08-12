@@ -432,6 +432,19 @@ const ComplaintDetails: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              {/* Show feedback button for resolved/closed complaints if user is the complainant */}
+              {(complaint.status === "RESOLVED" || complaint.status === "CLOSED") &&
+                complaint.submittedById === user?.id &&
+                !complaint.rating && (
+                  <Button
+                    className="w-full justify-start"
+                    onClick={() => setShowFeedbackDialog(true)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Provide Feedback
+                  </Button>
+                )}
+
               <Button variant="outline" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" />
                 Export Details
