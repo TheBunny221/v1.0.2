@@ -123,12 +123,14 @@ const Register: React.FC = () => {
         // Navigation will be handled by auth state change
       }
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error("Registration error:", JSON.stringify(error, null, 2));
+      console.error("Registration error object:", error);
 
       // Let the global error handler handle 401s
       if (!handleApiError(error)) {
         // Handle other errors
         const errorMessage = getApiErrorMessage(error);
+        console.log("Extracted error message:", errorMessage);
         toast({
           title: "Registration Failed",
           description: errorMessage,
