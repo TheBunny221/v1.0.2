@@ -36,6 +36,12 @@ export interface AuthState {
   requiresPasswordSetup: boolean;
   otpEmail?: string;
   otpExpiresAt?: string;
+  registrationStep: "none" | "completed" | "otp_required" | "otp_verified";
+  registrationData?: {
+    email: string;
+    fullName: string;
+    role: string;
+  };
 }
 
 // Initial state
