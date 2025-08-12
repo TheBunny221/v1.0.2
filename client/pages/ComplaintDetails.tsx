@@ -86,16 +86,18 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: string) => {
     if (id) {
-      dispatch(
-        updateComplaintStatus({
+      try {
+        await updateStatus({
           id,
-          status: newStatus,
-          comment: statusComment,
-        }),
-      );
-      setStatusComment("");
+          status: newStatus as any,
+          remarks: statusComment,
+        }).unwrap();
+        setStatusComment("");
+      } catch (error) {
+        console.error("Failed to update status:", error);
+      }
     }
   };
 
