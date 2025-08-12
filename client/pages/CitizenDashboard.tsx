@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, useMemo } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import {
   useGetComplaintsQuery,
@@ -52,19 +52,25 @@ import {
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Use RTK Query for better authentication handling
   const {
     data: complaintsResponse,
     isLoading: complaintsLoading,
     error: complaintsError,
+    refetch: refetchComplaints,
   } = useGetComplaintsQuery(
     { page: 1, limit: 50 }, // Get more complaints for better stats
     { skip: !isAuthenticated || !user },
   );
 
-  const { data: statsResponse, isLoading: statsLoading } =
-    useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
+  const {
+    data: statsResponse,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
   const complaints = complaintsResponse?.data || [];
   const isLoading = complaintsLoading;
@@ -82,15 +88,48 @@ const CitizenDashboard: React.FC = () => {
     searchParams.get("search") || "",
   );
   const [statusFilter, setStatusFilter] = useState(
-    searchParams.get("status") || "",
+    searchParams.get("status") || "all",
   );
-  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "");
+  const [typeFilter, setTypeFilter] = useState(
+    searchParams.get("type") || "all",
+  );
   const [sortBy, setSortBy] = useState(
     searchParams.get("sort") || "submittedOn",
   );
   const [sortOrder, setSortOrder] = useState(
     searchParams.get("order") || "desc",
   );
+
+  // Handler functions
+  const handleRefresh = () => {
+    refetchComplaints();
+    refetchStats();
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Update URL params to trigger re-fetch
+    const params = new URLSearchParams();
+    if (searchTerm) params.set("search", searchTerm);
+    if (statusFilter && statusFilter !== "all")
+      params.set("status", statusFilter);
+    if (typeFilter && typeFilter !== "all") params.set("type", typeFilter);
+    if (sortBy) params.set("sort", sortBy);
+    if (sortOrder) params.set("order", sortOrder);
+
+    navigate(`/dashboard?${params.toString()}`);
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setSortBy("submittedOn");
+    setSortOrder("desc");
+
+    // Navigate to dashboard without any query parameters
+    navigate("/dashboard");
+  };
 
   // Fetch complaints when user is available or filters change
   useEffect(() => {
@@ -338,7 +377,7 @@ const CitizenDashboard: React.FC = () => {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="REGISTERED">Registered</SelectItem>
                   <SelectItem value="ASSIGNED">Assigned</SelectItem>
                   <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
@@ -352,7 +391,7 @@ const CitizenDashboard: React.FC = () => {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="WATER_SUPPLY">Water Supply</SelectItem>
                   <SelectItem value="ELECTRICITY">Electricity</SelectItem>
                   <SelectItem value="ROAD_REPAIR">Road Repair</SelectItem>
@@ -390,7 +429,9 @@ const CitizenDashboard: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              {(searchTerm || statusFilter || typeFilter) && (
+              {(searchTerm ||
+                (statusFilter && statusFilter !== "all") ||
+                (typeFilter && typeFilter !== "all")) && (
                 <Button variant="ghost" onClick={clearAllFilters}>
                   <Filter className="h-4 w-4 mr-2" />
                   Clear Filters

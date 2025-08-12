@@ -23,6 +23,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
+import testRoutes from "./routes/testRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -156,6 +157,11 @@ export function createApp() {
   app.use("/api/uploads", uploadRoutes);
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
+
+  // Development test routes (only in development)
+  if (process.env.NODE_ENV !== "production") {
+    app.use("/api/test", testRoutes);
+  }
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {

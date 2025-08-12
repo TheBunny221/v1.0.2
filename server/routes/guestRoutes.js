@@ -64,12 +64,18 @@ const upload = multer({
   storage: storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB
+    files: 5, // Max 5 files
   },
   fileFilter: fileFilter,
 });
 
 // Public guest routes
 router.post("/complaint", upload.array("attachments", 5), submitGuestComplaint);
+router.post(
+  "/complaint-with-attachments",
+  upload.array("attachments", 5),
+  submitGuestComplaintWithAttachments,
+);
 router.post("/verify-otp", validateOtpVerification, verifyOTPAndRegister);
 router.post("/resend-otp", resendOTP);
 router.get("/track/:complaintId", validateComplaintTracking, trackComplaint);
