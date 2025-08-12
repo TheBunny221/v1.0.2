@@ -639,7 +639,7 @@ const Index: React.FC = () => {
                   <Button
                     type="submit"
                     className="flex-1 md:flex-none"
-                    disabled={isSubmitting}
+                    disabled={isLoading}
                   >
                     {isSubmitting
                       ? translations?.common?.loading || "Submitting..."
