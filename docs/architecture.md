@@ -71,30 +71,36 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Frontend Technologies
 
 #### Core Framework
+
 - **React 18.3.1**: Modern React with concurrent features
 - **TypeScript 5.5.3**: Static type checking and enhanced developer experience
 - **Vite 6.2.2**: Next-generation frontend build tool with HMR
 
 #### State Management
+
 - **Redux Toolkit 2.8.2**: Predictable state container
 - **React Redux 9.2.0**: Official React bindings for Redux
 - **RTK Query**: Data fetching and caching solution
 
 #### Routing & Navigation
+
 - **React Router 6.26.2**: Declarative routing for React applications
 - **SPA Mode**: Single Page Application architecture
 
 #### UI Framework & Styling
+
 - **TailwindCSS 3.4.11**: Utility-first CSS framework
 - **Radix UI**: Low-level UI primitives for accessibility
 - **Lucide React 0.462.0**: Modern icon library
 - **Framer Motion 12.6.2**: Production-ready motion library
 
 #### Form Management
+
 - **React Hook Form 7.53.0**: Performant forms with easy validation
 - **Zod 3.23.8**: TypeScript-first schema validation
 
 #### Development Tools
+
 - **Vitest 3.1.4**: Vite-native unit test framework
 - **Cypress**: End-to-end testing framework
 - **ESLint & Prettier**: Code quality and formatting
@@ -102,16 +108,19 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Backend Technologies
 
 #### Core Framework
+
 - **Node.js 18+**: JavaScript runtime environment
 - **Express.js 4.18.2**: Fast, unopinionated web framework
 - **TypeScript**: Server-side type safety
 
 #### Database & ORM
+
 - **Prisma 5.7.1**: Next-generation Node.js and TypeScript ORM
 - **SQLite**: Development database (file-based)
 - **PostgreSQL 13+**: Production database (recommended)
 
 #### Authentication & Security
+
 - **JSON Web Tokens (JWT)**: Stateless authentication
 - **bcryptjs 2.4.3**: Password hashing
 - **Helmet 8.1.0**: Security headers middleware
@@ -119,30 +128,36 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 - **Express Rate Limit**: API rate limiting
 
 #### API Documentation
+
 - **Swagger/OpenAPI 3.0**: API documentation standard
 - **swagger-jsdoc 6.2.8**: Swagger specification generator
 - **swagger-ui-express 5.0.1**: Swagger UI middleware
 
 #### File Management
+
 - **Multer 1.4.5**: Multipart/form-data file upload handling
 - **File System**: Local file storage with configurable paths
 
 #### Communication
+
 - **Nodemailer 7.0.5**: Email sending capabilities
 - **SMTP**: Email delivery protocol
 
 ### Development & Deployment
 
 #### Package Management
+
 - **npm**: Package manager and script runner
 - **Node.js 18+**: Runtime requirement
 
 #### Build & Development
+
 - **Concurrently**: Run multiple npm scripts simultaneously
 - **Nodemon**: Development server auto-restart
 - **Hot Module Replacement**: Live code updates
 
 #### Production Deployment
+
 - **PM2**: Production process manager
 - **Nginx**: Reverse proxy and static file serving
 - **Docker**: Containerization support
@@ -155,9 +170,11 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Frontend Modules
 
 #### 1. Authentication Module (`client/store/slices/authSlice.ts`)
+
 **Purpose**: Manages user authentication state and JWT tokens
 
 **Features**:
+
 - JWT token management
 - User session persistence
 - Role-based access control
@@ -165,15 +182,18 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 - Password reset functionality
 
 **API Dependencies**:
+
 - `POST /api/auth/login`
 - `POST /api/auth/register`
 - `POST /api/auth/verify-otp`
 - `GET /api/auth/me`
 
 #### 2. Complaint Management Module (`client/store/slices/complaintsSlice.ts`)
+
 **Purpose**: Handles all complaint-related operations
 
 **Features**:
+
 - Complaint CRUD operations
 - Status updates and tracking
 - File attachment management
@@ -181,38 +201,46 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 - Pagination support
 
 **API Dependencies**:
+
 - `GET /api/complaints`
 - `POST /api/complaints`
 - `PUT /api/complaints/:id/status`
 - `POST /api/uploads/complaint/:id/attachment`
 
 #### 3. Guest User Module (`client/store/slices/guestSlice.ts`)
+
 **Purpose**: Manages anonymous user interactions
 
 **Features**:
+
 - Guest complaint submission
 - OTP verification
 - Complaint tracking
 - Auto-registration option
 
 **API Dependencies**:
+
 - `POST /api/guest/complaint`
 - `POST /api/guest/verify-otp`
 - `GET /api/guest/track/:id`
 
 #### 4. UI Component Library (`client/components/ui/`)
+
 **Purpose**: Reusable UI components based on Radix UI
 
 **Components**:
+
 - Form controls (Button, Input, Select)
 - Layout components (Card, Dialog, Sheet)
 - Data display (Table, Badge, Alert)
 - Navigation components
 
 #### 5. Page Components (`client/pages/`)
+
 **Purpose**: Route-specific page components
 
 **Key Pages**:
+
 - Dashboard pages (role-specific)
 - Complaint management pages
 - User management (admin)
@@ -221,53 +249,65 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Backend Modules
 
 #### 1. Authentication Controller (`server/controller/authController.js`)
+
 **Purpose**: Handles user authentication and authorization
 
 **Endpoints**:
+
 - User registration and login
 - JWT token management
 - OTP generation and verification
 - Password reset workflows
 
 #### 2. Complaint Controller (`server/controller/complaintController.js`)
+
 **Purpose**: Manages complaint lifecycle
 
 **Endpoints**:
+
 - Complaint CRUD operations
 - Status updates and assignment
 - Feedback and rating system
 - Statistics and reporting
 
 #### 3. Guest Controller (`server/controller/guestController.js`)
+
 **Purpose**: Handles anonymous user operations
 
 **Endpoints**:
+
 - Guest complaint submission
 - OTP verification and auto-registration
 - Public complaint tracking
 - Public statistics
 
 #### 4. Admin Controller (`server/controller/adminController.js`)
+
 **Purpose**: Administrative operations
 
 **Endpoints**:
+
 - User management
 - System analytics
 - Bulk operations
 - System configuration
 
 #### 5. Upload Controller (`server/controller/uploadController.js`)
+
 **Purpose**: File upload and management
 
 **Endpoints**:
+
 - File upload handling
 - File serving and downloads
 - File validation and security
 
 #### 6. Middleware Layer (`server/middleware/`)
+
 **Purpose**: Request processing and security
 
 **Components**:
+
 - Authentication middleware
 - Authorization middleware
 - Validation middleware
@@ -277,6 +317,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Database Module (Prisma Schema)
 
 #### Core Models:
+
 1. **User**: User accounts and profiles
 2. **Ward**: Geographical divisions
 3. **Complaint**: Core complaint entity
@@ -335,16 +376,19 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Database Schema Design Principles
 
 #### 1. Normalization
+
 - **Third Normal Form (3NF)**: Eliminates data redundancy
 - **Referential Integrity**: Foreign key constraints maintain data consistency
 - **Indexed Fields**: Performance optimization for frequent queries
 
 #### 2. Scalability Considerations
+
 - **Partitioning Ready**: Complaints can be partitioned by date or ward
 - **Index Strategy**: Composite indexes on frequently queried combinations
 - **Data Archival**: Status logs can be archived for historical analysis
 
 #### 3. Data Types and Constraints
+
 ```sql
 -- Example constraint patterns
 CHECK (status IN ('REGISTERED', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'))
@@ -359,6 +403,7 @@ CHECK (rating >= 1 AND rating <= 5)
 ### RESTful Design Patterns
 
 #### 1. Resource-Based URLs
+
 ```
 GET    /api/complaints           # List complaints
 POST   /api/complaints           # Create complaint
@@ -368,6 +413,7 @@ DELETE /api/complaints/:id       # Delete complaint (admin only)
 ```
 
 #### 2. HTTP Status Codes
+
 - **200 OK**: Successful GET, PUT requests
 - **201 Created**: Successful POST requests
 - **400 Bad Request**: Client validation errors
@@ -379,6 +425,7 @@ DELETE /api/complaints/:id       # Delete complaint (admin only)
 - **500 Internal Server Error**: Server-side errors
 
 #### 3. Consistent Response Format
+
 ```json
 {
   "success": boolean,
@@ -397,23 +444,27 @@ DELETE /api/complaints/:id       # Delete complaint (admin only)
 ### API Endpoint Categorization
 
 #### Public Endpoints (No Authentication)
+
 - Health check
 - Public statistics
 - Guest complaint submission
 - Ward and complaint type listings
 
 #### User Endpoints (Authentication Required)
+
 - Profile management
 - Complaint operations
 - Dashboard data
 
 #### Role-Specific Endpoints
+
 - **Citizens**: Personal complaints, feedback
 - **Ward Officers**: Ward management, assignment
 - **Maintenance Teams**: Task management
 - **Administrators**: User management, system configuration
 
 #### Administrative Endpoints (Admin Only)
+
 - User CRUD operations
 - System analytics
 - Bulk operations
@@ -450,6 +501,7 @@ App (Provider Wrapper)
 ### State Management Architecture
 
 #### Redux Store Structure
+
 ```javascript
 {
   auth: {
@@ -479,6 +531,7 @@ App (Provider Wrapper)
 ```
 
 #### Data Flow Pattern
+
 ```
 Component → Action Creator → Reducer → Store → Component
      ↑                                              ↓
@@ -488,21 +541,24 @@ Component → Action Creator → Reducer → Store → Component
 ### Component Design Patterns
 
 #### 1. Container-Presentation Pattern
+
 - **Container Components**: Handle logic and state
 - **Presentation Components**: Pure UI rendering
 
 #### 2. Higher-Order Components (HOCs)
+
 - `RoleBasedRoute`: Authorization wrapper
 - `withAuth`: Authentication requirement
 - `withLoading`: Loading state management
 
 #### 3. Custom Hooks Pattern
+
 ```typescript
 // Custom hooks for business logic
-useAuth()         // Authentication state
-useComplaints()   // Complaint operations
-usePermissions()  // Role-based permissions
-usePagination()   // Pagination logic
+useAuth(); // Authentication state
+useComplaints(); // Complaint operations
+usePermissions(); // Role-based permissions
+usePagination(); // Pagination logic
 ```
 
 ---
@@ -524,6 +580,7 @@ usePagination()   // Pagination logic
 ### Authorization Layers
 
 #### 1. Route-Level Protection
+
 ```typescript
 <RoleBasedRoute allowedRoles={['ADMINISTRATOR']}>
   <AdminUsers />
@@ -531,12 +588,14 @@ usePagination()   // Pagination logic
 ```
 
 #### 2. API Middleware Protection
+
 ```javascript
-router.use(protect);                    // Authentication required
-router.use(authorize('ADMINISTRATOR')); // Role authorization
+router.use(protect); // Authentication required
+router.use(authorize("ADMINISTRATOR")); // Role authorization
 ```
 
 #### 3. Component-Level Security
+
 ```typescript
 {hasPermission('MANAGE_USERS') && (
   <UserManagementPanel />
@@ -546,16 +605,19 @@ router.use(authorize('ADMINISTRATOR')); // Role authorization
 ### Security Measures
 
 #### 1. Input Validation
+
 - **Frontend**: Zod schema validation
 - **Backend**: Express-validator middleware
 - **Database**: Prisma type safety
 
 #### 2. Data Protection
+
 - **Password Hashing**: bcrypt with salt rounds
 - **JWT Secrets**: Environment-based configuration
 - **CORS Configuration**: Restricted origin policies
 
 #### 3. File Upload Security
+
 - **File Type Validation**: Whitelist approach
 - **File Size Limits**: Configurable limits
 - **Path Traversal Prevention**: Sanitized file names
@@ -614,16 +676,19 @@ router.use(authorize('ADMINISTRATOR')); // Role authorization
 ### Cloud Deployment Options
 
 #### 1. Traditional VPS
+
 - **Components**: Nginx + PM2 + PostgreSQL
 - **Benefits**: Full control, cost-effective
 - **Use Case**: Self-hosted government infrastructure
 
 #### 2. Platform as a Service (PaaS)
+
 - **Heroku**: Easy deployment with add-ons
 - **Railway**: Modern deployment platform
 - **DigitalOcean App Platform**: Managed deployment
 
 #### 3. Container Deployment
+
 - **Docker**: Containerized application
 - **Kubernetes**: Orchestrated scaling
 - **Docker Compose**: Multi-service coordination
@@ -780,16 +845,19 @@ cochin-smart-city/
 ### Key Directory Explanations
 
 #### Frontend Structure (`client/`)
+
 - **Modular Architecture**: Clear separation between components, pages, and state
 - **Atomic Design**: UI components built on Radix primitives
 - **Type Safety**: Full TypeScript coverage with shared types
 
 #### Backend Structure (`server/`)
+
 - **Layered Architecture**: Controllers, routes, middleware separation
 - **RESTful Design**: Resource-based routing patterns
 - **Security-First**: Authentication and validation middleware
 
 #### Database Structure (`prisma/`)
+
 - **Schema-First**: Prisma schema defines database structure
 - **Type Generation**: Automatic TypeScript types from schema
 - **Migration Support**: Version-controlled database changes
@@ -806,7 +874,7 @@ sequenceDiagram
     participant F as Frontend
     participant B as Backend
     participant D as Database
-    
+
     U->>F: Enter credentials
     F->>B: POST /api/auth/login
     B->>D: Validate user
@@ -815,7 +883,7 @@ sequenceDiagram
     B->>F: JWT token + user data
     F->>F: Store token
     F->>U: Redirect to dashboard
-    
+
     Note over F,B: All subsequent requests include JWT
     F->>B: API request with Bearer token
     B->>B: Verify JWT
@@ -831,25 +899,25 @@ flowchart TD
     A[User starts complaint] --> B{Authenticated?}
     B -->|Yes| C[Fill complaint form]
     B -->|No| D[Guest complaint form]
-    
+
     C --> E[Upload attachments]
     D --> F[Enter contact details]
-    
+
     E --> G[Submit to API]
     F --> H[Submit guest complaint]
-    
+
     G --> I[Validate data]
     H --> J[Send OTP]
-    
+
     I --> K[Save to database]
     J --> L[Verify OTP]
-    
+
     K --> M[Generate tracking ID]
     L --> N[Save guest complaint]
-    
+
     M --> O[Send confirmation]
     N --> P[Auto-register option]
-    
+
     O --> Q[Redirect to tracking]
     P --> Q
 ```
@@ -861,14 +929,14 @@ flowchart TD
     A[User requests route] --> B[Check authentication]
     B -->|Not authenticated| C[Redirect to login]
     B -->|Authenticated| D[Check user role]
-    
+
     D --> E{Route permissions}
     E -->|CITIZEN| F[Citizen-specific routes]
     E -->|WARD_OFFICER| G[Ward officer routes]
     E -->|MAINTENANCE_TEAM| H[Maintenance routes]
     E -->|ADMINISTRATOR| I[Admin routes]
     E -->|Unauthorized| J[Show unauthorized page]
-    
+
     F --> K[Render component]
     G --> K
     H --> K
@@ -883,16 +951,19 @@ flowchart TD
 ### Horizontal Scaling Strategies
 
 #### 1. Frontend Scaling
+
 - **CDN Distribution**: Static assets served via CDN
 - **Load Balancing**: Multiple frontend instances
 - **Caching Strategy**: Service worker for offline capability
 
 #### 2. Backend Scaling
+
 - **Stateless Design**: JWT-based authentication (no sessions)
 - **Database Connection Pooling**: Efficient connection management
 - **Microservices Ready**: Modular controller structure
 
 #### 3. Database Scaling
+
 - **Read Replicas**: Separate read/write databases
 - **Indexing Strategy**: Optimized queries for large datasets
 - **Data Archiving**: Historical data management
@@ -900,6 +971,7 @@ flowchart TD
 ### Performance Optimizations
 
 #### Frontend Optimizations
+
 ```typescript
 // Code splitting by route
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -918,32 +990,35 @@ const ComplaintsList = memo(({ complaints }) => {
 ```
 
 #### Backend Optimizations
+
 ```javascript
 // Database query optimization
 const complaints = await prisma.complaint.findMany({
   include: {
     ward: true,
     submittedBy: {
-      select: { id: true, fullName: true }
-    }
+      select: { id: true, fullName: true },
+    },
   },
-  orderBy: { submittedOn: 'desc' },
+  orderBy: { submittedOn: "desc" },
   take: 20,
-  skip: (page - 1) * 20
+  skip: (page - 1) * 20,
 });
 
 // Caching frequently accessed data
-const cachedWards = await redis.get('wards:all');
+const cachedWards = await redis.get("wards:all");
 ```
 
 ### Monitoring and Observability
 
 #### Application Metrics
+
 - **Response Times**: API endpoint performance
 - **Error Rates**: Application error tracking
 - **User Activity**: Feature usage analytics
 
 #### Infrastructure Metrics
+
 - **Database Performance**: Query execution times
 - **Memory Usage**: Application memory consumption
 - **Network I/O**: Request/response patterns
