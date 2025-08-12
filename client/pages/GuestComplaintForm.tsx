@@ -88,31 +88,111 @@ import { useToast } from "../hooks/use-toast";
 
 // Mock data - in real app this would come from API
 const WARDS = [
-  { id: "ward-1", name: "Fort Kochi", subZones: ["Marine Drive", "Parade Ground", "Princess Street"] },
-  { id: "ward-2", name: "Mattancherry", subZones: ["Jew Town", "Dutch Palace", "Spice Market"] },
-  { id: "ward-3", name: "Ernakulam South", subZones: ["MG Road", "Broadway", "Shanmugham Road"] },
-  { id: "ward-4", name: "Ernakulam North", subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"] },
-  { id: "ward-5", name: "Kadavanthra", subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"] },
-  { id: "ward-6", name: "Thevara", subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"] },
+  {
+    id: "ward-1",
+    name: "Fort Kochi",
+    subZones: ["Marine Drive", "Parade Ground", "Princess Street"],
+  },
+  {
+    id: "ward-2",
+    name: "Mattancherry",
+    subZones: ["Jew Town", "Dutch Palace", "Spice Market"],
+  },
+  {
+    id: "ward-3",
+    name: "Ernakulam South",
+    subZones: ["MG Road", "Broadway", "Shanmugham Road"],
+  },
+  {
+    id: "ward-4",
+    name: "Ernakulam North",
+    subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"],
+  },
+  {
+    id: "ward-5",
+    name: "Kadavanthra",
+    subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"],
+  },
+  {
+    id: "ward-6",
+    name: "Thevara",
+    subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"],
+  },
 ];
 
 const COMPLAINT_TYPES = [
-  { value: "WATER_SUPPLY", label: "Water Supply", description: "Issues with water supply, quality, or pressure" },
-  { value: "ELECTRICITY", label: "Electricity", description: "Power outages, faulty connections, or street lighting" },
-  { value: "ROAD_REPAIR", label: "Road Repair", description: "Potholes, broken roads, or pedestrian issues" },
-  { value: "GARBAGE_COLLECTION", label: "Garbage Collection", description: "Waste management and cleanliness issues" },
-  { value: "STREET_LIGHTING", label: "Street Lighting", description: "Non-functioning or damaged street lights" },
-  { value: "SEWERAGE", label: "Sewerage", description: "Drainage problems, blockages, or overflow" },
-  { value: "PUBLIC_HEALTH", label: "Public Health", description: "Health and sanitation concerns" },
-  { value: "TRAFFIC", label: "Traffic", description: "Traffic management and road safety issues" },
-  { value: "OTHERS", label: "Others", description: "Any other civic issues not listed above" },
+  {
+    value: "WATER_SUPPLY",
+    label: "Water Supply",
+    description: "Issues with water supply, quality, or pressure",
+  },
+  {
+    value: "ELECTRICITY",
+    label: "Electricity",
+    description: "Power outages, faulty connections, or street lighting",
+  },
+  {
+    value: "ROAD_REPAIR",
+    label: "Road Repair",
+    description: "Potholes, broken roads, or pedestrian issues",
+  },
+  {
+    value: "GARBAGE_COLLECTION",
+    label: "Garbage Collection",
+    description: "Waste management and cleanliness issues",
+  },
+  {
+    value: "STREET_LIGHTING",
+    label: "Street Lighting",
+    description: "Non-functioning or damaged street lights",
+  },
+  {
+    value: "SEWERAGE",
+    label: "Sewerage",
+    description: "Drainage problems, blockages, or overflow",
+  },
+  {
+    value: "PUBLIC_HEALTH",
+    label: "Public Health",
+    description: "Health and sanitation concerns",
+  },
+  {
+    value: "TRAFFIC",
+    label: "Traffic",
+    description: "Traffic management and road safety issues",
+  },
+  {
+    value: "OTHERS",
+    label: "Others",
+    description: "Any other civic issues not listed above",
+  },
 ];
 
 const PRIORITIES = [
-  { value: "LOW", label: "Low", color: "bg-gray-500", description: "Non-urgent issues" },
-  { value: "MEDIUM", label: "Medium", color: "bg-blue-500", description: "Standard issues requiring attention" },
-  { value: "HIGH", label: "High", color: "bg-orange-500", description: "Important issues affecting daily life" },
-  { value: "CRITICAL", label: "Critical", color: "bg-red-500", description: "Emergency situations requiring immediate attention" },
+  {
+    value: "LOW",
+    label: "Low",
+    color: "bg-gray-500",
+    description: "Non-urgent issues",
+  },
+  {
+    value: "MEDIUM",
+    label: "Medium",
+    color: "bg-blue-500",
+    description: "Standard issues requiring attention",
+  },
+  {
+    value: "HIGH",
+    label: "High",
+    color: "bg-orange-500",
+    description: "Important issues affecting daily life",
+  },
+  {
+    value: "CRITICAL",
+    label: "Critical",
+    color: "bg-red-500",
+    description: "Emergency situations requiring immediate attention",
+  },
 ];
 
 const GuestComplaintForm: React.FC = () => {
@@ -160,12 +240,14 @@ const GuestComplaintForm: React.FC = () => {
             lng: position.coords.longitude,
           };
           setCurrentLocation(coords);
-          dispatch(updateFormData({
-            coordinates: {
-              latitude: coords.lat,
-              longitude: coords.lng,
-            }
-          }));
+          dispatch(
+            updateFormData({
+              coordinates: {
+                latitude: coords.lat,
+                longitude: coords.lng,
+              },
+            }),
+          );
         },
         (error) => {
           console.log("Location access denied or unavailable");
@@ -175,64 +257,78 @@ const GuestComplaintForm: React.FC = () => {
   }, [dispatch]);
 
   // Handle input changes
-  const handleInputChange = useCallback((
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    dispatch(updateFormData({ [name]: value }));
-  }, [dispatch]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      dispatch(updateFormData({ [name]: value }));
+    },
+    [dispatch],
+  );
 
   // Handle select changes
-  const handleSelectChange = useCallback((name: string, value: string) => {
-    dispatch(updateFormData({ [name]: value }));
-  }, [dispatch]);
+  const handleSelectChange = useCallback(
+    (name: string, value: string) => {
+      dispatch(updateFormData({ [name]: value }));
+    },
+    [dispatch],
+  );
 
   // Handle file upload
-  const handleFileUpload = useCallback((files: FileList | null) => {
-    if (!files) return;
+  const handleFileUpload = useCallback(
+    (files: FileList | null) => {
+      if (!files) return;
 
-    Array.from(files).forEach((file) => {
-      // Validate file
-      if (file.size > 10 * 1024 * 1024) { // 10MB
-        toast({
-          title: "File too large",
-          description: "Please select files smaller than 10MB",
-          variant: "destructive",
-        });
-        return;
-      }
+      Array.from(files).forEach((file) => {
+        // Validate file
+        if (file.size > 10 * 1024 * 1024) {
+          // 10MB
+          toast({
+            title: "File too large",
+            description: "Please select files smaller than 10MB",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Only JPG and PNG images are allowed",
-          variant: "destructive",
-        });
-        return;
-      }
+        if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+          toast({
+            title: "Invalid file type",
+            description: "Only JPG and PNG images are allowed",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      // Create attachment object
-      const attachment: AttachmentFile = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        file,
-        preview: URL.createObjectURL(file),
-        uploading: false,
-        uploaded: false,
-      };
+        // Create attachment object
+        const attachment: AttachmentFile = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          file,
+          preview: URL.createObjectURL(file),
+          uploading: false,
+          uploaded: false,
+        };
 
-      dispatch(addAttachment(attachment));
-    });
-  }, [dispatch, toast]);
+        dispatch(addAttachment(attachment));
+      });
+    },
+    [dispatch, toast],
+  );
 
   // Handle attachment removal
-  const handleRemoveAttachment = useCallback((id: string) => {
-    dispatch(removeAttachment(id));
-  }, [dispatch]);
+  const handleRemoveAttachment = useCallback(
+    (id: string) => {
+      dispatch(removeAttachment(id));
+    },
+    [dispatch],
+  );
 
   // Handle image preview
-  const handlePreviewImage = useCallback((url: string) => {
-    dispatch(setImagePreview({ show: true, url }));
-  }, [dispatch]);
+  const handlePreviewImage = useCallback(
+    (url: string) => {
+      dispatch(setImagePreview({ show: true, url }));
+    },
+    [dispatch],
+  );
 
   // Handle form navigation
   const handleNext = useCallback(() => {
@@ -252,16 +348,19 @@ const GuestComplaintForm: React.FC = () => {
     dispatch(prevStep());
   }, [dispatch]);
 
-  const handleStepClick = useCallback((stepNumber: number) => {
-    if (stepNumber <= currentStep) {
-      dispatch(setCurrentStep(stepNumber));
-    }
-  }, [dispatch, currentStep]);
+  const handleStepClick = useCallback(
+    (stepNumber: number) => {
+      if (stepNumber <= currentStep) {
+        dispatch(setCurrentStep(stepNumber));
+      }
+    },
+    [dispatch, currentStep],
+  );
 
   // Handle form submission
   const handleSubmit = useCallback(async () => {
     dispatch(validateCurrentStep());
-    
+
     // Final validation
     const hasErrors = Object.keys(validationErrors).length > 0;
     if (hasErrors) {
@@ -284,7 +383,8 @@ const GuestComplaintForm: React.FC = () => {
           complaintId: result.complaintId,
           trackingNumber: result.trackingNumber,
           title: "Verify Your Complaint",
-          description: "Enter the verification code sent to your email to complete your complaint submission",
+          description:
+            "Enter the verification code sent to your email to complete your complaint submission",
           onSuccess: () => {
             toast({
               title: "Success!",
@@ -302,7 +402,8 @@ const GuestComplaintForm: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit complaint. Please try again.",
+        description:
+          error.message || "Failed to submit complaint. Please try again.",
         variant: "destructive",
       });
     }
@@ -312,7 +413,8 @@ const GuestComplaintForm: React.FC = () => {
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   // Get available sub-zones based on selected ward
-  const availableSubZones = WARDS.find(ward => ward.id === formData.wardId)?.subZones || [];
+  const availableSubZones =
+    WARDS.find((ward) => ward.id === formData.wardId)?.subZones || [];
 
   // Success page
   if (submissionStep === "success") {
@@ -331,7 +433,8 @@ const GuestComplaintForm: React.FC = () => {
                     Welcome to Cochin Smart City!
                   </h2>
                   <p className="text-green-700 mt-2">
-                    Your complaint has been verified and you've been registered as a citizen.
+                    Your complaint has been verified and you've been registered
+                    as a citizen.
                   </p>
                 </div>
 
@@ -340,19 +443,24 @@ const GuestComplaintForm: React.FC = () => {
                     <strong>Tracking Number:</strong> {trackingNumber}
                   </p>
                   <p className="text-sm text-gray-700 mt-1">
-                    You can now track your complaint progress from your dashboard.
+                    You can now track your complaint progress from your
+                    dashboard.
                   </p>
                 </div>
 
                 <Alert className="border-amber-200 bg-amber-50">
                   <Shield className="h-4 w-4" />
                   <AlertDescription className="text-amber-700">
-                    <strong>Security Tip:</strong> Set a password in your profile settings for easier future logins.
+                    <strong>Security Tip:</strong> Set a password in your
+                    profile settings for easier future logins.
                   </AlertDescription>
                 </Alert>
 
                 <div className="space-y-2">
-                  <Button onClick={() => navigate("/dashboard")} className="w-full">
+                  <Button
+                    onClick={() => navigate("/dashboard")}
+                    className="w-full"
+                  >
                     Go to Dashboard
                   </Button>
 
@@ -397,7 +505,7 @@ const GuestComplaintForm: React.FC = () => {
                 </span>
               </div>
               <Progress value={progress} className="w-full" />
-              
+
               {/* Step indicators */}
               <div className="flex justify-between">
                 {steps.map((step, index) => (
@@ -409,18 +517,24 @@ const GuestComplaintForm: React.FC = () => {
                       step.id === currentStep
                         ? "bg-blue-100 text-blue-800"
                         : step.isCompleted
-                        ? "bg-green-100 text-green-800 cursor-pointer hover:bg-green-200"
-                        : "text-gray-400 cursor-not-allowed"
+                          ? "bg-green-100 text-green-800 cursor-pointer hover:bg-green-200"
+                          : "text-gray-400 cursor-not-allowed"
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      step.id === currentStep
-                        ? "bg-blue-600 text-white"
-                        : step.isCompleted
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-300 text-gray-600"
-                    }`}>
-                      {step.isCompleted ? <Check className="h-4 w-4" /> : step.id}
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        step.id === currentStep
+                          ? "bg-blue-600 text-white"
+                          : step.isCompleted
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-300 text-gray-600"
+                      }`}
+                    >
+                      {step.isCompleted ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        step.id
+                      )}
                     </div>
                     <span className="text-xs font-medium">{step.title}</span>
                   </button>
@@ -450,9 +564,11 @@ const GuestComplaintForm: React.FC = () => {
               {steps[currentStep - 1]?.title}
             </CardTitle>
             <CardDescription>
-              {currentStep === 1 && "Provide your details and describe the issue"}
+              {currentStep === 1 &&
+                "Provide your details and describe the issue"}
               {currentStep === 2 && "Specify the location of the problem"}
-              {currentStep === 3 && "Add images to help us understand the issue (optional)"}
+              {currentStep === 3 &&
+                "Add images to help us understand the issue (optional)"}
               {currentStep === 4 && "Review all information before submitting"}
               {currentStep === 5 && "Submit your complaint for verification"}
             </CardDescription>
@@ -463,8 +579,10 @@ const GuestComplaintForm: React.FC = () => {
               <div className="space-y-6">
                 {/* Personal Information */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Personal Information</h3>
-                  
+                  <h3 className="text-lg font-semibold">
+                    Personal Information
+                  </h3>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="fullName">
@@ -476,11 +594,23 @@ const GuestComplaintForm: React.FC = () => {
                         placeholder="Enter your full name"
                         value={formData.fullName}
                         onChange={handleInputChange}
-                        aria-describedby={validationErrors.fullName ? "fullName-error" : undefined}
-                        className={validationErrors.fullName ? "border-red-500 focus:ring-red-500" : ""}
+                        aria-describedby={
+                          validationErrors.fullName
+                            ? "fullName-error"
+                            : undefined
+                        }
+                        className={
+                          validationErrors.fullName
+                            ? "border-red-500 focus:ring-red-500"
+                            : ""
+                        }
                       />
                       {validationErrors.fullName && (
-                        <p id="fullName-error" className="text-sm text-red-600" role="alert">
+                        <p
+                          id="fullName-error"
+                          className="text-sm text-red-600"
+                          role="alert"
+                        >
                           {validationErrors.fullName}
                         </p>
                       )}
@@ -497,11 +627,21 @@ const GuestComplaintForm: React.FC = () => {
                         placeholder="Enter your email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        aria-describedby={validationErrors.email ? "email-error" : undefined}
-                        className={validationErrors.email ? "border-red-500 focus:ring-red-500" : ""}
+                        aria-describedby={
+                          validationErrors.email ? "email-error" : undefined
+                        }
+                        className={
+                          validationErrors.email
+                            ? "border-red-500 focus:ring-red-500"
+                            : ""
+                        }
                       />
                       {validationErrors.email && (
-                        <p id="email-error" className="text-sm text-red-600" role="alert">
+                        <p
+                          id="email-error"
+                          className="text-sm text-red-600"
+                          role="alert"
+                        >
                           {validationErrors.email}
                         </p>
                       )}
@@ -519,11 +659,23 @@ const GuestComplaintForm: React.FC = () => {
                       placeholder="Enter your phone number"
                       value={formData.phoneNumber}
                       onChange={handleInputChange}
-                      aria-describedby={validationErrors.phoneNumber ? "phoneNumber-error" : undefined}
-                      className={validationErrors.phoneNumber ? "border-red-500 focus:ring-red-500" : ""}
+                      aria-describedby={
+                        validationErrors.phoneNumber
+                          ? "phoneNumber-error"
+                          : undefined
+                      }
+                      className={
+                        validationErrors.phoneNumber
+                          ? "border-red-500 focus:ring-red-500"
+                          : ""
+                      }
                     />
                     {validationErrors.phoneNumber && (
-                      <p id="phoneNumber-error" className="text-sm text-red-600" role="alert">
+                      <p
+                        id="phoneNumber-error"
+                        className="text-sm text-red-600"
+                        role="alert"
+                      >
                         {validationErrors.phoneNumber}
                       </p>
                     )}
@@ -532,7 +684,9 @@ const GuestComplaintForm: React.FC = () => {
 
                 {/* Complaint Information */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Complaint Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Complaint Information
+                  </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -541,25 +695,43 @@ const GuestComplaintForm: React.FC = () => {
                       </Label>
                       <Select
                         value={formData.type}
-                        onValueChange={(value) => handleSelectChange("type", value)}
-                        aria-describedby={validationErrors.type ? "type-error" : undefined}
+                        onValueChange={(value) =>
+                          handleSelectChange("type", value)
+                        }
+                        aria-describedby={
+                          validationErrors.type ? "type-error" : undefined
+                        }
                       >
-                        <SelectTrigger className={validationErrors.type ? "border-red-500 focus:ring-red-500" : ""}>
+                        <SelectTrigger
+                          className={
+                            validationErrors.type
+                              ? "border-red-500 focus:ring-red-500"
+                              : ""
+                          }
+                        >
                           <SelectValue placeholder="Select complaint type" />
                         </SelectTrigger>
                         <SelectContent>
                           {COMPLAINT_TYPES.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               <div className="flex flex-col">
-                                <span className="font-medium">{type.label}</span>
-                                <span className="text-xs text-gray-500">{type.description}</span>
+                                <span className="font-medium">
+                                  {type.label}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {type.description}
+                                </span>
                               </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       {validationErrors.type && (
-                        <p id="type-error" className="text-sm text-red-600" role="alert">
+                        <p
+                          id="type-error"
+                          className="text-sm text-red-600"
+                          role="alert"
+                        >
                           {validationErrors.type}
                         </p>
                       )}
@@ -569,19 +741,30 @@ const GuestComplaintForm: React.FC = () => {
                       <Label>Priority</Label>
                       <Select
                         value={formData.priority}
-                        onValueChange={(value) => handleSelectChange("priority", value)}
+                        onValueChange={(value) =>
+                          handleSelectChange("priority", value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {PRIORITIES.map((priority) => (
-                            <SelectItem key={priority.value} value={priority.value}>
+                            <SelectItem
+                              key={priority.value}
+                              value={priority.value}
+                            >
                               <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${priority.color}`} />
+                                <div
+                                  className={`w-2 h-2 rounded-full ${priority.color}`}
+                                />
                                 <div className="flex flex-col">
-                                  <span className="font-medium">{priority.label}</span>
-                                  <span className="text-xs text-gray-500">{priority.description}</span>
+                                  <span className="font-medium">
+                                    {priority.label}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {priority.description}
+                                  </span>
                                 </div>
                               </div>
                             </SelectItem>
@@ -602,11 +785,23 @@ const GuestComplaintForm: React.FC = () => {
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={4}
-                      aria-describedby={validationErrors.description ? "description-error" : undefined}
-                      className={validationErrors.description ? "border-red-500 focus:ring-red-500" : ""}
+                      aria-describedby={
+                        validationErrors.description
+                          ? "description-error"
+                          : undefined
+                      }
+                      className={
+                        validationErrors.description
+                          ? "border-red-500 focus:ring-red-500"
+                          : ""
+                      }
                     />
                     {validationErrors.description && (
-                      <p id="description-error" className="text-sm text-red-600" role="alert">
+                      <p
+                        id="description-error"
+                        className="text-sm text-red-600"
+                        role="alert"
+                      >
                         {validationErrors.description}
                       </p>
                     )}
@@ -639,9 +834,17 @@ const GuestComplaintForm: React.FC = () => {
                           // Clear sub-zone when ward changes
                           dispatch(updateFormData({ subZoneId: "" }));
                         }}
-                        aria-describedby={validationErrors.wardId ? "wardId-error" : undefined}
+                        aria-describedby={
+                          validationErrors.wardId ? "wardId-error" : undefined
+                        }
                       >
-                        <SelectTrigger className={validationErrors.wardId ? "border-red-500 focus:ring-red-500" : ""}>
+                        <SelectTrigger
+                          className={
+                            validationErrors.wardId
+                              ? "border-red-500 focus:ring-red-500"
+                              : ""
+                          }
+                        >
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
@@ -653,7 +856,11 @@ const GuestComplaintForm: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
-                        <p id="wardId-error" className="text-sm text-red-600" role="alert">
+                        <p
+                          id="wardId-error"
+                          className="text-sm text-red-600"
+                          role="alert"
+                        >
                           {validationErrors.wardId}
                         </p>
                       )}
@@ -664,7 +871,9 @@ const GuestComplaintForm: React.FC = () => {
                         <Label>Sub-Zone</Label>
                         <Select
                           value={formData.subZoneId}
-                          onValueChange={(value) => handleSelectChange("subZoneId", value)}
+                          onValueChange={(value) =>
+                            handleSelectChange("subZoneId", value)
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select sub-zone" />
@@ -690,11 +899,21 @@ const GuestComplaintForm: React.FC = () => {
                         placeholder="Enter area or locality"
                         value={formData.area}
                         onChange={handleInputChange}
-                        aria-describedby={validationErrors.area ? "area-error" : undefined}
-                        className={validationErrors.area ? "border-red-500 focus:ring-red-500" : ""}
+                        aria-describedby={
+                          validationErrors.area ? "area-error" : undefined
+                        }
+                        className={
+                          validationErrors.area
+                            ? "border-red-500 focus:ring-red-500"
+                            : ""
+                        }
                       />
                       {validationErrors.area && (
-                        <p id="area-error" className="text-sm text-red-600" role="alert">
+                        <p
+                          id="area-error"
+                          className="text-sm text-red-600"
+                          role="alert"
+                        >
                           {validationErrors.area}
                         </p>
                       )}
@@ -730,13 +949,22 @@ const GuestComplaintForm: React.FC = () => {
                     <Label>Location on Map</Label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                       <MapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 mb-2">Interactive map picker coming soon</p>
+                      <p className="text-gray-500 mb-2">
+                        Interactive map picker coming soon
+                      </p>
                       {currentLocation && (
                         <div className="text-sm text-green-600">
-                          📍 Current location detected: {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+                          📍 Current location detected:{" "}
+                          {currentLocation.lat.toFixed(6)},{" "}
+                          {currentLocation.lng.toFixed(6)}
                         </div>
                       )}
-                      <Button variant="outline" size="sm" className="mt-2" disabled>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        disabled
+                      >
                         Select on Map
                       </Button>
                     </div>
@@ -745,7 +973,8 @@ const GuestComplaintForm: React.FC = () => {
                   {currentLocation && (
                     <div className="p-3 bg-green-50 rounded-lg">
                       <p className="text-sm text-green-700">
-                        📍 Your location has been detected and will be included with your complaint
+                        📍 Your location has been detected and will be included
+                        with your complaint
                       </p>
                     </div>
                   )}
@@ -763,7 +992,8 @@ const GuestComplaintForm: React.FC = () => {
                   </h3>
 
                   <p className="text-sm text-gray-600">
-                    Add photos to help us better understand the issue. You can upload up to 5 images.
+                    Add photos to help us better understand the issue. You can
+                    upload up to 5 images.
                   </p>
 
                   {/* File Upload Area */}
@@ -775,7 +1005,9 @@ const GuestComplaintForm: React.FC = () => {
                       accept="image/jpeg,image/png,image/jpg"
                       onChange={(e) => handleFileUpload(e.target.files)}
                       className="hidden"
-                      disabled={formData.attachments && formData.attachments.length >= 5}
+                      disabled={
+                        formData.attachments && formData.attachments.length >= 5
+                      }
                     />
                     <label
                       htmlFor="file-upload"
@@ -787,7 +1019,8 @@ const GuestComplaintForm: React.FC = () => {
                     >
                       <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-lg font-medium text-gray-600">
-                        {formData.attachments && formData.attachments.length >= 5
+                        {formData.attachments &&
+                        formData.attachments.length >= 5
                           ? "Maximum 5 files allowed"
                           : "Click to upload or drag and drop"}
                       </p>
@@ -824,7 +1057,10 @@ const GuestComplaintForm: React.FC = () => {
                                 {attachment.file.name}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {(attachment.file.size / 1024 / 1024).toFixed(2)} MB
+                                {(attachment.file.size / 1024 / 1024).toFixed(
+                                  2,
+                                )}{" "}
+                                MB
                               </p>
                             </div>
 
@@ -833,7 +1069,10 @@ const GuestComplaintForm: React.FC = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => attachment.preview && handlePreviewImage(attachment.preview)}
+                                onClick={() =>
+                                  attachment.preview &&
+                                  handlePreviewImage(attachment.preview)
+                                }
                                 className="flex items-center gap-1"
                               >
                                 <Eye className="h-3 w-3" />
@@ -842,7 +1081,9 @@ const GuestComplaintForm: React.FC = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleRemoveAttachment(attachment.id)}
+                                onClick={() =>
+                                  handleRemoveAttachment(attachment.id)
+                                }
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               >
                                 <X className="h-3 w-3" />
@@ -862,7 +1103,9 @@ const GuestComplaintForm: React.FC = () => {
                   )}
 
                   {/* Validation errors for attachments */}
-                  {Object.keys(validationErrors).some(key => key.startsWith("attachment_")) && (
+                  {Object.keys(validationErrors).some((key) =>
+                    key.startsWith("attachment_"),
+                  ) && (
                     <Alert variant="destructive">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
@@ -871,7 +1114,9 @@ const GuestComplaintForm: React.FC = () => {
                           {Object.entries(validationErrors)
                             .filter(([key]) => key.startsWith("attachment_"))
                             .map(([key, error]) => (
-                              <li key={key} className="text-sm">{error}</li>
+                              <li key={key} className="text-sm">
+                                {error}
+                              </li>
                             ))}
                         </ul>
                       </AlertDescription>
@@ -885,10 +1130,13 @@ const GuestComplaintForm: React.FC = () => {
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Review Your Complaint</h3>
-                  
+                  <h3 className="text-lg font-semibold">
+                    Review Your Complaint
+                  </h3>
+
                   <p className="text-sm text-gray-600">
-                    Please review all information before submitting. You can go back to make changes if needed.
+                    Please review all information before submitting. You can go
+                    back to make changes if needed.
                   </p>
 
                   {/* Personal Information Review */}
@@ -902,13 +1150,16 @@ const GuestComplaintForm: React.FC = () => {
                     <CardContent className="space-y-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="font-medium">Name:</span> {formData.fullName}
+                          <span className="font-medium">Name:</span>{" "}
+                          {formData.fullName}
                         </div>
                         <div>
-                          <span className="font-medium">Email:</span> {formData.email}
+                          <span className="font-medium">Email:</span>{" "}
+                          {formData.email}
                         </div>
                         <div>
-                          <span className="font-medium">Phone:</span> {formData.phoneNumber}
+                          <span className="font-medium">Phone:</span>{" "}
+                          {formData.phoneNumber}
                         </div>
                       </div>
                     </CardContent>
@@ -926,17 +1177,27 @@ const GuestComplaintForm: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="font-medium">Type:</span>{" "}
-                          {COMPLAINT_TYPES.find(t => t.value === formData.type)?.label}
+                          {
+                            COMPLAINT_TYPES.find(
+                              (t) => t.value === formData.type,
+                            )?.label
+                          }
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium">Priority:</span>
                           <Badge
                             variant="secondary"
                             className={`${
-                              PRIORITIES.find(p => p.value === formData.priority)?.color
+                              PRIORITIES.find(
+                                (p) => p.value === formData.priority,
+                              )?.color
                             } text-white`}
                           >
-                            {PRIORITIES.find(p => p.value === formData.priority)?.label}
+                            {
+                              PRIORITIES.find(
+                                (p) => p.value === formData.priority,
+                              )?.label
+                            }
                           </Badge>
                         </div>
                       </div>
@@ -961,26 +1222,31 @@ const GuestComplaintForm: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="font-medium">Ward:</span>{" "}
-                          {WARDS.find(w => w.id === formData.wardId)?.name}
+                          {WARDS.find((w) => w.id === formData.wardId)?.name}
                         </div>
                         {formData.subZoneId && (
                           <div>
-                            <span className="font-medium">Sub-Zone:</span> {formData.subZoneId}
+                            <span className="font-medium">Sub-Zone:</span>{" "}
+                            {formData.subZoneId}
                           </div>
                         )}
                         <div>
-                          <span className="font-medium">Area:</span> {formData.area}
+                          <span className="font-medium">Area:</span>{" "}
+                          {formData.area}
                         </div>
                         {formData.landmark && (
                           <div>
-                            <span className="font-medium">Landmark:</span> {formData.landmark}
+                            <span className="font-medium">Landmark:</span>{" "}
+                            {formData.landmark}
                           </div>
                         )}
                       </div>
                       {formData.address && (
                         <div className="mt-3">
                           <span className="font-medium">Address:</span>
-                          <p className="mt-1 text-sm text-gray-600">{formData.address}</p>
+                          <p className="mt-1 text-sm text-gray-600">
+                            {formData.address}
+                          </p>
                         </div>
                       )}
                       {formData.coordinates && (
@@ -1012,7 +1278,9 @@ const GuestComplaintForm: React.FC = () => {
                                     src={attachment.preview}
                                     alt={attachment.file.name}
                                     className="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
-                                    onClick={() => handlePreviewImage(attachment.preview!)}
+                                    onClick={() =>
+                                      handlePreviewImage(attachment.preview!)
+                                    }
                                   />
                                 )}
                               </div>
@@ -1034,33 +1302,46 @@ const GuestComplaintForm: React.FC = () => {
               <div className="space-y-6 text-center">
                 <div className="space-y-4">
                   <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
-                  <h3 className="text-2xl font-bold text-gray-900">Ready to Submit</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Ready to Submit
+                  </h3>
                   <p className="text-gray-600 max-w-md mx-auto">
-                    Your complaint is ready for submission. After submitting, you'll receive an email with a verification code.
+                    Your complaint is ready for submission. After submitting,
+                    you'll receive an email with a verification code.
                   </p>
                 </div>
 
                 {/* What happens next */}
                 <Card className="text-left">
                   <CardHeader>
-                    <CardTitle className="text-lg">What happens next?</CardTitle>
+                    <CardTitle className="text-lg">
+                      What happens next?
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ol className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">1</span>
+                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
+                          1
+                        </span>
                         Your complaint will be registered immediately
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">2</span>
+                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
+                          2
+                        </span>
                         You'll receive an OTP via email for verification
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">3</span>
+                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
+                          3
+                        </span>
                         After verification, you'll be registered as a citizen
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">4</span>
+                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
+                          4
+                        </span>
                         You can then track your complaint progress
                       </li>
                     </ol>
@@ -1083,7 +1364,7 @@ const GuestComplaintForm: React.FC = () => {
                   Previous
                 </Button>
               )}
-              
+
               {currentStep < 5 ? (
                 <Button
                   type="button"
@@ -1114,7 +1395,7 @@ const GuestComplaintForm: React.FC = () => {
                   )}
                 </Button>
               )}
-              
+
               {currentStep === 1 && (
                 <Button
                   type="button"
@@ -1144,13 +1425,14 @@ const GuestComplaintForm: React.FC = () => {
         </Card>
 
         {/* Image Preview Dialog */}
-        <Dialog open={imagePreview.show} onOpenChange={(open) => dispatch(setImagePreview({ show: open }))}>
+        <Dialog
+          open={imagePreview.show}
+          onOpenChange={(open) => dispatch(setImagePreview({ show: open }))}
+        >
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>Image Preview</DialogTitle>
-              <DialogDescription>
-                Preview of uploaded image
-              </DialogDescription>
+              <DialogDescription>Preview of uploaded image</DialogDescription>
             </DialogHeader>
             {imagePreview.url && (
               <div className="flex justify-center">

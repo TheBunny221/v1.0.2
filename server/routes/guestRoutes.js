@@ -90,7 +90,7 @@ router.get("/files/:filename", (req, res) => {
   }
 
   // Set appropriate headers
-  res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  res.setHeader("Cache-Control", "public, max-age=31536000"); // Cache for 1 year
   res.sendFile(path.resolve(filePath));
 });
 

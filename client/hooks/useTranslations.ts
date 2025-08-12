@@ -3,7 +3,7 @@ import { selectTranslations } from "../store/slices/languageSlice";
 
 export const useTranslations = () => {
   const translations = useAppSelector(selectTranslations);
-  
+
   return translations;
 };
 

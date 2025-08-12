@@ -18,7 +18,7 @@ export interface GuestComplaintData {
   type: string;
   description: string;
   priority?: string;
-  
+
   // Step 2: Location
   wardId: string;
   subZoneId?: string;
@@ -29,7 +29,7 @@ export interface GuestComplaintData {
     latitude: number;
     longitude: number;
   };
-  
+
   // Step 3: Attachments
   attachments?: AttachmentFile[];
 }
@@ -67,7 +67,7 @@ export interface GuestState {
   formData: GuestComplaintData;
   validationErrors: ValidationErrors;
   isDraftSaved: boolean;
-  
+
   // Submission state
   complaintId: string | null;
   trackingNumber: string | null;
@@ -81,7 +81,7 @@ export interface GuestState {
   userEmail: string | null;
   newUserRegistered: boolean;
   trackingData: any | null;
-  
+
   // UI state
   showImagePreview: boolean;
   previewImageUrl: string | null;
@@ -120,7 +120,7 @@ const initialState: GuestState = {
   formData: initialFormData,
   validationErrors: {},
   isDraftSaved: false,
-  
+
   complaintId: null,
   trackingNumber: null,
   sessionId: null,
@@ -133,7 +133,7 @@ const initialState: GuestState = {
   userEmail: null,
   newUserRegistered: false,
   trackingData: null,
-  
+
   showImagePreview: false,
   previewImageUrl: null,
 };
@@ -154,13 +154,13 @@ const saveDraftToStorage = (formData: GuestComplaintData) => {
     // Don't save file objects to sessionStorage
     const dataTosave = {
       ...formData,
-      attachments: formData.attachments?.map(att => ({
+      attachments: formData.attachments?.map((att) => ({
         id: att.id,
         // Only save metadata, not the actual file
         name: att.file.name,
         size: att.file.size,
         type: att.file.type,
-      }))
+      })),
     };
     sessionStorage.setItem("guestComplaintDraft", JSON.stringify(dataTosave));
   } catch (error) {
@@ -213,7 +213,7 @@ export const submitGuestComplaint = createAsyncThunk(
     try {
       // Create FormData for file uploads
       const formData = new FormData();
-      
+
       // Add text data
       formData.append("fullName", complaintData.fullName);
       formData.append("email", complaintData.email);
@@ -222,16 +222,22 @@ export const submitGuestComplaint = createAsyncThunk(
       formData.append("description", complaintData.description);
       formData.append("priority", complaintData.priority || "MEDIUM");
       formData.append("wardId", complaintData.wardId);
-      if (complaintData.subZoneId) formData.append("subZoneId", complaintData.subZoneId);
+      if (complaintData.subZoneId)
+        formData.append("subZoneId", complaintData.subZoneId);
       formData.append("area", complaintData.area);
-      if (complaintData.landmark) formData.append("landmark", complaintData.landmark);
-      if (complaintData.address) formData.append("address", complaintData.address);
-      
+      if (complaintData.landmark)
+        formData.append("landmark", complaintData.landmark);
+      if (complaintData.address)
+        formData.append("address", complaintData.address);
+
       // Add coordinates
       if (complaintData.coordinates) {
-        formData.append("coordinates", JSON.stringify(complaintData.coordinates));
+        formData.append(
+          "coordinates",
+          JSON.stringify(complaintData.coordinates),
+        );
       }
-      
+
       // Add attachments
       if (complaintData.attachments) {
         complaintData.attachments.forEach((attachment, index) => {
@@ -366,49 +372,56 @@ export const getPublicStats = createAsyncThunk(
 // Validation helpers
 const validateStep1 = (formData: GuestComplaintData): ValidationErrors => {
   const errors: ValidationErrors = {};
-  
+
   if (!formData.fullName.trim()) errors.fullName = "Full name is required";
   if (!formData.email.trim()) errors.email = "Email is required";
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
     errors.email = "Please enter a valid email address";
   }
-  if (!formData.phoneNumber.trim()) errors.phoneNumber = "Phone number is required";
-  else if (!/^[\d\s\-\+\(\)]{10,}$/.test(formData.phoneNumber.replace(/\s/g, ""))) {
+  if (!formData.phoneNumber.trim())
+    errors.phoneNumber = "Phone number is required";
+  else if (
+    !/^[\d\s\-\+\(\)]{10,}$/.test(formData.phoneNumber.replace(/\s/g, ""))
+  ) {
     errors.phoneNumber = "Please enter a valid phone number";
   }
   if (!formData.type) errors.type = "Complaint type is required";
-  if (!formData.description.trim()) errors.description = "Description is required";
+  if (!formData.description.trim())
+    errors.description = "Description is required";
   else if (formData.description.trim().length < 10) {
     errors.description = "Description must be at least 10 characters";
   }
-  
+
   return errors;
 };
 
 const validateStep2 = (formData: GuestComplaintData): ValidationErrors => {
   const errors: ValidationErrors = {};
-  
+
   if (!formData.wardId) errors.wardId = "Ward selection is required";
   if (!formData.area.trim()) errors.area = "Area/locality is required";
-  
+
   return errors;
 };
 
 const validateStep3 = (formData: GuestComplaintData): ValidationErrors => {
   const errors: ValidationErrors = {};
-  
+
   // Attachments are optional, but validate if present
   if (formData.attachments && formData.attachments.length > 0) {
     formData.attachments.forEach((attachment, index) => {
-      if (attachment.file.size > 10 * 1024 * 1024) { // 10MB
+      if (attachment.file.size > 10 * 1024 * 1024) {
+        // 10MB
         errors[`attachment_${index}`] = "File size must be less than 10MB";
       }
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(attachment.file.type)) {
+      if (
+        !["image/jpeg", "image/png", "image/jpg"].includes(attachment.file.type)
+      ) {
         errors[`attachment_${index}`] = "Only JPG and PNG images are allowed";
       }
     });
   }
-  
+
   return errors;
 };
 
@@ -425,22 +438,25 @@ const guestSlice = createSlice({
         state.currentStep = action.payload;
       }
     },
-    
+
     nextStep: (state) => {
       if (state.currentStep < 5) {
         state.currentStep += 1;
       }
     },
-    
+
     prevStep: (state) => {
       if (state.currentStep > 1) {
         state.currentStep -= 1;
       }
     },
-    
-    updateFormData: (state, action: PayloadAction<Partial<GuestComplaintData>>) => {
+
+    updateFormData: (
+      state,
+      action: PayloadAction<Partial<GuestComplaintData>>,
+    ) => {
       state.formData = { ...state.formData, ...action.payload };
-      
+
       // Validate current step
       let errors: ValidationErrors = {};
       if (state.currentStep === 1) {
@@ -450,53 +466,59 @@ const guestSlice = createSlice({
       } else if (state.currentStep === 3) {
         errors = validateStep3(state.formData);
       }
-      
+
       state.validationErrors = errors;
-      
+
       // Update step completion status
       const isStepValid = Object.keys(errors).length === 0;
       state.steps[state.currentStep - 1].isValid = isStepValid;
       state.steps[state.currentStep - 1].isCompleted = isStepValid;
-      
+
       // Save draft to sessionStorage
       saveDraftToStorage(state.formData);
       state.isDraftSaved = true;
     },
-    
+
     addAttachment: (state, action: PayloadAction<AttachmentFile>) => {
       if (!state.formData.attachments) {
         state.formData.attachments = [];
       }
-      if (state.formData.attachments.length < 5) { // Max 5 attachments
+      if (state.formData.attachments.length < 5) {
+        // Max 5 attachments
         state.formData.attachments.push(action.payload);
         saveDraftToStorage(state.formData);
       }
     },
-    
+
     removeAttachment: (state, action: PayloadAction<string>) => {
       if (state.formData.attachments) {
         state.formData.attachments = state.formData.attachments.filter(
-          att => att.id !== action.payload
+          (att) => att.id !== action.payload,
         );
         saveDraftToStorage(state.formData);
       }
     },
-    
-    updateAttachment: (state, action: PayloadAction<{ id: string; updates: Partial<AttachmentFile> }>) => {
+
+    updateAttachment: (
+      state,
+      action: PayloadAction<{ id: string; updates: Partial<AttachmentFile> }>,
+    ) => {
       if (state.formData.attachments) {
-        const index = state.formData.attachments.findIndex(att => att.id === action.payload.id);
+        const index = state.formData.attachments.findIndex(
+          (att) => att.id === action.payload.id,
+        );
         if (index !== -1) {
           state.formData.attachments[index] = {
             ...state.formData.attachments[index],
-            ...action.payload.updates
+            ...action.payload.updates,
           };
         }
       }
     },
-    
+
     validateCurrentStep: (state) => {
       let errors: ValidationErrors = {};
-      
+
       switch (state.currentStep) {
         case 1:
           errors = validateStep1(state.formData);
@@ -516,18 +538,21 @@ const guestSlice = createSlice({
           };
           break;
       }
-      
+
       state.validationErrors = errors;
       const isStepValid = Object.keys(errors).length === 0;
       state.steps[state.currentStep - 1].isValid = isStepValid;
       state.steps[state.currentStep - 1].isCompleted = isStepValid;
     },
-    
-    setImagePreview: (state, action: PayloadAction<{ show: boolean; url?: string }>) => {
+
+    setImagePreview: (
+      state,
+      action: PayloadAction<{ show: boolean; url?: string }>,
+    ) => {
       state.showImagePreview = action.payload.show;
       state.previewImageUrl = action.payload.url || null;
     },
-    
+
     clearGuestData: (state) => {
       state.currentStep = 1;
       state.steps = initialSteps;
@@ -546,7 +571,7 @@ const guestSlice = createSlice({
       state.trackingData = null;
       state.showImagePreview = false;
       state.previewImageUrl = null;
-      
+
       // Clear sessionStorage
       try {
         sessionStorage.removeItem("guestComplaintDraft");
@@ -554,18 +579,18 @@ const guestSlice = createSlice({
         console.warn("Failed to clear draft from sessionStorage:", error);
       }
     },
-    
+
     setSubmissionStep: (
       state,
       action: PayloadAction<"form" | "otp" | "success">,
     ) => {
       state.submissionStep = action.payload;
     },
-    
+
     clearError: (state) => {
       state.error = null;
     },
-    
+
     resetOTPState: (state) => {
       state.otpSent = false;
       state.otpExpiry = null;
@@ -589,7 +614,7 @@ const guestSlice = createSlice({
         state.otpExpiry = new Date(action.payload.expiresAt);
         state.submissionStep = "otp";
         state.error = null;
-        
+
         // Mark submission step as completed
         state.steps[4].isCompleted = true;
         state.steps[4].isValid = true;
@@ -680,10 +705,13 @@ export default guestSlice.reducer;
 
 // Selectors
 export const selectGuestState = (state: { guest: GuestState }) => state.guest;
-export const selectCurrentStep = (state: { guest: GuestState }) => state.guest.currentStep;
+export const selectCurrentStep = (state: { guest: GuestState }) =>
+  state.guest.currentStep;
 export const selectSteps = (state: { guest: GuestState }) => state.guest.steps;
-export const selectFormData = (state: { guest: GuestState }) => state.guest.formData;
-export const selectValidationErrors = (state: { guest: GuestState }) => state.guest.validationErrors;
+export const selectFormData = (state: { guest: GuestState }) =>
+  state.guest.formData;
+export const selectValidationErrors = (state: { guest: GuestState }) =>
+  state.guest.validationErrors;
 export const selectIsStepValid = (state: { guest: GuestState }) => {
   const currentStepIndex = state.guest.currentStep - 1;
   return state.guest.steps[currentStepIndex]?.isValid || false;

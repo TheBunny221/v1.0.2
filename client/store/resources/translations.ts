@@ -447,7 +447,8 @@ export const englishTranslations: Translation = {
     completeAddress: "Complete Address",
     locationOnMap: "Location on Map",
     interactiveMapComing: "Interactive map picker coming soon",
-    currentLocationDetected: "Current location detected and will be included with your complaint",
+    currentLocationDetected:
+      "Current location detected and will be included with your complaint",
     addPhotos: "Add photos to help us better understand the issue",
     addPhotosDescription: "You can upload up to 5 images",
     uploadInstructions: "Click to upload or drag and drop",
@@ -458,9 +459,11 @@ export const englishTranslations: Translation = {
     preview: "Preview",
     remove: "Remove",
     reviewYourComplaint: "Review Your Complaint",
-    reviewDescription: "Please review all information before submitting. You can go back to make changes if needed.",
+    reviewDescription:
+      "Please review all information before submitting. You can go back to make changes if needed.",
     readyToSubmit: "Ready to Submit",
-    readyToSubmitDescription: "Your complaint is ready for submission. After submitting, you'll receive an email with a verification code.",
+    readyToSubmitDescription:
+      "Your complaint is ready for submission. After submitting, you'll receive an email with a verification code.",
     whatHappensNext: "What happens next?",
     step1: "Your complaint will be registered immediately",
     step2: "You'll receive an OTP via email for verification",
@@ -476,27 +479,34 @@ export const englishTranslations: Translation = {
     progress: "Progress",
     stepOf: "Step {current} of {total}",
     completeRequiredFields: "Please complete required fields",
-    fillRequiredInformation: "Fill in all required information before proceeding",
+    fillRequiredInformation:
+      "Fill in all required information before proceeding",
     fixValidationErrors: "Please fix validation errors",
-    completeAllRequiredFields: "Complete all required fields correctly before submitting",
+    completeAllRequiredFields:
+      "Complete all required fields correctly before submitting",
     invalidFileType: "Invalid file type",
     onlyImageFormats: "Only JPG and PNG images are allowed",
     fileTooLarge: "File too large",
     selectSmallerFiles: "Please select files smaller than 10MB",
     trackingNumber: "Tracking Number",
     verificationCodeSent: "Please check your email for the verification code",
-    checkEmailForCode: "Tracking number: {trackingNumber}. Please check your email for the verification code.",
+    checkEmailForCode:
+      "Tracking number: {trackingNumber}. Please check your email for the verification code.",
     welcomeToSmartCity: "Welcome to Cochin Smart City!",
-    complaintVerified: "Your complaint has been verified and you've been registered as a citizen.",
+    complaintVerified:
+      "Your complaint has been verified and you've been registered as a citizen.",
     nowRegisteredCitizen: "You are now registered as a citizen",
-    canTrackProgress: "You can now track your complaint progress from your dashboard.",
+    canTrackProgress:
+      "You can now track your complaint progress from your dashboard.",
     securityTip: "Security Tip",
-    setPasswordForEasierLogin: "Set a password in your profile settings for easier future logins.",
+    setPasswordForEasierLogin:
+      "Set a password in your profile settings for easier future logins.",
     goToDashboard: "Go to Dashboard",
     submitAnotherComplaint: "Submit Another Complaint",
     alreadyHaveAccount: "Already have an account?",
     loginHere: "Login here",
-    currentLocationIncluded: "Location detected and will be included with your complaint",
+    currentLocationIncluded:
+      "Location detected and will be included with your complaint",
     selectOnMap: "Select on Map",
     imagePreview: "Image Preview",
     previewOfUploadedImage: "Preview of uploaded image",
@@ -507,7 +517,8 @@ export const englishTranslations: Translation = {
     wardRequired: "Ward selection is required",
     areaRequired: "Area/locality is required",
     characterCount: "{count}/500 characters",
-    locationDetectedIncluded: "Your location has been detected and will be included with your complaint",
+    locationDetectedIncluded:
+      "Your location has been detected and will be included with your complaint",
   },
   profile: {
     personalInformation: "Personal Information",
