@@ -240,11 +240,7 @@ const GuestComplaintForm: React.FC = () => {
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto">
-                  {newUserRegistered ? (
-                    <UserPlus className="h-8 w-8 text-green-600" />
-                  ) : (
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  )}
+                  <UserPlus className="h-8 w-8 text-green-600" />
                 </div>
 
                 <div>
