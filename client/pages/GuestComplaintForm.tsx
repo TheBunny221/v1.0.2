@@ -93,10 +93,8 @@ const GuestComplaintForm: React.FC = () => {
     area: "",
     landmark: "",
     address: "",
-    otpCode: "",
   });
 
-  const [otpTimer, setOtpTimer] = useState(0);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
