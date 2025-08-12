@@ -941,7 +941,7 @@ const GuestComplaintForm: React.FC = () => {
                           handleSelectChange("wardId", value)
                         }
                       >
-                        <SelectTrigger className={validationErrors.wardId ? "border-red-500" : ""}>
+                        <SelectTrigger className={validationErrors.wardId ? "border-red-500" : ""} data-testid="ward-select">
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
