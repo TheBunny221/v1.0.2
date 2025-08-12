@@ -141,27 +141,77 @@ export const submitGuestComplaint = createAsyncThunk(
   "guest/submitComplaint",
   async (complaintData: GuestComplaintData, { rejectWithValue }) => {
     try {
-      // For now, we'll send as JSON. File uploads can be added later
-      const payload = {
-        fullName: complaintData.fullName,
-        email: complaintData.email,
-        phoneNumber: complaintData.phoneNumber,
-        type: complaintData.type,
-        description: complaintData.description,
-        priority: complaintData.priority || "MEDIUM",
-        wardId: complaintData.wardId,
-        area: complaintData.area,
-        landmark: complaintData.landmark,
-        address: complaintData.address,
-        coordinates: complaintData.coordinates,
-      };
+      // Check if we have attachments to upload
+      const hasAttachments = complaintData.attachments && complaintData.attachments.length > 0;
 
-      const data = await apiCall("/api/guest/complaint", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      if (hasAttachments) {
+        // Use FormData for multipart/form-data submission with files
+        const formData = new FormData();
 
-      return data.data as GuestComplaintResponse;
+        // Add text fields
+        formData.append('fullName', complaintData.fullName);
+        formData.append('email', complaintData.email);
+        formData.append('phoneNumber', complaintData.phoneNumber);
+        formData.append('type', complaintData.type);
+        formData.append('description', complaintData.description);
+        formData.append('priority', complaintData.priority || "MEDIUM");
+        formData.append('wardId', complaintData.wardId);
+        if (complaintData.subZoneId) {
+          formData.append('subZoneId', complaintData.subZoneId);
+        }
+        formData.append('area', complaintData.area);
+        if (complaintData.landmark) {
+          formData.append('landmark', complaintData.landmark);
+        }
+        if (complaintData.address) {
+          formData.append('address', complaintData.address);
+        }
+        if (complaintData.coordinates) {
+          formData.append('coordinates', JSON.stringify(complaintData.coordinates));
+        }
+
+        // Add file attachments
+        complaintData.attachments.forEach((file) => {
+          formData.append('attachments', file);
+        });
+
+        // Submit with FormData (don't set Content-Type header, let browser set it)
+        const response = await fetch("/api/guest/complaint-with-attachments", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData?.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.data as GuestComplaintResponse;
+      } else {
+        // No attachments, use regular JSON submission
+        const payload = {
+          fullName: complaintData.fullName,
+          email: complaintData.email,
+          phoneNumber: complaintData.phoneNumber,
+          type: complaintData.type,
+          description: complaintData.description,
+          priority: complaintData.priority || "MEDIUM",
+          wardId: complaintData.wardId,
+          subZoneId: complaintData.subZoneId,
+          area: complaintData.area,
+          landmark: complaintData.landmark,
+          address: complaintData.address,
+          coordinates: complaintData.coordinates,
+        };
+
+        const data = await apiCall("/api/guest/complaint", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+
+        return data.data as GuestComplaintResponse;
+      }
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to submit complaint",
