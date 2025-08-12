@@ -10,6 +10,7 @@ import { Toaster } from "./components/ui/toaster";
 import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
+import GlobalMessageHandler from "./components/GlobalMessageHandler";
 import Navigation from "./components/Navigation";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
