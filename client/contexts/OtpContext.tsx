@@ -44,16 +44,17 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const dispatch = useAppDispatch();
+  const { toast } = useToast();
   const [config, setConfig] = useState<OtpFlowConfig | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   // API hooks
-  const [verifyLoginOtp] = useAuthApi.useVerifyOTPLoginMutation();
-  const [verifyRegisterOtp] = useAuthApi.useVerifyRegistrationOTPMutation();
-  const [resendLoginOtp] = useAuthApi.useRequestOTPLoginMutation();
-  const [resendRegisterOtp] = useAuthApi.useResendRegistrationOTPMutation();
-  const [verifyGuestOtp] = useGuestApi.useVerifyGuestOtpMutation();
-  const [resendGuestOtp] = useGuestApi.useResendGuestOtpMutation();
+  const [verifyLoginOtp] = useVerifyOTPLoginMutation();
+  const [verifyRegisterOtp] = useVerifyRegistrationOTPMutation();
+  const [resendLoginOtp] = useRequestOTPLoginMutation();
+  const [resendRegisterOtp] = useResendRegistrationOTPMutation();
+  const [verifyGuestOtp] = useVerifyGuestOtpMutation();
+  const [resendGuestOtp] = useResendGuestOtpMutation();
 
   const openOtpFlow = useCallback((flowConfig: OtpFlowConfig) => {
     setConfig(flowConfig);
