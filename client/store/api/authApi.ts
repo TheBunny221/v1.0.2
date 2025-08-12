@@ -251,3 +251,20 @@ export const {
   useLogoutMutation,
   useRefreshTokenMutation,
 } = authApi;
+
+// Re-export for convenience and consistency
+export const useAuthApi = {
+  useLoginWithPasswordMutation,
+  useRequestOTPLoginMutation,
+  useVerifyOTPLoginMutation,
+  useRegisterMutation,
+  useVerifyRegistrationOTPMutation,
+  useResendRegistrationOTPMutation,
+  useSendPasswordSetupEmailMutation,
+  useSetPasswordMutation,
+  useChangePasswordMutation,
+  useGetCurrentUserQuery,
+  useUpdateProfileMutation,
+  useLogoutMutation,
+  useRefreshTokenMutation,
+};
