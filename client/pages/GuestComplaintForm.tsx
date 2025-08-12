@@ -218,7 +218,12 @@ const GuestComplaintForm: React.FC = () => {
   };
 
   const goToDashboard = () => {
-    navigate("/dashboard");
+    if (user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   const goToLogin = () => {
