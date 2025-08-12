@@ -150,8 +150,7 @@ const Register: React.FC = () => {
           } else if (!isActive && action === "verify_email") {
             toast({
               title: "Email Verification Pending",
-              description: "Please check your email for verification code or request a new one.",
-              variant: "destructive",
+              description: "This email is already registered but not verified. Please check your email for verification code.",
             });
 
             // Open OTP flow for the existing unverified user
@@ -159,7 +158,7 @@ const Register: React.FC = () => {
               context: "register",
               email: formData.email,
               title: "Complete Registration",
-              description: "Enter the verification code sent to your email to activate your account",
+              description: "Enter the verification code sent to your email to activate your account. Click 'Resend Code' if you need a new verification email.",
               onSuccess: (data) => {
                 toast({
                   title: "Registration Completed!",
