@@ -881,7 +881,7 @@ const Index: React.FC = () => {
                       </Button>
                       <Button asChild variant="outline" className="w-full">
                         <Link to="/profile">
-                          {translations?.nav?.profile || "Profile"}
+                          Profile
                         </Link>
                       </Button>
                     </div>
