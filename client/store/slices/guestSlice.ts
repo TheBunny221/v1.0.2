@@ -371,7 +371,7 @@ const guestSlice = createSlice({
       const dataToSave = { ...state.complaintData, currentStep: state.currentFormStep };
       saveFormDataToSession(dataToSave);
     },
-    loadFormDataFromSession: (state) => {
+    loadSavedFormData: (state) => {
       const savedData = loadFormDataFromSession();
       if (savedData) {
         const { currentStep, ...complaintData } = savedData;
