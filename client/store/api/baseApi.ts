@@ -51,63 +51,6 @@ const baseQueryWithReauth: BaseQueryFn<
   return result;
 };
 
-// Helper function to extract error messages
-function getErrorMessage(error: FetchBaseQueryError): string {
-  if ("status" in error) {
-    // Safely extract error message from response data
-    let errorMessage: string | undefined;
-
-    try {
-      if (
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data &&
-        typeof (error.data as any).message === "string"
-      ) {
-        errorMessage = (error.data as any).message;
-      }
-    } catch (e) {
-      // Ignore errors when trying to read the response data
-      console.warn("Error reading response data:", e);
-    }
-
-    // Return custom message if available, otherwise use default
-    if (errorMessage) {
-      return errorMessage;
-    }
-
-    switch (error.status) {
-      case 400:
-        return "Bad request - please check your input";
-      case 401:
-        return "Unauthorized - please login again";
-      case 403:
-        return "Forbidden - you do not have permission";
-      case 404:
-        return "Resource not found";
-      case 409:
-        return "Conflict - resource already exists";
-      case 422:
-        return "Validation error - please check your input";
-      case 429:
-        return "Too many requests - please try again later";
-      case 500:
-        return "Internal server error - please try again later";
-      case 502:
-        return "Bad gateway - service temporarily unavailable";
-      case 503:
-        return "Service unavailable - please try again later";
-      default:
-        return `An error occurred (${error.status})`;
-    }
-  }
-
-  if ("message" in error) {
-    return error.message || "Network error occurred";
-  }
-
-  return "An unexpected error occurred";
-}
 
 // Create the base API slice
 export const baseApi = createApi({
