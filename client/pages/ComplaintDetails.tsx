@@ -43,6 +43,7 @@ const ComplaintDetails: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   const [statusComment, setStatusComment] = useState("");
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   // Use RTK Query to fetch complaint details
   const { data: complaintResponse, isLoading, error } = useGetComplaintQuery(
