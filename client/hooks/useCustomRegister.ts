@@ -41,15 +41,19 @@ export const useCustomRegister = () => {
 
       return result;
     } catch (error: any) {
+      console.log("Caught error in useCustomRegister:", error);
+
       // If it's a fetch error, wrap it properly
       if (error.name === "TypeError" || error.message?.includes("fetch")) {
+        console.log("Network error detected, wrapping...");
         throw {
           status: 500,
           data: { message: "Network error. Please check your connection and try again." },
         };
       }
-      
+
       // Re-throw the error as-is if it's already structured
+      console.log("Re-throwing structured error:", error);
       throw error;
     } finally {
       setIsLoading(false);
