@@ -165,10 +165,15 @@ const initialState: ComplaintsState = {
 // Helper function to make API calls
 const apiCall = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Authentication required. Please log in.");
+  }
+
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
     ...options,
