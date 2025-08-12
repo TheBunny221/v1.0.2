@@ -735,6 +735,7 @@ export const {
   resetAuth,
   resetOTPState,
   setRequiresPasswordSetup,
+  resetRegistrationState,
 } = authSlice.actions;
 
 // Export common actions with backward compatibility
