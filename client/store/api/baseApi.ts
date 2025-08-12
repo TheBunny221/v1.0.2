@@ -64,7 +64,7 @@ const baseQueryWithReauth: BaseQueryFn<
     });
 
     // Set error in auth slice for global error handling
-    if (result.error.status >= 500) {
+    if (result.error.status && result.error.status >= 500) {
       api.dispatch(setError(errorMessage));
     }
   }
