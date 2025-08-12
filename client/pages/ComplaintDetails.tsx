@@ -38,26 +38,21 @@ import {
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useAppDispatch();
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
   const [statusComment, setStatusComment] = useState("");
-  const [complaint, setComplaint] = useState<any>(null);
 
-  useEffect(() => {
-    if (id) {
-      // Find complaint from store or fetch if needed
-      const foundComplaint = complaints.find((c) => c.id === id);
-      if (foundComplaint) {
-        setComplaint(foundComplaint);
-      } else {
-        // Dispatch action to fetch complaint by ID
-        // dispatch(fetchComplaintById(id));
-      }
-    }
-  }, [id, complaints, dispatch]);
+  // Use RTK Query to fetch complaint details
+  const { data: complaintResponse, isLoading, error } = useGetComplaintQuery(
+    id!,
+    { skip: !id || !isAuthenticated }
+  );
+
+  // Use RTK Query mutation for status updates
+  const [updateStatus, { isLoading: isUpdatingStatus }] = useUpdateComplaintStatusMutation();
+
+  const complaint = complaintResponse?.data;
 
   const getStatusColor = (status: string) => {
     switch (status) {
