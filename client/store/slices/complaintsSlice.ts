@@ -415,6 +415,37 @@ export const fetchComplaintStats = createAsyncThunk(
   },
 );
 
+export const submitFeedback = createAsyncThunk(
+  "complaints/submitFeedback",
+  async (
+    {
+      complaintId,
+      rating,
+      comment,
+    }: {
+      complaintId: string;
+      rating: number;
+      comment?: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await apiCall(`/api/complaints/${complaintId}/feedback`, {
+        method: "POST",
+        body: JSON.stringify({ rating, comment }),
+      });
+      return {
+        complaintId,
+        feedback: data.data.feedback,
+      };
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to submit feedback"
+      );
+    }
+  }
+);
+
 // Slice
 const complaintsSlice = createSlice({
   name: "complaints",
