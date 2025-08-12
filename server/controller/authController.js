@@ -45,11 +45,29 @@ export const register = asyncHandler(async (req, res) => {
   });
 
   if (existingUser) {
-    return res.status(400).json({
-      success: false,
-      message: "User already exists with this email",
-      data: null,
-    });
+    // Check if user is already active
+    if (existingUser.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email. Please try logging in instead.",
+        data: {
+          existingUser: true,
+          isActive: true,
+          action: "login"
+        },
+      });
+    } else {
+      // User exists but is not activated (pending email verification)
+      return res.status(400).json({
+        success: false,
+        message: "User already registered but email not verified. Please check your email for verification code or request a new one.",
+        data: {
+          existingUser: true,
+          isActive: false,
+          action: "verify_email"
+        },
+      });
+    }
   }
 
   // Hash password for storage but keep account inactive until email verification
