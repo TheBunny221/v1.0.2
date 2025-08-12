@@ -134,7 +134,14 @@ model Complaint {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
+  // Indexes for performance
+  @@index([submittedById, createdAt])
+  @@index([wardId, status])
+  @@index([assignedToId, status])
+  @@index([type, status])
+  @@index([priority, status])
+  @@index([submittedOn])
   @@map("complaints")
 }
 
