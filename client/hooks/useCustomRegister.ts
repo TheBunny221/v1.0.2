@@ -60,14 +60,23 @@ export const useCustomRegister = () => {
       });
 
       let result;
+      let textResponse = "";
+
       try {
+        // Clone the response to be able to read it as text if JSON parsing fails
+        const responseClone = response.clone();
         result = await response.json();
         console.log("Parsed JSON result:", result);
       } catch (jsonError) {
         console.error("Failed to parse response as JSON:", jsonError);
-        const textResult = await response.text();
-        console.log("Response as text:", textResult);
-        throw new Error(`Invalid JSON response: ${textResult}`);
+        try {
+          textResponse = await response.clone().text();
+          console.log("Response as text:", textResponse);
+        } catch (textError) {
+          console.error("Failed to read response as text:", textError);
+          textResponse = "Unable to read response";
+        }
+        throw new Error(`Invalid JSON response: ${textResponse}`);
       }
 
       if (!response.ok) {
