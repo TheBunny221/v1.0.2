@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
-  register,
   selectAuth,
-  selectRegistrationStep,
-  selectRegistrationData,
   resetRegistrationState,
+  getDashboardRouteForRole,
 } from "../store/slices/authSlice";
-import { showToast } from "../store/slices/uiSlice";
-import OTPVerification from "../components/OTPVerification";
+import { useRegisterMutation } from "../store/api/authApi";
+import { useToast } from "../hooks/use-toast";
+import { useOtpFlow } from "../contexts/OtpContext";
 import {
   Card,
   CardContent,
