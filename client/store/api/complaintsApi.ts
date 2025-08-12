@@ -296,7 +296,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         Object.entries(params).forEach(([key, value]) => {
           if (value) searchParams.append(key, value);
         });
-        return `/complaints/statistics?${searchParams.toString()}`;
+        return `/complaints/stats?${searchParams.toString()}`;
       },
       transformResponse: transformResponse,
       providesTags: ["Analytics"],
