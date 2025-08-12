@@ -909,13 +909,11 @@ const Index: React.FC = () => {
                         </Link>
                       </Button>
                       <Separator className="my-3" />
-                      <Button
-                        onClick={() => setIsFormExpanded(true)}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        {translations?.guest?.guestSubmission ||
-                          "Guest Complaint"}
+                      <Button asChild variant="outline" className="w-full">
+                        <Link to="/guest/complaint">
+                          {translations?.guest?.guestSubmission ||
+                            "Guest Complaint"}
+                        </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
                         <Link to="/guest/track">
