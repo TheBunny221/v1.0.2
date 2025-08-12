@@ -163,17 +163,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const resetToEmailInput = () => {
-    dispatch(resetOTPState());
-    setFormData((prev) => ({ ...prev, otpCode: "" }));
-    setOtpTimer(0);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   // Demo credentials for testing
   const demoCredentials = [
