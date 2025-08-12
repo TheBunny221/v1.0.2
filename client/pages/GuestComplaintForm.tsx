@@ -748,7 +748,7 @@ const GuestComplaintForm: React.FC = () => {
                 ))}
               </div>
               <Progress value={getProgressPercentage()} className="w-full" />
-              <div className="text-center">
+              <div className="text-center" data-testid="step-indicator">
                 <h3 className="font-semibold">{STEPS[currentStep - 1].name}</h3>
                 <p className="text-sm text-gray-600">
                   {STEPS[currentStep - 1].description}
