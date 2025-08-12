@@ -577,7 +577,7 @@ export const hindiTranslations: Translation = {
   },
   messages: {
     networkError: "���ेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
-    serverError: "सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें।",
+    serverError: "सर्वर त्रुटि। कृप���ा बाद में पुनः प्रयास करें।",
     notFound: "अनुरोधित संसाधन नहीं मिला।",
     unauthorized: "आप इस संसाधन तक पहुंचने के लिए अधिकृत नहीं हैं।",
     forbidden: "पहुंच निष���द्ध।",
@@ -596,7 +596,7 @@ export const malayalamTranslations: Translation = {
     edit: "എഡിറ്റ് ചെയ്യുക",
     delete: "നീക്കം ചെയ്യുക",
     view: "കാണുക",
-    search: "തിരയുക",
+    search: "ത���രയുക",
     loading: "ലോഡിംഗ്...",
     error: "പിശക്",
     success: "വിജയം",
@@ -677,7 +677,7 @@ export const malayalamTranslations: Translation = {
     electricity: "വൈദ്യുതി",
     roadRepair: "റോഡ് അറ്റകുറ്റപ്പണി",
     garbageCollection: "മാലിന്യ ശേഖരണം",
-    streetLighting: "സ്ട്രീറ്റ് ലൈറ്റിംഗ്",
+    streetLighting: "��്ട്രീറ്റ് ലൈറ്റിംഗ്",
     sewerage: "മലിനജല സംവിധാനം",
     publicHealth: "പൊതുജനാരോഗ്യം",
     traffic: "ട്രാഫിക്",
@@ -733,7 +733,7 @@ export const malayalamTranslations: Translation = {
   },
   dashboard: {
     totalComplaints: "മൊത്തം പരാതികൾ",
-    resolvedToday: "ഇന്ന് പരിഹരിച്ചത്",
+    resolvedToday: "ഇന്ന് പരിഹരിച്���ത്",
     slaBreaches: "SLA ലംഘനങ്ങൾ",
     activeUsers: "സജീവ ഉപയോക്താക്കൾ",
     complaintsByStatus: "നിലയനുസരിച്ച് പരാതികൾ",
@@ -746,9 +746,16 @@ export const malayalamTranslations: Translation = {
     warning: "മുന്നറിയിപ്പ്",
     overdue: "കാലഹരണപ്പെട്ട",
   },
+  admin: {
+    userManagement: "ഉപയോക്തൃ മാനേജ്മെന്റ്",
+    systemConfiguration: "സിസ്റ്റം കോൺഫിഗറേഷൻ",
+    languageManagement: "ഭാഷാ മാനേജ്മെന്റ്",
+    analytics: "അനാലിറ്റിക്സ്",
+    reports: "റിപ്പോർട്ടുകൾ",
+  },
   messages: {
     networkError:
-      "നെറ്റ്‌വർക്ക് കണക്ഷൻ പിശക്. ദയവായി നിങ്ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കുക.",
+      "നെറ്റ്‌വർക്ക് കണക്ഷൻ പിശക്. ദയവായി നിങ��ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കുക.",
     serverError: "സർവർ പിശക്. ദയവാ���ി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
     notFound: "അഭ്യർത്ഥി���്ച ഉറവിടം കണ്ടെത്തിയില്ല.",
     unauthorized: "ഈ ഉറവിടം ആക്സസ് ചെയ്യാൻ നിങ്ങൾക്ക് അധികാരമില്ല.",
