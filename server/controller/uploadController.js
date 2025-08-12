@@ -19,6 +19,42 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
     });
   }
 
+  // Validate file size (max 10MB)
+  const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+  if (req.file.size > maxSize) {
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+    return res.status(413).json({
+      success: false,
+      message: "File size too large. Maximum allowed size is 10MB.",
+      data: null,
+    });
+  }
+
+  // Validate mime type (images and documents only)
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+  ];
+
+  if (!allowedMimeTypes.includes(req.file.mimetype)) {
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid file type. Only images (JPEG, PNG, GIF, WebP) and documents (PDF, DOC, DOCX, TXT) are allowed.",
+      data: null,
+    });
+  }
+
   // Check if complaint exists
   const complaint = await prisma.complaint.findUnique({
     where: { id: complaintId },

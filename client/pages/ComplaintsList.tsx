@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchComplaints } from "../store/slices/complaintsSlice";
+import { useAppSelector } from "../store/hooks";
+import { useGetComplaintsQuery } from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -38,18 +38,27 @@ import {
 } from "lucide-react";
 
 const ComplaintsList: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
+  // Build query parameters
+  const queryParams: any = { page: 1, limit: 100 };
+  if (statusFilter !== "all") queryParams.status = statusFilter;
+  if (priorityFilter !== "all") queryParams.priority = priorityFilter;
+  if (searchTerm.trim()) queryParams.search = searchTerm.trim();
+
+  // Use RTK Query for better authentication handling
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+  } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
+
+  const complaints = complaintsResponse?.data || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -83,18 +92,18 @@ const ComplaintsList: React.FC = () => {
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint) => {
-    const matchesSearch =
-      complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || complaint.status === statusFilter;
-    const matchesPriority =
-      priorityFilter === "all" || complaint.priority === priorityFilter;
-
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  // Since filtering is now done server-side via query params, we don't need client-side filtering
+  // But we can still apply search term filtering for immediate feedback
+  const filteredComplaints = searchTerm
+    ? complaints.filter(
+        (complaint) =>
+          complaint.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          complaint.id.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : complaints;
 
   return (
     <div className="space-y-6">
@@ -105,7 +114,7 @@ const ComplaintsList: React.FC = () => {
           <p className="text-gray-600">Manage and track all complaints</p>
         </div>
         {user?.role === "CITIZEN" && (
-          <Link to="/">
+          <Link to="/complaints/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               New Complaint
@@ -152,7 +161,14 @@ const ComplaintsList: React.FC = () => {
                 <SelectItem value="CRITICAL">Critical</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setPriorityFilter("all");
+              }}
+            >
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
             </Button>

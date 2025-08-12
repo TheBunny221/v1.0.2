@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
 import {
-  fetchComplaints,
-  setFilters,
-  clearFilters,
-} from "../store/slices/complaintsSlice";
-import FeedbackDialog from "../components/FeedbackDialog";
+  useGetComplaintsQuery,
+  useGetComplaintStatisticsQuery,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -52,14 +50,24 @@ import {
 } from "lucide-react";
 
 const CitizenDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { translations } = useAppSelector((state) => state.language);
 
-  const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading, filters, pagination } = useAppSelector(
-    (state) => state.complaints,
+  // Use RTK Query for better authentication handling
+  const {
+    data: complaintsResponse,
+    isLoading: complaintsLoading,
+    error: complaintsError,
+  } = useGetComplaintsQuery(
+    { page: 1, limit: 50 }, // Get more complaints for better stats
+    { skip: !isAuthenticated || !user },
   );
+
+  const { data: statsResponse, isLoading: statsLoading } =
+    useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
+
+  const complaints = complaintsResponse?.data || [];
+  const isLoading = complaintsLoading;
 
   const [dashboardStats, setDashboardStats] = useState({
     total: 0,
@@ -86,65 +94,37 @@ const CitizenDashboard: React.FC = () => {
 
   // Fetch complaints when user is available or filters change
   useEffect(() => {
-    if (user) {
-      const filterParams = {
-        submittedById: user.id,
-        status: statusFilter || undefined,
-        type: typeFilter || undefined,
-        search: searchTerm || undefined,
-        sortBy,
-        sortOrder,
-        page: 1,
-        limit: 10,
-      };
+    // Calculate dashboard statistics from complaints or use stats API
+    if (statsResponse?.data) {
+      // Use API stats if available
+      const stats = statsResponse.data;
+      setDashboardStats({
+        total: stats.total,
+        pending: stats.byStatus?.REGISTERED || 0,
+        inProgress: stats.byStatus?.IN_PROGRESS || 0,
+        resolved: stats.byStatus?.RESOLVED || 0,
+        avgResolutionTime: stats.avgResolutionTime || 0,
+      });
+    } else {
+      // Calculate from complaints list as fallback
+      const total = complaints.length;
+      const pending = complaints.filter(
+        (c) => c.status === "REGISTERED",
+      ).length;
+      const inProgress = complaints.filter(
+        (c) => c.status === "IN_PROGRESS",
+      ).length;
+      const resolved = complaints.filter((c) => c.status === "RESOLVED").length;
 
-      dispatch(setFilters(filterParams));
-      dispatch(fetchComplaints(filterParams));
+      setDashboardStats({
+        total,
+        pending,
+        inProgress,
+        resolved,
+        avgResolutionTime: 0, // Will be calculated by backend stats API
+      });
     }
-  }, [dispatch, user, statusFilter, typeFilter, searchTerm, sortBy, sortOrder]);
-
-  // Update URL search params when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (searchTerm) params.set("search", searchTerm);
-    if (statusFilter) params.set("status", statusFilter);
-    if (typeFilter) params.set("type", typeFilter);
-    if (sortBy !== "submittedOn") params.set("sort", sortBy);
-    if (sortOrder !== "desc") params.set("order", sortOrder);
-
-    setSearchParams(params);
-  }, [
-    searchTerm,
-    statusFilter,
-    typeFilter,
-    sortBy,
-    sortOrder,
-    setSearchParams,
-  ]);
-
-  // Calculate dashboard statistics
-  useEffect(() => {
-    const total = complaints.length;
-    const pending = complaints.filter((c) => c.status === "REGISTERED").length;
-    const inProgress = complaints.filter(
-      (c) => c.status === "IN_PROGRESS" || c.status === "ASSIGNED",
-    ).length;
-    const resolved = complaints.filter(
-      (c) => c.status === "RESOLVED" || c.status === "CLOSED",
-    ).length;
-
-    // Calculate average resolution time (mock data for now)
-    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-
-    setDashboardStats({
-      total,
-      pending,
-      inProgress,
-      resolved,
-      avgResolutionTime: 3.2, // Mock data - in real app, calculate from actual data
-      resolutionRate,
-    });
-  }, [complaints]);
+  }, [complaints, statsResponse]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -178,62 +158,26 @@ const CitizenDashboard: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const recentComplaints = complaints.slice(0, 5);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Search is handled by useEffect
-  };
-
-  const handleRefresh = () => {
-    if (user) {
-      const filterParams = {
-        submittedById: user.id,
-        status: statusFilter || undefined,
-        type: typeFilter || undefined,
-        search: searchTerm || undefined,
-        sortBy,
-        sortOrder,
-        page: 1,
-        limit: 10,
-      };
-      dispatch(fetchComplaints(filterParams));
-    }
-  };
-
-  const clearAllFilters = () => {
-    setSearchTerm("");
-    setStatusFilter("");
-    setTypeFilter("");
-    setSortBy("submittedOn");
-    setSortOrder("desc");
-    dispatch(clearFilters());
-  };
-
-  const isResolved = (status: string) => {
-    return status === "RESOLVED" || status === "CLOSED";
-  };
-
-  const getComplaintTypeLabel = (type: string) => {
-    const typeLabels: Record<string, string> = {
-      WATER_SUPPLY: "Water Supply",
-      ELECTRICITY: "Electricity",
-      ROAD_REPAIR: "Road Repair",
-      GARBAGE_COLLECTION: "Garbage Collection",
-      STREET_LIGHTING: "Street Lighting",
-      SEWERAGE: "Sewerage",
-      PUBLIC_HEALTH: "Public Health",
-      TRAFFIC: "Traffic",
-      OTHERS: "Others",
-    };
-    return typeLabels[type] || type;
-  };
+  // Show error state if there's an authentication error
+  if (
+    complaintsError &&
+    "status" in complaintsError &&
+    complaintsError.status === 401
+  ) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <h2 className="text-xl font-semibold mb-2">Authentication Error</h2>
+          <p>Please log in again to access your dashboard.</p>
+        </div>
+        <Link to="/login">
+          <Button>Go to Login</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import {
-  fetchComplaintById,
-  updateComplaintStatus,
-} from "../store/slices/complaintsSlice";
+  useGetComplaintQuery,
+  useUpdateComplaintStatusMutation,
+} from "../store/api/complaintsApi";
+import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import {
   Card,
   CardContent,
@@ -38,26 +39,24 @@ import {
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useAppDispatch();
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
   const [statusComment, setStatusComment] = useState("");
-  const [complaint, setComplaint] = useState<any>(null);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      // Find complaint from store or fetch if needed
-      const foundComplaint = complaints.find((c) => c.id === id);
-      if (foundComplaint) {
-        setComplaint(foundComplaint);
-      } else {
-        // Dispatch action to fetch complaint by ID
-        // dispatch(fetchComplaintById(id));
-      }
-    }
-  }, [id, complaints, dispatch]);
+  // Use RTK Query to fetch complaint details
+  const {
+    data: complaintResponse,
+    isLoading,
+    error,
+  } = useGetComplaintQuery(id!, { skip: !id || !isAuthenticated });
+
+  // Use RTK Query mutation for status updates
+  const [updateStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateComplaintStatusMutation();
+
+  const complaint = complaintResponse?.data;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -91,16 +90,18 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: string) => {
     if (id) {
-      dispatch(
-        updateComplaintStatus({
+      try {
+        await updateStatus({
           id,
-          status: newStatus,
-          comment: statusComment,
-        }),
-      );
-      setStatusComment("");
+          status: newStatus as any,
+          remarks: statusComment,
+        }).unwrap();
+        setStatusComment("");
+      } catch (error) {
+        console.error("Failed to update status:", error);
+      }
     }
   };
 
@@ -318,26 +319,38 @@ const ComplaintDetails: React.FC = () => {
                 <div className="flex space-x-2">
                   {complaint.status === "REGISTERED" &&
                     user?.role === "WARD_OFFICER" && (
-                      <Button onClick={() => handleStatusUpdate("ASSIGNED")}>
-                        Assign
+                      <Button
+                        onClick={() => handleStatusUpdate("ASSIGNED")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Assigning..." : "Assign"}
                       </Button>
                     )}
                   {complaint.status === "ASSIGNED" &&
                     user?.role === "MAINTENANCE_TEAM" && (
-                      <Button onClick={() => handleStatusUpdate("IN_PROGRESS")}>
-                        Start Work
+                      <Button
+                        onClick={() => handleStatusUpdate("IN_PROGRESS")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Starting..." : "Start Work"}
                       </Button>
                     )}
                   {complaint.status === "IN_PROGRESS" &&
                     user?.role === "MAINTENANCE_TEAM" && (
-                      <Button onClick={() => handleStatusUpdate("RESOLVED")}>
-                        Mark Resolved
+                      <Button
+                        onClick={() => handleStatusUpdate("RESOLVED")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Resolving..." : "Mark Resolved"}
                       </Button>
                     )}
                   {complaint.status === "RESOLVED" &&
                     user?.role === "WARD_OFFICER" && (
-                      <Button onClick={() => handleStatusUpdate("CLOSED")}>
-                        Close Complaint
+                      <Button
+                        onClick={() => handleStatusUpdate("CLOSED")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Closing..." : "Close Complaint"}
                       </Button>
                     )}
                 </div>
@@ -421,6 +434,20 @@ const ComplaintDetails: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              {/* Show feedback button for resolved/closed complaints if user is the complainant */}
+              {(complaint.status === "RESOLVED" ||
+                complaint.status === "CLOSED") &&
+                complaint.submittedById === user?.id &&
+                !complaint.rating && (
+                  <Button
+                    className="w-full justify-start"
+                    onClick={() => setShowFeedbackDialog(true)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Provide Feedback
+                  </Button>
+                )}
+
               <Button variant="outline" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" />
                 Export Details
@@ -433,6 +460,17 @@ const ComplaintDetails: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Feedback Dialog */}
+      <ComplaintFeedbackDialog
+        complaintId={complaint.id}
+        isOpen={showFeedbackDialog}
+        onClose={() => setShowFeedbackDialog(false)}
+        onSuccess={() => {
+          // The complaint data will be automatically updated by RTK Query
+          // due to invalidation tags
+        }}
+      />
     </div>
   );
 };

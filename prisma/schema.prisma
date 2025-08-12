@@ -1,0 +1,273 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+  // For production, uncomment the line below and comment sqlite above:
+  // provider = "postgresql"
+}
+
+// Enums converted to String for SQLite compatibility
+// For PostgreSQL deployment, these should be converted back to proper enums
+
+// Models
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  fullName    String
+  phoneNumber String?
+  password    String?
+  role        String   @default("CITIZEN") // CITIZEN, WARD_OFFICER, MAINTENANCE_TEAM, ADMINISTRATOR, GUEST
+  wardId      String?
+  department  String?
+  language    String   @default("en")
+  avatar      String?
+  isActive    Boolean  @default(true)
+  lastLogin   DateTime?
+  joinedOn    DateTime @default(now())
+  
+  // Relations
+  ward              Ward?              @relation(fields: [wardId], references: [id])
+  submittedComplaints Complaint[]      @relation("SubmittedBy")
+  assignedComplaints  Complaint[]      @relation("AssignedTo")
+  statusLogs        StatusLog[]
+  notifications     Notification[]
+  sentMessages      Message[]          @relation("SentBy")
+  receivedMessages  Message[]          @relation("ReceivedBy")
+  otpSessions       OTPSession[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}
+
+model Ward {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  isActive    Boolean @default(true)
+  
+  // Relations
+  users       User[]
+  complaints  Complaint[]
+  subZones    SubZone[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("wards")
+}
+
+model SubZone {
+  id          String  @id @default(cuid())
+  name        String
+  wardId      String
+  description String?
+  isActive    Boolean @default(true)
+  
+  // Relations
+  ward        Ward        @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  complaints  Complaint[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("sub_zones")
+}
+
+model Complaint {
+  id              String            @id @default(cuid())
+  title           String?
+  description     String
+  type            String            // WATER_SUPPLY, ELECTRICITY, ROAD_REPAIR, etc.
+  status          String            @default("REGISTERED") // REGISTERED, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED, REOPENED
+  priority        String            @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  slaStatus       String            @default("ON_TIME") // ON_TIME, WARNING, OVERDUE, COMPLETED
+  
+  // Location Information
+  wardId          String
+  subZoneId       String?
+  area            String
+  landmark        String?
+  address         String?
+  coordinates     String?           // JSON string for lat/lng
+  
+  // Contact Information
+  contactName     String?
+  contactEmail    String?
+  contactPhone    String
+  isAnonymous     Boolean           @default(false)
+  
+  // Assignment and Tracking
+  submittedById   String?
+  assignedToId    String?
+  resolvedById    String?
+  
+  // Timestamps
+  submittedOn     DateTime          @default(now())
+  assignedOn      DateTime?
+  resolvedOn      DateTime?
+  closedOn        DateTime?
+  deadline        DateTime?
+  
+  // Additional Information
+  remarks         String?
+  citizenFeedback String?
+  rating          Int?              // 1-5 rating
+  tags            String?           // JSON array of tags
+  
+  // Relations
+  ward            Ward              @relation(fields: [wardId], references: [id])
+  subZone         SubZone?          @relation(fields: [subZoneId], references: [id])
+  submittedBy     User?             @relation("SubmittedBy", fields: [submittedById], references: [id])
+  assignedTo      User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
+  statusLogs      StatusLog[]
+  attachments     Attachment[]
+  notifications   Notification[]
+  messages        Message[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes for performance
+  @@index([submittedById, createdAt])
+  @@index([wardId, status])
+  @@index([assignedToId, status])
+  @@index([type, status])
+  @@index([priority, status])
+  @@index([submittedOn])
+  @@map("complaints")
+}
+
+model StatusLog {
+  id          String   @id @default(cuid())
+  complaintId String
+  userId      String
+  fromStatus  String?  // Previous status
+  toStatus    String   // New status
+  comment     String?
+  timestamp   DateTime @default(now())
+  
+  // Relations
+  complaint   Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id])
+
+  @@index([complaintId, timestamp])
+  @@map("status_logs")
+}
+
+model Attachment {
+  id          String    @id @default(cuid())
+  complaintId String
+  fileName    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  uploadedAt  DateTime  @default(now())
+  
+  // Relations
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  
+  @@map("attachments")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  complaintId String?
+  type        String   // EMAIL, SMS, IN_APP
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  sentAt      DateTime @default(now())
+  readAt      DateTime?
+  
+  // Relations
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  complaint   Complaint?       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([complaintId])
+  @@map("notifications")
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  complaintId String
+  sentById    String
+  receivedById String?
+  content     String
+  isInternal  Boolean   @default(true)  // Internal communication between officers
+  sentAt      DateTime  @default(now())
+  readAt      DateTime?
+  
+  // Relations
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  sentBy      User      @relation("SentBy", fields: [sentById], references: [id])
+  receivedBy  User?     @relation("ReceivedBy", fields: [receivedById], references: [id])
+  
+  @@map("messages")
+}
+
+model OTPSession {
+  id          String    @id @default(cuid())
+  userId      String?
+  email       String
+  phoneNumber String?
+  otpCode     String
+  purpose     String    @default("GUEST_VERIFICATION") // GUEST_VERIFICATION, PASSWORD_RESET, etc.
+  isVerified  Boolean   @default(false)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  verifiedAt  DateTime?
+  
+  // Relations
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email, purpose, isVerified])
+  @@index([expiresAt])
+  @@map("otp_sessions")
+}
+
+model Department {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  headUserId  String?
+  isActive    Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("departments")
+}
+
+model SystemConfig {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  value       String
+  description String?
+  isActive    Boolean   @default(true)
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("system_config")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // COMPLAINT_SUMMARY, SLA_COMPLIANCE, PERFORMANCE, etc.
+  filters     String   // JSON string of applied filters
+  data        String   // JSON string of report data
+  generatedBy String
+  generatedAt DateTime @default(now())
+  
+  @@map("reports")
+}

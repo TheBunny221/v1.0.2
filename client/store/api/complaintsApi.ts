@@ -239,7 +239,7 @@ export const complaintsApi = baseApi.injectEndpoints({
       query: ({ id, feedback, rating }) => ({
         url: `/complaints/${id}/feedback`,
         method: "POST",
-        body: { feedback, rating },
+        body: { citizenFeedback: feedback, rating },
       }),
       transformResponse: transformResponse<Complaint>,
       invalidatesTags: (result, error, { id }) => [
@@ -296,7 +296,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         Object.entries(params).forEach(([key, value]) => {
           if (value) searchParams.append(key, value);
         });
-        return `/complaints/statistics?${searchParams.toString()}`;
+        return `/complaints/stats?${searchParams.toString()}`;
       },
       transformResponse: transformResponse,
       providesTags: ["Analytics"],
