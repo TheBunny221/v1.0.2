@@ -937,8 +937,7 @@ const Index: React.FC = () => {
                         {translations?.nav?.trackStatus || "Real-time Tracking"}
                       </div>
                       <div className="text-gray-600">
-                        {translations?.complaints?.trackStatus ||
-                          "Monitor complaint progress"}
+                        Monitor complaint progress
                       </div>
                     </div>
                   </div>
