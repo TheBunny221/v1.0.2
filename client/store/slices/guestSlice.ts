@@ -422,8 +422,11 @@ const guestSlice = createSlice({
 export const {
   clearGuestData,
   setSubmissionStep,
+  setCurrentFormStep,
+  setFormValidation,
   clearError,
   updateComplaintData,
+  loadFormDataFromSession,
   resetOTPState,
 } = guestSlice.actions;
 
