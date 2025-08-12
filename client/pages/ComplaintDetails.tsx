@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import {
-  fetchComplaintById,
-  updateComplaintStatus,
-} from "../store/slices/complaintsSlice";
+  useGetComplaintQuery,
+  useUpdateComplaintStatusMutation,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
