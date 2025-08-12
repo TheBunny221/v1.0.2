@@ -22,5 +22,7 @@ router.post("/verify-otp", validateOtpVerification, verifyOTPAndRegister);
 router.post("/resend-otp", resendOTP);
 router.get("/track/:complaintId", validateComplaintTracking, trackComplaint);
 router.get("/stats", getPublicStats);
+router.get("/wards", getPublicWards);
+router.get("/complaint-types", getPublicComplaintTypes);
 
 export default router;
