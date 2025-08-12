@@ -88,20 +88,17 @@ export const useCustomRegister = () => {
       return result;
     } catch (error: any) {
       console.log("Caught error in useCustomRegister:");
-      console.log("Error name:", error.name);
-      console.log("Error message:", error.message);
-      console.log("Error stack:", error.stack);
-      console.log("Full error object:", error);
+      console.log("Error object:", error);
 
       // Check if this is already a structured error from our API response handling
       if (error.status && error.data) {
-        console.log("Re-throwing structured API error:", error);
+        console.log("Re-throwing structured API error with server message:", error.data);
         throw error;
       }
 
-      // If it's a fetch error, wrap it properly
-      if (error.name === "TypeError" || error.message?.includes("fetch")) {
-        console.log("Network/TypeError detected, wrapping...");
+      // If it's a network/fetch error, wrap it properly
+      if (error.name === "TypeError" || error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
+        console.log("Network error detected, wrapping...");
         throw {
           status: 500,
           data: {
@@ -110,12 +107,12 @@ export const useCustomRegister = () => {
         };
       }
 
-      // For other errors, wrap them with more detail
-      console.log("Wrapping unexpected error:", error);
+      // For other unexpected errors, wrap them
+      console.log("Wrapping unexpected error:", error.message);
       throw {
         status: 500,
         data: {
-          message: `Registration failed: ${error.message || "Unknown error"}`,
+          message: error.message || "Registration failed due to an unexpected error",
         },
       };
     } finally {
