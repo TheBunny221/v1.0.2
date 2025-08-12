@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { register } from "../store/slices/authSlice";
-import { addNotification } from "../store/slices/uiSlice";
+import {
+  register,
+  selectAuth,
+  selectRegistrationStep,
+  selectRegistrationData,
+  resetRegistrationState
+} from "../store/slices/authSlice";
+import { showToast } from "../store/slices/uiSlice";
+import OTPVerification from "../components/OTPVerification";
 import {
   Card,
   CardContent,
