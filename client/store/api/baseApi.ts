@@ -25,20 +25,6 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
-  // Ensure response is properly handled
-  responseHandler: async (response) => {
-    // Clone the response to avoid "body already used" errors
-    const clonedResponse = response.clone();
-
-    try {
-      const text = await clonedResponse.text();
-      return text ? JSON.parse(text) : {};
-    } catch (error) {
-      // If JSON parsing fails, return the response as-is
-      console.warn("Failed to parse response as JSON:", error);
-      return response;
-    }
-  },
 });
 
 // Enhanced base query with 401 auto-logout handling
