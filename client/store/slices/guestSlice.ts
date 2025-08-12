@@ -3,7 +3,9 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 // Types
 export interface AttachmentFile {
   id: string;
-  file: File;
+  name: string;
+  size: number;
+  type: string;
   preview?: string;
   uploading?: boolean;
   uploaded?: boolean;
@@ -155,16 +157,9 @@ const loadDraftFromStorage = (): Partial<GuestComplaintData> => {
 // Save draft to sessionStorage
 const saveDraftToStorage = (formData: GuestComplaintData) => {
   try {
-    // Don't save file objects to sessionStorage
+    // Attachments are already serializable now
     const dataTosave = {
       ...formData,
-      attachments: formData.attachments?.map((att) => ({
-        id: att.id,
-        // Only save metadata, not the actual file
-        name: att.file.name,
-        size: att.file.size,
-        type: att.file.type,
-      })),
     };
     sessionStorage.setItem("guestComplaintDraft", JSON.stringify(dataTosave));
   } catch (error) {
@@ -447,12 +442,12 @@ const validateStep3 = (formData: GuestComplaintData): ValidationErrors => {
   // Attachments are optional, but validate if present
   if (formData.attachments && formData.attachments.length > 0) {
     formData.attachments.forEach((attachment, index) => {
-      if (attachment.file.size > 10 * 1024 * 1024) {
+      if (attachment.size > 10 * 1024 * 1024) {
         // 10MB
         errors[`attachment_${index}`] = "File size must be less than 10MB";
       }
       if (
-        !["image/jpeg", "image/png", "image/jpg"].includes(attachment.file.type)
+        !["image/jpeg", "image/png", "image/jpg"].includes(attachment.type)
       ) {
         errors[`attachment_${index}`] = "Only JPG and PNG images are allowed";
       }
