@@ -1,6 +1,6 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
-import { handleUploadComplaintAttachment } from './uploadRoutes.js';
+import { uploadComplaintAttachment } from '../controller/uploadController.js';
 import {
   getComplaints,
   getComplaint,
@@ -48,7 +48,7 @@ router.put('/:id/reopen', authorize('ADMINISTRATOR'), reopenComplaint);
 router.post('/:id/attachments', (req, res, next) => {
   // Redirect to the actual upload endpoint
   req.params.complaintId = req.params.id;
-  handleUploadComplaintAttachment(req, res, next);
+  uploadComplaintAttachment(req, res, next);
 });
 
 export default router;
