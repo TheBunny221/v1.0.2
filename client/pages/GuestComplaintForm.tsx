@@ -304,7 +304,8 @@ const GuestComplaintForm: React.FC = () => {
         }
 
         // Create attachment object with serializable data
-        const attachmentId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        const attachmentId =
+          Date.now().toString() + Math.random().toString(36).substr(2, 9);
         const attachment: AttachmentFile = {
           id: attachmentId,
           name: file.name,
@@ -316,7 +317,7 @@ const GuestComplaintForm: React.FC = () => {
         };
 
         // Store the actual file separately
-        setFileMap(prev => new Map(prev).set(attachmentId, file));
+        setFileMap((prev) => new Map(prev).set(attachmentId, file));
         dispatch(addAttachment(attachment));
       });
     },
@@ -327,7 +328,7 @@ const GuestComplaintForm: React.FC = () => {
   const handleRemoveAttachment = useCallback(
     (id: string) => {
       // Clean up file map
-      setFileMap(prev => {
+      setFileMap((prev) => {
         const newMap = new Map(prev);
         newMap.delete(id);
         return newMap;
@@ -389,14 +390,17 @@ const GuestComplaintForm: React.FC = () => {
 
     try {
       // Prepare files array for submission
-      const files: FileAttachment[] = formData.attachments
-        ?.map(attachment => {
-          const file = fileMap.get(attachment.id);
-          return file ? { id: attachment.id, file } : null;
-        })
-        .filter((f): f is FileAttachment => f !== null) || [];
+      const files: FileAttachment[] =
+        formData.attachments
+          ?.map((attachment) => {
+            const file = fileMap.get(attachment.id);
+            return file ? { id: attachment.id, file } : null;
+          })
+          .filter((f): f is FileAttachment => f !== null) || [];
 
-      const result = await dispatch(submitGuestComplaint({ complaintData: formData, files })).unwrap();
+      const result = await dispatch(
+        submitGuestComplaint({ complaintData: formData, files }),
+      ).unwrap();
 
       if (result.complaintId && result.trackingNumber) {
         // Open unified OTP dialog

@@ -248,8 +248,11 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 export const submitGuestComplaint = createAsyncThunk(
   "guest/submitComplaint",
   async (
-    { complaintData, files }: { complaintData: GuestComplaintData; files: FileAttachment[] },
-    { rejectWithValue }
+    {
+      complaintData,
+      files,
+    }: { complaintData: GuestComplaintData; files: FileAttachment[] },
+    { rejectWithValue },
   ) => {
     try {
       // Create FormData for file uploads
@@ -455,9 +458,7 @@ const validateStep3 = (formData: GuestComplaintData): ValidationErrors => {
         // 10MB
         errors[`attachment_${index}`] = "File size must be less than 10MB";
       }
-      if (
-        !["image/jpeg", "image/png", "image/jpg"].includes(attachment.type)
-      ) {
+      if (!["image/jpeg", "image/png", "image/jpg"].includes(attachment.type)) {
         errors[`attachment_${index}`] = "Only JPG and PNG images are allowed";
       }
     });
