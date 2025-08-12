@@ -76,4 +76,22 @@ router.get("/stats", getPublicStats);
 router.get("/wards", getPublicWards);
 router.get("/complaint-types", getPublicComplaintTypes);
 
+// Serve uploaded guest files
+router.get("/files/:filename", (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(guestUploadDir, filename);
+
+  // Check if file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({
+      success: false,
+      message: "File not found",
+    });
+  }
+
+  // Set appropriate headers
+  res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  res.sendFile(path.resolve(filePath));
+});
+
 export default router;
