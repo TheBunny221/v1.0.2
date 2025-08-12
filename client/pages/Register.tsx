@@ -9,7 +9,7 @@ import {
 import { getApiErrorMessage } from "../store/api/baseApi";
 import { useToast } from "../hooks/use-toast";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import { useCustomRegister } from "../hooks/useCustomRegister";
+import { useRegisterMutation } from "../store/api/authApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import {
   Card,
@@ -38,8 +38,7 @@ const Register: React.FC = () => {
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // API hooks
-  const { register: registerUser, isLoading: isRegistering } =
-    useCustomRegister();
+  const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
 
   // Clear registration state on component mount
   useEffect(() => {
@@ -92,7 +91,7 @@ const Register: React.FC = () => {
         password: formData.password,
         role: formData.role as any,
         wardId: formData.wardId,
-      });
+      }).unwrap();
 
       if (result.data?.requiresOtpVerification) {
         // OTP verification required - open unified dialog
@@ -127,10 +126,60 @@ const Register: React.FC = () => {
       console.error("Registration error:", JSON.stringify(error, null, 2));
       console.error("Registration error object:", error);
 
-      // Let the global error handler handle 401s
-      if (!handleApiError(error)) {
-        // Handle other errors
-        const errorMessage = getApiErrorMessage(error);
+      // Handle RTK Query error structure
+      console.log("RTK Query error structure:", error);
+
+      // Check if this is an RTK Query error with data
+      const errorData = error?.data?.data || error?.data;
+      const errorStatus = error?.status;
+
+      // Handle specific user already exists scenarios
+      if (errorStatus === 400 && errorData?.existingUser) {
+        const { isActive, action } = errorData;
+
+        if (isActive && action === "login") {
+          toast({
+            title: "Account Already Exists",
+            description:
+              "This email is already registered. Please log in instead.",
+            variant: "destructive",
+            action: (
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline h-8 px-3"
+              >
+                Go to Login
+              </Link>
+            ),
+          });
+        } else if (!isActive && action === "verify_email") {
+          toast({
+            title: "Email Verification Pending",
+            description:
+              "This email is already registered but not verified. Please check your email for verification code.",
+          });
+
+          // Open OTP flow for the existing unverified user
+          openOtpFlow({
+            context: "register",
+            email: formData.email,
+            title: "Complete Registration",
+            description:
+              "Enter the verification code sent to your email to activate your account. Click 'Resend Code' if you need a new verification email.",
+            onSuccess: (data) => {
+              toast({
+                title: "Registration Completed!",
+                description: `Welcome ${data.user?.fullName}! Your account has been verified.`,
+              });
+            },
+          });
+        }
+      } else {
+        // Handle other errors - extract message from server response
+        const errorMessage =
+          errorData?.message ||
+          error?.data?.message ||
+          getApiErrorMessage(error);
         console.log("Extracted error message:", errorMessage);
         toast({
           title: "Registration Failed",
