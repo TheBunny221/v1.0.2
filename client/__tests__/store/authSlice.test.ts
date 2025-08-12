@@ -1,9 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import {
-  authSlice,
-  login,
+import authSlice, {
+  loginWithPassword,
   logout,
-  setUser,
+  clearError,
 } from "../../store/slices/authSlice";
 
 describe("authSlice", () => {
@@ -12,7 +11,7 @@ describe("authSlice", () => {
   beforeEach(() => {
     store = configureStore({
       reducer: {
-        auth: authSlice.reducer,
+        auth: authSlice,
       },
     });
   });
@@ -26,39 +25,16 @@ describe("authSlice", () => {
     expect(state.error).toBe(null);
   });
 
-  test("should handle setUser", () => {
-    const mockUser = {
-      id: "1",
-      email: "test@example.com",
-      fullName: "Test User",
-      role: "CITIZEN" as const,
-      phoneNumber: "+91-9876543210",
-      isActive: true,
-    };
-
-    store.dispatch(setUser(mockUser));
+  test("should handle clearError", () => {
+    store.dispatch(clearError());
     const state = store.getState().auth;
 
-    expect(state.user).toEqual(mockUser);
-    expect(state.isAuthenticated).toBe(true);
+    expect(state.error).toBe(null);
   });
 
-  test("should handle logout", () => {
-    // First set a user
-    const mockUser = {
-      id: "1",
-      email: "test@example.com",
-      fullName: "Test User",
-      role: "CITIZEN" as const,
-      phoneNumber: "+91-9876543210",
-      isActive: true,
-    };
-
-    store.dispatch(setUser(mockUser));
-
-    // Then logout
-    store.dispatch(logout());
-    const state = store.getState().auth;
+  test("should handle logout fulfilled", () => {
+    const action = { type: logout.fulfilled.type };
+    const state = authSlice(undefined, action);
 
     expect(state.isAuthenticated).toBe(false);
     expect(state.user).toBe(null);
@@ -66,13 +42,8 @@ describe("authSlice", () => {
   });
 
   test("should handle login pending state", () => {
-    store.dispatch(
-      login.pending("requestId", {
-        email: "test@example.com",
-        password: "password",
-      }),
-    );
-    const state = store.getState().auth;
+    const action = { type: loginWithPassword.pending.type };
+    const state = authSlice(undefined, action);
 
     expect(state.isLoading).toBe(true);
     expect(state.error).toBe(null);
@@ -87,17 +58,13 @@ describe("authSlice", () => {
         role: "CITIZEN" as const,
         phoneNumber: "+91-9876543210",
         isActive: true,
+        joinedOn: new Date().toISOString(),
       },
       token: "mock-jwt-token",
     };
 
-    store.dispatch(
-      login.fulfilled(mockResponse, "requestId", {
-        email: "test@example.com",
-        password: "password",
-      }),
-    );
-    const state = store.getState().auth;
+    const action = { type: loginWithPassword.fulfilled.type, payload: mockResponse };
+    const state = authSlice(undefined, action);
 
     expect(state.isLoading).toBe(false);
     expect(state.isAuthenticated).toBe(true);
@@ -108,14 +75,11 @@ describe("authSlice", () => {
 
   test("should handle login rejected state", () => {
     const errorMessage = "Invalid credentials";
-
-    store.dispatch(
-      login.rejected(new Error(errorMessage), "requestId", {
-        email: "test@example.com",
-        password: "wrong-password",
-      }),
-    );
-    const state = store.getState().auth;
+    const action = {
+      type: loginWithPassword.rejected.type,
+      payload: { message: errorMessage }
+    };
+    const state = authSlice(undefined, action);
 
     expect(state.isLoading).toBe(false);
     expect(state.isAuthenticated).toBe(false);
