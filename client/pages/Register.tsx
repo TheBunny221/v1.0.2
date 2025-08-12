@@ -129,14 +129,55 @@ const Register: React.FC = () => {
 
       // Let the global error handler handle 401s
       if (!handleApiError(error)) {
-        // Handle other errors
-        const errorMessage = getApiErrorMessage(error);
-        console.log("Extracted error message:", errorMessage);
-        toast({
-          title: "Registration Failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        // Handle specific user already exists scenarios
+        if (error?.status === 400 && error?.data?.existingUser) {
+          const { isActive, action } = error.data;
+
+          if (isActive && action === "login") {
+            toast({
+              title: "Account Already Exists",
+              description: "This email is already registered. Please log in instead.",
+              variant: "destructive",
+              action: (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline h-8 px-3"
+                >
+                  Go to Login
+                </Link>
+              ),
+            });
+          } else if (!isActive && action === "verify_email") {
+            toast({
+              title: "Email Verification Pending",
+              description: "Please check your email for verification code or request a new one.",
+              variant: "destructive",
+            });
+
+            // Open OTP flow for the existing unverified user
+            openOtpFlow({
+              context: "register",
+              email: formData.email,
+              title: "Complete Registration",
+              description: "Enter the verification code sent to your email to activate your account",
+              onSuccess: (data) => {
+                toast({
+                  title: "Registration Completed!",
+                  description: `Welcome ${data.user?.fullName}! Your account has been verified.`,
+                });
+              },
+            });
+          }
+        } else {
+          // Handle other errors
+          const errorMessage = getApiErrorMessage(error);
+          console.log("Extracted error message:", errorMessage);
+          toast({
+            title: "Registration Failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
       }
     }
   };
