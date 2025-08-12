@@ -31,6 +31,7 @@ import {
   submitGuestComplaint,
   verifyOTPAndRegister,
   resendOTP,
+  clearError,
   AttachmentFile,
   GuestComplaintData,
 } from "../store/slices/guestSlice";
@@ -421,7 +422,7 @@ const GuestComplaintForm: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 px-4">
         <div className="w-full max-w-md space-y-6">
-          <Card>
+          <Card data-testid="success-page">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto">
@@ -480,7 +481,7 @@ const GuestComplaintForm: React.FC = () => {
     );
   }
 
-  // Main complaint form
+  // Multi-step complaint form
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -781,7 +782,7 @@ const GuestComplaintForm: React.FC = () => {
                     <Textarea
                       id="description"
                       name="description"
-                      placeholder="Describe the issue in detail... (minimum 10 characters)"
+                      placeholder="Describe the issue in detail..."
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={4}
@@ -805,9 +806,6 @@ const GuestComplaintForm: React.FC = () => {
                         {validationErrors.description}
                       </p>
                     )}
-                    <p className="text-xs text-gray-500">
-                      {formData.description.length}/500 characters
-                    </p>
                   </div>
                 </div>
               </div>
@@ -817,8 +815,7 @@ const GuestComplaintForm: React.FC = () => {
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MapIcon className="h-5 w-5" />
+                  <h3 className="text-lg font-semibold">
                     Location Information
                   </h3>
 
@@ -829,13 +826,8 @@ const GuestComplaintForm: React.FC = () => {
                       </Label>
                       <Select
                         value={formData.wardId}
-                        onValueChange={(value) => {
-                          handleSelectChange("wardId", value);
-                          // Clear sub-zone when ward changes
-                          dispatch(updateFormData({ subZoneId: "" }));
-                        }}
-                        aria-describedby={
-                          validationErrors.wardId ? "wardId-error" : undefined
+                        onValueChange={(value) =>
+                          handleSelectChange("wardId", value)
                         }
                       >
                         <SelectTrigger
@@ -856,126 +848,104 @@ const GuestComplaintForm: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
-                        <p
-                          id="wardId-error"
-                          className="text-sm text-red-600"
-                          role="alert"
-                        >
+                        <p className="text-sm text-red-600" role="alert">
                           {validationErrors.wardId}
                         </p>
                       )}
                     </div>
 
-                    {availableSubZones.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Sub-Zone</Label>
-                        <Select
-                          value={formData.subZoneId}
-                          onValueChange={(value) =>
-                            handleSelectChange("subZoneId", value)
+                    <div className="space-y-2">
+                      <Label>
+                        Sub-Zone <span className="text-red-500">*</span>
+                      </Label>
+                      <Select
+                        value={formData.subZoneId}
+                        onValueChange={(value) =>
+                          handleSelectChange("subZoneId", value)
+                        }
+                        disabled={!formData.wardId}
+                      >
+                        <SelectTrigger
+                          className={
+                            validationErrors.subZoneId
+                              ? "border-red-500 focus:ring-red-500"
+                              : ""
                           }
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sub-zone" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableSubZones.map((subZone) => (
-                              <SelectItem key={subZone} value={subZone}>
-                                {subZone}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label htmlFor="area">
-                        Area/Locality <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="area"
-                        name="area"
-                        placeholder="Enter area or locality"
-                        value={formData.area}
-                        onChange={handleInputChange}
-                        aria-describedby={
-                          validationErrors.area ? "area-error" : undefined
-                        }
-                        className={
-                          validationErrors.area
-                            ? "border-red-500 focus:ring-red-500"
-                            : ""
-                        }
-                      />
-                      {validationErrors.area && (
-                        <p
-                          id="area-error"
-                          className="text-sm text-red-600"
-                          role="alert"
-                        >
-                          {validationErrors.area}
+                          <SelectValue placeholder="Select sub-zone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableSubZones.map((subZone, index) => (
+                            <SelectItem key={index} value={subZone}>
+                              {subZone}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.subZoneId && (
+                        <p className="text-sm text-red-600" role="alert">
+                          {validationErrors.subZoneId}
                         </p>
                       )}
                     </div>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="area">
+                      Area/Locality <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="area"
+                      name="area"
+                      placeholder="Enter specific area or locality"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      className={
+                        validationErrors.area
+                          ? "border-red-500 focus:ring-red-500"
+                          : ""
+                      }
+                    />
+                    {validationErrors.area && (
+                      <p className="text-sm text-red-600" role="alert">
+                        {validationErrors.area}
+                      </p>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="landmark">Nearby Landmark</Label>
+                      <Label htmlFor="landmark">Landmark (Optional)</Label>
                       <Input
                         id="landmark"
                         name="landmark"
-                        placeholder="Enter nearby landmark"
+                        placeholder="Nearby landmark"
                         value={formData.landmark}
                         onChange={handleInputChange}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address">Complete Address</Label>
+                      <Label htmlFor="address">Full Address (Optional)</Label>
                       <Input
                         id="address"
                         name="address"
-                        placeholder="Enter complete address"
+                        placeholder="Complete address"
                         value={formData.address}
                         onChange={handleInputChange}
                       />
                     </div>
                   </div>
 
-                  {/* Map Picker Stub */}
-                  <div className="space-y-2">
-                    <Label>Location on Map</Label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <MapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 mb-2">
-                        Interactive map picker coming soon
-                      </p>
-                      {currentLocation && (
-                        <div className="text-sm text-green-600">
-                          📍 Current location detected:{" "}
-                          {currentLocation.lat.toFixed(6)},{" "}
-                          {currentLocation.lng.toFixed(6)}
-                        </div>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                        disabled
-                      >
-                        Select on Map
-                      </Button>
-                    </div>
-                  </div>
-
                   {currentLocation && (
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-green-700">
-                        📍 Your location has been detected and will be included
-                        with your complaint
-                      </p>
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 text-green-700">
+                        <MapIcon className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          Location detected: {currentLocation.lat.toFixed(6)},{" "}
+                          {currentLocation.lng.toFixed(6)}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -986,142 +956,82 @@ const GuestComplaintForm: React.FC = () => {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <FileImage className="h-5 w-5" />
-                    Attachments (Optional)
+                  <h3 className="text-lg font-semibold">
+                    Upload Images (Optional)
                   </h3>
-
                   <p className="text-sm text-gray-600">
-                    Add photos to help us better understand the issue. You can
-                    upload up to 5 images.
+                    Upload images to help illustrate the issue. Maximum 5 files,
+                    10MB each.
                   </p>
 
-                  {/* File Upload Area */}
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                  <div className="space-y-4">
                     <input
                       type="file"
-                      id="file-upload"
                       multiple
-                      accept="image/jpeg,image/png,image/jpg"
+                      accept="image/*"
                       onChange={(e) => handleFileUpload(e.target.files)}
                       className="hidden"
-                      disabled={
-                        formData.attachments && formData.attachments.length >= 5
-                      }
+                      id="file-upload"
                     />
-                    <label
+                    <Label
                       htmlFor="file-upload"
-                      className={`cursor-pointer ${
-                        formData.attachments && formData.attachments.length >= 5
-                          ? "cursor-not-allowed opacity-50"
-                          : ""
-                      }`}
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
                     >
-                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-lg font-medium text-gray-600">
-                        {formData.attachments &&
-                        formData.attachments.length >= 5
-                          ? "Maximum 5 files allowed"
-                          : "Click to upload or drag and drop"}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        JPG, PNG up to 10MB each
-                      </p>
-                    </label>
-                  </div>
-
-                  {/* Attachment List */}
-                  {formData.attachments && formData.attachments.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="text-md font-medium">Uploaded Images</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {formData.attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="relative bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow"
-                          >
-                            {/* Image thumbnail */}
-                            <div className="aspect-video bg-gray-100 rounded-md mb-2 overflow-hidden">
-                              {attachment.preview && (
-                                <img
-                                  src={attachment.preview}
-                                  alt={attachment.file.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              )}
-                            </div>
-
-                            {/* File info */}
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-gray-900 truncate">
-                                {attachment.file.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {(attachment.file.size / 1024 / 1024).toFixed(
-                                  2,
-                                )}{" "}
-                                MB
-                              </p>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex justify-between items-center mt-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  attachment.preview &&
-                                  handlePreviewImage(attachment.preview)
-                                }
-                                className="flex items-center gap-1"
-                              >
-                                <Eye className="h-3 w-3" />
-                                Preview
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleRemoveAttachment(attachment.id)
-                                }
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </div>
-
-                            {/* Upload status */}
-                            {attachment.uploading && (
-                              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
-                                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span>{" "}
+                          or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG or JPEG (MAX. 10MB each)
+                        </p>
                       </div>
-                    </div>
-                  )}
+                    </Label>
 
-                  {/* Validation errors for attachments */}
-                  {Object.keys(validationErrors).some((key) =>
-                    key.startsWith("attachment_"),
-                  ) && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Some attachments have issues:
-                        <ul className="list-disc list-inside mt-1">
-                          {Object.entries(validationErrors)
-                            .filter(([key]) => key.startsWith("attachment_"))
-                            .map(([key, error]) => (
-                              <li key={key} className="text-sm">
-                                {error}
-                              </li>
-                            ))}
-                        </ul>
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                    {/* File previews */}
+                    {formData.attachments &&
+                      formData.attachments.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {formData.attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="relative group border rounded-lg overflow-hidden"
+                            >
+                              <img
+                                src={attachment.preview}
+                                alt="Preview"
+                                className="w-full h-24 object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                                <div className="opacity-0 group-hover:opacity-100 flex gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() =>
+                                      handlePreviewImage(attachment.preview!)
+                                    }
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleRemoveAttachment(attachment.id)
+                                    }
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1129,132 +1039,95 @@ const GuestComplaintForm: React.FC = () => {
             {/* Step 4: Review */}
             {currentStep === 4 && (
               <div className="space-y-6">
+                <h3 className="text-lg font-semibold">Review Your Complaint</h3>
+
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">
-                    Review Your Complaint
-                  </h3>
-
-                  <p className="text-sm text-gray-600">
-                    Please review all information before submitting. You can go
-                    back to make changes if needed.
-                  </p>
-
-                  {/* Personal Information Review */}
+                  {/* Personal Info Review */}
                   <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                    <CardHeader>
+                      <CardTitle className="text-base">
                         Personal Information
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">Name:</span>{" "}
-                          {formData.fullName}
-                        </div>
-                        <div>
-                          <span className="font-medium">Email:</span>{" "}
-                          {formData.email}
-                        </div>
-                        <div>
-                          <span className="font-medium">Phone:</span>{" "}
-                          {formData.phoneNumber}
-                        </div>
-                      </div>
+                      <p>
+                        <strong>Name:</strong> {formData.fullName}
+                      </p>
+                      <p>
+                        <strong>Email:</strong> {formData.email}
+                      </p>
+                      <p>
+                        <strong>Phone:</strong> {formData.phoneNumber}
+                      </p>
                     </CardContent>
                   </Card>
 
-                  {/* Complaint Information Review */}
+                  {/* Complaint Info Review */}
                   <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
+                    <CardHeader>
+                      <CardTitle className="text-base">
                         Complaint Details
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">Type:</span>{" "}
+                      <p>
+                        <strong>Type:</strong>{" "}
+                        {
+                          COMPLAINT_TYPES.find(
+                            (type) => type.value === formData.type,
+                          )?.label
+                        }
+                      </p>
+                      <p>
+                        <strong>Priority:</strong>{" "}
+                        <Badge
+                          className={
+                            PRIORITIES.find(
+                              (p) => p.value === formData.priority,
+                            )?.color
+                          }
+                        >
                           {
-                            COMPLAINT_TYPES.find(
-                              (t) => t.value === formData.type,
+                            PRIORITIES.find(
+                              (p) => p.value === formData.priority,
                             )?.label
                           }
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">Priority:</span>
-                          <Badge
-                            variant="secondary"
-                            className={`${
-                              PRIORITIES.find(
-                                (p) => p.value === formData.priority,
-                              )?.color
-                            } text-white`}
-                          >
-                            {
-                              PRIORITIES.find(
-                                (p) => p.value === formData.priority,
-                              )?.label
-                            }
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="mt-3">
-                        <span className="font-medium">Description:</span>
-                        <p className="mt-1 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                          {formData.description}
-                        </p>
-                      </div>
+                        </Badge>
+                      </p>
+                      <p>
+                        <strong>Description:</strong> {formData.description}
+                      </p>
                     </CardContent>
                   </Card>
 
-                  {/* Location Information Review */}
+                  {/* Location Review */}
                   <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        Location Information
-                      </CardTitle>
+                    <CardHeader>
+                      <CardTitle className="text-base">Location</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">Ward:</span>{" "}
-                          {WARDS.find((w) => w.id === formData.wardId)?.name}
-                        </div>
-                        {formData.subZoneId && (
-                          <div>
-                            <span className="font-medium">Sub-Zone:</span>{" "}
-                            {formData.subZoneId}
-                          </div>
-                        )}
-                        <div>
-                          <span className="font-medium">Area:</span>{" "}
-                          {formData.area}
-                        </div>
-                        {formData.landmark && (
-                          <div>
-                            <span className="font-medium">Landmark:</span>{" "}
-                            {formData.landmark}
-                          </div>
-                        )}
-                      </div>
-                      {formData.address && (
-                        <div className="mt-3">
-                          <span className="font-medium">Address:</span>
-                          <p className="mt-1 text-sm text-gray-600">
-                            {formData.address}
-                          </p>
-                        </div>
+                      <p>
+                        <strong>Ward:</strong>{" "}
+                        {
+                          WARDS.find((ward) => ward.id === formData.wardId)
+                            ?.name
+                        }
+                      </p>
+                      <p>
+                        <strong>Sub-Zone:</strong> {formData.subZoneId}
+                      </p>
+                      <p>
+                        <strong>Area:</strong> {formData.area}
+                      </p>
+                      {formData.landmark && (
+                        <p>
+                          <strong>Landmark:</strong> {formData.landmark}
+                        </p>
                       )}
-                      {formData.coordinates && (
-                        <div className="mt-3 p-2 bg-green-50 rounded-md">
-                          <span className="text-sm text-green-700">
-                            📍 GPS coordinates will be included
-                          </span>
-                        </div>
+                      {formData.address && (
+                        <p>
+                          <strong>Address:</strong> {formData.address}
+                        </p>
                       )}
                     </CardContent>
                   </Card>
@@ -1262,32 +1135,21 @@ const GuestComplaintForm: React.FC = () => {
                   {/* Attachments Review */}
                   {formData.attachments && formData.attachments.length > 0 && (
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <FileImage className="h-4 w-4" />
-                          Attachments ({formData.attachments.length})
-                        </CardTitle>
+                      <CardHeader>
+                        <CardTitle className="text-base">Attachments</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-3 gap-2">
                           {formData.attachments.map((attachment) => (
-                            <div key={attachment.id} className="space-y-1">
-                              <div className="aspect-square bg-gray-100 rounded-md overflow-hidden">
-                                {attachment.preview && (
-                                  <img
-                                    src={attachment.preview}
-                                    alt={attachment.file.name}
-                                    className="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
-                                    onClick={() =>
-                                      handlePreviewImage(attachment.preview!)
-                                    }
-                                  />
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-600 truncate">
-                                {attachment.file.name}
-                              </p>
-                            </div>
+                            <img
+                              key={attachment.id}
+                              src={attachment.preview}
+                              alt="Attachment"
+                              className="w-full h-20 object-cover rounded border cursor-pointer"
+                              onClick={() =>
+                                handlePreviewImage(attachment.preview!)
+                              }
+                            />
                           ))}
                         </div>
                       </CardContent>
@@ -1297,154 +1159,72 @@ const GuestComplaintForm: React.FC = () => {
               </div>
             )}
 
-            {/* Step 5: Submit */}
-            {currentStep === 5 && (
-              <div className="space-y-6 text-center">
-                <div className="space-y-4">
-                  <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Ready to Submit
-                  </h3>
-                  <p className="text-gray-600 max-w-md mx-auto">
-                    Your complaint is ready for submission. After submitting,
-                    you'll receive an email with a verification code.
-                  </p>
-                </div>
-
-                {/* What happens next */}
-                <Card className="text-left">
-                  <CardHeader>
-                    <CardTitle className="text-lg">
-                      What happens next?
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ol className="space-y-2 text-sm text-gray-600">
-                      <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
-                          1
-                        </span>
-                        Your complaint will be registered immediately
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
-                          2
-                        </span>
-                        You'll receive an OTP via email for verification
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
-                          3
-                        </span>
-                        After verification, you'll be registered as a citizen
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
-                          4
-                        </span>
-                        You can then track your complaint progress
-                      </li>
-                    </ol>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
             {/* Navigation Buttons */}
-            <div className="flex gap-4 pt-6">
-              {currentStep > 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePrev}
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Previous
-                </Button>
-              )}
+            <div className="flex justify-between pt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrev}
+                disabled={currentStep === 1}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
 
-              {currentStep < 5 ? (
+              {currentStep < steps.length ? (
                 <Button
                   type="button"
                   onClick={handleNext}
                   disabled={!canProceed}
-                  className="flex-1"
                 >
                   Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               ) : (
                 <Button
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting || !canProceed}
-                  className="flex-1"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Submitting...
                     </>
                   ) : (
                     <>
                       Submit Complaint
-                      <CheckCircle className="ml-2 h-4 w-4" />
+                      <CheckCircle className="h-4 w-4 ml-2" />
                     </>
                   )}
                 </Button>
               )}
-
-              {currentStep === 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/")}
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-              )}
-            </div>
-
-            {/* Login link */}
-            <div className="text-center pt-4 border-t">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <button
-                  onClick={() => navigate("/login")}
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Login here
-                </button>
-              </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Image Preview Dialog */}
-        <Dialog
-          open={imagePreview.show}
-          onOpenChange={(open) => dispatch(setImagePreview({ show: open }))}
-        >
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Image Preview</DialogTitle>
-              <DialogDescription>Preview of uploaded image</DialogDescription>
-            </DialogHeader>
-            {imagePreview.url && (
+        {imagePreview.show && (
+          <Dialog
+            open={imagePreview.show}
+            onOpenChange={(open) =>
+              dispatch(setImagePreview({ show: open, url: imagePreview.url }))
+            }
+          >
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Image Preview</DialogTitle>
+              </DialogHeader>
               <div className="flex justify-center">
                 <img
-                  src={imagePreview.url}
+                  src={imagePreview.url!}
                   alt="Preview"
-                  className="max-w-full max-h-96 object-contain rounded-lg"
+                  className="max-w-full max-h-96 object-contain"
                 />
               </div>
-            )}
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

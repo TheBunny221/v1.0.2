@@ -52,9 +52,10 @@ const Profile: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   const [formData, setFormData] = useState({
-    name: user?.name || "",
+    fullName: user?.fullName || "",
     email: user?.email || "",
-    phone: user?.phone || "",
+    phoneNumber: user?.phoneNumber || "",
+    language: user?.language || "en",
     ward: user?.ward?.name || "",
     department: user?.department || "",
   });
@@ -227,7 +228,7 @@ const Profile: React.FC = () => {
                   <Avatar className="w-24 h-24">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback className="text-lg">
-                      {getInitials(user.name)}
+                      {getInitials(user.fullName)}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -239,14 +240,14 @@ const Profile: React.FC = () => {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">{user.name}</h3>
+                  <h3 className="text-xl font-semibold">{user.fullName}</h3>
                   <Badge className={getRoleColor(user.role)}>
-                    {user.role.replace("-", " ").toUpperCase()}
+                    {user.role.replace("_", " ").toUpperCase()}
                   </Badge>
                   {user.ward && (
                     <p className="text-sm text-muted-foreground flex items-center">
                       <MapPin className="h-4 w-4 mr-1" />
-                      {user.ward}
+                      {user.ward.name}
                     </p>
                   )}
                   {user.department && (
@@ -261,11 +262,13 @@ const Profile: React.FC = () => {
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="fullName">Full Name</Label>
                   <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      handleInputChange("fullName", e.target.value)
+                    }
                     disabled={!isEditing}
                   />
                 </div>
@@ -288,14 +291,14 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      id="phone"
-                      value={formData.phone}
+                      id="phoneNumber"
+                      value={formData.phoneNumber}
                       onChange={(e) =>
-                        handleInputChange("phone", e.target.value)
+                        handleInputChange("phoneNumber", e.target.value)
                       }
                       disabled={!isEditing}
                       className="pl-10"
@@ -350,10 +353,11 @@ const Profile: React.FC = () => {
                       onClick={() => {
                         setIsEditing(false);
                         setFormData({
-                          name: user.name,
+                          fullName: user.fullName,
                           email: user.email,
-                          phone: user.phone,
-                          ward: user.ward || "",
+                          phoneNumber: user.phoneNumber || "",
+                          language: user.language || "en",
+                          ward: user.ward?.name || "",
                           department: user.department || "",
                         });
                       }}
@@ -513,7 +517,7 @@ const Profile: React.FC = () => {
                     </p>
                   </div>
                   <Switch
-                    checked={user.preferences.notifications}
+                    defaultChecked={true}
                     onCheckedChange={(checked) =>
                       handlePreferenceChange("notifications", checked)
                     }
@@ -523,14 +527,14 @@ const Profile: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-base font-medium">
-                      {translations.settings.emailAlerts}
+                      Email Alerts
                     </Label>
                     <p className="text-sm text-muted-foreground">
                       Get email notifications for important updates
                     </p>
                   </div>
                   <Switch
-                    checked={user.preferences.emailAlerts}
+                    defaultChecked={true}
                     onCheckedChange={(checked) =>
                       handlePreferenceChange("emailAlerts", checked)
                     }
@@ -540,12 +544,12 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <Label className="text-base font-medium flex items-center">
                     <Globe className="h-4 w-4 mr-2" />
-                    {translations.settings.language}
+                    Language
                   </Label>
                   <Select
-                    value={user.preferences.language}
+                    value={formData.language}
                     onValueChange={(value) =>
-                      handlePreferenceChange("language", value)
+                      handleInputChange("language", value)
                     }
                   >
                     <SelectTrigger className="w-full">

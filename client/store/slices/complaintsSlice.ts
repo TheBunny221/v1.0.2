@@ -416,6 +416,37 @@ export const fetchComplaintStats = createAsyncThunk(
   },
 );
 
+export const submitFeedback = createAsyncThunk(
+  "complaints/submitFeedback",
+  async (
+    {
+      complaintId,
+      rating,
+      comment,
+    }: {
+      complaintId: string;
+      rating: number;
+      comment?: string;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall(`/api/complaints/${complaintId}/feedback`, {
+        method: "POST",
+        body: JSON.stringify({ rating, comment }),
+      });
+      return {
+        complaintId,
+        feedback: data.data.feedback,
+      };
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to submit feedback",
+      );
+    }
+  },
+);
+
 // Slice
 const complaintsSlice = createSlice({
   name: "complaints",
@@ -553,6 +584,41 @@ const complaintsSlice = createSlice({
         state.error = null;
       })
       .addCase(addComplaintFeedback.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Submit feedback
+      .addCase(submitFeedback.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(submitFeedback.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const { complaintId, feedback } = action.payload;
+
+        // Update complaint in list
+        const index = state.complaints.findIndex((c) => c.id === complaintId);
+        if (index !== -1) {
+          state.complaints[index] = {
+            ...state.complaints[index],
+            citizenFeedback: feedback.comment,
+            rating: feedback.rating,
+          };
+        }
+
+        // Update current complaint
+        if (state.currentComplaint?.id === complaintId) {
+          state.currentComplaint = {
+            ...state.currentComplaint,
+            citizenFeedback: feedback.comment,
+            rating: feedback.rating,
+          };
+        }
+
+        state.error = null;
+      })
+      .addCase(submitFeedback.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })

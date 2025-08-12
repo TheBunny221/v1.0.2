@@ -77,6 +77,8 @@ export interface GuestState {
   otpSent: boolean;
   otpExpiry: Date | null;
   submissionStep: "form" | "otp" | "success";
+  currentFormStep: number;
+  formValidation: Record<string, string>;
   error: string | null;
   userEmail: string | null;
   newUserRegistered: boolean;
@@ -129,6 +131,8 @@ const initialState: GuestState = {
   otpSent: false,
   otpExpiry: null,
   submissionStep: "form",
+  currentFormStep: 1,
+  formValidation: {},
   error: null,
   userEmail: null,
   newUserRegistered: false,
@@ -165,6 +169,39 @@ const saveDraftToStorage = (formData: GuestComplaintData) => {
     sessionStorage.setItem("guestComplaintDraft", JSON.stringify(dataTosave));
   } catch (error) {
     console.warn("Failed to save draft to sessionStorage:", error);
+  }
+};
+
+// SessionStorage helpers
+const FORM_DATA_KEY = "guestComplaintFormData";
+
+const saveFormDataToSession = (
+  data: Partial<GuestComplaintData> & { currentStep?: number },
+) => {
+  try {
+    sessionStorage.setItem(FORM_DATA_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.warn("Failed to save form data to session storage:", error);
+  }
+};
+
+const loadFormDataFromSession = ():
+  | (Partial<GuestComplaintData> & { currentStep?: number })
+  | null => {
+  try {
+    const saved = sessionStorage.getItem(FORM_DATA_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.warn("Failed to load form data from session storage:", error);
+    return null;
+  }
+};
+
+const clearFormDataFromSession = () => {
+  try {
+    sessionStorage.removeItem(FORM_DATA_KEY);
+  } catch (error) {
+    console.warn("Failed to clear form data from session storage:", error);
   }
 };
 
@@ -563,6 +600,8 @@ const guestSlice = createSlice({
       state.trackingNumber = null;
       state.sessionId = null;
       state.submissionStep = "form";
+      state.currentFormStep = 1;
+      state.formValidation = {};
       state.otpSent = false;
       state.otpExpiry = null;
       state.error = null;
@@ -575,6 +614,7 @@ const guestSlice = createSlice({
       // Clear sessionStorage
       try {
         sessionStorage.removeItem("guestComplaintDraft");
+        clearFormDataFromSession();
       } catch (error) {
         console.warn("Failed to clear draft from sessionStorage:", error);
       }
@@ -587,10 +627,58 @@ const guestSlice = createSlice({
       state.submissionStep = action.payload;
     },
 
+    setCurrentFormStep: (state, action: PayloadAction<number>) => {
+      state.currentFormStep = action.payload;
+    },
+    setFormValidation: (
+      state,
+      action: PayloadAction<Record<string, string>>,
+    ) => {
+      state.formValidation = action.payload;
+    },
     clearError: (state) => {
       state.error = null;
     },
+    updateComplaintData: (
+      state,
+      action: PayloadAction<
+        Partial<GuestComplaintData> & { currentStep?: number }
+      >,
+    ) => {
+      const { currentStep, ...dataUpdate } = action.payload;
 
+      if (state.formData) {
+        state.formData = { ...state.formData, ...dataUpdate };
+      } else {
+        state.formData = dataUpdate as GuestComplaintData;
+      }
+
+      if (currentStep !== undefined) {
+        state.currentFormStep = currentStep;
+      }
+
+      // Save to sessionStorage
+      const dataToSave = {
+        ...state.formData,
+        currentStep: state.currentFormStep,
+      };
+      saveFormDataToSession(dataToSave);
+    },
+    loadSavedFormData: (state) => {
+      const savedData = loadFormDataFromSession();
+      if (savedData) {
+        const { currentStep, ...complaintData } = savedData;
+        if (Object.keys(complaintData).length > 0) {
+          state.formData = {
+            ...state.formData,
+            ...(complaintData as Partial<GuestComplaintData>),
+          };
+        }
+        if (currentStep) {
+          state.currentFormStep = currentStep;
+        }
+      }
+    },
     resetOTPState: (state) => {
       state.otpSent = false;
       state.otpExpiry = null;
@@ -697,7 +785,11 @@ export const {
   setImagePreview,
   clearGuestData,
   setSubmissionStep,
+  setCurrentFormStep,
+  setFormValidation,
   clearError,
+  updateComplaintData,
+  loadSavedFormData,
   resetOTPState,
 } = guestSlice.actions;
 

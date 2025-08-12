@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { fetchComplaints } from "../store/slices/complaintsSlice";
+import {
+  fetchComplaints,
+  setFilters,
+  clearFilters,
+} from "../store/slices/complaintsSlice";
+import FeedbackDialog from "../components/FeedbackDialog";
 import {
   Card,
   CardContent,
@@ -11,6 +16,22 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
+import { Input } from "../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
 import {
   PlusCircle,
   FileText,
@@ -21,13 +42,24 @@ import {
   MapPin,
   Calendar,
   TrendingUp,
+  Search,
+  Filter,
+  Eye,
+  Star,
+  MessageSquare,
+  ArrowUpRight,
+  RefreshCw,
 } from "lucide-react";
 
 const CitizenDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
-  const { translations } = useAppSelector((state) => state.language);
+  const { complaints, isLoading, filters, pagination } = useAppSelector(
+    (state) => state.complaints,
+  );
 
   const [dashboardStats, setDashboardStats] = useState({
     total: 0,
@@ -35,29 +67,82 @@ const CitizenDashboard: React.FC = () => {
     inProgress: 0,
     resolved: 0,
     avgResolutionTime: 0,
+    resolutionRate: 0,
   });
 
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get("status") || "",
+  );
+  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "");
+  const [sortBy, setSortBy] = useState(
+    searchParams.get("sort") || "submittedOn",
+  );
+  const [sortOrder, setSortOrder] = useState(
+    searchParams.get("order") || "desc",
+  );
+
+  // Fetch complaints when user is available or filters change
   useEffect(() => {
     if (user) {
-      dispatch(fetchComplaints());
-    }
-  }, [dispatch, user]);
+      const filterParams = {
+        submittedById: user.id,
+        status: statusFilter || undefined,
+        type: typeFilter || undefined,
+        search: searchTerm || undefined,
+        sortBy,
+        sortOrder,
+        page: 1,
+        limit: 10,
+      };
 
+      dispatch(setFilters(filterParams));
+      dispatch(fetchComplaints(filterParams));
+    }
+  }, [dispatch, user, statusFilter, typeFilter, searchTerm, sortBy, sortOrder]);
+
+  // Update URL search params when filters change
   useEffect(() => {
-    // Calculate dashboard statistics
+    const params = new URLSearchParams();
+    if (searchTerm) params.set("search", searchTerm);
+    if (statusFilter) params.set("status", statusFilter);
+    if (typeFilter) params.set("type", typeFilter);
+    if (sortBy !== "submittedOn") params.set("sort", sortBy);
+    if (sortOrder !== "desc") params.set("order", sortOrder);
+
+    setSearchParams(params);
+  }, [
+    searchTerm,
+    statusFilter,
+    typeFilter,
+    sortBy,
+    sortOrder,
+    setSearchParams,
+  ]);
+
+  // Calculate dashboard statistics
+  useEffect(() => {
     const total = complaints.length;
     const pending = complaints.filter((c) => c.status === "REGISTERED").length;
     const inProgress = complaints.filter(
-      (c) => c.status === "IN_PROGRESS",
+      (c) => c.status === "IN_PROGRESS" || c.status === "ASSIGNED",
     ).length;
-    const resolved = complaints.filter((c) => c.status === "RESOLVED").length;
+    const resolved = complaints.filter(
+      (c) => c.status === "RESOLVED" || c.status === "CLOSED",
+    ).length;
+
+    // Calculate average resolution time (mock data for now)
+    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
     setDashboardStats({
       total,
       pending,
       inProgress,
       resolved,
-      avgResolutionTime: 3.2, // Mock data - calculate from actual data
+      avgResolutionTime: 3.2, // Mock data - in real app, calculate from actual data
+      resolutionRate,
     });
   }, [complaints]);
 
@@ -93,30 +178,90 @@ const CitizenDashboard: React.FC = () => {
     }
   };
 
-  const recentComplaints = complaints.slice(0, 5);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Search is handled by useEffect
+  };
+
+  const handleRefresh = () => {
+    if (user) {
+      const filterParams = {
+        submittedById: user.id,
+        status: statusFilter || undefined,
+        type: typeFilter || undefined,
+        search: searchTerm || undefined,
+        sortBy,
+        sortOrder,
+        page: 1,
+        limit: 10,
+      };
+      dispatch(fetchComplaints(filterParams));
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("");
+    setTypeFilter("");
+    setSortBy("submittedOn");
+    setSortOrder("desc");
+    dispatch(clearFilters());
+  };
+
+  const isResolved = (status: string) => {
+    return status === "RESOLVED" || status === "CLOSED";
+  };
+
+  const getComplaintTypeLabel = (type: string) => {
+    const typeLabels: Record<string, string> = {
+      WATER_SUPPLY: "Water Supply",
+      ELECTRICITY: "Electricity",
+      ROAD_REPAIR: "Road Repair",
+      GARBAGE_COLLECTION: "Garbage Collection",
+      STREET_LIGHTING: "Street Lighting",
+      SEWERAGE: "Sewerage",
+      PUBLIC_HEALTH: "Public Health",
+      TRAFFIC: "Traffic",
+      OTHERS: "Others",
+    };
+    return typeLabels[type] || type;
+  };
 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">
-          Welcome back, {user?.fullName}!
-        </h1>
-        <p className="text-blue-100">
-          Track your complaints and stay updated with the latest progress.
-        </p>
-        <div className="mt-4">
-          <Link to="/complaints/new">
-            <Button className="bg-white text-blue-600 hover:bg-gray-100">
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Register New Complaint
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">
+              Welcome back, {user?.fullName || "Citizen"}!
+            </h1>
+            <p className="text-blue-100">
+              Track your complaints and stay updated with the latest progress.
+            </p>
+          </div>
+          <div className="hidden md:flex items-center space-x-4">
+            <Button
+              onClick={() => navigate("/complaints/create")}
+              className="bg-white text-blue-600 hover:bg-gray-50"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Complaint
             </Button>
-          </Link>
+          </div>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -174,183 +319,480 @@ const CitizenDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Recent Complaints and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Complaints */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="h-5 w-5 mr-2" />
-              Recent Complaints
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
+      {/* Resolution Rate Progress */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Resolution Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">
+                Overall Resolution Rate
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {dashboardStats.resolved} of {dashboardStats.total} complaints
+              </span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Progress</span>
+                <span>{dashboardStats.resolutionRate}%</span>
               </div>
-            ) : recentComplaints.length === 0 ? (
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">No complaints yet</p>
-                <Link to="/complaints/new">
-                  <Button className="mt-2">
-                    Register Your First Complaint
-                  </Button>
-                </Link>
+              <Progress value={dashboardStats.resolutionRate} className="h-2" />
+            </div>
+            {dashboardStats.avgResolutionTime > 0 && (
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Average Resolution Time</span>
+                <span>{dashboardStats.avgResolutionTime} days</span>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {recentComplaints.map((complaint) => (
-                  <div
-                    key={complaint.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-sm">
-                        {complaint.title ||
-                          `Complaint #${complaint.id.slice(-6)}`}
-                      </h3>
-                      <div className="flex space-x-2">
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* My Complaints Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">My Complaints</CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleRefresh}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button onClick={() => navigate("/complaints/create")} size="sm">
+                <PlusCircle className="h-4 w-4 mr-2" />
+                New Complaint
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Filters */}
+          <div className="space-y-4 mb-6">
+            <form onSubmit={handleSearch} className="flex gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search complaints..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Button type="submit" variant="outline">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+
+            <div className="flex flex-wrap gap-4">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="REGISTERED">Registered</SelectItem>
+                  <SelectItem value="ASSIGNED">Assigned</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="RESOLVED">Resolved</SelectItem>
+                  <SelectItem value="CLOSED">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="WATER_SUPPLY">Water Supply</SelectItem>
+                  <SelectItem value="ELECTRICITY">Electricity</SelectItem>
+                  <SelectItem value="ROAD_REPAIR">Road Repair</SelectItem>
+                  <SelectItem value="GARBAGE_COLLECTION">
+                    Garbage Collection
+                  </SelectItem>
+                  <SelectItem value="STREET_LIGHTING">
+                    Street Lighting
+                  </SelectItem>
+                  <SelectItem value="SEWERAGE">Sewerage</SelectItem>
+                  <SelectItem value="PUBLIC_HEALTH">Public Health</SelectItem>
+                  <SelectItem value="TRAFFIC">Traffic</SelectItem>
+                  <SelectItem value="OTHERS">Others</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={`${sortBy}-${sortOrder}`}
+                onValueChange={(value) => {
+                  const [newSortBy, newSortOrder] = value.split("-");
+                  setSortBy(newSortBy);
+                  setSortOrder(newSortOrder);
+                }}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="submittedOn-desc">Newest First</SelectItem>
+                  <SelectItem value="submittedOn-asc">Oldest First</SelectItem>
+                  <SelectItem value="priority-desc">
+                    High Priority First
+                  </SelectItem>
+                  <SelectItem value="status-asc">Status</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {(searchTerm || statusFilter || typeFilter) && (
+                <Button variant="ghost" onClick={clearAllFilters}>
+                  <Filter className="h-4 w-4 mr-2" />
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Complaints Table */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2">Loading complaints...</span>
+            </div>
+          ) : complaints.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No complaints found
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchTerm || statusFilter || typeFilter
+                  ? "No complaints match your current filters."
+                  : "You haven't submitted any complaints yet."}
+              </p>
+              <Button onClick={() => navigate("/complaints/create")}>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Submit Your First Complaint
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Mobile View */}
+              <div className="md:hidden space-y-4">
+                {complaints.map((complaint) => (
+                  <Card key={complaint.id} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">
+                            {complaint.title}
+                          </h4>
+                          <p className="text-xs text-gray-500 mt-1">
+                            ID: {complaint.id}
+                          </p>
+                        </div>
                         <Badge className={getStatusColor(complaint.status)}>
                           {complaint.status.replace("_", " ")}
                         </Badge>
-                        <Badge className={getPriorityColor(complaint.priority)}>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{getComplaintTypeLabel(complaint.type)}</span>
+                        <span>{formatDate(complaint.submittedOn)}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className={getPriorityColor(complaint.priority)}
+                        >
                           {complaint.priority}
                         </Badge>
+                        {complaint.ward && (
+                          <div className="flex items-center text-xs text-gray-500">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {complaint.ward.name}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {complaint.description}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {complaint.area}
-                        <Calendar className="h-3 w-3 ml-3 mr-1" />
-                        {new Date(complaint.submittedOn).toLocaleDateString()}
-                      </div>
-                      <Link to={`/complaints/${complaint.id}`}>
-                        <Button variant="outline" size="sm">
-                          View Details
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(`/complaints/${complaint.id}`)
+                          }
+                          className="flex-1"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
                         </Button>
-                      </Link>
+
+                        {isResolved(complaint.status) && (
+                          <FeedbackDialog
+                            complaintId={complaint.id}
+                            complaintTitle={complaint.title}
+                            isResolved={isResolved(complaint.status)}
+                            existingFeedback={
+                              complaint.rating
+                                ? {
+                                    rating: complaint.rating,
+                                    comment: complaint.citizenFeedback || "",
+                                  }
+                                : null
+                            }
+                          >
+                            <Button variant="outline" size="sm">
+                              <Star className="h-4 w-4 mr-1" />
+                              {complaint.rating ? "Update" : "Rate"}
+                            </Button>
+                          </FeedbackDialog>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </Card>
                 ))}
-                {complaints.length > 5 && (
-                  <div className="text-center">
-                    <Link to="/complaints">
-                      <Button variant="outline">View All Complaints</Button>
-                    </Link>
-                  </div>
-                )}
               </div>
-            )}
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {complaints.map((complaint) => (
+                      <TableRow key={complaint.id}>
+                        <TableCell className="font-mono text-xs">
+                          {complaint.id.slice(-8)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-48">
+                            <div className="font-medium text-sm truncate">
+                              {complaint.title}
+                            </div>
+                            {complaint.description && (
+                              <div className="text-xs text-gray-500 truncate">
+                                {complaint.description.slice(0, 50)}...
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">
+                            {getComplaintTypeLabel(complaint.type)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(complaint.status)}>
+                            {complaint.status.replace("_", " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={getPriorityColor(complaint.priority)}
+                          >
+                            {complaint.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {complaint.ward && (
+                            <div className="flex items-center text-sm">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              {complaint.ward.name}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center text-sm">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {formatDate(complaint.submittedOn)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {complaint.rating ? (
+                            <div className="flex items-center">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                              <span className="text-sm">
+                                {complaint.rating}/5
+                              </span>
+                            </div>
+                          ) : isResolved(complaint.status) ? (
+                            <span className="text-xs text-gray-500">
+                              Not rated
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                navigate(`/complaints/${complaint.id}`)
+                              }
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+
+                            {isResolved(complaint.status) && (
+                              <FeedbackDialog
+                                complaintId={complaint.id}
+                                complaintTitle={complaint.title}
+                                isResolved={isResolved(complaint.status)}
+                                existingFeedback={
+                                  complaint.rating
+                                    ? {
+                                        rating: complaint.rating,
+                                        comment:
+                                          complaint.citizenFeedback || "",
+                                      }
+                                    : null
+                                }
+                              >
+                                <Button variant="ghost" size="sm">
+                                  <Star className="h-4 w-4" />
+                                </Button>
+                              </FeedbackDialog>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    Showing{" "}
+                    {(pagination.currentPage - 1) * pagination.limit + 1} to{" "}
+                    {Math.min(
+                      pagination.currentPage * pagination.limit,
+                      pagination.totalItems,
+                    )}{" "}
+                    of {pagination.totalItems} complaints
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!pagination.hasPrev}
+                      onClick={() => {
+                        const newPage = pagination.currentPage - 1;
+                        if (user) {
+                          dispatch(
+                            fetchComplaints({
+                              submittedById: user.id,
+                              ...filters,
+                              page: newPage,
+                            }),
+                          );
+                        }
+                      }}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!pagination.hasNext}
+                      onClick={() => {
+                        const newPage = pagination.currentPage + 1;
+                        if (user) {
+                          dispatch(
+                            fetchComplaints({
+                              submittedById: user.id,
+                              ...filters,
+                              page: newPage,
+                            }),
+                          );
+                        }
+                      }}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions & Additional Info */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              onClick={() => navigate("/complaints/create")}
+              className="w-full justify-start"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Submit New Complaint
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/complaints")}
+              className="w-full justify-start"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              View All Complaints
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/guest/track")}
+              className="w-full justify-start"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              Track Complaint Status
+            </Button>
           </CardContent>
         </Card>
 
-        {/* Quick Actions & Progress */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link to="/complaints/new" className="block">
-                <Button className="w-full justify-start">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  New Complaint
-                </Button>
-              </Link>
-              <Link to="/complaints" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  View All Complaints
-                </Button>
-              </Link>
-              <Link to="/profile" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Update Profile
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Resolution Progress */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Resolution Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Overall Resolution Rate</span>
-                  <span>
-                    {dashboardStats.total > 0
-                      ? Math.round(
-                          (dashboardStats.resolved / dashboardStats.total) *
-                            100,
-                        )
-                      : 0}
-                    %
-                  </span>
-                </div>
-                <Progress
-                  value={
-                    dashboardStats.total > 0
-                      ? (dashboardStats.resolved / dashboardStats.total) * 100
-                      : 0
-                  }
-                  className="h-2"
-                />
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {dashboardStats.avgResolutionTime}
-                </div>
-                <p className="text-xs text-gray-500">
-                  Average Resolution Time (days)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentComplaints.slice(0, 3).map((complaint) => (
-                  <div
-                    key={complaint.id}
-                    className="flex items-center space-x-3"
-                  >
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    <div className="flex-1 text-sm">
-                      <p className="text-gray-600">
-                        Complaint #{complaint.id.slice(-6)} was{" "}
-                        {complaint.status.toLowerCase().replace("_", " ")}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(complaint.updatedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Help & Support */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Help & Support</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm text-gray-600">
+              <p className="mb-2">Need help with your complaints?</p>
+              <ul className="space-y-1 text-xs">
+                <li>• Check complaint status regularly</li>
+                <li>• Provide feedback when resolved</li>
+                <li>• Include photos for faster resolution</li>
+                <li>• Contact support if urgentissues</li>
+              </ul>
+            </div>
+            <Button variant="outline" className="w-full">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Contact Support
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
