@@ -20,12 +20,12 @@ const createTransporter = () => {
     // Development email configuration
     console.log("Email transporter created : ", process.env.EMAIL_SERVICE);
     return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE, // Must be a real resolvable domain
+      host: "smtp.ethereal.email", // Must be a real resolvable domain
       port: process.env.EMAIL_PORT || 587, // 587 for STARTTLS, 465 for SSL
       secure: false, // true if using port 465
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.ETHEREAL_USER,
+        pass: process.env.ETHEREAL_PASS,
       },
     });
   }
