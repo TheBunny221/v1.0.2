@@ -7,6 +7,7 @@ import {
   getDashboardRouteForRole,
 } from "../store/slices/authSlice";
 import { useRegisterMutation } from "../store/api/authApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import { useToast } from "../hooks/use-toast";
 import { useOtpFlow } from "../contexts/OtpContext";
 import {
