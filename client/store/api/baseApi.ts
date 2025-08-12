@@ -35,6 +35,7 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
+  // Only handle 401 errors here to avoid response body consumption issues
   if (result.error && result.error.status === 401) {
     // Unauthorized - clear auth state
     api.dispatch(logout());
@@ -45,28 +46,6 @@ const baseQueryWithReauth: BaseQueryFn<
       description: "Please login again to continue.",
       variant: "destructive",
     });
-
-    // Optionally, try to refresh token here if your backend supports it
-    // const refreshResult = await baseQuery('/auth/refresh', api, extraOptions);
-    // if (refreshResult.data) {
-    //   api.dispatch(setToken(refreshResult.data));
-    //   result = await baseQuery(args, api, extraOptions);
-    // }
-  } else if (result.error) {
-    // Handle other errors
-    const errorMessage = getErrorMessage(result.error);
-
-    // Log error for analytics
-    console.error("API Error:", {
-      endpoint: typeof args === "string" ? args : args.url,
-      error: result.error,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Set error in auth slice for global error handling
-    if (result.error.status && result.error.status >= 500) {
-      api.dispatch(setError(errorMessage));
-    }
   }
 
   return result;
