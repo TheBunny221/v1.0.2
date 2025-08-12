@@ -147,10 +147,10 @@ const CreateComplaint: React.FC = () => {
       // Navigate to complaint details
       navigate(`/complaints/${result.data.id}`);
     } catch (error: any) {
+      console.error("Create complaint error:", error);
       toast({
         title: "Submission Failed",
-        description:
-          error.message || "Failed to submit complaint. Please try again.",
+        description: getApiErrorMessage(error),
         variant: "destructive",
       });
     }
