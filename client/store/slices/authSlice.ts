@@ -757,3 +757,7 @@ export const selectRequiresPasswordSetup = (state: { auth: AuthState }) =>
   state.auth.requiresPasswordSetup;
 export const selectOTPEmail = (state: { auth: AuthState }) =>
   state.auth.otpEmail;
+export const selectRegistrationStep = (state: { auth: AuthState }) =>
+  state.auth.registrationStep;
+export const selectRegistrationData = (state: { auth: AuthState }) =>
+  state.auth.registrationData;
