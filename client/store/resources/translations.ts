@@ -41,15 +41,21 @@ export interface Translation {
     myComplaints: string;
     trackStatus: string;
     reopenComplaint: string;
+    ward: string;
   };
 
   // Authentication
   auth: {
     login: string;
+    register: string;
     logout: string;
     email: string;
     password: string;
+    confirmPassword: string;
     forgotPassword: string;
+    resetPassword: string;
+    profile: string;
+    updateProfile: string;
     rememberMe: string;
     loginSuccess: string;
     loginError: string;
@@ -165,6 +171,8 @@ export interface Translation {
 
   // Dashboard
   dashboard: {
+    overview: string;
+    statistics: string;
     totalComplaints: string;
     resolvedToday: string;
     slaBreaches: string;
@@ -172,8 +180,13 @@ export interface Translation {
     complaintsByStatus: string;
     slaCompliance: string;
     recentComplaints: string;
+    pendingTasks: string;
+    performanceMetrics: string;
     wardPerformance: string;
     quickActions: string;
+    notifications: string;
+    alerts: string;
+    reports: string;
     overallCompliance: string;
     onTime: string;
     warning: string;
@@ -402,7 +415,7 @@ export const hindiTranslations: Translation = {
     users: "उपयोगकर्ता",
     reports: "रिपोर्ट",
     profile: "प्रोफाइल",
-    settings: "सेटिंग्स",
+    settings: "सेटिंग्��",
     logout: "लॉगआउट",
     switchRole: "भूमिका बदलें",
   },
@@ -478,7 +491,7 @@ export const hindiTranslations: Translation = {
       "शिकायत जमा करने में असफल। कृपया पुनः प्रयास करें।",
     fileUploadError: "फाइल अपलोड में त्रुटि",
     invalidCaptcha: "गलत कैप्चा कोड",
-    requiredField: "यह फील्ड आवश्यक है",
+    requiredField: "यह ���ील्ड आवश्यक है",
     invalidEmail: "कृपया एक वैध ईमेल पता दर्ज करें",
     invalidPhone: "कृपया एक वैध फोन नंबर दर्ज करें",
     minCharacters: "न्यूनतम 5 अक्षर आवश्यक",
@@ -498,7 +511,7 @@ export const hindiTranslations: Translation = {
     passwordChanged: "पासवर्ड ��फलतापूर्वक बदला गया",
   },
   settings: {
-    generalSettings: "सामान्य सेटिंग्स",
+    generalSettings: "सामान्य से���िंग्स",
     languageSettings: "भाषा सेटिंग्स",
     notificationSettings: "अधिसूचना सेटिंग्स",
     privacySettings: "गोपनीयता सेटिंग्स",
@@ -521,7 +534,7 @@ export const hindiTranslations: Translation = {
     recentComplaints: "हाल की शिकायतें",
     wardPerformance: "वार्ड प्रदर्शन",
     quickActions: "त्वरित क्���ियाएं",
-    overallCompliance: "समग्र अनुपालन दर",
+    overallCompliance: "समग्र अनुपालन द��",
     onTime: "समय पर",
     warning: "चेतावनी",
     overdue: "देरी से",
@@ -643,7 +656,7 @@ export const malayalamTranslations: Translation = {
     captchaVerification: "കാപ്ച്ച സ്ഥിരീകരണം",
     enterCaptcha: "കാപ്ച്ച കോഡ് നൽകുക",
     resetForm: "ഫോം റീസെറ്റ് ചെയ്യുക",
-    submitComplaint: "പരാതി സമർപ്പിക്കുക",
+    submitComplaint: "പരാതി സമർ��്പിക്കുക",
     complaintSubmitted: "പരാതി വിജയകരമായി സമർപ്പിച്ചു!",
     complaintSubmissionError:
       "പരാതി സമർപ്പിക്കുന്നതിൽ പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
