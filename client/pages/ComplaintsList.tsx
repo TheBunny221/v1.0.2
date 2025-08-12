@@ -91,18 +91,15 @@ const ComplaintsList: React.FC = () => {
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint) => {
-    const matchesSearch =
-      complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || complaint.status === statusFilter;
-    const matchesPriority =
-      priorityFilter === "all" || complaint.priority === priorityFilter;
-
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  // Since filtering is now done server-side via query params, we don't need client-side filtering
+  // But we can still apply search term filtering for immediate feedback
+  const filteredComplaints = searchTerm
+    ? complaints.filter((complaint) =>
+        complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        complaint.id.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : complaints;
 
   return (
     <div className="space-y-6">
