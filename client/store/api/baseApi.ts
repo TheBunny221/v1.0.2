@@ -161,6 +161,11 @@ export const getApiErrorMessage = (error: any): string => {
   if (error?.status) {
     switch (error.status) {
       case 400:
+        // Check if it's a duplicate email error
+        if (error?.data?.message?.includes("already exists") ||
+            error?.data?.message?.includes("User already exists")) {
+          return "This email address is already registered. Please use a different email or try logging in.";
+        }
         return "Bad request - please check your input";
       case 401:
         return "Unauthorized - please login again";
