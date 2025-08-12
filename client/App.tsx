@@ -12,6 +12,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
 import Navigation from "./components/Navigation";
+import OtpProvider from "./contexts/OtpContext";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
 import { Loader2 } from "lucide-react";
