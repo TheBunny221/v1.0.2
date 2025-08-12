@@ -144,8 +144,8 @@ const Login: React.FC = () => {
 
       setOtpTimer(600); // 10 minutes
       toast({
-        title: "OTP Sent",
-        description: "Please check your email for the OTP code.",
+        title: "Email Sent Successfully!",
+        description: `A 6-digit verification code has been sent to ${formData.email}. Please check your email.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
