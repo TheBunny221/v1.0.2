@@ -25,22 +25,6 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
-  // Handle response properly to avoid body consumption issues
-  responseHandler: async (response) => {
-    try {
-      const text = await response.text();
-      if (!text) return null;
-
-      try {
-        return JSON.parse(text);
-      } catch {
-        return text;
-      }
-    } catch (error) {
-      console.warn('Response parsing failed:', error);
-      return null;
-    }
-  },
 });
 
 // Enhanced base query with 401 auto-logout handling
