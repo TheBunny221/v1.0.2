@@ -200,52 +200,9 @@ const GuestComplaintForm: React.FC = () => {
     }
   };
 
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!complaintId || !userEmail || !formData.otpCode) {
-      return;
-    }
-
-    try {
-      await dispatch(
-        verifyOTPAndRegister({
-          email: userEmail,
-          otpCode: formData.otpCode,
-          complaintId,
-        }),
-      ).unwrap();
-
-      // Success message will be shown in the success step
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
-  const handleResendOTP = async () => {
-    if (!complaintId || !userEmail) {
-      return;
-    }
-
-    try {
-      await dispatch(
-        resendOTP({
-          email: userEmail,
-          complaintId,
-        }),
-      ).unwrap();
-
-      toast({
-        title: "OTP Resent",
-        description: "A new OTP has been sent to your email.",
-      });
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
   const handleStartOver = () => {
-    dispatch(clearGuestData());
+    setSubmissionStep("form");
+    setComplaintId(null);
     setFormData({
       fullName: "",
       email: "",
@@ -257,14 +214,7 @@ const GuestComplaintForm: React.FC = () => {
       area: "",
       landmark: "",
       address: "",
-      otpCode: "",
     });
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const goToDashboard = () => {
