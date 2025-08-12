@@ -158,6 +158,11 @@ export function createApp() {
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
 
+  // Development test routes (only in development)
+  if (process.env.NODE_ENV !== "production") {
+    app.use("/api/test", testRoutes);
+  }
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.status(200).json({
