@@ -4,6 +4,8 @@ import {
   login,
   loginWithOTP,
   verifyOTPLogin,
+  verifyRegistrationOTP,
+  resendRegistrationOTP,
   sendPasswordSetup,
   setPassword,
   logout,
