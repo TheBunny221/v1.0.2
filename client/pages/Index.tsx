@@ -696,8 +696,7 @@ const Index: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>
-                      {translations?.dashboard?.overallCompliance ||
-                        "Success Rate"}
+                      Success Rate
                       :
                     </span>
                     <span className="font-semibold text-blue-600">94.2%</span>
