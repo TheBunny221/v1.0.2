@@ -51,11 +51,20 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     const info = await transporter.sendMail(mailOptions);
 
     if (process.env.NODE_ENV === "development") {
-      console.log("Message sent: %s", info.messageId);
-      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      console.log("✅ Email sent successfully!");
+      console.log("📧 Message ID:", info.messageId);
+      console.log("📬 To:", to);
+      console.log("📝 Subject:", subject);
+
+      // For Ethereal emails, show the preview URL
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      if (previewUrl) {
+        console.log("🔗 Preview URL (Ethereal):", previewUrl);
+        console.log("💡 Open this URL to see the sent email in your browser");
+      }
     }
 
-    return true;
+    return { success: true, messageId: info.messageId, previewUrl: nodemailer.getTestMessageUrl(info) };
   } catch (error) {
     console.error("Email sending failed:", error);
     return false;
