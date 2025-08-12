@@ -165,12 +165,16 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     });
   }
 
+  // Generate tracking number
+  const trackingNumber = `CSC${complaint.id.slice(-6).toUpperCase()}`;
+
   res.status(201).json({
     success: true,
     message:
       "Complaint registered successfully. Please check your email for OTP verification.",
     data: {
       complaintId: complaint.id,
+      trackingNumber,
       email,
       expiresAt,
       sessionId: otpSession.id,
