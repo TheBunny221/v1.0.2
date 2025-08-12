@@ -47,7 +47,7 @@ import {
 
 const Index: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isSubmitting } = useAppSelector((state) => state.complaints);
+  const { isLoading } = useAppSelector((state) => state.complaints);
   const { translations, currentLanguage } = useAppSelector(
     (state) => state.language,
   );
