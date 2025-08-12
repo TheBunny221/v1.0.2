@@ -423,7 +423,7 @@ const CitizenDashboard: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              {(searchTerm || statusFilter || typeFilter) && (
+              {(searchTerm || (statusFilter && statusFilter !== "all") || (typeFilter && typeFilter !== "all")) && (
                 <Button variant="ghost" onClick={clearAllFilters}>
                   <Filter className="h-4 w-4 mr-2" />
                   Clear Filters
