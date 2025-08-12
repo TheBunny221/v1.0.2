@@ -848,10 +848,7 @@ const GuestComplaintForm: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
-                        <p
-                          className="text-sm text-red-600"
-                          role="alert"
-                        >
+                        <p className="text-sm text-red-600" role="alert">
                           {validationErrors.wardId}
                         </p>
                       )}
@@ -886,10 +883,7 @@ const GuestComplaintForm: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {validationErrors.subZoneId && (
-                        <p
-                          className="text-sm text-red-600"
-                          role="alert"
-                        >
+                        <p className="text-sm text-red-600" role="alert">
                           {validationErrors.subZoneId}
                         </p>
                       )}
@@ -996,46 +990,47 @@ const GuestComplaintForm: React.FC = () => {
                     </Label>
 
                     {/* File previews */}
-                    {formData.attachments && formData.attachments.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {formData.attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="relative group border rounded-lg overflow-hidden"
-                          >
-                            <img
-                              src={attachment.preview}
-                              alt="Preview"
-                              className="w-full h-24 object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                              <div className="opacity-0 group-hover:opacity-100 flex gap-2">
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  size="sm"
-                                  onClick={() =>
-                                    handlePreviewImage(attachment.preview!)
-                                  }
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleRemoveAttachment(attachment.id)
-                                  }
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
+                    {formData.attachments &&
+                      formData.attachments.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {formData.attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="relative group border rounded-lg overflow-hidden"
+                            >
+                              <img
+                                src={attachment.preview}
+                                alt="Preview"
+                                className="w-full h-24 object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                                <div className="opacity-0 group-hover:opacity-100 flex gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() =>
+                                      handlePreviewImage(attachment.preview!)
+                                    }
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleRemoveAttachment(attachment.id)
+                                    }
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -1177,7 +1172,11 @@ const GuestComplaintForm: React.FC = () => {
               </Button>
 
               {currentStep < steps.length ? (
-                <Button type="button" onClick={handleNext} disabled={!canProceed}>
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!canProceed}
+                >
                   Next
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>

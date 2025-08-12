@@ -173,22 +173,26 @@ const saveDraftToStorage = (formData: GuestComplaintData) => {
 };
 
 // SessionStorage helpers
-const FORM_DATA_KEY = 'guestComplaintFormData';
+const FORM_DATA_KEY = "guestComplaintFormData";
 
-const saveFormDataToSession = (data: Partial<GuestComplaintData> & { currentStep?: number }) => {
+const saveFormDataToSession = (
+  data: Partial<GuestComplaintData> & { currentStep?: number },
+) => {
   try {
     sessionStorage.setItem(FORM_DATA_KEY, JSON.stringify(data));
   } catch (error) {
-    console.warn('Failed to save form data to session storage:', error);
+    console.warn("Failed to save form data to session storage:", error);
   }
 };
 
-const loadFormDataFromSession = (): (Partial<GuestComplaintData> & { currentStep?: number }) | null => {
+const loadFormDataFromSession = ():
+  | (Partial<GuestComplaintData> & { currentStep?: number })
+  | null => {
   try {
     const saved = sessionStorage.getItem(FORM_DATA_KEY);
     return saved ? JSON.parse(saved) : null;
   } catch (error) {
-    console.warn('Failed to load form data from session storage:', error);
+    console.warn("Failed to load form data from session storage:", error);
     return null;
   }
 };
@@ -197,7 +201,7 @@ const clearFormDataFromSession = () => {
   try {
     sessionStorage.removeItem(FORM_DATA_KEY);
   } catch (error) {
-    console.warn('Failed to clear form data from session storage:', error);
+    console.warn("Failed to clear form data from session storage:", error);
   }
 };
 
@@ -626,7 +630,10 @@ const guestSlice = createSlice({
     setCurrentFormStep: (state, action: PayloadAction<number>) => {
       state.currentFormStep = action.payload;
     },
-    setFormValidation: (state, action: PayloadAction<Record<string, string>>) => {
+    setFormValidation: (
+      state,
+      action: PayloadAction<Record<string, string>>,
+    ) => {
       state.formValidation = action.payload;
     },
     clearError: (state) => {
@@ -634,7 +641,9 @@ const guestSlice = createSlice({
     },
     updateComplaintData: (
       state,
-      action: PayloadAction<Partial<GuestComplaintData> & { currentStep?: number }>,
+      action: PayloadAction<
+        Partial<GuestComplaintData> & { currentStep?: number }
+      >,
     ) => {
       const { currentStep, ...dataUpdate } = action.payload;
 
@@ -649,7 +658,10 @@ const guestSlice = createSlice({
       }
 
       // Save to sessionStorage
-      const dataToSave = { ...state.formData, currentStep: state.currentFormStep };
+      const dataToSave = {
+        ...state.formData,
+        currentStep: state.currentFormStep,
+      };
       saveFormDataToSession(dataToSave);
     },
     loadSavedFormData: (state) => {
@@ -657,7 +669,10 @@ const guestSlice = createSlice({
       if (savedData) {
         const { currentStep, ...complaintData } = savedData;
         if (Object.keys(complaintData).length > 0) {
-          state.formData = { ...state.formData, ...complaintData as Partial<GuestComplaintData> };
+          state.formData = {
+            ...state.formData,
+            ...(complaintData as Partial<GuestComplaintData>),
+          };
         }
         if (currentStep) {
           state.currentFormStep = currentStep;

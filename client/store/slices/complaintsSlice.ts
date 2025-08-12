@@ -428,7 +428,7 @@ export const submitFeedback = createAsyncThunk(
       rating: number;
       comment?: string;
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const data = await apiCall(`/api/complaints/${complaintId}/feedback`, {
@@ -441,10 +441,10 @@ export const submitFeedback = createAsyncThunk(
       };
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to submit feedback"
+        error instanceof Error ? error.message : "Failed to submit feedback",
       );
     }
-  }
+  },
 );
 
 // Slice

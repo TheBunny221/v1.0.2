@@ -33,225 +33,248 @@ const generateComplaintId = () => {
 // @desc    Submit guest complaint with attachments
 // @route   POST /api/guest/complaint-with-attachments
 // @access  Public
-export const submitGuestComplaintWithAttachments = asyncHandler(async (req, res) => {
-  const {
-    fullName,
-    email,
-    phoneNumber,
-    description,
-    type,
-    priority,
-    wardId,
-    subZoneId,
-    area,
-    landmark,
-    address,
-    coordinates,
-  } = req.body;
-
-  const attachments = req.files || [];
-
-  // Validate JSON fields manually since multer changes the middleware chain
-  if (!fullName || fullName.trim().length < 2 || fullName.trim().length > 100) {
-    return res.status(400).json({
-      success: false,
-      message: "Full name must be between 2 and 100 characters",
-      data: null,
-    });
-  }
-
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide a valid email",
-      data: null,
-    });
-  }
-
-  if (!phoneNumber || !/^\+?[\d\s-()]{10,}$/.test(phoneNumber)) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide a valid phone number",
-      data: null,
-    });
-  }
-
-  const validTypes = ["WATER_SUPPLY", "ELECTRICITY", "ROAD_REPAIR", "GARBAGE_COLLECTION",
-                    "STREET_LIGHTING", "SEWERAGE", "PUBLIC_HEALTH", "TRAFFIC", "OTHERS"];
-  if (!type || !validTypes.includes(type)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid complaint type",
-      data: null,
-    });
-  }
-
-  if (!description || description.trim().length < 10 || description.trim().length > 2000) {
-    return res.status(400).json({
-      success: false,
-      message: "Description must be between 10 and 2000 characters",
-      data: null,
-    });
-  }
-
-  if (!wardId) {
-    return res.status(400).json({
-      success: false,
-      message: "Ward is required",
-      data: null,
-    });
-  }
-
-  if (!area || area.trim().length < 2 || area.trim().length > 200) {
-    return res.status(400).json({
-      success: false,
-      message: "Area must be between 2 and 200 characters",
-      data: null,
-    });
-  }
-
-  // Check if user already exists
-  let existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // Set deadline based on priority
-  const priorityHours = {
-    LOW: 72,
-    MEDIUM: 48,
-    HIGH: 24,
-    CRITICAL: 8,
-  };
-
-  const deadline = new Date(
-    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
-  );
-
-  // Parse coordinates if provided
-  let coordinatesObj = null;
-  if (coordinates) {
-    try {
-      coordinatesObj = typeof coordinates === 'string' ? JSON.parse(coordinates) : coordinates;
-    } catch (error) {
-      console.warn('Invalid coordinates format:', coordinates);
-    }
-  }
-
-  // Create complaint immediately with status "REGISTERED"
-  const complaint = await prisma.complaint.create({
-    data: {
-      title: `${type} complaint`,
+export const submitGuestComplaintWithAttachments = asyncHandler(
+  async (req, res) => {
+    const {
+      fullName,
+      email,
+      phoneNumber,
       description,
       type,
-      priority: priority || "MEDIUM",
-      status: "REGISTERED",
-      slaStatus: "ON_TIME",
+      priority,
       wardId,
-      subZoneId: subZoneId || null,
+      subZoneId,
       area,
       landmark,
       address,
-      coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
-      contactName: fullName,
-      contactEmail: email,
-      contactPhone: phoneNumber,
-      isAnonymous: false,
-      deadline,
-      // Don't assign submittedById yet - will be set after OTP verification
-    },
-    include: {
-      ward: true,
-    },
-  });
+      coordinates,
+    } = req.body;
 
-  // Process attachments if any
-  let attachmentRecords = [];
-  if (attachments.length > 0) {
-    try {
-      for (const file of attachments) {
-        const attachment = await prisma.attachment.create({
-          data: {
-            filename: file.filename,
-            originalName: file.originalname,
-            mimeType: file.mimetype,
-            size: file.size,
-            filePath: file.path,
-            uploadedBy: null, // Guest upload, no user yet
-            complaintId: complaint.id,
-          },
-        });
-        attachmentRecords.push(attachment);
-      }
-    } catch (attachmentError) {
-      console.error('Error creating attachment records:', attachmentError);
-      // Continue with complaint creation even if attachment recording fails
+    const attachments = req.files || [];
+
+    // Validate JSON fields manually since multer changes the middleware chain
+    if (
+      !fullName ||
+      fullName.trim().length < 2 ||
+      fullName.trim().length > 100
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Full name must be between 2 and 100 characters",
+        data: null,
+      });
     }
-  }
 
-  // Generate OTP
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email",
+        data: null,
+      });
+    }
 
-  // Create OTP session for guest
-  const otpSession = await prisma.oTPSession.create({
-    data: {
-      email,
-      phoneNumber,
-      otpCode,
-      purpose: "GUEST_VERIFICATION",
-      expiresAt,
-    },
-  });
+    if (!phoneNumber || !/^\+?[\d\s-()]{10,}$/.test(phoneNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid phone number",
+        data: null,
+      });
+    }
 
-  // Send OTP email
-  const emailSent = await sendEmail({
-    to: email,
-    subject: "Verify Your Complaint - Cochin Smart City",
-    text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
-    html: `
+    const validTypes = [
+      "WATER_SUPPLY",
+      "ELECTRICITY",
+      "ROAD_REPAIR",
+      "GARBAGE_COLLECTION",
+      "STREET_LIGHTING",
+      "SEWERAGE",
+      "PUBLIC_HEALTH",
+      "TRAFFIC",
+      "OTHERS",
+    ];
+    if (!type || !validTypes.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid complaint type",
+        data: null,
+      });
+    }
+
+    if (
+      !description ||
+      description.trim().length < 10 ||
+      description.trim().length > 2000
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Description must be between 10 and 2000 characters",
+        data: null,
+      });
+    }
+
+    if (!wardId) {
+      return res.status(400).json({
+        success: false,
+        message: "Ward is required",
+        data: null,
+      });
+    }
+
+    if (!area || area.trim().length < 2 || area.trim().length > 200) {
+      return res.status(400).json({
+        success: false,
+        message: "Area must be between 2 and 200 characters",
+        data: null,
+      });
+    }
+
+    // Check if user already exists
+    let existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Set deadline based on priority
+    const priorityHours = {
+      LOW: 72,
+      MEDIUM: 48,
+      HIGH: 24,
+      CRITICAL: 8,
+    };
+
+    const deadline = new Date(
+      Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
+    );
+
+    // Parse coordinates if provided
+    let coordinatesObj = null;
+    if (coordinates) {
+      try {
+        coordinatesObj =
+          typeof coordinates === "string"
+            ? JSON.parse(coordinates)
+            : coordinates;
+      } catch (error) {
+        console.warn("Invalid coordinates format:", coordinates);
+      }
+    }
+
+    // Create complaint immediately with status "REGISTERED"
+    const complaint = await prisma.complaint.create({
+      data: {
+        title: `${type} complaint`,
+        description,
+        type,
+        priority: priority || "MEDIUM",
+        status: "REGISTERED",
+        slaStatus: "ON_TIME",
+        wardId,
+        subZoneId: subZoneId || null,
+        area,
+        landmark,
+        address,
+        coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
+        contactName: fullName,
+        contactEmail: email,
+        contactPhone: phoneNumber,
+        isAnonymous: false,
+        deadline,
+        // Don't assign submittedById yet - will be set after OTP verification
+      },
+      include: {
+        ward: true,
+      },
+    });
+
+    // Process attachments if any
+    let attachmentRecords = [];
+    if (attachments.length > 0) {
+      try {
+        for (const file of attachments) {
+          const attachment = await prisma.attachment.create({
+            data: {
+              filename: file.filename,
+              originalName: file.originalname,
+              mimeType: file.mimetype,
+              size: file.size,
+              filePath: file.path,
+              uploadedBy: null, // Guest upload, no user yet
+              complaintId: complaint.id,
+            },
+          });
+          attachmentRecords.push(attachment);
+        }
+      } catch (attachmentError) {
+        console.error("Error creating attachment records:", attachmentError);
+        // Continue with complaint creation even if attachment recording fails
+      }
+    }
+
+    // Generate OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Create OTP session for guest
+    const otpSession = await prisma.oTPSession.create({
+      data: {
+        email,
+        phoneNumber,
+        otpCode,
+        purpose: "GUEST_VERIFICATION",
+        expiresAt,
+      },
+    });
+
+    // Send OTP email
+    const emailSent = await sendEmail({
+      to: email,
+      subject: "Verify Your Complaint - Cochin Smart City",
+      text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
+      html: `
       <h2>Complaint Registered Successfully</h2>
       <p>Your complaint has been registered with ID: <strong>${complaint.id}</strong></p>
       <p>To complete the verification process, please use the following OTP:</p>
       <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
       <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
-      ${attachmentRecords.length > 0 ? `<p>Your complaint includes ${attachmentRecords.length} attachment(s).</p>` : ''}
+      ${attachmentRecords.length > 0 ? `<p>Your complaint includes ${attachmentRecords.length} attachment(s).</p>` : ""}
     `,
-  });
-
-  if (!emailSent) {
-    // If email fails, delete the complaint, attachments, and OTP session
-    await prisma.complaint.delete({ where: { id: complaint.id } });
-    await prisma.oTPSession.delete({ where: { id: otpSession.id } });
-
-    // Clean up uploaded files
-    attachments.forEach(file => {
-      try {
-        fs.unlinkSync(file.path);
-      } catch (error) {
-        console.error('Error deleting file:', file.path, error);
-      }
     });
 
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send verification email. Please try again.",
-      data: null,
-    });
-  }
+    if (!emailSent) {
+      // If email fails, delete the complaint, attachments, and OTP session
+      await prisma.complaint.delete({ where: { id: complaint.id } });
+      await prisma.oTPSession.delete({ where: { id: otpSession.id } });
 
-  res.status(201).json({
-    success: true,
-    message: "Complaint registered successfully. Please check your email for OTP verification.",
-    data: {
-      complaintId: complaint.id,
-      email,
-      expiresAt,
-      sessionId: otpSession.id,
-      attachmentCount: attachmentRecords.length,
-    },
-  });
-});
+      // Clean up uploaded files
+      attachments.forEach((file) => {
+        try {
+          fs.unlinkSync(file.path);
+        } catch (error) {
+          console.error("Error deleting file:", file.path, error);
+        }
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send verification email. Please try again.",
+        data: null,
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message:
+        "Complaint registered successfully. Please check your email for OTP verification.",
+      data: {
+        complaintId: complaint.id,
+        email,
+        expiresAt,
+        sessionId: otpSession.id,
+        attachmentCount: attachmentRecords.length,
+      },
+    });
+  },
+);
 
 // @desc    Submit guest complaint with immediate registration
 // @route   POST /api/guest/complaint

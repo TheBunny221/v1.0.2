@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { fetchComplaints, setFilters, clearFilters } from "../store/slices/complaintsSlice";
+import {
+  fetchComplaints,
+  setFilters,
+  clearFilters,
+} from "../store/slices/complaintsSlice";
 import FeedbackDialog from "../components/FeedbackDialog";
 import {
   Card,
@@ -53,7 +57,9 @@ const CitizenDashboard: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading, filters, pagination } = useAppSelector((state) => state.complaints);
+  const { complaints, isLoading, filters, pagination } = useAppSelector(
+    (state) => state.complaints,
+  );
 
   const [dashboardStats, setDashboardStats] = useState({
     total: 0,
@@ -64,11 +70,19 @@ const CitizenDashboard: React.FC = () => {
     resolutionRate: 0,
   });
 
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get("status") || "",
+  );
   const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "");
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "submittedOn");
-  const [sortOrder, setSortOrder] = useState(searchParams.get("order") || "desc");
+  const [sortBy, setSortBy] = useState(
+    searchParams.get("sort") || "submittedOn",
+  );
+  const [sortOrder, setSortOrder] = useState(
+    searchParams.get("order") || "desc",
+  );
 
   // Fetch complaints when user is available or filters change
   useEffect(() => {
@@ -99,15 +113,26 @@ const CitizenDashboard: React.FC = () => {
     if (sortOrder !== "desc") params.set("order", sortOrder);
 
     setSearchParams(params);
-  }, [searchTerm, statusFilter, typeFilter, sortBy, sortOrder, setSearchParams]);
+  }, [
+    searchTerm,
+    statusFilter,
+    typeFilter,
+    sortBy,
+    sortOrder,
+    setSearchParams,
+  ]);
 
   // Calculate dashboard statistics
   useEffect(() => {
     const total = complaints.length;
     const pending = complaints.filter((c) => c.status === "REGISTERED").length;
-    const inProgress = complaints.filter((c) => c.status === "IN_PROGRESS" || c.status === "ASSIGNED").length;
-    const resolved = complaints.filter((c) => c.status === "RESOLVED" || c.status === "CLOSED").length;
-    
+    const inProgress = complaints.filter(
+      (c) => c.status === "IN_PROGRESS" || c.status === "ASSIGNED",
+    ).length;
+    const resolved = complaints.filter(
+      (c) => c.status === "RESOLVED" || c.status === "CLOSED",
+    ).length;
+
     // Calculate average resolution time (mock data for now)
     const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
@@ -154,10 +179,10 @@ const CitizenDashboard: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -239,7 +264,9 @@ const CitizenDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Complaints</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Complaints
+            </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -259,9 +286,7 @@ const CitizenDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-yellow-600">
               {dashboardStats.pending}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Awaiting assignment
-            </p>
+            <p className="text-xs text-muted-foreground">Awaiting assignment</p>
           </CardContent>
         </Card>
 
@@ -274,9 +299,7 @@ const CitizenDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-orange-600">
               {dashboardStats.inProgress}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Being worked on
-            </p>
+            <p className="text-xs text-muted-foreground">Being worked on</p>
           </CardContent>
         </Card>
 
@@ -304,7 +327,9 @@ const CitizenDashboard: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Overall Resolution Rate</span>
+              <span className="text-sm font-medium">
+                Overall Resolution Rate
+              </span>
               <span className="text-sm text-muted-foreground">
                 {dashboardStats.resolved} of {dashboardStats.total} complaints
               </span>
@@ -314,10 +339,7 @@ const CitizenDashboard: React.FC = () => {
                 <span>Progress</span>
                 <span>{dashboardStats.resolutionRate}%</span>
               </div>
-              <Progress
-                value={dashboardStats.resolutionRate}
-                className="h-2"
-              />
+              <Progress value={dashboardStats.resolutionRate} className="h-2" />
             </div>
             {dashboardStats.avgResolutionTime > 0 && (
               <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -390,8 +412,12 @@ const CitizenDashboard: React.FC = () => {
                   <SelectItem value="WATER_SUPPLY">Water Supply</SelectItem>
                   <SelectItem value="ELECTRICITY">Electricity</SelectItem>
                   <SelectItem value="ROAD_REPAIR">Road Repair</SelectItem>
-                  <SelectItem value="GARBAGE_COLLECTION">Garbage Collection</SelectItem>
-                  <SelectItem value="STREET_LIGHTING">Street Lighting</SelectItem>
+                  <SelectItem value="GARBAGE_COLLECTION">
+                    Garbage Collection
+                  </SelectItem>
+                  <SelectItem value="STREET_LIGHTING">
+                    Street Lighting
+                  </SelectItem>
                   <SelectItem value="SEWERAGE">Sewerage</SelectItem>
                   <SelectItem value="PUBLIC_HEALTH">Public Health</SelectItem>
                   <SelectItem value="TRAFFIC">Traffic</SelectItem>
@@ -399,18 +425,23 @@ const CitizenDashboard: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-                const [newSortBy, newSortOrder] = value.split('-');
-                setSortBy(newSortBy);
-                setSortOrder(newSortOrder);
-              }}>
+              <Select
+                value={`${sortBy}-${sortOrder}`}
+                onValueChange={(value) => {
+                  const [newSortBy, newSortOrder] = value.split("-");
+                  setSortBy(newSortBy);
+                  setSortOrder(newSortOrder);
+                }}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="submittedOn-desc">Newest First</SelectItem>
                   <SelectItem value="submittedOn-asc">Oldest First</SelectItem>
-                  <SelectItem value="priority-desc">High Priority First</SelectItem>
+                  <SelectItem value="priority-desc">
+                    High Priority First
+                  </SelectItem>
                   <SelectItem value="status-asc">Status</SelectItem>
                 </SelectContent>
               </Select>
@@ -455,23 +486,28 @@ const CitizenDashboard: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-medium text-sm">{complaint.title}</h4>
+                          <h4 className="font-medium text-sm">
+                            {complaint.title}
+                          </h4>
                           <p className="text-xs text-gray-500 mt-1">
                             ID: {complaint.id}
                           </p>
                         </div>
                         <Badge className={getStatusColor(complaint.status)}>
-                          {complaint.status.replace('_', ' ')}
+                          {complaint.status.replace("_", " ")}
                         </Badge>
                       </div>
-                      
+
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>{getComplaintTypeLabel(complaint.type)}</span>
                         <span>{formatDate(complaint.submittedOn)}</span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={getPriorityColor(complaint.priority)}>
+                        <Badge
+                          variant="outline"
+                          className={getPriorityColor(complaint.priority)}
+                        >
                           {complaint.priority}
                         </Badge>
                         {complaint.ward && (
@@ -486,13 +522,15 @@ const CitizenDashboard: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate(`/complaints/${complaint.id}`)}
+                          onClick={() =>
+                            navigate(`/complaints/${complaint.id}`)
+                          }
                           className="flex-1"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
-                        
+
                         {isResolved(complaint.status) && (
                           <FeedbackDialog
                             complaintId={complaint.id}
@@ -500,7 +538,10 @@ const CitizenDashboard: React.FC = () => {
                             isResolved={isResolved(complaint.status)}
                             existingFeedback={
                               complaint.rating
-                                ? { rating: complaint.rating, comment: complaint.citizenFeedback || "" }
+                                ? {
+                                    rating: complaint.rating,
+                                    comment: complaint.citizenFeedback || "",
+                                  }
                                 : null
                             }
                           >
@@ -557,11 +598,14 @@ const CitizenDashboard: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(complaint.status)}>
-                            {complaint.status.replace('_', ' ')}
+                            {complaint.status.replace("_", " ")}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={getPriorityColor(complaint.priority)}>
+                          <Badge
+                            variant="outline"
+                            className={getPriorityColor(complaint.priority)}
+                          >
                             {complaint.priority}
                           </Badge>
                         </TableCell>
@@ -583,10 +627,14 @@ const CitizenDashboard: React.FC = () => {
                           {complaint.rating ? (
                             <div className="flex items-center">
                               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                              <span className="text-sm">{complaint.rating}/5</span>
+                              <span className="text-sm">
+                                {complaint.rating}/5
+                              </span>
                             </div>
                           ) : isResolved(complaint.status) ? (
-                            <span className="text-xs text-gray-500">Not rated</span>
+                            <span className="text-xs text-gray-500">
+                              Not rated
+                            </span>
                           ) : (
                             <span className="text-xs text-gray-400">—</span>
                           )}
@@ -596,11 +644,13 @@ const CitizenDashboard: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/complaints/${complaint.id}`)}
+                              onClick={() =>
+                                navigate(`/complaints/${complaint.id}`)
+                              }
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            
+
                             {isResolved(complaint.status) && (
                               <FeedbackDialog
                                 complaintId={complaint.id}
@@ -608,7 +658,11 @@ const CitizenDashboard: React.FC = () => {
                                 isResolved={isResolved(complaint.status)}
                                 existingFeedback={
                                   complaint.rating
-                                    ? { rating: complaint.rating, comment: complaint.citizenFeedback || "" }
+                                    ? {
+                                        rating: complaint.rating,
+                                        comment:
+                                          complaint.citizenFeedback || "",
+                                      }
                                     : null
                                 }
                               >
@@ -629,9 +683,13 @@ const CitizenDashboard: React.FC = () => {
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-500">
-                    Showing {(pagination.currentPage - 1) * pagination.limit + 1} to{" "}
-                    {Math.min(pagination.currentPage * pagination.limit, pagination.totalItems)} of{" "}
-                    {pagination.totalItems} complaints
+                    Showing{" "}
+                    {(pagination.currentPage - 1) * pagination.limit + 1} to{" "}
+                    {Math.min(
+                      pagination.currentPage * pagination.limit,
+                      pagination.totalItems,
+                    )}{" "}
+                    of {pagination.totalItems} complaints
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -641,11 +699,13 @@ const CitizenDashboard: React.FC = () => {
                       onClick={() => {
                         const newPage = pagination.currentPage - 1;
                         if (user) {
-                          dispatch(fetchComplaints({
-                            submittedById: user.id,
-                            ...filters,
-                            page: newPage,
-                          }));
+                          dispatch(
+                            fetchComplaints({
+                              submittedById: user.id,
+                              ...filters,
+                              page: newPage,
+                            }),
+                          );
                         }
                       }}
                     >
@@ -658,11 +718,13 @@ const CitizenDashboard: React.FC = () => {
                       onClick={() => {
                         const newPage = pagination.currentPage + 1;
                         if (user) {
-                          dispatch(fetchComplaints({
-                            submittedById: user.id,
-                            ...filters,
-                            page: newPage,
-                          }));
+                          dispatch(
+                            fetchComplaints({
+                              submittedById: user.id,
+                              ...filters,
+                              page: newPage,
+                            }),
+                          );
                         }
                       }}
                     >
@@ -684,23 +746,23 @@ const CitizenDashboard: React.FC = () => {
             <CardTitle className="text-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button 
-              onClick={() => navigate("/complaints/create")} 
+            <Button
+              onClick={() => navigate("/complaints/create")}
               className="w-full justify-start"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Submit New Complaint
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate("/complaints")}
               className="w-full justify-start"
             >
               <FileText className="mr-2 h-4 w-4" />
               View All Complaints
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate("/guest/track")}
               className="w-full justify-start"
             >

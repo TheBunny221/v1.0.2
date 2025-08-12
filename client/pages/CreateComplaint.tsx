@@ -137,12 +137,16 @@ const CreateComplaint: React.FC = () => {
     attachments: [],
   });
 
-  const [attachmentPreviews, setAttachmentPreviews] = useState<AttachmentWithPreview[]>([]);
+  const [attachmentPreviews, setAttachmentPreviews] = useState<
+    AttachmentWithPreview[]
+  >([]);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   // Get current location
   useEffect(() => {
@@ -172,7 +176,7 @@ const CreateComplaint: React.FC = () => {
 
     // Clear validation error for this field
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -184,29 +188,29 @@ const CreateComplaint: React.FC = () => {
 
     // Clear validation error for this field
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
     // Reset subZoneId when wardId changes
-    if (name === 'wardId') {
+    if (name === "wardId") {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
-        subZoneId: '',
+        subZoneId: "",
       }));
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+
     // Validate files
     const validFiles: File[] = [];
     const errors: string[] = [];
 
-    files.forEach(file => {
+    files.forEach((file) => {
       // Check file type
-      if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
         errors.push(`${file.name}: Only JPG and PNG files are allowed`);
         return;
       }
@@ -223,7 +227,7 @@ const CreateComplaint: React.FC = () => {
     if (errors.length > 0) {
       toast({
         title: "File Upload Error",
-        description: errors.join(', '),
+        description: errors.join(", "),
         variant: "destructive",
       });
       return;
@@ -240,29 +244,29 @@ const CreateComplaint: React.FC = () => {
     }
 
     // Create previews for new files
-    const newPreviews: AttachmentWithPreview[] = validFiles.map(file => ({
+    const newPreviews: AttachmentWithPreview[] = validFiles.map((file) => ({
       file,
-      previewUrl: URL.createObjectURL(file)
+      previewUrl: URL.createObjectURL(file),
     }));
 
-    setAttachmentPreviews(prev => [...prev, ...newPreviews]);
-    setFormData(prev => ({
+    setAttachmentPreviews((prev) => [...prev, ...newPreviews]);
+    setFormData((prev) => ({
       ...prev,
-      attachments: [...prev.attachments, ...validFiles]
+      attachments: [...prev.attachments, ...validFiles],
     }));
 
     // Clear the input
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const removeAttachment = (index: number) => {
     const preview = attachmentPreviews[index];
     URL.revokeObjectURL(preview.previewUrl);
 
-    setAttachmentPreviews(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => ({
+    setAttachmentPreviews((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => ({
       ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index)
+      attachments: prev.attachments.filter((_, i) => i !== index),
     }));
   };
 
@@ -271,21 +275,23 @@ const CreateComplaint: React.FC = () => {
 
     switch (step) {
       case 1: // Details
-        if (!formData.title.trim()) errors.title = 'Title is required';
-        if (!formData.type) errors.type = 'Complaint type is required';
-        if (!formData.description.trim()) errors.description = 'Description is required';
-        if (formData.description.trim().length < 10) errors.description = 'Description must be at least 10 characters';
+        if (!formData.title.trim()) errors.title = "Title is required";
+        if (!formData.type) errors.type = "Complaint type is required";
+        if (!formData.description.trim())
+          errors.description = "Description is required";
+        if (formData.description.trim().length < 10)
+          errors.description = "Description must be at least 10 characters";
         break;
-      
+
       case 2: // Location
-        if (!formData.wardId) errors.wardId = 'Ward is required';
-        if (!formData.subZoneId) errors.subZoneId = 'Sub-zone is required';
-        if (!formData.area.trim()) errors.area = 'Area is required';
+        if (!formData.wardId) errors.wardId = "Ward is required";
+        if (!formData.subZoneId) errors.subZoneId = "Sub-zone is required";
+        if (!formData.area.trim()) errors.area = "Area is required";
         break;
-      
+
       case 3: // Attachments - optional, no validation required
         break;
-      
+
       case 4: // Review - all previous validations
         return validateStep(1) && validateStep(2);
     }
@@ -296,12 +302,12 @@ const CreateComplaint: React.FC = () => {
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      setCurrentStep((prev) => Math.min(prev + 1, 4));
     }
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = async () => {
@@ -346,7 +352,7 @@ const CreateComplaint: React.FC = () => {
   };
 
   const getAvailableSubZones = () => {
-    return SUB_ZONES.filter(sz => sz.wardId === formData.wardId);
+    return SUB_ZONES.filter((sz) => sz.wardId === formData.wardId);
   };
 
   const getProgressPercentage = () => {
@@ -418,8 +424,10 @@ const CreateComplaint: React.FC = () => {
           </CardTitle>
           <CardDescription>
             {currentStep === 1 && "Enter complaint details and description"}
-            {currentStep === 2 && "Specify the location where the issue occurred"}
-            {currentStep === 3 && "Optionally upload images to support your complaint"}
+            {currentStep === 2 &&
+              "Specify the location where the issue occurred"}
+            {currentStep === 3 &&
+              "Optionally upload images to support your complaint"}
             {currentStep === 4 && "Review all details before submitting"}
           </CardDescription>
         </CardHeader>
@@ -448,7 +456,9 @@ const CreateComplaint: React.FC = () => {
                     className={validationErrors.title ? "border-red-500" : ""}
                   />
                   {validationErrors.title && (
-                    <p className="text-sm text-red-500">{validationErrors.title}</p>
+                    <p className="text-sm text-red-500">
+                      {validationErrors.title}
+                    </p>
                   )}
                 </div>
 
@@ -461,7 +471,11 @@ const CreateComplaint: React.FC = () => {
                         handleSelectChange("type", value)
                       }
                     >
-                      <SelectTrigger className={validationErrors.type ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={
+                          validationErrors.type ? "border-red-500" : ""
+                        }
+                      >
                         <SelectValue placeholder="Select complaint type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -473,7 +487,9 @@ const CreateComplaint: React.FC = () => {
                       </SelectContent>
                     </Select>
                     {validationErrors.type && (
-                      <p className="text-sm text-red-500">{validationErrors.type}</p>
+                      <p className="text-sm text-red-500">
+                        {validationErrors.type}
+                      </p>
                     )}
                   </div>
 
@@ -516,10 +532,14 @@ const CreateComplaint: React.FC = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className={validationErrors.description ? "border-red-500" : ""}
+                    className={
+                      validationErrors.description ? "border-red-500" : ""
+                    }
                   />
                   {validationErrors.description && (
-                    <p className="text-sm text-red-500">{validationErrors.description}</p>
+                    <p className="text-sm text-red-500">
+                      {validationErrors.description}
+                    </p>
                   )}
                 </div>
               </div>
@@ -544,7 +564,11 @@ const CreateComplaint: React.FC = () => {
                         handleSelectChange("wardId", value)
                       }
                     >
-                      <SelectTrigger className={validationErrors.wardId ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={
+                          validationErrors.wardId ? "border-red-500" : ""
+                        }
+                      >
                         <SelectValue placeholder="Select ward" />
                       </SelectTrigger>
                       <SelectContent>
@@ -556,7 +580,9 @@ const CreateComplaint: React.FC = () => {
                       </SelectContent>
                     </Select>
                     {validationErrors.wardId && (
-                      <p className="text-sm text-red-500">{validationErrors.wardId}</p>
+                      <p className="text-sm text-red-500">
+                        {validationErrors.wardId}
+                      </p>
                     )}
                   </div>
 
@@ -569,7 +595,11 @@ const CreateComplaint: React.FC = () => {
                       }
                       disabled={!formData.wardId}
                     >
-                      <SelectTrigger className={validationErrors.subZoneId ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={
+                          validationErrors.subZoneId ? "border-red-500" : ""
+                        }
+                      >
                         <SelectValue placeholder="Select sub-zone" />
                       </SelectTrigger>
                       <SelectContent>
@@ -581,7 +611,9 @@ const CreateComplaint: React.FC = () => {
                       </SelectContent>
                     </Select>
                     {validationErrors.subZoneId && (
-                      <p className="text-sm text-red-500">{validationErrors.subZoneId}</p>
+                      <p className="text-sm text-red-500">
+                        {validationErrors.subZoneId}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -597,7 +629,9 @@ const CreateComplaint: React.FC = () => {
                     className={validationErrors.area ? "border-red-500" : ""}
                   />
                   {validationErrors.area && (
-                    <p className="text-sm text-red-500">{validationErrors.area}</p>
+                    <p className="text-sm text-red-500">
+                      {validationErrors.area}
+                    </p>
                   )}
                 </div>
 
@@ -704,7 +738,9 @@ const CreateComplaint: React.FC = () => {
                             <DialogHeader>
                               <DialogTitle>Image Preview</DialogTitle>
                               <DialogDescription>
-                                {preview.file.name} ({(preview.file.size / 1024 / 1024).toFixed(2)} MB)
+                                {preview.file.name} (
+                                {(preview.file.size / 1024 / 1024).toFixed(2)}{" "}
+                                MB)
                               </DialogDescription>
                             </DialogHeader>
                             <img
@@ -742,19 +778,30 @@ const CreateComplaint: React.FC = () => {
                   </h4>
                   <div className="space-y-3 text-sm">
                     <div>
-                      <span className="font-medium">Title:</span> {formData.title}
+                      <span className="font-medium">Title:</span>{" "}
+                      {formData.title}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <span className="font-medium">Type:</span> {COMPLAINT_TYPES.find(t => t.value === formData.type)?.label}
+                        <span className="font-medium">Type:</span>{" "}
+                        {
+                          COMPLAINT_TYPES.find((t) => t.value === formData.type)
+                            ?.label
+                        }
                       </div>
                       <div>
-                        <span className="font-medium">Priority:</span> {PRIORITIES.find(p => p.value === formData.priority)?.label}
+                        <span className="font-medium">Priority:</span>{" "}
+                        {
+                          PRIORITIES.find((p) => p.value === formData.priority)
+                            ?.label
+                        }
                       </div>
                     </div>
                     <div>
                       <span className="font-medium">Description:</span>
-                      <p className="mt-1 text-gray-700">{formData.description}</p>
+                      <p className="mt-1 text-gray-700">
+                        {formData.description}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -767,22 +814,29 @@ const CreateComplaint: React.FC = () => {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="font-medium">Ward:</span> {WARDS.find(w => w.id === formData.wardId)?.name}
+                      <span className="font-medium">Ward:</span>{" "}
+                      {WARDS.find((w) => w.id === formData.wardId)?.name}
                     </div>
                     <div>
-                      <span className="font-medium">Sub-Zone:</span> {SUB_ZONES.find(sz => sz.id === formData.subZoneId)?.name}
+                      <span className="font-medium">Sub-Zone:</span>{" "}
+                      {
+                        SUB_ZONES.find((sz) => sz.id === formData.subZoneId)
+                          ?.name
+                      }
                     </div>
                     <div>
                       <span className="font-medium">Area:</span> {formData.area}
                     </div>
                     {formData.landmark && (
                       <div>
-                        <span className="font-medium">Landmark:</span> {formData.landmark}
+                        <span className="font-medium">Landmark:</span>{" "}
+                        {formData.landmark}
                       </div>
                     )}
                     {formData.address && (
                       <div className="md:col-span-2">
-                        <span className="font-medium">Address:</span> {formData.address}
+                        <span className="font-medium">Address:</span>{" "}
+                        {formData.address}
                       </div>
                     )}
                   </div>
@@ -797,7 +851,10 @@ const CreateComplaint: React.FC = () => {
                     </h4>
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                       {attachmentPreviews.map((preview, index) => (
-                        <div key={index} className="aspect-square rounded-lg overflow-hidden border">
+                        <div
+                          key={index}
+                          className="aspect-square rounded-lg overflow-hidden border"
+                        >
                           <img
                             src={preview.previewUrl}
                             alt={`Attachment ${index + 1}`}
@@ -817,14 +874,16 @@ const CreateComplaint: React.FC = () => {
                   </h4>
                   <div className="text-sm">
                     <div>
-                      <span className="font-medium">Name:</span> {user?.fullName}
+                      <span className="font-medium">Name:</span>{" "}
+                      {user?.fullName}
                     </div>
                     <div>
                       <span className="font-medium">Email:</span> {user?.email}
                     </div>
                     {user?.phoneNumber && (
                       <div>
-                        <span className="font-medium">Phone:</span> {user.phoneNumber}
+                        <span className="font-medium">Phone:</span>{" "}
+                        {user.phoneNumber}
                       </div>
                     )}
                   </div>
@@ -834,7 +893,8 @@ const CreateComplaint: React.FC = () => {
               <Alert className="border-blue-200 bg-blue-50">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-blue-700">
-                  Please review all information carefully. After submission, you'll be able to track your complaint progress.
+                  Please review all information carefully. After submission,
+                  you'll be able to track your complaint progress.
                 </AlertDescription>
               </Alert>
             </div>
@@ -855,11 +915,7 @@ const CreateComplaint: React.FC = () => {
             )}
 
             {currentStep < 4 ? (
-              <Button
-                type="button"
-                onClick={nextStep}
-                className="flex-1"
-              >
+              <Button type="button" onClick={nextStep} className="flex-1">
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

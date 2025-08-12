@@ -7,17 +7,18 @@ import {
   isValidPhoneNumber,
   isValidComplaintType,
   isValidPriority,
-} from '../guestFormValidation';
+} from "../guestFormValidation";
 
-describe('Guest Form Validation', () => {
-  describe('validateStep1', () => {
-    it('should validate all required fields correctly', () => {
+describe("Guest Form Validation", () => {
+  describe("validateStep1", () => {
+    it("should validate all required fields correctly", () => {
       const validData = {
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'This is a valid description that meets the minimum length requirement.',
+        fullName: "John Doe",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description:
+          "This is a valid description that meets the minimum length requirement.",
       };
 
       const result = validateStep1(validData);
@@ -25,56 +26,66 @@ describe('Guest Form Validation', () => {
       expect(Object.keys(result.errors)).toHaveLength(0);
     });
 
-    it('should require full name', () => {
+    it("should require full name", () => {
       const invalidData = {
-        fullName: '',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'Valid description',
+        fullName: "",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "Valid description",
       };
 
       const result = validateStep1(invalidData);
       expect(result.isValid).toBe(false);
-      expect(result.errors.fullName).toBe('Full name is required');
+      expect(result.errors.fullName).toBe("Full name is required");
     });
 
-    it('should validate full name length', () => {
+    it("should validate full name length", () => {
       const shortName = {
-        fullName: 'A',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'Valid description',
+        fullName: "A",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "Valid description",
       };
 
       const result1 = validateStep1(shortName);
       expect(result1.isValid).toBe(false);
-      expect(result1.errors.fullName).toBe('Full name must be at least 2 characters');
+      expect(result1.errors.fullName).toBe(
+        "Full name must be at least 2 characters",
+      );
 
       const longName = {
-        fullName: 'A'.repeat(101),
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'Valid description',
+        fullName: "A".repeat(101),
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "Valid description",
       };
 
       const result2 = validateStep1(longName);
       expect(result2.isValid).toBe(false);
-      expect(result2.errors.fullName).toBe('Full name cannot exceed 100 characters');
+      expect(result2.errors.fullName).toBe(
+        "Full name cannot exceed 100 characters",
+      );
     });
 
-    it('should validate email format', () => {
-      const invalidEmails = ['', 'invalid', 'invalid@', '@example.com', 'invalid@.com'];
+    it("should validate email format", () => {
+      const invalidEmails = [
+        "",
+        "invalid",
+        "invalid@",
+        "@example.com",
+        "invalid@.com",
+      ];
 
-      invalidEmails.forEach(email => {
+      invalidEmails.forEach((email) => {
         const data = {
-          fullName: 'John Doe',
+          fullName: "John Doe",
           email,
-          phoneNumber: '+1234567890',
-          type: 'WATER_SUPPLY',
-          description: 'Valid description',
+          phoneNumber: "+1234567890",
+          type: "WATER_SUPPLY",
+          description: "Valid description",
         };
 
         const result = validateStep1(data);
@@ -83,16 +94,16 @@ describe('Guest Form Validation', () => {
       });
     });
 
-    it('should validate phone number format', () => {
-      const invalidPhones = ['', '123', '12345', 'abc123456789'];
+    it("should validate phone number format", () => {
+      const invalidPhones = ["", "123", "12345", "abc123456789"];
 
-      invalidPhones.forEach(phoneNumber => {
+      invalidPhones.forEach((phoneNumber) => {
         const data = {
-          fullName: 'John Doe',
-          email: 'john@example.com',
+          fullName: "John Doe",
+          email: "john@example.com",
           phoneNumber,
-          type: 'WATER_SUPPLY',
-          description: 'Valid description',
+          type: "WATER_SUPPLY",
+          description: "Valid description",
         };
 
         const result = validateStep1(data);
@@ -101,15 +112,20 @@ describe('Guest Form Validation', () => {
       });
 
       // Valid phone numbers
-      const validPhones = ['+1234567890', '1234567890', '+91 98765 43210', '(555) 123-4567'];
+      const validPhones = [
+        "+1234567890",
+        "1234567890",
+        "+91 98765 43210",
+        "(555) 123-4567",
+      ];
 
-      validPhones.forEach(phoneNumber => {
+      validPhones.forEach((phoneNumber) => {
         const data = {
-          fullName: 'John Doe',
-          email: 'john@example.com',
+          fullName: "John Doe",
+          email: "john@example.com",
           phoneNumber,
-          type: 'WATER_SUPPLY',
-          description: 'Valid description',
+          type: "WATER_SUPPLY",
+          description: "Valid description",
         };
 
         const result = validateStep1(data);
@@ -117,55 +133,59 @@ describe('Guest Form Validation', () => {
       });
     });
 
-    it('should validate complaint type', () => {
+    it("should validate complaint type", () => {
       const invalidData = {
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'INVALID_TYPE',
-        description: 'Valid description',
+        fullName: "John Doe",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "INVALID_TYPE",
+        description: "Valid description",
       };
 
       const result = validateStep1(invalidData);
       expect(result.isValid).toBe(false);
-      expect(result.errors.type).toBe('Invalid complaint type selected');
+      expect(result.errors.type).toBe("Invalid complaint type selected");
     });
 
-    it('should validate description length', () => {
+    it("should validate description length", () => {
       const shortDescription = {
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'Short',
+        fullName: "John Doe",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "Short",
       };
 
       const result1 = validateStep1(shortDescription);
       expect(result1.isValid).toBe(false);
-      expect(result1.errors.description).toBe('Description must be at least 10 characters');
+      expect(result1.errors.description).toBe(
+        "Description must be at least 10 characters",
+      );
 
       const longDescription = {
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'A'.repeat(2001),
+        fullName: "John Doe",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "A".repeat(2001),
       };
 
       const result2 = validateStep1(longDescription);
       expect(result2.isValid).toBe(false);
-      expect(result2.errors.description).toBe('Description cannot exceed 2000 characters');
+      expect(result2.errors.description).toBe(
+        "Description cannot exceed 2000 characters",
+      );
     });
   });
 
-  describe('validateStep2', () => {
-    it('should validate all required location fields', () => {
+  describe("validateStep2", () => {
+    it("should validate all required location fields", () => {
       const validData = {
-        wardId: 'ward-1',
-        subZoneId: 'sz-1',
-        area: 'Downtown Area',
-        landmark: 'Near City Mall',
-        address: '123 Main Street',
+        wardId: "ward-1",
+        subZoneId: "sz-1",
+        area: "Downtown Area",
+        landmark: "Near City Mall",
+        address: "123 Main Street",
       };
 
       const result = validateStep2(validData);
@@ -173,88 +193,92 @@ describe('Guest Form Validation', () => {
       expect(Object.keys(result.errors)).toHaveLength(0);
     });
 
-    it('should require ward selection', () => {
+    it("should require ward selection", () => {
       const invalidData = {
-        wardId: '',
-        subZoneId: 'sz-1',
-        area: 'Downtown Area',
+        wardId: "",
+        subZoneId: "sz-1",
+        area: "Downtown Area",
       };
 
       const result = validateStep2(invalidData);
       expect(result.isValid).toBe(false);
-      expect(result.errors.wardId).toBe('Ward selection is required');
+      expect(result.errors.wardId).toBe("Ward selection is required");
     });
 
-    it('should require sub-zone selection', () => {
+    it("should require sub-zone selection", () => {
       const invalidData = {
-        wardId: 'ward-1',
-        subZoneId: '',
-        area: 'Downtown Area',
+        wardId: "ward-1",
+        subZoneId: "",
+        area: "Downtown Area",
       };
 
       const result = validateStep2(invalidData);
       expect(result.isValid).toBe(false);
-      expect(result.errors.subZoneId).toBe('Sub-zone selection is required');
+      expect(result.errors.subZoneId).toBe("Sub-zone selection is required");
     });
 
-    it('should validate area length', () => {
+    it("should validate area length", () => {
       const shortArea = {
-        wardId: 'ward-1',
-        subZoneId: 'sz-1',
-        area: 'A',
+        wardId: "ward-1",
+        subZoneId: "sz-1",
+        area: "A",
       };
 
       const result1 = validateStep2(shortArea);
       expect(result1.isValid).toBe(false);
-      expect(result1.errors.area).toBe('Area must be at least 2 characters');
+      expect(result1.errors.area).toBe("Area must be at least 2 characters");
 
       const longArea = {
-        wardId: 'ward-1',
-        subZoneId: 'sz-1',
-        area: 'A'.repeat(201),
+        wardId: "ward-1",
+        subZoneId: "sz-1",
+        area: "A".repeat(201),
       };
 
       const result2 = validateStep2(longArea);
       expect(result2.isValid).toBe(false);
-      expect(result2.errors.area).toBe('Area cannot exceed 200 characters');
+      expect(result2.errors.area).toBe("Area cannot exceed 200 characters");
     });
 
-    it('should validate optional fields length', () => {
+    it("should validate optional fields length", () => {
       const longAddress = {
-        wardId: 'ward-1',
-        subZoneId: 'sz-1',
-        area: 'Valid Area',
-        address: 'A'.repeat(501),
+        wardId: "ward-1",
+        subZoneId: "sz-1",
+        area: "Valid Area",
+        address: "A".repeat(501),
       };
 
       const result1 = validateStep2(longAddress);
       expect(result1.isValid).toBe(false);
-      expect(result1.errors.address).toBe('Address cannot exceed 500 characters');
+      expect(result1.errors.address).toBe(
+        "Address cannot exceed 500 characters",
+      );
 
       const longLandmark = {
-        wardId: 'ward-1',
-        subZoneId: 'sz-1',
-        area: 'Valid Area',
-        landmark: 'A'.repeat(201),
+        wardId: "ward-1",
+        subZoneId: "sz-1",
+        area: "Valid Area",
+        landmark: "A".repeat(201),
       };
 
       const result2 = validateStep2(longLandmark);
       expect(result2.isValid).toBe(false);
-      expect(result2.errors.landmark).toBe('Landmark cannot exceed 200 characters');
+      expect(result2.errors.landmark).toBe(
+        "Landmark cannot exceed 200 characters",
+      );
     });
   });
 
-  describe('validateStep3', () => {
+  describe("validateStep3", () => {
     // Helper to create mock files
     const createMockFile = (name: string, size: number, type: string): File => {
-      const blob = new Blob([''], { type });
+      const blob = new Blob([""], { type });
       return new File([blob], name, { type, lastModified: Date.now() });
     };
 
-    it('should allow valid image files', () => {
+    it("should allow valid image files", () => {
       const validFiles = [
-        createMockFile('image1.jpg', 5 * 1024 * 1024, 'image/jpeg'),
-        createMockFile('image2.png', 3 * 1024 * 1024, 'image/png'),
+        createMockFile("image1.jpg", 5 * 1024 * 1024, "image/jpeg"),
+        createMockFile("image2.png", 3 * 1024 * 1024, "image/png"),
       ];
 
       const result = validateStep3(validFiles);
@@ -262,48 +286,59 @@ describe('Guest Form Validation', () => {
       expect(Object.keys(result.errors)).toHaveLength(0);
     });
 
-    it('should reject too many files', () => {
+    it("should reject too many files", () => {
       const tooManyFiles = Array.from({ length: 6 }, (_, i) =>
-        createMockFile(`image${i}.jpg`, 1024 * 1024, 'image/jpeg')
+        createMockFile(`image${i}.jpg`, 1024 * 1024, "image/jpeg"),
       );
 
       const result = validateStep3(tooManyFiles);
       expect(result.isValid).toBe(false);
-      expect(result.errors.attachments).toBe('Maximum 5 files allowed');
+      expect(result.errors.attachments).toBe("Maximum 5 files allowed");
     });
 
-    it('should reject files exceeding size limit', () => {
-      const largeFile = createMockFile('large.jpg', 11 * 1024 * 1024, 'image/jpeg');
+    it("should reject files exceeding size limit", () => {
+      const largeFile = createMockFile(
+        "large.jpg",
+        11 * 1024 * 1024,
+        "image/jpeg",
+      );
 
       const result = validateStep3([largeFile]);
       expect(result.isValid).toBe(false);
-      expect(result.errors.attachments).toContain('exceeds 10MB limit');
+      expect(result.errors.attachments).toContain("exceeds 10MB limit");
     });
 
-    it('should reject invalid file types', () => {
-      const invalidFile = createMockFile('document.pdf', 1024 * 1024, 'application/pdf');
+    it("should reject invalid file types", () => {
+      const invalidFile = createMockFile(
+        "document.pdf",
+        1024 * 1024,
+        "application/pdf",
+      );
 
       const result = validateStep3([invalidFile]);
       expect(result.isValid).toBe(false);
-      expect(result.errors.attachments).toContain('must be JPG or PNG format');
+      expect(result.errors.attachments).toContain("must be JPG or PNG format");
     });
   });
 
-  describe('validateAllSteps', () => {
-    it('should validate complete form data', () => {
+  describe("validateAllSteps", () => {
+    it("should validate complete form data", () => {
       const validData = {
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'This is a valid description that meets requirements.',
-        wardId: 'ward-1',
-        subZoneId: 'sz-1',
-        area: 'Downtown Area',
+        fullName: "John Doe",
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "This is a valid description that meets requirements.",
+        wardId: "ward-1",
+        subZoneId: "sz-1",
+        area: "Downtown Area",
       };
 
       const validFiles = [
-        new File([''], 'image.jpg', { type: 'image/jpeg', lastModified: Date.now() }),
+        new File([""], "image.jpg", {
+          type: "image/jpeg",
+          lastModified: Date.now(),
+        }),
       ];
 
       const result = validateAllSteps(validData, validFiles);
@@ -311,16 +346,16 @@ describe('Guest Form Validation', () => {
       expect(Object.keys(result.errors)).toHaveLength(0);
     });
 
-    it('should combine errors from all steps', () => {
+    it("should combine errors from all steps", () => {
       const invalidData = {
-        fullName: '', // Invalid
-        email: 'john@example.com',
-        phoneNumber: '+1234567890',
-        type: 'WATER_SUPPLY',
-        description: 'Valid description',
-        wardId: '', // Invalid
-        subZoneId: 'sz-1',
-        area: 'Valid Area',
+        fullName: "", // Invalid
+        email: "john@example.com",
+        phoneNumber: "+1234567890",
+        type: "WATER_SUPPLY",
+        description: "Valid description",
+        wardId: "", // Invalid
+        subZoneId: "sz-1",
+        area: "Valid Area",
       };
 
       const result = validateAllSteps(invalidData);
@@ -330,45 +365,45 @@ describe('Guest Form Validation', () => {
     });
   });
 
-  describe('Helper functions', () => {
-    describe('isValidEmail', () => {
-      it('should validate email formats correctly', () => {
-        expect(isValidEmail('test@example.com')).toBe(true);
-        expect(isValidEmail('user+tag@domain.co.uk')).toBe(true);
-        expect(isValidEmail('invalid-email')).toBe(false);
-        expect(isValidEmail('@example.com')).toBe(false);
-        expect(isValidEmail('test@')).toBe(false);
+  describe("Helper functions", () => {
+    describe("isValidEmail", () => {
+      it("should validate email formats correctly", () => {
+        expect(isValidEmail("test@example.com")).toBe(true);
+        expect(isValidEmail("user+tag@domain.co.uk")).toBe(true);
+        expect(isValidEmail("invalid-email")).toBe(false);
+        expect(isValidEmail("@example.com")).toBe(false);
+        expect(isValidEmail("test@")).toBe(false);
       });
     });
 
-    describe('isValidPhoneNumber', () => {
-      it('should validate phone number formats correctly', () => {
-        expect(isValidPhoneNumber('+1234567890')).toBe(true);
-        expect(isValidPhoneNumber('1234567890')).toBe(true);
-        expect(isValidPhoneNumber('+91 98765 43210')).toBe(true);
-        expect(isValidPhoneNumber('(555) 123-4567')).toBe(true);
-        expect(isValidPhoneNumber('123')).toBe(false);
-        expect(isValidPhoneNumber('abc123')).toBe(false);
+    describe("isValidPhoneNumber", () => {
+      it("should validate phone number formats correctly", () => {
+        expect(isValidPhoneNumber("+1234567890")).toBe(true);
+        expect(isValidPhoneNumber("1234567890")).toBe(true);
+        expect(isValidPhoneNumber("+91 98765 43210")).toBe(true);
+        expect(isValidPhoneNumber("(555) 123-4567")).toBe(true);
+        expect(isValidPhoneNumber("123")).toBe(false);
+        expect(isValidPhoneNumber("abc123")).toBe(false);
       });
     });
 
-    describe('isValidComplaintType', () => {
-      it('should validate complaint types correctly', () => {
-        expect(isValidComplaintType('WATER_SUPPLY')).toBe(true);
-        expect(isValidComplaintType('ELECTRICITY')).toBe(true);
-        expect(isValidComplaintType('INVALID_TYPE')).toBe(false);
-        expect(isValidComplaintType('')).toBe(false);
+    describe("isValidComplaintType", () => {
+      it("should validate complaint types correctly", () => {
+        expect(isValidComplaintType("WATER_SUPPLY")).toBe(true);
+        expect(isValidComplaintType("ELECTRICITY")).toBe(true);
+        expect(isValidComplaintType("INVALID_TYPE")).toBe(false);
+        expect(isValidComplaintType("")).toBe(false);
       });
     });
 
-    describe('isValidPriority', () => {
-      it('should validate priority levels correctly', () => {
-        expect(isValidPriority('LOW')).toBe(true);
-        expect(isValidPriority('MEDIUM')).toBe(true);
-        expect(isValidPriority('HIGH')).toBe(true);
-        expect(isValidPriority('CRITICAL')).toBe(true);
-        expect(isValidPriority('INVALID')).toBe(false);
-        expect(isValidPriority('')).toBe(false);
+    describe("isValidPriority", () => {
+      it("should validate priority levels correctly", () => {
+        expect(isValidPriority("LOW")).toBe(true);
+        expect(isValidPriority("MEDIUM")).toBe(true);
+        expect(isValidPriority("HIGH")).toBe(true);
+        expect(isValidPriority("CRITICAL")).toBe(true);
+        expect(isValidPriority("INVALID")).toBe(false);
+        expect(isValidPriority("")).toBe(false);
       });
     });
   });

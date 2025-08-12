@@ -266,7 +266,9 @@ const Profile: React.FC = () => {
                   <Input
                     id="fullName"
                     value={formData.fullName}
-                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("fullName", e.target.value)
+                    }
                     disabled={!isEditing}
                   />
                 </div>

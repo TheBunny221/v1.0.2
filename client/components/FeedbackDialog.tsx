@@ -62,12 +62,13 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
           complaintId,
           rating,
           comment: comment.trim(),
-        })
+        }),
       ).unwrap();
 
       toast({
         title: "Feedback Submitted",
-        description: "Thank you for your feedback! It helps us improve our services.",
+        description:
+          "Thank you for your feedback! It helps us improve our services.",
       });
 
       setOpen(false);
@@ -132,9 +133,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -142,7 +141,8 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
             {existingFeedback ? "Update Feedback" : "Provide Feedback"}
           </DialogTitle>
           <DialogDescription>
-            How would you rate the resolution of your complaint "{complaintTitle}"?
+            How would you rate the resolution of your complaint "
+            {complaintTitle}"?
           </DialogDescription>
         </DialogHeader>
 
@@ -172,7 +172,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
             </div>
             <p
               className={`text-sm font-medium ${getRatingColor(
-                hoveredRating || rating
+                hoveredRating || rating,
               )}`}
             >
               {getRatingText(hoveredRating || rating)}
@@ -198,11 +198,15 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
 
           {/* Rating Guidelines */}
           <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">Rating Guidelines:</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Rating Guidelines:
+            </p>
             <div className="space-y-1 text-xs text-gray-600">
               <div className="flex items-center gap-2">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span>5 - Excellent: Issue resolved quickly and efficiently</span>
+                <span>
+                  5 - Excellent: Issue resolved quickly and efficiently
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -214,7 +218,9 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span>2 - Poor: Issue resolved but with significant delays</span>
+                <span>
+                  2 - Poor: Issue resolved but with significant delays
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
