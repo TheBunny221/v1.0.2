@@ -62,17 +62,9 @@ const baseQueryWithReauth: BaseQueryFn<
   return result;
 };
 
-// Helper function to extract error messages
+// Helper function to extract error messages (simplified to avoid response body consumption)
 function getErrorMessage(error: FetchBaseQueryError): string {
   if ("status" in error) {
-    if (
-      error.data &&
-      typeof error.data === "object" &&
-      "message" in error.data
-    ) {
-      return (error.data as any).message;
-    }
-
     switch (error.status) {
       case 400:
         return "Bad request - please check your input";
@@ -97,10 +89,6 @@ function getErrorMessage(error: FetchBaseQueryError): string {
       default:
         return `An error occurred (${error.status})`;
     }
-  }
-
-  if ("message" in error) {
-    return error.message || "Network error occurred";
   }
 
   return "An unexpected error occurred";
