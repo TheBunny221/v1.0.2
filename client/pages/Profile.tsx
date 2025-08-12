@@ -289,14 +289,14 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      id="phone"
-                      value={formData.phone}
+                      id="phoneNumber"
+                      value={formData.phoneNumber}
                       onChange={(e) =>
-                        handleInputChange("phone", e.target.value)
+                        handleInputChange("phoneNumber", e.target.value)
                       }
                       disabled={!isEditing}
                       className="pl-10"
