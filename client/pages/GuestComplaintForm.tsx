@@ -249,14 +249,10 @@ const GuestComplaintForm: React.FC = () => {
 
                 <div>
                   <h2 className="text-2xl font-bold text-green-800">
-                    {newUserRegistered
-                      ? "Welcome to Cochin Smart City!"
-                      : "Verification Successful!"}
+                    Welcome to Cochin Smart City!
                   </h2>
                   <p className="text-green-700 mt-2">
-                    {newUserRegistered
-                      ? "Your complaint has been verified and you've been registered as a citizen."
-                      : "Your complaint has been verified and you're now logged in."}
+                    Your complaint has been verified and you've been registered as a citizen.
                   </p>
                 </div>
 
