@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { register } from "../store/slices/authSlice";
-import { addNotification } from "../store/slices/uiSlice";
+import {
+  register,
+  selectAuth,
+  selectRegistrationStep,
+  selectRegistrationData,
+  resetRegistrationState,
+} from "../store/slices/authSlice";
+import { showToast } from "../store/slices/uiSlice";
+import OTPVerification from "../components/OTPVerification";
 import {
   Card,
   CardContent,
@@ -19,12 +26,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Shield, User, Mail, Lock, Phone, MapPin } from "lucide-react";
+import { Shield, User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.auth);
+  const auth = useAppSelector(selectAuth);
+  const registrationStep = useAppSelector(selectRegistrationStep);
+  const registrationData = useAppSelector(selectRegistrationData);
+
+  // Clear registration state on component mount
+  useEffect(() => {
+    dispatch(resetRegistrationState());
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -49,7 +63,7 @@ const Register: React.FC = () => {
 
     if (formData.password !== formData.confirmPassword) {
       dispatch(
-        addNotification({
+        showToast({
           type: "error",
           title: "Password Mismatch",
           message: "Passwords do not match",
@@ -59,7 +73,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      await dispatch(
+      const result = await dispatch(
         register({
           fullName: formData.fullName,
           email: formData.email,
@@ -70,29 +84,74 @@ const Register: React.FC = () => {
         }),
       ).unwrap();
 
+      if (result.requiresOtpVerification) {
+        // OTP verification required
+        dispatch(
+          showToast({
+            type: "success",
+            title: "Registration Successful!",
+            message: "Please check your email for the verification code.",
+          }),
+        );
+      } else {
+        // Direct registration without OTP
+        dispatch(
+          showToast({
+            type: "success",
+            title: "Registration Successful!",
+            message: "Account created successfully! Welcome aboard!",
+          }),
+        );
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
       dispatch(
-        addNotification({
-          type: "success",
-          title: "Registration Successful",
-          message: "Account created successfully! Please login.",
-        }),
-      );
-      navigate("/login");
-    } catch (error) {
-      dispatch(
-        addNotification({
+        showToast({
           type: "error",
           title: "Registration Failed",
-          message:
-            error instanceof Error ? error.message : "Failed to create account",
+          message: error.message || "Failed to create account",
         }),
       );
     }
   };
 
+  const handleBackToRegistration = () => {
+    dispatch(resetRegistrationState());
+  };
+
+  // Show OTP verification if required
+  if (registrationStep === "otp_required") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Cochin Smart City
+            </h1>
+            <p className="text-gray-600">E-Governance Portal</p>
+          </div>
+
+          <OTPVerification onBack={handleBackToRegistration} />
+
+          {/* Home Link */}
+          <div className="text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -229,8 +288,12 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Create Account"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={auth.isLoading}
+              >
+                {auth.isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
@@ -248,6 +311,15 @@ const Register: React.FC = () => {
                   className="text-green-600 hover:underline"
                 >
                   Submit as Guest
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                >
+                  <Home className="h-4 w-4" />
+                  Back to Home
                 </Link>
               </p>
             </div>

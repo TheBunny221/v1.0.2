@@ -40,6 +40,7 @@ import {
   Clock,
   CheckCircle,
   ArrowLeft,
+  Home,
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
@@ -143,8 +144,8 @@ const Login: React.FC = () => {
 
       setOtpTimer(600); // 10 minutes
       toast({
-        title: "OTP Sent",
-        description: "Please check your email for the OTP code.",
+        title: "Email Sent Successfully!",
+        description: `A 6-digit verification code has been sent to ${formData.email}. Please check your email.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
@@ -185,8 +186,8 @@ const Login: React.FC = () => {
 
       setOtpTimer(600);
       toast({
-        title: "OTP Resent",
-        description: "A new OTP has been sent to your email.",
+        title: "Email Sent Successfully!",
+        description: `A new verification code has been sent to ${formData.email}. Please check your email.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
@@ -202,8 +203,8 @@ const Login: React.FC = () => {
       ).unwrap();
 
       toast({
-        title: "Password Setup Email Sent",
-        description: "Please check your email for the password setup link.",
+        title: "Email Sent Successfully!",
+        description: `Password setup instructions have been sent to ${formData.email}. Please check your email and follow the instructions.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
@@ -513,6 +514,15 @@ const Login: React.FC = () => {
                   className="text-blue-600 hover:underline"
                 >
                   Submit complaint
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                >
+                  <Home className="h-4 w-4" />
+                  Back to Home
                 </Link>
               </p>
             </div>
