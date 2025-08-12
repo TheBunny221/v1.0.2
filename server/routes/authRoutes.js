@@ -19,6 +19,7 @@ import {
   validateRegistration,
   validateLogin,
   validateOTP,
+  validateOTPRequest,
   validatePasswordChange,
 } from "../middleware/validation.js";
 
