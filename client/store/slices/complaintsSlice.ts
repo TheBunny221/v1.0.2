@@ -587,6 +587,41 @@ const complaintsSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // Submit feedback
+      .addCase(submitFeedback.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(submitFeedback.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const { complaintId, feedback } = action.payload;
+
+        // Update complaint in list
+        const index = state.complaints.findIndex((c) => c.id === complaintId);
+        if (index !== -1) {
+          state.complaints[index] = {
+            ...state.complaints[index],
+            citizenFeedback: feedback.comment,
+            rating: feedback.rating,
+          };
+        }
+
+        // Update current complaint
+        if (state.currentComplaint?.id === complaintId) {
+          state.currentComplaint = {
+            ...state.currentComplaint,
+            citizenFeedback: feedback.comment,
+            rating: feedback.rating,
+          };
+        }
+
+        state.error = null;
+      })
+      .addCase(submitFeedback.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
       // Reopen complaint
       .addCase(reopenComplaint.pending, (state) => {
         state.isLoading = true;
