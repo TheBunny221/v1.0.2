@@ -184,23 +184,22 @@ const Index: React.FC = () => {
     }
 
     try {
-      const complaintData = {
-        type: formData.problemType as any,
+      const complaintDataForAPI = {
+        title: `${formData.problemType} complaint`,
         description: formData.description,
-        contactInfo: {
-          mobile: formData.mobile,
-          email: formData.email || undefined,
-        },
-        location: {
-          ward: formData.ward,
-          area: formData.area,
-          address: formData.address || undefined,
-          landmark: formData.location || undefined,
-        },
+        type: formData.problemType as ComplaintType,
+        priority: "MEDIUM" as Priority,
+        wardId: formData.ward,
+        area: formData.area,
+        landmark: formData.location,
+        address: formData.address,
+        contactName: isAuthenticated && user ? user.fullName : "Guest",
+        contactEmail: formData.email || (isAuthenticated && user ? user.email : ""),
+        contactPhone: formData.mobile,
         isAnonymous: !isAuthenticated,
       };
 
-      const result = await dispatch(createComplaint(complaintData)).unwrap();
+      const result = await dispatch(createComplaint(complaintDataForAPI)).unwrap();
 
       dispatch(
         showSuccessToast(
