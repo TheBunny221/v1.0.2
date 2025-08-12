@@ -858,7 +858,7 @@ const GuestComplaintForm: React.FC = () => {
                           handleSelectChange("type", value)
                         }
                       >
-                        <SelectTrigger className={validationErrors.type ? "border-red-500" : ""}>
+                        <SelectTrigger className={validationErrors.type ? "border-red-500" : ""} data-testid="complaint-type-select">
                           <SelectValue placeholder="Select complaint type" />
                         </SelectTrigger>
                         <SelectContent>
