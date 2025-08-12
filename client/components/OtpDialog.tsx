@@ -138,7 +138,7 @@ const OtpDialog: React.FC<OtpDialogProps> = ({
     // Call parent's verify function with the OTP code
     // The parent will handle the actual verification based on context
     try {
-      await onVerified({ token: "", user: null }); // This will be handled by parent
+      await onVerified({ token: "", user: null, otpCode });
     } catch (err) {
       // Error handled by parent
     }
