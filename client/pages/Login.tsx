@@ -145,47 +145,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleOTPVerification = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.email || !formData.otpCode) {
-      return;
-    }
-
-    try {
-      await dispatch(
-        verifyOTPLogin({
-          email: formData.email,
-          otpCode: formData.otpCode,
-        }),
-      ).unwrap();
-
-      toast({
-        title: "Login Successful",
-        description: "OTP verified successfully!",
-      });
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
-  const handleResendOTP = async () => {
-    try {
-      await dispatch(
-        requestOTPLogin({
-          email: formData.email,
-        }),
-      ).unwrap();
-
-      setOtpTimer(600);
-      toast({
-        title: "Email Sent Successfully!",
-        description: `A new verification code has been sent to ${formData.email}. Please check your email.`,
-      });
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
 
   const handlePasswordSetupRequest = async () => {
     try {
