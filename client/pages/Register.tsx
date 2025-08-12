@@ -121,9 +121,10 @@ const Register: React.FC = () => {
         // Navigation will be handled by auth state change
       }
     } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration Failed",
-        description: error.message || "Failed to create account",
+        description: getApiErrorMessage(error),
         variant: "destructive",
       });
     }
