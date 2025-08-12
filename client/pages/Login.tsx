@@ -186,8 +186,8 @@ const Login: React.FC = () => {
 
       setOtpTimer(600);
       toast({
-        title: "OTP Resent",
-        description: "A new OTP has been sent to your email.",
+        title: "Email Sent Successfully!",
+        description: `A new verification code has been sent to ${formData.email}. Please check your email.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
