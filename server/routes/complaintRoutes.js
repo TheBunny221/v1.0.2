@@ -1,6 +1,6 @@
-import express from 'express';
-import { protect, authorize } from '../middleware/auth.js';
-import { uploadComplaintAttachment } from '../controller/uploadController.js';
+import express from "express";
+import { protect, authorize } from "../middleware/auth.js";
+import { uploadComplaintAttachment } from "../controller/uploadController.js";
 import {
   getComplaints,
   getComplaint,
@@ -9,43 +9,51 @@ import {
   assignComplaint,
   addComplaintFeedback,
   reopenComplaint,
-  getComplaintStats
-} from '../controller/complaintController.js';
+  getComplaintStats,
+} from "../controller/complaintController.js";
 
 const router = express.Router();
 
 // Public routes
-router.get('/public/stats', getComplaintStats);
+router.get("/public/stats", getComplaintStats);
 
 // Protected routes
 router.use(protect); // All routes below require authentication
 
 // Get complaints with filtering and pagination
-router.get('/', getComplaints);
+router.get("/", getComplaints);
 
 // Create new complaint
-router.post('/', authorize('CITIZEN', 'ADMINISTRATOR'), createComplaint);
+router.post("/", authorize("CITIZEN", "ADMINISTRATOR"), createComplaint);
 
 // Get complaint statistics for authenticated users
-router.get('/stats', getComplaintStats);
+router.get("/stats", getComplaintStats);
 
 // Get single complaint
-router.get('/:id', getComplaint);
+router.get("/:id", getComplaint);
 
 // Update complaint status
-router.put('/:id/status', authorize('WARD_OFFICER', 'MAINTENANCE_TEAM', 'ADMINISTRATOR'), updateComplaintStatus);
+router.put(
+  "/:id/status",
+  authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"),
+  updateComplaintStatus,
+);
 
 // Assign complaint
-router.put('/:id/assign', authorize('WARD_OFFICER', 'ADMINISTRATOR'), assignComplaint);
+router.put(
+  "/:id/assign",
+  authorize("WARD_OFFICER", "ADMINISTRATOR"),
+  assignComplaint,
+);
 
 // Add feedback to complaint
-router.post('/:id/feedback', authorize('CITIZEN'), addComplaintFeedback);
+router.post("/:id/feedback", authorize("CITIZEN"), addComplaintFeedback);
 
 // Reopen complaint
-router.put('/:id/reopen', authorize('ADMINISTRATOR'), reopenComplaint);
+router.put("/:id/reopen", authorize("ADMINISTRATOR"), reopenComplaint);
 
 // File upload endpoint alias - Frontend compatibility
-router.post('/:id/attachments', (req, res, next) => {
+router.post("/:id/attachments", (req, res, next) => {
   // Redirect to the actual upload endpoint
   req.params.complaintId = req.params.id;
   uploadComplaintAttachment(req, res, next);
