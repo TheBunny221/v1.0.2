@@ -70,7 +70,11 @@ const upload = multer({
 });
 
 // Public guest routes
-router.post("/complaint", upload.array("attachments", 5), submitGuestComplaintWithAttachments);
+router.post(
+  "/complaint",
+  upload.array("attachments", 5),
+  submitGuestComplaintWithAttachments,
+);
 router.post("/verify-otp", validateOtpVerification, verifyOTPAndRegister);
 router.post("/resend-otp", resendOTP);
 router.get("/track/:complaintId", validateComplaintTracking, trackComplaint);

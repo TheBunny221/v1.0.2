@@ -22,15 +22,26 @@ export const useCustomRegister = () => {
       console.log("Testing API connectivity...");
       try {
         const testResponse = await fetch("/api/health");
-        console.log("Health check response:", testResponse.status, testResponse.statusText);
+        console.log(
+          "Health check response:",
+          testResponse.status,
+          testResponse.statusText,
+        );
         const healthData = await testResponse.json();
         console.log("Health check data:", healthData);
       } catch (testError) {
         console.error("Health check failed:", testError);
-        console.error("Health check error details:", testError.name, testError.message);
+        console.error(
+          "Health check error details:",
+          testError.name,
+          testError.message,
+        );
       }
 
-      console.log("Making fetch request to /api/auth/register with data:", data);
+      console.log(
+        "Making fetch request to /api/auth/register with data:",
+        data,
+      );
 
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -45,7 +56,7 @@ export const useCustomRegister = () => {
         status: response.status,
         statusText: response.statusText,
         ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
+        headers: Object.fromEntries(response.headers.entries()),
       });
 
       let result;
@@ -88,7 +99,9 @@ export const useCustomRegister = () => {
         console.log("Network/TypeError detected, wrapping...");
         throw {
           status: 500,
-          data: { message: `Network error: ${error.message}. Please check your connection and try again.` },
+          data: {
+            message: `Network error: ${error.message}. Please check your connection and try again.`,
+          },
         };
       }
 
@@ -96,7 +109,9 @@ export const useCustomRegister = () => {
       console.log("Wrapping unexpected error:", error);
       throw {
         status: 500,
-        data: { message: `Registration failed: ${error.message || 'Unknown error'}` },
+        data: {
+          message: `Registration failed: ${error.message || "Unknown error"}`,
+        },
       };
     } finally {
       setIsLoading(false);
