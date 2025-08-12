@@ -114,6 +114,21 @@ const CitizenDashboard: React.FC = () => {
 
   const recentComplaints = complaints.slice(0, 5);
 
+  // Show error state if there's an authentication error
+  if (complaintsError && 'status' in complaintsError && complaintsError.status === 401) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <h2 className="text-xl font-semibold mb-2">Authentication Error</h2>
+          <p>Please log in again to access your dashboard.</p>
+        </div>
+        <Link to="/login">
+          <Button>Go to Login</Button>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
