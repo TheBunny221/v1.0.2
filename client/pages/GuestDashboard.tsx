@@ -194,9 +194,9 @@ const GuestDashboard: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
     }).format(amount);
   };
 
@@ -235,7 +235,11 @@ const GuestDashboard: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="complaints">Complaints</TabsTrigger>
@@ -251,49 +255,74 @@ const GuestDashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Total Requests
+                  </CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockProfile.totalRequests}</div>
-                  <p className="text-xs text-muted-foreground">All time submissions</p>
+                  <div className="text-2xl font-bold">
+                    {mockProfile.totalRequests}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    All time submissions
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Resolved
+                  </CardTitle>
                   <CheckCircle className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{mockProfile.resolvedRequests}</div>
-                  <p className="text-xs text-muted-foreground">Successfully resolved</p>
+                  <div className="text-2xl font-bold text-green-600">
+                    {mockProfile.resolvedRequests}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Successfully resolved
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    In Progress
+                  </CardTitle>
                   <Clock className="h-4 w-4 text-orange-600" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-orange-600">
                     {mockProfile.totalRequests - mockProfile.resolvedRequests}
                   </div>
-                  <p className="text-xs text-muted-foreground">Being worked on</p>
+                  <p className="text-xs text-muted-foreground">
+                    Being worked on
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Success Rate
+                  </CardTitle>
                   <TrendingUp className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-blue-600">
-                    {Math.round((mockProfile.resolvedRequests / mockProfile.totalRequests) * 100)}%
+                    {Math.round(
+                      (mockProfile.resolvedRequests /
+                        mockProfile.totalRequests) *
+                        100,
+                    )}
+                    %
                   </div>
-                  <p className="text-xs text-muted-foreground">Resolution rate</p>
+                  <p className="text-xs text-muted-foreground">
+                    Resolution rate
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -308,10 +337,17 @@ const GuestDashboard: React.FC = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {mockComplaints.slice(0, 3).map((complaint) => (
-                      <div key={complaint.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={complaint.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
                         <div className="flex-1">
-                          <h3 className="font-medium text-sm">{complaint.title}</h3>
-                          <p className="text-xs text-gray-500 mt-1">ID: {complaint.id}</p>
+                          <h3 className="font-medium text-sm">
+                            {complaint.title}
+                          </h3>
+                          <p className="text-xs text-gray-500 mt-1">
+                            ID: {complaint.id}
+                          </p>
                         </div>
                         <Badge className={getStatusColor(complaint.status)}>
                           {complaint.status.replace("_", " ")}
@@ -334,15 +370,24 @@ const GuestDashboard: React.FC = () => {
               {/* Recent Service Requests */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Recent Service Requests</CardTitle>
+                  <CardTitle className="text-lg">
+                    Recent Service Requests
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {mockServiceRequests.slice(0, 3).map((service) => (
-                      <div key={service.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={service.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
                         <div className="flex-1">
-                          <h3 className="font-medium text-sm">{service.title}</h3>
-                          <p className="text-xs text-gray-500 mt-1">ID: {service.id}</p>
+                          <h3 className="font-medium text-sm">
+                            {service.title}
+                          </h3>
+                          <p className="text-xs text-gray-500 mt-1">
+                            ID: {service.id}
+                          </p>
                         </div>
                         <Badge className={getStatusColor(service.status)}>
                           {service.status}
@@ -377,7 +422,9 @@ const GuestDashboard: React.FC = () => {
                     <PlusCircle className="mr-2 h-5 w-5" />
                     <div className="text-left">
                       <div className="font-medium">Submit Complaint</div>
-                      <div className="text-xs opacity-75">Report civic issues</div>
+                      <div className="text-xs opacity-75">
+                        Report civic issues
+                      </div>
                     </div>
                   </Button>
                   <Button
@@ -388,7 +435,9 @@ const GuestDashboard: React.FC = () => {
                     <FileText className="mr-2 h-5 w-5" />
                     <div className="text-left">
                       <div className="font-medium">Request Service</div>
-                      <div className="text-xs opacity-75">Municipal services</div>
+                      <div className="text-xs opacity-75">
+                        Municipal services
+                      </div>
                     </div>
                   </Button>
                   <Button
@@ -449,21 +498,32 @@ const GuestDashboard: React.FC = () => {
                   <TableBody>
                     {mockComplaints.map((complaint) => (
                       <TableRow key={complaint.id}>
-                        <TableCell className="font-mono text-xs">{complaint.id}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {complaint.id}
+                        </TableCell>
                         <TableCell>
                           <div className="max-w-48">
-                            <div className="font-medium text-sm truncate">{complaint.title}</div>
-                            <div className="text-xs text-gray-500 truncate">{complaint.description}</div>
+                            <div className="font-medium text-sm truncate">
+                              {complaint.title}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {complaint.description}
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell>{complaint.type.replace("_", " ")}</TableCell>
+                        <TableCell>
+                          {complaint.type.replace("_", " ")}
+                        </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(complaint.status)}>
                             {complaint.status.replace("_", " ")}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={getPriorityColor(complaint.priority)}>
+                          <Badge
+                            variant="outline"
+                            className={getPriorityColor(complaint.priority)}
+                          >
                             {complaint.priority}
                           </Badge>
                         </TableCell>
@@ -513,11 +573,17 @@ const GuestDashboard: React.FC = () => {
                   <TableBody>
                     {mockServiceRequests.map((service) => (
                       <TableRow key={service.id}>
-                        <TableCell className="font-mono text-xs">{service.id}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {service.id}
+                        </TableCell>
                         <TableCell>
                           <div className="max-w-48">
-                            <div className="font-medium text-sm">{service.title}</div>
-                            <div className="text-xs text-gray-500">{service.description}</div>
+                            <div className="font-medium text-sm">
+                              {service.title}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {service.description}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -527,12 +593,11 @@ const GuestDashboard: React.FC = () => {
                         </TableCell>
                         <TableCell>{formatDate(service.submittedOn)}</TableCell>
                         <TableCell>
-                          {service.status === "APPROVED" && service.completedOn 
+                          {service.status === "APPROVED" && service.completedOn
                             ? formatDate(service.completedOn)
-                            : service.expectedCompletion 
-                            ? formatDate(service.expectedCompletion)
-                            : "TBD"
-                          }
+                            : service.expectedCompletion
+                              ? formatDate(service.expectedCompletion)
+                              : "TBD"}
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm">
@@ -568,19 +633,24 @@ const GuestDashboard: React.FC = () => {
                   <TableBody>
                     {mockPayments.map((payment) => (
                       <TableRow key={payment.id}>
-                        <TableCell className="font-mono text-xs">{payment.id}</TableCell>
-                        <TableCell className="font-medium">{payment.description}</TableCell>
-                        <TableCell className="font-semibold">{formatCurrency(payment.amount)}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {payment.id}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {payment.description}
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {formatCurrency(payment.amount)}
+                        </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(payment.status)}>
                             {payment.status}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {payment.status === "PAID" 
+                          {payment.status === "PAID"
                             ? formatDate(payment.paidOn!)
-                            : `Due: ${formatDate(payment.dueDate!)}`
-                          }
+                            : `Due: ${formatDate(payment.dueDate!)}`}
                         </TableCell>
                         <TableCell>{payment.method || "—"}</TableCell>
                       </TableRow>
@@ -603,18 +673,26 @@ const GuestDashboard: React.FC = () => {
                     <div
                       key={notification.id}
                       className={`p-4 border rounded-lg ${
-                        !notification.read ? "bg-blue-50 border-blue-200" : "bg-white"
+                        !notification.read
+                          ? "bg-blue-50 border-blue-200"
+                          : "bg-white"
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-sm">{notification.title}</h3>
+                            <h3 className="font-medium text-sm">
+                              {notification.title}
+                            </h3>
                             {!notification.read && (
-                              <Badge className="bg-blue-100 text-blue-800 text-xs">New</Badge>
+                              <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                New
+                              </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {notification.message}
+                          </p>
                           <p className="text-xs text-gray-500 mt-2">
                             {new Date(notification.timestamp).toLocaleString()}
                           </p>
@@ -639,7 +717,11 @@ const GuestDashboard: React.FC = () => {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
-                    <Input id="fullName" value={mockProfile.fullName} readOnly />
+                    <Input
+                      id="fullName"
+                      value={mockProfile.fullName}
+                      readOnly
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
@@ -647,7 +729,11 @@ const GuestDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" value={mockProfile.phoneNumber} readOnly />
+                    <Input
+                      id="phone"
+                      value={mockProfile.phoneNumber}
+                      readOnly
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Address</Label>
@@ -655,7 +741,11 @@ const GuestDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="joinedDate">Member Since</Label>
-                    <Input id="joinedDate" value={formatDate(mockProfile.joinedDate)} readOnly />
+                    <Input
+                      id="joinedDate"
+                      value={formatDate(mockProfile.joinedDate)}
+                      readOnly
+                    />
                   </div>
                   <Button className="w-full" disabled>
                     <Settings className="h-4 w-4 mr-2" />
@@ -672,31 +762,51 @@ const GuestDashboard: React.FC = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{mockProfile.totalRequests}</div>
-                      <div className="text-sm text-blue-700">Total Requests</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {mockProfile.totalRequests}
+                      </div>
+                      <div className="text-sm text-blue-700">
+                        Total Requests
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{mockProfile.resolvedRequests}</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {mockProfile.resolvedRequests}
+                      </div>
                       <div className="text-sm text-green-700">Resolved</div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Success Rate</span>
+                      <span className="text-sm text-gray-600">
+                        Success Rate
+                      </span>
                       <span className="font-medium">
-                        {Math.round((mockProfile.resolvedRequests / mockProfile.totalRequests) * 100)}%
+                        {Math.round(
+                          (mockProfile.resolvedRequests /
+                            mockProfile.totalRequests) *
+                            100,
+                        )}
+                        %
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Active Requests</span>
+                      <span className="text-sm text-gray-600">
+                        Active Requests
+                      </span>
                       <span className="font-medium">
-                        {mockProfile.totalRequests - mockProfile.resolvedRequests}
+                        {mockProfile.totalRequests -
+                          mockProfile.resolvedRequests}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Member Since</span>
-                      <span className="font-medium">{formatDate(mockProfile.joinedDate)}</span>
+                      <span className="text-sm text-gray-600">
+                        Member Since
+                      </span>
+                      <span className="font-medium">
+                        {formatDate(mockProfile.joinedDate)}
+                      </span>
                     </div>
                   </div>
 

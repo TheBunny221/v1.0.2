@@ -9,6 +9,7 @@
 ## 🚀 Pre-Deployment Checklist
 
 ### **✅ Code Quality & Testing**
+
 - [ ] All unit tests passing (`npm test`)
 - [ ] Integration tests completed successfully
 - [ ] TypeScript compilation without errors (`npm run typecheck`)
@@ -18,6 +19,7 @@
 - [ ] Performance testing completed
 
 ### **✅ Feature Completeness**
+
 - [ ] Guest complaint submission flow working end-to-end
 - [ ] Guest service request system functional
 - [ ] Guest dashboard and tracking operational
@@ -34,6 +36,7 @@
 ### **✅ Server Configuration**
 
 #### **Environment Variables**
+
 ```bash
 # Copy and configure .env file
 cp .env.example .env
@@ -68,6 +71,7 @@ LOG_LEVEL="info"
 ```
 
 #### **Server Setup**
+
 - [ ] Node.js 18+ installed
 - [ ] PostgreSQL 14+ installed and configured
 - [ ] SMTP server configured and tested
@@ -98,6 +102,7 @@ npm run db:studio
 ```
 
 #### **Database Checklist**
+
 - [ ] PostgreSQL server running and accessible
 - [ ] Database created with proper permissions
 - [ ] All migrations applied successfully
@@ -126,6 +131,7 @@ ls -la dist/
 ```
 
 #### **Build Verification**
+
 - [ ] Client build completed without errors
 - [ ] Server build completed without errors
 - [ ] All static assets generated
@@ -144,29 +150,32 @@ pm2 startup
 ```
 
 #### **Process Management (PM2 Configuration)**
+
 ```javascript
 // ecosystem.config.js
 module.exports = {
-  apps: [{
-    name: 'smart-city-app',
-    script: 'server/server.js',
-    env: {
-      NODE_ENV: 'development'
+  apps: [
+    {
+      name: "smart-city-app",
+      script: "server/server.js",
+      env: {
+        NODE_ENV: "development",
+      },
+      env_production: {
+        NODE_ENV: "production",
+        PORT: 3000,
+      },
+      instances: "max",
+      exec_mode: "cluster",
+      watch: false,
+      max_memory_restart: "1G",
+      error_file: "./logs/err.log",
+      out_file: "./logs/out.log",
+      log_file: "./logs/combined.log",
+      time: true,
     },
-    env_production: {
-      NODE_ENV: 'production',
-      PORT: 3000
-    },
-    instances: 'max',
-    exec_mode: 'cluster',
-    watch: false,
-    max_memory_restart: '1G',
-    error_file: './logs/err.log',
-    out_file: './logs/out.log',
-    log_file: './logs/combined.log',
-    time: true
-  }]
-}
+  ],
+};
 ```
 
 ---
@@ -174,12 +183,14 @@ module.exports = {
 ## 🔒 Security Configuration
 
 ### **✅ SSL/HTTPS Setup**
+
 - [ ] SSL certificate installed (Let's Encrypt or commercial)
 - [ ] HTTPS redirect configured
 - [ ] HSTS headers enabled
 - [ ] Mixed content warnings resolved
 
 ### **✅ Nginx Configuration**
+
 ```nginx
 # /etc/nginx/sites-available/smartcity
 server {
@@ -225,6 +236,7 @@ server {
 ```
 
 ### **✅ Firewall Configuration**
+
 ```bash
 # UFW Firewall rules
 sudo ufw allow ssh
@@ -241,6 +253,7 @@ sudo ufw enable
 ### **✅ Functional Testing**
 
 #### **Guest Features**
+
 - [ ] Navigate to `/guest/complaint`
 - [ ] Fill out complete complaint form
 - [ ] Submit and verify OTP email received
@@ -249,7 +262,8 @@ sudo ufw enable
 - [ ] Test complaint tracking at `/guest/track`
 - [ ] Test service request at `/guest/service-request`
 
-#### **Citizen Features** 
+#### **Citizen Features**
+
 - [ ] Login with test citizen account
 - [ ] Verify dashboard loads with statistics
 - [ ] Navigate to `/complaints/citizen-form`
@@ -259,6 +273,7 @@ sudo ufw enable
 - [ ] Test complaint filtering and search
 
 #### **Authentication Testing**
+
 - [ ] Test password login
 - [ ] Test OTP login
 - [ ] Test token expiration handling
@@ -266,6 +281,7 @@ sudo ufw enable
 - [ ] Test logout functionality
 
 ### **✅ Performance Testing**
+
 - [ ] Page load times under 3 seconds
 - [ ] API response times under 200ms
 - [ ] File upload works for 10MB files
@@ -273,6 +289,7 @@ sudo ufw enable
 - [ ] Memory usage within acceptable limits
 
 ### **✅ Security Testing**
+
 - [ ] SQL injection attempts blocked
 - [ ] XSS attacks prevented
 - [ ] CSRF protection working
@@ -287,57 +304,60 @@ sudo ufw enable
 ### **✅ Application Monitoring**
 
 #### **Health Check Endpoint**
+
 ```javascript
 // Add to server/routes/healthRoutes.js
-app.get('/health', async (req, res) => {
+app.get("/health", async (req, res) => {
   try {
     // Database connectivity check
     await prisma.$queryRaw`SELECT 1`;
-    
+
     // Email service check (optional)
     // await emailService.testConnection();
-    
+
     res.status(200).json({
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV,
-      version: process.env.npm_package_version
+      version: process.env.npm_package_version,
     });
   } catch (error) {
     res.status(500).json({
-      status: 'unhealthy',
-      error: error.message
+      status: "unhealthy",
+      error: error.message,
     });
   }
 });
 ```
 
 #### **Logging Configuration**
+
 ```javascript
 // Structured logging with winston
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
-    winston.format.json()
+    winston.format.json(),
   ),
   transports: [
-    new winston.transports.File({ 
-      filename: 'logs/error.log', 
-      level: 'error' 
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: "error",
     }),
-    new winston.transports.File({ 
-      filename: 'logs/combined.log' 
-    })
-  ]
+    new winston.transports.File({
+      filename: "logs/combined.log",
+    }),
+  ],
 });
 ```
 
 ### **✅ Monitoring Checklist**
+
 - [ ] Application health check accessible
 - [ ] Error logging configured
 - [ ] Performance metrics collection setup
@@ -351,6 +371,7 @@ const logger = winston.createLogger({
 ## 🔄 Backup & Recovery
 
 ### **✅ Database Backup**
+
 ```bash
 # Automated daily backup script
 #!/bin/bash
@@ -363,6 +384,7 @@ find $BACKUP_DIR -name "*.sql" -type f -mtime +30 -delete
 ```
 
 ### **✅ File Backup**
+
 ```bash
 # Backup uploaded files
 rsync -avz ./uploads/ /backups/uploads/
@@ -376,6 +398,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 ```
 
 ### **✅ Backup Checklist**
+
 - [ ] Database backup script configured and tested
 - [ ] File upload backup configured
 - [ ] Backup verification process in place
@@ -387,6 +410,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 ## 📞 Post-Deployment Support
 
 ### **✅ Documentation**
+
 - [ ] API documentation updated
 - [ ] User guides created
 - [ ] Admin guides created
@@ -394,6 +418,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 - [ ] Emergency contact information documented
 
 ### **✅ Monitoring & Alerts**
+
 - [ ] Error rate monitoring setup
 - [ ] Performance degradation alerts
 - [ ] Database connection alerts
@@ -402,6 +427,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 - [ ] SSL certificate expiration alerts
 
 ### **✅ Maintenance Schedule**
+
 - [ ] **Daily**: Check error logs and system health
 - [ ] **Weekly**: Review performance metrics and user feedback
 - [ ] **Monthly**: Update dependencies and security patches
@@ -413,6 +439,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 ## 🎯 Go-Live Checklist
 
 ### **Final Pre-Launch**
+
 - [ ] All checklist items above completed
 - [ ] Stakeholder approval obtained
 - [ ] User training completed
@@ -422,6 +449,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 - [ ] CDN configured (if applicable)
 
 ### **Launch Day**
+
 - [ ] Monitor application startup
 - [ ] Verify all services are running
 - [ ] Test critical user flows
@@ -432,6 +460,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 - [ ] Check SSL certificate status
 
 ### **Post-Launch (First 24 hours)**
+
 - [ ] Monitor application metrics continuously
 - [ ] Check error logs every 2 hours
 - [ ] Verify user registration flows
@@ -445,6 +474,7 @@ tar -czf /backups/app_backup_$(date +%Y%m%d).tar.gz \
 ## 🚨 Emergency Procedures
 
 ### **Rollback Plan**
+
 ```bash
 # Quick rollback to previous version
 pm2 stop smart-city-app
@@ -458,8 +488,9 @@ npm run db:migrate:rollback
 ```
 
 ### **Emergency Contacts**
+
 - **Development Team Lead**: [Contact Info]
-- **System Administrator**: [Contact Info]  
+- **System Administrator**: [Contact Info]
 - **Database Administrator**: [Contact Info]
 - **Network Administrator**: [Contact Info]
 
@@ -468,15 +499,17 @@ npm run db:migrate:rollback
 ## ✅ Sign-off
 
 ### **Technical Team Sign-off**
-- [ ] **Lead Developer**: _________________ Date: _______
-- [ ] **QA Lead**: _________________ Date: _______  
-- [ ] **DevOps Engineer**: _________________ Date: _______
-- [ ] **Security Officer**: _________________ Date: _______
+
+- [ ] **Lead Developer**: ********\_******** Date: **\_\_\_**
+- [ ] **QA Lead**: ********\_******** Date: **\_\_\_**
+- [ ] **DevOps Engineer**: ********\_******** Date: **\_\_\_**
+- [ ] **Security Officer**: ********\_******** Date: **\_\_\_**
 
 ### **Business Team Sign-off**
-- [ ] **Project Manager**: _________________ Date: _______
-- [ ] **Product Owner**: _________________ Date: _______
-- [ ] **Operations Manager**: _________________ Date: _______
+
+- [ ] **Project Manager**: ********\_******** Date: **\_\_\_**
+- [ ] **Product Owner**: ********\_******** Date: **\_\_\_**
+- [ ] **Operations Manager**: ********\_******** Date: **\_\_\_**
 
 ---
 

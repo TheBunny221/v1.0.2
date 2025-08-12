@@ -149,12 +149,36 @@ const PRIORITIES = [
 ];
 
 const WARDS = [
-  { id: "ward-1", name: "Fort Kochi", subZones: ["Marine Drive", "Parade Ground", "Princess Street"] },
-  { id: "ward-2", name: "Mattancherry", subZones: ["Jew Town", "Dutch Palace", "Spice Market"] },
-  { id: "ward-3", name: "Ernakulam South", subZones: ["MG Road", "Broadway", "Shanmugham Road"] },
-  { id: "ward-4", name: "Ernakulam North", subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"] },
-  { id: "ward-5", name: "Kadavanthra", subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"] },
-  { id: "ward-6", name: "Thevara", subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"] },
+  {
+    id: "ward-1",
+    name: "Fort Kochi",
+    subZones: ["Marine Drive", "Parade Ground", "Princess Street"],
+  },
+  {
+    id: "ward-2",
+    name: "Mattancherry",
+    subZones: ["Jew Town", "Dutch Palace", "Spice Market"],
+  },
+  {
+    id: "ward-3",
+    name: "Ernakulam South",
+    subZones: ["MG Road", "Broadway", "Shanmugham Road"],
+  },
+  {
+    id: "ward-4",
+    name: "Ernakulam North",
+    subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"],
+  },
+  {
+    id: "ward-5",
+    name: "Kadavanthra",
+    subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"],
+  },
+  {
+    id: "ward-6",
+    name: "Thevara",
+    subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"],
+  },
 ];
 
 const CitizenComplaintForm: React.FC = () => {
@@ -186,7 +210,9 @@ const CitizenComplaintForm: React.FC = () => {
     attachments: [],
   });
 
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   const steps = [
     { id: 1, title: "Details", icon: FileText, isCompleted: false },
@@ -205,7 +231,7 @@ const CitizenComplaintForm: React.FC = () => {
     }
 
     // Auto-fill form with user data
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       fullName: user.fullName,
       email: user.email,
@@ -224,7 +250,7 @@ const CitizenComplaintForm: React.FC = () => {
             lng: position.coords.longitude,
           };
           setCurrentLocation(coords);
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             coordinates: {
               latitude: coords.lat,
@@ -239,18 +265,20 @@ const CitizenComplaintForm: React.FC = () => {
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -260,7 +288,8 @@ const CitizenComplaintForm: React.FC = () => {
     switch (step) {
       case 1:
         if (!formData.type) errors.type = "Complaint type is required";
-        if (!formData.description.trim()) errors.description = "Description is required";
+        if (!formData.description.trim())
+          errors.description = "Description is required";
         else if (formData.description.trim().length < 10) {
           errors.description = "Description must be at least 10 characters";
         }
@@ -277,12 +306,12 @@ const CitizenComplaintForm: React.FC = () => {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      setCurrentStep((prev) => Math.min(prev + 1, 4));
     }
   };
 
   const handlePrev = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = async () => {
@@ -291,18 +320,20 @@ const CitizenComplaintForm: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Simulate API call to submit complaint
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       toast({
         title: "Complaint Submitted Successfully!",
-        description: "Your complaint has been registered and assigned a tracking number. You will receive updates via email and in-app notifications.",
+        description:
+          "Your complaint has been registered and assigned a tracking number. You will receive updates via email and in-app notifications.",
       });
 
       navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your complaint. Please try again.",
+        description:
+          "There was an error submitting your complaint. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -310,8 +341,10 @@ const CitizenComplaintForm: React.FC = () => {
     }
   };
 
-  const selectedComplaintType = COMPLAINT_TYPES.find(c => c.value === formData.type);
-  const selectedWard = WARDS.find(w => w.id === formData.wardId);
+  const selectedComplaintType = COMPLAINT_TYPES.find(
+    (c) => c.value === formData.type,
+  );
+  const selectedWard = WARDS.find((w) => w.id === formData.wardId);
   const availableSubZones = selectedWard?.subZones || [];
 
   if (!isAuthenticated || !user) {
@@ -323,8 +356,13 @@ const CitizenComplaintForm: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Submit a Complaint</h1>
-          <p className="text-gray-600">As a registered citizen, your information is pre-filled for faster submission</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Submit a Complaint
+          </h1>
+          <p className="text-gray-600">
+            As a registered citizen, your information is pre-filled for faster
+            submission
+          </p>
         </div>
 
         {/* Citizen Info Alert */}
@@ -333,13 +371,15 @@ const CitizenComplaintForm: React.FC = () => {
           <AlertDescription className="text-blue-800">
             <strong>Logged in as:</strong> {user.fullName} ({user.email})
             <br />
-            Your personal information is automatically filled and cannot be changed here. To update your profile, visit the{" "}
-            <button 
+            Your personal information is automatically filled and cannot be
+            changed here. To update your profile, visit the{" "}
+            <button
               onClick={() => navigate("/profile")}
               className="underline hover:no-underline"
             >
               Profile Settings
-            </button>.
+            </button>
+            .
           </AlertDescription>
         </Alert>
 
@@ -398,7 +438,9 @@ const CitizenComplaintForm: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {React.createElement(steps[currentStep - 1].icon, { className: "h-5 w-5" })}
+              {React.createElement(steps[currentStep - 1].icon, {
+                className: "h-5 w-5",
+              })}
               {steps[currentStep - 1].title}
             </CardTitle>
             <CardDescription>
@@ -414,23 +456,41 @@ const CitizenComplaintForm: React.FC = () => {
               <div className="space-y-6">
                 {/* Pre-filled Personal Information (Read-only) */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Personal Information (Auto-filled)</h3>
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    Personal Information (Auto-filled)
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                     <div className="space-y-2">
                       <Label>Full Name</Label>
-                      <Input value={formData.fullName} readOnly className="bg-gray-100" />
+                      <Input
+                        value={formData.fullName}
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Email Address</Label>
-                      <Input value={formData.email} readOnly className="bg-gray-100" />
+                      <Input
+                        value={formData.email}
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Phone Number</Label>
-                      <Input value={formData.phoneNumber} readOnly className="bg-gray-100" />
+                      <Input
+                        value={formData.phoneNumber}
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Citizen ID</Label>
-                      <Input value={user.id.slice(-8).toUpperCase()} readOnly className="bg-gray-100 font-mono" />
+                      <Input
+                        value={user.id.slice(-8).toUpperCase()}
+                        readOnly
+                        className="bg-gray-100 font-mono"
+                      />
                     </div>
                   </div>
                 </div>
@@ -443,9 +503,15 @@ const CitizenComplaintForm: React.FC = () => {
                     <Label>Complaint Type *</Label>
                     <Select
                       value={formData.type}
-                      onValueChange={(value) => handleSelectChange("type", value)}
+                      onValueChange={(value) =>
+                        handleSelectChange("type", value)
+                      }
                     >
-                      <SelectTrigger className={validationErrors.type ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={
+                          validationErrors.type ? "border-red-500" : ""
+                        }
+                      >
                         <SelectValue placeholder="Select complaint type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -453,26 +519,36 @@ const CitizenComplaintForm: React.FC = () => {
                           <SelectItem key={type.value} value={type.value}>
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium">{type.label}</span>
+                                <span className="font-medium">
+                                  {type.label}
+                                </span>
                                 <Badge variant="outline" className="text-xs">
                                   {type.urgency}
                                 </Badge>
                               </div>
-                              <span className="text-xs text-gray-500">{type.description}</span>
+                              <span className="text-xs text-gray-500">
+                                {type.description}
+                              </span>
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {validationErrors.type && (
-                      <p className="text-sm text-red-600">{validationErrors.type}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.type}
+                      </p>
                     )}
                   </div>
 
                   {selectedComplaintType && (
                     <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">{selectedComplaintType.label}</h4>
-                      <p className="text-sm text-blue-700 mb-2">{selectedComplaintType.description}</p>
+                      <h4 className="font-medium text-blue-900 mb-2">
+                        {selectedComplaintType.label}
+                      </h4>
+                      <p className="text-sm text-blue-700 mb-2">
+                        {selectedComplaintType.description}
+                      </p>
                       <div className="flex items-center gap-2">
                         <Info className="h-4 w-4 text-blue-600" />
                         <span className="text-sm text-blue-600">
@@ -486,19 +562,30 @@ const CitizenComplaintForm: React.FC = () => {
                     <Label>Priority</Label>
                     <Select
                       value={formData.priority}
-                      onValueChange={(value) => handleSelectChange("priority", value)}
+                      onValueChange={(value) =>
+                        handleSelectChange("priority", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {PRIORITIES.map((priority) => (
-                          <SelectItem key={priority.value} value={priority.value}>
+                          <SelectItem
+                            key={priority.value}
+                            value={priority.value}
+                          >
                             <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${priority.color}`} />
+                              <div
+                                className={`w-2 h-2 rounded-full ${priority.color}`}
+                              />
                               <div className="flex flex-col">
-                                <span className="font-medium">{priority.label}</span>
-                                <span className="text-xs text-gray-500">{priority.description}</span>
+                                <span className="font-medium">
+                                  {priority.label}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {priority.description}
+                                </span>
                               </div>
                             </div>
                           </SelectItem>
@@ -516,13 +603,18 @@ const CitizenComplaintForm: React.FC = () => {
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={4}
-                      className={validationErrors.description ? "border-red-500" : ""}
+                      className={
+                        validationErrors.description ? "border-red-500" : ""
+                      }
                     />
                     {validationErrors.description && (
-                      <p className="text-sm text-red-600">{validationErrors.description}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.description}
+                      </p>
                     )}
                     <p className="text-xs text-gray-500">
-                      Be specific about the problem, when it started, and how it affects you.
+                      Be specific about the problem, when it started, and how it
+                      affects you.
                     </p>
                   </div>
                 </div>
@@ -533,16 +625,24 @@ const CitizenComplaintForm: React.FC = () => {
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Location Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Location Information
+                  </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Ward *</Label>
                       <Select
                         value={formData.wardId}
-                        onValueChange={(value) => handleSelectChange("wardId", value)}
+                        onValueChange={(value) =>
+                          handleSelectChange("wardId", value)
+                        }
                       >
-                        <SelectTrigger className={validationErrors.wardId ? "border-red-500" : ""}>
+                        <SelectTrigger
+                          className={
+                            validationErrors.wardId ? "border-red-500" : ""
+                          }
+                        >
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
@@ -554,7 +654,9 @@ const CitizenComplaintForm: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
-                        <p className="text-sm text-red-600">{validationErrors.wardId}</p>
+                        <p className="text-sm text-red-600">
+                          {validationErrors.wardId}
+                        </p>
                       )}
                     </div>
 
@@ -562,7 +664,9 @@ const CitizenComplaintForm: React.FC = () => {
                       <Label>Sub-Zone (Optional)</Label>
                       <Select
                         value={formData.subZoneId}
-                        onValueChange={(value) => handleSelectChange("subZoneId", value)}
+                        onValueChange={(value) =>
+                          handleSelectChange("subZoneId", value)
+                        }
                         disabled={!formData.wardId}
                       >
                         <SelectTrigger>
@@ -590,7 +694,9 @@ const CitizenComplaintForm: React.FC = () => {
                       className={validationErrors.area ? "border-red-500" : ""}
                     />
                     {validationErrors.area && (
-                      <p className="text-sm text-red-600">{validationErrors.area}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.area}
+                      </p>
                     )}
                   </div>
 
@@ -623,11 +729,13 @@ const CitizenComplaintForm: React.FC = () => {
                       <div className="flex items-center gap-2 text-green-700">
                         <MapPin className="h-4 w-4" />
                         <span className="text-sm font-medium">
-                          Current location detected and will be included with your complaint
+                          Current location detected and will be included with
+                          your complaint
                         </span>
                       </div>
                       <p className="text-xs text-green-600 mt-1">
-                        Coordinates: {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+                        Coordinates: {currentLocation.lat.toFixed(6)},{" "}
+                        {currentLocation.lng.toFixed(6)}
                       </p>
                     </div>
                   )}
@@ -639,9 +747,12 @@ const CitizenComplaintForm: React.FC = () => {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Upload Images (Optional)</h3>
+                  <h3 className="text-lg font-semibold">
+                    Upload Images (Optional)
+                  </h3>
                   <p className="text-sm text-gray-600">
-                    Adding photos helps our team understand and resolve the issue faster. You can upload up to 5 images.
+                    Adding photos helps our team understand and resolve the
+                    issue faster. You can upload up to 5 images.
                   </p>
 
                   <div className="space-y-4">
@@ -659,7 +770,8 @@ const CitizenComplaintForm: React.FC = () => {
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-8 h-8 mb-2 text-gray-500" />
                         <p className="mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
+                          <span className="font-semibold">Click to upload</span>{" "}
+                          or drag and drop
                         </p>
                         <p className="text-xs text-gray-500">
                           PNG, JPG or JPEG (MAX. 10MB each)
@@ -668,12 +780,18 @@ const CitizenComplaintForm: React.FC = () => {
                     </Label>
 
                     <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">Tips for better photos:</h4>
+                      <h4 className="font-medium text-blue-900 mb-2">
+                        Tips for better photos:
+                      </h4>
                       <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Take clear, well-lit photos of the problem area</li>
+                        <li>
+                          • Take clear, well-lit photos of the problem area
+                        </li>
                         <li>• Include wider shots to show context</li>
                         <li>• Capture any visible damage or hazards</li>
-                        <li>• Avoid including personal or sensitive information</li>
+                        <li>
+                          • Avoid including personal or sensitive information
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -690,29 +808,53 @@ const CitizenComplaintForm: React.FC = () => {
                   {/* Citizen Info */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Citizen Information</CardTitle>
+                      <CardTitle className="text-base">
+                        Citizen Information
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Name:</strong> {formData.fullName}</p>
-                      <p><strong>Email:</strong> {formData.email}</p>
-                      <p><strong>Phone:</strong> {formData.phoneNumber}</p>
-                      <p><strong>Citizen ID:</strong> {user.id.slice(-8).toUpperCase()}</p>
+                      <p>
+                        <strong>Name:</strong> {formData.fullName}
+                      </p>
+                      <p>
+                        <strong>Email:</strong> {formData.email}
+                      </p>
+                      <p>
+                        <strong>Phone:</strong> {formData.phoneNumber}
+                      </p>
+                      <p>
+                        <strong>Citizen ID:</strong>{" "}
+                        {user.id.slice(-8).toUpperCase()}
+                      </p>
                     </CardContent>
                   </Card>
 
                   {/* Complaint Details */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Complaint Details</CardTitle>
+                      <CardTitle className="text-base">
+                        Complaint Details
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Type:</strong> {selectedComplaintType?.label}</p>
-                      <p><strong>Priority:</strong> 
-                        <Badge className={`ml-2 ${PRIORITIES.find(p => p.value === formData.priority)?.color}`}>
-                          {PRIORITIES.find(p => p.value === formData.priority)?.label}
+                      <p>
+                        <strong>Type:</strong> {selectedComplaintType?.label}
+                      </p>
+                      <p>
+                        <strong>Priority:</strong>
+                        <Badge
+                          className={`ml-2 ${PRIORITIES.find((p) => p.value === formData.priority)?.color}`}
+                        >
+                          {
+                            PRIORITIES.find(
+                              (p) => p.value === formData.priority,
+                            )?.label
+                          }
                         </Badge>
                       </p>
-                      <p><strong>Description:</strong> {formData.description}</p>
+                      <p>
+                        <strong>Description:</strong> {formData.description}
+                      </p>
                     </CardContent>
                   </Card>
 
@@ -722,13 +864,32 @@ const CitizenComplaintForm: React.FC = () => {
                       <CardTitle className="text-base">Location</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Ward:</strong> {WARDS.find(w => w.id === formData.wardId)?.name}</p>
-                      {formData.subZoneId && <p><strong>Sub-Zone:</strong> {formData.subZoneId}</p>}
-                      <p><strong>Area:</strong> {formData.area}</p>
-                      {formData.landmark && <p><strong>Landmark:</strong> {formData.landmark}</p>}
-                      {formData.address && <p><strong>Address:</strong> {formData.address}</p>}
+                      <p>
+                        <strong>Ward:</strong>{" "}
+                        {WARDS.find((w) => w.id === formData.wardId)?.name}
+                      </p>
+                      {formData.subZoneId && (
+                        <p>
+                          <strong>Sub-Zone:</strong> {formData.subZoneId}
+                        </p>
+                      )}
+                      <p>
+                        <strong>Area:</strong> {formData.area}
+                      </p>
+                      {formData.landmark && (
+                        <p>
+                          <strong>Landmark:</strong> {formData.landmark}
+                        </p>
+                      )}
+                      {formData.address && (
+                        <p>
+                          <strong>Address:</strong> {formData.address}
+                        </p>
+                      )}
                       {currentLocation && (
-                        <p><strong>GPS Coordinates:</strong> Included</p>
+                        <p>
+                          <strong>GPS Coordinates:</strong> Included
+                        </p>
                       )}
                     </CardContent>
                   </Card>
@@ -736,7 +897,10 @@ const CitizenComplaintForm: React.FC = () => {
                   <Alert className="border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription className="text-green-800">
-                      <strong>Ready to submit!</strong> Your complaint will be automatically assigned a tracking number and forwarded to the appropriate department. You'll receive email notifications about status updates.
+                      <strong>Ready to submit!</strong> Your complaint will be
+                      automatically assigned a tracking number and forwarded to
+                      the appropriate department. You'll receive email
+                      notifications about status updates.
                     </AlertDescription>
                   </Alert>
                 </div>

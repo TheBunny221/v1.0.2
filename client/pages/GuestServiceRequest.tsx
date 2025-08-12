@@ -138,7 +138,9 @@ const GuestServiceRequest: React.FC = () => {
     landmark: "",
   });
 
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   const steps = [
     { id: 1, title: "Service Details", icon: FileText },
@@ -150,18 +152,20 @@ const GuestServiceRequest: React.FC = () => {
 
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -170,20 +174,26 @@ const GuestServiceRequest: React.FC = () => {
 
     switch (step) {
       case 1:
-        if (!formData.serviceType) errors.serviceType = "Service type is required";
-        if (!formData.description.trim()) errors.description = "Description is required";
+        if (!formData.serviceType)
+          errors.serviceType = "Service type is required";
+        if (!formData.description.trim())
+          errors.description = "Description is required";
         else if (formData.description.trim().length < 10) {
           errors.description = "Description must be at least 10 characters";
         }
         break;
       case 2:
-        if (!formData.fullName.trim()) errors.fullName = "Full name is required";
+        if (!formData.fullName.trim())
+          errors.fullName = "Full name is required";
         if (!formData.email.trim()) errors.email = "Email is required";
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
           errors.email = "Please enter a valid email address";
         }
-        if (!formData.phoneNumber.trim()) errors.phoneNumber = "Phone number is required";
-        else if (!/^[\d\s\-\+\(\)]{10,}$/.test(formData.phoneNumber.replace(/\s/g, ""))) {
+        if (!formData.phoneNumber.trim())
+          errors.phoneNumber = "Phone number is required";
+        else if (
+          !/^[\d\s\-\+\(\)]{10,}$/.test(formData.phoneNumber.replace(/\s/g, ""))
+        ) {
           errors.phoneNumber = "Please enter a valid phone number";
         }
         break;
@@ -193,8 +203,10 @@ const GuestServiceRequest: React.FC = () => {
         if (!formData.address.trim()) errors.address = "Address is required";
         break;
       case 4:
-        if (!formData.preferredDate) errors.preferredDate = "Preferred date is required";
-        if (!formData.preferredTime) errors.preferredTime = "Preferred time is required";
+        if (!formData.preferredDate)
+          errors.preferredDate = "Preferred date is required";
+        if (!formData.preferredTime)
+          errors.preferredTime = "Preferred time is required";
         break;
     }
 
@@ -204,12 +216,12 @@ const GuestServiceRequest: React.FC = () => {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 5));
+      setCurrentStep((prev) => Math.min(prev + 1, 5));
     }
   };
 
   const handlePrev = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = async () => {
@@ -218,18 +230,20 @@ const GuestServiceRequest: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       toast({
         title: "Service Request Submitted",
-        description: "Your service request has been submitted successfully. You will receive a confirmation email shortly.",
+        description:
+          "Your service request has been submitted successfully. You will receive a confirmation email shortly.",
       });
 
       navigate("/guest/track");
     } catch (error) {
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your request. Please try again.",
+        description:
+          "There was an error submitting your request. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -237,7 +251,9 @@ const GuestServiceRequest: React.FC = () => {
     }
   };
 
-  const selectedService = SERVICE_TYPES.find(s => s.value === formData.serviceType);
+  const selectedService = SERVICE_TYPES.find(
+    (s) => s.value === formData.serviceType,
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
@@ -303,11 +319,14 @@ const GuestServiceRequest: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {React.createElement(steps[currentStep - 1].icon, { className: "h-5 w-5" })}
+              {React.createElement(steps[currentStep - 1].icon, {
+                className: "h-5 w-5",
+              })}
               {steps[currentStep - 1].title}
             </CardTitle>
             <CardDescription>
-              {currentStep === 1 && "Select the service you need and provide details"}
+              {currentStep === 1 &&
+                "Select the service you need and provide details"}
               {currentStep === 2 && "Enter your personal information"}
               {currentStep === 3 && "Specify your location"}
               {currentStep === 4 && "Choose your preferred appointment time"}
@@ -322,9 +341,15 @@ const GuestServiceRequest: React.FC = () => {
                   <Label>Service Type *</Label>
                   <Select
                     value={formData.serviceType}
-                    onValueChange={(value) => handleSelectChange("serviceType", value)}
+                    onValueChange={(value) =>
+                      handleSelectChange("serviceType", value)
+                    }
                   >
-                    <SelectTrigger className={validationErrors.serviceType ? "border-red-500" : ""}>
+                    <SelectTrigger
+                      className={
+                        validationErrors.serviceType ? "border-red-500" : ""
+                      }
+                    >
                       <SelectValue placeholder="Select service type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -332,21 +357,29 @@ const GuestServiceRequest: React.FC = () => {
                         <SelectItem key={service.value} value={service.value}>
                           <div className="flex flex-col">
                             <span className="font-medium">{service.label}</span>
-                            <span className="text-xs text-gray-500">{service.description}</span>
+                            <span className="text-xs text-gray-500">
+                              {service.description}
+                            </span>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {validationErrors.serviceType && (
-                    <p className="text-sm text-red-600">{validationErrors.serviceType}</p>
+                    <p className="text-sm text-red-600">
+                      {validationErrors.serviceType}
+                    </p>
                   )}
                 </div>
 
                 {selectedService && (
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="font-medium text-blue-900 mb-2">{selectedService.label}</h3>
-                    <p className="text-sm text-blue-700 mb-2">{selectedService.description}</p>
+                    <h3 className="font-medium text-blue-900 mb-2">
+                      {selectedService.label}
+                    </h3>
+                    <p className="text-sm text-blue-700 mb-2">
+                      {selectedService.description}
+                    </p>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-blue-600" />
                       <span className="text-sm text-blue-600">
@@ -360,7 +393,9 @@ const GuestServiceRequest: React.FC = () => {
                   <Label>Priority</Label>
                   <Select
                     value={formData.priority}
-                    onValueChange={(value) => handleSelectChange("priority", value)}
+                    onValueChange={(value) =>
+                      handleSelectChange("priority", value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -369,7 +404,9 @@ const GuestServiceRequest: React.FC = () => {
                       {PRIORITIES.map((priority) => (
                         <SelectItem key={priority.value} value={priority.value}>
                           <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${priority.color}`} />
+                            <div
+                              className={`w-2 h-2 rounded-full ${priority.color}`}
+                            />
                             {priority.label}
                           </div>
                         </SelectItem>
@@ -387,10 +424,14 @@ const GuestServiceRequest: React.FC = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className={validationErrors.description ? "border-red-500" : ""}
+                    className={
+                      validationErrors.description ? "border-red-500" : ""
+                    }
                   />
                   {validationErrors.description && (
-                    <p className="text-sm text-red-600">{validationErrors.description}</p>
+                    <p className="text-sm text-red-600">
+                      {validationErrors.description}
+                    </p>
                   )}
                 </div>
               </div>
@@ -408,10 +449,14 @@ const GuestServiceRequest: React.FC = () => {
                       placeholder="Enter your full name"
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      className={validationErrors.fullName ? "border-red-500" : ""}
+                      className={
+                        validationErrors.fullName ? "border-red-500" : ""
+                      }
                     />
                     {validationErrors.fullName && (
-                      <p className="text-sm text-red-600">{validationErrors.fullName}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.fullName}
+                      </p>
                     )}
                   </div>
 
@@ -427,7 +472,9 @@ const GuestServiceRequest: React.FC = () => {
                       className={validationErrors.email ? "border-red-500" : ""}
                     />
                     {validationErrors.email && (
-                      <p className="text-sm text-red-600">{validationErrors.email}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.email}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -441,10 +488,14 @@ const GuestServiceRequest: React.FC = () => {
                     placeholder="Enter your phone number"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    className={validationErrors.phoneNumber ? "border-red-500" : ""}
+                    className={
+                      validationErrors.phoneNumber ? "border-red-500" : ""
+                    }
                   />
                   {validationErrors.phoneNumber && (
-                    <p className="text-sm text-red-600">{validationErrors.phoneNumber}</p>
+                    <p className="text-sm text-red-600">
+                      {validationErrors.phoneNumber}
+                    </p>
                   )}
                 </div>
               </div>
@@ -458,9 +509,15 @@ const GuestServiceRequest: React.FC = () => {
                     <Label>Ward *</Label>
                     <Select
                       value={formData.wardId}
-                      onValueChange={(value) => handleSelectChange("wardId", value)}
+                      onValueChange={(value) =>
+                        handleSelectChange("wardId", value)
+                      }
                     >
-                      <SelectTrigger className={validationErrors.wardId ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={
+                          validationErrors.wardId ? "border-red-500" : ""
+                        }
+                      >
                         <SelectValue placeholder="Select ward" />
                       </SelectTrigger>
                       <SelectContent>
@@ -472,7 +529,9 @@ const GuestServiceRequest: React.FC = () => {
                       </SelectContent>
                     </Select>
                     {validationErrors.wardId && (
-                      <p className="text-sm text-red-600">{validationErrors.wardId}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.wardId}
+                      </p>
                     )}
                   </div>
 
@@ -487,7 +546,9 @@ const GuestServiceRequest: React.FC = () => {
                       className={validationErrors.area ? "border-red-500" : ""}
                     />
                     {validationErrors.area && (
-                      <p className="text-sm text-red-600">{validationErrors.area}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.area}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -504,7 +565,9 @@ const GuestServiceRequest: React.FC = () => {
                     className={validationErrors.address ? "border-red-500" : ""}
                   />
                   {validationErrors.address && (
-                    <p className="text-sm text-red-600">{validationErrors.address}</p>
+                    <p className="text-sm text-red-600">
+                      {validationErrors.address}
+                    </p>
                   )}
                 </div>
 
@@ -533,11 +596,15 @@ const GuestServiceRequest: React.FC = () => {
                       type="date"
                       value={formData.preferredDate}
                       onChange={handleInputChange}
-                      min={new Date().toISOString().split('T')[0]}
-                      className={validationErrors.preferredDate ? "border-red-500" : ""}
+                      min={new Date().toISOString().split("T")[0]}
+                      className={
+                        validationErrors.preferredDate ? "border-red-500" : ""
+                      }
                     />
                     {validationErrors.preferredDate && (
-                      <p className="text-sm text-red-600">{validationErrors.preferredDate}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.preferredDate}
+                      </p>
                     )}
                   </div>
 
@@ -545,9 +612,15 @@ const GuestServiceRequest: React.FC = () => {
                     <Label htmlFor="preferredTime">Preferred Time *</Label>
                     <Select
                       value={formData.preferredTime}
-                      onValueChange={(value) => handleSelectChange("preferredTime", value)}
+                      onValueChange={(value) =>
+                        handleSelectChange("preferredTime", value)
+                      }
                     >
-                      <SelectTrigger className={validationErrors.preferredTime ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={
+                          validationErrors.preferredTime ? "border-red-500" : ""
+                        }
+                      >
                         <SelectValue placeholder="Select time slot" />
                       </SelectTrigger>
                       <SelectContent>
@@ -561,16 +634,23 @@ const GuestServiceRequest: React.FC = () => {
                       </SelectContent>
                     </Select>
                     {validationErrors.preferredTime && (
-                      <p className="text-sm text-red-600">{validationErrors.preferredTime}</p>
+                      <p className="text-sm text-red-600">
+                        {validationErrors.preferredTime}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 <div className="bg-amber-50 p-4 rounded-lg">
-                  <h3 className="font-medium text-amber-900 mb-2">Important Notes</h3>
+                  <h3 className="font-medium text-amber-900 mb-2">
+                    Important Notes
+                  </h3>
                   <ul className="text-sm text-amber-700 space-y-1">
                     <li>• Appointments are subject to availability</li>
-                    <li>• You will receive a confirmation email with final appointment details</li>
+                    <li>
+                      • You will receive a confirmation email with final
+                      appointment details
+                    </li>
                     <li>• Please bring all required documents</li>
                     <li>• Arrive 15 minutes before your scheduled time</li>
                   </ul>
@@ -581,34 +661,57 @@ const GuestServiceRequest: React.FC = () => {
             {/* Step 5: Review */}
             {currentStep === 5 && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Review Your Service Request</h3>
+                <h3 className="text-lg font-semibold">
+                  Review Your Service Request
+                </h3>
 
                 <div className="space-y-4">
                   {/* Service Details */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Service Details</CardTitle>
+                      <CardTitle className="text-base">
+                        Service Details
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Service:</strong> {selectedService?.label}</p>
-                      <p><strong>Priority:</strong> 
-                        <Badge className={`ml-2 ${PRIORITIES.find(p => p.value === formData.priority)?.color}`}>
-                          {PRIORITIES.find(p => p.value === formData.priority)?.label}
+                      <p>
+                        <strong>Service:</strong> {selectedService?.label}
+                      </p>
+                      <p>
+                        <strong>Priority:</strong>
+                        <Badge
+                          className={`ml-2 ${PRIORITIES.find((p) => p.value === formData.priority)?.color}`}
+                        >
+                          {
+                            PRIORITIES.find(
+                              (p) => p.value === formData.priority,
+                            )?.label
+                          }
                         </Badge>
                       </p>
-                      <p><strong>Description:</strong> {formData.description}</p>
+                      <p>
+                        <strong>Description:</strong> {formData.description}
+                      </p>
                     </CardContent>
                   </Card>
 
                   {/* Personal Information */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Personal Information</CardTitle>
+                      <CardTitle className="text-base">
+                        Personal Information
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Name:</strong> {formData.fullName}</p>
-                      <p><strong>Email:</strong> {formData.email}</p>
-                      <p><strong>Phone:</strong> {formData.phoneNumber}</p>
+                      <p>
+                        <strong>Name:</strong> {formData.fullName}
+                      </p>
+                      <p>
+                        <strong>Email:</strong> {formData.email}
+                      </p>
+                      <p>
+                        <strong>Phone:</strong> {formData.phoneNumber}
+                      </p>
                     </CardContent>
                   </Card>
 
@@ -618,10 +721,21 @@ const GuestServiceRequest: React.FC = () => {
                       <CardTitle className="text-base">Location</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Ward:</strong> {WARDS.find(w => w.id === formData.wardId)?.name}</p>
-                      <p><strong>Area:</strong> {formData.area}</p>
-                      <p><strong>Address:</strong> {formData.address}</p>
-                      {formData.landmark && <p><strong>Landmark:</strong> {formData.landmark}</p>}
+                      <p>
+                        <strong>Ward:</strong>{" "}
+                        {WARDS.find((w) => w.id === formData.wardId)?.name}
+                      </p>
+                      <p>
+                        <strong>Area:</strong> {formData.area}
+                      </p>
+                      <p>
+                        <strong>Address:</strong> {formData.address}
+                      </p>
+                      {formData.landmark && (
+                        <p>
+                          <strong>Landmark:</strong> {formData.landmark}
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -631,8 +745,13 @@ const GuestServiceRequest: React.FC = () => {
                       <CardTitle className="text-base">Appointment</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p><strong>Date:</strong> {new Date(formData.preferredDate).toLocaleDateString()}</p>
-                      <p><strong>Time:</strong> {formData.preferredTime}</p>
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {new Date(formData.preferredDate).toLocaleDateString()}
+                      </p>
+                      <p>
+                        <strong>Time:</strong> {formData.preferredTime}
+                      </p>
                     </CardContent>
                   </Card>
                 </div>

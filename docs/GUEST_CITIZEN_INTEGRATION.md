@@ -17,6 +17,7 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 ### 🔍 **Guest Features (Public Access)**
 
 #### 1. **Complaint Submission System**
+
 - ✅ Multi-step complaint form with progressive validation
 - ✅ Auto-filled location detection via GPS
 - ✅ File upload support (images up to 10MB each, max 5 files)
@@ -25,12 +26,14 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 - ✅ Automatic user registration upon verification
 
 #### 2. **Service Request System**
+
 - ✅ Municipal service request form (Birth Certificate, Trade License, etc.)
 - ✅ Appointment scheduling with preferred date/time
 - ✅ Service type catalog with processing times and fees
 - ✅ Status tracking and progress updates
 
 #### 3. **Guest Dashboard**
+
 - ✅ Unified dashboard for managing complaints and service requests
 - ✅ Payment history and tracking
 - ✅ Notification center
@@ -38,6 +41,7 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 - ✅ Historical data and analytics
 
 #### 4. **Tracking System**
+
 - ✅ Public complaint tracking with verification
 - ✅ Real-time status updates
 - ✅ Email/phone number verification for access
@@ -46,12 +50,14 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 ### 👤 **Citizen Features (Authenticated Access)**
 
 #### 1. **Enhanced Complaint Form**
+
 - ✅ Auto-filled personal information from user profile
 - ✅ Streamlined 4-step process
 - ✅ Role-based form validation
 - ✅ Immediate submission without OTP (already verified user)
 
 #### 2. **Citizen Dashboard**
+
 - ✅ Personalized welcome and statistics
 - ✅ Complaint history with filtering and search
 - ✅ Real-time status updates
@@ -60,12 +66,14 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 - ✅ Feedback and rating system
 
 #### 3. **Profile Integration**
+
 - ✅ Auto-filled contact information
 - ✅ Ward-based filtering
 - ✅ Citizen ID display
 - ✅ Profile edit restrictions (maintain data integrity)
 
 #### 4. **Extended Privileges**
+
 - ✅ Advanced complaint filtering options
 - ✅ Historical analytics and trends
 - ✅ Priority status for known users
@@ -78,11 +86,12 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 ### **Multi-layer Security System**
 
 #### 1. **JWT Authentication**
+
 ```typescript
 // Example token payload
 {
   id: "user-id",
-  email: "user@example.com", 
+  email: "user@example.com",
   role: "CITIZEN",
   wardId: "ward-id",
   exp: 1234567890
@@ -90,6 +99,7 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 ```
 
 #### 2. **Role-Based Access Control (RBAC)**
+
 - ✅ **GUEST**: Public access to complaint/service forms and tracking
 - ✅ **CITIZEN**: Enhanced features with profile integration
 - ✅ **WARD_OFFICER**: Complaint management and assignment
@@ -97,6 +107,7 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 - ✅ **ADMINISTRATOR**: Full system access and configuration
 
 #### 3. **OTP Verification System**
+
 ```typescript
 // OTP Flow
 1. User submits complaint/service request
@@ -108,6 +119,7 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 ```
 
 #### 4. **Input Validation & Security**
+
 - ✅ Client-side validation with Zod schemas
 - ✅ Server-side validation with express-validator
 - ✅ SQL injection prevention via Prisma ORM
@@ -121,6 +133,7 @@ This document provides a comprehensive overview of the completed Guest and Citiz
 ### **New Models Added**
 
 #### ServiceRequest Model
+
 ```prisma
 model ServiceRequest {
   id                String    @id @default(cuid())
@@ -141,7 +154,7 @@ model ServiceRequest {
   preferredDateTime DateTime?
   expectedCompletion DateTime?
   completedOn       DateTime?
-  
+
   // Relations
   ward              Ward      @relation(fields: [wardId], references: [id])
   submittedBy       User?     @relation("ServiceSubmittedBy", fields: [submittedById], references: [id])
@@ -152,11 +165,12 @@ model ServiceRequest {
 ```
 
 #### Enhanced User Relations
+
 ```prisma
 model User {
   // Existing fields...
   submittedServiceRequests ServiceRequest[] @relation("ServiceSubmittedBy")
-  assignedServiceRequests  ServiceRequest[] @relation("ServiceAssignedTo") 
+  assignedServiceRequests  ServiceRequest[] @relation("ServiceAssignedTo")
   serviceStatusLogs        ServiceRequestStatusLog[]
 }
 ```
@@ -168,6 +182,7 @@ model User {
 ### **State Architecture**
 
 #### 1. **Auth Slice** (`authSlice.ts`)
+
 ```typescript
 interface AuthState {
   user: User | null;
@@ -182,17 +197,18 @@ interface AuthState {
 ```
 
 #### 2. **Guest Slice** (`guestSlice.ts`)
+
 ```typescript
 interface GuestState {
   // Complaint form state
   currentStep: number;
   formData: GuestComplaintData;
   validationErrors: ValidationErrors;
-  
-  // Service request state  
+
+  // Service request state
   serviceRequestData: GuestServiceRequestData;
   serviceRequestStep: "form" | "otp" | "success";
-  
+
   // Submission state
   isSubmitting: boolean;
   isVerifying: boolean;
@@ -202,6 +218,7 @@ interface GuestState {
 ```
 
 #### 3. **RTK Query APIs**
+
 - ✅ `complaintsApi.ts` - Complaint CRUD operations
 - ✅ `guestApi.ts` - Guest-specific endpoints
 - ✅ `authApi.ts` - Authentication operations
@@ -213,11 +230,12 @@ interface GuestState {
 ## 🛠️ API Endpoints Reference
 
 ### **Guest APIs**
+
 ```typescript
 // Complaint submission
 POST   /api/guest/complaint
 POST   /api/guest/verify-otp
-POST   /api/guest/resend-otp  
+POST   /api/guest/resend-otp
 GET    /api/guest/track/:complaintId
 
 // Service requests
@@ -233,6 +251,7 @@ GET    /api/guest/complaint-types
 ```
 
 ### **Citizen APIs**
+
 ```typescript
 // Enhanced complaint management
 POST   /api/complaints                    // Create with profile autofill
@@ -255,6 +274,7 @@ PUT    /api/auth/profile                 // Update profile
 ### **Integration Tests Implemented**
 
 #### 1. **Guest Complaint Flow Test**
+
 ```typescript
 // Tests complete flow: UI → Redux → API → DB
 - Form validation and error handling
@@ -265,6 +285,7 @@ PUT    /api/auth/profile                 // Update profile
 ```
 
 #### 2. **Citizen Dashboard Test**
+
 ```typescript
 // Tests authenticated user experience
 - Dashboard data loading
@@ -275,6 +296,7 @@ PUT    /api/auth/profile                 // Update profile
 ```
 
 #### 3. **Authentication Flow Test**
+
 ```typescript
 // Tests security and access control
 - JWT token validation
@@ -284,6 +306,7 @@ PUT    /api/auth/profile                 // Update profile
 ```
 
 ### **Test Coverage**
+
 - ✅ **Unit Tests**: Component logic and utility functions
 - ✅ **Integration Tests**: Full user flows with API mocking
 - ✅ **E2E Tests**: Critical user journeys
@@ -295,6 +318,7 @@ PUT    /api/auth/profile                 // Update profile
 ## 🚀 Production Deployment Checklist
 
 ### **Environment Configuration**
+
 ```bash
 # Required Environment Variables
 DATABASE_URL="postgresql://user:pass@host:5432/smartcity"
@@ -304,7 +328,7 @@ JWT_EXPIRE="7d"
 # Email Service (Required for OTP)
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT=587
-SMTP_USER="your-email@domain.com" 
+SMTP_USER="your-email@domain.com"
 SMTP_PASS="your-app-password"
 FROM_EMAIL="noreply@smartcity.gov"
 
@@ -318,6 +342,7 @@ RATE_LIMIT_MAX=100
 ```
 
 ### **Database Setup**
+
 ```bash
 # Install dependencies
 npm install
@@ -333,6 +358,7 @@ npm run db:seed
 ```
 
 ### **Build & Deploy**
+
 ```bash
 # Build application
 npm run build
@@ -342,6 +368,7 @@ npm run start:prod
 ```
 
 ### **Post-Deployment Verification**
+
 - ✅ Guest complaint submission works end-to-end
 - ✅ Email OTP delivery functions correctly
 - ✅ Citizen dashboard loads with proper data
@@ -355,18 +382,21 @@ npm run start:prod
 ## 📊 Performance Metrics
 
 ### **Frontend Performance**
+
 - ✅ **Initial Load**: < 3 seconds on 3G
 - ✅ **Code Splitting**: Lazy-loaded routes reduce bundle size
 - ✅ **Component Optimization**: React.memo and useMemo for heavy operations
 - ✅ **State Management**: Efficient Redux subscriptions
 
-### **Backend Performance**  
+### **Backend Performance**
+
 - ✅ **API Response Time**: < 200ms average
 - ✅ **Database Queries**: Optimized with proper indexing
 - ✅ **File Upload**: Streamed uploads for large files
 - ✅ **Error Handling**: Graceful degradation
 
 ### **Security Metrics**
+
 - ✅ **Authentication**: JWT with automatic expiration
 - ✅ **Input Validation**: 100% server-side validation
 - ✅ **Rate Limiting**: 100 requests/15min per IP
@@ -376,32 +406,34 @@ npm run start:prod
 
 ## 🎉 Feature Completion Status
 
-| Feature Category | Status | Details |
-|-----------------|--------|---------|
+| Feature Category               | Status      | Details                                              |
+| ------------------------------ | ----------- | ---------------------------------------------------- |
 | **Guest Complaint Submission** | ✅ Complete | Multi-step form, OTP verification, auto-registration |
-| **Guest Service Requests** | ✅ Complete | Municipal services, appointment booking, tracking |
-| **Guest Dashboard** | ✅ Complete | Profile, history, payments, notifications |
-| **Citizen Enhanced Form** | ✅ Complete | Profile autofill, streamlined process |
-| **Citizen Dashboard** | ✅ Complete | Statistics, history, advanced filtering |
-| **Authentication System** | ✅ Complete | JWT, RBAC, OTP verification |
-| **Backend APIs** | ✅ Complete | All endpoints implemented and tested |
-| **Database Schema** | ✅ Complete | Extended models for service requests |
-| **Redux Integration** | ✅ Complete | RTK Query with optimistic updates |
-| **Security Features** | ✅ Complete | Input validation, rate limiting, CORS |
-| **Integration Tests** | ✅ Complete | Critical user flows tested |
-| **Production Deployment** | ✅ Ready | Environment setup documented |
+| **Guest Service Requests**     | ✅ Complete | Municipal services, appointment booking, tracking    |
+| **Guest Dashboard**            | ✅ Complete | Profile, history, payments, notifications            |
+| **Citizen Enhanced Form**      | ✅ Complete | Profile autofill, streamlined process                |
+| **Citizen Dashboard**          | ✅ Complete | Statistics, history, advanced filtering              |
+| **Authentication System**      | ✅ Complete | JWT, RBAC, OTP verification                          |
+| **Backend APIs**               | ✅ Complete | All endpoints implemented and tested                 |
+| **Database Schema**            | ✅ Complete | Extended models for service requests                 |
+| **Redux Integration**          | ✅ Complete | RTK Query with optimistic updates                    |
+| **Security Features**          | ✅ Complete | Input validation, rate limiting, CORS                |
+| **Integration Tests**          | ✅ Complete | Critical user flows tested                           |
+| **Production Deployment**      | ✅ Ready    | Environment setup documented                         |
 
 ---
 
 ## 📞 Support & Maintenance
 
 ### **Monitoring Recommendations**
+
 - **Application Performance**: Monitor API response times and error rates
-- **Authentication Events**: Track login attempts and failures  
+- **Authentication Events**: Track login attempts and failures
 - **Business Metrics**: Complaint submission rates and resolution times
 - **Security Events**: Failed authentication attempts and rate limit violations
 
 ### **Maintenance Tasks**
+
 - **Weekly**: Review error logs and performance metrics
 - **Monthly**: Update dependencies and security patches
 - **Quarterly**: Audit user roles and permissions

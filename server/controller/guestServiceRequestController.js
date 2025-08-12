@@ -24,11 +24,7 @@ export const submitGuestServiceRequest = asyncHandler(async (req, res) => {
   } = req.body;
 
   // Validation
-  if (
-    !fullName ||
-    fullName.trim().length < 2 ||
-    fullName.trim().length > 100
-  ) {
+  if (!fullName || fullName.trim().length < 2 || fullName.trim().length > 100) {
     return res.status(400).json({
       success: false,
       message: "Full name must be between 2 and 100 characters",
@@ -54,7 +50,7 @@ export const submitGuestServiceRequest = asyncHandler(async (req, res) => {
 
   const validServiceTypes = [
     "BIRTH_CERTIFICATE",
-    "DEATH_CERTIFICATE", 
+    "DEATH_CERTIFICATE",
     "MARRIAGE_CERTIFICATE",
     "PROPERTY_TAX",
     "TRADE_LICENSE",
@@ -187,9 +183,11 @@ export const submitGuestServiceRequest = asyncHandler(async (req, res) => {
   });
 
   // Send confirmation email
-  const serviceTypeLabel = serviceType.replace(/_/g, " ").toLowerCase()
+  const serviceTypeLabel = serviceType
+    .replace(/_/g, " ")
+    .toLowerCase()
     .split(" ")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
   const emailSent = await sendEmail({
@@ -230,7 +228,8 @@ export const submitGuestServiceRequest = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: "Service request submitted successfully. Please check your email for OTP verification.",
+    message:
+      "Service request submitted successfully. Please check your email for OTP verification.",
     data: {
       serviceRequestId: serviceRequest.id,
       serviceType: serviceTypeLabel,
@@ -434,7 +433,7 @@ export const trackServiceRequest = asyncHandler(async (req, res) => {
 
   // Verify email or phone number
   const isAuthorized =
-    serviceRequest.contactEmail === email || 
+    serviceRequest.contactEmail === email ||
     serviceRequest.contactPhone === phoneNumber;
 
   if (!isAuthorized) {
@@ -484,7 +483,11 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Birth Certificate",
       description: "New birth certificate issuance",
       processingTime: "5-7 days",
-      requiredDocuments: ["Hospital birth record", "Parent's ID proof", "Address proof"],
+      requiredDocuments: [
+        "Hospital birth record",
+        "Parent's ID proof",
+        "Address proof",
+      ],
       fee: 50,
     },
     {
@@ -492,7 +495,11 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Death Certificate",
       description: "Death certificate issuance",
       processingTime: "3-5 days",
-      requiredDocuments: ["Death report", "ID proof of applicant", "Address proof"],
+      requiredDocuments: [
+        "Death report",
+        "ID proof of applicant",
+        "Address proof",
+      ],
       fee: 50,
     },
     {
@@ -500,7 +507,11 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Marriage Certificate",
       description: "Marriage certificate issuance",
       processingTime: "7-10 days",
-      requiredDocuments: ["Marriage photos", "ID proof of both parties", "Witnesses ID"],
+      requiredDocuments: [
+        "Marriage photos",
+        "ID proof of both parties",
+        "Witnesses ID",
+      ],
       fee: 100,
     },
     {
@@ -508,7 +519,11 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Property Tax",
       description: "Property tax payment and certificates",
       processingTime: "2-3 days",
-      requiredDocuments: ["Property documents", "Previous tax receipt", "ID proof"],
+      requiredDocuments: [
+        "Property documents",
+        "Previous tax receipt",
+        "ID proof",
+      ],
       fee: "Variable",
     },
     {
@@ -516,7 +531,12 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Trade License",
       description: "Business trade license application",
       processingTime: "10-15 days",
-      requiredDocuments: ["Business plan", "NOC from fire department", "ID proof", "Address proof"],
+      requiredDocuments: [
+        "Business plan",
+        "NOC from fire department",
+        "ID proof",
+        "Address proof",
+      ],
       fee: 500,
     },
     {
@@ -524,7 +544,12 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Building Permit",
       description: "Construction and renovation permits",
       processingTime: "15-20 days",
-      requiredDocuments: ["Architectural plans", "Site survey", "NOC from utilities", "Property documents"],
+      requiredDocuments: [
+        "Architectural plans",
+        "Site survey",
+        "NOC from utilities",
+        "Property documents",
+      ],
       fee: 1000,
     },
     {
@@ -532,7 +557,11 @@ export const getServiceTypes = asyncHandler(async (req, res) => {
       name: "Water Connection",
       description: "New water connection application",
       processingTime: "7-10 days",
-      requiredDocuments: ["Property ownership proof", "ID proof", "Address proof"],
+      requiredDocuments: [
+        "Property ownership proof",
+        "ID proof",
+        "Address proof",
+      ],
       fee: 2500,
     },
     {

@@ -470,7 +470,9 @@ export const submitGuestServiceRequest = createAsyncThunk(
       return data.data;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to submit service request",
+        error instanceof Error
+          ? error.message
+          : "Failed to submit service request",
       );
     }
   },
@@ -696,7 +698,10 @@ const guestSlice = createSlice({
       state,
       action: PayloadAction<Partial<GuestServiceRequestData>>,
     ) => {
-      state.serviceRequestData = { ...state.serviceRequestData, ...action.payload };
+      state.serviceRequestData = {
+        ...state.serviceRequestData,
+        ...action.payload,
+      };
     },
 
     setServiceRequestStep: (
