@@ -263,13 +263,70 @@ export const registerUser = createAsyncThunk(
         body: JSON.stringify(userData),
       });
 
-      // Store token in localStorage
+      // Check if OTP verification is required
+      if (data.data.requiresOtpVerification) {
+        return {
+          requiresOtpVerification: true,
+          email: userData.email,
+          fullName: userData.fullName,
+          role: userData.role || "CITIZEN",
+          message: data.message || "Registration successful. Please verify your email with the OTP sent.",
+        };
+      }
+
+      // Store token in localStorage if no OTP required
       localStorage.setItem("token", data.data.token);
 
       return data.data;
     } catch (error) {
       return rejectWithValue({
         message: error instanceof Error ? error.message : "Registration failed",
+      });
+    }
+  },
+);
+
+// Registration OTP verification
+export const verifyRegistrationOTP = createAsyncThunk(
+  "auth/verifyRegistrationOTP",
+  async (
+    { email, otpCode }: { email: string; otpCode: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall("/api/auth/verify-registration-otp", {
+        method: "POST",
+        body: JSON.stringify({ email, otpCode }),
+      });
+
+      // Store token in localStorage
+      localStorage.setItem("token", data.data.token);
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message:
+          error instanceof Error ? error.message : "OTP verification failed",
+      });
+    }
+  },
+);
+
+// Resend registration OTP
+export const resendRegistrationOTP = createAsyncThunk(
+  "auth/resendRegistrationOTP",
+  async ({ email }: { email: string }, { rejectWithValue }) => {
+    try {
+      const data = await apiCall("/api/auth/resend-registration-otp", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message:
+          error instanceof Error ? error.message : "Failed to resend OTP",
       });
     }
   },
