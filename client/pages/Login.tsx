@@ -44,12 +44,13 @@ const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { openOtpFlow } = useOtpFlow();
 
-  const { isLoading, error, isAuthenticated } = useAppSelector(selectAuth);
-
-  const otpStep = useAppSelector(selectOTPStep);
+  const { isLoading, error, isAuthenticated, user } = useAppSelector(selectAuth);
   const requiresPasswordSetup = useAppSelector(selectRequiresPasswordSetup);
-  const otpEmail = useAppSelector(selectOTPEmail);
+
+  // API hooks
+  const [requestOTPLogin, { isLoading: isRequestingOtp }] = useRequestOTPLoginMutation();
 
   // Form states
   const [loginMethod, setLoginMethod] = useState<"password" | "otp">(
@@ -58,10 +59,8 @@ const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    otpCode: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0);
 
   // Clear error when component mounts
   useEffect(() => {
