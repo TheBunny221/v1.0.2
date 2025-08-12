@@ -3,16 +3,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   loginWithPassword,
-  requestOTPLogin,
-  verifyOTPLogin,
   sendPasswordSetupEmail,
   clearError,
-  resetOTPState,
   selectAuth,
-  selectOTPStep,
   selectRequiresPasswordSetup,
-  selectOTPEmail,
+  getDashboardRouteForRole,
 } from "../store/slices/authSlice";
+import {
+  useRequestOTPLoginMutation,
+} from "../store/api/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -36,13 +35,10 @@ import {
   EyeOff,
   Mail,
   Lock,
-  Shield,
-  Clock,
-  CheckCircle,
-  ArrowLeft,
   Home,
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
+import { useOtpFlow } from "../contexts/OtpContext";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
