@@ -133,10 +133,6 @@ const GuestComplaintForm: React.FC = () => {
       ...prev,
       [name]: value,
     }));
-
-    if (error) {
-      dispatch(clearError());
-    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
