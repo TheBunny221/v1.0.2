@@ -865,7 +865,6 @@ const Index: React.FC = () => {
                       <span>{translations?.complaints?.ward || "Ward"}: </span>
                       <span className="font-medium">
                         {user?.ward?.name ||
-                          translations?.common?.none ||
                           "Not assigned"}
                       </span>
                     </div>
