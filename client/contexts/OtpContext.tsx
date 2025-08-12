@@ -1,10 +1,18 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { useAppDispatch } from "../store/hooks";
 import { setCredentials } from "../store/slices/authSlice";
-import { useAuthApi } from "../store/api/authApi";
-import { useGuestApi } from "../store/api/guestApi";
+import {
+  useVerifyOTPLoginMutation,
+  useVerifyRegistrationOTPMutation,
+  useRequestOTPLoginMutation,
+  useResendRegistrationOTPMutation,
+} from "../store/api/authApi";
+import {
+  useVerifyGuestOtpMutation,
+  useResendGuestOtpMutation,
+} from "../store/api/guestApi";
 import OtpDialog from "../components/OtpDialog";
-import { toast } from "../hooks/use-toast";
+import { useToast } from "../hooks/use-toast";
 
 export interface OtpFlowConfig {
   context: "login" | "register" | "guestComplaint" | "complaintAuth";
