@@ -57,9 +57,18 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   const [resendGuestOtp] = useResendGuestOtpMutation();
 
   const openOtpFlow = useCallback((flowConfig: OtpFlowConfig) => {
-    setConfig(flowConfig);
-    setIsOpen(true);
-  }, []);
+    try {
+      setConfig(flowConfig);
+      setIsOpen(true);
+    } catch (error) {
+      console.error("Failed to open OTP flow:", error);
+      toast({
+        title: "Error",
+        description: "Failed to open verification dialog",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   const closeOtpFlow = useCallback(() => {
     setIsOpen(false);
