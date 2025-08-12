@@ -5,6 +5,7 @@ import {
   useGetComplaintQuery,
   useUpdateComplaintStatusMutation,
 } from "../store/api/complaintsApi";
+import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import {
   Card,
   CardContent,
