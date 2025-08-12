@@ -228,7 +228,7 @@ const Profile: React.FC = () => {
                   <Avatar className="w-24 h-24">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback className="text-lg">
-                      {getInitials(user.name)}
+                      {getInitials(user.fullName)}
                     </AvatarFallback>
                   </Avatar>
                   <Button
