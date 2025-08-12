@@ -828,8 +828,7 @@ const Index: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-orange-500" />
                     <span className="text-sm">
-                      {translations?.dashboard?.overallCompliance ||
-                        "Office Hours"}
+                      Office Hours
                       : 9 AM - 6 PM
                     </span>
                   </div>
