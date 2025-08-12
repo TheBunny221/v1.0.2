@@ -180,7 +180,7 @@ export const getApiErrorMessage = (error: any): string => {
     console.log("Handling custom fetch error with status:", error.status);
     console.log("Error data:", error.data);
 
-    // Server error response with message
+    // Server error response with message - prioritize server message
     if (typeof error.data === "object" && error.data.message) {
       console.log("Found message in error.data:", error.data.message);
       return error.data.message;
@@ -198,10 +198,11 @@ export const getApiErrorMessage = (error: any): string => {
       }
     }
 
-    // Fallback to status-based message for custom errors
+    // Only use fallback messages if server didn't provide a specific message
+    console.log("No server message found, using status-based fallback");
     switch (error.status) {
       case 400:
-        return "This email address is already registered. Please use a different email or try logging in.";
+        return "Bad request - please check your input";
       case 401:
         return "Unauthorized - please login again";
       case 403:
