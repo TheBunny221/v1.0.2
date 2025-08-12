@@ -637,7 +637,7 @@ const GuestComplaintForm: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 px-4">
         <div className="w-full max-w-md space-y-6">
-          <Card>
+          <Card data-testid="success-page">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto">
