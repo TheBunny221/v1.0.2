@@ -5,6 +5,7 @@ This document provides a comprehensive reference for all backend API endpoints, 
 ## 🔧 API Configuration
 
 ### Base Settings
+
 - **Base URL**: `/api`
 - **Protocol**: HTTP/HTTPS
 - **Rate Limiting**: 100 requests per 15 minutes per IP address
@@ -13,6 +14,7 @@ This document provides a comprehensive reference for all backend API endpoints, 
 - **API Documentation**: `/api-docs` (Swagger UI)
 
 ### Global Response Format
+
 ```json
 // Success Response
 {
@@ -31,6 +33,7 @@ This document provides a comprehensive reference for all backend API endpoints, 
 ```
 
 ### Authentication Headers
+
 ```
 Authorization: Bearer <jwt-token>
 Content-Type: application/json
@@ -41,6 +44,7 @@ Content-Type: application/json
 ## 🔐 Authentication System
 
 ### JWT Token Structure
+
 ```json
 {
   "userId": "string",
@@ -53,6 +57,7 @@ Content-Type: application/json
 ```
 
 ### Role Hierarchy & Permissions
+
 1. **GUEST** - No authentication required
 2. **CITIZEN** - Basic authenticated user
 3. **WARD_OFFICER** - Manages specific ward complaints
@@ -68,6 +73,7 @@ Content-Type: application/json
 ## Public Authentication Routes
 
 ### Register New User
+
 ```http
 POST /api/auth/register
 Content-Type: application/json
@@ -82,6 +88,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -101,6 +108,7 @@ Content-Type: application/json
 ```
 
 ### Password Login
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -112,6 +120,7 @@ Content-Type: application/json
 ```
 
 ### OTP-Based Login
+
 ```http
 POST /api/auth/login-otp
 Content-Type: application/json
@@ -132,6 +141,7 @@ Content-Type: application/json
 ```
 
 ### Password Setup for New Users
+
 ```http
 POST /api/auth/send-password-setup
 Content-Type: application/json
@@ -153,12 +163,14 @@ Content-Type: application/json
 ## Protected Authentication Routes
 
 ### Get Current User Profile
+
 ```http
 GET /api/auth/me
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -185,6 +197,7 @@ Authorization: Bearer <token>
 ```
 
 ### Update User Profile
+
 ```http
 PUT /api/auth/profile
 Authorization: Bearer <token>
@@ -198,6 +211,7 @@ Content-Type: application/json
 ```
 
 ### Change Password
+
 ```http
 PUT /api/auth/change-password
 Authorization: Bearer <token>
@@ -216,11 +230,13 @@ Content-Type: application/json
 ## Public Complaint Routes
 
 ### Get Public Statistics
+
 ```http
 GET /api/complaints/public/stats
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -251,12 +267,14 @@ GET /api/complaints/public/stats
 ## Protected Complaint Routes
 
 ### Get Complaints (Role-Filtered)
+
 ```http
 GET /api/complaints?page=1&limit=10&status=REGISTERED&wardId=ward_456
 Authorization: Bearer <token>
 ```
 
 **Query Parameters:**
+
 - `page` (number): Page number (default: 1)
 - `limit` (number): Items per page (default: 10, max: 100)
 - `status` (string): Filter by status
@@ -270,6 +288,7 @@ Authorization: Bearer <token>
 - `search` (string): Text search in title/description
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -341,6 +360,7 @@ Authorization: Bearer <token>
 ```
 
 ### Create New Complaint
+
 ```http
 POST /api/complaints
 Authorization: Bearer <token>
@@ -366,12 +386,14 @@ Content-Type: application/json
 ```
 
 ### Get Specific Complaint
+
 ```http
 GET /api/complaints/complaint_789
 Authorization: Bearer <token>
 ```
 
 ### Update Complaint Status
+
 ```http
 PUT /api/complaints/complaint_789/status
 Authorization: Bearer <token>
@@ -385,6 +407,7 @@ Content-Type: application/json
 ```
 
 ### Assign Complaint
+
 ```http
 PUT /api/complaints/complaint_789/assign
 Authorization: Bearer <token>
@@ -396,6 +419,7 @@ Content-Type: application/json
 ```
 
 ### Add Citizen Feedback
+
 ```http
 POST /api/complaints/complaint_789/feedback
 Authorization: Bearer <token>
@@ -414,6 +438,7 @@ Content-Type: application/json
 ## Guest Complaint Submission
 
 ### Submit Guest Complaint
+
 ```http
 POST /api/guest/complaint
 Content-Type: application/json
@@ -437,6 +462,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -451,6 +477,7 @@ Content-Type: application/json
 ```
 
 ### Verify OTP and Activate Complaint
+
 ```http
 POST /api/guest/verify-otp
 Content-Type: application/json
@@ -464,11 +491,13 @@ Content-Type: application/json
 ```
 
 ### Track Guest Complaint
+
 ```http
 GET /api/guest/track/CSC2024010150001?email=user@example.com
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -506,11 +535,13 @@ GET /api/guest/track/CSC2024010150001?email=user@example.com
 ## Public User Routes
 
 ### Get All Wards
+
 ```http
 GET /api/users/wards
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -540,12 +571,14 @@ GET /api/users/wards
 ## Admin User Management
 
 ### Get All Users (Admin)
+
 ```http
 GET /api/users?page=1&limit=20&role=CITIZEN&ward=ward_456&status=active
 Authorization: Bearer <admin-token>
 ```
 
 ### Create User (Admin)
+
 ```http
 POST /api/users
 Authorization: Bearer <admin-token>
@@ -568,12 +601,14 @@ Content-Type: application/json
 ## Dashboard Metrics
 
 ### Get Dashboard Data
+
 ```http
 GET /api/reports/dashboard
 Authorization: Bearer <token>
 ```
 
 **Response (Role-filtered):**
+
 ```json
 {
   "success": true,
@@ -611,12 +646,14 @@ Authorization: Bearer <token>
 ```
 
 ### Get Complaint Trends
+
 ```http
 GET /api/reports/trends?period=month&startDate=2024-01-01&endDate=2024-01-31
 Authorization: Bearer <token>
 ```
 
 ### Get SLA Compliance Report
+
 ```http
 GET /api/reports/sla?wardId=ward_456
 Authorization: Bearer <token>
@@ -627,6 +664,7 @@ Authorization: Bearer <token>
 # 📁 File Upload Management (`/api/uploads`)
 
 ## Upload Complaint Attachment
+
 ```http
 POST /api/uploads/complaint/complaint_789/attachment
 Content-Type: multipart/form-data
@@ -636,6 +674,7 @@ complaintAttachment: [file]
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -653,6 +692,7 @@ complaintAttachment: [file]
 ```
 
 ## Upload Profile Picture
+
 ```http
 POST /api/uploads/profile/picture
 Content-Type: multipart/form-data
@@ -662,6 +702,7 @@ profilePicture: [file]
 ```
 
 ## Download/View File
+
 ```http
 GET /api/uploads/file_789
 Authorization: Bearer <token> (if required)
@@ -674,24 +715,28 @@ Authorization: Bearer <token> (if required)
 ## System Statistics (Admin Only)
 
 ### Get User Statistics
+
 ```http
 GET /api/admin/stats/users
 Authorization: Bearer <admin-token>
 ```
 
 ### Get System-wide Statistics
+
 ```http
 GET /api/admin/stats/system
 Authorization: Bearer <admin-token>
 ```
 
 ### Get Comprehensive Analytics
+
 ```http
 GET /api/admin/analytics?startDate=2024-01-01&endDate=2024-01-31&ward=ward_456
 Authorization: Bearer <admin-token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -734,6 +779,7 @@ Authorization: Bearer <admin-token>
 ```
 
 ## Bulk User Operations
+
 ```http
 POST /api/admin/users/bulk
 Authorization: Bearer <admin-token>
@@ -752,11 +798,13 @@ Content-Type: application/json
 ## Complaint Types
 
 ### Get All Complaint Types
+
 ```http
 GET /api/complaint-types
 ```
 
 ### Create Complaint Type (Admin)
+
 ```http
 POST /api/complaint-types
 Authorization: Bearer <admin-token>
@@ -774,12 +822,14 @@ Content-Type: application/json
 ## System Configuration
 
 ### Get System Settings (Admin)
+
 ```http
 GET /api/system-config
 Authorization: Bearer <admin-token>
 ```
 
 ### Update System Setting (Admin)
+
 ```http
 PUT /api/system-config/MAX_FILE_SIZE
 Authorization: Bearer <admin-token>
@@ -796,11 +846,13 @@ Content-Type: application/json
 # 🏥 System Health & Utilities
 
 ## Health Check
+
 ```http
 GET /api/health
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -818,14 +870,17 @@ GET /api/health
 ```
 
 ## API Documentation
+
 ```http
 GET /api-docs
 ```
+
 Access Swagger UI for interactive API documentation.
 
 ```http
 GET /api/docs/json
 ```
+
 Get OpenAPI specification in JSON format.
 
 ---
@@ -833,6 +888,7 @@ Get OpenAPI specification in JSON format.
 # 🔒 Error Handling & Status Codes
 
 ## HTTP Status Codes
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request / Validation Error
@@ -848,6 +904,7 @@ Get OpenAPI specification in JSON format.
 ## Common Error Responses
 
 ### Validation Error
+
 ```json
 {
   "success": false,
@@ -867,6 +924,7 @@ Get OpenAPI specification in JSON format.
 ```
 
 ### Authentication Error
+
 ```json
 {
   "success": false,
@@ -876,6 +934,7 @@ Get OpenAPI specification in JSON format.
 ```
 
 ### Permission Error
+
 ```json
 {
   "success": false,
@@ -891,54 +950,62 @@ Get OpenAPI specification in JSON format.
 ## Complete Complaint Flow Example
 
 ### 1. User Authentication
+
 ```javascript
 // Login request
-const loginResponse = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const loginResponse = await fetch("/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    email: 'user@example.com',
-    password: 'userpassword'
-  })
+    email: "user@example.com",
+    password: "userpassword",
+  }),
 });
 
-const { data: { token, user } } = await loginResponse.json();
-localStorage.setItem('token', token);
+const {
+  data: { token, user },
+} = await loginResponse.json();
+localStorage.setItem("token", token);
 ```
 
 ### 2. Submit Complaint
+
 ```javascript
 // Create complaint
-const complaintResponse = await fetch('/api/complaints', {
-  method: 'POST',
+const complaintResponse = await fetch("/api/complaints", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
-    title: 'Street Light Issue',
-    description: 'Street light not working',
-    type: 'STREET_LIGHTING',
-    wardId: 'ward_456',
-    area: 'Kaloor',
-    coordinates: { latitude: 9.9816, longitude: 76.2999 }
-  })
+    title: "Street Light Issue",
+    description: "Street light not working",
+    type: "STREET_LIGHTING",
+    wardId: "ward_456",
+    area: "Kaloor",
+    coordinates: { latitude: 9.9816, longitude: 76.2999 },
+  }),
 });
 
 const { data: complaint } = await complaintResponse.json();
 ```
 
 ### 3. Upload Attachment
+
 ```javascript
 // Upload file
 const formData = new FormData();
-formData.append('complaintAttachment', fileInput.files[0]);
+formData.append("complaintAttachment", fileInput.files[0]);
 
-const uploadResponse = await fetch(`/api/uploads/complaint/${complaint.id}/attachment`, {
-  method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` },
-  body: formData
-});
+const uploadResponse = await fetch(
+  `/api/uploads/complaint/${complaint.id}/attachment`,
+  {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  },
+);
 ```
 
 This comprehensive API reference provides all the information needed to integrate with the Cochin Smart City Complaint Management System backend. Each endpoint includes example requests, responses, and proper error handling patterns.

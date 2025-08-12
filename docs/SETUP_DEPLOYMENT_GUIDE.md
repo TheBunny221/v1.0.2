@@ -3,6 +3,7 @@
 This comprehensive guide covers everything you need to know about setting up, deploying, and maintaining the Cochin Smart City Complaint Management System.
 
 ## 📋 Table of Contents
+
 1. [Prerequisites](#prerequisites)
 2. [Local Development Setup](#local-development-setup)
 3. [Database Setup](#database-setup)
@@ -20,6 +21,7 @@ This comprehensive guide covers everything you need to know about setting up, de
 ## 🛠️ Prerequisites
 
 ### System Requirements
+
 - **Node.js**: 18.0.0 or higher
 - **npm**: 9.0.0 or higher (or yarn 1.22.0+)
 - **Database**: SQLite (development) / PostgreSQL 13+ (production)
@@ -28,6 +30,7 @@ This comprehensive guide covers everything you need to know about setting up, de
 - **OS**: Windows 10+, macOS 10.15+, or Linux (Ubuntu 18.04+)
 
 ### Development Tools (Recommended)
+
 - **IDE**: Visual Studio Code with extensions:
   - TypeScript and JavaScript Language Features
   - Prettier - Code formatter
@@ -35,11 +38,12 @@ This comprehensive guide covers everything you need to know about setting up, de
   - Prisma
   - REST Client
 - **Git**: Version 2.25.0 or higher
-- **Database Tools**: 
+- **Database Tools**:
   - DBeaver (universal database tool)
   - Prisma Studio (built-in ORM tool)
 
 ### Browser Support
+
 - **Modern Browsers**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 - **Mobile**: iOS Safari 14+, Chrome Mobile 90+
 
@@ -48,6 +52,7 @@ This comprehensive guide covers everything you need to know about setting up, de
 ## 🚀 Local Development Setup
 
 ### 1. Clone the Repository
+
 ```bash
 # Clone the project
 git clone https://github.com/your-org/cochin-smart-city.git
@@ -59,6 +64,7 @@ npm --version   # Should be 9.0.0 or higher
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 # Install all dependencies (frontend + backend)
 npm install
@@ -68,6 +74,7 @@ npm list --depth=0
 ```
 
 ### 3. Environment Setup
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -77,6 +84,7 @@ nano .env  # or use your preferred editor
 ```
 
 ### 4. Database Initialization
+
 ```bash
 # Generate Prisma client
 npm run db:generate
@@ -92,6 +100,7 @@ npm run db:studio
 ```
 
 ### 5. Start Development Servers
+
 ```bash
 # Start both frontend and backend in development mode
 npm run dev
@@ -102,6 +111,7 @@ npm run dev:server    # Backend only (port 4005)
 ```
 
 ### 6. Verify Setup
+
 Once servers are running, verify the setup:
 
 - **Frontend**: http://localhost:3000
@@ -110,6 +120,7 @@ Once servers are running, verify the setup:
 - **Database Studio**: http://localhost:5555 (if running)
 
 **Expected Health Check Response:**
+
 ```json
 {
   "success": true,
@@ -127,6 +138,7 @@ Once servers are running, verify the setup:
 ## 🗄️ Database Setup
 
 ### SQLite (Development)
+
 SQLite is used by default for development with zero configuration:
 
 ```bash
@@ -140,6 +152,7 @@ npm run db:reset
 ### PostgreSQL (Production)
 
 #### 1. Install PostgreSQL
+
 ```bash
 # Ubuntu/Debian
 sudo apt update
@@ -154,6 +167,7 @@ brew services start postgresql
 ```
 
 #### 2. Create Database
+
 ```bash
 # Connect to PostgreSQL
 sudo -u postgres psql
@@ -166,12 +180,14 @@ GRANT ALL PRIVILEGES ON DATABASE cochin_smart_city TO cochin_user;
 ```
 
 #### 3. Update Environment
+
 ```bash
 # Update .env file
 DATABASE_URL="postgresql://cochin_user:your_secure_password@localhost:5432/cochin_smart_city"
 ```
 
 #### 4. Migrate to PostgreSQL
+
 ```bash
 # Push schema to PostgreSQL
 npm run db:push
@@ -186,6 +202,7 @@ npm run db:seed
 ### Database Backup & Restore
 
 #### SQLite Backup
+
 ```bash
 # Backup SQLite database
 cp dev.db backup-$(date +%Y%m%d-%H%M%S).db
@@ -195,6 +212,7 @@ cp backup-20240115-103045.db dev.db
 ```
 
 #### PostgreSQL Backup
+
 ```bash
 # Backup PostgreSQL database
 pg_dump -U cochin_user -h localhost cochin_smart_city > backup-$(date +%Y%m%d-%H%M%S).sql
@@ -208,6 +226,7 @@ psql -U cochin_user -h localhost cochin_smart_city < backup-20240115-103045.sql
 ## ⚙️ Environment Configuration
 
 ### Development Environment (`.env`)
+
 ```bash
 # Application
 NODE_ENV=development
@@ -250,6 +269,7 @@ LOG_FILE=./logs/app.log
 ```
 
 ### Production Environment
+
 ```bash
 # Application
 NODE_ENV=production
@@ -297,6 +317,7 @@ SENTRY_DSN=your-sentry-dsn-for-error-tracking
 ## 🔄 Development Workflow
 
 ### Daily Development
+
 ```bash
 # Start fresh development session
 git pull origin main
@@ -312,6 +333,7 @@ npm run test:e2e    # End-to-end tests (Cypress)
 ```
 
 ### Code Quality
+
 ```bash
 # Format code
 npm run format.fix
@@ -327,6 +349,7 @@ npm run pre-commit
 ```
 
 ### Database Management
+
 ```bash
 # View current data
 npm run db:studio
@@ -342,6 +365,7 @@ npm run db:migrate
 ```
 
 ### Testing Strategy
+
 ```bash
 # Unit tests (Vitest)
 npm run test:unit
@@ -367,6 +391,7 @@ npm run test:all
 ### Option 1: Traditional VPS/Server Deployment
 
 #### 1. Server Preparation
+
 ```bash
 # Update system
 sudo apt update && sudo apt upgrade -y
@@ -390,6 +415,7 @@ sudo usermod -aG sudo cochin-app
 ```
 
 #### 2. Application Deployment
+
 ```bash
 # Switch to application user
 sudo su - cochin-app
@@ -414,31 +440,34 @@ npm run db:seed
 ```
 
 #### 3. PM2 Configuration
+
 Create `ecosystem.config.js`:
+
 ```javascript
 module.exports = {
   apps: [
     {
-      name: 'cochin-smart-city',
-      script: 'npm',
-      args: 'start',
-      cwd: '/home/cochin-app/cochin-smart-city',
-      instances: 'max',
-      exec_mode: 'cluster',
+      name: "cochin-smart-city",
+      script: "npm",
+      args: "start",
+      cwd: "/home/cochin-app/cochin-smart-city",
+      instances: "max",
+      exec_mode: "cluster",
       env: {
-        NODE_ENV: 'production',
-        PORT: 4005
+        NODE_ENV: "production",
+        PORT: 4005,
       },
-      error_file: './logs/err.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
-      time: true
-    }
-  ]
+      error_file: "./logs/err.log",
+      out_file: "./logs/out.log",
+      log_file: "./logs/combined.log",
+      time: true,
+    },
+  ],
 };
 ```
 
 Start application:
+
 ```bash
 # Start with PM2
 pm2 start ecosystem.config.js
@@ -452,7 +481,9 @@ sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u cochin-app --hp /home/cochin
 ```
 
 #### 4. Nginx Configuration
+
 Create `/etc/nginx/sites-available/cochin-smart-city`:
+
 ```nginx
 server {
     listen 80;
@@ -487,7 +518,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # Increase timeouts for file uploads
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
@@ -498,7 +529,7 @@ server {
     location / {
         root /home/cochin-app/cochin-smart-city/dist/spa;
         try_files $uri $uri/ /index.html;
-        
+
         # Cache static assets
         location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
             expires 1y;
@@ -525,6 +556,7 @@ server {
 ```
 
 Enable site and restart Nginx:
+
 ```bash
 sudo ln -s /etc/nginx/sites-available/cochin-smart-city /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -534,6 +566,7 @@ sudo systemctl restart nginx
 ### Option 2: Docker Deployment
 
 #### 1. Dockerfile
+
 ```dockerfile
 # Multi-stage build
 FROM node:18-alpine AS builder
@@ -574,8 +607,9 @@ CMD ["dumb-init", "node", "dist/server/server.js"]
 ```
 
 #### 2. Docker Compose
+
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -623,6 +657,7 @@ volumes:
 ### Option 3: Cloud Platform Deployment
 
 #### Heroku
+
 ```bash
 # Install Heroku CLI
 npm install -g heroku
@@ -646,6 +681,7 @@ heroku run npm run db:migrate
 ```
 
 #### Vercel (Frontend + Serverless Backend)
+
 ```json
 // vercel.json
 {
@@ -676,30 +712,31 @@ heroku run npm run db:migrate
 ```
 
 #### DigitalOcean App Platform
+
 ```yaml
 # .do/app.yaml
 name: cochin-smart-city
 services:
-- name: web
-  source_dir: /
-  github:
-    repo: your-org/cochin-smart-city
-    branch: main
-  run_command: npm start
-  environment_slug: node-js
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  envs:
-  - key: NODE_ENV
-    value: production
-  - key: DATABASE_URL
-    value: ${db.DATABASE_URL}
+  - name: web
+    source_dir: /
+    github:
+      repo: your-org/cochin-smart-city
+      branch: main
+    run_command: npm start
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${db.DATABASE_URL}
 
 databases:
-- name: db
-  engine: PG
-  version: "13"
-  size_slug: db-s-1vcpu-1gb
+  - name: db
+    engine: PG
+    version: "13"
+    size_slug: db-s-1vcpu-1gb
 ```
 
 ---
@@ -707,9 +744,11 @@ databases:
 ## 🚨 Known Issues & Fixes
 
 ### Issue 1: TypeScript Compilation Errors
+
 **Problem**: Multiple TypeScript errors related to missing translation properties
 
 **Symptoms**:
+
 ```
 error TS2339: Property 'myComplaints' does not exist on type...
 error TS2339: Property 'admin' does not exist on type 'Translation'
@@ -718,6 +757,7 @@ error TS2339: Property 'admin' does not exist on type 'Translation'
 **Fixed**: ✅ Translation interface has been updated with all required properties
 
 **Resolution**: If you encounter similar issues:
+
 ```bash
 # Check for missing translation properties
 npm run typecheck
@@ -727,15 +767,18 @@ npm run typecheck
 ```
 
 ### Issue 2: Database Connection Issues
+
 **Problem**: SQLite database locked or connection refused
 
 **Symptoms**:
+
 ```
 Error: SQLITE_BUSY: database is locked
 Error: Cannot connect to database
 ```
 
 **Solutions**:
+
 ```bash
 # Check for existing connections
 lsof dev.db
@@ -752,15 +795,18 @@ sudo systemctl start postgresql
 ```
 
 ### Issue 3: Port Conflicts
+
 **Problem**: Development server fails to start due to port conflicts
 
 **Symptoms**:
+
 ```
 Error: listen EADDRINUSE: address already in use :::3000
 Error: listen EADDRINUSE: address already in use :::4005
 ```
 
 **Solutions**:
+
 ```bash
 # Find processes using ports
 lsof -ti:3000
@@ -776,9 +822,11 @@ PORT=4006 npm run dev:server
 ```
 
 ### Issue 4: File Upload Issues
+
 **Problem**: File uploads fail or return errors
 
 **Symptoms**:
+
 ```
 Error: File too large
 Error: Invalid file type
@@ -786,6 +834,7 @@ Error: Upload directory not writable
 ```
 
 **Solutions**:
+
 ```bash
 # Check upload directory permissions
 ls -la uploads/
@@ -801,15 +850,18 @@ df -h
 ```
 
 ### Issue 5: Environment Variable Issues
+
 **Problem**: Environment variables not loaded correctly
 
 **Symptoms**:
+
 ```
 JWT_SECRET is not defined
 Database URL is undefined
 ```
 
 **Solutions**:
+
 ```bash
 # Verify .env file exists
 ls -la .env
@@ -822,14 +874,17 @@ npm run dev
 ```
 
 ### Issue 6: CORS Issues in Production
+
 **Problem**: Frontend cannot connect to backend API
 
 **Symptoms**:
+
 ```
 Access to fetch at 'https://api.domain.com' from origin 'https://frontend.domain.com' has been blocked by CORS policy
 ```
 
 **Solutions**:
+
 ```bash
 # Update CORS_ORIGIN in production .env
 CORS_ORIGIN=https://frontend.domain.com,https://www.frontend.domain.com
@@ -843,9 +898,11 @@ sudo systemctl restart nginx
 ```
 
 ### Issue 7: JWT Token Expiration
+
 **Problem**: Users getting logged out frequently
 
 **Symptoms**:
+
 ```
 Token expired
 Invalid token
@@ -853,6 +910,7 @@ Unauthorized access
 ```
 
 **Solutions**:
+
 ```bash
 # Increase JWT expiry time
 JWT_EXPIRES_IN=7d  # 7 days instead of 24h
@@ -862,14 +920,17 @@ JWT_EXPIRES_IN=7d  # 7 days instead of 24h
 ```
 
 ### Issue 8: Performance Issues
+
 **Problem**: Slow page loads and API responses
 
 **Symptoms**:
+
 - Slow complaint list loading
 - Large bundle sizes
 - Database query timeouts
 
 **Solutions**:
+
 ```bash
 # Optimize database queries
 npm run db:studio
@@ -889,6 +950,7 @@ npx webpack-bundle-analyzer dist/spa/static/js/*.js
 ## 🔧 Performance Optimization
 
 ### Frontend Optimization
+
 ```bash
 # Bundle size analysis
 npm run build:analyze
@@ -904,11 +966,12 @@ npm run build:analyze
 ```
 
 ### Backend Optimization
+
 ```javascript
 // Database query optimization
 // Add indexes for frequently queried fields
-await prisma.$executeRaw`CREATE INDEX idx_complaints_status ON complaints(status);`
-await prisma.$executeRaw`CREATE INDEX idx_complaints_ward ON complaints(wardId);`
+await prisma.$executeRaw`CREATE INDEX idx_complaints_status ON complaints(status);`;
+await prisma.$executeRaw`CREATE INDEX idx_complaints_ward ON complaints(wardId);`;
 
 // Connection pooling
 const datasource = {
@@ -918,12 +981,13 @@ const datasource = {
     max: 20,
     min: 5,
     acquire: 30000,
-    idle: 10000
-  }
-}
+    idle: 10000,
+  },
+};
 ```
 
 ### Nginx Optimization
+
 ```nginx
 # Enable HTTP/2
 listen 443 ssl http2;
@@ -959,6 +1023,7 @@ location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
 ## 🔒 Security Considerations
 
 ### Environment Security
+
 ```bash
 # Use strong JWT secrets (minimum 32 characters)
 JWT_SECRET=$(openssl rand -base64 32)
@@ -971,30 +1036,34 @@ DATABASE_URL="postgresql://username:$(openssl rand -base64 32)@localhost:5432/db
 ```
 
 ### Application Security
+
 ```javascript
 // Helmet configuration for security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'"]
-    }
-  }
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        scriptSrc: ["'self'"],
+      },
+    },
+  }),
+);
 
 // Rate limiting per endpoint
 const strictLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5 // limit each IP to 5 requests per windowMs
+  max: 5, // limit each IP to 5 requests per windowMs
 });
 
-app.use('/api/auth/login', strictLimit);
+app.use("/api/auth/login", strictLimit);
 ```
 
 ### Database Security
+
 ```sql
 -- Create read-only user for analytics
 CREATE USER analytics_user WITH PASSWORD 'readonly_password';
@@ -1009,6 +1078,7 @@ pg_dump -U username dbname | gpg --cipher-algo AES256 --compress-algo 1 --symmet
 ## 📊 Monitoring & Maintenance
 
 ### Health Monitoring
+
 ```bash
 # Setup health check endpoint monitoring
 curl -f http://localhost:4005/api/health || exit 1
@@ -1022,6 +1092,7 @@ pm2 logs cochin-smart-city
 ```
 
 ### Database Maintenance
+
 ```bash
 # Regular database backups
 0 2 * * * /home/cochin-app/scripts/backup-db.sh
@@ -1032,6 +1103,7 @@ PRAGMA optimize; -- SQLite
 ```
 
 ### Log Management
+
 ```bash
 # Rotate logs
 sudo logrotate -f /etc/logrotate.d/cochin-smart-city
@@ -1041,6 +1113,7 @@ find ./logs -name "*.log" -mtime +30 -delete
 ```
 
 ### Update Process
+
 ```bash
 # Update dependencies
 npm update
@@ -1058,6 +1131,7 @@ pm2 reload ecosystem.config.js
 ## 🔍 Troubleshooting
 
 ### Debug Mode
+
 ```bash
 # Start in debug mode
 DEBUG=* npm run dev
@@ -1070,6 +1144,7 @@ DATABASE_LOGGING=true npm run dev
 ```
 
 ### Common Diagnostics
+
 ```bash
 # Check system resources
 free -h          # Memory usage
@@ -1092,6 +1167,7 @@ curl -X POST http://localhost:4005/api/auth/login \
 ```
 
 ### Recovery Procedures
+
 ```bash
 # Application crash recovery
 pm2 restart all

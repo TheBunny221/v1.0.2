@@ -18,6 +18,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: React 18 with TypeScript
 - **Routing**: React Router 6 (SPA mode)
 - **State Management**: Redux Toolkit
@@ -28,6 +29,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 - **Form Handling**: React Hook Form with Zod validation
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: SQLite (development) / PostgreSQL (production) via Prisma ORM
@@ -37,6 +39,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 - **Documentation**: Swagger/OpenAPI 3.0
 
 ### Development Tools
+
 - **Testing**: Vitest for unit tests, Cypress for E2E
 - **Type Checking**: TypeScript with strict mode
 - **Code Quality**: Prettier for formatting
@@ -90,6 +93,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 ## Architecture Overview
 
 ### Frontend Architecture
+
 - **Single Page Application (SPA)** with client-side routing
 - **Component-based architecture** with reusable UI components
 - **Redux Toolkit** for predictable state management
@@ -98,6 +102,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 - **Error boundaries** for graceful error handling
 
 ### Backend Architecture
+
 - **RESTful API** design with JSON responses
 - **Layered architecture**: Routes → Controllers → Models
 - **JWT-based authentication** with refresh token support
@@ -106,6 +111,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 - **Structured error handling** with consistent error responses
 
 ### Database Design
+
 - **Normalized relational schema** with referential integrity
 - **User roles and permissions** system
 - **Complaint lifecycle tracking** with status history
@@ -115,29 +121,34 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 ## User Roles & Permissions
 
 ### 1. Guest
+
 - Submit anonymous complaints
 - Track complaint status with ID
 - View public information
 
 ### 2. Citizen
+
 - Register and manage personal account
 - Submit complaints with full tracking
 - View personal complaint history
 - Update profile and preferences
 
 ### 3. Ward Officer
+
 - View and manage complaints in assigned ward
 - Assign complaints to maintenance teams
 - Update complaint status and add remarks
 - Generate ward-specific reports
 
 ### 4. Maintenance Team
+
 - View assigned tasks/complaints
 - Update work progress and status
 - Upload completion evidence
 - Communicate with ward officers
 
 ### 5. Administrator
+
 - Full system access and configuration
 - User management and role assignment
 - System analytics and reporting
@@ -147,6 +158,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 ## Core Features
 
 ### Complaint Management
+
 - **Multi-channel submission**: Web form, mobile-responsive interface
 - **Rich complaint details**: Type, description, location, attachments
 - **Automatic assignment**: Rule-based routing to appropriate ward/team
@@ -154,12 +166,14 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 - **SLA monitoring**: Automatic deadline tracking and escalation alerts
 
 ### User Management
+
 - **Multi-factor authentication**: Password + OTP support
 - **Role-based dashboards**: Customized interface per user type
 - **Profile management**: Personal information and preferences
 - **Password management**: Secure reset and change functionality
 
 ### Analytics & Reporting
+
 - **Real-time dashboards**: Key metrics and performance indicators
 - **Complaint analytics**: Status distribution, trend analysis
 - **SLA compliance tracking**: On-time resolution rates
@@ -167,6 +181,7 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 - **Export capabilities**: PDF/Excel report generation
 
 ### Communication
+
 - **Internal messaging**: Ward officers ↔ Maintenance teams
 - **Status notifications**: Email/SMS alerts for status changes
 - **Feedback system**: Citizen satisfaction ratings
@@ -175,11 +190,13 @@ A comprehensive full-stack complaint management system built for Cochin Smart Ci
 ## Development Environment
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - SQLite (development) or PostgreSQL (production)
 - Git for version control
 
 ### Quick Start
+
 ```bash
 # Install dependencies
 npm install
@@ -197,6 +214,7 @@ npm run dev
 ```
 
 ### Available Scripts
+
 - `npm run dev` - Start both frontend and backend in development mode
 - `npm run build` - Build for production
 - `npm run start` - Start production server
@@ -208,12 +226,14 @@ npm run dev
 ## Production Deployment
 
 ### Build Process
+
 ```bash
 npm run build        # Build client and server
 npm run start:prod   # Start production server
 ```
 
 ### Environment Variables
+
 ```bash
 NODE_ENV=production
 PORT=4005
@@ -223,6 +243,7 @@ CORS_ORIGIN=https://your-domain.com
 ```
 
 ### Deployment Options
+
 - **Traditional hosting**: VPS/dedicated server with PM2
 - **Cloud platforms**: Heroku, Railway, DigitalOcean App Platform
 - **Containerization**: Docker support available
