@@ -16,8 +16,10 @@ export const useCustomRegister = () => {
 
   const register = async (data: RegisterData) => {
     setIsLoading(true);
-    
+
     try {
+      console.log("Making fetch request to /api/auth/register with data:", data);
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -27,7 +29,23 @@ export const useCustomRegister = () => {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      console.log("Fetch response received:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      let result;
+      try {
+        result = await response.json();
+        console.log("Parsed JSON result:", result);
+      } catch (jsonError) {
+        console.error("Failed to parse response as JSON:", jsonError);
+        const textResult = await response.text();
+        console.log("Response as text:", textResult);
+        throw new Error(`Invalid JSON response: ${textResult}`);
+      }
 
       if (!response.ok) {
         // Create an error object that matches RTK Query structure
@@ -41,20 +59,33 @@ export const useCustomRegister = () => {
 
       return result;
     } catch (error: any) {
-      console.log("Caught error in useCustomRegister:", error);
+      console.log("Caught error in useCustomRegister:");
+      console.log("Error name:", error.name);
+      console.log("Error message:", error.message);
+      console.log("Error stack:", error.stack);
+      console.log("Full error object:", error);
+
+      // Check if this is already a structured error from our API response handling
+      if (error.status && error.data) {
+        console.log("Re-throwing structured API error:", error);
+        throw error;
+      }
 
       // If it's a fetch error, wrap it properly
       if (error.name === "TypeError" || error.message?.includes("fetch")) {
-        console.log("Network error detected, wrapping...");
+        console.log("Network/TypeError detected, wrapping...");
         throw {
           status: 500,
-          data: { message: "Network error. Please check your connection and try again." },
+          data: { message: `Network error: ${error.message}. Please check your connection and try again.` },
         };
       }
 
-      // Re-throw the error as-is if it's already structured
-      console.log("Re-throwing structured error:", error);
-      throw error;
+      // For other errors, wrap them with more detail
+      console.log("Wrapping unexpected error:", error);
+      throw {
+        status: 500,
+        data: { message: `Registration failed: ${error.message || 'Unknown error'}` },
+      };
     } finally {
       setIsLoading(false);
     }
