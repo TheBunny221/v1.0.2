@@ -240,14 +240,14 @@ const Profile: React.FC = () => {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">{user.name}</h3>
+                  <h3 className="text-xl font-semibold">{user.fullName}</h3>
                   <Badge className={getRoleColor(user.role)}>
-                    {user.role.replace("-", " ").toUpperCase()}
+                    {user.role.replace("_", " ").toUpperCase()}
                   </Badge>
                   {user.ward && (
                     <p className="text-sm text-muted-foreground flex items-center">
                       <MapPin className="h-4 w-4 mr-1" />
-                      {user.ward}
+                      {user.ward.name}
                     </p>
                   )}
                   {user.department && (
