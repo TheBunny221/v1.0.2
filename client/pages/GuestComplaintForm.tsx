@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import { selectAuth, getDashboardRouteForRole } from "../store/slices/authSlice";
 import {
-  useSubmitGuestComplaintMutation,
-} from "../store/api/guestApi";
+  selectAuth,
+  getDashboardRouteForRole,
+} from "../store/slices/authSlice";
+import { useSubmitGuestComplaintMutation } from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -77,9 +78,12 @@ const GuestComplaintForm: React.FC = () => {
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // API hooks
-  const [submitGuestComplaint, { isLoading: isSubmitting }] = useSubmitGuestComplaintMutation();
+  const [submitGuestComplaint, { isLoading: isSubmitting }] =
+    useSubmitGuestComplaintMutation();
 
-  const [submissionStep, setSubmissionStep] = useState<"form" | "success">("form");
+  const [submissionStep, setSubmissionStep] = useState<"form" | "success">(
+    "form",
+  );
   const [complaintId, setComplaintId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -176,12 +180,14 @@ const GuestComplaintForm: React.FC = () => {
           email: formData.email,
           complaintId: result.data.complaintId,
           title: "Verify Your Complaint",
-          description: "Enter the verification code sent to your email to complete your complaint submission and create your account",
+          description:
+            "Enter the verification code sent to your email to complete your complaint submission and create your account",
           onSuccess: (data) => {
             setSubmissionStep("success");
             toast({
               title: "Success!",
-              description: "Your complaint has been verified and you've been registered as a citizen.",
+              description:
+                "Your complaint has been verified and you've been registered as a citizen.",
             });
           },
         });
@@ -194,7 +200,8 @@ const GuestComplaintForm: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit complaint. Please try again.",
+        description:
+          error.message || "Failed to submit complaint. Please try again.",
         variant: "destructive",
       });
     }
@@ -248,7 +255,8 @@ const GuestComplaintForm: React.FC = () => {
                     Welcome to Cochin Smart City!
                   </h2>
                   <p className="text-green-700 mt-2">
-                    Your complaint has been verified and you've been registered as a citizen.
+                    Your complaint has been verified and you've been registered
+                    as a citizen.
                   </p>
                 </div>
 
@@ -266,8 +274,8 @@ const GuestComplaintForm: React.FC = () => {
                   <Shield className="h-4 w-4" />
                   <AlertDescription className="text-amber-700">
                     <strong>Security Tip:</strong> Set a password in your
-                    profile settings for easier future logins, or continue
-                    using OTP login.
+                    profile settings for easier future logins, or continue using
+                    OTP login.
                   </AlertDescription>
                 </Alert>
 
@@ -318,7 +326,6 @@ const GuestComplaintForm: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-
             <form onSubmit={handleComplaintSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="space-y-4">

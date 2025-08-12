@@ -9,9 +9,7 @@ import {
   selectRequiresPasswordSetup,
   getDashboardRouteForRole,
 } from "../store/slices/authSlice";
-import {
-  useRequestOTPLoginMutation,
-} from "../store/api/authApi";
+import { useRequestOTPLoginMutation } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -30,13 +28,7 @@ import {
 } from "../components/ui/tabs";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Home,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Home } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { useOtpFlow } from "../contexts/OtpContext";
 
@@ -46,11 +38,13 @@ const Login: React.FC = () => {
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
 
-  const { isLoading, error, isAuthenticated, user } = useAppSelector(selectAuth);
+  const { isLoading, error, isAuthenticated, user } =
+    useAppSelector(selectAuth);
   const requiresPasswordSetup = useAppSelector(selectRequiresPasswordSetup);
 
   // API hooks
-  const [requestOTPLogin, { isLoading: isRequestingOtp }] = useRequestOTPLoginMutation();
+  const [requestOTPLogin, { isLoading: isRequestingOtp }] =
+    useRequestOTPLoginMutation();
 
   // Form states
   const [loginMethod, setLoginMethod] = useState<"password" | "otp">(
@@ -145,7 +139,6 @@ const Login: React.FC = () => {
     }
   };
 
-
   const handlePasswordSetupRequest = async () => {
     try {
       await dispatch(
@@ -162,7 +155,6 @@ const Login: React.FC = () => {
       // Error is handled by the reducer
     }
   };
-
 
   // Demo credentials for testing
   const demoCredentials = [

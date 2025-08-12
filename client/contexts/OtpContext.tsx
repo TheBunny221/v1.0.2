@@ -93,7 +93,9 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
 
           case "guestComplaint":
             if (!config.complaintId) {
-              throw new Error("Complaint ID is required for guest verification");
+              throw new Error(
+                "Complaint ID is required for guest verification",
+              );
             }
             result = await verifyGuestOtp({
               email: config.email,
@@ -122,7 +124,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
             setCredentials({
               token: result.data.token,
               user: result.data.user,
-            })
+            }),
           );
 
           localStorage.setItem("token", result.data.token);
@@ -161,7 +163,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
       verifyRegisterOtp,
       verifyGuestOtp,
       toast,
-    ]
+    ],
   );
 
   const handleResend = useCallback(async () => {

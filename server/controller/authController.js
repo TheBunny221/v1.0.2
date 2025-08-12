@@ -126,7 +126,8 @@ export const register = asyncHandler(async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Registration initiated. Please check your email for verification code.",
+      message:
+        "Registration initiated. Please check your email for verification code.",
       data: {
         requiresOtpVerification: true,
         email: user.email,

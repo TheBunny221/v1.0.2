@@ -551,15 +551,52 @@ export const getPublicWards = asyncHandler(async (req, res) => {
 export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
   // Static complaint types for now - these could be stored in database if needed
   const complaintTypes = [
-    { id: "WATER_SUPPLY", name: "Water Supply", description: "Water related issues including supply, quality, and leakage" },
-    { id: "ELECTRICITY", name: "Electricity", description: "Power outages, faulty connections, and electrical issues" },
-    { id: "ROAD_REPAIR", name: "Road Repair", description: "Potholes, damaged roads, and road maintenance" },
-    { id: "GARBAGE_COLLECTION", name: "Garbage Collection", description: "Waste management and garbage collection issues" },
-    { id: "STREET_LIGHTING", name: "Street Lighting", description: "Street light repairs and new installations" },
-    { id: "SEWERAGE", name: "Sewerage", description: "Drainage, sewage blockages, and sanitation issues" },
-    { id: "PUBLIC_HEALTH", name: "Public Health", description: "Health and hygiene related public issues" },
-    { id: "TRAFFIC", name: "Traffic", description: "Traffic management, signals, and road safety" },
-    { id: "OTHERS", name: "Others", description: "Other civic issues not covered in above categories" },
+    {
+      id: "WATER_SUPPLY",
+      name: "Water Supply",
+      description:
+        "Water related issues including supply, quality, and leakage",
+    },
+    {
+      id: "ELECTRICITY",
+      name: "Electricity",
+      description: "Power outages, faulty connections, and electrical issues",
+    },
+    {
+      id: "ROAD_REPAIR",
+      name: "Road Repair",
+      description: "Potholes, damaged roads, and road maintenance",
+    },
+    {
+      id: "GARBAGE_COLLECTION",
+      name: "Garbage Collection",
+      description: "Waste management and garbage collection issues",
+    },
+    {
+      id: "STREET_LIGHTING",
+      name: "Street Lighting",
+      description: "Street light repairs and new installations",
+    },
+    {
+      id: "SEWERAGE",
+      name: "Sewerage",
+      description: "Drainage, sewage blockages, and sanitation issues",
+    },
+    {
+      id: "PUBLIC_HEALTH",
+      name: "Public Health",
+      description: "Health and hygiene related public issues",
+    },
+    {
+      id: "TRAFFIC",
+      name: "Traffic",
+      description: "Traffic management, signals, and road safety",
+    },
+    {
+      id: "OTHERS",
+      name: "Others",
+      description: "Other civic issues not covered in above categories",
+    },
   ];
 
   res.status(200).json({

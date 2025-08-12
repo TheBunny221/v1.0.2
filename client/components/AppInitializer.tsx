@@ -43,7 +43,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
               setCredentials({
                 token,
                 user: userResponse.data.user,
-              })
+              }),
             );
           } else if (userError) {
             // Token is invalid or expired - clear it

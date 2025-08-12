@@ -96,7 +96,8 @@ const Register: React.FC = () => {
           context: "register",
           email: formData.email,
           title: "Complete Registration",
-          description: "Enter the verification code sent to your email to activate your account",
+          description:
+            "Enter the verification code sent to your email to activate your account",
           onSuccess: (data) => {
             toast({
               title: "Registration Successful!",
@@ -126,7 +127,6 @@ const Register: React.FC = () => {
       });
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -267,11 +267,7 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isRegistering}
-              >
+              <Button type="submit" className="w-full" disabled={isRegistering}>
                 {isRegistering ? "Creating Account..." : "Create Account"}
               </Button>
             </form>

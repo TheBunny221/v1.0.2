@@ -31,7 +31,11 @@ router.post("/login", validateLogin, login);
 router.post("/login-otp", validateOTPRequest, loginWithOTP);
 router.post("/verify-otp", validateOTP, verifyOTPLogin);
 router.post("/verify-registration-otp", validateOTP, verifyRegistrationOTP);
-router.post("/resend-registration-otp", validateOTPRequest, resendRegistrationOTP);
+router.post(
+  "/resend-registration-otp",
+  validateOTPRequest,
+  resendRegistrationOTP,
+);
 router.post("/send-password-setup", sendPasswordSetup);
 router.post("/set-password/:token", setPassword);
 router.post("/logout", logout); // Logout should be accessible even with invalid tokens

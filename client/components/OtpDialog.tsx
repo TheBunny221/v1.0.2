@@ -120,7 +120,7 @@ const OtpDialog: React.FC<OtpDialogProps> = ({
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text/plain");
     const digits = pastedData.replace(/\D/g, "").slice(0, 6);
-    
+
     if (digits.length > 0) {
       setOtpCode(digits.padEnd(6, ""));
       // Focus the next empty input or the last one
@@ -162,28 +162,35 @@ const OtpDialog: React.FC<OtpDialogProps> = ({
       case "login":
         return {
           title: title || "Verify Your Identity",
-          description: description || "Enter the 6-digit code sent to your email to login",
+          description:
+            description || "Enter the 6-digit code sent to your email to login",
           submitText: "Verify & Login",
           icon: "🔐",
         };
       case "register":
         return {
           title: title || "Complete Registration",
-          description: description || "Enter the 6-digit code sent to your email to activate your account",
+          description:
+            description ||
+            "Enter the 6-digit code sent to your email to activate your account",
           submitText: "Verify & Complete Registration",
           icon: "✨",
         };
       case "guestComplaint":
         return {
           title: title || "Verify Your Complaint",
-          description: description || "Enter the 6-digit code sent to your email to complete your complaint submission",
+          description:
+            description ||
+            "Enter the 6-digit code sent to your email to complete your complaint submission",
           submitText: "Verify & Activate Complaint",
           icon: "📝",
         };
       case "complaintAuth":
         return {
           title: title || "Verify Your Access",
-          description: description || "Enter the 6-digit code sent to your email to access this complaint",
+          description:
+            description ||
+            "Enter the 6-digit code sent to your email to access this complaint",
           submitText: "Verify & Continue",
           icon: "🔍",
         };
@@ -241,7 +248,7 @@ const OtpDialog: React.FC<OtpDialogProps> = ({
                   className={cn(
                     "w-12 h-12 text-center text-lg font-mono border-2",
                     "focus:border-primary focus:ring-2 focus:ring-primary/20",
-                    otpCode[index] && "border-primary bg-primary/5"
+                    otpCode[index] && "border-primary bg-primary/5",
                   )}
                   aria-label={`OTP digit ${index + 1}`}
                 />

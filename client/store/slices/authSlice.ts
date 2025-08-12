@@ -513,7 +513,10 @@ const authSlice = createSlice({
       state.registrationStep = "none";
       state.registrationData = undefined;
     },
-    setCredentials: (state, action: PayloadAction<{ token: string; user: User }>) => {
+    setCredentials: (
+      state,
+      action: PayloadAction<{ token: string; user: User }>,
+    ) => {
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.isAuthenticated = true;
