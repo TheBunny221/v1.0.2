@@ -50,22 +50,35 @@ const CitizenDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    // Calculate dashboard statistics
-    const total = complaints.length;
-    const pending = complaints.filter((c) => c.status === "REGISTERED").length;
-    const inProgress = complaints.filter(
-      (c) => c.status === "IN_PROGRESS",
-    ).length;
-    const resolved = complaints.filter((c) => c.status === "RESOLVED").length;
+    // Calculate dashboard statistics from complaints or use stats API
+    if (statsResponse?.data) {
+      // Use API stats if available
+      const stats = statsResponse.data;
+      setDashboardStats({
+        total: stats.total,
+        pending: stats.byStatus?.REGISTERED || 0,
+        inProgress: stats.byStatus?.IN_PROGRESS || 0,
+        resolved: stats.byStatus?.RESOLVED || 0,
+        avgResolutionTime: stats.avgResolutionTime || 0,
+      });
+    } else {
+      // Calculate from complaints list as fallback
+      const total = complaints.length;
+      const pending = complaints.filter((c) => c.status === "REGISTERED").length;
+      const inProgress = complaints.filter(
+        (c) => c.status === "IN_PROGRESS",
+      ).length;
+      const resolved = complaints.filter((c) => c.status === "RESOLVED").length;
 
-    setDashboardStats({
-      total,
-      pending,
-      inProgress,
-      resolved,
-      avgResolutionTime: 3.2, // Mock data - calculate from actual data
-    });
-  }, [complaints]);
+      setDashboardStats({
+        total,
+        pending,
+        inProgress,
+        resolved,
+        avgResolutionTime: 0, // Will be calculated by backend stats API
+      });
+    }
+  }, [complaints, statsResponse]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
