@@ -63,7 +63,7 @@ const Register: React.FC = () => {
 
     if (formData.password !== formData.confirmPassword) {
       dispatch(
-        addNotification({
+        showToast({
           type: "error",
           title: "Password Mismatch",
           message: "Passwords do not match",
@@ -73,7 +73,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      await dispatch(
+      const result = await dispatch(
         register({
           fullName: formData.fullName,
           email: formData.email,
@@ -84,21 +84,32 @@ const Register: React.FC = () => {
         }),
       ).unwrap();
 
+      if (result.requiresOtpVerification) {
+        // OTP verification required
+        dispatch(
+          showToast({
+            type: "success",
+            title: "Registration Successful!",
+            message: "Please check your email for the verification code.",
+          }),
+        );
+      } else {
+        // Direct registration without OTP
+        dispatch(
+          showToast({
+            type: "success",
+            title: "Registration Successful!",
+            message: "Account created successfully! Welcome aboard!",
+          }),
+        );
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
       dispatch(
-        addNotification({
-          type: "success",
-          title: "Registration Successful",
-          message: "Account created successfully! Please login.",
-        }),
-      );
-      navigate("/login");
-    } catch (error) {
-      dispatch(
-        addNotification({
+        showToast({
           type: "error",
           title: "Registration Failed",
-          message:
-            error instanceof Error ? error.message : "Failed to create account",
+          message: error.message || "Failed to create account",
         }),
       );
     }
