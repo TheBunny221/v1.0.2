@@ -315,26 +315,38 @@ const ComplaintDetails: React.FC = () => {
                 <div className="flex space-x-2">
                   {complaint.status === "REGISTERED" &&
                     user?.role === "WARD_OFFICER" && (
-                      <Button onClick={() => handleStatusUpdate("ASSIGNED")}>
-                        Assign
+                      <Button
+                        onClick={() => handleStatusUpdate("ASSIGNED")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Assigning..." : "Assign"}
                       </Button>
                     )}
                   {complaint.status === "ASSIGNED" &&
                     user?.role === "MAINTENANCE_TEAM" && (
-                      <Button onClick={() => handleStatusUpdate("IN_PROGRESS")}>
-                        Start Work
+                      <Button
+                        onClick={() => handleStatusUpdate("IN_PROGRESS")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Starting..." : "Start Work"}
                       </Button>
                     )}
                   {complaint.status === "IN_PROGRESS" &&
                     user?.role === "MAINTENANCE_TEAM" && (
-                      <Button onClick={() => handleStatusUpdate("RESOLVED")}>
-                        Mark Resolved
+                      <Button
+                        onClick={() => handleStatusUpdate("RESOLVED")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Resolving..." : "Mark Resolved"}
                       </Button>
                     )}
                   {complaint.status === "RESOLVED" &&
                     user?.role === "WARD_OFFICER" && (
-                      <Button onClick={() => handleStatusUpdate("CLOSED")}>
-                        Close Complaint
+                      <Button
+                        onClick={() => handleStatusUpdate("CLOSED")}
+                        disabled={isUpdatingStatus}
+                      >
+                        {isUpdatingStatus ? "Closing..." : "Close Complaint"}
                       </Button>
                     )}
                 </div>
