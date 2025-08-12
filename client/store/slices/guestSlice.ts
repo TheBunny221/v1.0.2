@@ -12,6 +12,12 @@ export interface AttachmentFile {
   error?: string;
 }
 
+// Interface for holding actual files temporarily (not stored in Redux)
+export interface FileAttachment {
+  id: string;
+  file: File;
+}
+
 export interface GuestComplaintData {
   // Step 1: Details
   fullName: string;
@@ -241,7 +247,10 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 // Async thunks
 export const submitGuestComplaint = createAsyncThunk(
   "guest/submitComplaint",
-  async (complaintData: GuestComplaintData, { rejectWithValue }) => {
+  async (
+    { complaintData, files }: { complaintData: GuestComplaintData; files: FileAttachment[] },
+    { rejectWithValue }
+  ) => {
     try {
       // Create FormData for file uploads
       const formData = new FormData();
@@ -270,8 +279,12 @@ export const submitGuestComplaint = createAsyncThunk(
         );
       }
 
-      // Note: Actual files will be handled separately in the component
-      // This thunk now expects the files to be passed separately or handled differently
+      // Add attachments
+      if (files && files.length > 0) {
+        files.forEach((fileAttachment) => {
+          formData.append(`attachments`, fileAttachment.file);
+        });
+      }
 
       const response = await fetch("/api/guest/complaint", {
         method: "POST",
