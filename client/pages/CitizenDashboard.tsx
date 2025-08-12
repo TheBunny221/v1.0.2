@@ -53,6 +53,7 @@ const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Use RTK Query for better authentication handling
   const {
