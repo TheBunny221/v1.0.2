@@ -41,6 +41,7 @@ export const validateRegistration = [
     .withMessage("Please provide a valid phone number"),
 
   body("password")
+    .optional()
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters")
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
@@ -430,6 +431,16 @@ export const validateOTP = [
     .isLength({ min: 6, max: 6 })
     .isNumeric()
     .withMessage("OTP must be a 6-digit number"),
+
+  handleValidationErrors,
+];
+
+// OTP request validation (for login/registration)
+export const validateOTPRequest = [
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
 
   handleValidationErrors,
 ];

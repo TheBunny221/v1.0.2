@@ -4,6 +4,8 @@ import {
   login,
   loginWithOTP,
   verifyOTPLogin,
+  verifyRegistrationOTP,
+  resendRegistrationOTP,
   sendPasswordSetup,
   setPassword,
   logout,
@@ -17,6 +19,7 @@ import {
   validateRegistration,
   validateLogin,
   validateOTP,
+  validateOTPRequest,
   validatePasswordChange,
 } from "../middleware/validation.js";
 
@@ -25,8 +28,14 @@ const router = express.Router();
 // Public routes
 router.post("/register", validateRegistration, register);
 router.post("/login", validateLogin, login);
-router.post("/login-otp", loginWithOTP);
+router.post("/login-otp", validateOTPRequest, loginWithOTP);
 router.post("/verify-otp", validateOTP, verifyOTPLogin);
+router.post("/verify-registration-otp", validateOTP, verifyRegistrationOTP);
+router.post(
+  "/resend-registration-otp",
+  validateOTPRequest,
+  resendRegistrationOTP,
+);
 router.post("/send-password-setup", sendPasswordSetup);
 router.post("/set-password/:token", setPassword);
 router.post("/logout", logout); // Logout should be accessible even with invalid tokens

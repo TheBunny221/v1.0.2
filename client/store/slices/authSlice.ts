@@ -513,6 +513,31 @@ const authSlice = createSlice({
       state.registrationStep = "none";
       state.registrationData = undefined;
     },
+    setCredentials: (
+      state,
+      action: PayloadAction<{ token: string; user: User }>,
+    ) => {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+      state.error = null;
+      state.isLoading = false;
+      // Persist token to localStorage
+      localStorage.setItem("token", action.payload.token);
+    },
+    clearCredentials: (state) => {
+      state.token = null;
+      state.user = null;
+      state.isAuthenticated = false;
+      state.error = null;
+      state.isLoading = false;
+      state.otpStep = "none";
+      state.requiresPasswordSetup = false;
+      state.registrationStep = "none";
+      state.registrationData = undefined;
+      // Remove token from localStorage
+      localStorage.removeItem("token");
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -771,6 +796,8 @@ export const {
   resetOTPState,
   setRequiresPasswordSetup,
   resetRegistrationState,
+  setCredentials,
+  clearCredentials,
 } = authSlice.actions;
 
 // Export common actions with backward compatibility

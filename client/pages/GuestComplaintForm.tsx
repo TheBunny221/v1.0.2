@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import {
-  submitGuestComplaint,
-  verifyOTPAndRegister,
-  resendOTP,
-  clearError,
-  clearGuestData,
-  selectGuestState,
-  selectSubmissionStep,
-  selectComplaintId,
-  selectUserEmail,
-  selectNewUserRegistered,
-} from "../store/slices/guestSlice";
+  selectAuth,
+  getDashboardRouteForRole,
+} from "../store/slices/authSlice";
+import { useSubmitGuestComplaintMutation } from "../store/api/guestApi";
+import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -78,17 +72,19 @@ const PRIORITIES = [
 ];
 
 const GuestComplaintForm: React.FC = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { openOtpFlow } = useOtpFlow();
+  const { isAuthenticated, user } = useAppSelector(selectAuth);
 
-  const { isSubmitting, isVerifying, error, otpExpiry } =
-    useAppSelector(selectGuestState);
+  // API hooks
+  const [submitGuestComplaint, { isLoading: isSubmitting }] =
+    useSubmitGuestComplaintMutation();
 
-  const submissionStep = useAppSelector(selectSubmissionStep);
-  const complaintId = useAppSelector(selectComplaintId);
-  const userEmail = useAppSelector(selectUserEmail);
-  const newUserRegistered = useAppSelector(selectNewUserRegistered);
+  const [submissionStep, setSubmissionStep] = useState<"form" | "success">(
+    "form",
+  );
+  const [complaintId, setComplaintId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -101,36 +97,20 @@ const GuestComplaintForm: React.FC = () => {
     area: "",
     landmark: "",
     address: "",
-    otpCode: "",
   });
 
-  const [otpTimer, setOtpTimer] = useState(0);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
-  // Clear error and guest data when component mounts
+  // Redirect authenticated users to dashboard
   useEffect(() => {
-    dispatch(clearError());
-    // Don't clear guest data on mount in case user is returning to complete OTP
-  }, [dispatch]);
-
-  // OTP timer
-  useEffect(() => {
-    if (otpExpiry) {
-      const updateTimer = () => {
-        const now = new Date().getTime();
-        const expiry = new Date(otpExpiry).getTime();
-        const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
-        setOtpTimer(remaining);
-      };
-
-      updateTimer();
-      const interval = setInterval(updateTimer, 1000);
-      return () => clearInterval(interval);
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
     }
-  }, [otpExpiry]);
+  }, [isAuthenticated, user, navigate]);
 
   // Get current location
   useEffect(() => {
@@ -157,10 +137,6 @@ const GuestComplaintForm: React.FC = () => {
       ...prev,
       [name]: value,
     }));
-
-    if (error) {
-      dispatch(clearError());
-    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -168,10 +144,6 @@ const GuestComplaintForm: React.FC = () => {
       ...prev,
       [name]: value,
     }));
-
-    if (error) {
-      dispatch(clearError());
-    }
   };
 
   const handleComplaintSubmit = async (e: React.FormEvent) => {
@@ -197,63 +169,47 @@ const GuestComplaintForm: React.FC = () => {
     };
 
     try {
-      await dispatch(submitGuestComplaint(complaintData)).unwrap();
+      const result = await submitGuestComplaint(complaintData).unwrap();
+
+      if (result.data?.complaintId) {
+        setComplaintId(result.data.complaintId);
+
+        // Open unified OTP dialog
+        openOtpFlow({
+          context: "guestComplaint",
+          email: formData.email,
+          complaintId: result.data.complaintId,
+          title: "Verify Your Complaint",
+          description:
+            "Enter the verification code sent to your email to complete your complaint submission and create your account",
+          onSuccess: (data) => {
+            setSubmissionStep("success");
+            toast({
+              title: "Success!",
+              description:
+                "Your complaint has been verified and you've been registered as a citizen.",
+            });
+          },
+        });
+
+        toast({
+          title: "Complaint Submitted",
+          description: "Please check your email for the verification code.",
+        });
+      }
+    } catch (error: any) {
       toast({
-        title: "Complaint Submitted",
+        title: "Submission Failed",
         description:
-          "Please check your email for the OTP to complete verification.",
+          error.message || "Failed to submit complaint. Please try again.",
+        variant: "destructive",
       });
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!complaintId || !userEmail || !formData.otpCode) {
-      return;
-    }
-
-    try {
-      await dispatch(
-        verifyOTPAndRegister({
-          email: userEmail,
-          otpCode: formData.otpCode,
-          complaintId,
-        }),
-      ).unwrap();
-
-      // Success message will be shown in the success step
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
-  const handleResendOTP = async () => {
-    if (!complaintId || !userEmail) {
-      return;
-    }
-
-    try {
-      await dispatch(
-        resendOTP({
-          email: userEmail,
-          complaintId,
-        }),
-      ).unwrap();
-
-      toast({
-        title: "OTP Resent",
-        description: "A new OTP has been sent to your email.",
-      });
-    } catch (error: any) {
-      // Error is handled by the reducer
     }
   };
 
   const handleStartOver = () => {
-    dispatch(clearGuestData());
+    setSubmissionStep("form");
+    setComplaintId(null);
     setFormData({
       fullName: "",
       email: "",
@@ -265,18 +221,16 @@ const GuestComplaintForm: React.FC = () => {
       area: "",
       landmark: "",
       address: "",
-      otpCode: "",
     });
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   const goToDashboard = () => {
-    navigate("/dashboard");
+    if (user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   const goToLogin = () => {
@@ -284,115 +238,6 @@ const GuestComplaintForm: React.FC = () => {
   };
 
   // Render different steps
-  if (submissionStep === "otp") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-        <div className="w-full max-w-md space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Verify Your Email
-            </h1>
-            <p className="text-gray-600">
-              Complete your complaint registration
-            </p>
-          </div>
-
-          <Card>
-            <CardHeader className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mx-auto mb-4">
-                <Mail className="h-6 w-6 text-blue-600" />
-              </div>
-              <CardTitle>OTP Sent</CardTitle>
-              <CardDescription>
-                We've sent a 6-digit code to
-                <br />
-                <strong>{userEmail}</strong>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {error && (
-                <Alert className="mb-4 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-700">
-                    {error}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <form onSubmit={handleOTPSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="otpCode">Enter OTP Code</Label>
-                  <Input
-                    id="otpCode"
-                    name="otpCode"
-                    type="text"
-                    placeholder="000000"
-                    value={formData.otpCode}
-                    onChange={handleInputChange}
-                    maxLength={6}
-                    className="text-center tracking-widest text-lg"
-                    required
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isVerifying || formData.otpCode.length !== 6}
-                >
-                  {isVerifying ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    "Verify & Complete Registration"
-                  )}
-                </Button>
-              </form>
-
-              <div className="text-center space-y-2 mt-4">
-                {otpTimer > 0 ? (
-                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                    <Clock className="h-4 w-4" />
-                    Code expires in {formatTime(otpTimer)}
-                  </div>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleResendOTP}
-                    disabled={isSubmitting}
-                  >
-                    Resend OTP
-                  </Button>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleStartOver}
-                  className="ml-2"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Start Over
-                </Button>
-              </div>
-
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-700">
-                  <strong>Complaint ID:</strong> {complaintId}
-                </p>
-                <p className="text-sm text-blue-700 mt-1">
-                  After verification, you'll be automatically registered as a
-                  citizen and can track your complaint.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   if (submissionStep === "success") {
     return (
@@ -402,23 +247,16 @@ const GuestComplaintForm: React.FC = () => {
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto">
-                  {newUserRegistered ? (
-                    <UserPlus className="h-8 w-8 text-green-600" />
-                  ) : (
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  )}
+                  <UserPlus className="h-8 w-8 text-green-600" />
                 </div>
 
                 <div>
                   <h2 className="text-2xl font-bold text-green-800">
-                    {newUserRegistered
-                      ? "Welcome to Cochin Smart City!"
-                      : "Verification Successful!"}
+                    Welcome to Cochin Smart City!
                   </h2>
                   <p className="text-green-700 mt-2">
-                    {newUserRegistered
-                      ? "Your complaint has been verified and you've been registered as a citizen."
-                      : "Your complaint has been verified and you're now logged in."}
+                    Your complaint has been verified and you've been registered
+                    as a citizen.
                   </p>
                 </div>
 
@@ -432,16 +270,14 @@ const GuestComplaintForm: React.FC = () => {
                   </p>
                 </div>
 
-                {newUserRegistered && (
-                  <Alert className="border-amber-200 bg-amber-50">
-                    <Shield className="h-4 w-4" />
-                    <AlertDescription className="text-amber-700">
-                      <strong>Security Tip:</strong> Set a password in your
-                      profile settings for easier future logins, or continue
-                      using OTP login.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <Alert className="border-amber-200 bg-amber-50">
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription className="text-amber-700">
+                    <strong>Security Tip:</strong> Set a password in your
+                    profile settings for easier future logins, or continue using
+                    OTP login.
+                  </AlertDescription>
+                </Alert>
 
                 <div className="space-y-2">
                   <Button onClick={goToDashboard} className="w-full">
@@ -490,14 +326,6 @@ const GuestComplaintForm: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {error && (
-              <Alert className="mb-4 border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
-
             <form onSubmit={handleComplaintSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="space-y-4">
