@@ -42,6 +42,21 @@ export interface GuestComplaintData {
   attachments?: AttachmentFile[];
 }
 
+export interface GuestServiceRequestData {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  serviceType: string;
+  priority: string;
+  description: string;
+  preferredDate: string;
+  preferredTime: string;
+  wardId: string;
+  area: string;
+  address: string;
+  landmark?: string;
+}
+
 export interface FormStep {
   id: number;
   title: string;
@@ -75,6 +90,12 @@ export interface GuestState {
   formData: GuestComplaintData;
   validationErrors: ValidationErrors;
   isDraftSaved: boolean;
+
+  // Service Request state
+  serviceRequestData: GuestServiceRequestData;
+  serviceRequestId: string | null;
+  serviceRequestStep: "form" | "otp" | "success";
+  isSubmittingService: boolean;
 
   // Submission state
   complaintId: string | null;
@@ -114,6 +135,22 @@ const initialFormData: GuestComplaintData = {
   attachments: [],
 };
 
+// Initial service request data
+const initialServiceRequestData: GuestServiceRequestData = {
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+  serviceType: "",
+  priority: "NORMAL",
+  description: "",
+  preferredDate: "",
+  preferredTime: "",
+  wardId: "",
+  area: "",
+  address: "",
+  landmark: "",
+};
+
 // Initial steps
 const initialSteps: FormStep[] = [
   { id: 1, title: "Details", isCompleted: false, isValid: false },
@@ -130,6 +167,11 @@ const initialState: GuestState = {
   formData: initialFormData,
   validationErrors: {},
   isDraftSaved: false,
+
+  serviceRequestData: initialServiceRequestData,
+  serviceRequestId: null,
+  serviceRequestStep: "form",
+  isSubmittingService: false,
 
   complaintId: null,
   trackingNumber: null,
@@ -413,6 +455,27 @@ export const getPublicStats = createAsyncThunk(
   },
 );
 
+export const submitGuestServiceRequest = createAsyncThunk(
+  "guest/submitServiceRequest",
+  async (
+    { serviceData }: { serviceData: GuestServiceRequestData },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall("/api/guest/service-request", {
+        method: "POST",
+        body: JSON.stringify(serviceData),
+      });
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to submit service request",
+      );
+    }
+  },
+);
+
 // Validation helpers
 const validateStep1 = (formData: GuestComplaintData): ValidationErrors => {
   const errors: ValidationErrors = {};
@@ -601,6 +664,10 @@ const guestSlice = createSlice({
       state.formData = initialFormData;
       state.validationErrors = {};
       state.isDraftSaved = false;
+      state.serviceRequestData = initialServiceRequestData;
+      state.serviceRequestId = null;
+      state.serviceRequestStep = "form";
+      state.isSubmittingService = false;
       state.complaintId = null;
       state.trackingNumber = null;
       state.sessionId = null;
@@ -623,6 +690,20 @@ const guestSlice = createSlice({
       } catch (error) {
         console.warn("Failed to clear draft from sessionStorage:", error);
       }
+    },
+
+    updateServiceRequestData: (
+      state,
+      action: PayloadAction<Partial<GuestServiceRequestData>>,
+    ) => {
+      state.serviceRequestData = { ...state.serviceRequestData, ...action.payload };
+    },
+
+    setServiceRequestStep: (
+      state,
+      action: PayloadAction<"form" | "otp" | "success">,
+    ) => {
+      state.serviceRequestStep = action.payload;
     },
 
     setSubmissionStep: (
@@ -774,6 +855,22 @@ const guestSlice = createSlice({
       })
       .addCase(getPublicStats.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+
+      // Submit Service Request
+      .addCase(submitGuestServiceRequest.pending, (state) => {
+        state.isSubmittingService = true;
+        state.error = null;
+      })
+      .addCase(submitGuestServiceRequest.fulfilled, (state, action) => {
+        state.isSubmittingService = false;
+        state.serviceRequestId = action.payload.serviceRequestId;
+        state.serviceRequestStep = "success";
+        state.error = null;
+      })
+      .addCase(submitGuestServiceRequest.rejected, (state, action) => {
+        state.isSubmittingService = false;
+        state.error = action.payload as string;
       });
   },
 });
@@ -796,6 +893,8 @@ export const {
   updateComplaintData,
   loadSavedFormData,
   resetOTPState,
+  updateServiceRequestData,
+  setServiceRequestStep,
 } = guestSlice.actions;
 
 export default guestSlice.reducer;
@@ -843,3 +942,11 @@ export const selectImagePreview = (state: { guest: GuestState }) => ({
   show: state.guest.showImagePreview,
   url: state.guest.previewImageUrl,
 });
+export const selectServiceRequestData = (state: { guest: GuestState }) =>
+  state.guest.serviceRequestData;
+export const selectServiceRequestStep = (state: { guest: GuestState }) =>
+  state.guest.serviceRequestStep;
+export const selectIsSubmittingService = (state: { guest: GuestState }) =>
+  state.guest.isSubmittingService;
+export const selectServiceRequestId = (state: { guest: GuestState }) =>
+  state.guest.serviceRequestId;
