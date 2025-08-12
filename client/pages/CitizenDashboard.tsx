@@ -94,6 +94,24 @@ const CitizenDashboard: React.FC = () => {
     searchParams.get("order") || "desc",
   );
 
+  // Handler functions
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Update URL params to trigger re-fetch
+    const params = new URLSearchParams();
+    if (searchTerm) params.set("search", searchTerm);
+    if (statusFilter) params.set("status", statusFilter);
+    if (typeFilter) params.set("type", typeFilter);
+    if (sortBy) params.set("sort", sortBy);
+    if (sortOrder) params.set("order", sortOrder);
+
+    navigate(`/dashboard?${params.toString()}`);
+  };
+
   // Fetch complaints when user is available or filters change
   useEffect(() => {
     // Calculate dashboard statistics from complaints or use stats API
