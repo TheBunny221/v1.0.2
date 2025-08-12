@@ -159,23 +159,29 @@ export const getComplaints = asyncHandler(async (req, res) => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const filters = {};
 
-  // Role-based filtering
+  // Role-based filtering - enforce security defaults that cannot be overridden
   if (req.user.role === "CITIZEN") {
+    // Citizens can ONLY see their own complaints - ignore any query override
     filters.submittedById = req.user.id;
   } else if (req.user.role === "WARD_OFFICER") {
+    // Ward officers can ONLY see complaints in their ward - ignore any query override
     filters.wardId = req.user.wardId;
   } else if (req.user.role === "MAINTENANCE_TEAM") {
+    // Maintenance team can ONLY see complaints assigned to them - ignore any query override
     filters.assignedToId = req.user.id;
   }
 
-  // Apply additional filters
+  // Apply additional filters (only for roles that have permission)
   if (status) filters.status = status;
   if (priority) filters.priority = priority;
   if (type) filters.type = type;
-  if (wardId && req.user.role === "ADMINISTRATOR") filters.wardId = wardId;
-  if (assignedToId) filters.assignedToId = assignedToId;
-  if (submittedById && req.user.role === "ADMINISTRATOR")
-    filters.submittedById = submittedById;
+
+  // Only administrators can filter by wardId and submittedById via query params
+  if (req.user.role === "ADMINISTRATOR") {
+    if (wardId) filters.wardId = wardId;
+    if (assignedToId) filters.assignedToId = assignedToId;
+    if (submittedById) filters.submittedById = submittedById;
+  }
 
   // Date range filter
   if (dateFrom || dateTo) {
