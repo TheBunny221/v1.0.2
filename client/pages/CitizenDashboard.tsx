@@ -106,8 +106,8 @@ const CitizenDashboard: React.FC = () => {
     // Update URL params to trigger re-fetch
     const params = new URLSearchParams();
     if (searchTerm) params.set("search", searchTerm);
-    if (statusFilter) params.set("status", statusFilter);
-    if (typeFilter) params.set("type", typeFilter);
+    if (statusFilter && statusFilter !== "all") params.set("status", statusFilter);
+    if (typeFilter && typeFilter !== "all") params.set("type", typeFilter);
     if (sortBy) params.set("sort", sortBy);
     if (sortOrder) params.set("order", sortOrder);
 
