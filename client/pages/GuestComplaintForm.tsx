@@ -1075,7 +1075,7 @@ const GuestComplaintForm: React.FC = () => {
                   {attachmentPreviews.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {attachmentPreviews.map((preview, index) => (
-                        <div key={index} className="relative group">
+                        <div key={index} className="relative group" data-testid="attachment-preview">
                           <div className="aspect-square rounded-lg overflow-hidden border">
                             <img
                               src={preview.previewUrl}
@@ -1089,6 +1089,7 @@ const GuestComplaintForm: React.FC = () => {
                             size="sm"
                             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={() => removeAttachment(index)}
+                            data-testid={`remove-attachment-${index}`}
                           >
                             <X className="h-4 w-4" />
                           </Button>
