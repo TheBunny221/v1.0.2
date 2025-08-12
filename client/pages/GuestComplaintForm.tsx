@@ -1149,7 +1149,7 @@ const GuestComplaintForm: React.FC = () => {
 
                 <div className="space-y-4">
                   {/* Personal Information */}
-                  <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="p-4 bg-gray-50 rounded-lg" data-testid="review-personal-info">
                     <h4 className="font-medium mb-3 flex items-center gap-2">
                       <User className="h-4 w-4" />
                       Personal Information
