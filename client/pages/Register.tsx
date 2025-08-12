@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Shield, User, Mail, Lock, Phone, MapPin } from "lucide-react";
+import { Shield, User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
