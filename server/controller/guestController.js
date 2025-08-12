@@ -42,11 +42,25 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     type,
     priority,
     wardId,
+    subZoneId,
     area,
     landmark,
     address,
     coordinates,
   } = req.body;
+
+  // Parse coordinates if it's a string
+  let parsedCoordinates = coordinates;
+  if (typeof coordinates === "string") {
+    try {
+      parsedCoordinates = JSON.parse(coordinates);
+    } catch (error) {
+      parsedCoordinates = null;
+    }
+  }
+
+  // Handle uploaded files
+  const attachments = req.files || [];
 
   // Check if user already exists
   let existingUser = await prisma.user.findUnique({
@@ -75,10 +89,11 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       status: "REGISTERED",
       slaStatus: "ON_TIME",
       wardId,
+      subZoneId: subZoneId || null,
       area,
       landmark,
       address,
-      coordinates: coordinates ? JSON.stringify(coordinates) : null,
+      coordinates: parsedCoordinates ? JSON.stringify(parsedCoordinates) : null,
       contactName: fullName,
       contactEmail: email,
       contactPhone: phoneNumber,
@@ -90,6 +105,22 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       ward: true,
     },
   });
+
+  // Create attachment records if files were uploaded
+  const attachmentRecords = [];
+  for (const file of attachments) {
+    const attachment = await prisma.attachment.create({
+      data: {
+        fileName: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url: `/api/uploads/${file.filename}`, // URL to access the file
+        complaintId: complaint.id,
+      },
+    });
+    attachmentRecords.push(attachment);
+  }
 
   // Generate OTP
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -133,12 +164,16 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     });
   }
 
+  // Generate tracking number
+  const trackingNumber = `CSC${complaint.id.slice(-6).toUpperCase()}`;
+
   res.status(201).json({
     success: true,
     message:
       "Complaint registered successfully. Please check your email for OTP verification.",
     data: {
       complaintId: complaint.id,
+      trackingNumber,
       email,
       expiresAt,
       sessionId: otpSession.id,

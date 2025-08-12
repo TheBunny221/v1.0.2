@@ -137,6 +137,92 @@ export interface Translation {
     minCharacters: string;
   };
 
+  // Guest complaint form
+  guestForm: {
+    submitComplaint: string;
+    reportCivicIssues: string;
+    personalInformation: string;
+    complaintInformation: string;
+    locationInformation: string;
+    attachments: string;
+    reviewComplaint: string;
+    submitForVerification: string;
+    fullName: string;
+    emailAddress: string;
+    phoneNumber: string;
+    complaintType: string;
+    priority: string;
+    description: string;
+    ward: string;
+    subZone: string;
+    areaLocality: string;
+    nearbyLandmark: string;
+    completeAddress: string;
+    locationOnMap: string;
+    interactiveMapComing: string;
+    currentLocationDetected: string;
+    addPhotos: string;
+    addPhotosDescription: string;
+    uploadInstructions: string;
+    maxFilesAllowed: string;
+    fileSizeLimit: string;
+    allowedFormats: string;
+    uploadedImages: string;
+    preview: string;
+    remove: string;
+    reviewYourComplaint: string;
+    reviewDescription: string;
+    readyToSubmit: string;
+    readyToSubmitDescription: string;
+    whatHappensNext: string;
+    step1: string;
+    step2: string;
+    step3: string;
+    step4: string;
+    steps: {
+      details: string;
+      location: string;
+      attachments: string;
+      review: string;
+      submit: string;
+    };
+    progress: string;
+    stepOf: string;
+    completeRequiredFields: string;
+    fillRequiredInformation: string;
+    fixValidationErrors: string;
+    completeAllRequiredFields: string;
+    invalidFileType: string;
+    onlyImageFormats: string;
+    fileTooLarge: string;
+    selectSmallerFiles: string;
+    trackingNumber: string;
+    verificationCodeSent: string;
+    checkEmailForCode: string;
+    welcomeToSmartCity: string;
+    complaintVerified: string;
+    nowRegisteredCitizen: string;
+    canTrackProgress: string;
+    securityTip: string;
+    setPasswordForEasierLogin: string;
+    goToDashboard: string;
+    submitAnotherComplaint: string;
+    alreadyHaveAccount: string;
+    loginHere: string;
+    currentLocationIncluded: string;
+    selectOnMap: string;
+    imagePreview: string;
+    previewOfUploadedImage: string;
+    clickToUploadOrDrag: string;
+    invalidEmailFormat: string;
+    invalidPhoneFormat: string;
+    descriptionTooShort: string;
+    wardRequired: string;
+    areaRequired: string;
+    characterCount: string;
+    locationDetectedIncluded: string;
+  };
+
   // Profile
   profile: {
     personalInformation: string;
@@ -339,6 +425,101 @@ export const englishTranslations: Translation = {
     invalidPhone: "Please enter a valid phone number",
     minCharacters: "Minimum 5 characters required",
   },
+  guestForm: {
+    submitComplaint: "Submit a Complaint",
+    reportCivicIssues: "Report civic issues and get them resolved quickly",
+    personalInformation: "Personal Information",
+    complaintInformation: "Complaint Information",
+    locationInformation: "Location Information",
+    attachments: "Attachments",
+    reviewComplaint: "Review Your Complaint",
+    submitForVerification: "Submit for Verification",
+    fullName: "Full Name",
+    emailAddress: "Email Address",
+    phoneNumber: "Phone Number",
+    complaintType: "Complaint Type",
+    priority: "Priority",
+    description: "Description",
+    ward: "Ward",
+    subZone: "Sub-Zone",
+    areaLocality: "Area/Locality",
+    nearbyLandmark: "Nearby Landmark",
+    completeAddress: "Complete Address",
+    locationOnMap: "Location on Map",
+    interactiveMapComing: "Interactive map picker coming soon",
+    currentLocationDetected:
+      "Current location detected and will be included with your complaint",
+    addPhotos: "Add photos to help us better understand the issue",
+    addPhotosDescription: "You can upload up to 5 images",
+    uploadInstructions: "Click to upload or drag and drop",
+    maxFilesAllowed: "Maximum 5 files allowed",
+    fileSizeLimit: "JPG, PNG up to 10MB each",
+    allowedFormats: "Only JPG and PNG images are allowed",
+    uploadedImages: "Uploaded Images",
+    preview: "Preview",
+    remove: "Remove",
+    reviewYourComplaint: "Review Your Complaint",
+    reviewDescription:
+      "Please review all information before submitting. You can go back to make changes if needed.",
+    readyToSubmit: "Ready to Submit",
+    readyToSubmitDescription:
+      "Your complaint is ready for submission. After submitting, you'll receive an email with a verification code.",
+    whatHappensNext: "What happens next?",
+    step1: "Your complaint will be registered immediately",
+    step2: "You'll receive an OTP via email for verification",
+    step3: "After verification, you'll be registered as a citizen",
+    step4: "You can then track your complaint progress",
+    steps: {
+      details: "Details",
+      location: "Location",
+      attachments: "Attachments",
+      review: "Review",
+      submit: "Submit",
+    },
+    progress: "Progress",
+    stepOf: "Step {current} of {total}",
+    completeRequiredFields: "Please complete required fields",
+    fillRequiredInformation:
+      "Fill in all required information before proceeding",
+    fixValidationErrors: "Please fix validation errors",
+    completeAllRequiredFields:
+      "Complete all required fields correctly before submitting",
+    invalidFileType: "Invalid file type",
+    onlyImageFormats: "Only JPG and PNG images are allowed",
+    fileTooLarge: "File too large",
+    selectSmallerFiles: "Please select files smaller than 10MB",
+    trackingNumber: "Tracking Number",
+    verificationCodeSent: "Please check your email for the verification code",
+    checkEmailForCode:
+      "Tracking number: {trackingNumber}. Please check your email for the verification code.",
+    welcomeToSmartCity: "Welcome to Cochin Smart City!",
+    complaintVerified:
+      "Your complaint has been verified and you've been registered as a citizen.",
+    nowRegisteredCitizen: "You are now registered as a citizen",
+    canTrackProgress:
+      "You can now track your complaint progress from your dashboard.",
+    securityTip: "Security Tip",
+    setPasswordForEasierLogin:
+      "Set a password in your profile settings for easier future logins.",
+    goToDashboard: "Go to Dashboard",
+    submitAnotherComplaint: "Submit Another Complaint",
+    alreadyHaveAccount: "Already have an account?",
+    loginHere: "Login here",
+    currentLocationIncluded:
+      "Location detected and will be included with your complaint",
+    selectOnMap: "Select on Map",
+    imagePreview: "Image Preview",
+    previewOfUploadedImage: "Preview of uploaded image",
+    clickToUploadOrDrag: "Click to upload or drag and drop",
+    invalidEmailFormat: "Please enter a valid email address",
+    invalidPhoneFormat: "Please enter a valid phone number",
+    descriptionTooShort: "Description must be at least 10 characters",
+    wardRequired: "Ward selection is required",
+    areaRequired: "Area/locality is required",
+    characterCount: "{count}/500 characters",
+    locationDetectedIncluded:
+      "Your location has been detected and will be included with your complaint",
+  },
   profile: {
     personalInformation: "Personal Information",
     contactDetails: "Contact Details",
@@ -417,7 +598,7 @@ export const hindiTranslations: Translation = {
     save: "सहेजें",
     edit: "संपादित करें",
     delete: "मिटाएं",
-    view: "देखें",
+    view: "देख���ं",
     search: "खोजें",
     loading: "लोड हो रहा है...",
     error: "त्रुटि",
@@ -454,7 +635,7 @@ export const hindiTranslations: Translation = {
     email: "ईमेल",
     password: "पासवर्ड",
     forgotPassword: "पासवर्ड भूल गए?",
-    rememberMe: "मुझे याद रखें",
+    rememberMe: "मुझे याद रख���ं",
     loginSuccess: "लॉगिन सफल",
     loginError: "लॉगिन असफल",
     invalidCredentials: "गलत ईमेल ��ा पासवर्ड",
@@ -479,7 +660,7 @@ export const hindiTranslations: Translation = {
     location: "स्थान",
     address: "पता",
     mobile: "मोबाइल नंबर",
-    attachments: "अनुलग्नक",
+    attachments: "अनुलग���नक",
     remarks: "टिप्पणियां",
     trackStatus: "स्थिति ट्रैक करें",
     myComplaints: "मेरी ���िकायतें",
@@ -507,7 +688,7 @@ export const hindiTranslations: Translation = {
   },
   forms: {
     contactInformation: "संपर्क जानकारी",
-    problemDetails: "समस्या विवरण",
+    problemDetails: "समस्य�� विवरण",
     locationDetails: "स्थान विवरण",
     complaintDescription: "शिकायत ���िवरण",
     optionalUploads: "वैकल्पिक अपलोड",
@@ -551,7 +732,7 @@ export const hindiTranslations: Translation = {
     darkMode: "डार्क मोड",
     soundEffects: "स���उंड इफेक्ट्स",
     dataRetention: "डेटा रिटेंशन",
-    accountDeletion: "खाता हटाना",
+    accountDeletion: "��ाता हटाना",
   },
   dashboard: {
     totalComplaints: "कुल शिकायतें",
@@ -577,7 +758,7 @@ export const hindiTranslations: Translation = {
   },
   messages: {
     networkError:
-      "���ेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
+      "���ेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटर���ेट कनेक्शन जांचें।",
     serverError: "सर्वर त्रुटि। कृप���ा बाद में पुनः प्रयास करें।",
     notFound: "अनुरोधित संसाधन नहीं मिला।",
     unauthorized: "आप इस संसाधन तक पहुंचने के लिए अधिकृत नहीं हैं।",
@@ -594,7 +775,7 @@ export const malayalamTranslations: Translation = {
     submit: "സമർപ്പിക്കുക",
     cancel: "റദ്ദാക്കുക",
     save: "സേവ് ചെയ്യുക",
-    edit: "എഡിറ്റ് ചെയ്യുക",
+    edit: "എഡിറ്റ് ച��യ്യുക",
     delete: "നീക്കം ചെയ്യുക",
     view: "കാണുക",
     search: "ത���രയുക",
@@ -650,7 +831,7 @@ export const malayalamTranslations: Translation = {
     priority: "മുൻഗണന",
     submittedBy: "സമർപ്പിച്ചത്",
     submittedDate: "സമർപ���പിച്ച തീയതി",
-    lastUpdated: "അവസാന അപ്ഡേറ്റ്",
+    lastUpdated: "അവസാന അപ്ഡേ���്റ്",
     assignedTo: "നിയോഗിച്ചത്",
     slaDeadline: "SLA ഡെഡ്‌ലൈൻ",
     ward: "വാർഡ്",
@@ -676,7 +857,7 @@ export const malayalamTranslations: Translation = {
     critical: "നിർണായകം",
     waterSupply: "ജലവിതരണം",
     electricity: "വൈദ്യുതി",
-    roadRepair: "റോഡ് അറ്റകുറ്റപ്പണി",
+    roadRepair: "റോഡ് അ��്റകുറ്റപ്പണി",
     garbageCollection: "മാലിന്യ ശേഖരണം",
     streetLighting: "��്ട്രീറ്റ് ലൈറ്റിംഗ്",
     sewerage: "മലിനജല സംവിധാനം",
@@ -696,7 +877,7 @@ export const malayalamTranslations: Translation = {
     submitComplaint: "പരാതി സമർപ്പിക്കുക",
     complaintSubmitted: "പരാതി വിജയകരമായി സമർപ്പിച്ചു!",
     complaintSubmissionError:
-      "പരാതി സമർപ്പിക്കുന്നതിൽ പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+      "പരാതി സമർപ്പിക്കുന്ന���ിൽ പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
     fileUploadError: "ഫയൽ അപ്ലോഡ് ചെയ്യുന്നതിൽ പിശക്",
     invalidCaptcha: "തെറ്റായ കാപ്ച്ച കോഡ്",
     requiredField: "ഈ ഫീൽഡ് ആവശ്യമാണ്",

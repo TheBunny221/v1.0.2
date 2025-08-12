@@ -1,26 +1,49 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
+export interface AttachmentFile {
+  id: string;
+  file: File;
+  preview?: string;
+  uploading?: boolean;
+  uploaded?: boolean;
+  error?: string;
+}
+
 export interface GuestComplaintData {
+  // Step 1: Details
   fullName: string;
   email: string;
   phoneNumber: string;
   type: string;
   description: string;
+  priority?: string;
+
+  // Step 2: Location
+  wardId: string;
+  subZoneId?: string;
   area: string;
   landmark?: string;
   address?: string;
-  wardId: string;
-  priority?: string;
   coordinates?: {
     latitude: number;
     longitude: number;
   };
-  attachments?: File[];
+
+  // Step 3: Attachments
+  attachments?: AttachmentFile[];
+}
+
+export interface FormStep {
+  id: number;
+  title: string;
+  isCompleted: boolean;
+  isValid: boolean;
 }
 
 export interface GuestComplaintResponse {
   complaintId: string;
+  trackingNumber: string;
   email: string;
   expiresAt: string;
   sessionId: string;
@@ -33,35 +56,116 @@ export interface OTPVerificationResponse {
   isNewUser: boolean;
 }
 
+export interface ValidationErrors {
+  [key: string]: string;
+}
+
 export interface GuestState {
+  // Form state
+  currentStep: number;
+  steps: FormStep[];
+  formData: GuestComplaintData;
+  validationErrors: ValidationErrors;
+  isDraftSaved: boolean;
+
+  // Submission state
   complaintId: string | null;
+  trackingNumber: string | null;
   sessionId: string | null;
   isSubmitting: boolean;
   isVerifying: boolean;
   otpSent: boolean;
   otpExpiry: Date | null;
-  complaintData: GuestComplaintData | null;
   submissionStep: "form" | "otp" | "success";
   error: string | null;
   userEmail: string | null;
   newUserRegistered: boolean;
   trackingData: any | null;
+
+  // UI state
+  showImagePreview: boolean;
+  previewImageUrl: string | null;
 }
+
+// Initial form data
+const initialFormData: GuestComplaintData = {
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+  type: "",
+  description: "",
+  priority: "MEDIUM",
+  wardId: "",
+  subZoneId: "",
+  area: "",
+  landmark: "",
+  address: "",
+  coordinates: undefined,
+  attachments: [],
+};
+
+// Initial steps
+const initialSteps: FormStep[] = [
+  { id: 1, title: "Details", isCompleted: false, isValid: false },
+  { id: 2, title: "Location", isCompleted: false, isValid: false },
+  { id: 3, title: "Attachments", isCompleted: false, isValid: true }, // Optional
+  { id: 4, title: "Review", isCompleted: false, isValid: false },
+  { id: 5, title: "Submit", isCompleted: false, isValid: false },
+];
 
 // Initial state
 const initialState: GuestState = {
+  currentStep: 1,
+  steps: initialSteps,
+  formData: initialFormData,
+  validationErrors: {},
+  isDraftSaved: false,
+
   complaintId: null,
+  trackingNumber: null,
   sessionId: null,
   isSubmitting: false,
   isVerifying: false,
   otpSent: false,
   otpExpiry: null,
-  complaintData: null,
   submissionStep: "form",
   error: null,
   userEmail: null,
   newUserRegistered: false,
   trackingData: null,
+
+  showImagePreview: false,
+  previewImageUrl: null,
+};
+
+// Load draft from sessionStorage
+const loadDraftFromStorage = (): Partial<GuestComplaintData> => {
+  try {
+    const saved = sessionStorage.getItem("guestComplaintDraft");
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Save draft to sessionStorage
+const saveDraftToStorage = (formData: GuestComplaintData) => {
+  try {
+    // Don't save file objects to sessionStorage
+    const dataTosave = {
+      ...formData,
+      attachments: formData.attachments?.map((att) => ({
+        id: att.id,
+        // Only save metadata, not the actual file
+        name: att.file.name,
+        size: att.file.size,
+        type: att.file.type,
+      })),
+    };
+    sessionStorage.setItem("guestComplaintDraft", JSON.stringify(dataTosave));
+  } catch (error) {
+    console.warn("Failed to save draft to sessionStorage:", error);
+  }
 };
 
 // Helper function to make API calls
@@ -107,25 +211,58 @@ export const submitGuestComplaint = createAsyncThunk(
   "guest/submitComplaint",
   async (complaintData: GuestComplaintData, { rejectWithValue }) => {
     try {
-      // For now, we'll send as JSON. File uploads can be added later
-      const payload = {
-        fullName: complaintData.fullName,
-        email: complaintData.email,
-        phoneNumber: complaintData.phoneNumber,
-        type: complaintData.type,
-        description: complaintData.description,
-        priority: complaintData.priority || "MEDIUM",
-        wardId: complaintData.wardId,
-        area: complaintData.area,
-        landmark: complaintData.landmark,
-        address: complaintData.address,
-        coordinates: complaintData.coordinates,
-      };
+      // Create FormData for file uploads
+      const formData = new FormData();
 
-      const data = await apiCall("/api/guest/complaint", {
+      // Add text data
+      formData.append("fullName", complaintData.fullName);
+      formData.append("email", complaintData.email);
+      formData.append("phoneNumber", complaintData.phoneNumber);
+      formData.append("type", complaintData.type);
+      formData.append("description", complaintData.description);
+      formData.append("priority", complaintData.priority || "MEDIUM");
+      formData.append("wardId", complaintData.wardId);
+      if (complaintData.subZoneId)
+        formData.append("subZoneId", complaintData.subZoneId);
+      formData.append("area", complaintData.area);
+      if (complaintData.landmark)
+        formData.append("landmark", complaintData.landmark);
+      if (complaintData.address)
+        formData.append("address", complaintData.address);
+
+      // Add coordinates
+      if (complaintData.coordinates) {
+        formData.append(
+          "coordinates",
+          JSON.stringify(complaintData.coordinates),
+        );
+      }
+
+      // Add attachments
+      if (complaintData.attachments) {
+        complaintData.attachments.forEach((attachment, index) => {
+          formData.append(`attachments`, attachment.file);
+        });
+      }
+
+      const response = await fetch("/api/guest/complaint", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: formData,
       });
+
+      const contentType = response.headers.get("content-type");
+      const isJson = contentType && contentType.includes("application/json");
+
+      let data = null;
+      if (isJson) {
+        data = await response.json();
+      } else {
+        throw new Error("Server returned unexpected response format");
+      }
+
+      if (!response.ok) {
+        throw new Error(data?.message || `HTTP ${response.status}`);
+      }
 
       return data.data as GuestComplaintResponse;
     } catch (error) {
@@ -232,15 +369,199 @@ export const getPublicStats = createAsyncThunk(
   },
 );
 
+// Validation helpers
+const validateStep1 = (formData: GuestComplaintData): ValidationErrors => {
+  const errors: ValidationErrors = {};
+
+  if (!formData.fullName.trim()) errors.fullName = "Full name is required";
+  if (!formData.email.trim()) errors.email = "Email is required";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    errors.email = "Please enter a valid email address";
+  }
+  if (!formData.phoneNumber.trim())
+    errors.phoneNumber = "Phone number is required";
+  else if (
+    !/^[\d\s\-\+\(\)]{10,}$/.test(formData.phoneNumber.replace(/\s/g, ""))
+  ) {
+    errors.phoneNumber = "Please enter a valid phone number";
+  }
+  if (!formData.type) errors.type = "Complaint type is required";
+  if (!formData.description.trim())
+    errors.description = "Description is required";
+  else if (formData.description.trim().length < 10) {
+    errors.description = "Description must be at least 10 characters";
+  }
+
+  return errors;
+};
+
+const validateStep2 = (formData: GuestComplaintData): ValidationErrors => {
+  const errors: ValidationErrors = {};
+
+  if (!formData.wardId) errors.wardId = "Ward selection is required";
+  if (!formData.area.trim()) errors.area = "Area/locality is required";
+
+  return errors;
+};
+
+const validateStep3 = (formData: GuestComplaintData): ValidationErrors => {
+  const errors: ValidationErrors = {};
+
+  // Attachments are optional, but validate if present
+  if (formData.attachments && formData.attachments.length > 0) {
+    formData.attachments.forEach((attachment, index) => {
+      if (attachment.file.size > 10 * 1024 * 1024) {
+        // 10MB
+        errors[`attachment_${index}`] = "File size must be less than 10MB";
+      }
+      if (
+        !["image/jpeg", "image/png", "image/jpg"].includes(attachment.file.type)
+      ) {
+        errors[`attachment_${index}`] = "Only JPG and PNG images are allowed";
+      }
+    });
+  }
+
+  return errors;
+};
+
 // Slice
 const guestSlice = createSlice({
   name: "guest",
-  initialState,
+  initialState: {
+    ...initialState,
+    formData: { ...initialFormData, ...loadDraftFromStorage() },
+  },
   reducers: {
+    setCurrentStep: (state, action: PayloadAction<number>) => {
+      if (action.payload >= 1 && action.payload <= 5) {
+        state.currentStep = action.payload;
+      }
+    },
+
+    nextStep: (state) => {
+      if (state.currentStep < 5) {
+        state.currentStep += 1;
+      }
+    },
+
+    prevStep: (state) => {
+      if (state.currentStep > 1) {
+        state.currentStep -= 1;
+      }
+    },
+
+    updateFormData: (
+      state,
+      action: PayloadAction<Partial<GuestComplaintData>>,
+    ) => {
+      state.formData = { ...state.formData, ...action.payload };
+
+      // Validate current step
+      let errors: ValidationErrors = {};
+      if (state.currentStep === 1) {
+        errors = validateStep1(state.formData);
+      } else if (state.currentStep === 2) {
+        errors = validateStep2(state.formData);
+      } else if (state.currentStep === 3) {
+        errors = validateStep3(state.formData);
+      }
+
+      state.validationErrors = errors;
+
+      // Update step completion status
+      const isStepValid = Object.keys(errors).length === 0;
+      state.steps[state.currentStep - 1].isValid = isStepValid;
+      state.steps[state.currentStep - 1].isCompleted = isStepValid;
+
+      // Save draft to sessionStorage
+      saveDraftToStorage(state.formData);
+      state.isDraftSaved = true;
+    },
+
+    addAttachment: (state, action: PayloadAction<AttachmentFile>) => {
+      if (!state.formData.attachments) {
+        state.formData.attachments = [];
+      }
+      if (state.formData.attachments.length < 5) {
+        // Max 5 attachments
+        state.formData.attachments.push(action.payload);
+        saveDraftToStorage(state.formData);
+      }
+    },
+
+    removeAttachment: (state, action: PayloadAction<string>) => {
+      if (state.formData.attachments) {
+        state.formData.attachments = state.formData.attachments.filter(
+          (att) => att.id !== action.payload,
+        );
+        saveDraftToStorage(state.formData);
+      }
+    },
+
+    updateAttachment: (
+      state,
+      action: PayloadAction<{ id: string; updates: Partial<AttachmentFile> }>,
+    ) => {
+      if (state.formData.attachments) {
+        const index = state.formData.attachments.findIndex(
+          (att) => att.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.formData.attachments[index] = {
+            ...state.formData.attachments[index],
+            ...action.payload.updates,
+          };
+        }
+      }
+    },
+
+    validateCurrentStep: (state) => {
+      let errors: ValidationErrors = {};
+
+      switch (state.currentStep) {
+        case 1:
+          errors = validateStep1(state.formData);
+          break;
+        case 2:
+          errors = validateStep2(state.formData);
+          break;
+        case 3:
+          errors = validateStep3(state.formData);
+          break;
+        case 4:
+          // Review step - validate all previous steps
+          errors = {
+            ...validateStep1(state.formData),
+            ...validateStep2(state.formData),
+            ...validateStep3(state.formData),
+          };
+          break;
+      }
+
+      state.validationErrors = errors;
+      const isStepValid = Object.keys(errors).length === 0;
+      state.steps[state.currentStep - 1].isValid = isStepValid;
+      state.steps[state.currentStep - 1].isCompleted = isStepValid;
+    },
+
+    setImagePreview: (
+      state,
+      action: PayloadAction<{ show: boolean; url?: string }>,
+    ) => {
+      state.showImagePreview = action.payload.show;
+      state.previewImageUrl = action.payload.url || null;
+    },
+
     clearGuestData: (state) => {
+      state.currentStep = 1;
+      state.steps = initialSteps;
+      state.formData = initialFormData;
+      state.validationErrors = {};
+      state.isDraftSaved = false;
       state.complaintId = null;
+      state.trackingNumber = null;
       state.sessionId = null;
-      state.complaintData = null;
       state.submissionStep = "form";
       state.otpSent = false;
       state.otpExpiry = null;
@@ -248,26 +569,28 @@ const guestSlice = createSlice({
       state.userEmail = null;
       state.newUserRegistered = false;
       state.trackingData = null;
+      state.showImagePreview = false;
+      state.previewImageUrl = null;
+
+      // Clear sessionStorage
+      try {
+        sessionStorage.removeItem("guestComplaintDraft");
+      } catch (error) {
+        console.warn("Failed to clear draft from sessionStorage:", error);
+      }
     },
+
     setSubmissionStep: (
       state,
       action: PayloadAction<"form" | "otp" | "success">,
     ) => {
       state.submissionStep = action.payload;
     },
+
     clearError: (state) => {
       state.error = null;
     },
-    updateComplaintData: (
-      state,
-      action: PayloadAction<Partial<GuestComplaintData>>,
-    ) => {
-      if (state.complaintData) {
-        state.complaintData = { ...state.complaintData, ...action.payload };
-      } else {
-        state.complaintData = action.payload as GuestComplaintData;
-      }
-    },
+
     resetOTPState: (state) => {
       state.otpSent = false;
       state.otpExpiry = null;
@@ -284,12 +607,17 @@ const guestSlice = createSlice({
       .addCase(submitGuestComplaint.fulfilled, (state, action) => {
         state.isSubmitting = false;
         state.complaintId = action.payload.complaintId;
+        state.trackingNumber = action.payload.trackingNumber;
         state.sessionId = action.payload.sessionId;
         state.userEmail = action.payload.email;
         state.otpSent = true;
         state.otpExpiry = new Date(action.payload.expiresAt);
         state.submissionStep = "otp";
         state.error = null;
+
+        // Mark submission step as completed
+        state.steps[4].isCompleted = true;
+        state.steps[4].isValid = true;
       })
       .addCase(submitGuestComplaint.rejected, (state, action) => {
         state.isSubmitting = false;
@@ -307,8 +635,12 @@ const guestSlice = createSlice({
         state.newUserRegistered = action.payload.isNewUser;
         state.error = null;
 
-        // Clear guest data as user is now registered and logged in
-        // The auth slice will handle the user state
+        // Clear sessionStorage as process is complete
+        try {
+          sessionStorage.removeItem("guestComplaintDraft");
+        } catch (error) {
+          console.warn("Failed to clear draft from sessionStorage:", error);
+        }
       })
       .addCase(verifyOTPAndRegister.rejected, (state, action) => {
         state.isVerifying = false;
@@ -345,7 +677,6 @@ const guestSlice = createSlice({
         state.error = null;
       })
       .addCase(getPublicStats.fulfilled, (state, action) => {
-        // Stats can be stored in a separate slice or component state
         state.error = null;
       })
       .addCase(getPublicStats.rejected, (state, action) => {
@@ -355,10 +686,18 @@ const guestSlice = createSlice({
 });
 
 export const {
+  setCurrentStep,
+  nextStep,
+  prevStep,
+  updateFormData,
+  addAttachment,
+  removeAttachment,
+  updateAttachment,
+  validateCurrentStep,
+  setImagePreview,
   clearGuestData,
   setSubmissionStep,
   clearError,
-  updateComplaintData,
   resetOTPState,
 } = guestSlice.actions;
 
@@ -366,6 +705,21 @@ export default guestSlice.reducer;
 
 // Selectors
 export const selectGuestState = (state: { guest: GuestState }) => state.guest;
+export const selectCurrentStep = (state: { guest: GuestState }) =>
+  state.guest.currentStep;
+export const selectSteps = (state: { guest: GuestState }) => state.guest.steps;
+export const selectFormData = (state: { guest: GuestState }) =>
+  state.guest.formData;
+export const selectValidationErrors = (state: { guest: GuestState }) =>
+  state.guest.validationErrors;
+export const selectIsStepValid = (state: { guest: GuestState }) => {
+  const currentStepIndex = state.guest.currentStep - 1;
+  return state.guest.steps[currentStepIndex]?.isValid || false;
+};
+export const selectCanProceed = (state: { guest: GuestState }) => {
+  const currentStepIndex = state.guest.currentStep - 1;
+  return state.guest.steps[currentStepIndex]?.isValid || false;
+};
 export const selectIsSubmitting = (state: { guest: GuestState }) =>
   state.guest.isSubmitting;
 export const selectIsVerifying = (state: { guest: GuestState }) =>
@@ -378,9 +732,17 @@ export const selectGuestError = (state: { guest: GuestState }) =>
   state.guest.error;
 export const selectComplaintId = (state: { guest: GuestState }) =>
   state.guest.complaintId;
+export const selectTrackingNumber = (state: { guest: GuestState }) =>
+  state.guest.trackingNumber;
 export const selectUserEmail = (state: { guest: GuestState }) =>
   state.guest.userEmail;
 export const selectNewUserRegistered = (state: { guest: GuestState }) =>
   state.guest.newUserRegistered;
 export const selectTrackingData = (state: { guest: GuestState }) =>
   state.guest.trackingData;
+export const selectIsDraftSaved = (state: { guest: GuestState }) =>
+  state.guest.isDraftSaved;
+export const selectImagePreview = (state: { guest: GuestState }) => ({
+  show: state.guest.showImagePreview,
+  url: state.guest.previewImageUrl,
+});
