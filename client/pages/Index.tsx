@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { createComplaint } from "../store/slices/complaintsSlice";
+import { createComplaint, ComplaintType, Priority } from "../store/slices/complaintsSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
