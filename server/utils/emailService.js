@@ -17,15 +17,15 @@ const createTransporter = () => {
       },
     });
   } else {
-    // Development email configuration
-    console.log("Email transporter created : ", process.env.EMAIL_SERVICE);
+    // Development email configuration using Ethereal
+    console.log("Email transporter created for development with Ethereal");
     return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE, // Must be a real resolvable domain
-      port: process.env.EMAIL_PORT || 587, // 587 for STARTTLS, 465 for SSL
-      secure: false, // true if using port 465
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false, // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.ETHEREAL_USER,
+        pass: process.env.ETHEREAL_PASS,
       },
     });
   }
