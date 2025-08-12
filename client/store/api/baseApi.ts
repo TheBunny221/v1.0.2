@@ -45,27 +45,17 @@ const baseQueryWithReauth: BaseQueryFn<
       description: "Please login again to continue.",
       variant: "destructive",
     });
-
-    // Optionally, try to refresh token here if your backend supports it
-    // const refreshResult = await baseQuery('/auth/refresh', api, extraOptions);
-    // if (refreshResult.data) {
-    //   api.dispatch(setToken(refreshResult.data));
-    //   result = await baseQuery(args, api, extraOptions);
-    // }
   } else if (result.error) {
-    // Handle other errors
-    const errorMessage = getErrorMessage(result.error);
-
-    // Log error for analytics
+    // Log error for analytics without trying to read error data
     console.error("API Error:", {
       endpoint: typeof args === "string" ? args : args.url,
-      error: result.error,
+      status: result.error.status,
       timestamp: new Date().toISOString(),
     });
 
     // Set error in auth slice for global error handling
-    if (result.error.status >= 500) {
-      api.dispatch(setError(errorMessage));
+    if (result.error.status && result.error.status >= 500) {
+      api.dispatch(setError("A server error occurred. Please try again later."));
     }
   }
 
