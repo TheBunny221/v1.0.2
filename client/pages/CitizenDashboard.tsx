@@ -24,10 +24,22 @@ import {
 } from "lucide-react";
 
 const CitizenDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Use RTK Query for better authentication handling
+  const { data: complaintsResponse, isLoading: complaintsLoading, error: complaintsError } = useGetComplaintsQuery(
+    { page: 1, limit: 50 }, // Get more complaints for better stats
+    { skip: !isAuthenticated || !user }
+  );
+
+  const { data: statsResponse, isLoading: statsLoading } = useGetComplaintStatisticsQuery(
+    {},
+    { skip: !isAuthenticated || !user }
+  );
+
+  const complaints = complaintsResponse?.data || [];
+  const isLoading = complaintsLoading;
 
   const [dashboardStats, setDashboardStats] = useState({
     total: 0,
@@ -36,12 +48,6 @@ const CitizenDashboard: React.FC = () => {
     resolved: 0,
     avgResolutionTime: 0,
   });
-
-  useEffect(() => {
-    if (user) {
-      dispatch(fetchComplaints());
-    }
-  }, [dispatch, user]);
 
   useEffect(() => {
     // Calculate dashboard statistics
