@@ -43,6 +43,8 @@ export interface GuestState {
   otpExpiry: Date | null;
   complaintData: GuestComplaintData | null;
   submissionStep: "form" | "otp" | "success";
+  currentFormStep: number;
+  formValidation: Record<string, string>;
   error: string | null;
   userEmail: string | null;
   newUserRegistered: boolean;
