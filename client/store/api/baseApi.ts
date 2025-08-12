@@ -75,12 +75,26 @@ const baseQueryWithReauth: BaseQueryFn<
 // Helper function to extract error messages
 function getErrorMessage(error: FetchBaseQueryError): string {
   if ("status" in error) {
-    if (
-      error.data &&
-      typeof error.data === "object" &&
-      "message" in error.data
-    ) {
-      return (error.data as any).message;
+    // Safely extract error message from response data
+    let errorMessage: string | undefined;
+
+    try {
+      if (
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data &&
+        typeof (error.data as any).message === "string"
+      ) {
+        errorMessage = (error.data as any).message;
+      }
+    } catch (e) {
+      // Ignore errors when trying to read the response data
+      console.warn("Error reading response data:", e);
+    }
+
+    // Return custom message if available, otherwise use default
+    if (errorMessage) {
+      return errorMessage;
     }
 
     switch (error.status) {
