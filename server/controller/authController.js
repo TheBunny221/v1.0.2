@@ -52,8 +52,8 @@ export const register = asyncHandler(async (req, res) => {
     });
   }
 
-  // Hash password
-  const hashedPassword = await hashPassword(password);
+  // For unified OTP flow, allow registration without password initially
+  const hashedPassword = password ? await hashPassword(password) : null;
 
   // Create user data
   const userData = {
@@ -62,7 +62,7 @@ export const register = asyncHandler(async (req, res) => {
     phoneNumber,
     password: hashedPassword,
     role: role || "CITIZEN",
-    isActive: true,
+    isActive: !hashedPassword, // If no password, require OTP verification
     joinedOn: new Date(),
   };
 
