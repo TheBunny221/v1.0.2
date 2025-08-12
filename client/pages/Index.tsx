@@ -970,7 +970,7 @@ const Index: React.FC = () => {
                       <div className="font-medium">
                         {translations?.auth?.language || "Multi-language"}
                       </div>
-                      <div className="text-gray-600">{`${translations?.settings?.language || "Available in local languages"} (${currentLanguage.toUpperCase()})`}</div>
+                      <div className="text-gray-600">{`Available in local languages (${currentLanguage.toUpperCase()})`}</div>
                     </div>
                   </div>
                 </div>
