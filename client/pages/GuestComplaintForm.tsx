@@ -1023,7 +1023,7 @@ const GuestComplaintForm: React.FC = () => {
                   </div>
 
                   {currentLocation && (
-                    <div className="p-3 bg-green-50 rounded-lg">
+                    <div className="p-3 bg-green-50 rounded-lg" data-testid="location-detected">
                       <p className="text-sm text-green-700">
                         📍 Location detected and will be included with your
                         complaint
