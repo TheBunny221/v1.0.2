@@ -38,18 +38,26 @@ import {
 } from "lucide-react";
 
 const ComplaintsList: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
+  // Build query parameters
+  const queryParams: any = { page: 1, limit: 100 };
+  if (statusFilter !== "all") queryParams.status = statusFilter;
+  if (priorityFilter !== "all") queryParams.priority = priorityFilter;
+  if (searchTerm.trim()) queryParams.search = searchTerm.trim();
+
+  // Use RTK Query for better authentication handling
+  const { data: complaintsResponse, isLoading, error } = useGetComplaintsQuery(
+    queryParams,
+    { skip: !isAuthenticated || !user }
+  );
+
+  const complaints = complaintsResponse?.data || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
