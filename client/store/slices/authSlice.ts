@@ -474,6 +474,10 @@ const authSlice = createSlice({
     setRequiresPasswordSetup: (state, action: PayloadAction<boolean>) => {
       state.requiresPasswordSetup = action.payload;
     },
+    resetRegistrationState: (state) => {
+      state.registrationStep = "none";
+      state.registrationData = undefined;
+    },
   },
   extraReducers: (builder) => {
     builder
