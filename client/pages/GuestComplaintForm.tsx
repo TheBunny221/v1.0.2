@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
+import { selectAuth, getDashboardRouteForRole } from "../store/slices/authSlice";
 import {
-  submitGuestComplaint,
-  verifyOTPAndRegister,
-  resendOTP,
-  clearError,
-  clearGuestData,
-  selectGuestState,
-  selectSubmissionStep,
-  selectComplaintId,
-  selectUserEmail,
-  selectNewUserRegistered,
-} from "../store/slices/guestSlice";
+  useSubmitGuestComplaintMutation,
+} from "../store/api/guestApi";
+import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
