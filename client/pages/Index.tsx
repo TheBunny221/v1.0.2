@@ -674,8 +674,7 @@ const Index: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>
-                      {translations?.dashboard?.totalComplaints ||
-                        "Total Complaints"}
+                      Total Complaints
                       :
                     </span>
                     <span className="font-semibold">12,456</span>
