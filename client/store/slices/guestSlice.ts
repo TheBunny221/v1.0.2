@@ -276,12 +276,15 @@ const guestSlice = createSlice({
       state.sessionId = null;
       state.complaintData = null;
       state.submissionStep = "form";
+      state.currentFormStep = 1;
+      state.formValidation = {};
       state.otpSent = false;
       state.otpExpiry = null;
       state.error = null;
       state.userEmail = null;
       state.newUserRegistered = false;
       state.trackingData = null;
+      clearFormDataFromSession();
     },
     setSubmissionStep: (
       state,
@@ -289,17 +292,45 @@ const guestSlice = createSlice({
     ) => {
       state.submissionStep = action.payload;
     },
+    setCurrentFormStep: (state, action: PayloadAction<number>) => {
+      state.currentFormStep = action.payload;
+    },
+    setFormValidation: (state, action: PayloadAction<Record<string, string>>) => {
+      state.formValidation = action.payload;
+    },
     clearError: (state) => {
       state.error = null;
     },
     updateComplaintData: (
       state,
-      action: PayloadAction<Partial<GuestComplaintData>>,
+      action: PayloadAction<Partial<GuestComplaintData> & { currentStep?: number }>,
     ) => {
+      const { currentStep, ...dataUpdate } = action.payload;
+
       if (state.complaintData) {
-        state.complaintData = { ...state.complaintData, ...action.payload };
+        state.complaintData = { ...state.complaintData, ...dataUpdate };
       } else {
-        state.complaintData = action.payload as GuestComplaintData;
+        state.complaintData = dataUpdate as GuestComplaintData;
+      }
+
+      if (currentStep !== undefined) {
+        state.currentFormStep = currentStep;
+      }
+
+      // Save to sessionStorage
+      const dataToSave = { ...state.complaintData, currentStep: state.currentFormStep };
+      saveFormDataToSession(dataToSave);
+    },
+    loadFormDataFromSession: (state) => {
+      const savedData = loadFormDataFromSession();
+      if (savedData) {
+        const { currentStep, ...complaintData } = savedData;
+        if (Object.keys(complaintData).length > 0) {
+          state.complaintData = complaintData as GuestComplaintData;
+        }
+        if (currentStep) {
+          state.currentFormStep = currentStep;
+        }
       }
     },
     resetOTPState: (state) => {
