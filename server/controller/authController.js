@@ -49,22 +49,24 @@ export const register = asyncHandler(async (req, res) => {
     if (existingUser.isActive) {
       return res.status(400).json({
         success: false,
-        message: "User already exists with this email. Please try logging in instead.",
+        message:
+          "User already exists with this email. Please try logging in instead.",
         data: {
           existingUser: true,
           isActive: true,
-          action: "login"
+          action: "login",
         },
       });
     } else {
       // User exists but is not activated (pending email verification)
       return res.status(400).json({
         success: false,
-        message: "User already registered but email not verified. Please check your email for verification code or request a new one.",
+        message:
+          "User already registered but email not verified. Please check your email for verification code or request a new one.",
         data: {
           existingUser: true,
           isActive: false,
-          action: "verify_email"
+          action: "verify_email",
         },
       });
     }

@@ -140,7 +140,8 @@ const Register: React.FC = () => {
         if (isActive && action === "login") {
           toast({
             title: "Account Already Exists",
-            description: "This email is already registered. Please log in instead.",
+            description:
+              "This email is already registered. Please log in instead.",
             variant: "destructive",
             action: (
               <Link
@@ -154,7 +155,8 @@ const Register: React.FC = () => {
         } else if (!isActive && action === "verify_email") {
           toast({
             title: "Email Verification Pending",
-            description: "This email is already registered but not verified. Please check your email for verification code.",
+            description:
+              "This email is already registered but not verified. Please check your email for verification code.",
           });
 
           // Open OTP flow for the existing unverified user
@@ -162,7 +164,8 @@ const Register: React.FC = () => {
             context: "register",
             email: formData.email,
             title: "Complete Registration",
-            description: "Enter the verification code sent to your email to activate your account. Click 'Resend Code' if you need a new verification email.",
+            description:
+              "Enter the verification code sent to your email to activate your account. Click 'Resend Code' if you need a new verification email.",
             onSuccess: (data) => {
               toast({
                 title: "Registration Completed!",
@@ -173,7 +176,10 @@ const Register: React.FC = () => {
         }
       } else {
         // Handle other errors - extract message from server response
-        const errorMessage = errorData?.message || error?.data?.message || getApiErrorMessage(error);
+        const errorMessage =
+          errorData?.message ||
+          error?.data?.message ||
+          getApiErrorMessage(error);
         console.log("Extracted error message:", errorMessage);
         toast({
           title: "Registration Failed",
