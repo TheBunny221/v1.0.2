@@ -140,10 +140,6 @@ const GuestComplaintForm: React.FC = () => {
       ...prev,
       [name]: value,
     }));
-
-    if (error) {
-      dispatch(clearError());
-    }
   };
 
   const handleComplaintSubmit = async (e: React.FormEvent) => {
