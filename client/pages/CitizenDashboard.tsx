@@ -732,7 +732,7 @@ const CitizenDashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
-              onClick={() => navigate("/complaints/create")}
+              onClick={() => navigate("/complaints/citizen-form")}
               className="w-full justify-start"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
