@@ -476,7 +476,7 @@ export const {
   setFormValidation,
   clearError,
   updateComplaintData,
-  loadFormDataFromSession,
+  loadSavedFormData,
   resetOTPState,
 } = guestSlice.actions;
 
