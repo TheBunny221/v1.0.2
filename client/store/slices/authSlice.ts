@@ -601,9 +601,23 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+
+        if (action.payload.requiresOtpVerification) {
+          // OTP verification required
+          state.registrationStep = "otp_required";
+          state.registrationData = {
+            email: action.payload.email,
+            fullName: action.payload.fullName,
+            role: action.payload.role,
+          };
+          state.isAuthenticated = false;
+        } else {
+          // Direct registration without OTP
+          state.isAuthenticated = true;
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.registrationStep = "completed";
+        }
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -612,6 +626,41 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.error = (action.payload as any)?.message || "Registration failed";
+        state.registrationStep = "none";
+      })
+
+      // Registration OTP verification
+      .addCase(verifyRegistrationOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyRegistrationOTP.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.registrationStep = "otp_verified";
+        state.error = null;
+      })
+      .addCase(verifyRegistrationOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          (action.payload as any)?.message || "OTP verification failed";
+      })
+
+      // Resend registration OTP
+      .addCase(resendRegistrationOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendRegistrationOTP.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resendRegistrationOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          (action.payload as any)?.message || "Failed to resend OTP";
       })
 
       // Login with token
