@@ -114,6 +114,17 @@ const CitizenDashboard: React.FC = () => {
     navigate(`/dashboard?${params.toString()}`);
   };
 
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setSortBy("submittedOn");
+    setSortOrder("desc");
+
+    // Navigate to dashboard without any query parameters
+    navigate("/dashboard");
+  };
+
   // Fetch complaints when user is available or filters change
   useEffect(() => {
     // Calculate dashboard statistics from complaints or use stats API
