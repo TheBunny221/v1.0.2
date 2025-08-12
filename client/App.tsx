@@ -126,54 +126,6 @@ const App: React.FC = () => {
                                   }
                                 />
 
-<<<<<<< HEAD
-                              {/* Complaint routes */}
-                              <Route
-                                path="/complaints"
-                                element={
-                                  <RoleBasedRoute
-                                    allowedRoles={[
-                                      "CITIZEN",
-                                      "WARD_OFFICER",
-                                      "MAINTENANCE_TEAM",
-                                      "ADMINISTRATOR",
-                                    ]}
-                                  >
-                                    <ComplaintsList />
-                                  </RoleBasedRoute>
-                                }
-                              />
-                              <Route
-                                path="/complaints/create"
-                                element={
-                                  <RoleBasedRoute
-                                    allowedRoles={[
-                                      "CITIZEN",
-                                      "WARD_OFFICER",
-                                      "MAINTENANCE_TEAM",
-                                      "ADMINISTRATOR",
-                                    ]}
-                                  >
-                                    <CreateComplaint />
-                                  </RoleBasedRoute>
-                                }
-                              />
-                              <Route
-                                path="/complaints/:id"
-                                element={
-                                  <RoleBasedRoute
-                                    allowedRoles={[
-                                      "CITIZEN",
-                                      "WARD_OFFICER",
-                                      "MAINTENANCE_TEAM",
-                                      "ADMINISTRATOR",
-                                    ]}
-                                  >
-                                    <ComplaintDetails />
-                                  </RoleBasedRoute>
-                                }
-                              />
-=======
                                 {/* Complaint routes */}
                                 <Route
                                   path="/complaints"
@@ -187,6 +139,21 @@ const App: React.FC = () => {
                                       ]}
                                     >
                                       <ComplaintsList />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/complaints/create"
+                                  element={
+                                    <RoleBasedRoute
+                                      allowedRoles={[
+                                        "CITIZEN",
+                                        "WARD_OFFICER",
+                                        "MAINTENANCE_TEAM",
+                                        "ADMINISTRATOR",
+                                      ]}
+                                    >
+                                      <CreateComplaint />
                                     </RoleBasedRoute>
                                   }
                                 />
@@ -205,7 +172,6 @@ const App: React.FC = () => {
                                     </RoleBasedRoute>
                                   }
                                 />
->>>>>>> origin/main
 
                                 {/* Ward Officer routes */}
                                 <Route
