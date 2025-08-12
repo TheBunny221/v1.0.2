@@ -97,7 +97,8 @@ const CitizenDashboard: React.FC = () => {
 
   // Handler functions
   const handleRefresh = () => {
-    window.location.reload();
+    refetchComplaints();
+    refetchStats();
   };
 
   const handleSearch = (e: React.FormEvent) => {
