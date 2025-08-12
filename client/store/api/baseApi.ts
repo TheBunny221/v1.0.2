@@ -4,7 +4,7 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-// Define base query with JWT auto-inclusion
+// Define base query with JWT auto-inclusion and proper error handling
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
   prepareHeaders: (headers, { getState }) => {
@@ -21,6 +21,26 @@ const baseQuery = fetchBaseQuery({
     }
 
     return headers;
+  },
+  // Custom response handler to prevent cloning issues
+  responseHandler: async (response) => {
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        return await response.json();
+      } catch (error) {
+        console.warn("Failed to parse JSON response:", error);
+        return { success: false, message: "Invalid response format" };
+      }
+    }
+
+    try {
+      return await response.text();
+    } catch (error) {
+      console.warn("Failed to read response text:", error);
+      return "";
+    }
   },
 });
 
