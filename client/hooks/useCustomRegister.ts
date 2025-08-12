@@ -22,9 +22,12 @@ export const useCustomRegister = () => {
       console.log("Testing API connectivity...");
       try {
         const testResponse = await fetch("/api/health");
-        console.log("Health check response:", testResponse.status);
+        console.log("Health check response:", testResponse.status, testResponse.statusText);
+        const healthData = await testResponse.json();
+        console.log("Health check data:", healthData);
       } catch (testError) {
         console.error("Health check failed:", testError);
+        console.error("Health check error details:", testError.name, testError.message);
       }
 
       console.log("Making fetch request to /api/auth/register with data:", data);
