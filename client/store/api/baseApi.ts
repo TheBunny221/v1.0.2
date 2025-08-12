@@ -102,19 +102,39 @@ export const rollbackUpdate = <T>(
 
 // Helper to extract error message from RTK Query error
 export const getApiErrorMessage = (error: any): string => {
-  // If error has data property with message (from server)
-  if (error?.data?.message) {
-    return error.data.message;
+  console.log("Processing error:", error);
+
+  // Handle RTK Query SerializedError (when response cloning fails)
+  if (error?.name === "TypeError" && error?.message?.includes("Response body is already used")) {
+    return "A network error occurred. Please try again.";
   }
 
-  // If error has message property
-  if (error?.message) {
-    return error.message;
+  // Handle RTK Query FetchBaseQueryError structure
+  if (error?.data) {
+    // Server error response with message
+    if (typeof error.data === "object" && error.data.message) {
+      return error.data.message;
+    }
+
+    // Server error response as string
+    if (typeof error.data === "string") {
+      try {
+        const parsed = JSON.parse(error.data);
+        if (parsed.message) {
+          return parsed.message;
+        }
+      } catch {
+        return error.data;
+      }
+    }
   }
 
-  // If error has data as string
-  if (typeof error?.data === "string") {
-    return error.data;
+  // Handle SerializedError structure
+  if (error?.message && typeof error.message === "string") {
+    // Skip generic error messages that aren't helpful
+    if (!error.message.includes("Response body") && !error.message.includes("clone")) {
+      return error.message;
+    }
   }
 
   // Fallback to status-based message
@@ -129,7 +149,7 @@ export const getApiErrorMessage = (error: any): string => {
       case 404:
         return "Resource not found";
       case 409:
-        return "Conflict - resource already exists";
+        return "This email address is already registered. Please use a different email or try logging in.";
       case 422:
         return "Validation error - please check your input";
       case 429:
@@ -141,5 +161,5 @@ export const getApiErrorMessage = (error: any): string => {
     }
   }
 
-  return "An unexpected error occurred";
+  return "An unexpected error occurred. Please try again.";
 };
