@@ -233,7 +233,7 @@ const CitizenDashboard: React.FC = () => {
           </div>
           <div className="hidden md:flex items-center space-x-4">
             <Button
-              onClick={() => navigate("/complaints/create")}
+              onClick={() => navigate("/complaints/citizen-form")}
               className="bg-white text-blue-600 hover:bg-gray-50"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -344,7 +344,10 @@ const CitizenDashboard: React.FC = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button onClick={() => navigate("/complaints/create")} size="sm">
+              <Button
+                onClick={() => navigate("/complaints/citizen-form")}
+                size="sm"
+              >
                 <PlusCircle className="h-4 w-4 mr-2" />
                 New Complaint
               </Button>
@@ -457,7 +460,7 @@ const CitizenDashboard: React.FC = () => {
                   ? "No complaints match your current filters."
                   : "You haven't submitted any complaints yet."}
               </p>
-              <Button onClick={() => navigate("/complaints/create")}>
+              <Button onClick={() => navigate("/complaints/citizen-form")}>
                 <PlusCircle className="h-4 w-4 mr-2" />
                 Submit Your First Complaint
               </Button>
@@ -732,7 +735,7 @@ const CitizenDashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
-              onClick={() => navigate("/complaints/create")}
+              onClick={() => navigate("/complaints/citizen-form")}
               className="w-full justify-start"
             >
               <PlusCircle className="mr-2 h-4 w-4" />

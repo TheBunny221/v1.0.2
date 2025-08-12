@@ -14,6 +14,12 @@ import {
   getPublicComplaintTypes,
 } from "../controller/guestController.js";
 import {
+  submitGuestServiceRequest,
+  verifyServiceRequestOTP,
+  trackServiceRequest,
+  getServiceTypes,
+} from "../controller/guestServiceRequestController.js";
+import {
   validateOtpVerification,
   validateComplaintTracking,
 } from "../middleware/validation.js";
@@ -82,6 +88,12 @@ router.get("/track/:complaintId", validateComplaintTracking, trackComplaint);
 router.get("/stats", getPublicStats);
 router.get("/wards", getPublicWards);
 router.get("/complaint-types", getPublicComplaintTypes);
+
+// Service request routes
+router.post("/service-request", submitGuestServiceRequest);
+router.post("/verify-service-otp", verifyServiceRequestOTP);
+router.get("/track-service/:requestId", trackServiceRequest);
+router.get("/service-types", getServiceTypes);
 
 // Serve uploaded guest files
 router.get("/files/:filename", (req, res) => {

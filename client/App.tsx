@@ -35,8 +35,11 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ComplaintsList = lazy(() => import("./pages/ComplaintsList"));
 const ComplaintDetails = lazy(() => import("./pages/ComplaintDetails"));
 const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
+const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
 const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
 const GuestTrackComplaint = lazy(() => import("./pages/GuestTrackComplaint"));
+const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
+const GuestDashboard = lazy(() => import("./pages/GuestDashboard"));
 
 // Ward Officer pages
 const WardTasks = lazy(() => import("./pages/WardTasks"));
@@ -94,6 +97,14 @@ const App: React.FC = () => {
                     <Route
                       path="/guest/track"
                       element={<GuestTrackComplaint />}
+                    />
+                    <Route
+                      path="/guest/service-request"
+                      element={<GuestServiceRequest />}
+                    />
+                    <Route
+                      path="/guest/dashboard"
+                      element={<GuestDashboard />}
                     />
                     <Route path="/unauthorized" element={<Unauthorized />} />
 
@@ -154,6 +165,14 @@ const App: React.FC = () => {
                                       ]}
                                     >
                                       <CreateComplaint />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/complaints/citizen-form"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["CITIZEN"]}>
+                                      <CitizenComplaintForm />
                                     </RoleBasedRoute>
                                   }
                                 />
