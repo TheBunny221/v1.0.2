@@ -40,6 +40,7 @@ import {
   Clock,
   CheckCircle,
   ArrowLeft,
+  Home,
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
