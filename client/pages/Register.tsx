@@ -9,7 +9,7 @@ import {
 import { getApiErrorMessage } from "../store/api/baseApi";
 import { useToast } from "../hooks/use-toast";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import { useCustomRegister } from "../hooks/useCustomRegister";
+import { useRegisterMutation } from "../store/api/authApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import {
   Card,
