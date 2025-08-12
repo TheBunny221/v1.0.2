@@ -318,13 +318,6 @@ const GuestComplaintForm: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {error && (
-              <Alert className="mb-4 border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
 
             <form onSubmit={handleComplaintSubmit} className="space-y-6">
               {/* Personal Information */}
