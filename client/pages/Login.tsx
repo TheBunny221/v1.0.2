@@ -65,26 +65,15 @@ const Login: React.FC = () => {
   // Clear error when component mounts
   useEffect(() => {
     dispatch(clearError());
-    dispatch(resetOTPState());
   }, [dispatch]);
 
   // Redirect if authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
     }
-  }, [isAuthenticated, navigate]);
-
-  // OTP timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (otpTimer > 0) {
-      interval = setInterval(() => {
-        setOtpTimer((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [otpTimer]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
