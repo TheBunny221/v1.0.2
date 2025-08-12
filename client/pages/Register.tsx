@@ -38,8 +38,7 @@ const Register: React.FC = () => {
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // API hooks
-  const { register: registerUser, isLoading: isRegistering } =
-    useCustomRegister();
+  const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
 
   // Clear registration state on component mount
   useEffect(() => {
