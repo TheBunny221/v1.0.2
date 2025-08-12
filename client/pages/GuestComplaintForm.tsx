@@ -71,17 +71,16 @@ const PRIORITIES = [
 ];
 
 const GuestComplaintForm: React.FC = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { openOtpFlow } = useOtpFlow();
+  const { isAuthenticated, user } = useAppSelector(selectAuth);
 
-  const { isSubmitting, isVerifying, error, otpExpiry } =
-    useAppSelector(selectGuestState);
+  // API hooks
+  const [submitGuestComplaint, { isLoading: isSubmitting }] = useSubmitGuestComplaintMutation();
 
-  const submissionStep = useAppSelector(selectSubmissionStep);
-  const complaintId = useAppSelector(selectComplaintId);
-  const userEmail = useAppSelector(selectUserEmail);
-  const newUserRegistered = useAppSelector(selectNewUserRegistered);
+  const [submissionStep, setSubmissionStep] = useState<"form" | "success">("form");
+  const [complaintId, setComplaintId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     fullName: "",
