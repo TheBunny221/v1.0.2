@@ -30,14 +30,25 @@ import { Shield, User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const auth = useAppSelector(selectAuth);
-  const registrationStep = useAppSelector(selectRegistrationStep);
-  const registrationData = useAppSelector(selectRegistrationData);
+  const { toast } = useToast();
+  const { openOtpFlow } = useOtpFlow();
+  const { isAuthenticated, user } = useAppSelector(selectAuth);
+
+  // API hooks
+  const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
 
   // Clear registration state on component mount
   useEffect(() => {
     dispatch(resetRegistrationState());
   }, [dispatch]);
+
+  // Redirect if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const [formData, setFormData] = useState({
     fullName: "",
