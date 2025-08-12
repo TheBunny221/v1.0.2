@@ -288,8 +288,8 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Create Account"}
+              <Button type="submit" className="w-full" disabled={auth.isLoading}>
+                {auth.isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
