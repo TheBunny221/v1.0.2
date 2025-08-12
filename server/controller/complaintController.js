@@ -630,18 +630,21 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
 
   const filters = {};
 
-  // Role-based filtering
+  // Role-based filtering - enforce security defaults that cannot be overridden
   if (req.user.role === "CITIZEN") {
+    // Citizens can ONLY see stats for their own complaints
     filters.submittedById = req.user.id;
   } else if (req.user.role === "WARD_OFFICER") {
+    // Ward officers can ONLY see stats for their ward
     filters.wardId = req.user.wardId;
   } else if (req.user.role === "MAINTENANCE_TEAM") {
+    // Maintenance team can ONLY see stats for their assigned complaints
     filters.assignedToId = req.user.id;
   }
 
-  // Apply additional filters
-  if (wardId && req.user.role === "ADMINISTRATOR") {
-    filters.wardId = wardId;
+  // Apply additional filters (only for administrators)
+  if (req.user.role === "ADMINISTRATOR") {
+    if (wardId) filters.wardId = wardId;
   }
 
   // Date range filter
