@@ -303,7 +303,9 @@ export const registerUser = createAsyncThunk(
           email: userData.email,
           fullName: userData.fullName,
           role: userData.role || "CITIZEN",
-          message: data.message || "Registration successful. Please verify your email with the OTP sent.",
+          message:
+            data.message ||
+            "Registration successful. Please verify your email with the OTP sent.",
         };
       }
 

@@ -6,7 +6,7 @@ import {
   selectAuth,
   selectRegistrationStep,
   selectRegistrationData,
-  resetRegistrationState
+  resetRegistrationState,
 } from "../store/slices/authSlice";
 import { showToast } from "../store/slices/uiSlice";
 import OTPVerification from "../components/OTPVerification";
@@ -288,7 +288,11 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={auth.isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={auth.isLoading}
+              >
                 {auth.isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>

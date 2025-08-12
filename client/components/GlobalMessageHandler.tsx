@@ -1,6 +1,11 @@
 import React, { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { selectModals, selectToasts, hideModal, hideToast } from "../store/slices/uiSlice";
+import {
+  selectModals,
+  selectToasts,
+  hideModal,
+  hideToast,
+} from "../store/slices/uiSlice";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +33,7 @@ const GlobalMessageHandler: React.FC = () => {
         variant: toastItem.type === "error" ? "destructive" : "default",
         duration: toastItem.duration,
       });
-      
+
       // Remove from store after showing
       dispatch(hideToast(toastItem.id));
     });
@@ -43,7 +48,9 @@ const GlobalMessageHandler: React.FC = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>{modal.title}</AlertDialogTitle>
               <AlertDialogDescription>
-                {typeof modal.content === "string" ? modal.content : modal.content}
+                {typeof modal.content === "string"
+                  ? modal.content
+                  : modal.content}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

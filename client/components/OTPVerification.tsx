@@ -28,9 +28,10 @@ interface OTPVerificationProps {
 const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated, user } = useAppSelector(selectAuth);
+  const { isLoading, error, isAuthenticated, user } =
+    useAppSelector(selectAuth);
   const registrationData = useAppSelector(selectRegistrationData);
-  
+
   const [otpCode, setOtpCode] = useState("");
   const [timer, setTimer] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
@@ -55,22 +56,22 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
   useEffect(() => {
     if (isAuthenticated && user) {
       const dashboardRoute = getDashboardRouteForRole(user.role);
-      
+
       dispatch(
         showToast({
           type: "success",
           title: "Registration Successful!",
           message: `Welcome ${user.fullName}! Your account has been verified.`,
-        })
+        }),
       );
-      
+
       navigate(dashboardRoute);
     }
   }, [isAuthenticated, user, navigate, dispatch]);
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!registrationData?.email || otpCode.length !== 6) {
       return;
     }
@@ -80,7 +81,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
         verifyRegistrationOTP({
           email: registrationData.email,
           otpCode,
-        })
+        }),
       ).unwrap();
     } catch (error: any) {
       dispatch(
@@ -88,7 +89,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
           type: "error",
           title: "Verification Failed",
           message: error.message || "Invalid OTP. Please try again.",
-        })
+        }),
       );
     }
   };
@@ -100,7 +101,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
       await dispatch(
         resendRegistrationOTP({
           email: registrationData.email,
-        })
+        }),
       ).unwrap();
 
       dispatch(
@@ -108,7 +109,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
           type: "success",
           title: "Email Sent Successfully!",
           message: `A new verification code has been sent to ${registrationData.email}. Please check your email.`,
-        })
+        }),
       );
 
       setTimer(300);
@@ -119,7 +120,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
           type: "error",
           title: "Failed to Resend",
           message: error.message || "Failed to resend OTP. Please try again.",
-        })
+        }),
       );
     }
   };
@@ -133,7 +134,9 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
   if (!registrationData) {
     return (
       <div className="text-center p-8">
-        <p className="text-gray-600">No registration data found. Please register again.</p>
+        <p className="text-gray-600">
+          No registration data found. Please register again.
+        </p>
       </div>
     );
   }
@@ -161,7 +164,9 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
                 type="text"
                 placeholder="000000"
                 value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) =>
+                  setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 maxLength={6}
                 className="text-center tracking-widest text-lg"
                 required
@@ -169,9 +174,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 text-center">
-                {error}
-              </div>
+              <div className="text-sm text-red-600 text-center">{error}</div>
             )}
 
             <Button
