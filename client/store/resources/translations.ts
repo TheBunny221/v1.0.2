@@ -137,6 +137,92 @@ export interface Translation {
     minCharacters: string;
   };
 
+  // Guest complaint form
+  guestForm: {
+    submitComplaint: string;
+    reportCivicIssues: string;
+    personalInformation: string;
+    complaintInformation: string;
+    locationInformation: string;
+    attachments: string;
+    reviewComplaint: string;
+    submitForVerification: string;
+    fullName: string;
+    emailAddress: string;
+    phoneNumber: string;
+    complaintType: string;
+    priority: string;
+    description: string;
+    ward: string;
+    subZone: string;
+    areaLocality: string;
+    nearbyLandmark: string;
+    completeAddress: string;
+    locationOnMap: string;
+    interactiveMapComing: string;
+    currentLocationDetected: string;
+    addPhotos: string;
+    addPhotosDescription: string;
+    uploadInstructions: string;
+    maxFilesAllowed: string;
+    fileSizeLimit: string;
+    allowedFormats: string;
+    uploadedImages: string;
+    preview: string;
+    remove: string;
+    reviewYourComplaint: string;
+    reviewDescription: string;
+    readyToSubmit: string;
+    readyToSubmitDescription: string;
+    whatHappensNext: string;
+    step1: string;
+    step2: string;
+    step3: string;
+    step4: string;
+    steps: {
+      details: string;
+      location: string;
+      attachments: string;
+      review: string;
+      submit: string;
+    };
+    progress: string;
+    stepOf: string;
+    completeRequiredFields: string;
+    fillRequiredInformation: string;
+    fixValidationErrors: string;
+    completeAllRequiredFields: string;
+    invalidFileType: string;
+    onlyImageFormats: string;
+    fileTooLarge: string;
+    selectSmallerFiles: string;
+    trackingNumber: string;
+    verificationCodeSent: string;
+    checkEmailForCode: string;
+    welcomeToSmartCity: string;
+    complaintVerified: string;
+    nowRegisteredCitizen: string;
+    canTrackProgress: string;
+    securityTip: string;
+    setPasswordForEasierLogin: string;
+    goToDashboard: string;
+    submitAnotherComplaint: string;
+    alreadyHaveAccount: string;
+    loginHere: string;
+    currentLocationIncluded: string;
+    selectOnMap: string;
+    imagePreview: string;
+    previewOfUploadedImage: string;
+    clickToUploadOrDrag: string;
+    invalidEmailFormat: string;
+    invalidPhoneFormat: string;
+    descriptionTooShort: string;
+    wardRequired: string;
+    areaRequired: string;
+    characterCount: string;
+    locationDetectedIncluded: string;
+  };
+
   // Profile
   profile: {
     personalInformation: string;
@@ -432,7 +518,7 @@ export const hindiTranslations: Translation = {
     back: "वापस",
     next: "अगला",
     previous: "पिछला",
-    refresh: "ताज़ा करें",
+    refresh: "ताज़ा क���ें",
     export: "निर्यात",
     download: "डाउनलोड",
     upload: "अपलोड",
@@ -463,7 +549,7 @@ export const hindiTranslations: Translation = {
     continueAsGuest: "अतिथि के रूप में जारी रखें",
   },
   complaints: {
-    registerComplaint: "शिकायत दर्ज करें",
+    registerComplaint: "श���कायत दर्ज करें",
     complaintId: "शिकायत आईडी",
     complaintType: "शिकायत का प्रकार",
     description: "विवरण",
@@ -533,7 +619,7 @@ export const hindiTranslations: Translation = {
     avatar: "अवतार",
     updateProfile: "प्रोफाइल अपडेट करें",
     profileUpdated: "प्रोफाइल सफलतापूर्वक अपडेट किया गया",
-    currentPassword: "वर्तमान पासवर्ड",
+    currentPassword: "वर्त��ान पासवर्ड",
     newPassword: "नया पासवर्ड",
     confirmPassword: "पासवर्ड की पुष्टि करें",
     passwordMismatch: "पासवर्ड मेल नहीं खाते",
@@ -579,7 +665,7 @@ export const hindiTranslations: Translation = {
     networkError:
       "���ेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
     serverError: "सर्वर त्रुटि। कृप���ा बाद में पुनः प्रयास करें।",
-    notFound: "अनुरोधित संसाधन नहीं मिला।",
+    notFound: "अनुरोधित संसाधन नह��ं मिला।",
     unauthorized: "आप इस संसाधन तक पहुंचने के लिए अधिकृत नहीं हैं।",
     forbidden: "पहुंच निष���द्ध।",
     validationError: "कृपया अपना इनपुट जांचें और पुनः प्रयास क��ें।",
@@ -634,7 +720,7 @@ export const malayalamTranslations: Translation = {
     password: "പാസ്‌വേഡ്",
     forgotPassword: "പാസ്‌വേഡ് മറന്നോ?",
     rememberMe: "എന്നെ ഓർക്കുക",
-    loginSuccess: "ലോഗിൻ വിജയകരം",
+    loginSuccess: "���ോഗിൻ വിജയകരം",
     loginError: "ലോഗിൻ പരാജയപ്പെട്ടു",
     invalidCredentials: "തെറ്റായ ഇമെയിൽ അല്ലെങ്കിൽ പാസ്��വേഡ്",
     sessionExpired: "സെഷൻ കാലഹരണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
@@ -740,7 +826,7 @@ export const malayalamTranslations: Translation = {
     complaintsByStatus: "നിലയനുസരിച്ച് പരാതികൾ",
     slaCompliance: "SLA അനുസരണം",
     recentComplaints: "അടുത്തകാല പരാതികൾ",
-    wardPerformance: "വാർഡ് പ്രകടനം",
+    wardPerformance: "വാർ���് പ്രകടനം",
     quickActions: "വേഗത്തിലുള്ള പ്രവർത്തനങ്ങൾ",
     overallCompliance: "മൊത്തത്തിലുള്ള അനുസരണ നിരക��ക്",
     onTime: "സമയത്ത്",
