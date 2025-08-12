@@ -6,10 +6,10 @@ import {
   resetRegistrationState,
   getDashboardRouteForRole,
 } from "../store/slices/authSlice";
-import { useRegisterMutation } from "../store/api/authApi";
 import { getApiErrorMessage } from "../store/api/baseApi";
 import { useToast } from "../hooks/use-toast";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
+import { useCustomRegister } from "../hooks/useCustomRegister";
 import { useOtpFlow } from "../contexts/OtpContext";
 import {
   Card,
