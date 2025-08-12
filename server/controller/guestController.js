@@ -42,11 +42,25 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     type,
     priority,
     wardId,
+    subZoneId,
     area,
     landmark,
     address,
     coordinates,
   } = req.body;
+
+  // Parse coordinates if it's a string
+  let parsedCoordinates = coordinates;
+  if (typeof coordinates === "string") {
+    try {
+      parsedCoordinates = JSON.parse(coordinates);
+    } catch (error) {
+      parsedCoordinates = null;
+    }
+  }
+
+  // Handle uploaded files
+  const attachments = req.files || [];
 
   // Check if user already exists
   let existingUser = await prisma.user.findUnique({
