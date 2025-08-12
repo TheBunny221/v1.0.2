@@ -11,6 +11,7 @@ export interface GuestComplaintData {
   landmark?: string;
   address?: string;
   wardId: string;
+  subZoneId?: string;
   priority?: string;
   coordinates?: {
     latitude: number;
