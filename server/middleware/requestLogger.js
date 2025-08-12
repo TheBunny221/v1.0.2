@@ -18,7 +18,8 @@ export const requestLogger = (req, res, next) => {
       statusCode: res.statusCode,
       duration: `${duration}ms`,
       timestamp: new Date().toISOString(),
-      userId: req.user ? req.user._id : null,
+      // Use Prisma-style `id` if available, fallback to `_id` for legacy compatibility
+      userId: req.user ? req.user.id || req.user._id : null,
       userRole: req.user ? req.user.role : null,
     };
 
