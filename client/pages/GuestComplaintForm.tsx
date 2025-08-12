@@ -100,27 +100,13 @@ const GuestComplaintForm: React.FC = () => {
     lng: number;
   } | null>(null);
 
-  // Clear error and guest data when component mounts
+  // Redirect authenticated users to dashboard
   useEffect(() => {
-    dispatch(clearError());
-    // Don't clear guest data on mount in case user is returning to complete OTP
-  }, [dispatch]);
-
-  // OTP timer
-  useEffect(() => {
-    if (otpExpiry) {
-      const updateTimer = () => {
-        const now = new Date().getTime();
-        const expiry = new Date(otpExpiry).getTime();
-        const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
-        setOtpTimer(remaining);
-      };
-
-      updateTimer();
-      const interval = setInterval(updateTimer, 1000);
-      return () => clearInterval(interval);
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
     }
-  }, [otpExpiry]);
+  }, [isAuthenticated, user, navigate]);
 
   // Get current location
   useEffect(() => {
