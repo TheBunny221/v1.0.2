@@ -74,7 +74,8 @@ const App: React.FC = () => {
     <Provider store={store}>
       <ErrorBoundary>
         <AppInitializer>
-          <Router>
+          <OtpProvider>
+            <Router>
             <div className="min-h-screen bg-gray-50">
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
@@ -333,7 +334,8 @@ const App: React.FC = () => {
             </div>
             <Toaster />
             <GlobalMessageHandler />
-          </Router>
+            </Router>
+          </OtpProvider>
         </AppInitializer>
       </ErrorBoundary>
     </Provider>
