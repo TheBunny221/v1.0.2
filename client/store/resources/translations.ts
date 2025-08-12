@@ -193,6 +193,15 @@ export interface Translation {
     overdue: string;
   };
 
+  // Admin
+  admin: {
+    userManagement: string;
+    systemConfiguration: string;
+    languageManagement: string;
+    analytics: string;
+    reports: string;
+  };
+
   // Errors & Messages
   messages: {
     networkError: string;
@@ -396,11 +405,11 @@ export const englishTranslations: Translation = {
 
 export const hindiTranslations: Translation = {
   common: {
-    submit: "जमा करे��",
+    submit: "जमा करें",
     cancel: "रद्द करें",
     save: "सहेजें",
     edit: "संपादित करें",
-    delete: "मिटाएं",
+    delete: "म���टाएं",
     view: "देखें",
     search: "खोजें",
     loading: "लोड हो रहा है...",
@@ -434,14 +443,14 @@ export const hindiTranslations: Translation = {
   },
   auth: {
     login: "लॉगिन",
-    logout: "लॉ��आउट",
+    logout: "लॉगआउट",
     email: "ईमेल",
     password: "पासवर्ड",
     forgotPassword: "पासवर्ड भूल गए?",
     rememberMe: "मुझे याद रखें",
     loginSuccess: "लॉगिन सफल",
     loginError: "लॉगिन असफल",
-    invalidCredentials: "गलत ईमेल ��ा पासवर्ड",
+    invalidCredentials: "गलत ईमेल ���ा पासवर्ड",
     sessionExpired: "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करें।",
     guestMode: "अतिथि मोड",
     continueAsGuest: "अतिथि के रूप में जारी रखें",
@@ -458,7 +467,7 @@ export const hindiTranslations: Translation = {
     lastUpdated: "अंतिम अद्यतन",
     assignedTo: "सौंपा गया",
     slaDeadline: "SLA समय सीमा",
-    ward: "वार���ड",
+    ward: "वार्ड",
     area: "क्षेत्र",
     location: "स्थान",
     address: "पता",
@@ -466,7 +475,7 @@ export const hindiTranslations: Translation = {
     attachments: "अनुलग्नक",
     remarks: "टिप्पणियां",
     trackStatus: "स्थिति ट्रैक करें",
-    myComplaints: "मेरी ���िकायतें",
+    myComplaints: "मेर�� ���िकायतें",
     reopenComplaint: "शिकायत फिर से खोलें",
     feedback: "प्रतिक्रिया",
     registered: "पंजीकृत",
@@ -506,13 +515,13 @@ export const hindiTranslations: Translation = {
     invalidCaptcha: "गलत कैप्चा कोड",
     requiredField: "यह फील्ड आवश्यक है",
     invalidEmail: "कृपया एक वैध ईमेल पता दर्ज करें",
-    invalidPhone: "कृ���या एक वैध फोन नंबर दर्ज करें",
+    invalidPhone: "कृपया एक वैध फोन नंबर दर्ज करें",
     minCharacters: "न्यूनतम 5 अक्षर आवश्यक",
   },
   profile: {
     personalInformation: "व्यक्तिगत जानकारी",
     contactDetails: "संपर्क विवरण",
-    preferences: "प्राथमिकताएं",
+    preferences: "प्राथम���कताएं",
     changePassword: "पासवर्ड बदलें",
     avatar: "अवतार",
     updateProfile: "प्रोफाइल अपडेट करें",
@@ -553,7 +562,7 @@ export const hindiTranslations: Translation = {
     overdue: "देरी से",
   },
   messages: {
-    networkError: "नेटवर���क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
+    networkError: "नेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
     serverError: "सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें।",
     notFound: "अनुरोधित संसाधन नहीं मिला।",
     unauthorized: "आप इस संसाधन तक पहुंचने के लिए अधिकृत नहीं हैं।",
@@ -601,7 +610,7 @@ export const malayalamTranslations: Translation = {
     profile: "���്രൊഫൈൽ",
     settings: "സെറ്റിംഗ്സ്",
     logout: "ലോഗൗട്ട്",
-    switchRole: "റോൾ മ��റ്റുക",
+    switchRole: "റോൾ മാറ്റുക",
   },
   auth: {
     login: "ലോഗിൻ",
@@ -610,7 +619,7 @@ export const malayalamTranslations: Translation = {
     password: "പാസ്‌വേഡ്",
     forgotPassword: "പാസ്‌വേഡ് മറന്നോ?",
     rememberMe: "എന്നെ ഓർക്കുക",
-    loginSuccess: "ലോഗിൻ വിജയകരം",
+    loginSuccess: "ലോഗ��ൻ വിജയകരം",
     loginError: "ലോഗിൻ പരാജയപ്പെട്ടു",
     invalidCredentials: "തെറ്റായ ഇമെയിൽ അല്ലെങ്കിൽ പാസ്��വേഡ്",
     sessionExpired: "സെഷൻ കാലഹരണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
@@ -633,7 +642,7 @@ export const malayalamTranslations: Translation = {
     area: "പ്രദേശം",
     location: "സ്ഥലം",
     address: "വിലാസം",
-    mobile: "മൊബൈൽ നമ്പർ",
+    mobile: "മൊബ���ൽ നമ്പർ",
     attachments: "അറ്റാച്ച്‌മെന്റുകൾ",
     remarks: "കുറിപ്പുകൾ",
     trackStatus: "നില ട്രാക്ക് ചെയ്യ���ക",
@@ -656,7 +665,7 @@ export const malayalamTranslations: Translation = {
     garbageCollection: "മാലിന്യ ശേഖരണം",
     streetLighting: "സ്ട്രീറ്റ് ലൈറ്റിംഗ്",
     sewerage: "മലിനജല സംവിധാനം",
-    publicHealth: "പൊതുജനാരോഗ്യം",
+    publicHealth: "പൊതു��നാരോഗ്യം",
     traffic: "ട്രാഫിക്",
     others: "മറ്റുള്ളവ",
   },
@@ -696,7 +705,7 @@ export const malayalamTranslations: Translation = {
   },
   settings: {
     generalSettings: "സാധാരണ ക്രമീകരണങ്ങൾ",
-    languageSettings: "ഭാഷാ ക്രമീകരണങ്ങൾ",
+    languageSettings: "��ാഷാ ക്രമീകരണങ്ങൾ",
     notificationSettings: "അറിയിപ്പ് ക്രമീകരണങ്ങൾ",
     privacySettings: "സ്വക���ര്യത ക്രമീകരണങ്ങൾ",
     language: "ഭാഷ",
@@ -728,10 +737,10 @@ export const malayalamTranslations: Translation = {
       "നെറ്റ്‌വർക്ക് കണക്ഷൻ പിശക്. ദയവായി നിങ്ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കുക.",
     serverError: "സർവർ പിശക്. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
     notFound: "അഭ്യർത്ഥി���്ച ഉറവിടം കണ്ടെത്തിയില്ല.",
-    unauthorized: "ഈ ഉറവിടം ആക്സസ് ചെ��്യാൻ നിങ്ങൾക്ക് അധികാരമില്ല.",
+    unauthorized: "ഈ ഉറവിടം ആക്സസ് ചെയ്യാൻ നിങ്ങൾക്ക് അധികാരമില്ല.",
     forbidden: "പ്രവേശനം വിലക്കിയിരിക്കുന്നു.",
     validationError:
-      "ദയവായി നിങ്ങളുടെ ഇൻപുട്ട് പരിശോധിച്ച് വീണ���ടും ശ്രമിക്കുക.",
+      "ദയവായി നിങ്ങളുടെ ഇൻപുട്ട് പരിശോധിച്ച് വീണ���ടും ശ്ര���ിക്കുക.",
     sessionExpired:
       "നിങ്ങളുടെ സെഷൻ കാലഹരണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
     operationSuccess: "പ്രവർത്തനം വിജയകരമായി പൂർത്തിയാക്കി.",
