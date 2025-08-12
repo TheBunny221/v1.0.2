@@ -578,3 +578,153 @@ export const verifyToken = asyncHandler(async (req, res) => {
     },
   });
 });
+
+// @desc    Verify registration OTP
+// @route   POST /api/auth/verify-registration-otp
+// @access  Public
+export const verifyRegistrationOTP = asyncHandler(async (req, res) => {
+  const { email, otpCode } = req.body;
+
+  // Find valid OTP session
+  const otpSession = await prisma.oTPSession.findFirst({
+    where: {
+      email,
+      otpCode,
+      purpose: "REGISTRATION",
+      isVerified: false,
+      expiresAt: { gt: new Date() },
+    },
+    include: {
+      user: {
+        include: { ward: true },
+      },
+    },
+  });
+
+  if (!otpSession) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired OTP",
+      data: null,
+    });
+  }
+
+  // Activate user account
+  const user = await prisma.user.update({
+    where: { id: otpSession.user.id },
+    data: {
+      isActive: true,
+      lastLogin: new Date(),
+    },
+    include: { ward: true },
+  });
+
+  // Mark OTP as verified
+  await prisma.oTPSession.update({
+    where: { id: otpSession.id },
+    data: {
+      isVerified: true,
+      verifiedAt: new Date(),
+    },
+  });
+
+  // Generate JWT token
+  const token = generateJWTToken(user);
+
+  // Remove password from response
+  const { password: _, ...userResponse } = user;
+
+  res.status(200).json({
+    success: true,
+    message: "Registration completed successfully",
+    data: {
+      user: userResponse,
+      token,
+    },
+  });
+});
+
+// @desc    Resend registration OTP
+// @route   POST /api/auth/resend-registration-otp
+// @access  Public
+export const resendRegistrationOTP = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  // Find user
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+      data: null,
+    });
+  }
+
+  if (user.isActive) {
+    return res.status(400).json({
+      success: false,
+      message: "User is already verified",
+      data: null,
+    });
+  }
+
+  // Invalidate existing OTP sessions
+  await prisma.oTPSession.updateMany({
+    where: {
+      email,
+      purpose: "REGISTRATION",
+      isVerified: false,
+    },
+    data: {
+      expiresAt: new Date(), // Expire immediately
+    },
+  });
+
+  // Generate new OTP
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Create new OTP session
+  await prisma.oTPSession.create({
+    data: {
+      userId: user.id,
+      email: user.email,
+      otpCode,
+      purpose: "REGISTRATION",
+      expiresAt,
+    },
+  });
+
+  // Send OTP email
+  const emailSent = await sendEmail({
+    to: user.email,
+    subject: "Complete Your Registration - Cochin Smart City (Resent)",
+    text: `Your new verification OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    html: `
+      <h2>New Verification OTP</h2>
+      <p>Your new verification OTP is:</p>
+      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <p>This OTP will expire in 10 minutes.</p>
+    `,
+  });
+
+  if (!emailSent) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send OTP. Please try again.",
+      data: null,
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "New verification OTP sent to your email",
+    data: {
+      email: user.email,
+      expiresAt,
+    },
+  });
+});
