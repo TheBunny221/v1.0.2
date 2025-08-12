@@ -62,7 +62,10 @@ export const useCustomRegister = () => {
       // Parse response as JSON
       let result;
       try {
-        result = await response.json();
+        const responseText = await response.text();
+        console.log("Raw response text:", responseText);
+
+        result = JSON.parse(responseText);
         console.log("Parsed JSON result:", result);
       } catch (jsonError) {
         console.error("Failed to parse response as JSON:", jsonError);
