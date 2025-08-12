@@ -52,8 +52,8 @@ export const register = asyncHandler(async (req, res) => {
     });
   }
 
-  // For unified OTP flow, allow registration without password initially
-  const hashedPassword = password ? await hashPassword(password) : null;
+  // Hash password for storage but keep account inactive until email verification
+  const hashedPassword = await hashPassword(password);
 
   // Create user data
   const userData = {
@@ -62,7 +62,7 @@ export const register = asyncHandler(async (req, res) => {
     phoneNumber,
     password: hashedPassword,
     role: role || "CITIZEN",
-    isActive: !!hashedPassword, // If no password, set inactive until OTP verification
+    isActive: false, // Always start with inactive account requiring email verification
     joinedOn: new Date(),
   };
 
@@ -82,74 +82,56 @@ export const register = asyncHandler(async (req, res) => {
     },
   });
 
-  // If no password provided, require OTP verification
-  if (!password) {
-    // Generate OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  // Always require OTP verification for new registrations
+  // Generate OTP
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Create OTP session
-    await prisma.oTPSession.create({
-      data: {
-        userId: user.id,
-        email: user.email,
-        otpCode,
-        purpose: "REGISTRATION",
-        expiresAt,
-      },
-    });
+  // Create OTP session
+  await prisma.oTPSession.create({
+    data: {
+      userId: user.id,
+      email: user.email,
+      otpCode,
+      purpose: "REGISTRATION",
+      expiresAt,
+    },
+  });
 
-    // Send OTP email
-    const emailSent = await sendEmail({
-      to: user.email,
-      subject: "Complete Your Registration - Cochin Smart City",
-      text: `Welcome! Please verify your email to complete registration. Your OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
-      html: `
-        <h2>Welcome to Cochin Smart City!</h2>
-        <p>Thank you for registering. To complete your registration, please verify your email with the OTP below:</p>
-        <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
-        <p>This OTP will expire in 10 minutes.</p>
-        <p>After verification, you'll be able to access your dashboard.</p>
-      `,
-    });
+  // Send OTP email
+  const emailSent = await sendEmail({
+    to: user.email,
+    subject: "Complete Your Registration - Cochin Smart City",
+    text: `Welcome! Please verify your email to complete registration. Your OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    html: `
+      <h2>Welcome to Cochin Smart City!</h2>
+      <p>Thank you for registering. To complete your registration, please verify your email with the OTP below:</p>
+      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <p>This OTP will expire in 10 minutes.</p>
+      <p>After verification, you'll be able to access your dashboard.</p>
+    `,
+  });
 
-    if (!emailSent) {
-      // Delete user if email fails
-      await prisma.user.delete({ where: { id: user.id } });
+  if (!emailSent) {
+    // Delete user if email fails
+    await prisma.user.delete({ where: { id: user.id } });
 
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send verification email. Please try again.",
-        data: null,
-      });
-    }
-
-    return res.status(201).json({
-      success: true,
-      message:
-        "Registration initiated. Please check your email for verification code.",
-      data: {
-        requiresOtpVerification: true,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-      },
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send verification email. Please try again.",
+      data: null,
     });
   }
 
-  // Direct registration with password
-  // Generate JWT token
-  const token = generateJWTToken(user);
-
-  // Remove password from response
-  const { password: _, ...userResponse } = user;
-
-  res.status(201).json({
+  return res.status(201).json({
     success: true,
-    message: "User registered successfully",
+    message:
+      "Registration initiated. Please check your email for verification code.",
     data: {
-      user: userResponse,
-      token,
+      requiresOtpVerification: true,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
     },
   });
 });
