@@ -35,6 +35,7 @@ import {
   AttachmentFile,
   GuestComplaintData,
 } from "../store/slices/guestSlice";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -401,10 +402,10 @@ const GuestComplaintForm: React.FC = () => {
         });
       }
     } catch (error: any) {
+      console.error("Guest complaint submission error:", error);
       toast({
         title: "Submission Failed",
-        description:
-          error.message || "Failed to submit complaint. Please try again.",
+        description: getApiErrorMessage(error),
         variant: "destructive",
       });
     }

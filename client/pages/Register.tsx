@@ -6,8 +6,10 @@ import {
   resetRegistrationState,
   getDashboardRouteForRole,
 } from "../store/slices/authSlice";
-import { useRegisterMutation } from "../store/api/authApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import { useToast } from "../hooks/use-toast";
+import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
+import { useCustomRegister } from "../hooks/useCustomRegister";
 import { useOtpFlow } from "../contexts/OtpContext";
 import {
   Card,
@@ -32,10 +34,12 @@ const Register: React.FC = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const { handleApiError } = useApiErrorHandler();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // API hooks
-  const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
+  const { register: registerUser, isLoading: isRegistering } =
+    useCustomRegister();
 
   // Clear registration state on component mount
   useEffect(() => {
@@ -88,7 +92,7 @@ const Register: React.FC = () => {
         password: formData.password,
         role: formData.role as any,
         wardId: formData.wardId,
-      }).unwrap();
+      });
 
       if (result.data?.requiresOtpVerification) {
         // OTP verification required - open unified dialog
@@ -120,11 +124,20 @@ const Register: React.FC = () => {
         // Navigation will be handled by auth state change
       }
     } catch (error: any) {
-      toast({
-        title: "Registration Failed",
-        description: error.message || "Failed to create account",
-        variant: "destructive",
-      });
+      console.error("Registration error:", JSON.stringify(error, null, 2));
+      console.error("Registration error object:", error);
+
+      // Let the global error handler handle 401s
+      if (!handleApiError(error)) {
+        // Handle other errors
+        const errorMessage = getApiErrorMessage(error);
+        console.log("Extracted error message:", errorMessage);
+        toast({
+          title: "Registration Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     }
   };
 

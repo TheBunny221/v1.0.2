@@ -4,10 +4,7 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-import { logout, setError } from "../slices/authSlice";
-import { toast } from "../../components/ui/use-toast";
-
-// Define base query with JWT auto-inclusion
+// Define base query with JWT auto-inclusion - keep it simple to avoid cloning issues
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
   prepareHeaders: (headers, { getState }) => {
@@ -99,7 +96,7 @@ function getErrorMessage(error: FetchBaseQueryError): string {
 // Create the base API slice
 export const baseApi = createApi({
   reducerPath: "api",
-  baseQuery: baseQueryWithReauth,
+  baseQuery: baseQuery,
   tagTypes: [
     "Auth",
     "User",
@@ -169,4 +166,127 @@ export const rollbackUpdate = <T>(
   return items.map((item) =>
     item[idField] === originalItem[idField] ? originalItem : item,
   );
+};
+
+// Helper to extract error message from RTK Query error
+export const getApiErrorMessage = (error: any): string => {
+  console.log(
+    "Processing error in getApiErrorMessage:",
+    JSON.stringify(error, null, 2),
+  );
+
+  // Handle custom fetch errors from useCustomRegister hook
+  if (error?.status && error?.data) {
+    console.log("Handling custom fetch error with status:", error.status);
+    console.log("Error data:", error.data);
+
+    // Server error response with message
+    if (typeof error.data === "object" && error.data.message) {
+      console.log("Found message in error.data:", error.data.message);
+      return error.data.message;
+    }
+
+    // Server error response as string
+    if (typeof error.data === "string") {
+      try {
+        const parsed = JSON.parse(error.data);
+        if (parsed.message) {
+          return parsed.message;
+        }
+      } catch {
+        return error.data;
+      }
+    }
+
+    // Fallback to status-based message for custom errors
+    switch (error.status) {
+      case 400:
+        return "This email address is already registered. Please use a different email or try logging in.";
+      case 401:
+        return "Unauthorized - please login again";
+      case 403:
+        return "Forbidden - you do not have permission";
+      case 404:
+        return "Resource not found";
+      case 409:
+        return "This email address is already registered. Please use a different email or try logging in.";
+      case 422:
+        return "Validation error - please check your input";
+      case 429:
+        return "Too many requests - please try again later";
+      case 500:
+        return "Internal server error - please try again later";
+      default:
+        return `An error occurred (${error.status})`;
+    }
+  }
+
+  // Handle RTK Query SerializedError (when response cloning fails or other errors)
+  if (
+    error?.name === "TypeError" ||
+    error?.message?.includes("Response body") ||
+    error?.message?.includes("clone")
+  ) {
+    // This is a cloning/network error - try to provide a helpful message
+    return "Registration failed. This email address may already be registered. Please try using a different email or attempt to log in instead.";
+  }
+
+  // Handle RTK Query FetchBaseQueryError structure
+  if (error?.data) {
+    // Server error response with message
+    if (typeof error.data === "object" && error.data.message) {
+      return error.data.message;
+    }
+
+    // Server error response as string
+    if (typeof error.data === "string") {
+      try {
+        const parsed = JSON.parse(error.data);
+        if (parsed.message) {
+          return parsed.message;
+        }
+      } catch {
+        return error.data;
+      }
+    }
+  }
+
+  // Handle SerializedError structure
+  if (error?.message && typeof error.message === "string") {
+    // Skip generic error messages that aren't helpful
+    if (
+      !error.message.includes("Response body") &&
+      !error.message.includes("clone") &&
+      !error.message.includes("TypeError")
+    ) {
+      return error.message;
+    }
+  }
+
+  // Fallback to status-based message
+  if (error?.status) {
+    switch (error.status) {
+      case 400:
+        return "This email address is already registered. Please use a different email or try logging in.";
+      case 401:
+        return "Unauthorized - please login again";
+      case 403:
+        return "Forbidden - you do not have permission";
+      case 404:
+        return "Resource not found";
+      case 409:
+        return "This email address is already registered. Please use a different email or try logging in.";
+      case 422:
+        return "Validation error - please check your input";
+      case 429:
+        return "Too many requests - please try again later";
+      case 500:
+        return "Internal server error - please try again later";
+      default:
+        return `An error occurred (${error.status})`;
+    }
+  }
+
+  console.log("No specific error pattern matched, using fallback");
+  return "Registration failed. Please check your information and try again.";
 };
