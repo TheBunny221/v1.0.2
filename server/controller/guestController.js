@@ -111,13 +111,12 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
   for (const file of attachments) {
     const attachment = await prisma.attachment.create({
       data: {
-        filename: file.filename,
+        fileName: file.filename,
         originalName: file.originalname,
         mimeType: file.mimetype,
         size: file.size,
-        path: file.path,
+        url: `/api/uploads/${file.filename}`, // URL to access the file
         complaintId: complaint.id,
-        uploadedBy: null, // Guest upload
       },
     });
     attachmentRecords.push(attachment);
