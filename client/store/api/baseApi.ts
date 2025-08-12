@@ -4,6 +4,8 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
+import { logout, setError } from '../slices/authSlice';
+import { toast } from '../../components/ui/use-toast';
 // Define base query with JWT auto-inclusion - keep it simple to avoid cloning issues
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
@@ -96,7 +98,7 @@ function getErrorMessage(error: FetchBaseQueryError): string {
 // Create the base API slice
 export const baseApi = createApi({
   reducerPath: "api",
-  baseQuery: baseQuery,
+  baseQuery: baseQueryWithReauth,
   tagTypes: [
     "Auth",
     "User",
