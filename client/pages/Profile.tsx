@@ -52,9 +52,10 @@ const Profile: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   const [formData, setFormData] = useState({
-    name: user?.name || "",
+    fullName: user?.fullName || "",
     email: user?.email || "",
-    phone: user?.phone || "",
+    phoneNumber: user?.phoneNumber || "",
+    language: user?.language || "en",
     ward: user?.ward?.name || "",
     department: user?.department || "",
   });
