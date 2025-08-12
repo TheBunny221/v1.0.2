@@ -46,13 +46,15 @@ const ComplaintDetails: React.FC = () => {
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   // Use RTK Query to fetch complaint details
-  const { data: complaintResponse, isLoading, error } = useGetComplaintQuery(
-    id!,
-    { skip: !id || !isAuthenticated }
-  );
+  const {
+    data: complaintResponse,
+    isLoading,
+    error,
+  } = useGetComplaintQuery(id!, { skip: !id || !isAuthenticated });
 
   // Use RTK Query mutation for status updates
-  const [updateStatus, { isLoading: isUpdatingStatus }] = useUpdateComplaintStatusMutation();
+  const [updateStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateComplaintStatusMutation();
 
   const complaint = complaintResponse?.data;
 
@@ -433,7 +435,8 @@ const ComplaintDetails: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               {/* Show feedback button for resolved/closed complaints if user is the complainant */}
-              {(complaint.status === "RESOLVED" || complaint.status === "CLOSED") &&
+              {(complaint.status === "RESOLVED" ||
+                complaint.status === "CLOSED") &&
                 complaint.submittedById === user?.id &&
                 !complaint.rating && (
                   <Button

@@ -33,15 +33,15 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
 
   // Validate mime type (images and documents only)
   const allowedMimeTypes = [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
   ];
 
   if (!allowedMimeTypes.includes(req.file.mimetype)) {
@@ -49,7 +49,8 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
     fs.unlinkSync(req.file.path);
     return res.status(400).json({
       success: false,
-      message: "Invalid file type. Only images (JPEG, PNG, GIF, WebP) and documents (PDF, DOC, DOCX, TXT) are allowed.",
+      message:
+        "Invalid file type. Only images (JPEG, PNG, GIF, WebP) and documents (PDF, DOC, DOCX, TXT) are allowed.",
       data: null,
     });
   }

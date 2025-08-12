@@ -6,7 +6,9 @@ import { baseApi } from "../../store/api/baseApi";
 import { complaintsApi } from "../../store/api/complaintsApi";
 
 // Create test store with auth state
-const createTestStore = (authState = { token: "mock-token", user: { id: "1", role: "CITIZEN" } }) => {
+const createTestStore = (
+  authState = { token: "mock-token", user: { id: "1", role: "CITIZEN" } },
+) => {
   return configureStore({
     reducer: {
       auth: (state = authState) => state,
@@ -51,7 +53,7 @@ describe("complaintsApi", () => {
           submittedById: "1",
         },
         {
-          id: "2", 
+          id: "2",
           description: "Street light not working",
           type: "STREET_LIGHTING",
           status: "ASSIGNED",
@@ -153,7 +155,7 @@ describe("complaintsApi", () => {
 
     it("skips query when not authenticated", async () => {
       const unauthenticatedStore = createTestStore({ token: null, user: null });
-      
+
       const result = await unauthenticatedStore.dispatch(
         complaintsApi.endpoints.getComplaints.initiate({}, { skip: true }),
       );
@@ -369,7 +371,9 @@ describe("complaintsApi", () => {
           expect(req.params.id).toBe("1");
           expect(body.status).toBe("ASSIGNED");
           expect(body.remarks).toBe("Assigned to maintenance team");
-          expect(req.headers.get("authorization")).toBe("Bearer ward-officer-token");
+          expect(req.headers.get("authorization")).toBe(
+            "Bearer ward-officer-token",
+          );
           return res(ctx.json(mockResponse));
         }),
       );
@@ -454,7 +458,8 @@ describe("complaintsApi", () => {
             ctx.status(400),
             ctx.json({
               success: false,
-              message: "Feedback can only be added to resolved or closed complaints",
+              message:
+                "Feedback can only be added to resolved or closed complaints",
             }),
           );
         }),
@@ -573,7 +578,10 @@ describe("complaintsApi", () => {
     it("invalidates cache after mutations", async () => {
       const listResponse = {
         success: true,
-        data: { complaints: [{ id: "1", status: "REGISTERED" }], pagination: {} },
+        data: {
+          complaints: [{ id: "1", status: "REGISTERED" }],
+          pagination: {},
+        },
       };
 
       const updateResponse = {
@@ -614,13 +622,19 @@ describe("complaintsApi", () => {
     it("applies optimistic updates for complaint mutations", async () => {
       // First, populate cache with initial complaint
       store.dispatch(
-        complaintsApi.util.upsertQueryData("getComplaints", { page: 1 }, {
-          success: true,
-          data: {
-            complaints: [{ id: "1", status: "REGISTERED", description: "Test" }],
-            pagination: {},
+        complaintsApi.util.upsertQueryData(
+          "getComplaints",
+          { page: 1 },
+          {
+            success: true,
+            data: {
+              complaints: [
+                { id: "1", status: "REGISTERED", description: "Test" },
+              ],
+              pagination: {},
+            },
           },
-        }),
+        ),
       );
 
       let requestPromiseResolve: (value: any) => void;
@@ -649,9 +663,9 @@ describe("complaintsApi", () => {
       );
 
       // Check optimistic update was applied
-      const cacheEntry = complaintsApi.endpoints.getComplaints.select({ page: 1 })(
-        store.getState(),
-      );
+      const cacheEntry = complaintsApi.endpoints.getComplaints.select({
+        page: 1,
+      })(store.getState());
       expect(cacheEntry.data?.data.complaints[0].status).toBe("ASSIGNED");
 
       // Resolve request

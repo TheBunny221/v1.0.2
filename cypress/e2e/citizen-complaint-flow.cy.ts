@@ -222,14 +222,14 @@ describe("Citizen Complaint Flow", () => {
     cy.get('select[name="priority"]').select("HIGH");
     cy.get('input[name="title"]').type("Pothole on Main Road");
     cy.get('textarea[name="description"]').type(
-      "There is a large pothole on Marine Drive near the junction that is causing traffic issues and potential damage to vehicles. This needs immediate attention."
+      "There is a large pothole on Marine Drive near the junction that is causing traffic issues and potential damage to vehicles. This needs immediate attention.",
     );
 
     // Location details
     cy.get('input[name="area"]').type("Marine Drive");
     cy.get('input[name="landmark"]').type("Near Traffic Junction");
     cy.get('textarea[name="address"]').type(
-      "Marine Drive, Fort Kochi, Near Traffic Junction"
+      "Marine Drive, Fort Kochi, Near Traffic Junction",
     );
 
     // Contact information (should be pre-filled)
@@ -417,7 +417,7 @@ describe("Citizen Complaint Flow", () => {
 
     // Provide feedback text
     cy.get('textarea[placeholder*="Please share your experience"]').type(
-      "Great service, resolved quickly"
+      "Great service, resolved quickly",
     );
 
     // Submit feedback
@@ -496,7 +496,7 @@ describe("Citizen Complaint Flow", () => {
     cy.get('input[placeholder="Search complaints..."]').clear();
 
     // Test status filter
-    cy.get('select').first().select("REGISTERED");
+    cy.get("select").first().select("REGISTERED");
 
     // Should show only registered complaints
     cy.contains("Water Supply Issue").should("be.visible");

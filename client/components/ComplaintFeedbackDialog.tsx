@@ -46,7 +46,7 @@ const ComplaintFeedbackDialog: React.FC<ComplaintFeedbackDialogProps> = ({
 
     if (!feedback.trim()) {
       toast({
-        title: "Feedback Required", 
+        title: "Feedback Required",
         description: "Please provide your feedback.",
         variant: "destructive",
       });
@@ -68,7 +68,7 @@ const ComplaintFeedbackDialog: React.FC<ComplaintFeedbackDialogProps> = ({
       // Reset form
       setRating(0);
       setFeedback("");
-      
+
       if (onSuccess) {
         onSuccess();
       }
@@ -76,7 +76,8 @@ const ComplaintFeedbackDialog: React.FC<ComplaintFeedbackDialogProps> = ({
     } catch (error: any) {
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit feedback. Please try again.",
+        description:
+          error.message || "Failed to submit feedback. Please try again.",
         variant: "destructive",
       });
     }
@@ -97,7 +98,8 @@ const ComplaintFeedbackDialog: React.FC<ComplaintFeedbackDialogProps> = ({
             Provide Feedback
           </DialogTitle>
           <DialogDescription>
-            Please rate our service and share your experience with the complaint resolution.
+            Please rate our service and share your experience with the complaint
+            resolution.
           </DialogDescription>
         </DialogHeader>
 

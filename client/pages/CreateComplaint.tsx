@@ -71,17 +71,22 @@ const CreateComplaint: React.FC = () => {
   const [errors, setErrors] = useState<Partial<ComplaintFormData>>({});
 
   // Fetch complaint types
-  const { data: typesResponse, isLoading: typesLoading } = useGetComplaintTypesQuery();
+  const { data: typesResponse, isLoading: typesLoading } =
+    useGetComplaintTypesQuery();
   const complaintTypes = typesResponse?.data || [];
 
   // Create complaint mutation
-  const [createComplaint, { isLoading: isCreating }] = useCreateComplaintMutation();
+  const [createComplaint, { isLoading: isCreating }] =
+    useCreateComplaintMutation();
 
-  const handleInputChange = (field: keyof ComplaintFormData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof ComplaintFormData,
+    value: string | boolean,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -143,7 +148,8 @@ const CreateComplaint: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit complaint. Please try again.",
+        description:
+          error.message || "Failed to submit complaint. Please try again.",
         variant: "destructive",
       });
     }
@@ -159,9 +165,7 @@ const CreateComplaint: React.FC = () => {
         <p className="text-gray-600 mb-4">
           Please log in to submit a complaint.
         </p>
-        <Button onClick={() => navigate("/login")}>
-          Go to Login
-        </Button>
+        <Button onClick={() => navigate("/login")}>Go to Login</Button>
       </div>
     );
   }
@@ -179,8 +183,12 @@ const CreateComplaint: React.FC = () => {
           Back to Dashboard
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Register New Complaint</h1>
-          <p className="text-gray-600">Submit a complaint to get it resolved quickly</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Register New Complaint
+          </h1>
+          <p className="text-gray-600">
+            Submit a complaint to get it resolved quickly
+          </p>
         </div>
       </div>
 
@@ -206,7 +214,9 @@ const CreateComplaint: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {typesLoading ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
+                      <SelectItem value="loading" disabled>
+                        Loading...
+                      </SelectItem>
                     ) : (
                       complaintTypes.map((type) => (
                         <SelectItem key={type.id} value={type.id}>
@@ -216,14 +226,18 @@ const CreateComplaint: React.FC = () => {
                     )}
                   </SelectContent>
                 </Select>
-                {errors.type && <p className="text-sm text-red-600">{errors.type}</p>}
+                {errors.type && (
+                  <p className="text-sm text-red-600">{errors.type}</p>
+                )}
               </div>
 
               <div>
                 <Label htmlFor="priority">Priority</Label>
                 <Select
                   value={formData.priority}
-                  onValueChange={(value) => handleInputChange("priority", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("priority", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -253,7 +267,9 @@ const CreateComplaint: React.FC = () => {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 placeholder="Describe your complaint in detail..."
                 rows={4}
                 className={errors.description ? "border-red-500" : ""}
@@ -284,7 +300,9 @@ const CreateComplaint: React.FC = () => {
                   placeholder="e.g., Fort Kochi, Mattancherry"
                   className={errors.area ? "border-red-500" : ""}
                 />
-                {errors.area && <p className="text-sm text-red-600">{errors.area}</p>}
+                {errors.area && (
+                  <p className="text-sm text-red-600">{errors.area}</p>
+                )}
               </div>
 
               <div>
@@ -292,7 +310,9 @@ const CreateComplaint: React.FC = () => {
                 <Input
                   id="landmark"
                   value={formData.landmark}
-                  onChange={(e) => handleInputChange("landmark", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("landmark", e.target.value)
+                  }
                   placeholder="Nearby landmark (optional)"
                 />
               </div>
@@ -324,7 +344,9 @@ const CreateComplaint: React.FC = () => {
               <Checkbox
                 id="anonymous"
                 checked={formData.isAnonymous}
-                onCheckedChange={(checked) => handleInputChange("isAnonymous", checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleInputChange("isAnonymous", checked as boolean)
+                }
               />
               <Label htmlFor="anonymous">Submit anonymously</Label>
             </div>
@@ -335,7 +357,9 @@ const CreateComplaint: React.FC = () => {
                 <Input
                   id="contactName"
                   value={formData.contactName}
-                  onChange={(e) => handleInputChange("contactName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("contactName", e.target.value)
+                  }
                   placeholder="Your name"
                   disabled={formData.isAnonymous}
                 />
@@ -347,7 +371,9 @@ const CreateComplaint: React.FC = () => {
                   id="contactEmail"
                   type="email"
                   value={formData.contactEmail}
-                  onChange={(e) => handleInputChange("contactEmail", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("contactEmail", e.target.value)
+                  }
                   placeholder="your.email@example.com"
                   disabled={formData.isAnonymous}
                 />
@@ -359,7 +385,9 @@ const CreateComplaint: React.FC = () => {
                   id="contactPhone"
                   type="tel"
                   value={formData.contactPhone}
-                  onChange={(e) => handleInputChange("contactPhone", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("contactPhone", e.target.value)
+                  }
                   placeholder="Your phone number"
                   className={errors.contactPhone ? "border-red-500" : ""}
                 />
@@ -380,10 +408,7 @@ const CreateComplaint: React.FC = () => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={isCreating}
-          >
+          <Button type="submit" disabled={isCreating}>
             {isCreating ? (
               <>
                 <CheckCircle className="h-4 w-4 mr-2 animate-spin" />

@@ -1,4 +1,12 @@
-import { beforeAll, afterAll, beforeEach, afterEach, describe, it, expect } from "vitest";
+import {
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+  describe,
+  it,
+  expect,
+} from "vitest";
 import request from "supertest";
 import { createApp } from "../../app.js";
 import { getPrisma } from "../../db/connection.js";
@@ -67,7 +75,7 @@ const generateToken = (user) => {
       wardId: user.wardId,
     },
     process.env.JWT_SECRET || "test-secret",
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 };
 
@@ -125,8 +133,12 @@ describe("Complaints API Integration Tests", () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.complaint).toBeDefined();
-      expect(response.body.data.complaint.description).toBe(complaintData.description);
-      expect(response.body.data.complaint.submittedById).toBe(testUsers.citizen.id);
+      expect(response.body.data.complaint.description).toBe(
+        complaintData.description,
+      );
+      expect(response.body.data.complaint.submittedById).toBe(
+        testUsers.citizen.id,
+      );
       expect(response.body.data.complaint.status).toBe("REGISTERED");
     });
 
@@ -215,11 +227,8 @@ describe("Complaints API Integration Tests", () => {
 
     afterEach(async () => {
       await prisma.complaint.deleteMany({
-        where: { 
-          OR: [
-            { id: citizenComplaintId },
-            { id: otherComplaintId }
-          ]
+        where: {
+          OR: [{ id: citizenComplaintId }, { id: otherComplaintId }],
         },
       });
     });
@@ -232,7 +241,7 @@ describe("Complaints API Integration Tests", () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.complaints).toBeDefined();
-      
+
       // Should only see their own complaint
       const complaints = response.body.data.complaints;
       expect(complaints.length).toBe(1);
@@ -248,10 +257,10 @@ describe("Complaints API Integration Tests", () => {
 
       expect(response.body.success).toBe(true);
       const complaints = response.body.data.complaints;
-      
+
       // Should see all complaints in their ward
       expect(complaints.length).toBe(2);
-      complaints.forEach(complaint => {
+      complaints.forEach((complaint) => {
         expect(complaint.wardId).toBe(testWard.id);
       });
     });
@@ -264,15 +273,13 @@ describe("Complaints API Integration Tests", () => {
 
       expect(response.body.success).toBe(true);
       const complaints = response.body.data.complaints;
-      
+
       // Should see all complaints
       expect(complaints.length).toBeGreaterThanOrEqual(2);
     });
 
     it("should reject access without authentication", async () => {
-      await request(app)
-        .get("/api/complaints")
-        .expect(401);
+      await request(app).get("/api/complaints").expect(401);
     });
 
     it("should apply pagination correctly", async () => {
@@ -293,7 +300,7 @@ describe("Complaints API Integration Tests", () => {
         .expect(200);
 
       const complaints = response.body.data.complaints;
-      complaints.forEach(complaint => {
+      complaints.forEach((complaint) => {
         expect(complaint.status).toBe("REGISTERED");
       });
     });
@@ -347,11 +354,8 @@ describe("Complaints API Integration Tests", () => {
 
     afterEach(async () => {
       await prisma.complaint.deleteMany({
-        where: { 
-          OR: [
-            { id: citizenComplaintId },
-            { id: otherComplaintId }
-          ]
+        where: {
+          OR: [{ id: citizenComplaintId }, { id: otherComplaintId }],
         },
       });
     });
@@ -364,7 +368,9 @@ describe("Complaints API Integration Tests", () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.complaint.id).toBe(citizenComplaintId);
-      expect(response.body.data.complaint.submittedById).toBe(testUsers.citizen.id);
+      expect(response.body.data.complaint.submittedById).toBe(
+        testUsers.citizen.id,
+      );
     });
 
     it("should prevent citizen from accessing other user's complaint", async () => {
@@ -466,7 +472,7 @@ describe("Complaints API Integration Tests", () => {
       });
 
       expect(statusLogs.length).toBeGreaterThan(0);
-      expect(statusLogs.some(log => log.toStatus === "ASSIGNED")).toBe(true);
+      expect(statusLogs.some((log) => log.toStatus === "ASSIGNED")).toBe(true);
     });
   });
 
@@ -506,11 +512,8 @@ describe("Complaints API Integration Tests", () => {
 
     afterEach(async () => {
       await prisma.complaint.deleteMany({
-        where: { 
-          OR: [
-            { id: resolvedComplaintId },
-            { id: registeredComplaintId }
-          ]
+        where: {
+          OR: [{ id: resolvedComplaintId }, { id: registeredComplaintId }],
         },
       });
     });
@@ -529,7 +532,9 @@ describe("Complaints API Integration Tests", () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.complaint.rating).toBe(4);
-      expect(response.body.data.complaint.citizenFeedback).toBe(feedbackData.citizenFeedback);
+      expect(response.body.data.complaint.citizenFeedback).toBe(
+        feedbackData.citizenFeedback,
+      );
     });
 
     it("should prevent feedback on non-resolved complaints", async () => {
@@ -619,7 +624,7 @@ describe("Complaints API Integration Tests", () => {
     });
 
     it("should apply date range filters", async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       const response = await request(app)
         .get(`/api/complaints/stats?dateFrom=${today}&dateTo=${today}`)
         .set("Authorization", `Bearer ${adminToken}`)
@@ -633,9 +638,31 @@ describe("Complaints API Integration Tests", () => {
     it("should enforce proper role hierarchy", async () => {
       // Test that each role can only access what they're supposed to
       const testEndpoints = [
-        { method: "GET", path: "/api/complaints", allowedRoles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"] },
-        { method: "POST", path: "/api/complaints", allowedRoles: ["CITIZEN", "ADMINISTRATOR"] },
-        { method: "GET", path: "/api/complaints/stats", allowedRoles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"] },
+        {
+          method: "GET",
+          path: "/api/complaints",
+          allowedRoles: [
+            "CITIZEN",
+            "WARD_OFFICER",
+            "MAINTENANCE_TEAM",
+            "ADMINISTRATOR",
+          ],
+        },
+        {
+          method: "POST",
+          path: "/api/complaints",
+          allowedRoles: ["CITIZEN", "ADMINISTRATOR"],
+        },
+        {
+          method: "GET",
+          path: "/api/complaints/stats",
+          allowedRoles: [
+            "CITIZEN",
+            "WARD_OFFICER",
+            "MAINTENANCE_TEAM",
+            "ADMINISTRATOR",
+          ],
+        },
       ];
 
       for (const endpoint of testEndpoints) {
@@ -648,7 +675,7 @@ describe("Complaints API Integration Tests", () => {
             const response = await request(app)
               [endpoint.method.toLowerCase()](`${endpoint.path}`)
               .set("Authorization", `Bearer ${token}`);
-              
+
             expect(response.status).not.toBe(403); // Should not be forbidden
           } else {
             // Should be forbidden

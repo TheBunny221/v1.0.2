@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import { useGetComplaintsQuery, useGetComplaintStatisticsQuery } from "../store/api/complaintsApi";
+import {
+  useGetComplaintsQuery,
+  useGetComplaintStatisticsQuery,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -28,15 +31,17 @@ const CitizenDashboard: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   // Use RTK Query for better authentication handling
-  const { data: complaintsResponse, isLoading: complaintsLoading, error: complaintsError } = useGetComplaintsQuery(
+  const {
+    data: complaintsResponse,
+    isLoading: complaintsLoading,
+    error: complaintsError,
+  } = useGetComplaintsQuery(
     { page: 1, limit: 50 }, // Get more complaints for better stats
-    { skip: !isAuthenticated || !user }
+    { skip: !isAuthenticated || !user },
   );
 
-  const { data: statsResponse, isLoading: statsLoading } = useGetComplaintStatisticsQuery(
-    {},
-    { skip: !isAuthenticated || !user }
-  );
+  const { data: statsResponse, isLoading: statsLoading } =
+    useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
   const complaints = complaintsResponse?.data || [];
   const isLoading = complaintsLoading;
@@ -64,7 +69,9 @@ const CitizenDashboard: React.FC = () => {
     } else {
       // Calculate from complaints list as fallback
       const total = complaints.length;
-      const pending = complaints.filter((c) => c.status === "REGISTERED").length;
+      const pending = complaints.filter(
+        (c) => c.status === "REGISTERED",
+      ).length;
       const inProgress = complaints.filter(
         (c) => c.status === "IN_PROGRESS",
       ).length;
@@ -115,7 +122,11 @@ const CitizenDashboard: React.FC = () => {
   const recentComplaints = complaints.slice(0, 5);
 
   // Show error state if there's an authentication error
-  if (complaintsError && 'status' in complaintsError && complaintsError.status === 401) {
+  if (
+    complaintsError &&
+    "status" in complaintsError &&
+    complaintsError.status === 401
+  ) {
     return (
       <div className="text-center py-8">
         <div className="text-red-600 mb-4">

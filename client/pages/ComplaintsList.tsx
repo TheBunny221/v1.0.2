@@ -52,10 +52,11 @@ const ComplaintsList: React.FC = () => {
   if (searchTerm.trim()) queryParams.search = searchTerm.trim();
 
   // Use RTK Query for better authentication handling
-  const { data: complaintsResponse, isLoading, error } = useGetComplaintsQuery(
-    queryParams,
-    { skip: !isAuthenticated || !user }
-  );
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+  } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
   const complaints = complaintsResponse?.data || [];
 
@@ -94,10 +95,13 @@ const ComplaintsList: React.FC = () => {
   // Since filtering is now done server-side via query params, we don't need client-side filtering
   // But we can still apply search term filtering for immediate feedback
   const filteredComplaints = searchTerm
-    ? complaints.filter((complaint) =>
-        complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        complaint.id.toLowerCase().includes(searchTerm.toLowerCase())
+    ? complaints.filter(
+        (complaint) =>
+          complaint.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          complaint.id.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : complaints;
 
