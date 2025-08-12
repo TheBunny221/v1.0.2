@@ -18,7 +18,7 @@ import RoleBasedDashboard from "./components/RoleBasedDashboard";
 import { Loader2 } from "lucide-react";
 
 // Lazy load components for better performance
-const Index = lazy(() => import("./pages/TestIndex"));
+const Index = lazy(() => import("./pages/Index"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const SetPassword = lazy(() => import("./pages/SetPassword"));
