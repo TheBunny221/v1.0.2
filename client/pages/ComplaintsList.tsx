@@ -157,7 +157,14 @@ const ComplaintsList: React.FC = () => {
                 <SelectItem value="CRITICAL">Critical</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setPriorityFilter("all");
+              }}
+            >
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
             </Button>
