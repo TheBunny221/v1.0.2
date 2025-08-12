@@ -85,9 +85,9 @@ const CitizenDashboard: React.FC = () => {
     searchParams.get("search") || "",
   );
   const [statusFilter, setStatusFilter] = useState(
-    searchParams.get("status") || "",
+    searchParams.get("status") || "all",
   );
-  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "");
+  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "all");
   const [sortBy, setSortBy] = useState(
     searchParams.get("sort") || "submittedOn",
   );
