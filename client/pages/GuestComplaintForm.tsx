@@ -262,16 +262,14 @@ const GuestComplaintForm: React.FC = () => {
                   </p>
                 </div>
 
-                {newUserRegistered && (
-                  <Alert className="border-amber-200 bg-amber-50">
-                    <Shield className="h-4 w-4" />
-                    <AlertDescription className="text-amber-700">
-                      <strong>Security Tip:</strong> Set a password in your
-                      profile settings for easier future logins, or continue
-                      using OTP login.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <Alert className="border-amber-200 bg-amber-50">
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription className="text-amber-700">
+                    <strong>Security Tip:</strong> Set a password in your
+                    profile settings for easier future logins, or continue
+                    using OTP login.
+                  </AlertDescription>
+                </Alert>
 
                 <div className="space-y-2">
                   <Button onClick={goToDashboard} className="w-full">
