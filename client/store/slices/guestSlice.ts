@@ -61,6 +61,8 @@ const initialState: GuestState = {
   otpExpiry: null,
   complaintData: null,
   submissionStep: "form",
+  currentFormStep: 1,
+  formValidation: {},
   error: null,
   userEmail: null,
   newUserRegistered: false,
