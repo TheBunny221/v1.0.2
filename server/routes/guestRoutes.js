@@ -5,6 +5,8 @@ import {
   resendOTP,
   trackComplaint,
   getPublicStats,
+  getPublicWards,
+  getPublicComplaintTypes,
 } from "../controller/guestController.js";
 import {
   validateGuestComplaint,
