@@ -31,6 +31,7 @@ export const useCustomRegister = () => {
 
       if (!response.ok) {
         // Create an error object that matches RTK Query structure
+        console.log("Register API error response:", response.status, result);
         const error = {
           status: response.status,
           data: result,
