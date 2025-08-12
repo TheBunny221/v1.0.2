@@ -204,3 +204,47 @@ export const rollbackUpdate = <T>(
     item[idField] === originalItem[idField] ? originalItem : item,
   );
 };
+
+// Helper to extract error message from RTK Query error
+export const getApiErrorMessage = (error: any): string => {
+  // If error has data property with message (from server)
+  if (error?.data?.message) {
+    return error.data.message;
+  }
+
+  // If error has message property
+  if (error?.message) {
+    return error.message;
+  }
+
+  // If error has data as string
+  if (typeof error?.data === "string") {
+    return error.data;
+  }
+
+  // Fallback to status-based message
+  if (error?.status) {
+    switch (error.status) {
+      case 400:
+        return "Bad request - please check your input";
+      case 401:
+        return "Unauthorized - please login again";
+      case 403:
+        return "Forbidden - you do not have permission";
+      case 404:
+        return "Resource not found";
+      case 409:
+        return "Conflict - resource already exists";
+      case 422:
+        return "Validation error - please check your input";
+      case 429:
+        return "Too many requests - please try again later";
+      case 500:
+        return "Internal server error - please try again later";
+      default:
+        return `An error occurred (${error.status})`;
+    }
+  }
+
+  return "An unexpected error occurred";
+};
