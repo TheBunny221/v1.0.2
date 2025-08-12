@@ -324,119 +324,32 @@ const Login: React.FC = () => {
 
               {/* OTP Login Tab */}
               <TabsContent value="otp" className="space-y-4">
-                {otpStep === "none" && (
-                  <form onSubmit={handleOTPRequest} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp-email">Email Address</Label>
-                      <Input
-                        id="otp-email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading || !formData.email}
-                    >
-                      {isLoading ? "Sending OTP..." : "Send OTP"}
-                    </Button>
-                  </form>
-                )}
-
-                {otpStep === "sent" && (
-                  <div className="space-y-4">
-                    <div className="text-center space-y-2">
-                      <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mx-auto">
-                        <Mail className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <h3 className="font-semibold">OTP Sent</h3>
-                      <p className="text-sm text-gray-600">
-                        We've sent a 6-digit code to
-                        <br />
-                        <strong>{otpEmail}</strong>
-                      </p>
-                    </div>
-
-                    <form
-                      onSubmit={handleOTPVerification}
-                      className="space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor="otpCode">Enter OTP Code</Label>
-                        <Input
-                          id="otpCode"
-                          name="otpCode"
-                          type="text"
-                          placeholder="000000"
-                          value={formData.otpCode}
-                          onChange={handleInputChange}
-                          maxLength={6}
-                          className="text-center tracking-widest"
-                          required
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={isLoading || formData.otpCode.length !== 6}
-                      >
-                        {isLoading ? "Verifying..." : "Verify OTP"}
-                      </Button>
-                    </form>
-
-                    {/* OTP Timer and Resend */}
-                    <div className="text-center space-y-2">
-                      {otpTimer > 0 ? (
-                        <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                          <Clock className="h-4 w-4" />
-                          Code expires in {formatTime(otpTimer)}
-                        </div>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleResendOTP}
-                          disabled={isLoading}
-                        >
-                          Resend OTP
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={resetToEmailInput}
-                        className="ml-2"
-                      >
-                        <ArrowLeft className="h-4 w-4 mr-1" />
-                        Change Email
-                      </Button>
-                    </div>
+                <form onSubmit={handleOTPRequest} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-email">Email Address</Label>
+                    <Input
+                      id="otp-email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
-                )}
 
-                {otpStep === "verified" && (
-                  <div className="text-center space-y-4">
-                    <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
-                      <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-green-800">
-                        Login Successful!
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Redirecting to dashboard...
-                      </p>
-                    </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isRequestingOtp || !formData.email}
+                  >
+                    {isRequestingOtp ? "Sending OTP..." : "Send OTP"}
+                  </Button>
+
+                  <div className="text-center text-sm text-gray-600">
+                    <p>We'll send a 6-digit code to your email address</p>
                   </div>
-                )}
+                </form>
               </TabsContent>
             </Tabs>
 
