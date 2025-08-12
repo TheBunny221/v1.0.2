@@ -25,12 +25,6 @@ export interface GuestComplaintData {
   area: string;
   landmark?: string;
   address?: string;
-<<<<<<< HEAD
-  wardId: string;
-  subZoneId?: string;
-  priority?: string;
-=======
->>>>>>> origin/main
   coordinates?: {
     latitude: number;
     longitude: number;
@@ -250,79 +244,6 @@ export const submitGuestComplaint = createAsyncThunk(
   "guest/submitComplaint",
   async (complaintData: GuestComplaintData, { rejectWithValue }) => {
     try {
-<<<<<<< HEAD
-      // Check if we have attachments to upload
-      const hasAttachments = complaintData.attachments && complaintData.attachments.length > 0;
-
-      if (hasAttachments) {
-        // Use FormData for multipart/form-data submission with files
-        const formData = new FormData();
-
-        // Add text fields
-        formData.append('fullName', complaintData.fullName);
-        formData.append('email', complaintData.email);
-        formData.append('phoneNumber', complaintData.phoneNumber);
-        formData.append('type', complaintData.type);
-        formData.append('description', complaintData.description);
-        formData.append('priority', complaintData.priority || "MEDIUM");
-        formData.append('wardId', complaintData.wardId);
-        if (complaintData.subZoneId) {
-          formData.append('subZoneId', complaintData.subZoneId);
-        }
-        formData.append('area', complaintData.area);
-        if (complaintData.landmark) {
-          formData.append('landmark', complaintData.landmark);
-        }
-        if (complaintData.address) {
-          formData.append('address', complaintData.address);
-        }
-        if (complaintData.coordinates) {
-          formData.append('coordinates', JSON.stringify(complaintData.coordinates));
-        }
-
-        // Add file attachments
-        complaintData.attachments.forEach((file) => {
-          formData.append('attachments', file);
-        });
-
-        // Submit with FormData (don't set Content-Type header, let browser set it)
-        const response = await fetch("/api/guest/complaint-with-attachments", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData?.message || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.data as GuestComplaintResponse;
-      } else {
-        // No attachments, use regular JSON submission
-        const payload = {
-          fullName: complaintData.fullName,
-          email: complaintData.email,
-          phoneNumber: complaintData.phoneNumber,
-          type: complaintData.type,
-          description: complaintData.description,
-          priority: complaintData.priority || "MEDIUM",
-          wardId: complaintData.wardId,
-          subZoneId: complaintData.subZoneId,
-          area: complaintData.area,
-          landmark: complaintData.landmark,
-          address: complaintData.address,
-          coordinates: complaintData.coordinates,
-        };
-
-        const data = await apiCall("/api/guest/complaint", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-
-        return data.data as GuestComplaintResponse;
-      }
-=======
       // Create FormData for file uploads
       const formData = new FormData();
 
@@ -377,7 +298,6 @@ export const submitGuestComplaint = createAsyncThunk(
       }
 
       return data.data as GuestComplaintResponse;
->>>>>>> origin/main
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to submit complaint",
@@ -684,19 +604,16 @@ const guestSlice = createSlice({
       state.userEmail = null;
       state.newUserRegistered = false;
       state.trackingData = null;
-<<<<<<< HEAD
-      clearFormDataFromSession();
-=======
       state.showImagePreview = false;
       state.previewImageUrl = null;
 
       // Clear sessionStorage
       try {
         sessionStorage.removeItem("guestComplaintDraft");
+        clearFormDataFromSession();
       } catch (error) {
         console.warn("Failed to clear draft from sessionStorage:", error);
       }
->>>>>>> origin/main
     },
 
     setSubmissionStep: (
@@ -705,7 +622,7 @@ const guestSlice = createSlice({
     ) => {
       state.submissionStep = action.payload;
     },
-<<<<<<< HEAD
+
     setCurrentFormStep: (state, action: PayloadAction<number>) => {
       state.currentFormStep = action.payload;
     },
@@ -721,10 +638,10 @@ const guestSlice = createSlice({
     ) => {
       const { currentStep, ...dataUpdate } = action.payload;
 
-      if (state.complaintData) {
-        state.complaintData = { ...state.complaintData, ...dataUpdate };
+      if (state.formData) {
+        state.formData = { ...state.formData, ...dataUpdate };
       } else {
-        state.complaintData = dataUpdate as GuestComplaintData;
+        state.formData = dataUpdate as GuestComplaintData;
       }
 
       if (currentStep !== undefined) {
@@ -732,7 +649,7 @@ const guestSlice = createSlice({
       }
 
       // Save to sessionStorage
-      const dataToSave = { ...state.complaintData, currentStep: state.currentFormStep };
+      const dataToSave = { ...state.formData, currentStep: state.currentFormStep };
       saveFormDataToSession(dataToSave);
     },
     loadSavedFormData: (state) => {
@@ -740,20 +657,13 @@ const guestSlice = createSlice({
       if (savedData) {
         const { currentStep, ...complaintData } = savedData;
         if (Object.keys(complaintData).length > 0) {
-          state.complaintData = complaintData as GuestComplaintData;
+          state.formData = { ...state.formData, ...complaintData as Partial<GuestComplaintData> };
         }
         if (currentStep) {
           state.currentFormStep = currentStep;
         }
       }
     },
-=======
-
-    clearError: (state) => {
-      state.error = null;
-    },
-
->>>>>>> origin/main
     resetOTPState: (state) => {
       state.otpSent = false;
       state.otpExpiry = null;
@@ -863,11 +773,8 @@ export const {
   setCurrentFormStep,
   setFormValidation,
   clearError,
-<<<<<<< HEAD
   updateComplaintData,
   loadSavedFormData,
-=======
->>>>>>> origin/main
   resetOTPState,
 } = guestSlice.actions;
 
