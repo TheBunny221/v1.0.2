@@ -270,12 +270,8 @@ export const submitGuestComplaint = createAsyncThunk(
         );
       }
 
-      // Add attachments
-      if (complaintData.attachments) {
-        complaintData.attachments.forEach((attachment, index) => {
-          formData.append(`attachments`, attachment.file);
-        });
-      }
+      // Note: Actual files will be handled separately in the component
+      // This thunk now expects the files to be passed separately or handled differently
 
       const response = await fetch("/api/guest/complaint", {
         method: "POST",
