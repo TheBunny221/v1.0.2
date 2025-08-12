@@ -53,6 +53,8 @@ const initialState: AuthState = {
   error: null,
   otpStep: "none",
   requiresPasswordSetup: false,
+  registrationStep: "none",
+  registrationData: undefined,
 };
 
 // Helper function to make API calls
