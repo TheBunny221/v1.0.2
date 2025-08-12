@@ -351,10 +351,11 @@ const Profile: React.FC = () => {
                       onClick={() => {
                         setIsEditing(false);
                         setFormData({
-                          name: user.name,
+                          fullName: user.fullName,
                           email: user.email,
-                          phone: user.phone,
-                          ward: user.ward || "",
+                          phoneNumber: user.phoneNumber || "",
+                          language: user.language || "en",
+                          ward: user.ward?.name || "",
                           department: user.department || "",
                         });
                       }}
