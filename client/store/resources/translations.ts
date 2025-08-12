@@ -41,15 +41,21 @@ export interface Translation {
     myComplaints: string;
     trackStatus: string;
     reopenComplaint: string;
+    ward: string;
   };
 
   // Authentication
   auth: {
     login: string;
+    register: string;
     logout: string;
     email: string;
     password: string;
+    confirmPassword: string;
     forgotPassword: string;
+    resetPassword: string;
+    profile: string;
+    updateProfile: string;
     rememberMe: string;
     loginSuccess: string;
     loginError: string;
@@ -165,6 +171,8 @@ export interface Translation {
 
   // Dashboard
   dashboard: {
+    overview: string;
+    statistics: string;
     totalComplaints: string;
     resolvedToday: string;
     slaBreaches: string;
@@ -172,12 +180,26 @@ export interface Translation {
     complaintsByStatus: string;
     slaCompliance: string;
     recentComplaints: string;
+    pendingTasks: string;
+    performanceMetrics: string;
     wardPerformance: string;
     quickActions: string;
+    notifications: string;
+    alerts: string;
+    reports: string;
     overallCompliance: string;
     onTime: string;
     warning: string;
     overdue: string;
+  };
+
+  // Admin
+  admin: {
+    userManagement: string;
+    systemConfiguration: string;
+    languageManagement: string;
+    analytics: string;
+    reports: string;
   };
 
   // Errors & Messages
@@ -234,13 +256,19 @@ export const englishTranslations: Translation = {
     myComplaints: "My Complaints",
     trackStatus: "Track Status",
     reopenComplaint: "Reopen Complaint",
+    ward: "Ward",
   },
   auth: {
     login: "Login",
+    register: "Register",
     logout: "Logout",
     email: "Email",
     password: "Password",
+    confirmPassword: "Confirm Password",
     forgotPassword: "Forgot Password?",
+    resetPassword: "Reset Password",
+    profile: "Profile",
+    updateProfile: "Update Profile",
     rememberMe: "Remember Me",
     loginSuccess: "Login successful",
     loginError: "Login failed",
@@ -340,6 +368,8 @@ export const englishTranslations: Translation = {
     accountDeletion: "Account Deletion",
   },
   dashboard: {
+    overview: "Overview",
+    statistics: "Statistics",
     totalComplaints: "Total Complaints",
     resolvedToday: "Resolved Today",
     slaBreaches: "SLA Breaches",
@@ -347,12 +377,24 @@ export const englishTranslations: Translation = {
     complaintsByStatus: "Complaints by Status",
     slaCompliance: "SLA Compliance",
     recentComplaints: "Recent Complaints",
+    pendingTasks: "Pending Tasks",
+    performanceMetrics: "Performance Metrics",
     wardPerformance: "Ward Performance",
     quickActions: "Quick Actions",
+    notifications: "Notifications",
+    alerts: "Alerts",
+    reports: "Reports",
     overallCompliance: "Overall compliance rate",
     onTime: "On Time",
     warning: "Warning",
     overdue: "Overdue",
+  },
+  admin: {
+    userManagement: "User Management",
+    systemConfiguration: "System Configuration",
+    languageManagement: "Language Management",
+    analytics: "Analytics",
+    reports: "Reports",
   },
   messages: {
     networkError:
@@ -416,7 +458,7 @@ export const hindiTranslations: Translation = {
     loginSuccess: "लॉगिन सफल",
     loginError: "लॉगिन असफल",
     invalidCredentials: "गलत ईमेल ��ा पासवर्ड",
-    sessionExpired: "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करें।",
+    sessionExpired: "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करे��।",
     guestMode: "अतिथि मोड",
     continueAsGuest: "अतिथि के रूप में जारी रखें",
   },
@@ -447,7 +489,7 @@ export const hindiTranslations: Translation = {
     assigned: "सौंपा गया",
     inProgress: "प्रगति में",
     resolved: "हल किया गया",
-    closed: "बंद",
+    closed: "��ंद",
     reopened: "फिर से खोला गया",
     low: "कम",
     medium: "मध्यम",
@@ -467,13 +509,13 @@ export const hindiTranslations: Translation = {
     contactInformation: "संपर्क जानकारी",
     problemDetails: "समस्या विवरण",
     locationDetails: "स्थान विवरण",
-    complaintDescription: "शिकायत विवरण",
+    complaintDescription: "शिकायत ���िवरण",
     optionalUploads: "वैकल्पिक अपलोड",
     captchaVerification: "कैप्चा सत्यापन",
     enterCaptcha: "कैप्चा कोड दर्ज करें",
     resetForm: "��ॉर्म रीसेट करें",
     submitComplaint: "शिकायत जमा करें",
-    complaintSubmitted: "शिकायत सफलतापूर्���क जमा की गई!",
+    complaintSubmitted: "शि��ायत सफलतापूर्���क जमा की गई!",
     complaintSubmissionError:
       "शिकायत जमा करने में असफल। कृपया पुनः प्रयास करें।",
     fileUploadError: "फाइल अपलोड में त्रुटि",
@@ -507,7 +549,7 @@ export const hindiTranslations: Translation = {
     emailAlerts: "ईमेल अलर्ट",
     smsAlerts: "SMS अलर्ट",
     darkMode: "डार्क मोड",
-    soundEffects: "साउंड इफेक्ट्स",
+    soundEffects: "स���उंड इफेक्ट्स",
     dataRetention: "डेटा रिटेंशन",
     accountDeletion: "खाता हटाना",
   },
@@ -526,13 +568,21 @@ export const hindiTranslations: Translation = {
     warning: "चेतावनी",
     overdue: "देरी से",
   },
+  admin: {
+    userManagement: "उपयोगकर्ता प्रबंधन",
+    systemConfiguration: "सिस्टम कॉन्फ़िगरेशन",
+    languageManagement: "भाषा प्रबंधन",
+    analytics: "विश्लेषण",
+    reports: "रिपोर्ट",
+  },
   messages: {
-    networkError: "नेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
-    serverError: "सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें।",
+    networkError:
+      "���ेटवर्क कनेक्शन त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
+    serverError: "सर्वर त्रुटि। कृप���ा बाद में पुनः प्रयास करें।",
     notFound: "अनुरोधित संसाधन नहीं मिला।",
     unauthorized: "आप इस संसाधन तक पहुंचने के लिए अधिकृत नहीं हैं।",
     forbidden: "पहुंच निष���द्ध।",
-    validationError: "कृपया अपना इनपुट जांचें और पुनः प्रयास करें।",
+    validationError: "कृपया अपना इनपुट जांचें और पुनः प्रयास क��ें।",
     sessionExpired: "आपका सत���र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     operationSuccess: "ऑपरेशन सफलतापूर्वक पूरा हुआ।",
     operationFailed: "ऑपरेशन असफल। कृपया पुनः प���रयास करें।",
@@ -547,7 +597,7 @@ export const malayalamTranslations: Translation = {
     edit: "എഡിറ്റ് ചെയ്യുക",
     delete: "നീക്കം ചെയ്യുക",
     view: "കാണുക",
-    search: "തിരയുക",
+    search: "ത���രയുക",
     loading: "ലോഡിംഗ്...",
     error: "പിശക്",
     success: "വിജയം",
@@ -599,7 +649,7 @@ export const malayalamTranslations: Translation = {
     status: "നില",
     priority: "മുൻഗണന",
     submittedBy: "സമർപ്പിച്ചത്",
-    submittedDate: "സമർപ്പിച്ച തീയതി",
+    submittedDate: "സമർപ���പിച്ച തീയതി",
     lastUpdated: "അവസാന അപ്ഡേറ്റ്",
     assignedTo: "നിയോഗിച്ചത്",
     slaDeadline: "SLA ഡെഡ്‌ലൈൻ",
@@ -612,7 +662,7 @@ export const malayalamTranslations: Translation = {
     remarks: "കുറിപ്പുകൾ",
     trackStatus: "നില ട്രാക്ക് ചെയ്യ���ക",
     myComplaints: "എന്റെ പരാതികൾ",
-    reopenComplaint: "പരാതി വീണ്ടും തുറക്കുക",
+    reopenComplaint: "പരാതി വീണ്ടും തു��ക്കുക",
     feedback: "ഫീഡ്ബാക്ക്",
     registered: "രജിസ്റ്റർ ചെയ്തു",
     assigned: "നിയോഗിച്ചു",
@@ -628,7 +678,7 @@ export const malayalamTranslations: Translation = {
     electricity: "വൈദ്യുതി",
     roadRepair: "റോഡ് അറ്റകുറ്റപ്പണി",
     garbageCollection: "മാലിന്യ ശേഖരണം",
-    streetLighting: "സ്ട്രീറ്റ് ലൈറ്റിംഗ്",
+    streetLighting: "��്ട്രീറ്റ് ലൈറ്റിംഗ്",
     sewerage: "മലിനജല സംവിധാനം",
     publicHealth: "പൊതുജനാരോഗ്യം",
     traffic: "ട്രാഫിക്",
@@ -637,7 +687,7 @@ export const malayalamTranslations: Translation = {
   forms: {
     contactInformation: "ബന്ധപ്പെടാനുള്ള വിവരങ്��ൾ",
     problemDetails: "പ്രശ്ന വിവരങ്ങൾ",
-    locationDetails: "സ്ഥല വിവരങ്ങൾ",
+    locationDetails: "സ്ഥല വിവരങ്ങ��",
     complaintDescription: "പരാതി വിവരണം",
     optionalUploads: "ഓപ്ഷണൽ അപ്ലോഡുകൾ",
     captchaVerification: "കാപ്ച്ച സ്ഥിരീകരണം",
@@ -661,7 +711,7 @@ export const malayalamTranslations: Translation = {
     changePassword: "പാസ്‌വേഡ് മാറ്റുക",
     avatar: "അവതാർ",
     updateProfile: "പ്രൊഫൈൽ അപ്ഡേറ്റ് ചെയ്യുക",
-    profileUpdated: "പ്രൊഫൈൽ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു",
+    profileUpdated: "പ്രൊഫൈൽ വിജയകരമായ��� അപ്ഡേറ്റ് ചെയ്തു",
     currentPassword: "നിലവിലെ പാസ്‌വേഡ്",
     newPassword: "പുതിയ പാസ്‌വേഡ്",
     confirmPassword: "പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക",
@@ -684,7 +734,7 @@ export const malayalamTranslations: Translation = {
   },
   dashboard: {
     totalComplaints: "മൊത്തം പരാതികൾ",
-    resolvedToday: "ഇന്ന് പരിഹരിച്ചത്",
+    resolvedToday: "ഇന്ന് പരിഹരിച്���ത്",
     slaBreaches: "SLA ലംഘനങ്ങൾ",
     activeUsers: "സജീവ ഉപയോക്താക്കൾ",
     complaintsByStatus: "നിലയനുസരിച്ച് പരാതികൾ",
@@ -697,17 +747,24 @@ export const malayalamTranslations: Translation = {
     warning: "മുന്നറിയിപ്പ്",
     overdue: "കാലഹരണപ്പെട്ട",
   },
+  admin: {
+    userManagement: "ഉപയോക്തൃ മാനേജ്മെന്റ്",
+    systemConfiguration: "സിസ്റ്റം കോൺഫിഗറേഷൻ",
+    languageManagement: "ഭാഷാ മാനേജ്മെന്റ്",
+    analytics: "അനാലിറ്റിക്സ്",
+    reports: "റിപ്പോർട്ടുകൾ",
+  },
   messages: {
     networkError:
-      "നെറ്റ്‌വർക്ക് കണക്ഷൻ പിശക്. ദയവായി നിങ്ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കുക.",
-    serverError: "സർവർ പിശക്. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
+      "നെറ്റ്‌വർക്ക് കണക്ഷൻ പിശക്. ദയവായി നിങ��ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കുക.",
+    serverError: "സർവർ പിശക്. ദയവാ���ി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
     notFound: "അഭ്യർത്ഥി���്ച ഉറവിടം കണ്ടെത്തിയില്ല.",
     unauthorized: "ഈ ഉറവിടം ആക്സസ് ചെയ്യാൻ നിങ്ങൾക്ക് അധികാരമില്ല.",
     forbidden: "പ്രവേശനം വിലക്കിയിരിക്കുന്നു.",
     validationError:
       "ദയവായി നിങ്ങളുടെ ഇൻപുട്ട് പരിശോധിച്ച് വീണ���ടും ശ്രമിക്കുക.",
     sessionExpired:
-      "നിങ്ങളുടെ സെഷൻ കാലഹരണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
+      "നിങ്ങളുടെ സെഷൻ കാലഹ��ണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
     operationSuccess: "പ്രവർത്തനം വിജയകരമായി പൂർത്തിയാക്കി.",
     operationFailed: "പ്രവർത്തനം പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
   },
