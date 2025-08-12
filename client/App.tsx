@@ -331,6 +331,7 @@ const App: React.FC = () => {
               </Suspense>
             </div>
             <Toaster />
+            <GlobalMessageHandler />
           </Router>
         </AppInitializer>
       </ErrorBoundary>
