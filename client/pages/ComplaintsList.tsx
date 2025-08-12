@@ -110,7 +110,7 @@ const ComplaintsList: React.FC = () => {
           <p className="text-gray-600">Manage and track all complaints</p>
         </div>
         {user?.role === "CITIZEN" && (
-          <Link to="/">
+          <Link to="/complaints/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               New Complaint
