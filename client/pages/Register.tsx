@@ -124,11 +124,17 @@ const Register: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        title: "Registration Failed",
-        description: getApiErrorMessage(error),
-        variant: "destructive",
-      });
+
+      // Let the global error handler handle 401s
+      if (!handleApiError(error)) {
+        // Handle other errors
+        const errorMessage = getApiErrorMessage(error);
+        toast({
+          title: "Registration Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     }
   };
 
