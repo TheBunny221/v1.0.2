@@ -230,7 +230,9 @@ model OTPSession {
   
   // Relations
   user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  @@index([email, purpose, isVerified])
+  @@index([expiresAt])
   @@map("otp_sessions")
 }
 
