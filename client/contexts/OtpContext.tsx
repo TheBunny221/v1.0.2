@@ -48,7 +48,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   const [config, setConfig] = useState<OtpFlowConfig | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // API hooks
+  // API hooks with error boundaries
   const [verifyLoginOtp] = useVerifyOTPLoginMutation();
   const [verifyRegisterOtp] = useVerifyRegistrationOTPMutation();
   const [resendLoginOtp] = useRequestOTPLoginMutation();
