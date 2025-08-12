@@ -36,6 +36,12 @@ export interface AuthState {
   requiresPasswordSetup: boolean;
   otpEmail?: string;
   otpExpiresAt?: string;
+  registrationStep: "none" | "completed" | "otp_required" | "otp_verified";
+  registrationData?: {
+    email: string;
+    fullName: string;
+    role: string;
+  };
 }
 
 // Initial state
@@ -47,6 +53,40 @@ const initialState: AuthState = {
   error: null,
   otpStep: "none",
   requiresPasswordSetup: false,
+  registrationStep: "none",
+  registrationData: undefined,
+};
+
+// Helper function to handle API errors with user-friendly messages
+const getErrorMessage = (status: number, data: any): string => {
+  if (data?.message) {
+    return data.message;
+  }
+
+  switch (status) {
+    case 400:
+      return "Invalid request. Please check your input and try again.";
+    case 401:
+      return "Authentication failed. Please check your credentials.";
+    case 403:
+      return "Access denied. You don't have permission to perform this action.";
+    case 404:
+      return "The requested resource was not found.";
+    case 409:
+      return "A conflict occurred. This data already exists or there's a duplicate.";
+    case 422:
+      return "Validation failed. Please check your input data.";
+    case 429:
+      return "Too many requests. Please wait a moment and try again.";
+    case 500:
+      return "Server error. Please try again later.";
+    case 502:
+      return "Service temporarily unavailable. Please try again later.";
+    case 503:
+      return "Service unavailable. Please try again later.";
+    default:
+      return `An unexpected error occurred (${status}). Please try again.`;
+  }
 };
 
 // Helper function to make API calls
@@ -73,7 +113,8 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || `HTTP ${response.status}`);
+    const errorMessage = getErrorMessage(response.status, data);
+    throw new Error(errorMessage);
   }
 
   return data;
@@ -255,13 +296,72 @@ export const registerUser = createAsyncThunk(
         body: JSON.stringify(userData),
       });
 
-      // Store token in localStorage
+      // Check if OTP verification is required
+      if (data.data.requiresOtpVerification) {
+        return {
+          requiresOtpVerification: true,
+          email: userData.email,
+          fullName: userData.fullName,
+          role: userData.role || "CITIZEN",
+          message:
+            data.message ||
+            "Registration successful. Please verify your email with the OTP sent.",
+        };
+      }
+
+      // Store token in localStorage if no OTP required
       localStorage.setItem("token", data.data.token);
 
       return data.data;
     } catch (error) {
       return rejectWithValue({
         message: error instanceof Error ? error.message : "Registration failed",
+      });
+    }
+  },
+);
+
+// Registration OTP verification
+export const verifyRegistrationOTP = createAsyncThunk(
+  "auth/verifyRegistrationOTP",
+  async (
+    { email, otpCode }: { email: string; otpCode: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await apiCall("/api/auth/verify-registration-otp", {
+        method: "POST",
+        body: JSON.stringify({ email, otpCode }),
+      });
+
+      // Store token in localStorage
+      localStorage.setItem("token", data.data.token);
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message:
+          error instanceof Error ? error.message : "OTP verification failed",
+      });
+    }
+  },
+);
+
+// Resend registration OTP
+export const resendRegistrationOTP = createAsyncThunk(
+  "auth/resendRegistrationOTP",
+  async ({ email }: { email: string }, { rejectWithValue }) => {
+    try {
+      const data = await apiCall("/api/auth/resend-registration-otp", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue({
+        message:
+          error instanceof Error ? error.message : "Failed to resend OTP",
       });
     }
   },
@@ -409,6 +509,35 @@ const authSlice = createSlice({
     setRequiresPasswordSetup: (state, action: PayloadAction<boolean>) => {
       state.requiresPasswordSetup = action.payload;
     },
+    resetRegistrationState: (state) => {
+      state.registrationStep = "none";
+      state.registrationData = undefined;
+    },
+    setCredentials: (
+      state,
+      action: PayloadAction<{ token: string; user: User }>,
+    ) => {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+      state.error = null;
+      state.isLoading = false;
+      // Persist token to localStorage
+      localStorage.setItem("token", action.payload.token);
+    },
+    clearCredentials: (state) => {
+      state.token = null;
+      state.user = null;
+      state.isAuthenticated = false;
+      state.error = null;
+      state.isLoading = false;
+      state.otpStep = "none";
+      state.requiresPasswordSetup = false;
+      state.registrationStep = "none";
+      state.registrationData = undefined;
+      // Remove token from localStorage
+      localStorage.removeItem("token");
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -532,9 +661,23 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+
+        if (action.payload.requiresOtpVerification) {
+          // OTP verification required
+          state.registrationStep = "otp_required";
+          state.registrationData = {
+            email: action.payload.email,
+            fullName: action.payload.fullName,
+            role: action.payload.role,
+          };
+          state.isAuthenticated = false;
+        } else {
+          // Direct registration without OTP
+          state.isAuthenticated = true;
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.registrationStep = "completed";
+        }
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -543,6 +686,41 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.error = (action.payload as any)?.message || "Registration failed";
+        state.registrationStep = "none";
+      })
+
+      // Registration OTP verification
+      .addCase(verifyRegistrationOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyRegistrationOTP.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.registrationStep = "otp_verified";
+        state.error = null;
+      })
+      .addCase(verifyRegistrationOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          (action.payload as any)?.message || "OTP verification failed";
+      })
+
+      // Resend registration OTP
+      .addCase(resendRegistrationOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendRegistrationOTP.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resendRegistrationOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          (action.payload as any)?.message || "Failed to resend OTP";
       })
 
       // Login with token
@@ -617,6 +795,9 @@ export const {
   resetAuth,
   resetOTPState,
   setRequiresPasswordSetup,
+  resetRegistrationState,
+  setCredentials,
+  clearCredentials,
 } = authSlice.actions;
 
 // Export common actions with backward compatibility
@@ -638,3 +819,23 @@ export const selectRequiresPasswordSetup = (state: { auth: AuthState }) =>
   state.auth.requiresPasswordSetup;
 export const selectOTPEmail = (state: { auth: AuthState }) =>
   state.auth.otpEmail;
+export const selectRegistrationStep = (state: { auth: AuthState }) =>
+  state.auth.registrationStep;
+export const selectRegistrationData = (state: { auth: AuthState }) =>
+  state.auth.registrationData;
+
+// Utility function to get dashboard route based on user role
+export const getDashboardRouteForRole = (role: User["role"]): string => {
+  switch (role) {
+    case "ADMINISTRATOR":
+      return "/dashboard";
+    case "WARD_OFFICER":
+      return "/dashboard";
+    case "MAINTENANCE_TEAM":
+      return "/dashboard";
+    case "CITIZEN":
+      return "/dashboard";
+    default:
+      return "/dashboard";
+  }
+};

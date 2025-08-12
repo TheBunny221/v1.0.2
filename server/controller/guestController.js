@@ -265,11 +265,25 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     type,
     priority,
     wardId,
+    subZoneId,
     area,
     landmark,
     address,
     coordinates,
   } = req.body;
+
+  // Parse coordinates if it's a string
+  let parsedCoordinates = coordinates;
+  if (typeof coordinates === "string") {
+    try {
+      parsedCoordinates = JSON.parse(coordinates);
+    } catch (error) {
+      parsedCoordinates = null;
+    }
+  }
+
+  // Handle uploaded files
+  const attachments = req.files || [];
 
   // Check if user already exists
   let existingUser = await prisma.user.findUnique({
@@ -298,10 +312,11 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       status: "REGISTERED",
       slaStatus: "ON_TIME",
       wardId,
+      subZoneId: subZoneId || null,
       area,
       landmark,
       address,
-      coordinates: coordinates ? JSON.stringify(coordinates) : null,
+      coordinates: parsedCoordinates ? JSON.stringify(parsedCoordinates) : null,
       contactName: fullName,
       contactEmail: email,
       contactPhone: phoneNumber,
@@ -313,6 +328,22 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       ward: true,
     },
   });
+
+  // Create attachment records if files were uploaded
+  const attachmentRecords = [];
+  for (const file of attachments) {
+    const attachment = await prisma.attachment.create({
+      data: {
+        fileName: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url: `/api/uploads/${file.filename}`, // URL to access the file
+        complaintId: complaint.id,
+      },
+    });
+    attachmentRecords.push(attachment);
+  }
 
   // Generate OTP
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -356,12 +387,16 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     });
   }
 
+  // Generate tracking number
+  const trackingNumber = `CSC${complaint.id.slice(-6).toUpperCase()}`;
+
   res.status(201).json({
     success: true,
     message:
       "Complaint registered successfully. Please check your email for OTP verification.",
     data: {
       complaintId: complaint.id,
+      trackingNumber,
       email,
       expiresAt,
       sessionId: otpSession.id,
@@ -744,5 +779,87 @@ export const getPublicStats = asyncHandler(async (req, res) => {
     success: true,
     message: "Public statistics retrieved successfully",
     data: { stats },
+  });
+});
+
+// @desc    Get public wards list
+// @route   GET /api/guest/wards
+// @access  Public
+export const getPublicWards = asyncHandler(async (req, res) => {
+  const wards = await prisma.ward.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+    orderBy: { name: "asc" },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Wards retrieved successfully",
+    data: wards,
+  });
+});
+
+// @desc    Get public complaint types
+// @route   GET /api/guest/complaint-types
+// @access  Public
+export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
+  // Static complaint types for now - these could be stored in database if needed
+  const complaintTypes = [
+    {
+      id: "WATER_SUPPLY",
+      name: "Water Supply",
+      description:
+        "Water related issues including supply, quality, and leakage",
+    },
+    {
+      id: "ELECTRICITY",
+      name: "Electricity",
+      description: "Power outages, faulty connections, and electrical issues",
+    },
+    {
+      id: "ROAD_REPAIR",
+      name: "Road Repair",
+      description: "Potholes, damaged roads, and road maintenance",
+    },
+    {
+      id: "GARBAGE_COLLECTION",
+      name: "Garbage Collection",
+      description: "Waste management and garbage collection issues",
+    },
+    {
+      id: "STREET_LIGHTING",
+      name: "Street Lighting",
+      description: "Street light repairs and new installations",
+    },
+    {
+      id: "SEWERAGE",
+      name: "Sewerage",
+      description: "Drainage, sewage blockages, and sanitation issues",
+    },
+    {
+      id: "PUBLIC_HEALTH",
+      name: "Public Health",
+      description: "Health and hygiene related public issues",
+    },
+    {
+      id: "TRAFFIC",
+      name: "Traffic",
+      description: "Traffic management, signals, and road safety",
+    },
+    {
+      id: "OTHERS",
+      name: "Others",
+      description: "Other civic issues not covered in above categories",
+    },
+  ];
+
+  res.status(200).json({
+    success: true,
+    message: "Complaint types retrieved successfully",
+    data: complaintTypes,
   });
 });

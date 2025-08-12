@@ -27,6 +27,7 @@ router.get("/public/stats", getComplaintStats);
 router.use(protect);
 
 // Complaint management routes
+
 router
   .route("/")
   .get(validatePagination, validateComplaintFilters, getComplaints)

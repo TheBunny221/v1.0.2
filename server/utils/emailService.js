@@ -7,21 +7,25 @@ dotenv.config();
 const createTransporter = () => {
   if (process.env.NODE_ENV === "production") {
     // Production email configuration
-    return nodemailer.createTransporter({
-      service: process.env.EMAIL_SERVICE || "gmail",
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_SERVICE, // Must be a real resolvable domain
+      port: process.env.EMAIL_PORT || 587, // 587 for STARTTLS, 465 for SSL
+      secure: false, // true if using port 465
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
   } else {
-    // Development configuration (using ethereal email for testing)
-    return nodemailer.createTransporter({
-      host: "smtp.ethereal.email",
-      port: 587,
+    // Development email configuration
+    console.log("Email transporter created : ", process.env.EMAIL_SERVICE);
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_SERVICE, // Must be a real resolvable domain
+      port: process.env.EMAIL_PORT || 587, // 587 for STARTTLS, 465 for SSL
+      secure: false, // true if using port 465
       auth: {
-        user: process.env.ETHEREAL_USER || "ethereal.user@ethereal.email",
-        pass: process.env.ETHEREAL_PASS || "ethereal.pass",
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
   }

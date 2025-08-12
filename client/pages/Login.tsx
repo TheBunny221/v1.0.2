@@ -3,16 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   loginWithPassword,
-  requestOTPLogin,
-  verifyOTPLogin,
   sendPasswordSetupEmail,
   clearError,
-  resetOTPState,
   selectAuth,
-  selectOTPStep,
   selectRequiresPasswordSetup,
-  selectOTPEmail,
+  getDashboardRouteForRole,
 } from "../store/slices/authSlice";
+import { useRequestOTPLoginMutation } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -31,28 +28,23 @@ import {
 } from "../components/ui/tabs";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Shield,
-  Clock,
-  CheckCircle,
-  ArrowLeft,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Home } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
+import { useOtpFlow } from "../contexts/OtpContext";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { openOtpFlow } = useOtpFlow();
 
-  const { isLoading, error, isAuthenticated } = useAppSelector(selectAuth);
-
-  const otpStep = useAppSelector(selectOTPStep);
+  const { isLoading, error, isAuthenticated, user } =
+    useAppSelector(selectAuth);
   const requiresPasswordSetup = useAppSelector(selectRequiresPasswordSetup);
-  const otpEmail = useAppSelector(selectOTPEmail);
+
+  // API hooks
+  const [requestOTPLogin, { isLoading: isRequestingOtp }] =
+    useRequestOTPLoginMutation();
 
   // Form states
   const [loginMethod, setLoginMethod] = useState<"password" | "otp">(
@@ -61,34 +53,21 @@ const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    otpCode: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0);
 
   // Clear error when component mounts
   useEffect(() => {
     dispatch(clearError());
-    dispatch(resetOTPState());
   }, [dispatch]);
 
   // Redirect if authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
     }
-  }, [isAuthenticated, navigate]);
-
-  // OTP timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (otpTimer > 0) {
-      interval = setInterval(() => {
-        setOtpTimer((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [otpTimer]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -135,61 +114,28 @@ const Login: React.FC = () => {
     }
 
     try {
-      await dispatch(
-        requestOTPLogin({
-          email: formData.email,
-        }),
-      ).unwrap();
+      // Request OTP first
+      await requestOTPLogin({ email: formData.email }).unwrap();
 
-      setOtpTimer(600); // 10 minutes
+      // Open the unified OTP dialog
+      openOtpFlow({
+        context: "login",
+        email: formData.email,
+        onSuccess: (data) => {
+          toast({
+            title: "Login Successful",
+            description: "Welcome back!",
+          });
+          // Navigation will be handled by the auth state change
+        },
+      });
+
       toast({
         title: "OTP Sent",
-        description: "Please check your email for the OTP code.",
+        description: `A verification code has been sent to ${formData.email}`,
       });
     } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
-  const handleOTPVerification = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.email || !formData.otpCode) {
-      return;
-    }
-
-    try {
-      await dispatch(
-        verifyOTPLogin({
-          email: formData.email,
-          otpCode: formData.otpCode,
-        }),
-      ).unwrap();
-
-      toast({
-        title: "Login Successful",
-        description: "OTP verified successfully!",
-      });
-    } catch (error: any) {
-      // Error is handled by the reducer
-    }
-  };
-
-  const handleResendOTP = async () => {
-    try {
-      await dispatch(
-        requestOTPLogin({
-          email: formData.email,
-        }),
-      ).unwrap();
-
-      setOtpTimer(600);
-      toast({
-        title: "OTP Resent",
-        description: "A new OTP has been sent to your email.",
-      });
-    } catch (error: any) {
-      // Error is handled by the reducer
+      // Error is handled by the mutation
     }
   };
 
@@ -202,24 +148,12 @@ const Login: React.FC = () => {
       ).unwrap();
 
       toast({
-        title: "Password Setup Email Sent",
-        description: "Please check your email for the password setup link.",
+        title: "Email Sent Successfully!",
+        description: `Password setup instructions have been sent to ${formData.email}. Please check your email and follow the instructions.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
     }
-  };
-
-  const resetToEmailInput = () => {
-    dispatch(resetOTPState());
-    setFormData((prev) => ({ ...prev, otpCode: "" }));
-    setOtpTimer(0);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Demo credentials for testing
@@ -382,119 +316,32 @@ const Login: React.FC = () => {
 
               {/* OTP Login Tab */}
               <TabsContent value="otp" className="space-y-4">
-                {otpStep === "none" && (
-                  <form onSubmit={handleOTPRequest} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp-email">Email Address</Label>
-                      <Input
-                        id="otp-email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading || !formData.email}
-                    >
-                      {isLoading ? "Sending OTP..." : "Send OTP"}
-                    </Button>
-                  </form>
-                )}
-
-                {otpStep === "sent" && (
-                  <div className="space-y-4">
-                    <div className="text-center space-y-2">
-                      <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mx-auto">
-                        <Mail className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <h3 className="font-semibold">OTP Sent</h3>
-                      <p className="text-sm text-gray-600">
-                        We've sent a 6-digit code to
-                        <br />
-                        <strong>{otpEmail}</strong>
-                      </p>
-                    </div>
-
-                    <form
-                      onSubmit={handleOTPVerification}
-                      className="space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor="otpCode">Enter OTP Code</Label>
-                        <Input
-                          id="otpCode"
-                          name="otpCode"
-                          type="text"
-                          placeholder="000000"
-                          value={formData.otpCode}
-                          onChange={handleInputChange}
-                          maxLength={6}
-                          className="text-center tracking-widest"
-                          required
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={isLoading || formData.otpCode.length !== 6}
-                      >
-                        {isLoading ? "Verifying..." : "Verify OTP"}
-                      </Button>
-                    </form>
-
-                    {/* OTP Timer and Resend */}
-                    <div className="text-center space-y-2">
-                      {otpTimer > 0 ? (
-                        <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                          <Clock className="h-4 w-4" />
-                          Code expires in {formatTime(otpTimer)}
-                        </div>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleResendOTP}
-                          disabled={isLoading}
-                        >
-                          Resend OTP
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={resetToEmailInput}
-                        className="ml-2"
-                      >
-                        <ArrowLeft className="h-4 w-4 mr-1" />
-                        Change Email
-                      </Button>
-                    </div>
+                <form onSubmit={handleOTPRequest} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-email">Email Address</Label>
+                    <Input
+                      id="otp-email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
-                )}
 
-                {otpStep === "verified" && (
-                  <div className="text-center space-y-4">
-                    <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
-                      <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-green-800">
-                        Login Successful!
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Redirecting to dashboard...
-                      </p>
-                    </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isRequestingOtp || !formData.email}
+                  >
+                    {isRequestingOtp ? "Sending OTP..." : "Send OTP"}
+                  </Button>
+
+                  <div className="text-center text-sm text-gray-600">
+                    <p>We'll send a 6-digit code to your email address</p>
                   </div>
-                )}
+                </form>
               </TabsContent>
             </Tabs>
 
@@ -513,6 +360,15 @@ const Login: React.FC = () => {
                   className="text-blue-600 hover:underline"
                 >
                   Submit complaint
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                >
+                  <Home className="h-4 w-4" />
+                  Back to Home
                 </Link>
               </p>
             </div>

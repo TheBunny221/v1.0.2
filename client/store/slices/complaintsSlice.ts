@@ -266,6 +266,7 @@ export const createComplaint = createAsyncThunk(
       contactEmail?: string;
       contactPhone?: string;
       isAnonymous?: boolean;
+      isSubmitting?: boolean;
     },
     { rejectWithValue },
   ) => {

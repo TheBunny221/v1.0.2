@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { loginWithToken } from "../store/slices/authSlice";
+import { useAppDispatch } from "../store/hooks";
+import { setCredentials, clearCredentials } from "../store/slices/authSlice";
 import { initializeLanguage } from "../store/slices/languageSlice";
 import { initializeTheme, setOnlineStatus } from "../store/slices/uiSlice";
+import { useGetCurrentUserQuery } from "../store/api/authApi";
 
 interface AppInitializerProps {
   children: React.ReactNode;
@@ -10,8 +11,20 @@ interface AppInitializerProps {
 
 const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.auth);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Get token from localStorage to determine if we should try to auto-login
+  const token = localStorage.getItem("token");
+  const hasValidToken = token && token !== "null" && token !== "undefined";
+
+  // Use RTK Query to get current user if we have a token
+  const {
+    data: userResponse,
+    isLoading: isLoadingUser,
+    error: userError,
+  } = useGetCurrentUserQuery(undefined, {
+    skip: !hasValidToken, // Skip query if no token
+  });
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -22,16 +35,22 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         // Initialize language
         dispatch(initializeLanguage());
 
-        // Check for existing token and login automatically
-        const token = localStorage.getItem("token");
-        if (token && token !== "null" && token !== "undefined") {
-          try {
-            await dispatch(loginWithToken()).unwrap();
-          } catch (error) {
-            // Token is invalid, remove it
-            localStorage.removeItem("token");
-            console.warn("Invalid token removed:", error);
+        // Handle auto-login based on token and user query result
+        if (hasValidToken) {
+          if (userResponse?.data?.user) {
+            // Token is valid and we have user data - set credentials
+            dispatch(
+              setCredentials({
+                token,
+                user: userResponse.data.user,
+              }),
+            );
+          } else if (userError) {
+            // Token is invalid or expired - clear it
+            dispatch(clearCredentials());
+            console.warn("Invalid token removed:", userError);
           }
+          // If still loading, we'll wait for the query to complete
         }
 
         // Setup online/offline listeners
@@ -47,15 +66,18 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           window.removeEventListener("offline", handleOffline);
         };
       } finally {
-        setIsInitialized(true);
+        // Only set initialized when we're done with the user query (or don't need it)
+        if (!hasValidToken || userResponse || userError) {
+          setIsInitialized(true);
+        }
       }
     };
 
     initializeApp();
-  }, [dispatch]);
+  }, [dispatch, hasValidToken, userResponse, userError, token]);
 
-  // Show loading screen while initializing
-  if (!isInitialized || isLoading) {
+  // Show loading screen while initializing or checking user
+  if (!isInitialized || (hasValidToken && isLoadingUser)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">

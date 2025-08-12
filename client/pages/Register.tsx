@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { register } from "../store/slices/authSlice";
-import { addNotification } from "../store/slices/uiSlice";
+import {
+  selectAuth,
+  resetRegistrationState,
+  getDashboardRouteForRole,
+} from "../store/slices/authSlice";
+import { useRegisterMutation } from "../store/api/authApi";
+import { useToast } from "../hooks/use-toast";
+import { useOtpFlow } from "../contexts/OtpContext";
 import {
   Card,
   CardContent,
@@ -19,12 +25,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Shield, User, Mail, Lock, Phone, MapPin } from "lucide-react";
+import { Shield, User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.auth);
+  const { toast } = useToast();
+  const { openOtpFlow } = useOtpFlow();
+  const { isAuthenticated, user } = useAppSelector(selectAuth);
+
+  // API hooks
+  const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
+
+  // Clear registration state on component mount
+  useEffect(() => {
+    dispatch(resetRegistrationState());
+  }, [dispatch]);
+
+  // Redirect if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRouteForRole(user.role);
+      navigate(dashboardRoute);
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -48,51 +72,65 @@ const Register: React.FC = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      dispatch(
-        addNotification({
-          type: "error",
-          title: "Password Mismatch",
-          message: "Passwords do not match",
-        }),
-      );
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
-      await dispatch(
-        register({
-          fullName: formData.fullName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          password: formData.password,
-          role: formData.role as any,
-          wardId: formData.wardId,
-        }),
-      ).unwrap();
+      const result = await registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        role: formData.role as any,
+        wardId: formData.wardId,
+      }).unwrap();
 
-      dispatch(
-        addNotification({
-          type: "success",
-          title: "Registration Successful",
-          message: "Account created successfully! Please login.",
-        }),
-      );
-      navigate("/login");
-    } catch (error) {
-      dispatch(
-        addNotification({
-          type: "error",
-          title: "Registration Failed",
-          message:
-            error instanceof Error ? error.message : "Failed to create account",
-        }),
-      );
+      if (result.data?.requiresOtpVerification) {
+        // OTP verification required - open unified dialog
+        openOtpFlow({
+          context: "register",
+          email: formData.email,
+          title: "Complete Registration",
+          description:
+            "Enter the verification code sent to your email to activate your account",
+          onSuccess: (data) => {
+            toast({
+              title: "Registration Successful!",
+              description: `Welcome ${data.user?.fullName}! Your account has been verified.`,
+            });
+            // Navigation will be handled by auth state change
+          },
+        });
+
+        toast({
+          title: "Registration Initiated",
+          description: "Please check your email for the verification code.",
+        });
+      } else {
+        // Direct registration without OTP
+        toast({
+          title: "Registration Successful!",
+          description: "Account created successfully! Welcome aboard!",
+        });
+        // Navigation will be handled by auth state change
+      }
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to create account",
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -229,8 +267,8 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Create Account"}
+              <Button type="submit" className="w-full" disabled={isRegistering}>
+                {isRegistering ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
@@ -248,6 +286,15 @@ const Register: React.FC = () => {
                   className="text-green-600 hover:underline"
                 >
                   Submit as Guest
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                >
+                  <Home className="h-4 w-4" />
+                  Back to Home
                 </Link>
               </p>
             </div>
