@@ -966,7 +966,7 @@ const GuestComplaintForm: React.FC = () => {
                         }
                         disabled={!formData.wardId}
                       >
-                        <SelectTrigger className={validationErrors.subZoneId ? "border-red-500" : ""}>
+                        <SelectTrigger className={validationErrors.subZoneId ? "border-red-500" : ""} data-testid="subzone-select">
                           <SelectValue placeholder="Select sub-zone" />
                         </SelectTrigger>
                         <SelectContent>
