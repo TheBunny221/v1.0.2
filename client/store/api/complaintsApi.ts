@@ -1,4 +1,9 @@
-import { baseApi, ApiResponse, transformResponse, optimisticUpdate } from './baseApi';
+import {
+  baseApi,
+  ApiResponse,
+  transformResponse,
+  optimisticUpdate,
+} from "./baseApi";
 
 // Types for complaint operations
 export interface Complaint {
@@ -6,8 +11,14 @@ export interface Complaint {
   complaintId: string;
   type: string;
   description: string;
-  status: 'registered' | 'assigned' | 'in_progress' | 'resolved' | 'closed' | 'reopened';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status:
+    | "registered"
+    | "assigned"
+    | "in_progress"
+    | "resolved"
+    | "closed"
+    | "reopened";
+  priority: "low" | "medium" | "high" | "critical";
   submittedBy: string;
   submittedDate: string;
   lastUpdated: string;
@@ -25,14 +36,14 @@ export interface Complaint {
   feedback?: string;
   rating?: number;
   escalationLevel: number;
-  slaStatus: 'ontime' | 'warning' | 'overdue' | 'completed';
+  slaStatus: "ontime" | "warning" | "overdue" | "completed";
   timeElapsed: number;
 }
 
 export interface CreateComplaintRequest {
   type: string;
   description: string;
-  priority?: 'low' | 'medium' | 'high' | 'critical';
+  priority?: "low" | "medium" | "high" | "critical";
   ward: string;
   area: string;
   location: string;
@@ -44,10 +55,10 @@ export interface CreateComplaintRequest {
 
 export interface UpdateComplaintRequest {
   id: string;
-  status?: Complaint['status'];
+  status?: Complaint["status"];
   assignedTo?: string;
   remarks?: string;
-  priority?: Complaint['priority'];
+  priority?: Complaint["priority"];
 }
 
 export interface ComplaintFilters {
@@ -66,64 +77,72 @@ export interface ComplaintListParams extends ComplaintFilters {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // Complaints API slice
 export const complaintsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get complaints list with pagination and filtering
-    getComplaints: builder.query<ApiResponse<Complaint[]>, ComplaintListParams>({
-      query: (params) => {
-        const searchParams = new URLSearchParams();
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            if (Array.isArray(value)) {
-              value.forEach(v => searchParams.append(key, v));
-            } else {
-              searchParams.append(key, value.toString());
+    getComplaints: builder.query<ApiResponse<Complaint[]>, ComplaintListParams>(
+      {
+        query: (params) => {
+          const searchParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (Array.isArray(value)) {
+                value.forEach((v) => searchParams.append(key, v));
+              } else {
+                searchParams.append(key, value.toString());
+              }
             }
-          }
-        });
-        return `/complaints?${searchParams.toString()}`;
+          });
+          return `/complaints?${searchParams.toString()}`;
+        },
+        transformResponse: transformResponse<Complaint[]>,
+        providesTags: (result) =>
+          result?.data
+            ? [
+                ...result.data.map(({ id }) => ({
+                  type: "Complaint" as const,
+                  id,
+                })),
+                { type: "Complaint", id: "LIST" },
+              ]
+            : [{ type: "Complaint", id: "LIST" }],
       },
-      transformResponse: transformResponse<Complaint[]>,
-      providesTags: (result) =>
-        result?.data
-          ? [
-              ...result.data.map(({ id }) => ({ type: 'Complaint' as const, id })),
-              { type: 'Complaint', id: 'LIST' },
-            ]
-          : [{ type: 'Complaint', id: 'LIST' }],
-    }),
+    ),
 
     // Get single complaint
     getComplaint: builder.query<ApiResponse<Complaint>, string>({
       query: (id) => `/complaints/${id}`,
       transformResponse: transformResponse<Complaint>,
-      providesTags: (result, error, id) => [{ type: 'Complaint', id }],
+      providesTags: (result, error, id) => [{ type: "Complaint", id }],
     }),
 
     // Create new complaint
-    createComplaint: builder.mutation<ApiResponse<Complaint>, CreateComplaintRequest>({
+    createComplaint: builder.mutation<
+      ApiResponse<Complaint>,
+      CreateComplaintRequest
+    >({
       query: (data) => ({
-        url: '/complaints',
-        method: 'POST',
+        url: "/complaints",
+        method: "POST",
         body: data,
       }),
       transformResponse: transformResponse<Complaint>,
-      invalidatesTags: [{ type: 'Complaint', id: 'LIST' }],
+      invalidatesTags: [{ type: "Complaint", id: "LIST" }],
       // Optimistic update for immediate feedback
       onQueryStarted: async (newComplaint, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
           // Update complaints list if it's cached
           dispatch(
-            complaintsApi.util.updateQueryData('getComplaints', {}, (draft) => {
+            complaintsApi.util.updateQueryData("getComplaints", {}, (draft) => {
               if (draft.data) {
                 draft.data.unshift(data.data);
               }
-            })
+            }),
           );
         } catch {
           // Error handled by base query
@@ -132,35 +151,41 @@ export const complaintsApi = baseApi.injectEndpoints({
     }),
 
     // Update complaint
-    updateComplaint: builder.mutation<ApiResponse<Complaint>, UpdateComplaintRequest>({
+    updateComplaint: builder.mutation<
+      ApiResponse<Complaint>,
+      UpdateComplaintRequest
+    >({
       query: ({ id, ...data }) => ({
         url: `/complaints/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
       transformResponse: transformResponse<Complaint>,
       invalidatesTags: (result, error, { id }) => [
-        { type: 'Complaint', id },
-        { type: 'Complaint', id: 'LIST' },
+        { type: "Complaint", id },
+        { type: "Complaint", id: "LIST" },
       ],
       // Optimistic update
-      onQueryStarted: async ({ id, ...patch }, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (
+        { id, ...patch },
+        { dispatch, queryFulfilled },
+      ) => {
         // Update single complaint query
         const patchResult1 = dispatch(
-          complaintsApi.util.updateQueryData('getComplaint', id, (draft) => {
+          complaintsApi.util.updateQueryData("getComplaint", id, (draft) => {
             if (draft.data) {
               Object.assign(draft.data, patch);
             }
-          })
+          }),
         );
 
         // Update complaints list
         const patchResult2 = dispatch(
-          complaintsApi.util.updateQueryData('getComplaints', {}, (draft) => {
+          complaintsApi.util.updateQueryData("getComplaints", {}, (draft) => {
             if (draft.data) {
               draft.data = optimisticUpdate(draft.data, { id, ...patch });
             }
-          })
+          }),
         );
 
         try {
@@ -173,79 +198,99 @@ export const complaintsApi = baseApi.injectEndpoints({
     }),
 
     // Assign complaint
-    assignComplaint: builder.mutation<ApiResponse<Complaint>, { id: string; assignedTo: string; remarks?: string }>({
+    assignComplaint: builder.mutation<
+      ApiResponse<Complaint>,
+      { id: string; assignedTo: string; remarks?: string }
+    >({
       query: ({ id, assignedTo, remarks }) => ({
         url: `/complaints/${id}/assign`,
-        method: 'PUT',
+        method: "PUT",
         body: { assignedTo, remarks },
       }),
       transformResponse: transformResponse<Complaint>,
       invalidatesTags: (result, error, { id }) => [
-        { type: 'Complaint', id },
-        { type: 'Complaint', id: 'LIST' },
+        { type: "Complaint", id },
+        { type: "Complaint", id: "LIST" },
       ],
     }),
 
     // Update complaint status
-    updateComplaintStatus: builder.mutation<ApiResponse<Complaint>, { id: string; status: Complaint['status']; remarks?: string }>({
+    updateComplaintStatus: builder.mutation<
+      ApiResponse<Complaint>,
+      { id: string; status: Complaint["status"]; remarks?: string }
+    >({
       query: ({ id, status, remarks }) => ({
         url: `/complaints/${id}/status`,
-        method: 'PUT',
+        method: "PUT",
         body: { status, remarks },
       }),
       transformResponse: transformResponse<Complaint>,
       invalidatesTags: (result, error, { id }) => [
-        { type: 'Complaint', id },
-        { type: 'Complaint', id: 'LIST' },
+        { type: "Complaint", id },
+        { type: "Complaint", id: "LIST" },
       ],
     }),
 
     // Add complaint feedback
-    addComplaintFeedback: builder.mutation<ApiResponse<Complaint>, { id: string; feedback: string; rating: number }>({
+    addComplaintFeedback: builder.mutation<
+      ApiResponse<Complaint>,
+      { id: string; feedback: string; rating: number }
+    >({
       query: ({ id, feedback, rating }) => ({
         url: `/complaints/${id}/feedback`,
-        method: 'POST',
+        method: "POST",
         body: { feedback, rating },
       }),
       transformResponse: transformResponse<Complaint>,
       invalidatesTags: (result, error, { id }) => [
-        { type: 'Complaint', id },
-        { type: 'Complaint', id: 'LIST' },
+        { type: "Complaint", id },
+        { type: "Complaint", id: "LIST" },
       ],
     }),
 
     // Upload complaint attachments
-    uploadComplaintAttachment: builder.mutation<ApiResponse<{ filename: string; url: string }>, { id: string; file: File }>({
+    uploadComplaintAttachment: builder.mutation<
+      ApiResponse<{ filename: string; url: string }>,
+      { id: string; file: File }
+    >({
       query: ({ id, file }) => {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
         return {
           url: `/complaints/${id}/attachments`,
-          method: 'POST',
+          method: "POST",
           body: formData,
           formData: true,
         };
       },
       transformResponse: transformResponse,
-      invalidatesTags: (result, error, { id }) => [{ type: 'Complaint', id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "Complaint", id }],
     }),
 
     // Get complaint types
-    getComplaintTypes: builder.query<ApiResponse<{ id: string; name: string; description?: string; slaHours: number }[]>, void>({
-      query: () => '/complaint-types',
+    getComplaintTypes: builder.query<
+      ApiResponse<
+        { id: string; name: string; description?: string; slaHours: number }[]
+      >,
+      void
+    >({
+      query: () => "/complaint-types",
       transformResponse: transformResponse,
-      providesTags: ['ComplaintType'],
+      providesTags: ["ComplaintType"],
     }),
 
     // Get complaint statistics
-    getComplaintStatistics: builder.query<ApiResponse<{
-      total: number;
-      byStatus: Record<string, number>;
-      byPriority: Record<string, number>;
-      byType: Record<string, number>;
-      slaCompliance: number;
-      avgResolutionTime: number;
-    }>, { dateFrom?: string; dateTo?: string; ward?: string }>({
+    getComplaintStatistics: builder.query<
+      ApiResponse<{
+        total: number;
+        byStatus: Record<string, number>;
+        byPriority: Record<string, number>;
+        byType: Record<string, number>;
+        slaCompliance: number;
+        avgResolutionTime: number;
+      }>,
+      { dateFrom?: string; dateTo?: string; ward?: string }
+    >({
       query: (params) => {
         const searchParams = new URLSearchParams();
         Object.entries(params).forEach(([key, value]) => {
@@ -254,7 +299,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         return `/complaints/statistics?${searchParams.toString()}`;
       },
       transformResponse: transformResponse,
-      providesTags: ['Analytics'],
+      providesTags: ["Analytics"],
     }),
   }),
 });

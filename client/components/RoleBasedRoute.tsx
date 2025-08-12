@@ -44,7 +44,9 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
   onUnauthorized,
   loadingComponent,
 }) => {
-  const { user, isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated, isLoading, token } = useAppSelector(
+    (state) => state.auth,
+  );
   const translations = useAppSelector(selectTranslations);
   const location = useLocation();
   const dispatch = useAppDispatch();
@@ -54,14 +56,15 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
     const handleTokenExpiration = () => {
       if (token && isAuthenticated) {
         try {
-          const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
           const currentTime = Date.now() / 1000;
-          
+
           if (tokenPayload.exp && tokenPayload.exp < currentTime) {
             // Token expired
             dispatch(logout());
             toast({
-              title: translations?.messages?.sessionExpired || "Session Expired",
+              title:
+                translations?.messages?.sessionExpired || "Session Expired",
               description: "Please login again to continue.",
               variant: "destructive",
             });
@@ -88,15 +91,18 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
 
   // Handle unauthenticated users
   if (requiresAuth && (!isAuthenticated || !user)) {
-    const redirectPath = location.pathname !== fallbackPath ? fallbackPath : "/";
+    const redirectPath =
+      location.pathname !== fallbackPath ? fallbackPath : "/";
     return (
-      <Navigate 
-        to={redirectPath} 
-        state={{ 
-          from: location, 
-          message: translations?.messages?.unauthorizedAccess || "Please login to access this page."
-        }} 
-        replace 
+      <Navigate
+        to={redirectPath}
+        state={{
+          from: location,
+          message:
+            translations?.messages?.unauthorizedAccess ||
+            "Please login to access this page.",
+        }}
+        replace
       />
     );
   }
@@ -143,7 +149,7 @@ export function withRoleBasedAccess<P extends object>(
     fallbackPath?: string;
     unauthorizedPath?: string;
     checkPermissions?: (user: any) => boolean;
-  }
+  },
 ) {
   return function RoleProtectedComponent(props: P) {
     return (
@@ -171,15 +177,18 @@ export function usePermissions() {
 
   const hasAnyRole = (roles: UserRole[]): boolean => {
     if (!isAuthenticated || !user) return false;
-    return roles.some(role => user.role === role);
+    return roles.some((role) => user.role === role);
   };
 
   const hasAllRoles = (roles: UserRole[]): boolean => {
     if (!isAuthenticated || !user) return false;
-    return roles.every(role => user.role === role);
+    return roles.every((role) => user.role === role);
   };
 
-  const canAccess = (requiredRoles: UserRole[], customCheck?: (user: any) => boolean): boolean => {
+  const canAccess = (
+    requiredRoles: UserRole[],
+    customCheck?: (user: any) => boolean,
+  ): boolean => {
     if (!hasRole(requiredRoles)) return false;
     if (customCheck && !customCheck(user)) return false;
     return true;

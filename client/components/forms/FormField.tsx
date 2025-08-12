@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control, FieldPath, FieldValues } from 'react-hook-form';
+import React from "react";
+import { Control, FieldPath, FieldValues } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -7,22 +7,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Checkbox } from '../ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { Switch } from '../ui/switch';
-import { cn } from '../../lib/utils';
-import { Eye, EyeOff, Upload, X } from 'lucide-react';
+} from "../ui/select";
+import { Checkbox } from "../ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Switch } from "../ui/switch";
+import { cn } from "../../lib/utils";
+import { Eye, EyeOff, Upload, X } from "lucide-react";
 
 // Base form field props
 interface BaseFormFieldProps<T extends FieldValues> {
@@ -38,7 +38,7 @@ interface BaseFormFieldProps<T extends FieldValues> {
 
 // Text input field
 interface TextInputProps<T extends FieldValues> extends BaseFormFieldProps<T> {
-  type?: 'text' | 'email' | 'tel' | 'url' | 'search';
+  type?: "text" | "email" | "tel" | "url" | "search";
   autoComplete?: string;
   maxLength?: number;
   minLength?: number;
@@ -56,7 +56,7 @@ export function TextInput<T extends FieldValues>({
   disabled,
   className,
   placeholder,
-  type = 'text',
+  type = "text",
   autoComplete,
   maxLength,
   minLength,
@@ -71,7 +71,12 @@ export function TextInput<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className={cn(required && "after:content-['*'] after:ml-0.5 after:text-red-500")}>
+            <FormLabel
+              className={cn(
+                required &&
+                  "after:content-['*'] after:ml-0.5 after:text-red-500",
+              )}
+            >
               {label}
             </FormLabel>
           )}
@@ -94,15 +99,15 @@ export function TextInput<T extends FieldValues>({
                 className={cn(
                   leftIcon && "pl-10",
                   rightIcon && "pr-10",
-                  fieldState.error && "border-red-500 focus:border-red-500"
+                  fieldState.error && "border-red-500 focus:border-red-500",
                 )}
-                aria-invalid={fieldState.error ? 'true' : 'false'}
+                aria-invalid={fieldState.error ? "true" : "false"}
                 aria-describedby={
-                  fieldState.error 
-                    ? `${name}-error` 
-                    : description 
-                    ? `${name}-description` 
-                    : undefined
+                  fieldState.error
+                    ? `${name}-error`
+                    : description
+                      ? `${name}-description`
+                      : undefined
                 }
               />
               {rightIcon && (
@@ -125,7 +130,8 @@ export function TextInput<T extends FieldValues>({
 }
 
 // Password input field with toggle visibility
-interface PasswordInputProps<T extends FieldValues> extends BaseFormFieldProps<T> {
+interface PasswordInputProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
   autoComplete?: string;
   showStrengthIndicator?: boolean;
 }
@@ -139,7 +145,7 @@ export function PasswordInput<T extends FieldValues>({
   disabled,
   className,
   placeholder,
-  autoComplete = 'current-password',
+  autoComplete = "current-password",
   showStrengthIndicator = false,
 }: PasswordInputProps<T>) {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -151,7 +157,12 @@ export function PasswordInput<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className={cn(required && "after:content-['*'] after:ml-0.5 after:text-red-500")}>
+            <FormLabel
+              className={cn(
+                required &&
+                  "after:content-['*'] after:ml-0.5 after:text-red-500",
+              )}
+            >
               {label}
             </FormLabel>
           )}
@@ -159,15 +170,15 @@ export function PasswordInput<T extends FieldValues>({
             <div className="relative">
               <Input
                 {...field}
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder={placeholder}
                 disabled={disabled}
                 autoComplete={autoComplete}
                 className={cn(
                   "pr-10",
-                  fieldState.error && "border-red-500 focus:border-red-500"
+                  fieldState.error && "border-red-500 focus:border-red-500",
                 )}
-                aria-invalid={fieldState.error ? 'true' : 'false'}
+                aria-invalid={fieldState.error ? "true" : "false"}
               />
               <Button
                 type="button"
@@ -176,7 +187,7 @@ export function PasswordInput<T extends FieldValues>({
                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={disabled}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -210,8 +221,14 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
   };
 
   const strength = getStrength(password);
-  const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+  const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+  const strengthColors = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-yellow-500",
+    "bg-blue-500",
+    "bg-green-500",
+  ];
 
   return (
     <div className="mt-2">
@@ -221,24 +238,25 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
             key={level}
             className={cn(
               "h-2 w-full rounded",
-              level <= strength ? strengthColors[strength - 1] : "bg-gray-200"
+              level <= strength ? strengthColors[strength - 1] : "bg-gray-200",
             )}
           />
         ))}
       </div>
       <p className="text-sm text-gray-600 mt-1">
-        Strength: {strengthLabels[strength - 1] || 'Very Weak'}
+        Strength: {strengthLabels[strength - 1] || "Very Weak"}
       </p>
     </div>
   );
 }
 
 // Textarea field
-interface TextareaFieldProps<T extends FieldValues> extends BaseFormFieldProps<T> {
+interface TextareaFieldProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
   rows?: number;
   maxLength?: number;
   showCharCount?: boolean;
-  resize?: 'none' | 'vertical' | 'horizontal' | 'both';
+  resize?: "none" | "vertical" | "horizontal" | "both";
 }
 
 export function TextareaField<T extends FieldValues>({
@@ -253,7 +271,7 @@ export function TextareaField<T extends FieldValues>({
   rows = 3,
   maxLength,
   showCharCount = false,
-  resize = 'vertical',
+  resize = "vertical",
 }: TextareaFieldProps<T>) {
   return (
     <ShadcnFormField
@@ -262,7 +280,12 @@ export function TextareaField<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className={cn(required && "after:content-['*'] after:ml-0.5 after:text-red-500")}>
+            <FormLabel
+              className={cn(
+                required &&
+                  "after:content-['*'] after:ml-0.5 after:text-red-500",
+              )}
+            >
               {label}
             </FormLabel>
           )}
@@ -276,12 +299,12 @@ export function TextareaField<T extends FieldValues>({
                 maxLength={maxLength}
                 className={cn(
                   fieldState.error && "border-red-500 focus:border-red-500",
-                  resize === 'none' && 'resize-none',
-                  resize === 'vertical' && 'resize-y',
-                  resize === 'horizontal' && 'resize-x'
+                  resize === "none" && "resize-none",
+                  resize === "vertical" && "resize-y",
+                  resize === "horizontal" && "resize-x",
                 )}
                 style={{ resize }}
-                aria-invalid={fieldState.error ? 'true' : 'false'}
+                aria-invalid={fieldState.error ? "true" : "false"}
               />
               {showCharCount && maxLength && (
                 <div className="absolute bottom-2 right-2 text-xs text-gray-500">
@@ -299,7 +322,8 @@ export function TextareaField<T extends FieldValues>({
 }
 
 // Select field
-interface SelectFieldProps<T extends FieldValues> extends BaseFormFieldProps<T> {
+interface SelectFieldProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
   options: { value: string; label: string; disabled?: boolean }[];
   emptyText?: string;
 }
@@ -323,7 +347,12 @@ export function SelectField<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className={cn(required && "after:content-['*'] after:ml-0.5 after:text-red-500")}>
+            <FormLabel
+              className={cn(
+                required &&
+                  "after:content-['*'] after:ml-0.5 after:text-red-500",
+              )}
+            >
               {label}
             </FormLabel>
           )}
@@ -334,8 +363,10 @@ export function SelectField<T extends FieldValues>({
           >
             <FormControl>
               <SelectTrigger
-                className={cn(fieldState.error && "border-red-500 focus:border-red-500")}
-                aria-invalid={fieldState.error ? 'true' : 'false'}
+                className={cn(
+                  fieldState.error && "border-red-500 focus:border-red-500",
+                )}
+                aria-invalid={fieldState.error ? "true" : "false"}
               >
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
@@ -367,7 +398,8 @@ export function SelectField<T extends FieldValues>({
 }
 
 // Checkbox field
-interface CheckboxFieldProps<T extends FieldValues> extends BaseFormFieldProps<T> {
+interface CheckboxFieldProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
   children: React.ReactNode;
 }
 
@@ -384,7 +416,12 @@ export function CheckboxField<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("flex flex-row items-start space-x-3 space-y-0", className)}>
+        <FormItem
+          className={cn(
+            "flex flex-row items-start space-x-3 space-y-0",
+            className,
+          )}
+        >
           <FormControl>
             <Checkbox
               checked={field.value}
@@ -393,9 +430,7 @@ export function CheckboxField<T extends FieldValues>({
             />
           </FormControl>
           <div className="space-y-1 leading-none">
-            <FormLabel className="cursor-pointer">
-              {children}
-            </FormLabel>
+            <FormLabel className="cursor-pointer">{children}</FormLabel>
             {description && <FormDescription>{description}</FormDescription>}
           </div>
         </FormItem>
@@ -405,9 +440,15 @@ export function CheckboxField<T extends FieldValues>({
 }
 
 // Radio group field
-interface RadioGroupFieldProps<T extends FieldValues> extends BaseFormFieldProps<T> {
-  options: { value: string; label: string; description?: string; disabled?: boolean }[];
-  orientation?: 'horizontal' | 'vertical';
+interface RadioGroupFieldProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
+  options: {
+    value: string;
+    label: string;
+    description?: string;
+    disabled?: boolean;
+  }[];
+  orientation?: "horizontal" | "vertical";
 }
 
 export function RadioGroupField<T extends FieldValues>({
@@ -419,7 +460,7 @@ export function RadioGroupField<T extends FieldValues>({
   disabled,
   className,
   options,
-  orientation = 'vertical',
+  orientation = "vertical",
 }: RadioGroupFieldProps<T>) {
   return (
     <ShadcnFormField
@@ -428,7 +469,12 @@ export function RadioGroupField<T extends FieldValues>({
       render={({ field }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className={cn(required && "after:content-['*'] after:ml-0.5 after:text-red-500")}>
+            <FormLabel
+              className={cn(
+                required &&
+                  "after:content-['*'] after:ml-0.5 after:text-red-500",
+              )}
+            >
               {label}
             </FormLabel>
           )}
@@ -437,7 +483,9 @@ export function RadioGroupField<T extends FieldValues>({
               onValueChange={field.onChange}
               defaultValue={field.value}
               className={cn(
-                orientation === 'horizontal' ? "flex flex-row space-x-4" : "flex flex-col space-y-2"
+                orientation === "horizontal"
+                  ? "flex flex-row space-x-4"
+                  : "flex flex-col space-y-2",
               )}
               disabled={disabled}
             >
@@ -473,7 +521,8 @@ export function RadioGroupField<T extends FieldValues>({
 }
 
 // Switch field
-interface SwitchFieldProps<T extends FieldValues> extends BaseFormFieldProps<T> {
+interface SwitchFieldProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
   children: React.ReactNode;
 }
 
@@ -490,7 +539,12 @@ export function SwitchField<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("flex flex-row items-center justify-between rounded-lg border p-4", className)}>
+        <FormItem
+          className={cn(
+            "flex flex-row items-center justify-between rounded-lg border p-4",
+            className,
+          )}
+        >
           <div className="space-y-0.5">
             <FormLabel className="text-base cursor-pointer">
               {children}
@@ -511,7 +565,8 @@ export function SwitchField<T extends FieldValues>({
 }
 
 // File upload field
-interface FileUploadFieldProps<T extends FieldValues> extends BaseFormFieldProps<T> {
+interface FileUploadFieldProps<T extends FieldValues>
+  extends BaseFormFieldProps<T> {
   accept?: string;
   multiple?: boolean;
   maxSize?: number; // in bytes
@@ -540,7 +595,12 @@ export function FileUploadField<T extends FieldValues>({
       render={({ field: { onChange, value, ...field }, fieldState }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className={cn(required && "after:content-['*'] after:ml-0.5 after:text-red-500")}>
+            <FormLabel
+              className={cn(
+                required &&
+                  "after:content-['*'] after:ml-0.5 after:text-red-500",
+              )}
+            >
               {label}
             </FormLabel>
           )}
@@ -549,10 +609,10 @@ export function FileUploadField<T extends FieldValues>({
               <div
                 className={cn(
                   "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-                  fieldState.error 
-                    ? "border-red-500 hover:border-red-600" 
+                  fieldState.error
+                    ? "border-red-500 hover:border-red-600"
                     : "border-gray-300 hover:border-gray-400",
-                  disabled && "opacity-50 cursor-not-allowed"
+                  disabled && "opacity-50 cursor-not-allowed",
                 )}
                 onClick={() => !disabled && inputRef.current?.click()}
               >
@@ -571,7 +631,7 @@ export function FileUploadField<T extends FieldValues>({
                   </p>
                 )}
               </div>
-              
+
               <input
                 {...field}
                 ref={inputRef}
@@ -586,7 +646,7 @@ export function FileUploadField<T extends FieldValues>({
                   onFileSelect?.(files);
                 }}
               />
-              
+
               {value && (
                 <div className="space-y-2">
                   {multiple && Array.isArray(value) ? (
@@ -595,16 +655,15 @@ export function FileUploadField<T extends FieldValues>({
                         key={index}
                         file={file}
                         onRemove={() => {
-                          const newFiles = value.filter((_: any, i: number) => i !== index);
+                          const newFiles = value.filter(
+                            (_: any, i: number) => i !== index,
+                          );
                           onChange(newFiles.length > 0 ? newFiles : null);
                         }}
                       />
                     ))
                   ) : value instanceof File ? (
-                    <FilePreview
-                      file={value}
-                      onRemove={() => onChange(null)}
-                    />
+                    <FilePreview file={value} onRemove={() => onChange(null)} />
                   ) : null}
                 </div>
               )}

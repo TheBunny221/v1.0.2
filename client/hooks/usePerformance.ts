@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
-import { debounce, throttle } from 'lodash-es';
+import { useCallback, useMemo, useRef, useEffect, useState } from "react";
+import { debounce, throttle } from "lodash-es";
 
 // Hook for debounced values
 export function useDebounce<T>(value: T, delay: number): T {
@@ -22,11 +22,11 @@ export function useDebounce<T>(value: T, delay: number): T {
 export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
-  deps: React.DependencyList = []
+  deps: React.DependencyList = [],
 ): T {
   const debouncedCallback = useMemo(
     () => debounce(callback, delay),
-    [...deps, delay]
+    [...deps, delay],
   );
 
   useEffect(() => {
@@ -42,11 +42,11 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
 export function useThrottledCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
-  deps: React.DependencyList = []
+  deps: React.DependencyList = [],
 ): T {
   const throttledCallback = useMemo(
     () => throttle(callback, delay),
-    [...deps, delay]
+    [...deps, delay],
   );
 
   useEffect(() => {
@@ -61,14 +61,14 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
 // Hook for memoized expensive calculations
 export function useMemoizedComputation<T>(
   computation: () => T,
-  deps: React.DependencyList
+  deps: React.DependencyList,
 ): T {
   return useMemo(computation, deps);
 }
 
 // Hook for intersection observer (lazy loading)
 export function useIntersectionObserver(
-  options: IntersectionObserverInit = {}
+  options: IntersectionObserverInit = {},
 ): [React.RefCallback<Element>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [element, setElement] = useState<Element | null>(null);
@@ -86,9 +86,9 @@ export function useIntersectionObserver(
       },
       {
         threshold: 0.1,
-        rootMargin: '50px',
+        rootMargin: "50px",
         ...options,
-      }
+      },
     );
 
     observer.observe(element);
@@ -119,7 +119,7 @@ export function useVirtualScrolling<T>({
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
     items.length - 1,
-    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
+    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan,
   );
 
   const visibleItems = useMemo(() => {
@@ -145,7 +145,7 @@ export function useVirtualScrolling<T>({
 
 // Hook for image lazy loading
 export function useLazyImage(src: string, placeholder?: string) {
-  const [imageSrc, setImageSrc] = useState(placeholder || '');
+  const [imageSrc, setImageSrc] = useState(placeholder || "");
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [ref, isIntersecting] = useIntersectionObserver();
@@ -153,16 +153,16 @@ export function useLazyImage(src: string, placeholder?: string) {
   useEffect(() => {
     if (isIntersecting && src && !isLoaded && !isError) {
       const img = new Image();
-      
+
       img.onload = () => {
         setImageSrc(src);
         setIsLoaded(true);
       };
-      
+
       img.onerror = () => {
         setIsError(true);
       };
-      
+
       img.src = src;
     }
   }, [isIntersecting, src, isLoaded, isError]);
@@ -180,7 +180,7 @@ export function useLazyImage(src: string, placeholder?: string) {
 export function usePrefetch<T>(
   prefetchFn: () => Promise<T>,
   deps: React.DependencyList = [],
-  delay = 100
+  delay = 100,
 ) {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -188,7 +188,7 @@ export function usePrefetch<T>(
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     timeoutRef.current = setTimeout(() => {
       prefetchFn().catch(() => {
         // Silently ignore prefetch errors
@@ -219,15 +219,15 @@ export function usePerformanceMeasurement(name: string) {
     if (startTimeRef.current) {
       const duration = performance.now() - startTimeRef.current;
       console.log(`Performance [${name}]: ${duration.toFixed(2)}ms`);
-      
+
       // Send to analytics if needed
       if (window.gtag) {
-        window.gtag('event', 'timing_complete', {
+        window.gtag("event", "timing_complete", {
           name,
           value: Math.round(duration),
         });
       }
-      
+
       startTimeRef.current = undefined;
       return duration;
     }
@@ -243,24 +243,28 @@ export function useBatchUpdates<T>(initialState: T, delay = 16) {
   const pendingUpdatesRef = useRef<Partial<T>[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const batchedSetState = useCallback((update: Partial<T> | ((prev: T) => Partial<T>)) => {
-    const updateObject = typeof update === 'function' ? update(state) : update;
-    pendingUpdatesRef.current.push(updateObject);
+  const batchedSetState = useCallback(
+    (update: Partial<T> | ((prev: T) => Partial<T>)) => {
+      const updateObject =
+        typeof update === "function" ? update(state) : update;
+      pendingUpdatesRef.current.push(updateObject);
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-    timeoutRef.current = setTimeout(() => {
-      const mergedUpdate = pendingUpdatesRef.current.reduce(
-        (acc, update) => ({ ...acc, ...update }),
-        {}
-      );
-      
-      setState(prev => ({ ...prev, ...mergedUpdate }));
-      pendingUpdatesRef.current = [];
-    }, delay);
-  }, [state, delay]);
+      timeoutRef.current = setTimeout(() => {
+        const mergedUpdate = pendingUpdatesRef.current.reduce(
+          (acc, update) => ({ ...acc, ...update }),
+          {},
+        );
+
+        setState((prev) => ({ ...prev, ...mergedUpdate }));
+        pendingUpdatesRef.current = [];
+      }, delay);
+    },
+    [state, delay],
+  );
 
   useEffect(() => {
     return () => {
@@ -299,13 +303,19 @@ export function useOptimizedList<T>({
     return map;
   }, [memoizedItems]);
 
-  const getItem = useCallback((key: string | number) => {
-    return itemsMap.get(key);
-  }, [itemsMap]);
+  const getItem = useCallback(
+    (key: string | number) => {
+      return itemsMap.get(key);
+    },
+    [itemsMap],
+  );
 
-  const hasItem = useCallback((key: string | number) => {
-    return itemsMap.has(key);
-  }, [itemsMap]);
+  const hasItem = useCallback(
+    (key: string | number) => {
+      return itemsMap.has(key);
+    },
+    [itemsMap],
+  );
 
   return {
     items: memoizedItems,
@@ -359,9 +369,9 @@ export function useResourcePreloader() {
   const preloadScript = useCallback((src: string) => {
     if (preloadedResources.current.has(src)) return;
 
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'script';
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "script";
     link.href = src;
     document.head.appendChild(link);
     preloadedResources.current.add(src);
@@ -370,9 +380,9 @@ export function useResourcePreloader() {
   const preloadStylesheet = useCallback((href: string) => {
     if (preloadedResources.current.has(href)) return;
 
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'style';
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "style";
     link.href = href;
     document.head.appendChild(link);
     preloadedResources.current.add(href);
@@ -391,7 +401,7 @@ export function useMemoryMonitoring() {
 
   useEffect(() => {
     const updateMemoryInfo = () => {
-      if ('memory' in performance) {
+      if ("memory" in performance) {
         setMemoryInfo((performance as any).memory);
       }
     };
@@ -411,7 +421,7 @@ export function useShallowMemo<T extends object>(obj: T): T {
 
   return useMemo(() => {
     const keys = Object.keys(obj) as Array<keyof T>;
-    
+
     // Check if any values have changed
     for (const key of keys) {
       if (obj[key] !== ref.current[key]) {

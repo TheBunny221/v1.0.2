@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 // Analytics and Event Tracking System
 
@@ -21,7 +21,7 @@ export interface ErrorEvent {
   url?: string;
   metadata?: Record<string, any>;
   timestamp?: number;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
+  severity?: "low" | "medium" | "high" | "critical";
 }
 
 export interface PerformanceEvent {
@@ -73,7 +73,7 @@ class AnalyticsManager {
   }
 
   // Event Tracking
-  track(event: Omit<AnalyticsEvent, 'timestamp' | 'userId'>) {
+  track(event: Omit<AnalyticsEvent, "timestamp" | "userId">) {
     if (!this.isEnabled) return;
 
     const enhancedEvent: AnalyticsEvent = {
@@ -90,7 +90,12 @@ class AnalyticsManager {
   }
 
   // Error Tracking
-  trackError(error: Error | string, context?: string, metadata?: Record<string, any>, severity: ErrorEvent['severity'] = 'medium') {
+  trackError(
+    error: Error | string,
+    context?: string,
+    metadata?: Record<string, any>,
+    severity: ErrorEvent["severity"] = "medium",
+  ) {
     if (!this.isEnabled) return;
 
     const errorEvent: ErrorEvent = {
@@ -111,13 +116,17 @@ class AnalyticsManager {
     this.sendToExternalErrorTracking(errorEvent);
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Analytics Error:', errorEvent);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Analytics Error:", errorEvent);
     }
   }
 
   // Performance Tracking
-  trackPerformance(name: string, duration: number, metadata?: Record<string, any>) {
+  trackPerformance(
+    name: string,
+    duration: number,
+    metadata?: Record<string, any>,
+  ) {
     if (!this.isEnabled) return;
 
     const performanceEvent: PerformanceEvent = {
@@ -134,7 +143,12 @@ class AnalyticsManager {
   }
 
   // User Action Tracking
-  trackUserAction(action: string, entity?: string, entityId?: string, metadata?: Record<string, any>) {
+  trackUserAction(
+    action: string,
+    entity?: string,
+    entityId?: string,
+    metadata?: Record<string, any>,
+  ) {
     if (!this.isEnabled || !this.userId) return;
 
     const userEvent: UserEvent = {
@@ -153,9 +167,9 @@ class AnalyticsManager {
   // Page View Tracking
   trackPageView(page: string, title?: string, metadata?: Record<string, any>) {
     this.track({
-      event: 'page_view',
-      category: 'navigation',
-      action: 'view',
+      event: "page_view",
+      category: "navigation",
+      action: "view",
       label: page,
       metadata: {
         title,
@@ -165,43 +179,59 @@ class AnalyticsManager {
   }
 
   // Complaint System Specific Events
-  trackComplaintEvent(action: string, complaintId?: string, metadata?: Record<string, any>) {
+  trackComplaintEvent(
+    action: string,
+    complaintId?: string,
+    metadata?: Record<string, any>,
+  ) {
     this.track({
-      event: 'complaint_action',
-      category: 'complaints',
+      event: "complaint_action",
+      category: "complaints",
       action,
       label: complaintId,
       metadata,
     });
 
-    this.trackUserAction(action, 'complaint', complaintId, metadata);
+    this.trackUserAction(action, "complaint", complaintId, metadata);
   }
 
-  trackAuthEvent(action: string, method?: string, metadata?: Record<string, any>) {
+  trackAuthEvent(
+    action: string,
+    method?: string,
+    metadata?: Record<string, any>,
+  ) {
     this.track({
-      event: 'auth_action',
-      category: 'authentication',
+      event: "auth_action",
+      category: "authentication",
       action,
       label: method,
       metadata,
     });
   }
 
-  trackFormEvent(action: string, formName: string, metadata?: Record<string, any>) {
+  trackFormEvent(
+    action: string,
+    formName: string,
+    metadata?: Record<string, any>,
+  ) {
     this.track({
-      event: 'form_action',
-      category: 'forms',
+      event: "form_action",
+      category: "forms",
       action,
       label: formName,
       metadata,
     });
   }
 
-  trackSearchEvent(query: string, results: number, metadata?: Record<string, any>) {
+  trackSearchEvent(
+    query: string,
+    results: number,
+    metadata?: Record<string, any>,
+  ) {
     this.track({
-      event: 'search',
-      category: 'search',
-      action: 'query',
+      event: "search",
+      category: "search",
+      action: "query",
       label: query,
       value: results,
       metadata,
@@ -210,7 +240,9 @@ class AnalyticsManager {
 
   // Private methods
   private generateSessionId(): string {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return (
+      "session_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9)
+    );
   }
 
   private initializeFlushInterval() {
@@ -221,9 +253,12 @@ class AnalyticsManager {
 
   private scheduleFlush() {
     // Flush immediately if queues are getting large
-    const totalEvents = this.eventQueue.length + this.errorQueue.length + 
-                       this.performanceQueue.length + this.userEventQueue.length;
-    
+    const totalEvents =
+      this.eventQueue.length +
+      this.errorQueue.length +
+      this.performanceQueue.length +
+      this.userEventQueue.length;
+
     if (totalEvents >= 10) {
       this.flush();
     }
@@ -243,7 +278,12 @@ class AnalyticsManager {
     this.performanceQueue = [];
     this.userEventQueue = [];
 
-    if (events.length === 0 && errors.length === 0 && performance.length === 0 && userEvents.length === 0) {
+    if (
+      events.length === 0 &&
+      errors.length === 0 &&
+      performance.length === 0 &&
+      userEvents.length === 0
+    ) {
       return;
     }
 
@@ -262,16 +302,16 @@ class AnalyticsManager {
       this.errorQueue.unshift(...errors);
       this.performanceQueue.unshift(...performance);
       this.userEventQueue.unshift(...userEvents);
-      
-      console.warn('Failed to send analytics data:', error);
+
+      console.warn("Failed to send analytics data:", error);
     }
   }
 
   private async sendToServer(data: any) {
-    const response = await fetch('/api/analytics', {
-      method: 'POST',
+    const response = await fetch("/api/analytics", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -284,7 +324,7 @@ class AnalyticsManager {
   private sendToExternalAnalytics(event: AnalyticsEvent) {
     // Google Analytics 4
     if (window.gtag) {
-      window.gtag('event', event.action, {
+      window.gtag("event", event.action, {
         event_category: event.category,
         event_label: event.label,
         value: event.value,
@@ -311,18 +351,18 @@ class AnalyticsManager {
   }
 
   private setupOnlineStatusListener() {
-    window.addEventListener('online', () => {
+    window.addEventListener("online", () => {
       this.isOnline = true;
       this.flush(); // Flush queued events when back online
     });
 
-    window.addEventListener('offline', () => {
+    window.addEventListener("offline", () => {
       this.isOnline = false;
     });
   }
 
   private setupUnloadListener() {
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener("beforeunload", () => {
       // Use sendBeacon for reliable delivery on page unload
       if (navigator.sendBeacon && this.isOnline) {
         const data = {
@@ -333,38 +373,42 @@ class AnalyticsManager {
           userEvents: this.userEventQueue,
           timestamp: Date.now(),
         };
-        
-        navigator.sendBeacon('/api/analytics', JSON.stringify(data));
+
+        navigator.sendBeacon("/api/analytics", JSON.stringify(data));
       }
     });
   }
 
   private setupPerformanceObserver() {
-    if ('PerformanceObserver' in window) {
+    if ("PerformanceObserver" in window) {
       // Track Largest Contentful Paint
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1];
-        
-        this.trackPerformance('lcp', lastEntry.startTime, {
+
+        this.trackPerformance("lcp", lastEntry.startTime, {
           element: lastEntry.element?.tagName,
           url: lastEntry.url,
         });
       });
-      
-      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+
+      lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
 
       // Track First Input Delay
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
-          this.trackPerformance('fid', entry.processingStart - entry.startTime, {
-            eventType: entry.name,
-          });
+          this.trackPerformance(
+            "fid",
+            entry.processingStart - entry.startTime,
+            {
+              eventType: entry.name,
+            },
+          );
         });
       });
-      
-      fidObserver.observe({ entryTypes: ['first-input'] });
+
+      fidObserver.observe({ entryTypes: ["first-input"] });
 
       // Track Cumulative Layout Shift
       let clsValue = 0;
@@ -374,11 +418,11 @@ class AnalyticsManager {
             clsValue += entry.value;
           }
         }
-        
-        this.trackPerformance('cls', clsValue);
+
+        this.trackPerformance("cls", clsValue);
       });
-      
-      clsObserver.observe({ entryTypes: ['layout-shift'] });
+
+      clsObserver.observe({ entryTypes: ["layout-shift"] });
     }
   }
 
@@ -420,7 +464,7 @@ export function useAnalytics() {
 // Higher-order component for automatic page view tracking
 export function withPageTracking<P extends object>(
   Component: React.ComponentType<P>,
-  pageName: string
+  pageName: string,
 ) {
   return function TrackedComponent(props: P) {
     React.useEffect(() => {
@@ -433,7 +477,10 @@ export function withPageTracking<P extends object>(
 
 // Error boundary with analytics
 export class AnalyticsErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ComponentType<{ error: Error }> },
+  {
+    children: React.ReactNode;
+    fallback?: React.ComponentType<{ error: Error }>;
+  },
   { hasError: boolean; error: Error | null }
 > {
   constructor(props: any) {
@@ -446,16 +493,23 @@ export class AnalyticsErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    analytics.trackError(error, 'react_error_boundary', {
-      componentStack: errorInfo.componentStack,
-      errorBoundary: true,
-    }, 'high');
+    analytics.trackError(
+      error,
+      "react_error_boundary",
+      {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: true,
+      },
+      "high",
+    );
   }
 
   render() {
     if (this.state.hasError && this.state.error) {
       const Fallback = this.props.fallback;
-      return Fallback ? React.createElement(Fallback, { error: this.state.error }) : React.createElement('div', {}, 'Something went wrong.');
+      return Fallback
+        ? React.createElement(Fallback, { error: this.state.error })
+        : React.createElement("div", {}, "Something went wrong.");
     }
 
     return this.props.children;

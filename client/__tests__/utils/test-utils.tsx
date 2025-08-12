@@ -1,14 +1,14 @@
-import React from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
-import { configureStore } from '@reduxjs/toolkit';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
+import { configureStore } from "@reduxjs/toolkit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import authSlice from '../../store/slices/authSlice';
-import languageSlice from '../../store/slices/languageSlice';
-import uiSlice from '../../store/slices/uiSlice';
-import { baseApi } from '../../store/api/baseApi';
+import authSlice from "../../store/slices/authSlice";
+import languageSlice from "../../store/slices/languageSlice";
+import uiSlice from "../../store/slices/uiSlice";
+import { baseApi } from "../../store/api/baseApi";
 
 // Test store configuration
 export function createTestStore(preloadedState = {}) {
@@ -24,9 +24,9 @@ export function createTestStore(preloadedState = {}) {
       getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [
-            'api/executeQuery/pending',
-            'api/executeQuery/fulfilled',
-            'api/executeQuery/rejected',
+            "api/executeQuery/pending",
+            "api/executeQuery/fulfilled",
+            "api/executeQuery/rejected",
           ],
         },
       }).concat(baseApi.middleware),
@@ -34,7 +34,7 @@ export function createTestStore(preloadedState = {}) {
 }
 
 // Custom render function with providers
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
   preloadedState?: any;
   store?: ReturnType<typeof createTestStore>;
   initialEntries?: string[];
@@ -46,7 +46,7 @@ export function renderWithProviders(
   {
     preloadedState = {},
     store = createTestStore(preloadedState),
-    initialEntries = ['/'],
+    initialEntries = ["/"],
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -60,15 +60,13 @@ export function renderWithProviders(
       },
     }),
     ...renderOptions
-  }: CustomRenderOptions = {}
+  }: CustomRenderOptions = {},
 ) {
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            {children}
-          </BrowserRouter>
+          <BrowserRouter>{children}</BrowserRouter>
         </QueryClientProvider>
       </Provider>
     );
@@ -85,13 +83,13 @@ export function renderWithProviders(
 export function renderWithAuth(
   ui: React.ReactElement,
   userOverrides = {},
-  options: CustomRenderOptions = {}
+  options: CustomRenderOptions = {},
 ) {
   const mockUser = {
-    id: '1',
-    fullName: 'Test User',
-    email: 'test@example.com',
-    role: 'CITIZEN',
+    id: "1",
+    fullName: "Test User",
+    email: "test@example.com",
+    role: "CITIZEN",
     isActive: true,
     joinedOn: new Date().toISOString(),
     ...userOverrides,
@@ -100,21 +98,21 @@ export function renderWithAuth(
   const preloadedState = {
     auth: {
       user: mockUser,
-      token: 'mock-token',
+      token: "mock-token",
       isAuthenticated: true,
       isLoading: false,
       error: null,
-      otpStep: 'none',
+      otpStep: "none",
       requiresPasswordSetup: false,
-      registrationStep: 'none',
+      registrationStep: "none",
     },
     language: {
-      currentLanguage: 'en',
+      currentLanguage: "en",
       translations: {
-        common: { loading: 'Loading...', error: 'Error' },
-        messages: { 
-          operationSuccess: 'Success',
-          unauthorizedAccess: 'Unauthorized',
+        common: { loading: "Loading...", error: "Error" },
+        messages: {
+          operationSuccess: "Success",
+          unauthorizedAccess: "Unauthorized",
         },
       },
       isLoading: false,
@@ -128,7 +126,7 @@ export function renderWithAuth(
 // Helper to render without authentication
 export function renderWithoutAuth(
   ui: React.ReactElement,
-  options: CustomRenderOptions = {}
+  options: CustomRenderOptions = {},
 ) {
   const preloadedState = {
     auth: {
@@ -137,15 +135,15 @@ export function renderWithoutAuth(
       isAuthenticated: false,
       isLoading: false,
       error: null,
-      otpStep: 'none',
+      otpStep: "none",
       requiresPasswordSetup: false,
-      registrationStep: 'none',
+      registrationStep: "none",
     },
     language: {
-      currentLanguage: 'en',
+      currentLanguage: "en",
       translations: {
-        common: { loading: 'Loading...', error: 'Error' },
-        messages: { unauthorizedAccess: 'Unauthorized' },
+        common: { loading: "Loading...", error: "Error" },
+        messages: { unauthorizedAccess: "Unauthorized" },
       },
       isLoading: false,
     },
@@ -159,7 +157,7 @@ export function renderWithoutAuth(
 export const fillFormField = async (
   getByLabelText: (text: string) => HTMLElement,
   labelText: string,
-  value: string
+  value: string,
 ) => {
   const field = getByLabelText(labelText);
   await userEvent.clear(field);
@@ -168,9 +166,9 @@ export const fillFormField = async (
 };
 
 export const submitForm = async (
-  getByRole: (role: string, options?: any) => HTMLElement
+  getByRole: (role: string, options?: any) => HTMLElement,
 ) => {
-  const submitButton = getByRole('button', { name: /submit|save|create/i });
+  const submitButton = getByRole("button", { name: /submit|save|create/i });
   await userEvent.click(submitButton);
   return submitButton;
 };
@@ -178,16 +176,16 @@ export const submitForm = async (
 // Mock implementations
 export const mockNavigate = vi.fn();
 export const mockLocation = {
-  pathname: '/',
-  search: '',
-  hash: '',
+  pathname: "/",
+  search: "",
+  hash: "",
   state: null,
-  key: 'default',
+  key: "default",
 };
 
 // Mock react-router hooks
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -198,14 +196,14 @@ vi.mock('react-router-dom', async () => {
 // Helper for testing async components
 export const waitForElementToBeRemoved = async (
   element: HTMLElement,
-  timeout = 1000
+  timeout = 1000,
 ) => {
   const startTime = Date.now();
   while (document.body.contains(element)) {
     if (Date.now() - startTime > timeout) {
-      throw new Error('Element was not removed within timeout');
+      throw new Error("Element was not removed within timeout");
     }
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
 };
 
@@ -214,7 +212,10 @@ export const expectLoadingState = (container: HTMLElement) => {
   expect(container).toHaveTextContent(/loading/i);
 };
 
-export const expectErrorState = (container: HTMLElement, errorText?: string) => {
+export const expectErrorState = (
+  container: HTMLElement,
+  errorText?: string,
+) => {
   if (errorText) {
     expect(container).toHaveTextContent(errorText);
   } else {
@@ -224,10 +225,14 @@ export const expectErrorState = (container: HTMLElement, errorText?: string) => 
 
 // Helper for testing accessibility
 export const expectAccessibleForm = (form: HTMLElement) => {
-  const inputs = form.querySelectorAll('input, select, textarea');
-  inputs.forEach(input => {
+  const inputs = form.querySelectorAll("input, select, textarea");
+  inputs.forEach((input) => {
     const label = form.querySelector(`label[for="${input.id}"]`);
-    if (!label && !input.getAttribute('aria-label') && !input.getAttribute('aria-labelledby')) {
+    if (
+      !label &&
+      !input.getAttribute("aria-label") &&
+      !input.getAttribute("aria-labelledby")
+    ) {
       throw new Error(`Input ${input.id || input.name} is missing a label`);
     }
   });
@@ -236,7 +241,7 @@ export const expectAccessibleForm = (form: HTMLElement) => {
 // Helper for testing keyboard navigation
 export const testKeyboardNavigation = async (
   container: HTMLElement,
-  keySequence: string[]
+  keySequence: string[],
 ) => {
   for (const key of keySequence) {
     await userEvent.keyboard(`{${key}}`);
@@ -245,17 +250,17 @@ export const testKeyboardNavigation = async (
 
 // Helper for testing responsive design
 export const setViewport = (width: number, height: number) => {
-  Object.defineProperty(window, 'innerWidth', {
+  Object.defineProperty(window, "innerWidth", {
     writable: true,
     configurable: true,
     value: width,
   });
-  Object.defineProperty(window, 'innerHeight', {
+  Object.defineProperty(window, "innerHeight", {
     writable: true,
     configurable: true,
     value: height,
   });
-  window.dispatchEvent(new Event('resize'));
+  window.dispatchEvent(new Event("resize"));
 };
 
 // Helper for testing intersection observer
@@ -282,7 +287,7 @@ export const mockIntersectionObserver = (isIntersecting = true) => {
 // Helper for testing local storage
 export const mockLocalStorageImplementation = () => {
   const store: Record<string, string> = {};
-  
+
   return {
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -292,27 +297,23 @@ export const mockLocalStorageImplementation = () => {
       delete store[key];
     }),
     clear: vi.fn(() => {
-      Object.keys(store).forEach(key => delete store[key]);
+      Object.keys(store).forEach((key) => delete store[key]);
     }),
   };
 };
 
 // Helper for testing API calls
-export const expectApiCall = (
-  method: string,
-  url: string,
-  body?: any
-) => {
+export const expectApiCall = (method: string, url: string, body?: any) => {
   expect(fetch).toHaveBeenCalledWith(
     expect.stringContaining(url),
     expect.objectContaining({
       method: method.toUpperCase(),
       ...(body && { body: JSON.stringify(body) }),
-    })
+    }),
   );
 };
 
 // Re-export testing library utilities
-export * from '@testing-library/react';
-export { userEvent } from '@testing-library/user-event';
-export { vi } from 'vitest';
+export * from "@testing-library/react";
+export { userEvent } from "@testing-library/user-event";
+export { vi } from "vitest";

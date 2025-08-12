@@ -1,9 +1,20 @@
-import React, { useRef, useEffect } from 'react';
-import { cn } from '../lib/utils';
-import { useFocusTrap, useKeyboardNavigation, useScreenReader, useFocusManagement } from '../hooks/useAccessibility';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Button } from './ui/button';
-import { X, AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react';
+import React, { useRef, useEffect } from "react";
+import { cn } from "../lib/utils";
+import {
+  useFocusTrap,
+  useKeyboardNavigation,
+  useScreenReader,
+  useFocusManagement,
+} from "../hooks/useAccessibility";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { X, AlertTriangle, CheckCircle, Info, XCircle } from "lucide-react";
 
 // Accessible Modal/Dialog Component
 interface AccessibleDialogProps {
@@ -15,7 +26,7 @@ interface AccessibleDialogProps {
   className?: string;
   closeOnEscape?: boolean;
   closeOnOverlayClick?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export const AccessibleDialog: React.FC<AccessibleDialogProps> = ({
@@ -27,7 +38,7 @@ export const AccessibleDialog: React.FC<AccessibleDialogProps> = ({
   className,
   closeOnEscape = true,
   closeOnOverlayClick = true,
-  size = 'md',
+  size = "md",
 }) => {
   const { saveFocus, restoreFocus } = useFocusManagement();
   const { announce } = useScreenReader();
@@ -35,7 +46,7 @@ export const AccessibleDialog: React.FC<AccessibleDialogProps> = ({
   useEffect(() => {
     if (isOpen) {
       saveFocus();
-      announce(`Dialog opened: ${title}`, 'polite');
+      announce(`Dialog opened: ${title}`, "polite");
     } else {
       restoreFocus();
     }
@@ -43,30 +54,35 @@ export const AccessibleDialog: React.FC<AccessibleDialogProps> = ({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && closeOnEscape) {
+      if (e.key === "Escape" && closeOnEscape) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener("keydown", handleEscape);
     }
 
-    return () => document.removeEventListener('keydown', handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose, closeOnEscape]);
 
   const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg', 
-    xl: 'max-w-xl',
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeOnOverlayClick ? onClose : undefined}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={closeOnOverlayClick ? onClose : undefined}
+    >
       <DialogContent
         className={cn(sizeClasses[size], className)}
-        onPointerDownOutside={closeOnOverlayClick ? undefined : (e) => e.preventDefault()}
+        onPointerDownOutside={
+          closeOnOverlayClick ? undefined : (e) => e.preventDefault()
+        }
         aria-labelledby="dialog-title"
         aria-describedby={description ? "dialog-description" : undefined}
       >
@@ -78,9 +94,7 @@ export const AccessibleDialog: React.FC<AccessibleDialogProps> = ({
             </DialogDescription>
           )}
         </DialogHeader>
-        <div className="mt-4">
-          {children}
-        </div>
+        <div className="mt-4">{children}</div>
         <Button
           variant="ghost"
           size="sm"
@@ -120,14 +134,14 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links, className }) => {
 // Live Region for Screen Reader Announcements
 interface LiveRegionProps {
   message: string;
-  priority?: 'polite' | 'assertive';
+  priority?: "polite" | "assertive";
   atomic?: boolean;
   className?: string;
 }
 
 export const LiveRegion: React.FC<LiveRegionProps> = ({
   message,
-  priority = 'polite',
+  priority = "polite",
   atomic = true,
   className,
 }) => {
@@ -144,7 +158,7 @@ export const LiveRegion: React.FC<LiveRegionProps> = ({
 
 // Accessible Alert Component
 interface AccessibleAlertProps {
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: "success" | "error" | "warning" | "info";
   title: string;
   message: string;
   onClose?: () => void;
@@ -165,7 +179,10 @@ export const AccessibleAlert: React.FC<AccessibleAlertProps> = ({
   const { announce } = useScreenReader();
 
   useEffect(() => {
-    announce(`${type}: ${title}. ${message}`, type === 'error' ? 'assertive' : 'polite');
+    announce(
+      `${type}: ${title}. ${message}`,
+      type === "error" ? "assertive" : "polite",
+    );
   }, [announce, type, title, message]);
 
   useEffect(() => {
@@ -185,17 +202,17 @@ export const AccessibleAlert: React.FC<AccessibleAlertProps> = ({
   const Icon = icons[type];
 
   const typeClasses = {
-    success: 'bg-green-50 border-green-200 text-green-800',
-    error: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
+    success: "bg-green-50 border-green-200 text-green-800",
+    error: "bg-red-50 border-red-200 text-red-800",
+    warning: "bg-yellow-50 border-yellow-200 text-yellow-800",
+    info: "bg-blue-50 border-blue-200 text-blue-800",
   };
 
   const iconClasses = {
-    success: 'text-green-400',
-    error: 'text-red-400',
-    warning: 'text-yellow-400',
-    info: 'text-blue-400',
+    success: "text-green-400",
+    error: "text-red-400",
+    warning: "text-yellow-400",
+    info: "text-blue-400",
   };
 
   return (
@@ -203,15 +220,14 @@ export const AccessibleAlert: React.FC<AccessibleAlertProps> = ({
       role="alert"
       aria-labelledby="alert-title"
       aria-describedby="alert-message"
-      className={cn(
-        "rounded-md border p-4",
-        typeClasses[type],
-        className
-      )}
+      className={cn("rounded-md border p-4", typeClasses[type], className)}
     >
       <div className="flex">
         <div className="flex-shrink-0">
-          <Icon className={cn("h-5 w-5", iconClasses[type])} aria-hidden="true" />
+          <Icon
+            className={cn("h-5 w-5", iconClasses[type])}
+            aria-hidden="true"
+          />
         </div>
         <div className="ml-3 flex-1">
           <h3 id="alert-title" className="text-sm font-medium">
@@ -252,7 +268,7 @@ interface AccessibleTabsProps {
   defaultTab?: string;
   onTabChange?: (tabId: string) => void;
   className?: string;
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: "horizontal" | "vertical";
 }
 
 export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
@@ -260,13 +276,13 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
   defaultTab,
   onTabChange,
   className,
-  orientation = 'horizontal',
+  orientation = "horizontal",
 }) => {
   const [activeTab, setActiveTab] = React.useState(defaultTab || tabs[0]?.id);
   const tabListRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const enabledTabs = tabs.filter(tab => !tab.disabled);
+  const enabledTabs = tabs.filter((tab) => !tab.disabled);
   const enabledTabElements = tabRefs.current.filter(Boolean);
 
   useKeyboardNavigation(enabledTabElements, {
@@ -285,7 +301,7 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
     onTabChange?.(tabId);
   };
 
-  const activeTabContent = tabs.find(tab => tab.id === activeTab)?.content;
+  const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
 
   return (
     <div className={cn("w-full", className)}>
@@ -295,7 +311,7 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
         aria-orientation={orientation}
         className={cn(
           "flex border-b border-gray-200",
-          orientation === 'vertical' && "flex-col border-b-0 border-r"
+          orientation === "vertical" && "flex-col border-b-0 border-r",
         )}
       >
         {tabs.map((tab, index) => (
@@ -303,7 +319,9 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
             key={tab.id}
             ref={(el) => {
               if (!tab.disabled) {
-                const enabledIndex = enabledTabs.findIndex(t => t.id === tab.id);
+                const enabledIndex = enabledTabs.findIndex(
+                  (t) => t.id === tab.id,
+                );
                 if (enabledIndex >= 0) {
                   tabRefs.current[enabledIndex] = el;
                 }
@@ -322,14 +340,14 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
               activeTab === tab.id
                 ? "bg-white border-b-2 border-primary text-primary"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
-              orientation === 'vertical' && "rounded-t-none rounded-l-lg"
+              orientation === "vertical" && "rounded-t-none rounded-l-lg",
             )}
           >
             {tab.label}
           </button>
         ))}
       </div>
-      
+
       <div
         role="tabpanel"
         id={`tabpanel-${activeTab}`}
@@ -357,14 +375,14 @@ interface AccessibleMenuProps {
   trigger: React.ReactElement;
   items: MenuItem[];
   className?: string;
-  placement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
+  placement?: "bottom-start" | "bottom-end" | "top-start" | "top-end";
 }
 
 export const AccessibleMenu: React.FC<AccessibleMenuProps> = ({
   trigger,
   items,
   className,
-  placement = 'bottom-start',
+  placement = "bottom-start",
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [focusedIndex, setFocusedIndex] = React.useState(-1);
@@ -374,10 +392,10 @@ export const AccessibleMenu: React.FC<AccessibleMenuProps> = ({
 
   const focusTrapRef = useFocusTrap<HTMLDivElement>(isOpen);
 
-  const enabledItems = items.filter(item => !item.disabled);
+  const enabledItems = items.filter((item) => !item.disabled);
 
   useKeyboardNavigation(itemRefs.current.filter(Boolean), {
-    orientation: 'vertical',
+    orientation: "vertical",
     onSelect: (index) => {
       const item = enabledItems[index];
       if (item) {
@@ -406,21 +424,21 @@ export const AccessibleMenu: React.FC<AccessibleMenuProps> = ({
   };
 
   const placementClasses = {
-    'bottom-start': 'top-full left-0 mt-1',
-    'bottom-end': 'top-full right-0 mt-1',
-    'top-start': 'bottom-full left-0 mb-1',
-    'top-end': 'bottom-full right-0 mb-1',
+    "bottom-start": "top-full left-0 mt-1",
+    "bottom-end": "top-full right-0 mt-1",
+    "top-start": "bottom-full left-0 mb-1",
+    "top-end": "bottom-full right-0 mb-1",
   };
 
   return (
     <div className="relative">
       {React.cloneElement(trigger, {
         onClick: handleTriggerClick,
-        'aria-expanded': isOpen,
-        'aria-haspopup': 'menu',
-        id: 'menu-trigger',
+        "aria-expanded": isOpen,
+        "aria-haspopup": "menu",
+        id: "menu-trigger",
       })}
-      
+
       {isOpen && (
         <div
           ref={focusTrapRef}
@@ -429,12 +447,14 @@ export const AccessibleMenu: React.FC<AccessibleMenuProps> = ({
           className={cn(
             "absolute z-50 min-w-48 bg-white border border-gray-200 rounded-md shadow-lg",
             placementClasses[placement],
-            className
+            className,
           )}
         >
           <div className="py-1">
             {items.map((item, index) => {
-              const enabledIndex = enabledItems.findIndex(i => i.id === item.id);
+              const enabledIndex = enabledItems.findIndex(
+                (i) => i.id === item.id,
+              );
               return (
                 <button
                   key={item.id}
@@ -450,7 +470,7 @@ export const AccessibleMenu: React.FC<AccessibleMenuProps> = ({
                     "flex w-full items-center px-3 py-2 text-sm text-left",
                     "hover:bg-gray-100 focus:bg-gray-100 focus:outline-none",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    focusedIndex === enabledIndex && "bg-gray-100"
+                    focusedIndex === enabledIndex && "bg-gray-100",
                   )}
                 >
                   {item.icon && (
@@ -460,7 +480,10 @@ export const AccessibleMenu: React.FC<AccessibleMenuProps> = ({
                   )}
                   <span className="flex-1">{item.label}</span>
                   {item.shortcut && (
-                    <span className="ml-3 text-xs text-gray-400" aria-hidden="true">
+                    <span
+                      className="ml-3 text-xs text-gray-400"
+                      aria-hidden="true"
+                    >
                       {item.shortcut}
                     </span>
                   )}

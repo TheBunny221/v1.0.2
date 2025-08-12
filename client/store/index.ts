@@ -32,12 +32,12 @@ export const store = configureStore({
           "api/executeMutation/fulfilled",
           "api/executeMutation/rejected",
         ],
-        ignoredActionsPaths: ['meta.arg', 'payload.timestamp'],
-        ignoredPaths: ['api.queries', 'api.mutations'],
+        ignoredActionsPaths: ["meta.arg", "payload.timestamp"],
+        ignoredPaths: ["api.queries", "api.mutations"],
       },
     })
-    // Add RTK Query middleware
-    .concat(baseApi.middleware),
+      // Add RTK Query middleware
+      .concat(baseApi.middleware),
   devTools: process.env.NODE_ENV !== "production",
 });
 
