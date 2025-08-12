@@ -1,0 +1,790 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { selectAuth } from "../store/slices/authSlice";
+import { useToast } from "../hooks/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { Badge } from "../components/ui/badge";
+import { Progress } from "../components/ui/progress";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import {
+  FileText,
+  MapPin,
+  User,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Loader2,
+  Camera,
+  Upload,
+  X,
+  Eye,
+  Info,
+  UserCheck,
+} from "lucide-react";
+
+interface CitizenComplaintData {
+  // Step 1: Details (auto-filled from citizen profile)
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  type: string;
+  description: string;
+  priority: string;
+
+  // Step 2: Location
+  wardId: string;
+  subZoneId?: string;
+  area: string;
+  landmark?: string;
+  address?: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+
+  // Step 3: Attachments
+  attachments?: any[];
+}
+
+const COMPLAINT_TYPES = [
+  {
+    value: "WATER_SUPPLY",
+    label: "Water Supply",
+    description: "Issues with water supply, quality, or pressure",
+    urgency: "Medium",
+  },
+  {
+    value: "ELECTRICITY",
+    label: "Electricity",
+    description: "Power outages, faulty connections, or street lighting",
+    urgency: "High",
+  },
+  {
+    value: "ROAD_REPAIR",
+    label: "Road Repair",
+    description: "Potholes, broken roads, or pedestrian issues",
+    urgency: "Medium",
+  },
+  {
+    value: "GARBAGE_COLLECTION",
+    label: "Garbage Collection",
+    description: "Waste management and cleanliness issues",
+    urgency: "Medium",
+  },
+  {
+    value: "STREET_LIGHTING",
+    label: "Street Lighting",
+    description: "Non-functioning or damaged street lights",
+    urgency: "Medium",
+  },
+  {
+    value: "SEWERAGE",
+    label: "Sewerage",
+    description: "Drainage problems, blockages, or overflow",
+    urgency: "High",
+  },
+  {
+    value: "PUBLIC_HEALTH",
+    label: "Public Health",
+    description: "Health and sanitation concerns",
+    urgency: "High",
+  },
+  {
+    value: "TRAFFIC",
+    label: "Traffic",
+    description: "Traffic management and road safety issues",
+    urgency: "Medium",
+  },
+  {
+    value: "OTHERS",
+    label: "Others",
+    description: "Any other civic issues not listed above",
+    urgency: "Low",
+  },
+];
+
+const PRIORITIES = [
+  {
+    value: "LOW",
+    label: "Low",
+    color: "bg-gray-500",
+    description: "Non-urgent issues",
+  },
+  {
+    value: "MEDIUM",
+    label: "Medium",
+    color: "bg-blue-500",
+    description: "Standard issues requiring attention",
+  },
+  {
+    value: "HIGH",
+    label: "High",
+    color: "bg-orange-500",
+    description: "Important issues affecting daily life",
+  },
+  {
+    value: "CRITICAL",
+    label: "Critical",
+    color: "bg-red-500",
+    description: "Emergency situations requiring immediate attention",
+  },
+];
+
+const WARDS = [
+  { id: "ward-1", name: "Fort Kochi", subZones: ["Marine Drive", "Parade Ground", "Princess Street"] },
+  { id: "ward-2", name: "Mattancherry", subZones: ["Jew Town", "Dutch Palace", "Spice Market"] },
+  { id: "ward-3", name: "Ernakulam South", subZones: ["MG Road", "Broadway", "Shanmugham Road"] },
+  { id: "ward-4", name: "Ernakulam North", subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"] },
+  { id: "ward-5", name: "Kadavanthra", subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"] },
+  { id: "ward-6", name: "Thevara", subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"] },
+];
+
+const CitizenComplaintForm: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const { user, isAuthenticated } = useAppSelector(selectAuth);
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  // Initialize form data with citizen profile information
+  const [formData, setFormData] = useState<CitizenComplaintData>({
+    fullName: user?.fullName || "",
+    email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "",
+    type: "",
+    description: "",
+    priority: "MEDIUM",
+    wardId: user?.wardId || "",
+    area: "",
+    landmark: "",
+    address: "",
+    coordinates: undefined,
+    attachments: [],
+  });
+
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const steps = [
+    { id: 1, title: "Details", icon: FileText, isCompleted: false },
+    { id: 2, title: "Location", icon: MapPin, isCompleted: false },
+    { id: 3, title: "Attachments", icon: Camera, isCompleted: false },
+    { id: 4, title: "Review", icon: CheckCircle, isCompleted: false },
+  ];
+
+  const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      navigate("/login");
+      return;
+    }
+
+    // Auto-fill form with user data
+    setFormData(prev => ({
+      ...prev,
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber || "",
+      wardId: user.wardId || "",
+    }));
+  }, [isAuthenticated, user, navigate]);
+
+  // Get current location
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setCurrentLocation(coords);
+          setFormData(prev => ({
+            ...prev,
+            coordinates: {
+              latitude: coords.lat,
+              longitude: coords.lng,
+            },
+          }));
+        },
+        (error) => {
+          console.log("Location access denied or unavailable");
+        },
+      );
+    }
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateStep = (step: number): boolean => {
+    const errors: Record<string, string> = {};
+
+    switch (step) {
+      case 1:
+        if (!formData.type) errors.type = "Complaint type is required";
+        if (!formData.description.trim()) errors.description = "Description is required";
+        else if (formData.description.trim().length < 10) {
+          errors.description = "Description must be at least 10 characters";
+        }
+        break;
+      case 2:
+        if (!formData.wardId) errors.wardId = "Ward selection is required";
+        if (!formData.area.trim()) errors.area = "Area/locality is required";
+        break;
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, 4));
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(2)) return;
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call to submit complaint
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Complaint Submitted Successfully!",
+        description: "Your complaint has been registered and assigned a tracking number. You will receive updates via email and in-app notifications.",
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your complaint. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const selectedComplaintType = COMPLAINT_TYPES.find(c => c.value === formData.type);
+  const selectedWard = WARDS.find(w => w.id === formData.wardId);
+  const availableSubZones = selectedWard?.subZones || [];
+
+  if (!isAuthenticated || !user) {
+    return null; // Will redirect in useEffect
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-gray-900">Submit a Complaint</h1>
+          <p className="text-gray-600">As a registered citizen, your information is pre-filled for faster submission</p>
+        </div>
+
+        {/* Citizen Info Alert */}
+        <Alert className="border-blue-200 bg-blue-50">
+          <UserCheck className="h-4 w-4" />
+          <AlertDescription className="text-blue-800">
+            <strong>Logged in as:</strong> {user.fullName} ({user.email})
+            <br />
+            Your personal information is automatically filled and cannot be changed here. To update your profile, visit the{" "}
+            <button 
+              onClick={() => navigate("/profile")}
+              className="underline hover:no-underline"
+            >
+              Profile Settings
+            </button>.
+          </AlertDescription>
+        </Alert>
+
+        {/* Progress Indicator */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Progress</h3>
+                <span className="text-sm text-gray-500">
+                  Step {currentStep} of {steps.length}
+                </span>
+              </div>
+              <Progress value={progress} className="w-full" />
+
+              {/* Step indicators */}
+              <div className="flex justify-between">
+                {steps.map((step) => {
+                  const StepIcon = step.icon;
+                  return (
+                    <div
+                      key={step.id}
+                      className={`flex flex-col items-center space-y-2 p-2 rounded-lg transition-colors ${
+                        step.id === currentStep
+                          ? "bg-blue-100 text-blue-800"
+                          : step.id < currentStep
+                            ? "bg-green-100 text-green-800"
+                            : "text-gray-400"
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                          step.id === currentStep
+                            ? "bg-blue-600 text-white"
+                            : step.id < currentStep
+                              ? "bg-green-600 text-white"
+                              : "bg-gray-300 text-gray-600"
+                        }`}
+                      >
+                        {step.id < currentStep ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : (
+                          <StepIcon className="h-4 w-4" />
+                        )}
+                      </div>
+                      <span className="text-xs font-medium">{step.title}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Form Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {React.createElement(steps[currentStep - 1].icon, { className: "h-5 w-5" })}
+              {steps[currentStep - 1].title}
+            </CardTitle>
+            <CardDescription>
+              {currentStep === 1 && "Describe your complaint and set priority"}
+              {currentStep === 2 && "Specify the exact location of the issue"}
+              {currentStep === 3 && "Add supporting images (optional)"}
+              {currentStep === 4 && "Review and submit your complaint"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Step 1: Details */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                {/* Pre-filled Personal Information (Read-only) */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Personal Information (Auto-filled)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="space-y-2">
+                      <Label>Full Name</Label>
+                      <Input value={formData.fullName} readOnly className="bg-gray-100" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email Address</Label>
+                      <Input value={formData.email} readOnly className="bg-gray-100" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Phone Number</Label>
+                      <Input value={formData.phoneNumber} readOnly className="bg-gray-100" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Citizen ID</Label>
+                      <Input value={user.id.slice(-8).toUpperCase()} readOnly className="bg-gray-100 font-mono" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Complaint Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Complaint Details</h3>
+
+                  <div className="space-y-2">
+                    <Label>Complaint Type *</Label>
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value) => handleSelectChange("type", value)}
+                    >
+                      <SelectTrigger className={validationErrors.type ? "border-red-500" : ""}>
+                        <SelectValue placeholder="Select complaint type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMPLAINT_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{type.label}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {type.urgency}
+                                </Badge>
+                              </div>
+                              <span className="text-xs text-gray-500">{type.description}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {validationErrors.type && (
+                      <p className="text-sm text-red-600">{validationErrors.type}</p>
+                    )}
+                  </div>
+
+                  {selectedComplaintType && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">{selectedComplaintType.label}</h4>
+                      <p className="text-sm text-blue-700 mb-2">{selectedComplaintType.description}</p>
+                      <div className="flex items-center gap-2">
+                        <Info className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-blue-600">
+                          Typical urgency level: {selectedComplaintType.urgency}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label>Priority</Label>
+                    <Select
+                      value={formData.priority}
+                      onValueChange={(value) => handleSelectChange("priority", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRIORITIES.map((priority) => (
+                          <SelectItem key={priority.value} value={priority.value}>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${priority.color}`} />
+                              <div className="flex flex-col">
+                                <span className="font-medium">{priority.label}</span>
+                                <span className="text-xs text-gray-500">{priority.description}</span>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description *</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      placeholder="Describe the issue in detail... (What happened? When? Where exactly?)"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      rows={4}
+                      className={validationErrors.description ? "border-red-500" : ""}
+                    />
+                    {validationErrors.description && (
+                      <p className="text-sm text-red-600">{validationErrors.description}</p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Be specific about the problem, when it started, and how it affects you.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Location */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Location Information</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Ward *</Label>
+                      <Select
+                        value={formData.wardId}
+                        onValueChange={(value) => handleSelectChange("wardId", value)}
+                      >
+                        <SelectTrigger className={validationErrors.wardId ? "border-red-500" : ""}>
+                          <SelectValue placeholder="Select ward" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {WARDS.map((ward) => (
+                            <SelectItem key={ward.id} value={ward.id}>
+                              {ward.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.wardId && (
+                        <p className="text-sm text-red-600">{validationErrors.wardId}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Sub-Zone (Optional)</Label>
+                      <Select
+                        value={formData.subZoneId}
+                        onValueChange={(value) => handleSelectChange("subZoneId", value)}
+                        disabled={!formData.wardId}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select sub-zone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableSubZones.map((subZone, index) => (
+                            <SelectItem key={index} value={subZone}>
+                              {subZone}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="area">Area/Locality *</Label>
+                    <Input
+                      id="area"
+                      name="area"
+                      placeholder="Enter specific area or locality (e.g., Near Metro Station, Main Road)"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      className={validationErrors.area ? "border-red-500" : ""}
+                    />
+                    {validationErrors.area && (
+                      <p className="text-sm text-red-600">{validationErrors.area}</p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="landmark">Landmark (Optional)</Label>
+                      <Input
+                        id="landmark"
+                        name="landmark"
+                        placeholder="Nearby landmark (e.g., Next to Bank, Opposite School)"
+                        value={formData.landmark}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Full Address (Optional)</Label>
+                      <Input
+                        id="address"
+                        name="address"
+                        placeholder="Complete address if applicable"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+
+                  {currentLocation && (
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 text-green-700">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          Current location detected and will be included with your complaint
+                        </span>
+                      </div>
+                      <p className="text-xs text-green-600 mt-1">
+                        Coordinates: {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Attachments */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Upload Images (Optional)</h3>
+                  <p className="text-sm text-gray-600">
+                    Adding photos helps our team understand and resolve the issue faster. You can upload up to 5 images.
+                  </p>
+
+                  <div className="space-y-4">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <Label
+                      htmlFor="file-upload"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG or JPEG (MAX. 10MB each)
+                        </p>
+                      </div>
+                    </Label>
+
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Tips for better photos:</h4>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• Take clear, well-lit photos of the problem area</li>
+                        <li>• Include wider shots to show context</li>
+                        <li>• Capture any visible damage or hazards</li>
+                        <li>• Avoid including personal or sensitive information</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Review */}
+            {currentStep === 4 && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold">Review Your Complaint</h3>
+
+                <div className="space-y-4">
+                  {/* Citizen Info */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Citizen Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p><strong>Name:</strong> {formData.fullName}</p>
+                      <p><strong>Email:</strong> {formData.email}</p>
+                      <p><strong>Phone:</strong> {formData.phoneNumber}</p>
+                      <p><strong>Citizen ID:</strong> {user.id.slice(-8).toUpperCase()}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Complaint Details */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Complaint Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p><strong>Type:</strong> {selectedComplaintType?.label}</p>
+                      <p><strong>Priority:</strong> 
+                        <Badge className={`ml-2 ${PRIORITIES.find(p => p.value === formData.priority)?.color}`}>
+                          {PRIORITIES.find(p => p.value === formData.priority)?.label}
+                        </Badge>
+                      </p>
+                      <p><strong>Description:</strong> {formData.description}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Location */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Location</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p><strong>Ward:</strong> {WARDS.find(w => w.id === formData.wardId)?.name}</p>
+                      {formData.subZoneId && <p><strong>Sub-Zone:</strong> {formData.subZoneId}</p>}
+                      <p><strong>Area:</strong> {formData.area}</p>
+                      {formData.landmark && <p><strong>Landmark:</strong> {formData.landmark}</p>}
+                      {formData.address && <p><strong>Address:</strong> {formData.address}</p>}
+                      {currentLocation && (
+                        <p><strong>GPS Coordinates:</strong> Included</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Alert className="border-green-200 bg-green-50">
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Ready to submit!</strong> Your complaint will be automatically assigned a tracking number and forwarded to the appropriate department. You'll receive email notifications about status updates.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrev}
+                disabled={currentStep === 1}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+
+              {currentStep < 4 ? (
+                <Button type="button" onClick={handleNext}>
+                  Next
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Submit Complaint
+                      <CheckCircle className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default CitizenComplaintForm;
