@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Analytics and Event Tracking System
 
 export interface AnalyticsEvent {
@@ -290,9 +292,6 @@ class AnalyticsManager {
         custom_parameter_2: event.metadata?.feature,
       });
     }
-
-    // Other analytics providers can be added here
-    // Example: Mixpanel, Amplitude, etc.
   }
 
   private sendToExternalErrorTracking(error: ErrorEvent) {
@@ -309,8 +308,6 @@ class AnalyticsManager {
         },
       });
     }
-
-    // Other error tracking services can be added here
   }
 
   private setupOnlineStatusListener() {
@@ -430,7 +427,7 @@ export function withPageTracking<P extends object>(
       analytics.trackPageView(pageName);
     }, []);
 
-    return <Component {...props} />;
+    return React.createElement(Component, props);
   };
 }
 
@@ -458,7 +455,7 @@ export class AnalyticsErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError && this.state.error) {
       const Fallback = this.props.fallback;
-      return Fallback ? <Fallback error={this.state.error} /> : <div>Something went wrong.</div>;
+      return Fallback ? React.createElement(Fallback, { error: this.state.error }) : React.createElement('div', {}, 'Something went wrong.');
     }
 
     return this.props.children;
