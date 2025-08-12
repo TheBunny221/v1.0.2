@@ -402,10 +402,10 @@ const GuestComplaintForm: React.FC = () => {
         });
       }
     } catch (error: any) {
+      console.error("Guest complaint submission error:", error);
       toast({
         title: "Submission Failed",
-        description:
-          error.message || "Failed to submit complaint. Please try again.",
+        description: getApiErrorMessage(error),
         variant: "destructive",
       });
     }
