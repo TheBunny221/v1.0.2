@@ -457,6 +457,17 @@ const ComplaintDetails: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Feedback Dialog */}
+      <ComplaintFeedbackDialog
+        complaintId={complaint.id}
+        isOpen={showFeedbackDialog}
+        onClose={() => setShowFeedbackDialog(false)}
+        onSuccess={() => {
+          // The complaint data will be automatically updated by RTK Query
+          // due to invalidation tags
+        }}
+      />
     </div>
   );
 };
