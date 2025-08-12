@@ -688,7 +688,7 @@ const Index: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>
-                      {translations?.common?.average || "Average Resolution"}:
+                      Average Resolution:
                     </span>
                     <span className="font-semibold">
                       3.2 {translations?.common?.date || "days"}
