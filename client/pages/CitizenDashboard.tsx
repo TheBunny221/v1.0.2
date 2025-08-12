@@ -233,7 +233,7 @@ const CitizenDashboard: React.FC = () => {
           </div>
           <div className="hidden md:flex items-center space-x-4">
             <Button
-              onClick={() => navigate("/complaints/create")}
+              onClick={() => navigate("/complaints/citizen-form")}
               className="bg-white text-blue-600 hover:bg-gray-50"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
