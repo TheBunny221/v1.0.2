@@ -157,7 +157,8 @@ model StatusLog {
   // Relations
   complaint   Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   user        User            @relation(fields: [userId], references: [id])
-  
+
+  @@index([complaintId, timestamp])
   @@map("status_logs")
 }
 
