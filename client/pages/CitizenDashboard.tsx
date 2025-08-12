@@ -374,7 +374,7 @@ const CitizenDashboard: React.FC = () => {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="WATER_SUPPLY">Water Supply</SelectItem>
                   <SelectItem value="ELECTRICITY">Electricity</SelectItem>
                   <SelectItem value="ROAD_REPAIR">Road Repair</SelectItem>
