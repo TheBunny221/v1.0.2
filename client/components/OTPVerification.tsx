@@ -106,8 +106,8 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onBack }) => {
       dispatch(
         showToast({
           type: "success",
-          title: "OTP Sent",
-          message: "A new verification code has been sent to your email.",
+          title: "Email Sent Successfully!",
+          message: `A new verification code has been sent to ${registrationData.email}. Please check your email.`,
         })
       );
 
