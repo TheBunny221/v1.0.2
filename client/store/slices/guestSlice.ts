@@ -69,6 +69,35 @@ const initialState: GuestState = {
   trackingData: null,
 };
 
+// SessionStorage helpers
+const FORM_DATA_KEY = 'guestComplaintFormData';
+
+const saveFormDataToSession = (data: Partial<GuestComplaintData> & { currentStep?: number }) => {
+  try {
+    sessionStorage.setItem(FORM_DATA_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.warn('Failed to save form data to session storage:', error);
+  }
+};
+
+const loadFormDataFromSession = (): (Partial<GuestComplaintData> & { currentStep?: number }) | null => {
+  try {
+    const saved = sessionStorage.getItem(FORM_DATA_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.warn('Failed to load form data from session storage:', error);
+    return null;
+  }
+};
+
+const clearFormDataFromSession = () => {
+  try {
+    sessionStorage.removeItem(FORM_DATA_KEY);
+  } catch (error) {
+    console.warn('Failed to clear form data from session storage:', error);
+  }
+};
+
 // Helper function to make API calls
 const apiCall = async (url: string, options: RequestInit = {}) => {
   const response = await fetch(url, {
