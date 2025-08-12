@@ -761,3 +761,19 @@ export const selectRegistrationStep = (state: { auth: AuthState }) =>
   state.auth.registrationStep;
 export const selectRegistrationData = (state: { auth: AuthState }) =>
   state.auth.registrationData;
+
+// Utility function to get dashboard route based on user role
+export const getDashboardRouteForRole = (role: User["role"]): string => {
+  switch (role) {
+    case "ADMINISTRATOR":
+      return "/dashboard";
+    case "WARD_OFFICER":
+      return "/dashboard";
+    case "MAINTENANCE_TEAM":
+      return "/dashboard";
+    case "CITIZEN":
+      return "/dashboard";
+    default:
+      return "/dashboard";
+  }
+};
