@@ -641,7 +641,7 @@ const Index: React.FC = () => {
                     className="flex-1 md:flex-none"
                     disabled={isLoading}
                   >
-                    {isSubmitting
+                    {isLoading
                       ? translations?.common?.loading || "Submitting..."
                       : translations?.forms?.submitComplaint ||
                         "Submit Complaint"}
