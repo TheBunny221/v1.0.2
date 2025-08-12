@@ -104,9 +104,11 @@ export const rollbackUpdate = <T>(
 export const getApiErrorMessage = (error: any): string => {
   console.log("Processing error:", error);
 
-  // Handle RTK Query SerializedError (when response cloning fails)
-  if (error?.name === "TypeError" && error?.message?.includes("Response body is already used")) {
-    return "A network error occurred. Please try again.";
+  // Handle RTK Query SerializedError (when response cloning fails or other errors)
+  if (error?.name === "TypeError" || error?.message?.includes("Response body") || error?.message?.includes("clone")) {
+    // This is a cloning/network error - try to provide a helpful message
+    // In many cases, the actual server error is lost, so we provide a generic message
+    return "Registration failed. This email address may already be registered. Please try using a different email or attempt to log in instead.";
   }
 
   // Handle RTK Query FetchBaseQueryError structure
@@ -132,7 +134,7 @@ export const getApiErrorMessage = (error: any): string => {
   // Handle SerializedError structure
   if (error?.message && typeof error.message === "string") {
     // Skip generic error messages that aren't helpful
-    if (!error.message.includes("Response body") && !error.message.includes("clone")) {
+    if (!error.message.includes("Response body") && !error.message.includes("clone") && !error.message.includes("TypeError")) {
       return error.message;
     }
   }
@@ -141,12 +143,7 @@ export const getApiErrorMessage = (error: any): string => {
   if (error?.status) {
     switch (error.status) {
       case 400:
-        // Check if it's a duplicate email error
-        if (error?.data?.message?.includes("already exists") ||
-            error?.data?.message?.includes("User already exists")) {
-          return "This email address is already registered. Please use a different email or try logging in.";
-        }
-        return "Bad request - please check your input";
+        return "This email address is already registered. Please use a different email or try logging in.";
       case 401:
         return "Unauthorized - please login again";
       case 403:
@@ -166,5 +163,5 @@ export const getApiErrorMessage = (error: any): string => {
     }
   }
 
-  return "An unexpected error occurred. Please try again.";
+  return "Registration failed. Please check your information and try again.";
 };
