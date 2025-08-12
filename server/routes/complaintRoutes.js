@@ -1,8 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
-const { handleUploadComplaintAttachment } = require('./uploadRoutes');
-const {
+import express from 'express';
+import { protect, authorize } from '../middleware/auth.js';
+import { handleUploadComplaintAttachment } from './uploadRoutes.js';
+import {
   getComplaints,
   getComplaint,
   createComplaint,
@@ -11,7 +10,9 @@ const {
   addComplaintFeedback,
   reopenComplaint,
   getComplaintStats
-} = require('../controller/complaintController');
+} from '../controller/complaintController.js';
+
+const router = express.Router();
 
 // Public routes
 router.get('/public/stats', getComplaintStats);
@@ -50,4 +51,4 @@ router.post('/:id/attachments', (req, res, next) => {
   handleUploadComplaintAttachment(req, res, next);
 });
 
-module.exports = router;
+export default router;
