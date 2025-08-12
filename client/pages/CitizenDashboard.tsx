@@ -457,7 +457,7 @@ const CitizenDashboard: React.FC = () => {
                   ? "No complaints match your current filters."
                   : "You haven't submitted any complaints yet."}
               </p>
-              <Button onClick={() => navigate("/complaints/create")}>
+              <Button onClick={() => navigate("/complaints/citizen-form")}>
                 <PlusCircle className="h-4 w-4 mr-2" />
                 Submit Your First Complaint
               </Button>
