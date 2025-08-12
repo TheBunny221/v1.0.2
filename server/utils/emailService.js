@@ -8,8 +8,8 @@ const createTransporter = () => {
   if (process.env.NODE_ENV === "production") {
     // Production email configuration
     return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE, // Must be a real resolvable domain
-      port: process.env.EMAIL_PORT || 587, // 587 for STARTTLS, 465 for SSL
+      host: process.env.EMAIL_SERVICE,
+      port: process.env.EMAIL_PORT || 587,
       secure: false, // true if using port 465
       auth: {
         user: process.env.EMAIL_USER,
@@ -17,16 +17,21 @@ const createTransporter = () => {
       },
     });
   } else {
-    // Development email configuration
-    console.log("Email transporter created : ", process.env.EMAIL_SERVICE);
+    // Development email configuration using Ethereal
+    console.log(
+      "Email transporter created for development:",
+      process.env.EMAIL_SERVICE,
+    );
     return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE, // Must be a real resolvable domain
-      port: process.env.EMAIL_PORT || 587, // 587 for STARTTLS, 465 for SSL
-      secure: false, // true if using port 465
+      host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
+      port: parseInt(process.env.EMAIL_PORT) || 587,
+      secure: false, // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
+        pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
       },
+      debug: true, // Enable debug logs for development
+      logger: true, // Enable logs
     });
   }
 };
@@ -49,11 +54,24 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     const info = await transporter.sendMail(mailOptions);
 
     if (process.env.NODE_ENV === "development") {
-      console.log("Message sent: %s", info.messageId);
-      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      console.log("✅ Email sent successfully!");
+      console.log("📧 Message ID:", info.messageId);
+      console.log("📬 To:", to);
+      console.log("📝 Subject:", subject);
+
+      // For Ethereal emails, show the preview URL
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      if (previewUrl) {
+        console.log("🔗 Preview URL (Ethereal):", previewUrl);
+        console.log("💡 Open this URL to see the sent email in your browser");
+      }
     }
 
-    return true;
+    return {
+      success: true,
+      messageId: info.messageId,
+      previewUrl: nodemailer.getTestMessageUrl(info),
+    };
   } catch (error) {
     console.error("Email sending failed:", error);
     return false;
