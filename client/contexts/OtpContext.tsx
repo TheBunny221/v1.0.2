@@ -70,8 +70,8 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [config]);
 
   const handleVerified = useCallback(
-    async (otpCode: string) => {
-      if (!config) return;
+    async (data: { token: string; user: any; otpCode?: string }) => {
+      if (!config || !data.otpCode) return;
 
       try {
         let result: any;
@@ -80,14 +80,14 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
           case "login":
             result = await verifyLoginOtp({
               email: config.email,
-              otpCode,
+              otpCode: data.otpCode,
             }).unwrap();
             break;
 
           case "register":
             result = await verifyRegisterOtp({
               email: config.email,
-              otpCode,
+              otpCode: data.otpCode,
             }).unwrap();
             break;
 
@@ -97,7 +97,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
             }
             result = await verifyGuestOtp({
               email: config.email,
-              otpCode,
+              otpCode: data.otpCode,
               complaintId: config.complaintId,
               createAccount: true,
             }).unwrap();
@@ -108,7 +108,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
             // This might use a different API endpoint
             result = await verifyLoginOtp({
               email: config.email,
-              otpCode,
+              otpCode: data.otpCode,
             }).unwrap();
             break;
 
