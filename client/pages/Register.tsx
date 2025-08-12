@@ -31,7 +31,14 @@ import { Shield, User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.auth);
+  const auth = useAppSelector(selectAuth);
+  const registrationStep = useAppSelector(selectRegistrationStep);
+  const registrationData = useAppSelector(selectRegistrationData);
+
+  // Clear registration state on component mount
+  useEffect(() => {
+    dispatch(resetRegistrationState());
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     fullName: "",
