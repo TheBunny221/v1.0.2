@@ -60,12 +60,13 @@ const CitizenDashboard: React.FC = () => {
     data: complaintsResponse,
     isLoading: complaintsLoading,
     error: complaintsError,
+    refetch: refetchComplaints,
   } = useGetComplaintsQuery(
     { page: 1, limit: 50 }, // Get more complaints for better stats
     { skip: !isAuthenticated || !user },
   );
 
-  const { data: statsResponse, isLoading: statsLoading } =
+  const { data: statsResponse, isLoading: statsLoading, refetch: refetchStats } =
     useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
   const complaints = complaintsResponse?.data || [];
