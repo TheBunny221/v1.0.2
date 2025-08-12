@@ -57,6 +57,38 @@ const initialState: AuthState = {
   registrationData: undefined,
 };
 
+// Helper function to handle API errors with user-friendly messages
+const getErrorMessage = (status: number, data: any): string => {
+  if (data?.message) {
+    return data.message;
+  }
+
+  switch (status) {
+    case 400:
+      return "Invalid request. Please check your input and try again.";
+    case 401:
+      return "Authentication failed. Please check your credentials.";
+    case 403:
+      return "Access denied. You don't have permission to perform this action.";
+    case 404:
+      return "The requested resource was not found.";
+    case 409:
+      return "A conflict occurred. This data already exists or there's a duplicate.";
+    case 422:
+      return "Validation failed. Please check your input data.";
+    case 429:
+      return "Too many requests. Please wait a moment and try again.";
+    case 500:
+      return "Server error. Please try again later.";
+    case 502:
+      return "Service temporarily unavailable. Please try again later.";
+    case 503:
+      return "Service unavailable. Please try again later.";
+    default:
+      return `An unexpected error occurred (${status}). Please try again.`;
+  }
+};
+
 // Helper function to make API calls
 const apiCall = async (url: string, options: RequestInit = {}) => {
   const response = await fetch(url, {
@@ -81,7 +113,8 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || `HTTP ${response.status}`);
+    const errorMessage = getErrorMessage(response.status, data);
+    throw new Error(errorMessage);
   }
 
   return data;
