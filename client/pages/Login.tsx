@@ -203,8 +203,8 @@ const Login: React.FC = () => {
       ).unwrap();
 
       toast({
-        title: "Password Setup Email Sent",
-        description: "Please check your email for the password setup link.",
+        title: "Email Sent Successfully!",
+        description: `Password setup instructions have been sent to ${formData.email}. Please check your email and follow the instructions.`,
       });
     } catch (error: any) {
       // Error is handled by the reducer
