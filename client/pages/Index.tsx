@@ -849,7 +849,7 @@ const Index: React.FC = () => {
                 <CardTitle className="text-lg">
                   {isAuthenticated
                     ? `${translations?.guest?.welcomeBack || "Welcome"}, ${user?.fullName || "User"}`
-                    : `${translations?.guest?.welcomeBack || "Welcome"}, ${translations?.auth?.guestMode || "Guest"}`}
+                    : `${translations?.guest?.welcomeBack || "Welcome"}, Guest`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
