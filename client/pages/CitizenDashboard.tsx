@@ -344,7 +344,7 @@ const CitizenDashboard: React.FC = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button onClick={() => navigate("/complaints/create")} size="sm">
+              <Button onClick={() => navigate("/complaints/citizen-form")} size="sm">
                 <PlusCircle className="h-4 w-4 mr-2" />
                 New Complaint
               </Button>
