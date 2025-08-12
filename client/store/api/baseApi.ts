@@ -27,11 +27,18 @@ const baseQuery = fetchBaseQuery({
   },
   // Handle response properly to avoid body consumption issues
   responseHandler: async (response) => {
-    const text = await response.text();
     try {
-      return JSON.parse(text);
-    } catch {
-      return text;
+      const text = await response.text();
+      if (!text) return null;
+
+      try {
+        return JSON.parse(text);
+      } catch {
+        return text;
+      }
+    } catch (error) {
+      console.warn('Response parsing failed:', error);
+      return null;
     }
   },
 });
