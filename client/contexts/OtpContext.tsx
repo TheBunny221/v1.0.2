@@ -219,7 +219,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
           complaintId={config.complaintId}
           title={config.title}
           description={config.description}
-          onVerified={(data) => handleVerified(data.otpCode || "")}
+          onVerified={handleVerified}
           onResend={handleResend}
           // These will be managed by the mutations
           isVerifying={false}
