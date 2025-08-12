@@ -60,10 +60,9 @@ export default defineConfig({
     testTimeout: 10000,
     hookTimeout: 10000,
     // Reporter configuration
-    reporter: ["verbose", "json", "html"],
+    reporter: ["verbose", "json"],
     outputFile: {
       json: "./coverage/test-results.json",
-      html: "./coverage/test-results.html",
     },
   },
   resolve: {
