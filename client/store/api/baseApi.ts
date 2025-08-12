@@ -4,9 +4,6 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-import { logout, setError } from "../slices/authSlice";
-import { toast } from "../../components/ui/use-toast";
-
 // Define base query with JWT auto-inclusion
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
@@ -26,30 +23,6 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
 });
-
-// Enhanced base query with 401 auto-logout handling
-const baseQueryWithReauth: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions);
-
-  // Only handle 401 errors here to avoid response body consumption issues
-  if (result.error && result.error.status === 401) {
-    // Unauthorized - clear auth state
-    api.dispatch(logout());
-
-    // Show toast notification
-    toast({
-      title: "Session Expired",
-      description: "Please login again to continue.",
-      variant: "destructive",
-    });
-  }
-
-  return result;
-};
 
 
 // Create the base API slice
