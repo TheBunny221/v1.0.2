@@ -62,7 +62,7 @@ export const register = asyncHandler(async (req, res) => {
     phoneNumber,
     password: hashedPassword,
     role: role || "CITIZEN",
-    isActive: !hashedPassword, // If no password, require OTP verification
+    isActive: !!hashedPassword, // If no password, set inactive until OTP verification
     joinedOn: new Date(),
   };
 
