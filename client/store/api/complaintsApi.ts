@@ -239,7 +239,7 @@ export const complaintsApi = baseApi.injectEndpoints({
       query: ({ id, feedback, rating }) => ({
         url: `/complaints/${id}/feedback`,
         method: "POST",
-        body: { feedback, rating },
+        body: { citizenFeedback: feedback, rating },
       }),
       transformResponse: transformResponse<Complaint>,
       invalidatesTags: (result, error, { id }) => [
