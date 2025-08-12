@@ -93,9 +93,12 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
 
           case "guestComplaint":
             if (!config.complaintId) {
-              throw new Error(
-                "Complaint ID is required for guest verification",
-              );
+              toast({
+                title: "Error",
+                description: "Complaint ID is required for guest verification",
+                variant: "destructive",
+              });
+              return;
             }
             result = await verifyGuestOtp({
               email: config.email,
@@ -115,7 +118,12 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
             break;
 
           default:
-            throw new Error("Invalid OTP context");
+            toast({
+              title: "Error",
+              description: "Invalid OTP context",
+              variant: "destructive",
+            });
+            return;
         }
 
         // Store credentials if we have a token
