@@ -71,10 +71,17 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [toast]);
 
   const closeOtpFlow = useCallback(() => {
-    setIsOpen(false);
-    setConfig(null);
-    if (config?.onCancel) {
-      config.onCancel();
+    try {
+      setIsOpen(false);
+      if (config?.onCancel) {
+        config.onCancel();
+      }
+      setConfig(null);
+    } catch (error) {
+      console.error("Failed to close OTP flow:", error);
+      // Still try to close the dialog
+      setIsOpen(false);
+      setConfig(null);
     }
   }, [config]);
 
