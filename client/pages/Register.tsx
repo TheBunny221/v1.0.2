@@ -72,56 +72,58 @@ const Register: React.FC = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      dispatch(
-        showToast({
-          type: "error",
-          title: "Password Mismatch",
-          message: "Passwords do not match",
-        }),
-      );
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
-      const result = await dispatch(
-        register({
-          fullName: formData.fullName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          password: formData.password,
-          role: formData.role as any,
-          wardId: formData.wardId,
-        }),
-      ).unwrap();
+      const result = await registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        role: formData.role as any,
+        wardId: formData.wardId,
+      }).unwrap();
 
-      if (result.requiresOtpVerification) {
-        // OTP verification required
-        dispatch(
-          showToast({
-            type: "success",
-            title: "Registration Successful!",
-            message: "Please check your email for the verification code.",
-          }),
-        );
+      if (result.data?.requiresOtpVerification) {
+        // OTP verification required - open unified dialog
+        openOtpFlow({
+          context: "register",
+          email: formData.email,
+          title: "Complete Registration",
+          description: "Enter the verification code sent to your email to activate your account",
+          onSuccess: (data) => {
+            toast({
+              title: "Registration Successful!",
+              description: `Welcome ${data.user?.fullName}! Your account has been verified.`,
+            });
+            // Navigation will be handled by auth state change
+          },
+        });
+
+        toast({
+          title: "Registration Initiated",
+          description: "Please check your email for the verification code.",
+        });
       } else {
         // Direct registration without OTP
-        dispatch(
-          showToast({
-            type: "success",
-            title: "Registration Successful!",
-            message: "Account created successfully! Welcome aboard!",
-          }),
-        );
-        navigate("/dashboard");
+        toast({
+          title: "Registration Successful!",
+          description: "Account created successfully! Welcome aboard!",
+        });
+        // Navigation will be handled by auth state change
       }
     } catch (error: any) {
-      dispatch(
-        showToast({
-          type: "error",
-          title: "Registration Failed",
-          message: error.message || "Failed to create account",
-        }),
-      );
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to create account",
+        variant: "destructive",
+      });
     }
   };
 
