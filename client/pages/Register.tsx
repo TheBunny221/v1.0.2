@@ -115,9 +115,43 @@ const Register: React.FC = () => {
     }
   };
 
+  const handleBackToRegistration = () => {
+    dispatch(resetRegistrationState());
+  };
+
+  // Show OTP verification if required
+  if (registrationStep === "otp_required") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Cochin Smart City
+            </h1>
+            <p className="text-gray-600">E-Governance Portal</p>
+          </div>
+
+          <OTPVerification onBack={handleBackToRegistration} />
+
+          {/* Home Link */}
+          <div className="text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
