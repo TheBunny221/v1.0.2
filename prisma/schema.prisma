@@ -192,7 +192,9 @@ model Notification {
   // Relations
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   complaint   Complaint?       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  
+
+  @@index([userId, isRead])
+  @@index([complaintId])
   @@map("notifications")
 }
 
