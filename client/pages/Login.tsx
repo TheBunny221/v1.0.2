@@ -120,19 +120,28 @@ const Login: React.FC = () => {
     }
 
     try {
-      await dispatch(
-        requestOTPLogin({
-          email: formData.email,
-        }),
-      ).unwrap();
+      // Request OTP first
+      await requestOTPLogin({ email: formData.email }).unwrap();
 
-      setOtpTimer(600); // 10 minutes
+      // Open the unified OTP dialog
+      openOtpFlow({
+        context: "login",
+        email: formData.email,
+        onSuccess: (data) => {
+          toast({
+            title: "Login Successful",
+            description: "Welcome back!",
+          });
+          // Navigation will be handled by the auth state change
+        },
+      });
+
       toast({
-        title: "Email Sent Successfully!",
-        description: `A 6-digit verification code has been sent to ${formData.email}. Please check your email.`,
+        title: "OTP Sent",
+        description: `A verification code has been sent to ${formData.email}`,
       });
     } catch (error: any) {
-      // Error is handled by the reducer
+      // Error is handled by the mutation
     }
   };
 
