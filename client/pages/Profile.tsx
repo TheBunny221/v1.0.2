@@ -515,7 +515,7 @@ const Profile: React.FC = () => {
                     </p>
                   </div>
                   <Switch
-                    checked={user.preferences.notifications}
+                    defaultChecked={true}
                     onCheckedChange={(checked) =>
                       handlePreferenceChange("notifications", checked)
                     }
@@ -525,14 +525,14 @@ const Profile: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-base font-medium">
-                      {translations.settings.emailAlerts}
+                      Email Alerts
                     </Label>
                     <p className="text-sm text-muted-foreground">
                       Get email notifications for important updates
                     </p>
                   </div>
                   <Switch
-                    checked={user.preferences.emailAlerts}
+                    defaultChecked={true}
                     onCheckedChange={(checked) =>
                       handlePreferenceChange("emailAlerts", checked)
                     }
@@ -542,12 +542,12 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <Label className="text-base font-medium flex items-center">
                     <Globe className="h-4 w-4 mr-2" />
-                    {translations.settings.language}
+                    Language
                   </Label>
                   <Select
-                    value={user.preferences.language}
+                    value={formData.language}
                     onValueChange={(value) =>
-                      handlePreferenceChange("language", value)
+                      handleInputChange("language", value)
                     }
                   >
                     <SelectTrigger className="w-full">
