@@ -165,14 +165,38 @@ const GuestComplaintForm: React.FC = () => {
     };
 
     try {
-      await dispatch(submitGuestComplaint(complaintData)).unwrap();
-      toast({
-        title: "Complaint Submitted",
-        description:
-          "Please check your email for the OTP to complete verification.",
-      });
+      const result = await submitGuestComplaint(complaintData).unwrap();
+
+      if (result.data?.complaintId) {
+        setComplaintId(result.data.complaintId);
+
+        // Open unified OTP dialog
+        openOtpFlow({
+          context: "guestComplaint",
+          email: formData.email,
+          complaintId: result.data.complaintId,
+          title: "Verify Your Complaint",
+          description: "Enter the verification code sent to your email to complete your complaint submission and create your account",
+          onSuccess: (data) => {
+            setSubmissionStep("success");
+            toast({
+              title: "Success!",
+              description: "Your complaint has been verified and you've been registered as a citizen.",
+            });
+          },
+        });
+
+        toast({
+          title: "Complaint Submitted",
+          description: "Please check your email for the verification code.",
+        });
+      }
     } catch (error: any) {
-      // Error is handled by the reducer
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Failed to submit complaint. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
