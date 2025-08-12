@@ -33,6 +33,7 @@ import {
   resendOTP,
   clearError,
   AttachmentFile,
+  FileAttachment,
   GuestComplaintData,
 } from "../store/slices/guestSlice";
 import { getApiErrorMessage } from "../store/api/baseApi";
@@ -223,6 +224,7 @@ const GuestComplaintForm: React.FC = () => {
     lat: number;
     lng: number;
   } | null>(null);
+  const [fileMap, setFileMap] = useState<Map<string, File>>(new Map());
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
@@ -301,15 +303,21 @@ const GuestComplaintForm: React.FC = () => {
           return;
         }
 
-        // Create attachment object
+        // Create attachment object with serializable data
+        const attachmentId =
+          Date.now().toString() + Math.random().toString(36).substr(2, 9);
         const attachment: AttachmentFile = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          file,
+          id: attachmentId,
+          name: file.name,
+          size: file.size,
+          type: file.type,
           preview: URL.createObjectURL(file),
           uploading: false,
           uploaded: false,
         };
 
+        // Store the actual file separately
+        setFileMap((prev) => new Map(prev).set(attachmentId, file));
         dispatch(addAttachment(attachment));
       });
     },
@@ -319,6 +327,12 @@ const GuestComplaintForm: React.FC = () => {
   // Handle attachment removal
   const handleRemoveAttachment = useCallback(
     (id: string) => {
+      // Clean up file map
+      setFileMap((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(id);
+        return newMap;
+      });
       dispatch(removeAttachment(id));
     },
     [dispatch],
@@ -375,7 +389,18 @@ const GuestComplaintForm: React.FC = () => {
     }
 
     try {
-      const result = await dispatch(submitGuestComplaint(formData)).unwrap();
+      // Prepare files array for submission
+      const files: FileAttachment[] =
+        formData.attachments
+          ?.map((attachment) => {
+            const file = fileMap.get(attachment.id);
+            return file ? { id: attachment.id, file } : null;
+          })
+          .filter((f): f is FileAttachment => f !== null) || [];
+
+      const result = await dispatch(
+        submitGuestComplaint({ complaintData: formData, files }),
+      ).unwrap();
 
       if (result.complaintId && result.trackingNumber) {
         // Open unified OTP dialog
