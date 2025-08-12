@@ -91,7 +91,7 @@ const Register: React.FC = () => {
         password: formData.password,
         role: formData.role as any,
         wardId: formData.wardId,
-      }).unwrap();
+      });
 
       if (result.data?.requiresOtpVerification) {
         // OTP verification required - open unified dialog
