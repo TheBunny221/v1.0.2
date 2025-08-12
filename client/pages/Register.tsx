@@ -309,6 +309,15 @@ const Register: React.FC = () => {
                   Submit as Guest
                 </Link>
               </p>
+              <p className="text-sm text-gray-600">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                >
+                  <Home className="h-4 w-4" />
+                  Back to Home
+                </Link>
+              </p>
             </div>
           </CardContent>
         </Card>
