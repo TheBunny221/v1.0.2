@@ -342,15 +342,19 @@ export const submitGuestComplaint = createAsyncThunk(
       let data = null;
       if (isJson) {
         data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.message || `HTTP ${response.status}`);
+        }
+
+        return data.data as GuestComplaintResponse;
       } else {
+        // Non-JSON response handling
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Server returned unexpected response format`);
+        }
         throw new Error("Server returned unexpected response format");
       }
-
-      if (!response.ok) {
-        throw new Error(data?.message || `HTTP ${response.status}`);
-      }
-
-      return data.data as GuestComplaintResponse;
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to submit complaint",
