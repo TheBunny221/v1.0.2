@@ -37,6 +37,7 @@ const ComplaintDetails = lazy(() => import("./pages/ComplaintDetails"));
 const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
 const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
 const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
+const UnifiedComplaintForm = lazy(() => import("./pages/UnifiedComplaintForm"));
 const GuestTrackComplaint = lazy(() => import("./pages/GuestTrackComplaint"));
 const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
 const GuestDashboard = lazy(() => import("./pages/GuestDashboard"));
