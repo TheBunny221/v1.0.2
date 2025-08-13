@@ -412,8 +412,8 @@ const GuestComplaintForm: React.FC = () => {
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   // Get available sub-zones based on selected ward
-  const availableSubZones =
-    WARDS.find((ward) => ward.id === formData.wardId)?.subZones || [];
+  const selectedWard = wards.find((ward) => ward.id === formData.wardId);
+  const availableSubZones = selectedWard?.subZones || [];
 
   // Success page
   if (submissionStep === "success") {
