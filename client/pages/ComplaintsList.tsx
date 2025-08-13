@@ -74,6 +74,15 @@ const ComplaintsList: React.FC = () => {
 
   const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
 
+  // Debug logging
+  console.log('ComplaintsList Debug:', {
+    complaintsResponse,
+    complaintsCount: complaints.length,
+    isLoading,
+    error,
+    queryParams
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "REGISTERED":
