@@ -78,6 +78,13 @@ const ComplaintsList: React.FC = () => {
 
   const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
 
+  // Cache complaints data when loaded
+  useEffect(() => {
+    if (complaints.length > 0) {
+      cacheComplaintsList(complaints);
+    }
+  }, [complaints, cacheComplaintsList]);
+
   // Debug logging
   console.log('ComplaintsList Debug:', {
     complaintsResponse,
