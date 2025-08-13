@@ -6,66 +6,26 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
-// Custom base query that handles response cloning properly
-const baseQuery: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  try {
-    // Get token from auth state
-    const token = (api.getState() as any).auth.token;
+// Revert to using RTK Query's fetchBaseQuery with proper configuration
+import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-    // Prepare request configuration
-    const url = typeof args === 'string' ? args : args.url;
-    const config: RequestInit = {
-      method: typeof args === 'string' ? 'GET' : args.method || 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...(typeof args !== 'string' && args.headers ? args.headers : {}),
-      },
-      ...(typeof args !== 'string' && args.body ? { body: JSON.stringify(args.body) } : {}),
-    };
+const baseQuery = fetchBaseQuery({
+  baseUrl: "/api",
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as any).auth.token;
 
-    // Make the request
-    const response = await fetch(`/api${url.startsWith('/') ? url : `/${url}`}`, config);
-
-    // Clone the response to prevent "body already used" errors
-    const responseClone = response.clone();
-
-    // Parse the response
-    let result;
-    try {
-      const text = await responseClone.text();
-      result = text ? JSON.parse(text) : {};
-    } catch (parseError) {
-      console.warn("Failed to parse response as JSON:", parseError);
-      result = {};
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
     }
 
-    if (!response.ok) {
-      return {
-        error: {
-          status: response.status,
-          statusText: response.statusText,
-          data: result,
-        },
-      };
+    // Don't set content-type for FormData requests
+    if (!headers.has("content-type")) {
+      headers.set("content-type", "application/json");
     }
 
-    return { data: result };
-  } catch (error: any) {
-    console.error("Base query error:", error);
-    return {
-      error: {
-        status: 'FETCH_ERROR',
-        error: error.message || 'Network error',
-        data: { message: 'Network error occurred. Please try again.' },
-      },
-    };
-  }
-};
+    return headers;
+  },
+});
 
 // Enhanced base query with 401 auto-logout handling
 const baseQueryWithReauth: BaseQueryFn<
