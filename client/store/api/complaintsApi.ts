@@ -250,21 +250,21 @@ export const complaintsApi = baseApi.injectEndpoints({
 
     // Upload complaint attachments
     uploadComplaintAttachment: builder.mutation<
-      ApiResponse<{ filename: string; url: string }>,
-      { id: string; file: File }
+      ApiResponse<{ fileName: string; url: string; id: string; originalName: string; size: number }>,
+      { complaintId: string; file: File }
     >({
-      query: ({ id, file }) => {
+      query: ({ complaintId, file }) => {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("complaintAttachment", file);
         return {
-          url: `/complaints/${id}/attachments`,
+          url: `/uploads/complaint/${complaintId}/attachment`,
           method: "POST",
           body: formData,
           formData: true,
         };
       },
       transformResponse: transformResponse,
-      invalidatesTags: (result, error, { id }) => [{ type: "Complaint", id }],
+      invalidatesTags: (result, error, { complaintId }) => [{ type: "Complaint", id: complaintId }],
     }),
 
     // Get complaint types
