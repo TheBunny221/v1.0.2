@@ -493,6 +493,14 @@ const Profile: React.FC = () => {
                         <p className="text-xs text-gray-500">
                           You can either click the link in your email to go to the setup page, or copy the token from the link and paste it here.
                         </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSendPasswordSetupEmail}
+                          className="mt-2"
+                        >
+                          Resend Email
+                        </Button>
                       </div>
                     </div>
                   )}
