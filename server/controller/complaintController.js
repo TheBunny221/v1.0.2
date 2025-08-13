@@ -765,7 +765,7 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
         resolvedOn: { not: null },
       },
       _avg: {
-        // Calculate resolution time in hours
+        rating: true,
       },
     }),
   ]);
