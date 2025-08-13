@@ -148,32 +148,6 @@ const Profile: React.FC = () => {
     });
   };
 
-  const handlePreferenceChange = (key: string, value: any) => {
-    dispatch(updateUserPreferences({ [key]: value }));
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-purple-100 text-purple-800";
-      case "ward-officer":
-        return "bg-blue-100 text-blue-800";
-      case "maintenance":
-        return "bg-green-100 text-green-800";
-      case "citizen":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
 
   if (!user) {
     return (
