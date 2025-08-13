@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
+import { useDataManager } from "../hooks/useDataManager";
 import {
   Card,
   CardContent,
