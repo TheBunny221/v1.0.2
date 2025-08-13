@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from "../store/hooks";
 import {
   selectAuth,
   getDashboardRouteForRole,
+  setCredentials,
 } from "../store/slices/authSlice";
 import { createComplaint } from "../store/slices/complaintsSlice";
 import {
