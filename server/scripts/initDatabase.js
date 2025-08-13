@@ -93,7 +93,7 @@ export const initializeDatabase = async () => {
     // 5. Database migration check (if needed)
     try {
       // This will fail gracefully if migrations are not needed
-      await prisma.$executeRaw`PRAGMA table_info(users);`;
+      await prisma.$queryRaw`PRAGMA table_info(users);`;
       console.log("✅ Database schema appears to be up to date");
     } catch (error) {
       console.warn("⚠️ Could not verify database schema. You may need to run migrations:");
