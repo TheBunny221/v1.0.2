@@ -44,12 +44,39 @@ export interface AuthState {
   };
 }
 
-// Get initial token from localStorage
+// Check if JWT token is expired
+const isTokenExpired = (token: string): boolean => {
+  try {
+    // Simple JWT expiration check without verification
+    // Just decode the payload to check exp claim
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp && payload.exp < now;
+  } catch {
+    return true; // If we can't decode, consider it expired
+  }
+};
+
+// Get initial token from localStorage with expiration check
 const getInitialToken = () => {
   try {
     const token = localStorage.getItem("token");
-    return token && token !== "null" && token !== "undefined" ? token : null;
-  } catch {
+    if (!token || token === "null" || token === "undefined") {
+      return null;
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(token)) {
+      console.warn("🕒 Stored token has expired, removing from localStorage");
+      localStorage.removeItem("token");
+      return null;
+    }
+
+    return token;
+  } catch (error) {
+    console.warn("⚠️ Error checking token expiration:", error);
+    // If there's an error, remove the potentially corrupted token
+    localStorage.removeItem("token");
     return null;
   }
 };
