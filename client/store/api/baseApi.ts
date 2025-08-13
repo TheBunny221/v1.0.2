@@ -102,62 +102,9 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  let result;
+  const result = await baseQuery(args, api, extraOptions);
 
-  try {
-    result = await baseQuery(args, api, extraOptions);
-  } catch (networkError: any) {
-    // Handle network errors that occur before response is received
-    console.error("BaseQuery network error:", networkError);
-
-    // Check for specific error types that indicate response body issues
-    if (networkError?.message?.includes("Response body") ||
-        networkError?.message?.includes("already used") ||
-        networkError?.message?.includes("disturbed") ||
-        networkError?.message?.includes("body stream") ||
-        networkError?.name === "TypeError") {
-
-      console.warn("Response body consumption error detected:", networkError.message);
-
-      return {
-        error: {
-          status: "FETCH_ERROR",
-          error: "Response processing error",
-          data: { message: "A network error occurred. Please try again." },
-        },
-      };
-    }
-
-    // Handle other network errors
-    let errorMessage = "A network error occurred. Please try again.";
-    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" = "FETCH_ERROR";
-
-    if (networkError?.name === "TypeError" && networkError?.message?.includes("fetch")) {
-      errorMessage = "Network connection failed. Please check your internet connection.";
-    } else if (
-      networkError?.message?.includes("timeout") ||
-      networkError?.message?.includes("Timeout")
-    ) {
-      errorMessage = "Request timed out. Please try again.";
-      errorStatus = "TIMEOUT_ERROR";
-    } else if (
-      networkError?.message?.includes("JSON") ||
-      networkError?.message?.includes("parse")
-    ) {
-      errorMessage = "Invalid response from server. Please try again.";
-      errorStatus = "PARSING_ERROR";
-    }
-
-    return {
-      error: {
-        status: errorStatus,
-        error: networkError.message || "Network error",
-        data: { message: errorMessage },
-      },
-    };
-  }
-
-  // Handle successful response or API errors
+  // Handle 401 unauthorized responses
   if (result.error && result.error.status === 401) {
     // Check if this is an auth-related endpoint to avoid logout loops
     const endpoint = typeof args === "string" ? args : args.url;
@@ -190,7 +137,7 @@ const baseQueryWithReauth: BaseQueryFn<
       }
     }
   } else if (result.error) {
-    // Log error for analytics without trying to access error data
+    // Log error for analytics
     const endpoint = typeof args === "string" ? args : args.url;
     console.warn("API Error:", {
       endpoint,
@@ -199,7 +146,7 @@ const baseQueryWithReauth: BaseQueryFn<
     });
 
     // Set error in auth slice for global error handling (only for server errors)
-    if (result.error.status && result.error.status >= 500) {
+    if (typeof result.error.status === "number" && result.error.status >= 500) {
       try {
         api.dispatch(
           setError("A server error occurred. Please try again later."),
