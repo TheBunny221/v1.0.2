@@ -561,6 +561,25 @@ const authSlice = createSlice({
       state.isLoading = false;
       // Persist token to localStorage
       localStorage.setItem("token", action.payload.token);
+
+      // Set up token expiration warning
+      try {
+        const payload = JSON.parse(atob(action.payload.token.split('.')[1]));
+        if (payload.exp) {
+          const expiresAt = payload.exp * 1000; // Convert to milliseconds
+          const now = Date.now();
+          const timeToExpiry = expiresAt - now;
+
+          // Warn 5 minutes before expiration
+          if (timeToExpiry > 5 * 60 * 1000) {
+            setTimeout(() => {
+              console.warn("🕒 Token will expire in 5 minutes");
+            }, timeToExpiry - 5 * 60 * 1000);
+          }
+        }
+      } catch (error) {
+        console.warn("Could not set up token expiration warning:", error);
+      }
     },
     clearCredentials: (state) => {
       state.token = null;
