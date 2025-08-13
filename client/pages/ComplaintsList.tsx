@@ -44,18 +44,32 @@ const ComplaintsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Build query parameters
-  const queryParams: any = { page: 1, limit: 100 };
-  if (statusFilter !== "all") queryParams.status = statusFilter;
-  if (priorityFilter !== "all") queryParams.priority = priorityFilter;
-  if (searchTerm.trim()) queryParams.search = searchTerm.trim();
+  // Debounce search term for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Build query parameters for server-side filtering
+  const queryParams = useMemo(() => {
+    const params: any = { page: 1, limit: 100 };
+    if (statusFilter !== "all") params.status = statusFilter.toUpperCase();
+    if (priorityFilter !== "all") params.priority = priorityFilter.toUpperCase();
+    if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
+    return params;
+  }, [statusFilter, priorityFilter, debouncedSearchTerm]);
 
   // Use RTK Query for better authentication handling
   const {
     data: complaintsResponse,
     isLoading,
     error,
+    refetch,
   } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
   const complaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
