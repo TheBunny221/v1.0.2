@@ -321,7 +321,6 @@ export const updateUser = asyncHandler(async (req, res) => {
   const user = await prisma.user.update({
     where: { id: userId },
     data: updates,
-    include: { ward: true },
     select: {
       id: true,
       fullName: true,
@@ -335,7 +334,13 @@ export const updateUser = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
     },
   });
 
@@ -486,7 +491,6 @@ export const verifyAccount = asyncHandler(async (req, res) => {
       password: hashedPassword,
       isActive: true,
     },
-    include: { ward: true },
     select: {
       id: true,
       fullName: true,
@@ -500,7 +504,13 @@ export const verifyAccount = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
     },
   });
 
