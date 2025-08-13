@@ -67,9 +67,55 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
               }),
             );
           } else if (userError) {
-            // Token is invalid or expired - clear it
+            // Handle different types of auth errors
+            const error = userError as any;
+            const errorData = 'data' in error ? error.data : null;
+
+            logAuthError("User Query Failed", error);
+
+            // Handle specific error types
+            const errorCode = errorData?.data?.code;
+            const isServerError = error.status >= 500;
+            const isDatabaseError = errorCode === "DATABASE_READONLY" || errorCode === "DATABASE_ERROR";
+
+            if (isDatabaseError || isServerError) {
+              console.warn("🚨 Server/Database issue detected - not clearing user credentials");
+              console.log("User can continue with cached data until server recovers");
+
+              // Don't clear credentials for server issues - user might be able to continue
+              // with cached data until the server recovers
+              setIsInitialized(true);
+              return;
+            }
+
+            // Clear invalid credentials for client errors
             dispatch(clearCredentials());
-            console.warn("Invalid token removed:", userError);
+            localStorage.removeItem("token");
+
+            // Log specific error types for debugging
+            if (errorCode) {
+              console.log(`📋 Handling auth error: ${errorCode}`);
+
+              switch (errorCode) {
+                case "TOKEN_EXPIRED":
+                  console.log("🕒 Token expired, user needs to login again");
+                  break;
+                case "TOKEN_INVALID":
+                case "TOKEN_MALFORMED":
+                  console.log("🔍 Invalid token format, clearing credentials");
+                  break;
+                case "USER_NOT_FOUND":
+                  console.log("👤 User account no longer exists");
+                  break;
+                case "ACCOUNT_DEACTIVATED":
+                  console.log("🚫 User account has been deactivated");
+                  break;
+                default:
+                  console.log("❓ Unknown authentication error");
+              }
+            }
+
+            console.log("✅ Invalid token cleared successfully");
           } else if (token && !reduxAuth.token) {
             // Have token in localStorage but not in Redux - sync it
             console.log("Syncing token from localStorage to Redux");
