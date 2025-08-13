@@ -853,6 +853,15 @@ export const getPublicWards = asyncHandler(async (req, res) => {
       id: true,
       name: true,
       description: true,
+      subZones: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+        orderBy: { name: "asc" },
+      },
     },
     orderBy: { name: "asc" },
   });
