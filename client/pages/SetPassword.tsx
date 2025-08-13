@@ -23,7 +23,8 @@ const SetPassword: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
 
-  const { isLoading, error, isAuthenticated } = useAppSelector(selectAuth);
+  const { error, isAuthenticated } = useAppSelector(selectAuth);
+  const [setPasswordMutation, { isLoading }] = useSetPasswordMutation();
 
   const [formData, setFormData] = useState({
     password: "",
