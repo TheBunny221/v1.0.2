@@ -69,6 +69,9 @@ const Profile: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
+  const [otpStep, setOtpStep] = useState<"none" | "sent" | "verified">("none");
+  const [otpCode, setOtpCode] = useState("");
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
