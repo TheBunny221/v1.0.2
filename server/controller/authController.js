@@ -315,7 +315,18 @@ export const loginWithOTP = asyncHandler(async (req, res) => {
   // Find user
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { ward: true },
+    select: {
+      id: true,
+      email: true,
+      isActive: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+    },
   });
 
   if (!user) {
