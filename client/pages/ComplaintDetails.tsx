@@ -56,7 +56,7 @@ const ComplaintDetails: React.FC = () => {
   const [updateStatus, { isLoading: isUpdatingStatus }] =
     useUpdateComplaintStatusMutation();
 
-  const complaint = complaintResponse?.data;
+  const complaint = complaintResponse?.data?.complaint;
 
   // Debug logging
   console.log('ComplaintDetails Debug:', {
