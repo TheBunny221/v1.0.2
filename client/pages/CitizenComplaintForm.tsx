@@ -849,6 +849,49 @@ const CitizenComplaintForm: React.FC = () => {
                       </div>
                     </Label>
 
+                    {/* Display uploaded files */}
+                    {formData.attachments && formData.attachments.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm text-gray-700">
+                          Uploaded Files ({formData.attachments.length}/5)
+                        </h4>
+                        <div className="space-y-2">
+                          {formData.attachments.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <Image className="h-5 w-5 text-blue-500" />
+                                <div>
+                                  <p className="text-sm font-medium">{file.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {(file.size / 1024).toFixed(1)} KB
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFile(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File upload errors */}
+                    {fileUploadErrors.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm text-red-700">Upload Errors:</h4>
+                        {fileUploadErrors.map((error, index) => (
+                          <p key={index} className="text-sm text-red-600">{error}</p>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">
                         Tips for better photos:
