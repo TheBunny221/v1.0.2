@@ -175,11 +175,7 @@ const ComplaintsList: React.FC = () => {
             </Select>
             <Button
               variant="outline"
-              onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("all");
-                setPriorityFilter("all");
-              }}
+              onClick={clearFilters}
             >
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
