@@ -67,15 +67,28 @@ const baseQueryWithReauth: BaseQueryFn<
     }
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
     // Handle errors that occur during baseQuery execution
     console.error("BaseQuery error:", error);
+
+    // Check if this is a "Response body already used" error
+    if (error?.message?.includes("Response body") || error?.message?.includes("already used")) {
+      console.warn("Response body already consumed, returning generic error");
+      return {
+        error: {
+          status: 'PARSING_ERROR' as const,
+          error: "Response parsing error - this may be due to concurrent requests",
+          data: { message: "A request error occurred. Please try again." }
+        }
+      };
+    }
 
     // Return a properly formatted error response
     return {
       error: {
         status: 'FETCH_ERROR' as const,
-        error: String(error)
+        error: String(error),
+        data: { message: "Network error occurred. Please try again." }
       }
     };
   }
