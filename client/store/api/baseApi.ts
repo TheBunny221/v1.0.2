@@ -7,129 +7,105 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: "/api",
-  prepareHeaders: (headers, { getState }) => {
-    const state = getState() as any;
-    const token = state.auth.token;
-    const localStorageToken = localStorage.getItem("token");
-
-    // Use token from Redux state, fallback to localStorage if Redux token is not available
-    const activeToken = token || localStorageToken;
-
-    // Debug token availability
-    if (process.env.NODE_ENV === "development") {
-      console.log("BaseQuery Debug:", {
-        reduxToken: token ? `${token.substring(0, 10)}...` : "null",
-        localStorageToken: localStorageToken
-          ? `${localStorageToken.substring(0, 10)}...`
-          : "null",
-        activeToken: activeToken
-          ? `${activeToken.substring(0, 10)}...`
-          : "null",
-        isAuthenticated: state.auth.isAuthenticated,
-        hasUser: !!state.auth.user,
-      });
-    }
-
-    if (activeToken) {
-      headers.set("authorization", `Bearer ${activeToken}`);
-    }
-
-    // Don't set content-type for FormData requests
-    if (!headers.has("content-type")) {
-      headers.set("content-type", "application/json");
-    }
-
-    return headers;
-  },
-});
-
-// Enhanced base query with 401 auto-logout handling and error handling
-const baseQueryWithReauth: BaseQueryFn<
+// Custom base query implementation to prevent response body consumption issues
+const customBaseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  const state = api.getState() as any;
+  const token = state.auth.token;
+  const localStorageToken = localStorage.getItem("token");
+  const activeToken = token || localStorageToken;
+
+  // Prepare request
+  const url = typeof args === "string" ? args : args.url;
+  const method = typeof args === "string" ? "GET" : args.method || "GET";
+  const body = typeof args === "string" ? undefined : args.body;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (activeToken) {
+    headers.authorization = `Bearer ${activeToken}`;
+  }
+
+  // Handle FormData requests
+  if (body instanceof FormData) {
+    delete headers["Content-Type"];
+  }
+
   try {
-    const result = await baseQuery(args, api, extraOptions);
+    // Create abort controller for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    if (result.error && result.error.status === 401) {
-      // Check if this is an auth-related endpoint to avoid logout loops
-      const endpoint = typeof args === "string" ? args : args.url;
-      const isAuthEndpoint =
-        typeof endpoint === "string" &&
-        (endpoint.includes("/auth/login") ||
-          endpoint.includes("/auth/register") ||
-          endpoint.includes("/auth/verify-otp") ||
-          endpoint.includes("/auth/login-otp"));
+    const response = await fetch(
+      `/api${url.startsWith("/") ? url : `/${url}`}`,
+      {
+        method,
+        headers,
+        body:
+          body instanceof FormData
+            ? body
+            : body
+              ? JSON.stringify(body)
+              : undefined,
+        signal: controller.signal,
+      },
+    );
 
-      if (!isAuthEndpoint) {
-        // Only auto-logout for non-auth endpoints
-        console.warn(
-          "401 Unauthorized detected for non-auth endpoint:",
-          endpoint,
-        );
+    clearTimeout(timeoutId);
 
-        // Clear auth state
-        api.dispatch(logout());
+    let data;
+    const contentType = response.headers.get("content-type") || "";
 
-        // Show toast notification (avoid multiple toasts)
+    try {
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
         try {
-          toast({
-            title: "Session Expired",
-            description: "Please login again to continue.",
-            variant: "destructive",
-          });
-        } catch (toastError) {
-          console.warn("Toast notification failed:", toastError);
+          data = JSON.parse(text);
+        } catch {
+          data = { message: text || "Response received" };
         }
       }
-    } else if (result.error) {
-      // Log error for analytics without trying to access error data
-      const endpoint = typeof args === "string" ? args : args.url;
-      console.warn("API Error:", {
-        endpoint,
-        status: result.error.status,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Set error in auth slice for global error handling (only for server errors)
-      if (result.error.status && result.error.status >= 500) {
-        try {
-          api.dispatch(
-            setError("A server error occurred. Please try again later."),
-          );
-        } catch (dispatchError) {
-          console.error("Failed to dispatch error:", dispatchError);
-        }
-      }
+    } catch (parseError: any) {
+      console.warn("Response parsing error:", parseError);
+      // Don't use clone, just provide a safe fallback
+      data = {
+        message: "Failed to parse response",
+        error: parseError.message,
+        status: response.status,
+      };
     }
 
-    return result;
+    if (!response.ok) {
+      return {
+        error: {
+          status: response.status,
+          data,
+        },
+      };
+    }
+
+    return { data };
   } catch (error: any) {
-    console.error("BaseQuery error caught:", error);
+    console.error("Custom base query error:", error);
 
-    // Provide more specific error messages based on error type
-    let errorMessage = "A network error occurred. Please try again.";
-    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" =
-      "FETCH_ERROR";
+    let errorMessage = "Network request failed";
+    let errorStatus = "FETCH_ERROR";
 
-    if (error?.name === "TypeError" && error?.message?.includes("fetch")) {
-      errorMessage =
-        "Network connection failed. Please check your internet connection.";
-    } else if (
-      error?.message?.includes("timeout") ||
-      error?.message?.includes("Timeout")
-    ) {
+    if (error.name === "AbortError") {
       errorMessage = "Request timed out. Please try again.";
       errorStatus = "TIMEOUT_ERROR";
-    } else if (
-      error?.message?.includes("JSON") ||
-      error?.message?.includes("parse")
-    ) {
-      errorMessage = "Invalid response from server. Please try again.";
-      errorStatus = "PARSING_ERROR";
+    } else if (error.message?.includes("Failed to fetch")) {
+      errorMessage =
+        "Network connection failed. Please check your internet connection.";
+    } else if (error.message?.includes("TypeError")) {
+      errorMessage = "Request failed due to a network issue.";
     }
 
     return {
@@ -140,6 +116,72 @@ const baseQueryWithReauth: BaseQueryFn<
       },
     };
   }
+};
+
+const baseQuery = customBaseQuery;
+
+// Enhanced base query with 401 auto-logout handling and error handling
+const baseQueryWithReauth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const result = await baseQuery(args, api, extraOptions);
+
+  // Handle 401 unauthorized responses
+  if (result.error && result.error.status === 401) {
+    // Check if this is an auth-related endpoint to avoid logout loops
+    const endpoint = typeof args === "string" ? args : args.url;
+    const isAuthEndpoint =
+      typeof endpoint === "string" &&
+      (endpoint.includes("/auth/login") ||
+        endpoint.includes("/auth/register") ||
+        endpoint.includes("/auth/verify-otp") ||
+        endpoint.includes("/auth/login-otp"));
+
+    if (!isAuthEndpoint) {
+      // Only auto-logout for non-auth endpoints
+      console.warn(
+        "401 Unauthorized detected for non-auth endpoint:",
+        endpoint,
+      );
+
+      // Clear auth state
+      api.dispatch(logout());
+
+      // Show toast notification (avoid multiple toasts)
+      try {
+        toast({
+          title: "Session Expired",
+          description: "Please login again to continue.",
+          variant: "destructive",
+        });
+      } catch (toastError) {
+        console.warn("Toast notification failed:", toastError);
+      }
+    }
+  } else if (result.error) {
+    // Log error for analytics
+    const endpoint = typeof args === "string" ? args : args.url;
+    console.warn("API Error:", {
+      endpoint,
+      status: result.error.status,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Set error in auth slice for global error handling (only for server errors)
+    if (typeof result.error.status === "number" && result.error.status >= 500) {
+      try {
+        api.dispatch(
+          setError("A server error occurred. Please try again later."),
+        );
+      } catch (dispatchError) {
+        console.error("Failed to dispatch error:", dispatchError);
+      }
+    }
+  }
+
+  return result;
 };
 
 // Helper function to extract error messages (simplified to avoid response body consumption)
@@ -335,10 +377,15 @@ export const getApiErrorMessage = (error: any): string => {
   if (
     error?.name === "TypeError" ||
     error?.message?.includes("Response body") ||
-    error?.message?.includes("clone")
+    error?.message?.includes("already used") ||
+    error?.message?.includes("clone") ||
+    error?.message?.includes("disturbed")
   ) {
-    // This is a cloning/network error - try to provide a helpful message
-    return "Registration failed. This email address may already be registered. Please try using a different email or attempt to log in instead.";
+    // This is a cloning/network error - provide a generic helpful message
+    console.warn(
+      "Response body or cloning error detected in getApiErrorMessage",
+    );
+    return "Request failed due to a network issue. Please try again.";
   }
 
   // Handle RTK Query FetchBaseQueryError structure

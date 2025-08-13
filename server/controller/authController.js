@@ -315,7 +315,18 @@ export const loginWithOTP = asyncHandler(async (req, res) => {
   // Find user
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { ward: true },
+    select: {
+      id: true,
+      email: true,
+      isActive: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -392,7 +403,27 @@ export const verifyOTPLogin = asyncHandler(async (req, res) => {
     },
     include: {
       user: {
-        include: { ward: true },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          role: true,
+          wardId: true,
+          department: true,
+          language: true,
+          avatar: true,
+          isActive: true,
+          lastLogin: true,
+          joinedOn: true,
+          ward: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            },
+          },
+        },
       },
     },
   });
@@ -571,9 +602,6 @@ export const setPassword = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    include: {
-      ward: true,
-    },
     select: {
       id: true,
       fullName: true,
@@ -587,7 +615,13 @@ export const getMe = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
     },
   });
 
@@ -615,7 +649,6 @@ export const updateProfile = asyncHandler(async (req, res) => {
   const user = await prisma.user.update({
     where: { id: req.user.id },
     data: updates,
-    include: { ward: true },
     select: {
       id: true,
       fullName: true,
@@ -629,7 +662,13 @@ export const updateProfile = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
     },
   });
 
@@ -731,7 +770,27 @@ export const verifyRegistrationOTP = asyncHandler(async (req, res) => {
     },
     include: {
       user: {
-        include: { ward: true },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          role: true,
+          wardId: true,
+          department: true,
+          language: true,
+          avatar: true,
+          isActive: true,
+          lastLogin: true,
+          joinedOn: true,
+          ward: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            },
+          },
+        },
       },
     },
   });
@@ -751,7 +810,27 @@ export const verifyRegistrationOTP = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: new Date(),
     },
-    include: { ward: true },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phoneNumber: true,
+      role: true,
+      wardId: true,
+      department: true,
+      language: true,
+      avatar: true,
+      isActive: true,
+      lastLogin: true,
+      joinedOn: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+    },
   });
 
   // Mark OTP as verified

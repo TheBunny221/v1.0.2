@@ -18,10 +18,16 @@ window.addEventListener("unhandledrejection", (event) => {
     event.reason?.message?.includes("IFrame evaluation timeout") ||
     event.reason?.message?.includes("Response body is already used") ||
     event.reason?.message?.includes("AbortError") ||
-    event.reason?.message?.includes("NetworkError")
+    event.reason?.message?.includes("NetworkError") ||
+    event.reason?.message?.includes("WebSocket closed without opened") ||
+    event.reason?.message?.includes("WebSocket") ||
+    event.reason?.toString?.()?.includes("WebSocket")
   ) {
     // These are non-critical errors that can be safely ignored
-    console.warn("Non-critical error ignored:", event.reason?.message);
+    console.warn(
+      "Non-critical error ignored:",
+      event.reason?.message || event.reason,
+    );
     event.preventDefault();
     return;
   }
