@@ -79,7 +79,7 @@ export const protect = asyncHandler(async (req, res, next) => {
             select: {
               id: true,
               name: true,
-              code: true,
+              description: true,
             },
           },
         },
@@ -221,12 +221,12 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
             lastLogin: true,
             joinedOn: true,
             ward: {
-              select: {
-                id: true,
-                name: true,
-                code: true,
-              },
+            select: {
+              id: true,
+              name: true,
+              description: true,
             },
+          },
           },
         });
 
