@@ -1043,6 +1043,33 @@ const CitizenComplaintForm: React.FC = () => {
                     </CardContent>
                   </Card>
 
+                  {/* Attachments */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Attachments</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {formData.attachments && formData.attachments.length > 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-600 mb-3">
+                            {formData.attachments.length} file(s) will be uploaded with your complaint:
+                          </p>
+                          {formData.attachments.map((file, index) => (
+                            <div key={index} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                              <Image className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm">{file.name}</span>
+                              <span className="text-xs text-gray-500">
+                                ({(file.size / 1024).toFixed(1)} KB)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No attachments</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   <Alert className="border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription className="text-green-800">
