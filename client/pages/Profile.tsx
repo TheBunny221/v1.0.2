@@ -110,8 +110,8 @@ const Profile: React.FC = () => {
       dispatch(
         addNotification({
           type: "error",
-          title: translations.common.error,
-          message: translations.profile.passwordMismatch,
+          title: translations?.common?.error || "Error",
+          message: translations?.profile?.passwordMismatch || "Passwords do not match",
         }),
       );
       return;
