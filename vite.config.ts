@@ -5,14 +5,15 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Detect cloud environment
-  const isCloudEnvironment = process.env.FLY_APP_NAME || 
-                            process.env.RENDER || 
-                            process.env.RAILWAY_PROJECT_ID ||
-                            process.env.VERCEL ||
-                            process.env.NETLIFY;
-  
+  const isCloudEnvironment =
+    process.env.FLY_APP_NAME ||
+    process.env.RENDER ||
+    process.env.RAILWAY_PROJECT_ID ||
+    process.env.VERCEL ||
+    process.env.NETLIFY;
+
   const isProduction = mode === "production" || isCloudEnvironment;
-  
+
   return {
     server: {
       host: "::",
@@ -33,11 +34,13 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-      hmr: isProduction ? false : {
-        overlay: false,
-        port: 3001,
-        clientPort: 3001,
-      },
+      hmr: isProduction
+        ? false
+        : {
+            overlay: false,
+            port: 3001,
+            clientPort: 3001,
+          },
       watch: {
         usePolling: false,
         interval: 1000,

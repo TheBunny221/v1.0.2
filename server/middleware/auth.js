@@ -221,12 +221,12 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
             lastLogin: true,
             joinedOn: true,
             ward: {
-            select: {
-              id: true,
-              name: true,
-              description: true,
+              select: {
+                id: true,
+                name: true,
+                description: true,
+              },
             },
-          },
           },
         });
 

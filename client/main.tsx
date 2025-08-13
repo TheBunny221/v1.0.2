@@ -24,7 +24,10 @@ window.addEventListener("unhandledrejection", (event) => {
     event.reason?.toString?.()?.includes("WebSocket")
   ) {
     // These are non-critical errors that can be safely ignored
-    console.warn("Non-critical error ignored:", event.reason?.message || event.reason);
+    console.warn(
+      "Non-critical error ignored:",
+      event.reason?.message || event.reason,
+    );
     event.preventDefault();
     return;
   }

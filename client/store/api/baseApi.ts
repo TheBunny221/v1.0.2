@@ -20,7 +20,7 @@ const customBaseQuery: BaseQueryFn<
 
   // Prepare request
   const url = typeof args === "string" ? args : args.url;
-  const method = typeof args === "string" ? "GET" : (args.method || "GET");
+  const method = typeof args === "string" ? "GET" : args.method || "GET";
   const body = typeof args === "string" ? undefined : args.body;
 
   const headers: Record<string, string> = {
@@ -41,12 +41,20 @@ const customBaseQuery: BaseQueryFn<
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    const response = await fetch(`/api${url.startsWith("/") ? url : `/${url}`}`, {
-      method,
-      headers,
-      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
-      signal: controller.signal,
-    });
+    const response = await fetch(
+      `/api${url.startsWith("/") ? url : `/${url}`}`,
+      {
+        method,
+        headers,
+        body:
+          body instanceof FormData
+            ? body
+            : body
+              ? JSON.stringify(body)
+              : undefined,
+        signal: controller.signal,
+      },
+    );
 
     clearTimeout(timeoutId);
 
@@ -70,7 +78,7 @@ const customBaseQuery: BaseQueryFn<
       data = {
         message: "Failed to parse response",
         error: parseError.message,
-        status: response.status
+        status: response.status,
       };
     }
 
@@ -94,7 +102,8 @@ const customBaseQuery: BaseQueryFn<
       errorMessage = "Request timed out. Please try again.";
       errorStatus = "TIMEOUT_ERROR";
     } else if (error.message?.includes("Failed to fetch")) {
-      errorMessage = "Network connection failed. Please check your internet connection.";
+      errorMessage =
+        "Network connection failed. Please check your internet connection.";
     } else if (error.message?.includes("TypeError")) {
       errorMessage = "Request failed due to a network issue.";
     }
@@ -373,7 +382,9 @@ export const getApiErrorMessage = (error: any): string => {
     error?.message?.includes("disturbed")
   ) {
     // This is a cloning/network error - provide a generic helpful message
-    console.warn("Response body or cloning error detected in getApiErrorMessage");
+    console.warn(
+      "Response body or cloning error detected in getApiErrorMessage",
+    );
     return "Request failed due to a network issue. Please try again.";
   }
 
