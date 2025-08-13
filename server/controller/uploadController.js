@@ -73,13 +73,12 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
   // Create attachment record
   const attachment = await prisma.attachment.create({
     data: {
-      filename: req.file.filename,
+      fileName: req.file.filename,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      path: req.file.path,
+      url: `/api/uploads/${req.file.filename}`,
       complaintId: complaintId,
-      uploadedBy: req.user?.id || null,
     },
   });
 
@@ -88,11 +87,11 @@ export const uploadComplaintAttachment = asyncHandler(async (req, res) => {
     message: "File uploaded successfully",
     data: {
       id: attachment.id,
-      filename: attachment.filename,
+      fileName: attachment.fileName,
       originalName: attachment.originalName,
       mimeType: attachment.mimeType,
       size: attachment.size,
-      url: `/api/uploads/${attachment.id}`,
+      url: attachment.url,
     },
   });
 });
@@ -128,25 +127,17 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
 });
 
 // @desc    Get uploaded file
-// @route   GET /api/uploads/:id
+// @route   GET /api/uploads/:filename
 // @access  Public
 export const getAttachment = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  const attachment = await prisma.attachment.findUnique({
-    where: { id },
-  });
-
-  if (!attachment) {
-    return res.status(404).json({
-      success: false,
-      message: "File not found",
-      data: null,
-    });
-  }
+  const { filename } = req.params;
+  const filePath = path.join(
+    process.env.UPLOAD_PATH || "./uploads",
+    filename,
+  );
 
   // Check if file exists on disk
-  if (!fs.existsSync(attachment.path)) {
+  if (!fs.existsSync(filePath)) {
     return res.status(404).json({
       success: false,
       message: "File not found on server",
@@ -154,15 +145,33 @@ export const getAttachment = asyncHandler(async (req, res) => {
     });
   }
 
-  // Set appropriate headers
-  res.setHeader("Content-Type", attachment.mimeType);
-  res.setHeader(
-    "Content-Disposition",
-    `inline; filename="${attachment.originalName}"`,
-  );
+  // Find attachment in database for metadata
+  const attachment = await prisma.attachment.findFirst({
+    where: { fileName: filename },
+  });
+
+  if (attachment) {
+    // Set appropriate headers with original name
+    res.setHeader("Content-Type", attachment.mimeType);
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${attachment.originalName}"`,
+    );
+  } else {
+    // Fallback for files not in database
+    const ext = path.extname(filename).toLowerCase();
+    const contentTypes = {
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".pdf": "application/pdf",
+    };
+    res.setHeader("Content-Type", contentTypes[ext] || "application/octet-stream");
+  }
 
   // Stream the file
-  const fileStream = fs.createReadStream(attachment.path);
+  const fileStream = fs.createReadStream(filePath);
   fileStream.pipe(res);
 });
 
@@ -200,9 +209,15 @@ export const deleteAttachment = asyncHandler(async (req, res) => {
     });
   }
 
+  // Construct file path
+  const filePath = path.join(
+    process.env.UPLOAD_PATH || "./uploads",
+    attachment.fileName,
+  );
+
   // Delete file from disk
-  if (fs.existsSync(attachment.path)) {
-    fs.unlinkSync(attachment.path);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
   }
 
   // Delete database record
