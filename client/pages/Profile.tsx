@@ -155,13 +155,13 @@ const Profile: React.FC = () => {
       return;
     }
 
-    // For password setup, require OTP verification
-    if (!user?.hasPassword && !isOtpVerified) {
+    // For password setup, require token
+    if (!user?.hasPassword && !setupToken) {
       dispatch(
         addNotification({
           type: "error",
-          title: "Verification Required",
-          message: "Please verify your email with OTP first",
+          title: "Token Required",
+          message: "Please get the setup token from your email first",
         }),
       );
       return;
