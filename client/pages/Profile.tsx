@@ -402,16 +402,16 @@ const Profile: React.FC = () => {
                         });
                       }}
                     >
-                      {translations.common.cancel}
+                      {translations?.common?.cancel || "Cancel"}
                     </Button>
                     <Button onClick={handleSaveProfile} disabled={isLoading}>
                       <Save className="h-4 w-4 mr-2" />
-                      {translations.common.save}
+                      {translations?.common?.save || "Save"}
                     </Button>
                   </>
                 ) : (
                   <Button onClick={() => setIsEditing(true)}>
-                    {translations.common.edit} Profile
+                    {translations?.common?.edit || "Edit"} Profile
                   </Button>
                 )}
               </div>
@@ -472,7 +472,7 @@ const Profile: React.FC = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="newPassword">
-                  {translations.profile.newPassword}
+                  {translations?.profile?.newPassword || "New Password"}
                 </Label>
                 <div className="relative">
                   <Input
@@ -504,7 +504,7 @@ const Profile: React.FC = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">
-                  {translations.profile.confirmPassword}
+                  {translations?.profile?.confirmPassword || "Confirm Password"}
                 </Label>
                 <div className="relative">
                   <Input
@@ -552,7 +552,7 @@ const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Bell className="h-5 w-5" />
-                <span>{translations.profile.preferences}</span>
+                <span>{translations?.profile?.preferences || "Preferences"}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -560,7 +560,7 @@ const Profile: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-base font-medium">
-                      {translations.settings.notifications}
+                      {translations?.settings?.notifications || "Notifications"}
                     </Label>
                     <p className="text-sm text-muted-foreground">
                       Receive notifications about complaint updates
