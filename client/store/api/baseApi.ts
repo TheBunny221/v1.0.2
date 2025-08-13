@@ -55,28 +55,51 @@ const baseQueryWithReauth: BaseQueryFn<
     const result = await baseQuery(args, api, extraOptions);
 
     if (result.error && result.error.status === 401) {
-      // Unauthorized - clear auth state
-      api.dispatch(logout());
+      // Check if this is an auth-related endpoint to avoid logout loops
+      const endpoint = typeof args === "string" ? args : args.url;
+      const isAuthEndpoint = typeof endpoint === 'string' && (
+        endpoint.includes('/auth/login') ||
+        endpoint.includes('/auth/register') ||
+        endpoint.includes('/auth/verify-otp') ||
+        endpoint.includes('/auth/login-otp')
+      );
 
-      // Show toast notification
-      toast({
-        title: "Session Expired",
-        description: "Please login again to continue.",
-        variant: "destructive",
-      });
+      if (!isAuthEndpoint) {
+        // Only auto-logout for non-auth endpoints
+        console.warn("401 Unauthorized detected for non-auth endpoint:", endpoint);
+
+        // Clear auth state
+        api.dispatch(logout());
+
+        // Show toast notification (avoid multiple toasts)
+        try {
+          toast({
+            title: "Session Expired",
+            description: "Please login again to continue.",
+            variant: "destructive",
+          });
+        } catch (toastError) {
+          console.warn("Toast notification failed:", toastError);
+        }
+      }
     } else if (result.error) {
       // Log error for analytics without trying to access error data
-      console.error("API Error:", {
-        endpoint: typeof args === "string" ? args : args.url,
+      const endpoint = typeof args === "string" ? args : args.url;
+      console.warn("API Error:", {
+        endpoint,
         status: result.error.status,
         timestamp: new Date().toISOString(),
       });
 
-      // Set error in auth slice for global error handling
+      // Set error in auth slice for global error handling (only for server errors)
       if (result.error.status && result.error.status >= 500) {
-        api.dispatch(
-          setError("A server error occurred. Please try again later."),
-        );
+        try {
+          api.dispatch(
+            setError("A server error occurred. Please try again later."),
+          );
+        } catch (dispatchError) {
+          console.error("Failed to dispatch error:", dispatchError);
+        }
       }
     }
 
@@ -84,13 +107,25 @@ const baseQueryWithReauth: BaseQueryFn<
   } catch (error: any) {
     console.error("BaseQuery error caught:", error);
 
-    // Handle any errors that occur during the baseQuery execution
-    // This includes "Response body is already used" errors
+    // Provide more specific error messages based on error type
+    let errorMessage = "A network error occurred. Please try again.";
+    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" = "FETCH_ERROR";
+
+    if (error?.name === "TypeError" && error?.message?.includes("fetch")) {
+      errorMessage = "Network connection failed. Please check your internet connection.";
+    } else if (error?.message?.includes("timeout") || error?.message?.includes("Timeout")) {
+      errorMessage = "Request timed out. Please try again.";
+      errorStatus = "TIMEOUT_ERROR";
+    } else if (error?.message?.includes("JSON") || error?.message?.includes("parse")) {
+      errorMessage = "Invalid response from server. Please try again.";
+      errorStatus = "PARSING_ERROR";
+    }
+
     return {
       error: {
-        status: "FETCH_ERROR" as const,
+        status: errorStatus,
         error: error.message || "Network error",
-        data: { message: "A network error occurred. Please try again." },
+        data: { message: errorMessage },
       },
     };
   }
