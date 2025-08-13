@@ -109,6 +109,14 @@ const ComplaintsList: React.FC = () => {
   // Use all complaints since filtering is done server-side
   const filteredComplaints = complaints;
 
+  // Clear all filters and refetch data
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setDebouncedSearchTerm("");
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
