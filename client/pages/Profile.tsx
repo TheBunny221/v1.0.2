@@ -89,8 +89,8 @@ const Profile: React.FC = () => {
       dispatch(
         addNotification({
           type: "success",
-          title: translations.common.success,
-          message: translations.profile.profileUpdated,
+          title: translations?.common?.success || "Success",
+          message: translations?.profile?.profileUpdated || "Profile updated successfully",
         }),
       );
       setIsEditing(false);
