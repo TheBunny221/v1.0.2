@@ -88,39 +88,6 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-// Mock data - in real app this would come from API
-const WARDS = [
-  {
-    id: "ward-1",
-    name: "Fort Kochi",
-    subZones: ["Marine Drive", "Parade Ground", "Princess Street"],
-  },
-  {
-    id: "ward-2",
-    name: "Mattancherry",
-    subZones: ["Jew Town", "Dutch Palace", "Spice Market"],
-  },
-  {
-    id: "ward-3",
-    name: "Ernakulam South",
-    subZones: ["MG Road", "Broadway", "Shanmugham Road"],
-  },
-  {
-    id: "ward-4",
-    name: "Ernakulam North",
-    subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"],
-  },
-  {
-    id: "ward-5",
-    name: "Kadavanthra",
-    subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"],
-  },
-  {
-    id: "ward-6",
-    name: "Thevara",
-    subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"],
-  },
-];
 
 const COMPLAINT_TYPES = [
   {
