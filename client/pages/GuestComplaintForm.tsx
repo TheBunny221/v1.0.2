@@ -173,6 +173,10 @@ const GuestComplaintForm: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
+  // Fetch wards from API
+  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const wards = wardsResponse?.data || [];
+
   // Guest form state
   const currentStep = useAppSelector(selectCurrentStep);
   const steps = useAppSelector(selectSteps);
