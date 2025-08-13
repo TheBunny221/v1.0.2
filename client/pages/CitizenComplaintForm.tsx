@@ -343,6 +343,72 @@ const CitizenComplaintForm: React.FC = () => {
     }
   };
 
+  // File upload handlers
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // Validate file count
+    const currentFileCount = formData.attachments?.length || 0;
+    if (currentFileCount + files.length > 5) {
+      toast({
+        title: "Too many files",
+        description: "You can upload a maximum of 5 files",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validFiles = [];
+    const errors = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        errors.push(`${file.name}: File size too large (max 10MB)`);
+        continue;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        errors.push(`${file.name}: Invalid file type (only images allowed)`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (errors.length > 0) {
+      setFileUploadErrors(errors);
+      toast({
+        title: "File validation errors",
+        description: `${errors.length} file(s) were rejected`,
+        variant: "destructive",
+      });
+    }
+
+    if (validFiles.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        attachments: [...(prev.attachments || []), ...validFiles]
+      }));
+      setFileUploadErrors([]);
+    }
+
+    // Clear the input
+    event.target.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: prev.attachments?.filter((_, i) => i !== index) || []
+    }));
+  };
+
   const selectedComplaintType = COMPLAINT_TYPES.find(
     (c) => c.value === formData.type,
   );
