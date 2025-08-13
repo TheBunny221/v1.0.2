@@ -49,7 +49,7 @@ const isTokenExpired = (token: string): boolean => {
   try {
     // Simple JWT expiration check without verification
     // Just decode the payload to check exp claim
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const now = Math.floor(Date.now() / 1000);
     return payload.exp && payload.exp < now;
   } catch {
@@ -564,7 +564,7 @@ const authSlice = createSlice({
 
       // Set up token expiration warning
       try {
-        const payload = JSON.parse(atob(action.payload.token.split('.')[1]));
+        const payload = JSON.parse(atob(action.payload.token.split(".")[1]));
         if (payload.exp) {
           const expiresAt = payload.exp * 1000; // Convert to milliseconds
           const now = Date.now();
@@ -572,9 +572,12 @@ const authSlice = createSlice({
 
           // Warn 5 minutes before expiration
           if (timeToExpiry > 5 * 60 * 1000) {
-            setTimeout(() => {
-              console.warn("🕒 Token will expire in 5 minutes");
-            }, timeToExpiry - 5 * 60 * 1000);
+            setTimeout(
+              () => {
+                console.warn("🕒 Token will expire in 5 minutes");
+              },
+              timeToExpiry - 5 * 60 * 1000,
+            );
           }
         }
       } catch (error) {
