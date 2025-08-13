@@ -1227,6 +1227,103 @@ const UnifiedComplaintForm: React.FC = () => {
               </div>
             )}
 
+            {/* Step 5: Submit with OTP */}
+            {currentStep === 5 && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold">Verify and Submit</h3>
+
+                {submissionMode === "citizen" ? (
+                  // Citizen users: Direct submission without OTP
+                  <div className="space-y-4">
+                    <Alert className="border-blue-200 bg-blue-50">
+                      <Shield className="h-4 w-4" />
+                      <AlertDescription className="text-blue-800">
+                        <strong>Citizen Account Detected:</strong> As a verified citizen, your complaint will be submitted immediately without requiring additional verification.
+                      </AlertDescription>
+                    </Alert>
+
+                    <div className="text-center py-8">
+                      <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+                      <h4 className="text-lg font-semibold mb-2">Ready to Submit</h4>
+                      <p className="text-gray-600 mb-6">Your complaint is ready to be submitted to the relevant authorities.</p>
+                    </div>
+                  </div>
+                ) : (
+                  // Guest users: OTP verification required
+                  <div className="space-y-4">
+                    {!complaintId ? (
+                      // Step 5a: Send OTP
+                      <div className="space-y-4">
+                        <Alert className="border-green-200 bg-green-50">
+                          <Mail className="h-4 w-4" />
+                          <AlertDescription className="text-green-800">
+                            <strong>Email Verification Required:</strong> We'll send a verification code to <strong>{formData.email}</strong> to secure your complaint submission and create your citizen account.
+                          </AlertDescription>
+                        </Alert>
+
+                        <div className="text-center py-8">
+                          <Mail className="mx-auto h-16 w-16 text-blue-500 mb-4" />
+                          <h4 className="text-lg font-semibold mb-2">Send Verification Code</h4>
+                          <p className="text-gray-600 mb-6">Click below to send a verification code to your email address.</p>
+                        </div>
+                      </div>
+                    ) : (
+                      // Step 5b: Enter OTP
+                      <div className="space-y-4">
+                        <Alert className="border-orange-200 bg-orange-50">
+                          <Clock className="h-4 w-4" />
+                          <AlertDescription className="text-orange-800">
+                            <strong>Verification Code Sent:</strong> Please check your email and enter the 6-digit verification code below.
+                          </AlertDescription>
+                        </Alert>
+
+                        <div className="max-w-md mx-auto space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="otpCode" className="text-center block">
+                              Enter Verification Code
+                            </Label>
+                            <Input
+                              id="otpCode"
+                              name="otpCode"
+                              type="text"
+                              placeholder="Enter 6-digit code"
+                              maxLength={6}
+                              className="text-center text-xl font-mono tracking-widest"
+                              value={otpCode}
+                              onChange={handleOtpChange}
+                              autoComplete="one-time-code"
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">
+                              Code sent to: {formData.email}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              onClick={handleResendOtp}
+                              disabled={isSubmitting}
+                              className="text-blue-600 p-0"
+                            >
+                              Resend Code
+                            </Button>
+                          </div>
+
+                          {validationErrors.otpCode && (
+                            <p className="text-sm text-red-600 text-center" role="alert">
+                              {validationErrors.otpCode}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Navigation Buttons */}
             <div className="flex justify-between pt-6">
               <Button
