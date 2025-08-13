@@ -73,61 +73,35 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  try {
-    let result = await baseQuery(args, api, extraOptions);
+  const result = await baseQuery(args, api, extraOptions);
 
-    if (result.error && result.error.status === 401) {
-      // Unauthorized - clear auth state
-      api.dispatch(logout());
+  if (result.error && result.error.status === 401) {
+    // Unauthorized - clear auth state
+    api.dispatch(logout());
 
-      // Show toast notification
-      toast({
-        title: "Session Expired",
-        description: "Please login again to continue.",
-        variant: "destructive",
-      });
-    } else if (result.error) {
-      // Log error for analytics without trying to read error data
-      console.error("API Error:", {
-        endpoint: typeof args === "string" ? args : args.url,
-        status: result.error.status,
-        timestamp: new Date().toISOString(),
-      });
+    // Show toast notification
+    toast({
+      title: "Session Expired",
+      description: "Please login again to continue.",
+      variant: "destructive",
+    });
+  } else if (result.error) {
+    // Log error for analytics
+    console.error("API Error:", {
+      endpoint: typeof args === "string" ? args : args.url,
+      status: result.error.status,
+      timestamp: new Date().toISOString(),
+    });
 
-      // Set error in auth slice for global error handling
-      if (result.error.status && result.error.status >= 500) {
-        api.dispatch(
-          setError("A server error occurred. Please try again later."),
-        );
-      }
+    // Set error in auth slice for global error handling
+    if (result.error.status && result.error.status >= 500) {
+      api.dispatch(
+        setError("A server error occurred. Please try again later."),
+      );
     }
-
-    return result;
-  } catch (error: any) {
-    // Handle errors that occur during baseQuery execution
-    console.error("BaseQuery error:", error);
-
-    // Check if this is a "Response body already used" error
-    if (error?.message?.includes("Response body") || error?.message?.includes("already used")) {
-      console.warn("Response body already consumed, returning generic error");
-      return {
-        error: {
-          status: 'PARSING_ERROR' as const,
-          error: "Response parsing error - this may be due to concurrent requests",
-          data: { message: "A request error occurred. Please try again." }
-        }
-      };
-    }
-
-    // Return a properly formatted error response
-    return {
-      error: {
-        status: 'FETCH_ERROR' as const,
-        error: String(error),
-        data: { message: "Network error occurred. Please try again." }
-      }
-    };
   }
+
+  return result;
 };
 
 // Helper function to extract error messages (simplified to avoid response body consumption)
