@@ -196,6 +196,36 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
+      {/* Password Setup Alert */}
+      {requiresPasswordSetup && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-orange-800">
+                  Password Setup Required
+                </h3>
+                <p className="mt-1 text-sm text-orange-700">
+                  Your account was created without a password. Please set up a password to secure your account.
+                </p>
+                <div className="mt-4">
+                  <Button
+                    onClick={() => setActiveTab("security")}
+                    className="bg-orange-600 hover:bg-orange-700"
+                    size="sm"
+                  >
+                    Set Up Password
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="personal">
