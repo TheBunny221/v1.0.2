@@ -31,6 +31,7 @@ import {
   FileAttachment,
   GuestComplaintData,
   resendOTP,
+  verifyOTPAndRegister,
 } from "../store/slices/guestSlice";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
