@@ -28,7 +28,6 @@ import {
   validateCurrentStep,
   setImagePreview,
   clearGuestData,
-  submitGuestComplaint,
   verifyOTPAndRegister,
   resendOTP,
   clearError,
