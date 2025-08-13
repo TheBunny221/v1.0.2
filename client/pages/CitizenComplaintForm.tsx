@@ -213,6 +213,8 @@ const CitizenComplaintForm: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [fileUploadErrors, setFileUploadErrors] = useState<string[]>([]);
 
   const steps = [
     { id: 1, title: "Details", icon: FileText, isCompleted: false },
