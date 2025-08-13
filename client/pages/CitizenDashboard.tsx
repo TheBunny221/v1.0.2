@@ -198,6 +198,11 @@ const CitizenDashboard: React.FC = () => {
     }
   };
 
+  const getComplaintTypeLabel = (type: string) => {
+    // Convert type to readable format
+    return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   const recentComplaints = complaints.slice(0, 5);
 
   // Show error state if there's an authentication error
