@@ -414,11 +414,11 @@ const UnifiedComplaintForm: React.FC = () => {
     [dispatch, currentStep],
   );
 
-  // Handle form submission - unified for both citizen and guest
-  const handleSubmit = useCallback(async () => {
+  // Handle initial complaint submission (step 5 - send OTP)
+  const handleSendOtp = useCallback(async () => {
     dispatch(validateCurrentStep());
 
-    // Final validation
+    // Final validation of all previous steps
     const hasErrors = Object.keys(validationErrors).length > 0;
     if (hasErrors) {
       toast({
@@ -460,7 +460,7 @@ const UnifiedComplaintForm: React.FC = () => {
         dispatch(clearGuestData());
         navigate(getDashboardRouteForRole(user?.role || "CITIZEN"));
       } else {
-        // Guest flow: Submit to guest API and trigger OTP
+        // Guest flow: Submit complaint and send OTP
         const files: FileAttachment[] =
           formData.attachments
             ?.map((attachment) => {
@@ -474,28 +474,10 @@ const UnifiedComplaintForm: React.FC = () => {
         ).unwrap();
 
         if (result.complaintId && result.trackingNumber) {
-          // Open unified OTP dialog for guest verification
-          openOtpFlow({
-            context: "guestComplaint",
-            email: formData.email,
-            complaintId: result.complaintId,
-            trackingNumber: result.trackingNumber,
-            title: "Verify Your Complaint",
-            description:
-              "Enter the verification code sent to your email to complete your complaint submission and create your citizen account",
-            onSuccess: () => {
-              toast({
-                title: "Success!",
-                description:
-                  "Your complaint has been verified and your citizen account has been created successfully.",
-              });
-              navigate("/dashboard");
-            },
-          });
-
+          setOtpSent(true);
           toast({
-            title: "Complaint Submitted",
-            description: `Tracking number: ${result.trackingNumber}. Please check your email for the verification code.`,
+            title: "Verification Code Sent",
+            description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
           });
         }
       }
@@ -516,10 +498,91 @@ const UnifiedComplaintForm: React.FC = () => {
     isAuthenticated,
     user,
     fileMap,
-    openOtpFlow,
     toast,
     navigate,
   ]);
+
+  // Handle OTP verification and final submission
+  const handleVerifyAndSubmit = useCallback(async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter a valid 6-digit verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!complaintId) {
+      toast({
+        title: "Error",
+        description: "Complaint ID not found. Please try submitting again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Verify OTP and auto-register user
+      const result = await dispatch(
+        verifyOTPAndRegister({
+          email: formData.email,
+          otpCode,
+          complaintId,
+        }),
+      ).unwrap();
+
+      // Store auth token and user data
+      if (result.token && result.user) {
+        dispatch(
+          setCredentials({
+            token: result.token,
+            user: result.user,
+          }),
+        );
+        localStorage.setItem("token", result.token);
+      }
+
+      toast({
+        title: "Success!",
+        description: result.isNewUser
+          ? "Your complaint has been verified and your citizen account has been created successfully!"
+          : "Your complaint has been verified and you've been logged in successfully!",
+      });
+
+      // Clear form data and navigate to dashboard
+      dispatch(clearGuestData());
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Invalid verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [
+    otpCode,
+    complaintId,
+    formData.email,
+    dispatch,
+    toast,
+    navigate,
+  ]);
+
+  // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
+  const handleSubmit = useCallback(() => {
+    if (currentStep === 5) {
+      if (submissionMode === "citizen") {
+        return handleSendOtp();
+      } else if (!complaintId) {
+        return handleSendOtp();
+      } else {
+        return handleVerifyAndSubmit();
+      }
+    }
+    return handleSendOtp();
+  }, [currentStep, submissionMode, complaintId, handleSendOtp, handleVerifyAndSubmit]);
 
   // Calculate progress
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
