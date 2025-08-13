@@ -38,9 +38,6 @@ export const protect = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     // Check if JWT_SECRET is properly configured
     if (!process.env.JWT_SECRET) {
       console.error("❌ JWT_SECRET not configured - this is a critical security issue");
@@ -50,6 +47,13 @@ export const protect = asyncHandler(async (req, res, next) => {
         data: { code: "JWT_CONFIG_ERROR" },
       });
     }
+
+    // Verify token with enhanced validation
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      algorithms: ['HS256'], // Explicitly specify allowed algorithms
+      maxAge: process.env.JWT_EXPIRE || '7d', // Validate token age
+      clockTolerance: 60, // Allow 60 seconds clock skew
+    });
 
     // Get user from token with error handling
     let user;
