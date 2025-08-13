@@ -163,13 +163,25 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       dispatch(
         addNotification({
           type: "error",
           title: translations?.common?.error || "Error",
           message: translations?.profile?.passwordMismatch || "Passwords do not match",
+        }),
+      );
+      return;
+    }
+
+    // For password setup, require OTP verification
+    if (!user?.hasPassword && !isOtpVerified) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Verification Required",
+          message: "Please verify your email with OTP first",
         }),
       );
       return;
@@ -187,22 +199,47 @@ const Profile: React.FC = () => {
       return;
     }
 
-    // Mock password change/setup
-    dispatch(
-      addNotification({
-        type: "success",
-        title: translations?.common?.success || "Success",
-        message: !user?.hasPassword
-          ? "Password set up successfully"
-          : (translations?.profile?.passwordChanged || "Password changed successfully"),
-      }),
-    );
+    try {
+      if (!user?.hasPassword) {
+        // Password setup with OTP verification
+        await setPassword({
+          email: user?.email || "",
+          otpCode,
+          newPassword: passwordData.newPassword,
+        }).unwrap();
+      } else {
+        // Regular password change - mock implementation
+      }
 
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+      dispatch(
+        addNotification({
+          type: "success",
+          title: translations?.common?.success || "Success",
+          message: !user?.hasPassword
+            ? "Password set up successfully"
+            : (translations?.profile?.passwordChanged || "Password changed successfully"),
+        }),
+      );
+
+      // Reset form and OTP state
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setOtpStep("none");
+      setOtpCode("");
+      setIsOtpVerified(false);
+
+    } catch (error: any) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: error?.data?.message || "Failed to set password",
+        }),
+      );
+    }
   };
 
 
