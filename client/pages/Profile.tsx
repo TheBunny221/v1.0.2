@@ -98,7 +98,7 @@ const Profile: React.FC = () => {
       dispatch(
         addNotification({
           type: "error",
-          title: translations.common.error,
+          title: translations?.common?.error || "Error",
           message: error instanceof Error ? error.message : "Update failed",
         }),
       );
