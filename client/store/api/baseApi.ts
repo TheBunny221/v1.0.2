@@ -37,22 +37,16 @@ const baseQueryWithReauth: BaseQueryFn<
     const endpoint = typeof args === "string" ? args : args.url;
     const isAuthEndpoint =
       typeof endpoint === "string" &&
-      (endpoint.includes("/auth/login") ||
-        endpoint.includes("/auth/register") ||
-        endpoint.includes("/auth/verify-otp") ||
-        endpoint.includes("/auth/login-otp"));
+      (endpoint.includes("auth/login") ||
+        endpoint.includes("auth/register") ||
+        endpoint.includes("auth/verify-otp") ||
+        endpoint.includes("auth/login-otp"));
 
     if (!isAuthEndpoint) {
-      // Only auto-logout for non-auth endpoints
-      console.warn(
-        "401 Unauthorized detected for non-auth endpoint:",
-        endpoint,
-      );
-
       // Clear auth state
       api.dispatch(logout());
 
-      // Show toast notification (avoid multiple toasts)
+      // Show toast notification
       try {
         toast({
           title: "Session Expired",
@@ -61,25 +55,6 @@ const baseQueryWithReauth: BaseQueryFn<
         });
       } catch (toastError) {
         console.warn("Toast notification failed:", toastError);
-      }
-    }
-  } else if (result.error) {
-    // Log error for analytics
-    const endpoint = typeof args === "string" ? args : args.url;
-    console.warn("API Error:", {
-      endpoint,
-      status: result.error.status,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Set error in auth slice for global error handling (only for server errors)
-    if (typeof result.error.status === "number" && result.error.status >= 500) {
-      try {
-        api.dispatch(
-          setError("A server error occurred. Please try again later."),
-        );
-      } catch (dispatchError) {
-        console.error("Failed to dispatch error:", dispatchError);
       }
     }
   }
