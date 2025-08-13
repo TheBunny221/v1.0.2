@@ -14,18 +14,19 @@ const baseQuery = fetchBaseQuery({
     const token = state.auth.token;
     const localStorageToken = localStorage.getItem("token");
 
+    // Use token from Redux state, fallback to localStorage if Redux token is not available
+    const activeToken = token || localStorageToken;
+
     // Debug token availability
     if (process.env.NODE_ENV === "development") {
       console.log("BaseQuery Debug:", {
         reduxToken: token ? `${token.substring(0, 10)}...` : "null",
         localStorageToken: localStorageToken ? `${localStorageToken.substring(0, 10)}...` : "null",
+        activeToken: activeToken ? `${activeToken.substring(0, 10)}...` : "null",
         isAuthenticated: state.auth.isAuthenticated,
         hasUser: !!state.auth.user,
       });
     }
-
-    // Use token from Redux state, fallback to localStorage
-    const activeToken = token || localStorageToken;
 
     if (activeToken) {
       headers.set("authorization", `Bearer ${activeToken}`);
