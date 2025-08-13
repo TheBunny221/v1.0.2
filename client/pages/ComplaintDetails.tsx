@@ -122,7 +122,7 @@ const ComplaintDetails: React.FC = () => {
         }).unwrap();
 
         // Update centralized store
-        updateStatus(id, newStatus, statusComment);
+        updateComplaintStatus(id, newStatus, statusComment);
 
         setStatusComment("");
       } catch (error) {
