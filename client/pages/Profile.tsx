@@ -300,7 +300,7 @@ const Profile: React.FC = () => {
                     className="bg-orange-600 hover:bg-orange-700"
                     size="sm"
                   >
-                    Set Up Password
+                    Set Up Password Now
                   </Button>
                 </div>
               </div>
