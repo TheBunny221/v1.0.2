@@ -879,11 +879,15 @@ const GuestComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select sub-zone" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableSubZones.map((subZone, index) => (
-                            <SelectItem key={index} value={subZone}>
-                              {subZone}
-                            </SelectItem>
-                          ))}
+                          {availableSubZones.length === 0 ? (
+                            <SelectItem value="" disabled>No sub-zones available</SelectItem>
+                          ) : (
+                            availableSubZones.map((subZone) => (
+                              <SelectItem key={subZone.id} value={subZone.id}>
+                                {subZone.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       {validationErrors.subZoneId && (
