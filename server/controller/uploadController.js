@@ -131,13 +131,25 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
 // @access  Public
 export const getAttachment = asyncHandler(async (req, res) => {
   const { filename } = req.params;
-  const filePath = path.join(
-    process.env.UPLOAD_PATH || "./uploads",
-    filename,
-  );
+  const uploadDir = process.env.UPLOAD_PATH || "./uploads";
+
+  // Try different possible file paths
+  const possiblePaths = [
+    path.join(uploadDir, filename), // Direct in uploads
+    path.join(uploadDir, "complaints", filename), // In complaints subdirectory
+    path.join(uploadDir, "profiles", filename), // In profiles subdirectory
+  ];
+
+  let filePath = null;
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      filePath = possiblePath;
+      break;
+    }
+  }
 
   // Check if file exists on disk
-  if (!fs.existsSync(filePath)) {
+  if (!filePath) {
     return res.status(404).json({
       success: false,
       message: "File not found on server",
