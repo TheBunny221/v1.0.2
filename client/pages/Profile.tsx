@@ -48,7 +48,7 @@ import {
 
 const Profile: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { user, isLoading } = useAppSelector((state) => state.auth);
+  const { user, isLoading, requiresPasswordSetup } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
   const [formData, setFormData] = useState({
