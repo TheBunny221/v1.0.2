@@ -98,7 +98,7 @@ const connectDB = async () => {
         await prisma.$connect();
         
         // Test again
-        await prisma.$executeRaw`SELECT 1;`;
+        await prisma.$queryRaw`SELECT 1 as test;`;
         console.log("✅ Database readonly issue resolved");
       } else {
         throw dbError;
