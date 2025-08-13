@@ -177,6 +177,9 @@ const GuestComplaintForm: React.FC = () => {
   const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
   const wards = wardsResponse?.data || [];
 
+  // RTK Query mutation for form submission
+  const [submitComplaintMutation] = useSubmitGuestComplaintMutation();
+
   // Guest form state
   const currentStep = useAppSelector(selectCurrentStep);
   const steps = useAppSelector(selectSteps);
