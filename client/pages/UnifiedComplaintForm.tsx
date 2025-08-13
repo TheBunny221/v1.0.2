@@ -697,6 +697,10 @@ const UnifiedComplaintForm: React.FC = () => {
               {currentStep === 3 &&
                 "Add images to help us understand the issue (optional)"}
               {currentStep === 4 && "Review all information before submitting"}
+              {currentStep === 5 &&
+                (submissionMode === "citizen"
+                  ? "Submit your complaint to the authorities"
+                  : "Verify your email and submit your complaint")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
