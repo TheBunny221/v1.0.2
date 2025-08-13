@@ -72,7 +72,7 @@ const ComplaintsList: React.FC = () => {
     refetch,
   } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
-  const complaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
