@@ -688,6 +688,7 @@ const UnifiedComplaintForm: React.FC = () => {
               {currentStep === 2 && <MapPin className="h-5 w-5" />}
               {currentStep === 3 && <Camera className="h-5 w-5" />}
               {currentStep === 4 && <CheckCircle className="h-5 w-5" />}
+              {currentStep === 5 && (submissionMode === "citizen" ? <Shield className="h-5 w-5" /> : <Mail className="h-5 w-5" />)}
               {steps[currentStep - 1]?.title}
             </CardTitle>
             <CardDescription>
