@@ -1,528 +1,334 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import {
-  hasPermission,
-  canViewComplaint,
-  DataFilters,
-} from "../../utils/permissions";
-import type { UserRole } from "../../utils/permissions";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// Types
-interface DataState {
+// Types for centralized data management
+export interface CachedData<T = any> {
+  data: T;
+  timestamp: number;
+  isStale?: boolean;
+}
+
+export interface DataState {
   // Complaints data
-  allComplaints: any[];
-  userComplaints: any[];
-  wardComplaints: any[];
-  assignedComplaints: any[];
-
+  complaints: {
+    list: CachedData<any[]> | null;
+    details: Record<string, CachedData<any>>;
+  };
+  
+  // Service requests data
+  serviceRequests: {
+    list: CachedData<any[]> | null;
+    details: Record<string, CachedData<any>>;
+  };
+  
   // Users data
-  allUsers: any[];
-  wardUsers: any[];
-
-  // Analytics data
+  users: {
+    list: CachedData<any[]> | null;
+    profile: CachedData<any> | null;
+  };
+  
+  // Wards and locations
+  locations: {
+    wards: CachedData<any[]> | null;
+    subZones: Record<string, CachedData<any[]>>;
+  };
+  
+  // Configuration data
+  config: {
+    complaintTypes: CachedData<any[]> | null;
+    systemSettings: CachedData<any> | null;
+  };
+  
+  // Statistics and analytics
   analytics: {
-    complaintsStats: any;
-    wardStats: any;
-    userStats: any;
-    slaStats: any;
+    complaintStats: CachedData<any> | null;
+    userStats: CachedData<any> | null;
+    wardStats: Record<string, CachedData<any>>;
   };
-
-  // Loading states
-  loading: {
-    complaints: boolean;
-    users: boolean;
-    analytics: boolean;
-  };
-
-  // Error states
-  errors: {
-    complaints: string | null;
-    users: string | null;
-    analytics: string | null;
-  };
-
-  // Last updated timestamps
-  lastUpdated: {
-    complaints: number | null;
-    users: number | null;
-    analytics: number | null;
+  
+  // Status tracking
+  statusTracking: {
+    activeComplaints: CachedData<any[]> | null;
+    recentUpdates: CachedData<any[]> | null;
   };
 }
 
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 const initialState: DataState = {
-  allComplaints: [],
-  userComplaints: [],
-  wardComplaints: [],
-  assignedComplaints: [],
-  allUsers: [],
-  wardUsers: [],
+  complaints: {
+    list: null,
+    details: {},
+  },
+  serviceRequests: {
+    list: null,
+    details: {},
+  },
+  users: {
+    list: null,
+    profile: null,
+  },
+  locations: {
+    wards: null,
+    subZones: {},
+  },
+  config: {
+    complaintTypes: null,
+    systemSettings: null,
+  },
   analytics: {
-    complaintsStats: null,
-    wardStats: null,
+    complaintStats: null,
     userStats: null,
-    slaStats: null,
+    wardStats: {},
   },
-  loading: {
-    complaints: false,
-    users: false,
-    analytics: false,
-  },
-  errors: {
-    complaints: null,
-    users: null,
-    analytics: null,
-  },
-  lastUpdated: {
-    complaints: null,
-    users: null,
-    analytics: null,
+  statusTracking: {
+    activeComplaints: null,
+    recentUpdates: null,
   },
 };
 
-// Helper function for API calls
-const apiCall = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  });
-
-  // Check if response is JSON
-  const contentType = response.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
-
-  let data = null;
-  if (isJson) {
-    try {
-      data = await response.json();
-    } catch (error) {
-      throw new Error("Failed to parse server response");
-    }
-  } else {
-    // Non-JSON response (likely HTML error page)
-    const text = await response.text();
-    if (text.includes("<!doctype") || text.includes("<html")) {
-      throw new Error("Authentication required. Please log in and try again.");
-    } else {
-      throw new Error("Server returned unexpected response format");
-    }
-  }
-
-  if (!response.ok) {
-    throw new Error(data?.message || `HTTP ${response.status}`);
-  }
-
-  return data.data;
-};
-
-// Async thunks
-export const fetchAllComplaints = createAsyncThunk(
-  "data/fetchAllComplaints",
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const complaints = await apiCall("/api/complaints");
-
-      // Filter complaints based on user permissions
-      const filteredComplaints = DataFilters.filterComplaints(
-        complaints,
-        user.role as UserRole,
-        user.id,
-        user.wardId,
-      );
-
-      return {
-        allComplaints: complaints,
-        filteredComplaints,
-        userRole: user.role,
-        userId: user.id,
-        userWardId: user.wardId,
-      };
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch complaints",
-      );
-    }
-  },
-);
-
-export const fetchUserComplaints = createAsyncThunk(
-  "data/fetchUserComplaints",
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const complaints = await apiCall(`/api/complaints/user/${user.id}`);
-      return complaints;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user complaints",
-      );
-    }
-  },
-);
-
-export const fetchWardComplaints = createAsyncThunk(
-  "data/fetchWardComplaints",
-  async (wardId: string, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user || !hasPermission(user.role, "complaint:view:ward")) {
-        throw new Error("Insufficient permissions");
-      }
-
-      const complaints = await apiCall(`/api/complaints/ward/${wardId}`);
-      return complaints;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch ward complaints",
-      );
-    }
-  },
-);
-
-export const fetchAssignedComplaints = createAsyncThunk(
-  "data/fetchAssignedComplaints",
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const complaints = await apiCall(`/api/complaints/assigned/${user.id}`);
-      return complaints;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch assigned complaints",
-      );
-    }
-  },
-);
-
-export const fetchAllUsers = createAsyncThunk(
-  "data/fetchAllUsers",
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user || !hasPermission(user.role, "user:view:all")) {
-        throw new Error("Insufficient permissions");
-      }
-
-      const users = await apiCall("/api/users");
-      return users;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch users",
-      );
-    }
-  },
-);
-
-export const fetchWardUsers = createAsyncThunk(
-  "data/fetchWardUsers",
-  async (wardId: string, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user || !hasPermission(user.role, "ward:manage")) {
-        throw new Error("Insufficient permissions");
-      }
-
-      const users = await apiCall(`/api/users/ward/${wardId}`);
-      return users;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch ward users",
-      );
-    }
-  },
-);
-
-export const fetchAnalytics = createAsyncThunk(
-  "data/fetchAnalytics",
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-
-      if (!user || !hasPermission(user.role, "system:analytics")) {
-        throw new Error("Insufficient permissions");
-      }
-
-      const [complaintsStats, wardStats, userStats, slaStats] =
-        await Promise.all([
-          apiCall("/api/analytics/complaints"),
-          apiCall("/api/analytics/wards"),
-          apiCall("/api/analytics/users"),
-          apiCall("/api/analytics/sla"),
-        ]);
-
-      return {
-        complaintsStats,
-        wardStats,
-        userStats,
-        slaStats,
-      };
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch analytics",
-      );
-    }
-  },
-);
-
-// Update complaint with role-based validation
-export const updateComplaint = createAsyncThunk(
-  "data/updateComplaint",
-  async (
-    { complaintId, updates }: { complaintId: string; updates: any },
-    { getState, rejectWithValue },
-  ) => {
-    try {
-      const state = getState() as any;
-      const user = state.auth.user;
-      const complaint = state.data.allComplaints.find(
-        (c: any) => c.id === complaintId,
-      );
-
-      if (!user || !complaint) {
-        throw new Error("User not authenticated or complaint not found");
-      }
-
-      // Check permissions before update
-      const canModify =
-        hasPermission(user.role, "complaint:update:all") ||
-        (hasPermission(user.role, "complaint:update:own") &&
-          complaint.submittedById === user.id) ||
-        (hasPermission(user.role, "complaint:update:ward") &&
-          complaint.wardId === user.wardId) ||
-        (hasPermission(user.role, "complaint:update:own") &&
-          complaint.assignedToId === user.id);
-
-      if (!canModify) {
-        throw new Error("Insufficient permissions to update this complaint");
-      }
-
-      const updatedComplaint = await apiCall(`/api/complaints/${complaintId}`, {
-        method: "PUT",
-        body: JSON.stringify(updates),
-      });
-
-      return updatedComplaint;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update complaint",
-      );
-    }
-  },
-);
-
-// Data slice
 const dataSlice = createSlice({
-  name: "data",
+  name: 'data',
   initialState,
   reducers: {
-    clearErrors: (state) => {
-      state.errors = {
-        complaints: null,
-        users: null,
-        analytics: null,
+    // Complaints management
+    setComplaintsList: (state, action: PayloadAction<any[]>) => {
+      state.complaints.list = {
+        data: action.payload,
+        timestamp: Date.now(),
       };
     },
-
-    clearComplaintsCache: (state) => {
-      state.allComplaints = [];
-      state.userComplaints = [];
-      state.wardComplaints = [];
-      state.assignedComplaints = [];
-      state.lastUpdated.complaints = null;
-    },
-
-    clearUsersCache: (state) => {
-      state.allUsers = [];
-      state.wardUsers = [];
-      state.lastUpdated.users = null;
-    },
-
-    clearAnalyticsCache: (state) => {
-      state.analytics = {
-        complaintsStats: null,
-        wardStats: null,
-        userStats: null,
-        slaStats: null,
+    
+    setComplaintDetails: (state, action: PayloadAction<{ id: string; data: any }>) => {
+      state.complaints.details[action.payload.id] = {
+        data: action.payload.data,
+        timestamp: Date.now(),
       };
-      state.lastUpdated.analytics = null;
     },
-
-    // Optimistic updates for better UX
-    optimisticComplaintUpdate: (
-      state,
-      action: PayloadAction<{ id: string; updates: any }>,
-    ) => {
+    
+    updateComplaintInList: (state, action: PayloadAction<{ id: string; updates: Partial<any> }>) => {
       const { id, updates } = action.payload;
-
-      // Update in all relevant arrays
-      const updateComplaintInArray = (complaints: any[]) => {
-        const index = complaints.findIndex((c) => c.id === id);
+      
+      // Update in list if exists
+      if (state.complaints.list?.data) {
+        const index = state.complaints.list.data.findIndex(complaint => complaint.id === id);
         if (index !== -1) {
-          complaints[index] = { ...complaints[index], ...updates };
+          state.complaints.list.data[index] = { ...state.complaints.list.data[index], ...updates };
         }
-      };
-
-      updateComplaintInArray(state.allComplaints);
-      updateComplaintInArray(state.userComplaints);
-      updateComplaintInArray(state.wardComplaints);
-      updateComplaintInArray(state.assignedComplaints);
+      }
+      
+      // Update in details if exists
+      if (state.complaints.details[id]) {
+        state.complaints.details[id].data = { ...state.complaints.details[id].data, ...updates };
+      }
     },
-  },
-
-  extraReducers: (builder) => {
-    // Fetch all complaints
-    builder
-      .addCase(fetchAllComplaints.pending, (state) => {
-        state.loading.complaints = true;
-        state.errors.complaints = null;
-      })
-      .addCase(fetchAllComplaints.fulfilled, (state, action) => {
-        state.loading.complaints = false;
-        state.allComplaints = action.payload.filteredComplaints;
-        state.lastUpdated.complaints = Date.now();
-      })
-      .addCase(fetchAllComplaints.rejected, (state, action) => {
-        state.loading.complaints = false;
-        state.errors.complaints = action.payload as string;
-      });
-
-    // Fetch user complaints
-    builder.addCase(fetchUserComplaints.fulfilled, (state, action) => {
-      state.userComplaints = action.payload;
-    });
-
-    // Fetch ward complaints
-    builder.addCase(fetchWardComplaints.fulfilled, (state, action) => {
-      state.wardComplaints = action.payload;
-    });
-
-    // Fetch assigned complaints
-    builder.addCase(fetchAssignedComplaints.fulfilled, (state, action) => {
-      state.assignedComplaints = action.payload;
-    });
-
-    // Fetch all users
-    builder
-      .addCase(fetchAllUsers.pending, (state) => {
-        state.loading.users = true;
-        state.errors.users = null;
-      })
-      .addCase(fetchAllUsers.fulfilled, (state, action) => {
-        state.loading.users = false;
-        state.allUsers = action.payload;
-        state.lastUpdated.users = Date.now();
-      })
-      .addCase(fetchAllUsers.rejected, (state, action) => {
-        state.loading.users = false;
-        state.errors.users = action.payload as string;
-      });
-
-    // Fetch ward users
-    builder.addCase(fetchWardUsers.fulfilled, (state, action) => {
-      state.wardUsers = action.payload;
-    });
-
-    // Fetch analytics
-    builder
-      .addCase(fetchAnalytics.pending, (state) => {
-        state.loading.analytics = true;
-        state.errors.analytics = null;
-      })
-      .addCase(fetchAnalytics.fulfilled, (state, action) => {
-        state.loading.analytics = false;
-        state.analytics = action.payload;
-        state.lastUpdated.analytics = Date.now();
-      })
-      .addCase(fetchAnalytics.rejected, (state, action) => {
-        state.loading.analytics = false;
-        state.errors.analytics = action.payload as string;
-      });
-
-    // Update complaint
-    builder.addCase(updateComplaint.fulfilled, (state, action) => {
-      // Update the complaint in all relevant arrays
-      const updatedComplaint = action.payload;
-      const updateInArray = (complaints: any[]) => {
-        const index = complaints.findIndex((c) => c.id === updatedComplaint.id);
-        if (index !== -1) {
-          complaints[index] = updatedComplaint;
-        }
+    
+    // Service requests management
+    setServiceRequestsList: (state, action: PayloadAction<any[]>) => {
+      state.serviceRequests.list = {
+        data: action.payload,
+        timestamp: Date.now(),
       };
-
-      updateInArray(state.allComplaints);
-      updateInArray(state.userComplaints);
-      updateInArray(state.wardComplaints);
-      updateInArray(state.assignedComplaints);
-    });
+    },
+    
+    setServiceRequestDetails: (state, action: PayloadAction<{ id: string; data: any }>) => {
+      state.serviceRequests.details[action.payload.id] = {
+        data: action.payload.data,
+        timestamp: Date.now(),
+      };
+    },
+    
+    // Users management
+    setUsersList: (state, action: PayloadAction<any[]>) => {
+      state.users.list = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    setUserProfile: (state, action: PayloadAction<any>) => {
+      state.users.profile = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    // Locations management
+    setWards: (state, action: PayloadAction<any[]>) => {
+      state.locations.wards = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    setSubZones: (state, action: PayloadAction<{ wardId: string; data: any[] }>) => {
+      state.locations.subZones[action.payload.wardId] = {
+        data: action.payload.data,
+        timestamp: Date.now(),
+      };
+    },
+    
+    // Configuration management
+    setComplaintTypes: (state, action: PayloadAction<any[]>) => {
+      state.config.complaintTypes = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    setSystemSettings: (state, action: PayloadAction<any>) => {
+      state.config.systemSettings = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    // Analytics management
+    setComplaintStats: (state, action: PayloadAction<any>) => {
+      state.analytics.complaintStats = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    setUserStats: (state, action: PayloadAction<any>) => {
+      state.analytics.userStats = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    setWardStats: (state, action: PayloadAction<{ wardId: string; data: any }>) => {
+      state.analytics.wardStats[action.payload.wardId] = {
+        data: action.payload.data,
+        timestamp: Date.now(),
+      };
+    },
+    
+    // Status tracking management
+    setActiveComplaints: (state, action: PayloadAction<any[]>) => {
+      state.statusTracking.activeComplaints = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    setRecentUpdates: (state, action: PayloadAction<any[]>) => {
+      state.statusTracking.recentUpdates = {
+        data: action.payload,
+        timestamp: Date.now(),
+      };
+    },
+    
+    // Cache management
+    markDataAsStale: (state, action: PayloadAction<string>) => {
+      const path = action.payload.split('.');
+      let current: any = state;
+      
+      for (let i = 0; i < path.length - 1; i++) {
+        current = current[path[i]];
+        if (!current) return;
+      }
+      
+      const final = current[path[path.length - 1]];
+      if (final && typeof final === 'object' && 'isStale' in final) {
+        final.isStale = true;
+      }
+    },
+    
+    clearStaleData: (state) => {
+      const now = Date.now();
+      
+      // Helper function to check and clear stale data
+      const clearIfStale = (cached: CachedData<any> | null) => {
+        if (cached && (now - cached.timestamp > CACHE_TTL || cached.isStale)) {
+          return null;
+        }
+        return cached;
+      };
+      
+      // Clear stale data across all sections
+      state.complaints.list = clearIfStale(state.complaints.list);
+      state.serviceRequests.list = clearIfStale(state.serviceRequests.list);
+      state.users.list = clearIfStale(state.users.list);
+      state.users.profile = clearIfStale(state.users.profile);
+      state.locations.wards = clearIfStale(state.locations.wards);
+      state.config.complaintTypes = clearIfStale(state.config.complaintTypes);
+      state.config.systemSettings = clearIfStale(state.config.systemSettings);
+      state.analytics.complaintStats = clearIfStale(state.analytics.complaintStats);
+      state.analytics.userStats = clearIfStale(state.analytics.userStats);
+      
+      // Clear stale details
+      Object.keys(state.complaints.details).forEach(id => {
+        const cached = state.complaints.details[id];
+        if (now - cached.timestamp > CACHE_TTL || cached.isStale) {
+          delete state.complaints.details[id];
+        }
+      });
+      
+      Object.keys(state.serviceRequests.details).forEach(id => {
+        const cached = state.serviceRequests.details[id];
+        if (now - cached.timestamp > CACHE_TTL || cached.isStale) {
+          delete state.serviceRequests.details[id];
+        }
+      });
+    },
+    
+    clearAllData: (state) => {
+      return initialState;
+    },
   },
 });
 
 export const {
-  clearErrors,
-  clearComplaintsCache,
-  clearUsersCache,
-  clearAnalyticsCache,
-  optimisticComplaintUpdate,
+  setComplaintsList,
+  setComplaintDetails,
+  updateComplaintInList,
+  setServiceRequestsList,
+  setServiceRequestDetails,
+  setUsersList,
+  setUserProfile,
+  setWards,
+  setSubZones,
+  setComplaintTypes,
+  setSystemSettings,
+  setComplaintStats,
+  setUserStats,
+  setWardStats,
+  setActiveComplaints,
+  setRecentUpdates,
+  markDataAsStale,
+  clearStaleData,
+  clearAllData,
 } = dataSlice.actions;
 
-// Selectors with role-based filtering
-export const selectFilteredComplaints = (state: any) => {
-  const { user } = state.auth;
-  const { allComplaints } = state.data;
+// Selectors for easy data access
+export const selectComplaintsList = (state: { data: DataState }) => state.data.complaints.list;
+export const selectComplaintDetails = (id: string) => (state: { data: DataState }) => 
+  state.data.complaints.details[id];
+export const selectWards = (state: { data: DataState }) => state.data.locations.wards;
+export const selectSubZones = (wardId: string) => (state: { data: DataState }) => 
+  state.data.locations.subZones[wardId];
+export const selectComplaintTypes = (state: { data: DataState }) => state.data.config.complaintTypes;
+export const selectComplaintStats = (state: { data: DataState }) => state.data.analytics.complaintStats;
+export const selectActiveComplaints = (state: { data: DataState }) => state.data.statusTracking.activeComplaints;
+export const selectRecentUpdates = (state: { data: DataState }) => state.data.statusTracking.recentUpdates;
 
-  if (!user) return [];
-
-  return DataFilters.filterComplaints(
-    allComplaints,
-    user.role as UserRole,
-    user.id,
-    user.wardId,
-  );
+// Helper selectors for checking data freshness
+export const selectIsDataFresh = (dataPath: string) => (state: { data: DataState }) => {
+  const path = dataPath.split('.');
+  let current: any = state.data;
+  
+  for (const segment of path) {
+    current = current[segment];
+    if (!current) return false;
+  }
+  
+  if (!current || typeof current !== 'object' || !('timestamp' in current)) {
+    return false;
+  }
+  
+  const now = Date.now();
+  return (now - current.timestamp < CACHE_TTL) && !current.isStale;
 };
-
-export const selectUserComplaints = (state: any) => state.data.userComplaints;
-export const selectWardComplaints = (state: any) => state.data.wardComplaints;
-export const selectAssignedComplaints = (state: any) =>
-  state.data.assignedComplaints;
-export const selectAllUsers = (state: any) => state.data.allUsers;
-export const selectWardUsers = (state: any) => state.data.wardUsers;
-export const selectAnalytics = (state: any) => state.data.analytics;
-export const selectDataLoading = (state: any) => state.data.loading;
-export const selectDataErrors = (state: any) => state.data.errors;
 
 export default dataSlice.reducer;
