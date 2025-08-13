@@ -48,10 +48,18 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     const initializeApp = async () => {
       try {
         // Initialize theme
-        dispatch(initializeTheme());
+        try {
+          dispatch(initializeTheme());
+        } catch (themeError) {
+          console.warn("Theme initialization failed:", themeError);
+        }
 
         // Initialize language
-        dispatch(initializeLanguage());
+        try {
+          dispatch(initializeLanguage());
+        } catch (langError) {
+          console.warn("Language initialization failed:", langError);
+        }
 
         // Handle auto-login based on token and user query result
         if (hasValidToken) {
