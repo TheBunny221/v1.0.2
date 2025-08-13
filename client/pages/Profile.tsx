@@ -478,6 +478,55 @@ const Profile: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* OTP Verification for Password Setup */}
+              {!user?.hasPassword && (
+                <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-blue-900">Email Verification Required</h4>
+                    <p className="text-sm text-blue-700">
+                      To set up your password, we need to verify your email address first.
+                    </p>
+                  </div>
+
+                  {otpStep === "none" && (
+                    <Button
+                      onClick={handleSendOTP}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                    >
+                      Send OTP to {user?.email}
+                    </Button>
+                  )}
+
+                  {otpStep === "sent" && !isOtpVerified && (
+                    <div className="space-y-2">
+                      <Label htmlFor="otpCode">Enter OTP Code</Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          id="otpCode"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          placeholder="Enter 6-digit OTP"
+                          maxLength={6}
+                          className="flex-1"
+                        />
+                        <Button onClick={handleVerifyOTP}>
+                          Verify
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Check your email for the OTP code. (Demo: use 123456)
+                      </p>
+                    </div>
+                  )}
+
+                  {isOtpVerified && (
+                    <div className="flex items-center space-x-2 text-green-700">
+                      <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium">Email verified! You can now set your password below.</span>
+                    </div>
+                  )}
+                </div>
+              )}
               {user?.hasPassword && (
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">
