@@ -638,11 +638,23 @@ const guestSlice = createSlice({
           break;
         case 4:
           // Review step - validate all previous steps
+          const step1Errors = validateStep1(state.formData);
+          const step2Errors = validateStep2(state.formData);
+          const step3Errors = validateStep3(state.formData);
+
           errors = {
-            ...validateStep1(state.formData),
-            ...validateStep2(state.formData),
-            ...validateStep3(state.formData),
+            ...step1Errors,
+            ...step2Errors,
+            ...step3Errors,
           };
+
+          // Update previous steps' validity
+          state.steps[0].isValid = Object.keys(step1Errors).length === 0;
+          state.steps[0].isCompleted = state.steps[0].isValid;
+          state.steps[1].isValid = Object.keys(step2Errors).length === 0;
+          state.steps[1].isCompleted = state.steps[1].isValid;
+          state.steps[2].isValid = Object.keys(step3Errors).length === 0;
+          state.steps[2].isCompleted = state.steps[2].isValid;
           break;
       }
 
