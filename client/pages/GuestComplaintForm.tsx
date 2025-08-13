@@ -38,7 +38,7 @@ import {
 } from "../store/slices/guestSlice";
 import { getApiErrorMessage } from "../store/api/baseApi";
 import { useOtpFlow } from "../contexts/OtpContext";
-import { useGetWardsQuery } from "../store/api/guestApi";
+import { useGetWardsQuery, useSubmitGuestComplaintMutation } from "../store/api/guestApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
