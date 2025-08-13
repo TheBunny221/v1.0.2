@@ -132,17 +132,38 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           // If still loading, we'll wait for the query to complete
         }
 
-        // Setup online/offline listeners
-        const handleOnline = () => dispatch(setOnlineStatus(true));
-        const handleOffline = () => dispatch(setOnlineStatus(false));
+        // Setup online/offline listeners with error handling
+        const handleOnline = () => {
+          try {
+            dispatch(setOnlineStatus(true));
+          } catch (error) {
+            console.warn("Failed to update online status:", error);
+          }
+        };
 
-        window.addEventListener("online", handleOnline);
-        window.addEventListener("offline", handleOffline);
+        const handleOffline = () => {
+          try {
+            dispatch(setOnlineStatus(false));
+          } catch (error) {
+            console.warn("Failed to update offline status:", error);
+          }
+        };
+
+        try {
+          window.addEventListener("online", handleOnline);
+          window.addEventListener("offline", handleOffline);
+        } catch (listenerError) {
+          console.warn("Failed to add online/offline listeners:", listenerError);
+        }
 
         // Cleanup function
         return () => {
-          window.removeEventListener("online", handleOnline);
-          window.removeEventListener("offline", handleOffline);
+          try {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+          } catch (cleanupError) {
+            console.warn("Failed to remove event listeners:", cleanupError);
+          }
         };
       } finally {
         // Only set initialized when we're done with the user query (or don't need it)
