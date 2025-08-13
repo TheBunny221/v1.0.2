@@ -111,19 +111,24 @@ const SetPassword: React.FC = () => {
     }
 
     try {
-      await dispatch(
-        setPassword({
-          token,
-          password,
-        }),
-      ).unwrap();
+      await setPasswordMutation({
+        token: token!,
+        password,
+      }).unwrap();
 
       toast({
         title: "Password Set Successfully",
         description: "You are now logged in and can access your account.",
       });
+
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (error: any) {
-      // Error is handled by the reducer
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to set password. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
