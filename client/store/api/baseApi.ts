@@ -7,29 +7,29 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Use standard fetchBaseQuery with proper auth handling
-const baseQuery = fetchBaseQuery({
-  baseUrl: '/api/',
-  prepareHeaders: (headers, { getState }) => {
-    const state = getState() as any;
-    const token = state.auth.token || localStorage.getItem("token");
-
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-
-    return headers;
-  },
-  timeout: 30000,
-});
-
-// Enhanced base query with 401 auto-logout handling and error handling
+// Robust base query that handles all edge cases properly
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
+  // Use the built-in fetchBaseQuery for each request to avoid response body conflicts
+  const baseQuery = fetchBaseQuery({
+    baseUrl: '/api/',
+    prepareHeaders: (headers) => {
+      const state = api.getState() as any;
+      const token = state.auth.token || localStorage.getItem("token");
+
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
+      return headers;
+    },
+    timeout: 30000,
+  });
+
+  let result = await baseQuery(args, api, extraOptions);
 
   // Handle 401 unauthorized responses
   if (result.error && result.error.status === 401) {
