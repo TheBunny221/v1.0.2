@@ -77,13 +77,13 @@ const connectDB = async () => {
     
     // Run a simple query to verify read/write access
     try {
-      await prisma.$executeRaw`SELECT 1;`;
+      await prisma.$queryRaw`SELECT 1 as test;`;
       console.log("✅ Database read access verified");
-      
+
       // Test write access by checking if we can perform a transaction
       await prisma.$transaction(async (tx) => {
         // This is a no-op transaction just to test write access
-        await tx.$executeRaw`SELECT 1;`;
+        await tx.$queryRaw`SELECT 1 as test;`;
       });
       console.log("✅ Database write access verified");
       
