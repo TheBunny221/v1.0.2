@@ -830,6 +830,7 @@ const CitizenComplaintForm: React.FC = () => {
                       accept="image/*"
                       className="hidden"
                       id="file-upload"
+                      onChange={handleFileUpload}
                     />
                     <Label
                       htmlFor="file-upload"
