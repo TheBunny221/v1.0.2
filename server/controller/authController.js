@@ -162,71 +162,130 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Find user
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: {
-      ward: true,
-    },
-  });
-
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid credentials",
-      data: null,
-    });
-  }
-
-  // Check if user is active
-  if (!user.isActive) {
-    return res.status(401).json({
-      success: false,
-      message: "Account is deactivated. Please contact support.",
-      data: null,
-    });
-  }
-
-  // Check if password is set
-  if (!user.password) {
+  // Validate input
+  if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: "Password not set. Please use OTP login or set your password.",
-      data: { requiresPasswordSetup: true },
-    });
-  }
-
-  // Check password
-  const isPasswordMatch = await comparePassword(password, user.password);
-
-  if (!isPasswordMatch) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid credentials",
+      message: "Email and password are required",
       data: null,
     });
   }
 
-  // Update last login
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { lastLogin: new Date() },
-  });
+  try {
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        ward: true,
+      },
+    });
 
-  // Generate JWT token
-  const token = generateJWTToken(user);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+        data: null,
+      });
+    }
 
-  // Remove password from response
-  const { password: _, ...userResponse } = user;
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: "Account is deactivated. Please contact support.",
+        data: null,
+      });
+    }
 
-  res.status(200).json({
-    success: true,
-    message: "Login successful",
-    data: {
-      user: userResponse,
-      token,
-    },
-  });
+    // Check if password is set
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password not set. Please use OTP login or set your password.",
+        data: { requiresPasswordSetup: true },
+      });
+    }
+
+    // Check password
+    const isPasswordMatch = await comparePassword(password, user.password);
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+        data: null,
+      });
+    }
+
+    // Update last login with retry logic for readonly database issues
+    let updateSuccess = false;
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (!updateSuccess && retryCount < maxRetries) {
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLogin: new Date() },
+        });
+        updateSuccess = true;
+      } catch (updateError) {
+        retryCount++;
+        console.warn(`Login update attempt ${retryCount} failed:`, updateError.message);
+
+        if (updateError.message.includes("readonly") || updateError.message.includes("READONLY")) {
+          // For readonly database, continue with login but log the issue
+          console.error("��� Database is readonly - cannot update last login timestamp");
+          console.error("🔧 This indicates a database permission issue that needs immediate attention");
+          break; // Don't retry for readonly errors
+        }
+
+        if (retryCount >= maxRetries) {
+          console.error(`❌ Failed to update last login after ${maxRetries} attempts`);
+          // Continue with login even if update fails
+        } else {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+        }
+      }
+    }
+
+    // Generate JWT token
+    const token = generateJWTToken(user);
+
+    // Remove password from response
+    const { password: _, ...userResponse } = user;
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        user: userResponse,
+        token,
+        ...(updateSuccess ? {} : { warning: "Login successful but user data update failed" })
+      },
+    });
+  } catch (error) {
+    console.error("❌ Login error:", error);
+
+    // Handle specific database errors
+    if (error.message.includes("readonly") || error.message.includes("READONLY")) {
+      return res.status(503).json({
+        success: false,
+        message: "Service temporarily unavailable due to database maintenance. Please try again later.",
+        data: {
+          error: "DATABASE_READONLY",
+          retryAfter: 60 // seconds
+        },
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Login failed due to server error. Please try again.",
+      data: null,
+    });
+  }
 });
 
 // @desc    Login user with OTP
