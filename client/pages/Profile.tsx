@@ -204,7 +204,7 @@ const Profile: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="preferences">
-            {translations.profile.preferences}
+            {translations?.profile?.preferences || "Preferences"}
           </TabsTrigger>
         </TabsList>
 
