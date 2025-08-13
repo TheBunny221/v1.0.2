@@ -38,6 +38,9 @@
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "@prisma/client": "^5.7.1",
     "@reduxjs/toolkit": "^2.8.2",

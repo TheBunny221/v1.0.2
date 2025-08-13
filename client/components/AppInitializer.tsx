@@ -5,6 +5,19 @@ import { initializeLanguage } from "../store/slices/languageSlice";
 import { initializeTheme, setOnlineStatus } from "../store/slices/uiSlice";
 import { useGetCurrentUserQuery } from "../store/api/authApi";
 
+// Error logging utility
+const logAuthError = (context: string, error: any) => {
+  console.group(`🔐 Auth Error - ${context}`);
+  console.error("Error:", error);
+  if (error?.data) {
+    console.error("Error Data:", error.data);
+  }
+  if (error?.status) {
+    console.error("HTTP Status:", error.status);
+  }
+  console.groupEnd();
+};
+
 interface AppInitializerProps {
   children: React.ReactNode;
 }
@@ -35,10 +48,18 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     const initializeApp = async () => {
       try {
         // Initialize theme
-        dispatch(initializeTheme());
+        try {
+          dispatch(initializeTheme());
+        } catch (themeError) {
+          console.warn("Theme initialization failed:", themeError);
+        }
 
         // Initialize language
-        dispatch(initializeLanguage());
+        try {
+          dispatch(initializeLanguage());
+        } catch (langError) {
+          console.warn("Language initialization failed:", langError);
+        }
 
         // Handle auto-login based on token and user query result
         if (hasValidToken) {
@@ -54,9 +75,61 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
               }),
             );
           } else if (userError) {
-            // Token is invalid or expired - clear it
+            // Handle different types of auth errors
+            const error = userError as any;
+            const errorData = "data" in error ? error.data : null;
+
+            logAuthError("User Query Failed", error);
+
+            // Handle specific error types
+            const errorCode = errorData?.data?.code;
+            const isServerError = error.status >= 500;
+            const isDatabaseError =
+              errorCode === "DATABASE_READONLY" ||
+              errorCode === "DATABASE_ERROR";
+
+            if (isDatabaseError || isServerError) {
+              console.warn(
+                "🚨 Server/Database issue detected - not clearing user credentials",
+              );
+              console.log(
+                "User can continue with cached data until server recovers",
+              );
+
+              // Don't clear credentials for server issues - user might be able to continue
+              // with cached data until the server recovers
+              setIsInitialized(true);
+              return;
+            }
+
+            // Clear invalid credentials for client errors
             dispatch(clearCredentials());
-            console.warn("Invalid token removed:", userError);
+            localStorage.removeItem("token");
+
+            // Log specific error types for debugging
+            if (errorCode) {
+              console.log(`📋 Handling auth error: ${errorCode}`);
+
+              switch (errorCode) {
+                case "TOKEN_EXPIRED":
+                  console.log("🕒 Token expired, user needs to login again");
+                  break;
+                case "TOKEN_INVALID":
+                case "TOKEN_MALFORMED":
+                  console.log("🔍 Invalid token format, clearing credentials");
+                  break;
+                case "USER_NOT_FOUND":
+                  console.log("👤 User account no longer exists");
+                  break;
+                case "ACCOUNT_DEACTIVATED":
+                  console.log("🚫 User account has been deactivated");
+                  break;
+                default:
+                  console.log("❓ Unknown authentication error");
+              }
+            }
+
+            console.log("✅ Invalid token cleared successfully");
           } else if (token && !reduxAuth.token) {
             // Have token in localStorage but not in Redux - sync it
             console.log("Syncing token from localStorage to Redux");
@@ -65,17 +138,41 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           // If still loading, we'll wait for the query to complete
         }
 
-        // Setup online/offline listeners
-        const handleOnline = () => dispatch(setOnlineStatus(true));
-        const handleOffline = () => dispatch(setOnlineStatus(false));
+        // Setup online/offline listeners with error handling
+        const handleOnline = () => {
+          try {
+            dispatch(setOnlineStatus(true));
+          } catch (error) {
+            console.warn("Failed to update online status:", error);
+          }
+        };
 
-        window.addEventListener("online", handleOnline);
-        window.addEventListener("offline", handleOffline);
+        const handleOffline = () => {
+          try {
+            dispatch(setOnlineStatus(false));
+          } catch (error) {
+            console.warn("Failed to update offline status:", error);
+          }
+        };
+
+        try {
+          window.addEventListener("online", handleOnline);
+          window.addEventListener("offline", handleOffline);
+        } catch (listenerError) {
+          console.warn(
+            "Failed to add online/offline listeners:",
+            listenerError,
+          );
+        }
 
         // Cleanup function
         return () => {
-          window.removeEventListener("online", handleOnline);
-          window.removeEventListener("offline", handleOffline);
+          try {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+          } catch (cleanupError) {
+            console.warn("Failed to remove event listeners:", cleanupError);
+          }
         };
       } finally {
         // Only set initialized when we're done with the user query (or don't need it)

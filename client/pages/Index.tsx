@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { createComplaint } from "../store/slices/complaintsSlice";
+import { createComplaint, ComplaintType, Priority } from "../store/slices/complaintsSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -47,7 +47,7 @@ import {
 
 const Index: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isSubmitting } = useAppSelector((state) => state.complaints);
+  const { isLoading } = useAppSelector((state) => state.complaints);
   const { translations, currentLanguage } = useAppSelector(
     (state) => state.language,
   );
@@ -184,23 +184,22 @@ const Index: React.FC = () => {
     }
 
     try {
-      const complaintData = {
-        type: formData.problemType as any,
+      const complaintDataForAPI = {
+        title: `${formData.problemType} complaint`,
         description: formData.description,
-        contactInfo: {
-          mobile: formData.mobile,
-          email: formData.email || undefined,
-        },
-        location: {
-          ward: formData.ward,
-          area: formData.area,
-          address: formData.address || undefined,
-          landmark: formData.location || undefined,
-        },
+        type: formData.problemType as ComplaintType,
+        priority: "MEDIUM" as Priority,
+        wardId: formData.ward,
+        area: formData.area,
+        landmark: formData.location,
+        address: formData.address,
+        contactName: isAuthenticated && user ? user.fullName : "Guest",
+        contactEmail: formData.email || (isAuthenticated && user ? user.email : ""),
+        contactPhone: formData.mobile,
         isAnonymous: !isAuthenticated,
       };
 
-      const result = await dispatch(createComplaint(complaintData)).unwrap();
+      const result = await dispatch(createComplaint(complaintDataForAPI)).unwrap();
 
       dispatch(
         showSuccessToast(
@@ -651,9 +650,9 @@ const Index: React.FC = () => {
                   <Button
                     type="submit"
                     className="flex-1 md:flex-none"
-                    disabled={isSubmitting}
+                    disabled={isLoading}
                   >
-                    {isSubmitting
+                    {isLoading
                       ? translations?.common?.loading || "Submitting..."
                       : translations?.forms?.submitComplaint ||
                         "Submit Complaint"}
@@ -686,23 +685,21 @@ const Index: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>
-                      {translations?.dashboard?.totalComplaints ||
-                        "Total Complaints"}
+                      Total Complaints
                       :
                     </span>
                     <span className="font-semibold">12,456</span>
                   </div>
                   <div className="flex justify-between">
                     <span>
-                      {translations?.dashboard?.resolvedToday ||
-                        "Resolved This Month"}
+                      Resolved This Month
                       :
                     </span>
                     <span className="font-semibold text-green-600">1,234</span>
                   </div>
                   <div className="flex justify-between">
                     <span>
-                      {translations?.common?.average || "Average Resolution"}:
+                      Average Resolution:
                     </span>
                     <span className="font-semibold">
                       3.2 {translations?.common?.date || "days"}
@@ -710,8 +707,7 @@ const Index: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>
-                      {translations?.dashboard?.overallCompliance ||
-                        "Success Rate"}
+                      Success Rate
                       :
                     </span>
                     <span className="font-semibold text-blue-600">94.2%</span>
@@ -842,8 +838,7 @@ const Index: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-orange-500" />
                     <span className="text-sm">
-                      {translations?.dashboard?.overallCompliance ||
-                        "Office Hours"}
+                      Office Hours
                       : 9 AM - 6 PM
                     </span>
                   </div>
@@ -863,7 +858,7 @@ const Index: React.FC = () => {
                 <CardTitle className="text-lg">
                   {isAuthenticated
                     ? `${translations?.guest?.welcomeBack || "Welcome"}, ${user?.fullName || "User"}`
-                    : `${translations?.guest?.welcomeBack || "Welcome"}, ${translations?.auth?.guestMode || "Guest"}`}
+                    : `${translations?.guest?.welcomeBack || "Welcome"}, Guest`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -879,7 +874,6 @@ const Index: React.FC = () => {
                       <span>{translations?.complaints?.ward || "Ward"}: </span>
                       <span className="font-medium">
                         {user?.ward?.name ||
-                          translations?.common?.none ||
                           "Not assigned"}
                       </span>
                     </div>
@@ -896,7 +890,7 @@ const Index: React.FC = () => {
                       </Button>
                       <Button asChild variant="outline" className="w-full">
                         <Link to="/profile">
-                          {translations?.nav?.profile || "Profile"}
+                          Profile
                         </Link>
                       </Button>
                     </div>
@@ -952,8 +946,7 @@ const Index: React.FC = () => {
                         {translations?.nav?.trackStatus || "Real-time Tracking"}
                       </div>
                       <div className="text-gray-600">
-                        {translations?.complaints?.trackStatus ||
-                          "Monitor complaint progress"}
+                        Monitor complaint progress
                       </div>
                     </div>
                   </div>
@@ -987,7 +980,7 @@ const Index: React.FC = () => {
                       <div className="font-medium">
                         {translations?.auth?.language || "Multi-language"}
                       </div>
-                      <div className="text-gray-600">{`${translations?.settings?.language || "Available in local languages"} (${currentLanguage.toUpperCase()})`}</div>
+                      <div className="text-gray-600">{`Available in local languages (${currentLanguage.toUpperCase()})`}</div>
                     </div>
                   </div>
                 </div>
