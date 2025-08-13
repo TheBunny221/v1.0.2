@@ -403,7 +403,27 @@ export const verifyOTPLogin = asyncHandler(async (req, res) => {
     },
     include: {
       user: {
-        include: { ward: true },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          role: true,
+          wardId: true,
+          department: true,
+          language: true,
+          avatar: true,
+          isActive: true,
+          lastLogin: true,
+          joinedOn: true,
+          ward: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            },
+          },
+        },
       },
     },
   });
@@ -747,7 +767,27 @@ export const verifyRegistrationOTP = asyncHandler(async (req, res) => {
     },
     include: {
       user: {
-        include: { ward: true },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          role: true,
+          wardId: true,
+          department: true,
+          language: true,
+          avatar: true,
+          isActive: true,
+          lastLogin: true,
+          joinedOn: true,
+          ward: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            },
+          },
+        },
       },
     },
   });
@@ -767,7 +807,27 @@ export const verifyRegistrationOTP = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: new Date(),
     },
-    include: { ward: true },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phoneNumber: true,
+      role: true,
+      wardId: true,
+      department: true,
+      language: true,
+      avatar: true,
+      isActive: true,
+      lastLogin: true,
+      joinedOn: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+    },
   });
 
   // Mark OTP as verified
