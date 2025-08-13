@@ -217,6 +217,10 @@ const CitizenComplaintForm: React.FC = () => {
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [fileUploadErrors, setFileUploadErrors] = useState<string[]>([]);
 
+  // API mutation hooks
+  const [createComplaint] = useCreateComplaintMutation();
+  const [uploadAttachment] = useUploadComplaintAttachmentMutation();
+
   const steps = [
     { id: 1, title: "Details", icon: FileText, isCompleted: false },
     { id: 2, title: "Location", icon: MapPin, isCompleted: false },
