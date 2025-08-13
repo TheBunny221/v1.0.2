@@ -259,41 +259,21 @@ const Profile: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Avatar Section */}
-              <div className="flex items-center space-x-6">
-                <div className="relative">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback className="text-lg">
-                      {getInitials(user.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">{user.fullName}</h3>
-                  <Badge className={getRoleColor(user.role)}>
-                    {user.role.replace("_", " ").toUpperCase()}
-                  </Badge>
-                  {user.ward && (
-                    <p className="text-sm text-muted-foreground flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {user.ward.name}
-                    </p>
-                  )}
-                  {user.department && (
-                    <p className="text-sm text-muted-foreground flex items-center">
-                      <Shield className="h-4 w-4 mr-1" />
-                      {user.department}
-                    </p>
-                  )}
-                </div>
+              {/* User Info Section */}
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">{user.fullName}</h3>
+                {user.ward && (
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {user.ward.name}
+                  </p>
+                )}
+                {user.department && (
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <Shield className="h-4 w-4 mr-1" />
+                    {user.department}
+                  </p>
+                )}
               </div>
 
               {/* Form Fields */}
