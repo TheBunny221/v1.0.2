@@ -22,13 +22,22 @@ const createTransporter = () => {
       "Email transporter created for development:",
       process.env.EMAIL_SERVICE,
     );
+    
+
+    // # Email Configuration
+    var EMAIL_SERVICE="smtp.office365.com"
+    var EMAIL_USER="swsm@cimconautomation.com"
+    var EMAIL_PASS="cimcon@1987"
+    var EMAIL_FROM="Cochin Smart City"
+    var EMAIL_PORT=587
+
     return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE,
-      port: process.env.EMAIL_PORT || 587,
+      host: EMAIL_SERVICE,
+      port: EMAIL_PORT || 587,
       secure: false, // true if using port 465
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user:EMAIL_USER,
+        pass:EMAIL_PASS,
       },
     });
     // return nodemailer.createTransport({
