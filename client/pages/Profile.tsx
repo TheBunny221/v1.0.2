@@ -34,13 +34,10 @@ import {
   Phone,
   MapPin,
   Shield,
-  Camera,
   Save,
   Eye,
   EyeOff,
-  Bell,
   Lock,
-  Globe,
   AlertTriangle,
 } from "lucide-react";
 
