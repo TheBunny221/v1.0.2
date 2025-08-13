@@ -101,7 +101,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         },
         transformResponse: transformResponse<Complaint[]>,
         providesTags: (result) =>
-          result?.data
+          result?.data && Array.isArray(result.data)
             ? [
                 ...result.data.map(({ id }) => ({
                   type: "Complaint" as const,
