@@ -31,6 +31,7 @@ import { Badge } from "../components/ui/badge";
 import { Eye, EyeOff, Mail, Lock, Home } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { useOtpFlow } from "../contexts/OtpContext";
+import AdminSeeder from "../components/AdminSeeder";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
