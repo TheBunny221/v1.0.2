@@ -491,7 +491,7 @@ const Profile: React.FC = () => {
                           className="w-full"
                         />
                         <p className="text-xs text-gray-500">
-                          Copy the token from the link in your email, or click the link directly.
+                          You can either click the link in your email to go to the setup page, or copy the token from the link and paste it here.
                         </p>
                       </div>
                     </div>
