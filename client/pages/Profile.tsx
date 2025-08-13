@@ -170,13 +170,8 @@ const Profile: React.FC = () => {
     );
   }
 
-  // Show loading state if translations are not loaded yet
-  if (
-    !translations ||
-    !translations.profile ||
-    !translations.nav ||
-    !translations.common
-  ) {
+  // Show loading state only if user is still loading
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
