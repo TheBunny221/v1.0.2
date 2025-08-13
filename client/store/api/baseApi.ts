@@ -32,35 +32,48 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions);
+  try {
+    let result = await baseQuery(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401) {
-    // Unauthorized - clear auth state
-    api.dispatch(logout());
+    if (result.error && result.error.status === 401) {
+      // Unauthorized - clear auth state
+      api.dispatch(logout());
 
-    // Show toast notification
-    toast({
-      title: "Session Expired",
-      description: "Please login again to continue.",
-      variant: "destructive",
-    });
-  } else if (result.error) {
-    // Log error for analytics without trying to read error data
-    console.error("API Error:", {
-      endpoint: typeof args === "string" ? args : args.url,
-      status: result.error.status,
-      timestamp: new Date().toISOString(),
-    });
+      // Show toast notification
+      toast({
+        title: "Session Expired",
+        description: "Please login again to continue.",
+        variant: "destructive",
+      });
+    } else if (result.error) {
+      // Log error for analytics without trying to read error data
+      console.error("API Error:", {
+        endpoint: typeof args === "string" ? args : args.url,
+        status: result.error.status,
+        timestamp: new Date().toISOString(),
+      });
 
-    // Set error in auth slice for global error handling
-    if (result.error.status && result.error.status >= 500) {
-      api.dispatch(
-        setError("A server error occurred. Please try again later."),
-      );
+      // Set error in auth slice for global error handling
+      if (result.error.status && result.error.status >= 500) {
+        api.dispatch(
+          setError("A server error occurred. Please try again later."),
+        );
+      }
     }
-  }
 
-  return result;
+    return result;
+  } catch (error) {
+    // Handle errors that occur during baseQuery execution
+    console.error("BaseQuery error:", error);
+
+    // Return a properly formatted error response
+    return {
+      error: {
+        status: 'FETCH_ERROR' as const,
+        error: String(error)
+      }
+    };
+  }
 };
 
 // Helper function to extract error messages (simplified to avoid response body consumption)
