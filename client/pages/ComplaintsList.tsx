@@ -58,7 +58,7 @@ const ComplaintsList: React.FC = () => {
     error,
   } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
-  const complaints = complaintsResponse?.data || [];
+  const complaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
