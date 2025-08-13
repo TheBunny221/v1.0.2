@@ -326,25 +326,57 @@ const CitizenComplaintForm: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call to submit complaint
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Create complaint
+      const complaintData = {
+        title: `${formData.type} complaint`,
+        description: formData.description,
+        type: formData.type,
+        priority: formData.priority,
+        wardId: formData.wardId,
+        subZoneId: formData.subZoneId,
+        area: formData.area,
+        landmark: formData.landmark,
+        address: formData.address,
+        coordinates: formData.coordinates,
+        contactName: formData.fullName,
+        contactEmail: formData.email,
+        contactPhone: formData.phoneNumber,
+        isAnonymous: false,
+      };
+
+      const complaintResponse = await createComplaint(complaintData).unwrap();
+      const complaintId = complaintResponse.data.complaint.id;
+
+      // Upload attachments if any
+      if (formData.attachments && formData.attachments.length > 0) {
+        setUploadingFiles(true);
+        for (const file of formData.attachments) {
+          try {
+            await uploadAttachment({ complaintId, file }).unwrap();
+          } catch (uploadError) {
+            console.error("Failed to upload file:", file.name, uploadError);
+            // Don't fail the entire submission for file upload errors
+          }
+        }
+        setUploadingFiles(false);
+      }
 
       toast({
         title: "Complaint Submitted Successfully!",
-        description:
-          "Your complaint has been registered and assigned a tracking number. You will receive updates via email and in-app notifications.",
+        description: `Your complaint has been registered with ID: ${complaintId.slice(-6).toUpperCase()}. You will receive updates via email and in-app notifications.`,
       });
 
-      navigate("/dashboard");
-    } catch (error) {
+      navigate("/complaints");
+    } catch (error: any) {
+      console.error("Submission error:", error);
       toast({
         title: "Submission Failed",
-        description:
-          "There was an error submitting your complaint. Please try again.",
+        description: error?.data?.message || "There was an error submitting your complaint. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
+      setUploadingFiles(false);
     }
   };
 
