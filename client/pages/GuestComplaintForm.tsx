@@ -373,9 +373,36 @@ const GuestComplaintForm: React.FC = () => {
           })
           .filter((f): f is FileAttachment => f !== null) || [];
 
-      const result = await dispatch(
-        submitGuestComplaint({ complaintData: formData, files }),
-      ).unwrap();
+      // Create FormData for file uploads
+      const submissionData = new FormData();
+
+      // Add text data
+      submissionData.append("fullName", formData.fullName);
+      submissionData.append("email", formData.email);
+      submissionData.append("phoneNumber", formData.phoneNumber);
+      submissionData.append("type", formData.type);
+      submissionData.append("description", formData.description);
+      submissionData.append("priority", formData.priority || "MEDIUM");
+      submissionData.append("wardId", formData.wardId);
+      if (formData.subZoneId) submissionData.append("subZoneId", formData.subZoneId);
+      submissionData.append("area", formData.area);
+      if (formData.landmark) submissionData.append("landmark", formData.landmark);
+      if (formData.address) submissionData.append("address", formData.address);
+
+      // Add coordinates
+      if (formData.coordinates) {
+        submissionData.append("coordinates", JSON.stringify(formData.coordinates));
+      }
+
+      // Add attachments
+      if (files && files.length > 0) {
+        files.forEach((fileAttachment) => {
+          submissionData.append("attachments", fileAttachment.file);
+        });
+      }
+
+      const response = await submitComplaintMutation(submissionData).unwrap();
+      const result = response.data;
 
       if (result.complaintId && result.trackingNumber) {
         // Open unified OTP dialog
