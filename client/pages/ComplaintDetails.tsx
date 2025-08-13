@@ -114,11 +114,16 @@ const ComplaintDetails: React.FC = () => {
   const handleStatusUpdate = async (newStatus: string) => {
     if (id) {
       try {
+        // Update via API
         await updateStatus({
           id,
           status: newStatus as any,
           remarks: statusComment,
         }).unwrap();
+
+        // Update centralized store
+        updateStatus(id, newStatus, statusComment);
+
         setStatusComment("");
       } catch (error) {
         console.error("Failed to update status:", error);
