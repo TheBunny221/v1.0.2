@@ -171,6 +171,10 @@ const UnifiedComplaintForm: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
+  // Fetch wards from API
+  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const wards = wardsResponse?.data || [];
+
   // Use guest form state as the canonical source for form management
   const currentStep = useAppSelector(selectCurrentStep);
   const steps = useAppSelector(selectSteps);
