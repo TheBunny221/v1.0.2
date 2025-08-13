@@ -1106,10 +1106,10 @@ const CitizenComplaintForm: React.FC = () => {
                   onClick={handleSubmit}
                   disabled={isSubmitting || uploadingFiles}
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || uploadingFiles ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
+                      {uploadingFiles ? "Uploading files..." : "Submitting..."}
                     </>
                   ) : (
                     <>
