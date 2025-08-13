@@ -5,6 +5,19 @@ import { initializeLanguage } from "../store/slices/languageSlice";
 import { initializeTheme, setOnlineStatus } from "../store/slices/uiSlice";
 import { useGetCurrentUserQuery } from "../store/api/authApi";
 
+// Error logging utility
+const logAuthError = (context: string, error: any) => {
+  console.group(`🔐 Auth Error - ${context}`);
+  console.error('Error:', error);
+  if (error?.data) {
+    console.error('Error Data:', error.data);
+  }
+  if (error?.status) {
+    console.error('HTTP Status:', error.status);
+  }
+  console.groupEnd();
+};
+
 interface AppInitializerProps {
   children: React.ReactNode;
 }
