@@ -1104,7 +1104,7 @@ const CitizenComplaintForm: React.FC = () => {
                 <Button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || uploadingFiles}
                 >
                   {isSubmitting ? (
                     <>
