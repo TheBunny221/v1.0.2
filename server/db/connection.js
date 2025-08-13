@@ -182,11 +182,11 @@ const getPrisma = () => {
 // Health check function for database
 const checkDatabaseHealth = async () => {
   try {
-    await prisma.$executeRaw`SELECT 1;`;
+    await prisma.$queryRaw`SELECT 1 as test;`;
     return { healthy: true, message: "Database connection is healthy" };
   } catch (error) {
-    return { 
-      healthy: false, 
+    return {
+      healthy: false,
       message: `Database connection failed: ${error.message}`,
       error: error.code || "UNKNOWN_ERROR"
     };
