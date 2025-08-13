@@ -71,7 +71,7 @@ export const guestApi = baseApi.injectEndpoints({
     // Submit guest complaint
     submitGuestComplaint: builder.mutation<
       ApiResponse<GuestComplaintResponse>,
-      GuestComplaintRequest
+      GuestComplaintRequest | FormData
     >({
       query: (complaintData) => ({
         url: "/guest/complaint",
