@@ -171,12 +171,36 @@ export interface ApiResponse<T = any> {
 
 // Helper for transforming API responses
 export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  return {
-    success: response?.success ?? true,
-    data: response?.data ?? response,
-    message: response?.message,
-    meta: response?.meta,
-  };
+  try {
+    // Handle null or undefined responses
+    if (response == null) {
+      return {
+        success: false,
+        data: {} as T,
+        message: "No response received",
+      };
+    }
+
+    // If response is already in our expected format, return it
+    if (typeof response === 'object' && 'success' in response && 'data' in response) {
+      return response as ApiResponse<T>;
+    }
+
+    // Transform raw response to our format
+    return {
+      success: response?.success ?? true,
+      data: response?.data ?? response,
+      message: response?.message,
+      meta: response?.meta,
+    };
+  } catch (error) {
+    console.warn("Error transforming response:", error);
+    return {
+      success: false,
+      data: {} as T,
+      message: "Response transformation error",
+    };
+  }
 };
 
 // Helper for handling optimistic updates
