@@ -72,7 +72,7 @@ const CitizenDashboard: React.FC = () => {
     refetch: refetchStats,
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
-  const complaints = complaintsResponse?.data || [];
+  const complaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
   const isLoading = complaintsLoading;
 
   const [dashboardStats, setDashboardStats] = useState({
