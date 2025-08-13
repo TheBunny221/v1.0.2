@@ -23,6 +23,8 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
+  // Add timeout to prevent hanging requests
+  timeout: 10000,
 });
 
 // Enhanced base query with 401 auto-logout handling
