@@ -258,7 +258,7 @@ const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <User className="h-5 w-5" />
-                <span>{translations.profile.personalInformation}</span>
+                <span>{translations?.profile?.personalInformation || "Personal Information"}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
