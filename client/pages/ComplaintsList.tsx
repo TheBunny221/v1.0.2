@@ -47,6 +47,9 @@ const ComplaintsList: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
+  // Data management
+  const { cacheComplaintsList } = useDataManager();
+
   // Debounce search term for better performance
   useEffect(() => {
     const timer = setTimeout(() => {
