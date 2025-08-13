@@ -21,13 +21,13 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const reduxAuth = useAppSelector((state) => state.auth);
   const isAlreadyAuthenticated = reduxAuth.isAuthenticated && reduxAuth.user && reduxAuth.token;
 
-  // Use RTK Query to get current user if we have a token
+  // Use RTK Query to get current user if we have a token but are not already authenticated
   const {
     data: userResponse,
     isLoading: isLoadingUser,
     error: userError,
   } = useGetCurrentUserQuery(undefined, {
-    skip: !hasValidToken, // Skip query if no token
+    skip: !hasValidToken || isAlreadyAuthenticated, // Skip query if no token or already authenticated
   });
 
   useEffect(() => {
