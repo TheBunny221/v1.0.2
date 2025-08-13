@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setPassword, clearError, selectAuth } from "../store/slices/authSlice";
+import { clearError, selectAuth } from "../store/slices/authSlice";
+import { useSetPasswordMutation } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
