@@ -610,6 +610,7 @@ const Profile: React.FC = () => {
                       handlePasswordChange("confirmPassword", e.target.value)
                     }
                     placeholder="Confirm new password"
+                    disabled={!user?.hasPassword && !isOtpVerified}
                   />
                   <Button
                     type="button"
