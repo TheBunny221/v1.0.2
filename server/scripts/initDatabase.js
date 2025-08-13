@@ -35,7 +35,7 @@ export const initializeDatabase = async () => {
     
     // Test write operation (safe)
     try {
-      await prisma.$executeRaw`SELECT 1 as test;`;
+      await prisma.$queryRaw`SELECT 1 as test;`;
       console.log("✅ Database write access confirmed");
     } catch (error) {
       if (error.message.includes("readonly") || error.message.includes("READONLY")) {
