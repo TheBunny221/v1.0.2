@@ -6,30 +6,66 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
-// Define base query with JWT auto-inclusion - keep it simple to avoid cloning issues
-const baseQuery = fetchBaseQuery({
-  baseUrl: "/api",
-  prepareHeaders: (headers, { getState }) => {
+// Custom base query that handles response cloning properly
+const baseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  try {
     // Get token from auth state
-    const token = (getState() as any).auth.token;
+    const token = (api.getState() as any).auth.token;
 
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+    // Prepare request configuration
+    const url = typeof args === 'string' ? args : args.url;
+    const config: RequestInit = {
+      method: typeof args === 'string' ? 'GET' : args.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...(typeof args !== 'string' && args.headers ? args.headers : {}),
+      },
+      ...(typeof args !== 'string' && args.body ? { body: JSON.stringify(args.body) } : {}),
+    };
+
+    // Make the request
+    const response = await fetch(`/api${url.startsWith('/') ? url : `/${url}`}`, config);
+
+    // Clone the response to prevent "body already used" errors
+    const responseClone = response.clone();
+
+    // Parse the response
+    let result;
+    try {
+      const text = await responseClone.text();
+      result = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      console.warn("Failed to parse response as JSON:", parseError);
+      result = {};
     }
 
-    // Set content type if not already set
-    if (!headers.has("content-type")) {
-      headers.set("content-type", "application/json");
+    if (!response.ok) {
+      return {
+        error: {
+          status: response.status,
+          statusText: response.statusText,
+          data: result,
+        },
+      };
     }
 
-    return headers;
-  },
-  // Add response validation to prevent body consumption issues
-  validateStatus: (response, result) => {
-    // Accept any response status and let error handling decide what to do
-    return true;
-  },
-});
+    return { data: result };
+  } catch (error: any) {
+    console.error("Base query error:", error);
+    return {
+      error: {
+        status: 'FETCH_ERROR',
+        error: error.message || 'Network error',
+        data: { message: 'Network error occurred. Please try again.' },
+      },
+    };
+  }
+};
 
 // Enhanced base query with 401 auto-logout handling
 const baseQueryWithReauth: BaseQueryFn<
