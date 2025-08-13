@@ -141,7 +141,39 @@ export const createComplaint = asyncHandler(async (req, res) => {
 // @desc    Get all complaints with filters
 // @route   GET /api/complaints
 // @access  Private
+// getComplaints with [gpt5] debug logs
+
 export const getComplaints = asyncHandler(async (req, res) => {
+  // --- [gpt5] debug helpers ---
+  const startedAt = process.hrtime.bigint();
+  const correlationId =
+    req.id ||
+    req.headers["x-request-id"] ||
+    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  const shouldDebug =
+    (typeof process !== "undefined" &&
+      process.env &&
+      typeof process.env.DEBUG === "string" &&
+      process.env.DEBUG.toLowerCase().includes("gpt5")) ||
+    (typeof process !== "undefined" &&
+      process.env &&
+      process.env.NODE_ENV !== "production");
+
+  const dbg = (...args) => {
+    if (shouldDebug) {
+      // eslint-disable-next-line no-console
+      console.debug("[gpt5][getComplaints]", `req=${correlationId}`, ...args);
+    }
+  };
+  const warn = (...args) => {
+    if (shouldDebug) {
+      // eslint-disable-next-line no-console
+      console.warn("[gpt5][getComplaints][warn]", `req=${correlationId}`, ...args);
+    }
+  };
+
+  // --- parse & normalize inputs ---
   const {
     page = 1,
     limit = 10,
@@ -156,41 +188,77 @@ export const getComplaints = asyncHandler(async (req, res) => {
     search,
   } = req.query;
 
-  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const pageNum = Number.parseInt(page, 10);
+  const limitNum = Number.parseInt(limit, 10);
+  const skip = (pageNum - 1) * limitNum;
+
+  dbg("incoming", {
+    user: {
+      id: req.user?.id,
+      role: req.user?.role,
+      wardId: req.user?.wardId ?? null,
+    },
+    query: {
+      page: pageNum,
+      limit: limitNum,
+      status,
+      priority,
+      type,
+      wardId,
+      assignedToId,
+      submittedById,
+      dateFrom,
+      dateTo,
+      searchLen: typeof search === "string" ? search.length : 0,
+    },
+  });
+
   const filters = {};
+  const enforced = {};
 
-  // Role-based filtering - enforce security defaults that cannot be overridden
+  // --- role-based enforcement ---
   if (req.user.role === "CITIZEN") {
-    // Citizens can ONLY see their own complaints - ignore any query override
     filters.submittedById = req.user.id;
+    enforced.submittedById = req.user.id;
   } else if (req.user.role === "WARD_OFFICER") {
-    // Ward officers can ONLY see complaints in their ward - ignore any query override
     filters.wardId = req.user.wardId;
+    enforced.wardId = req.user.wardId;
   } else if (req.user.role === "MAINTENANCE_TEAM") {
-    // Maintenance team can ONLY see complaints assigned to them - ignore any query override
     filters.assignedToId = req.user.id;
+    enforced.assignedToId = req.user.id;
   }
+  if (Object.keys(enforced).length) dbg("role enforcement applied", enforced);
 
-  // Apply additional filters (only for roles that have permission)
+  // --- generic filters ---
   if (status) filters.status = status;
   if (priority) filters.priority = priority;
   if (type) filters.type = type;
 
-  // Only administrators can filter by wardId and submittedById via query params
+  // --- admin-only overrides ---
   if (req.user.role === "ADMINISTRATOR") {
     if (wardId) filters.wardId = wardId;
     if (assignedToId) filters.assignedToId = assignedToId;
     if (submittedById) filters.submittedById = submittedById;
+  } else if (wardId || assignedToId || submittedById) {
+    dbg("ignored query overrides for non-admin", {
+      wardId,
+      assignedToId,
+      submittedById,
+    });
   }
 
-  // Date range filter
-  if (dateFrom || dateTo) {
+  // --- date range filter with validation ---
+  const validFrom = dateFrom && !Number.isNaN(Date.parse(dateFrom)) ? new Date(dateFrom) : null;
+  const validTo = dateTo && !Number.isNaN(Date.parse(dateTo)) ? new Date(dateTo) : null;
+  if (dateFrom && !validFrom) warn("invalid dateFrom ignored", { dateFrom });
+  if (dateTo && !validTo) warn("invalid dateTo ignored", { dateTo });
+  if (validFrom || validTo) {
     filters.submittedOn = {};
-    if (dateFrom) filters.submittedOn.gte = new Date(dateFrom);
-    if (dateTo) filters.submittedOn.lte = new Date(dateTo);
+    if (validFrom) filters.submittedOn.gte = validFrom;
+    if (validTo) filters.submittedOn.lte = validTo;
   }
 
-  // Search filter
+  // --- search filter ---
   if (search) {
     filters.OR = [
       { title: { contains: search, mode: "insensitive" } },
@@ -199,64 +267,77 @@ export const getComplaints = asyncHandler(async (req, res) => {
     ];
   }
 
-  const [complaints, total] = await Promise.all([
-    prisma.complaint.findMany({
-      where: filters,
-      skip,
-      take: parseInt(limit),
-      orderBy: { submittedOn: "desc" },
-      include: {
-        ward: true,
-        subZone: true,
-        submittedBy: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phoneNumber: true,
+  dbg("final prisma.where filters", filters);
+  dbg("pagination", { skip, take: limitNum, orderBy: { submittedOn: "desc" } });
+
+  try {
+    const [complaints, total] = await Promise.all([
+      prisma.complaint.findMany({
+        where: filters,
+        skip,
+        take: limitNum,
+        orderBy: { submittedOn: "desc" },
+        include: {
+          ward: true,
+          subZone: true,
+          submittedBy: {
+            select: { id: true, fullName: true, email: true, phoneNumber: true },
           },
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phoneNumber: true,
+          assignedTo: {
+            select: { id: true, fullName: true, email: true, phoneNumber: true },
           },
-        },
-        attachments: true,
-        statusLogs: {
-          orderBy: { timestamp: "desc" },
-          take: 1,
-          include: {
-            user: {
-              select: {
-                fullName: true,
-                role: true,
-              },
+          attachments: true,
+          statusLogs: {
+            orderBy: { timestamp: "desc" },
+            take: 1,
+            include: {
+              user: { select: { fullName: true, role: true } },
             },
           },
         },
-      },
-    }),
-    prisma.complaint.count({ where: filters }),
-  ]);
+      }),
+      prisma.complaint.count({ where: filters }),
+    ]);
 
-  res.status(200).json({
-    success: true,
-    message: "Complaints retrieved successfully",
-    data: {
-      complaints,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / parseInt(limit)),
-        totalItems: total,
-        hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
-        hasPrev: parseInt(page) > 1,
+    const totalPages = Math.ceil(total / limitNum);
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+
+    dbg("query results", {
+      complaintsFetched: complaints.length,
+      totalItems: total,
+      totalPages,
+      hasNext: pageNum < totalPages,
+      hasPrev: pageNum > 1,
+      durationMs: Math.round(durationMs),
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Complaints retrieved successfully",
+      data: {
+        complaints,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalItems: total,
+          hasNext: pageNum < totalPages,
+          hasPrev: pageNum > 1,
+        },
+        meta: { correlationId },
       },
-    },
-  });
+    });
+  } catch (err) {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+    warn("prisma query failed", {
+      message: err?.message,
+      name: err?.name,
+      durationMs: Math.round(durationMs),
+    });
+    // Re-throw so asyncHandler / global error middleware can respond
+    throw err;
+  }
 });
+
 
 // @desc    Get single complaint
 // @route   GET /api/complaints/:id

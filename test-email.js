@@ -18,7 +18,7 @@ async function testEmailService() {
   try {
     console.log("1️⃣ Testing Basic Email...");
     const basicEmailResult = await sendEmail({
-      to: "test@example.com",
+      to: "",
       subject: "Test Email from Cochin Smart City",
       text: "This is a test email to verify the email service integration.",
       html: `

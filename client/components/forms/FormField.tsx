@@ -662,7 +662,7 @@ export function FileUploadField<T extends FieldValues>({
                         }}
                       />
                     ))
-                  ) : value instanceof File ? (
+                  ) : (value as any) instanceof File ? (
                     <FilePreview file={value} onRemove={() => onChange(null)} />
                   ) : null}
                 </div>
