@@ -79,7 +79,12 @@ export function createApp() {
   const app = express();
 
   // Trust proxy for cloud deployments (fixes rate limiting X-Forwarded-For issue)
-  app.set("trust proxy", true);
+  // Use a more specific trust proxy setting for security
+  if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1); // Trust only first proxy
+  } else {
+    app.set("trust proxy", "loopback"); // Trust only localhost in development
+  }
 
   // Security middleware
   app.use(
