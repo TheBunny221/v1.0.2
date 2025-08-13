@@ -157,7 +157,7 @@ const initialSteps: FormStep[] = [
   { id: 2, title: "Location", isCompleted: false, isValid: false },
   { id: 3, title: "Attachments", isCompleted: false, isValid: true }, // Optional
   { id: 4, title: "Review", isCompleted: false, isValid: true },
-  { id: 5, title: "Submit", isCompleted: false, isValid: false },
+  { id: 5, title: "Submit", isCompleted: false, isValid: true },
 ];
 
 // Initial state
