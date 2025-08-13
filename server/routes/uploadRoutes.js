@@ -206,7 +206,7 @@ router.post(
  *       404:
  *         description: File not found
  */
-router.get("/:id", getAttachment);
+router.get("/:filename", getAttachment);
 
 /**
  * @swagger
