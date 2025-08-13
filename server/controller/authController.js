@@ -615,6 +615,7 @@ export const getMe = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
+      password: true, // Include password to check if it exists
       ward: {
         select: {
           id: true,
@@ -624,6 +625,13 @@ export const getMe = asyncHandler(async (req, res) => {
       },
     },
   });
+
+  // Add hasPassword field and remove password from response
+  const userResponse = {
+    ...user,
+    hasPassword: !!user.password,
+  };
+  delete userResponse.password;
 
   res.status(200).json({
     success: true,
