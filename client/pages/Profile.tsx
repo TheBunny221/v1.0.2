@@ -46,6 +46,10 @@ const Profile: React.FC = () => {
   const { user, isLoading } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
+  // API mutations
+  const [sendPasswordSetupEmail] = useSendPasswordSetupEmailMutation();
+  const [setPassword] = useSetPasswordMutation();
+
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
     email: user?.email || "",
