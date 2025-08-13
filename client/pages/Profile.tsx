@@ -181,11 +181,10 @@ const Profile: React.FC = () => {
 
     try {
       if (!user?.hasPassword) {
-        // Password setup with OTP verification
+        // Password setup with token
         await setPassword({
-          email: user?.email || "",
-          otpCode,
-          newPassword: passwordData.newPassword,
+          token: setupToken,
+          password: passwordData.newPassword,
         }).unwrap();
       } else {
         // Regular password change - mock implementation
