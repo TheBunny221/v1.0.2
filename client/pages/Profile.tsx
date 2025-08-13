@@ -112,7 +112,7 @@ const Profile: React.FC = () => {
     }
 
     // Validate current password is provided (only for password change, not setup)
-    if (!requiresPasswordSetup && !passwordData.currentPassword) {
+    if (user?.hasPassword && !passwordData.currentPassword) {
       dispatch(
         addNotification({
           type: "error",
@@ -128,7 +128,7 @@ const Profile: React.FC = () => {
       addNotification({
         type: "success",
         title: translations?.common?.success || "Success",
-        message: requiresPasswordSetup
+        message: !user?.hasPassword
           ? "Password set up successfully"
           : (translations?.profile?.passwordChanged || "Password changed successfully"),
       }),
@@ -179,7 +179,7 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Password Setup Alert */}
-      {requiresPasswordSetup && (
+      {!user?.hasPassword && (
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="pt-6">
             <div className="flex items-start space-x-4">
@@ -369,7 +369,7 @@ const Profile: React.FC = () => {
               <CardTitle className="flex items-center space-x-2">
                 <Lock className="h-5 w-5" />
                 <span>
-                  {requiresPasswordSetup
+                  {!user?.hasPassword
                     ? "Set Up Password"
                     : (translations?.profile?.changePassword || "Change Password")
                   }
@@ -377,7 +377,7 @@ const Profile: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!requiresPasswordSetup && (
+              {user?.hasPassword && (
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">
                     {translations?.profile?.currentPassword || "Current Password"}
@@ -482,7 +482,7 @@ const Profile: React.FC = () => {
               </div>
 
               <Button onClick={handleChangePassword} className="w-full">
-                {requiresPasswordSetup
+                {!user?.hasPassword
                   ? "Set Up Password"
                   : (translations?.profile?.changePassword || "Change Password")
                 }
