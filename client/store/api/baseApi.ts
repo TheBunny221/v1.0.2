@@ -10,10 +10,25 @@ import { toast } from "../../components/ui/use-toast";
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as any).auth.token;
+    const state = getState() as any;
+    const token = state.auth.token;
+    const localStorageToken = localStorage.getItem("token");
 
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+    // Debug token availability
+    if (process.env.NODE_ENV === "development") {
+      console.log("BaseQuery Debug:", {
+        reduxToken: token ? `${token.substring(0, 10)}...` : "null",
+        localStorageToken: localStorageToken ? `${localStorageToken.substring(0, 10)}...` : "null",
+        isAuthenticated: state.auth.isAuthenticated,
+        hasUser: !!state.auth.user,
+      });
+    }
+
+    // Use token from Redux state, fallback to localStorage
+    const activeToken = token || localStorageToken;
+
+    if (activeToken) {
+      headers.set("authorization", `Bearer ${activeToken}`);
     }
 
     // Don't set content-type for FormData requests
