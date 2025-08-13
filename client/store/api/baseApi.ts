@@ -64,12 +64,16 @@ const baseQueryWithReauth: BaseQueryFn<
     // Check for specific error types that indicate response body issues
     if (networkError?.message?.includes("Response body") ||
         networkError?.message?.includes("already used") ||
-        networkError?.message?.includes("disturbed")) {
+        networkError?.message?.includes("disturbed") ||
+        networkError?.message?.includes("body stream") ||
+        networkError?.name === "TypeError") {
+
+      console.warn("Response body consumption error detected:", networkError.message);
 
       return {
         error: {
           status: "FETCH_ERROR",
-          error: "Network communication error",
+          error: "Response processing error",
           data: { message: "A network error occurred. Please try again." },
         },
       };
