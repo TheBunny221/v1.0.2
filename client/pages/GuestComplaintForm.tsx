@@ -1119,7 +1119,9 @@ const GuestComplaintForm: React.FC = () => {
                         {selectedWard?.name || formData.wardId}
                       </p>
                       <p>
-                        <strong>Sub-Zone:</strong> {formData.subZoneId}
+                        <strong>Sub-Zone:</strong> {
+                          availableSubZones.find(sz => sz.id === formData.subZoneId)?.name || formData.subZoneId || "Not specified"
+                        }
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}
