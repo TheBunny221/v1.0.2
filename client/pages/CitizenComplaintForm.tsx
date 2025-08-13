@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { selectAuth } from "../store/slices/authSlice";
 import { useToast } from "../hooks/use-toast";
-import { useUploadComplaintAttachmentMutation } from "../store/api/complaintsApi";
+import { useUploadComplaintAttachmentMutation, useCreateComplaintMutation } from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
