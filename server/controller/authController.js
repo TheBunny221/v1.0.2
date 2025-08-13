@@ -602,9 +602,6 @@ export const setPassword = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    include: {
-      ward: true,
-    },
     select: {
       id: true,
       fullName: true,
@@ -618,7 +615,13 @@ export const getMe = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
     },
   });
 
