@@ -61,8 +61,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_FROM ||
-        "Cochin Smart City <noreply@cochinsmartcity.gov.in>",
+        "Cochin Smart City ",
       to,
       subject,
       text,
