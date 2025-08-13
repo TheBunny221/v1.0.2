@@ -230,6 +230,18 @@ const Navigation: React.FC = () => {
             </Link>
           </div>
 
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {filteredNavItems.map((item) => (
