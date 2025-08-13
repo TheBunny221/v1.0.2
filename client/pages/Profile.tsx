@@ -135,7 +135,9 @@ const Profile: React.FC = () => {
       addNotification({
         type: "success",
         title: translations?.common?.success || "Success",
-        message: translations?.profile?.passwordChanged || "Password changed successfully",
+        message: requiresPasswordSetup
+          ? "Password set up successfully"
+          : (translations?.profile?.passwordChanged || "Password changed successfully"),
       }),
     );
 
