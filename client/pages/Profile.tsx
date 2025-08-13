@@ -456,51 +456,44 @@ const Profile: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* OTP Verification for Password Setup */}
+              {/* Email Setup for Password Setup */}
               {!user?.hasPassword && (
                 <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="space-y-2">
-                    <h4 className="font-medium text-blue-900">Email Verification Required</h4>
+                    <h4 className="font-medium text-blue-900">Password Setup Required</h4>
                     <p className="text-sm text-blue-700">
-                      To set up your password, we need to verify your email address first.
+                      We'll send you a secure link to set up your password.
                     </p>
                   </div>
 
-                  {otpStep === "none" && (
+                  {emailStep === "none" && (
                     <Button
-                      onClick={handleSendOTP}
+                      onClick={handleSendPasswordSetupEmail}
                       className="w-full bg-blue-600 hover:bg-blue-700"
                     >
-                      Send OTP to {user?.email}
+                      Send Setup Link to {user?.email}
                     </Button>
                   )}
 
-                  {otpStep === "sent" && !isOtpVerified && (
+                  {emailStep === "sent" && (
                     <div className="space-y-2">
-                      <Label htmlFor="otpCode">Enter OTP Code</Label>
-                      <div className="flex space-x-2">
-                        <Input
-                          id="otpCode"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value)}
-                          placeholder="Enter 6-digit OTP"
-                          maxLength={6}
-                          className="flex-1"
-                        />
-                        <Button onClick={handleVerifyOTP}>
-                          Verify
-                        </Button>
+                      <div className="flex items-center space-x-2 text-green-700">
+                        <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Setup link sent! Check your email.</span>
                       </div>
-                      <p className="text-xs text-gray-500">
-                        Check your email for the OTP code. (Demo: use 123456)
-                      </p>
-                    </div>
-                  )}
-
-                  {isOtpVerified && (
-                    <div className="flex items-center space-x-2 text-green-700">
-                      <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium">Email verified! You can now set your password below.</span>
+                      <div className="space-y-2">
+                        <Label htmlFor="setupToken">Setup Token (from email)</Label>
+                        <Input
+                          id="setupToken"
+                          value={setupToken}
+                          onChange={(e) => setSetupToken(e.target.value)}
+                          placeholder="Enter token from email link"
+                          className="w-full"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Copy the token from the link in your email, or click the link directly.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
