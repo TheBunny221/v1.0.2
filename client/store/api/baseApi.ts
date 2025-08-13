@@ -9,6 +9,7 @@ import { toast } from "../../components/ui/use-toast";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
+  timeout: 30000, // 30 seconds timeout to prevent hanging requests
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as any;
     const token = state.auth.token;
@@ -43,8 +44,7 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
-  // Remove custom responseHandler to use default RTK Query handling
-  // This prevents response body consumption conflicts
+  // Use default RTK Query response handling to prevent body consumption conflicts
 });
 
 // Enhanced base query with 401 auto-logout handling and error handling
