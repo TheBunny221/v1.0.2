@@ -156,8 +156,8 @@ const initialSteps: FormStep[] = [
   { id: 1, title: "Details", isCompleted: false, isValid: false },
   { id: 2, title: "Location", isCompleted: false, isValid: false },
   { id: 3, title: "Attachments", isCompleted: false, isValid: true }, // Optional
-  { id: 4, title: "Review", isCompleted: false, isValid: false },
-  { id: 5, title: "Submit", isCompleted: false, isValid: false },
+  { id: 4, title: "Review", isCompleted: false, isValid: true },
+  { id: 5, title: "Submit", isCompleted: false, isValid: true },
 ];
 
 // Initial state
@@ -266,11 +266,26 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
   if (isJson) {
     try {
       data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || `HTTP ${response.status}`);
+      }
+
+      return data;
     } catch (error) {
+      if (error.message.includes("HTTP ")) {
+        throw error; // Re-throw our custom error
+      }
       throw new Error("Failed to parse server response");
     }
   } else {
     // Non-JSON response (likely HTML error page)
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status}: Server error occurred. Please try again later.`,
+      );
+    }
+
     const text = await response.text();
     if (text.includes("<!doctype") || text.includes("<html")) {
       throw new Error("Server error occurred. Please try again later.");
@@ -278,12 +293,6 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
       throw new Error("Server returned unexpected response format");
     }
   }
-
-  if (!response.ok) {
-    throw new Error(data?.message || `HTTP ${response.status}`);
-  }
-
-  return data;
 };
 
 // Async thunks
@@ -342,15 +351,21 @@ export const submitGuestComplaint = createAsyncThunk(
       let data = null;
       if (isJson) {
         data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.message || `HTTP ${response.status}`);
+        }
+
+        return data.data as GuestComplaintResponse;
       } else {
+        // Non-JSON response handling
+        if (!response.ok) {
+          throw new Error(
+            `HTTP ${response.status}: Server returned unexpected response format`,
+          );
+        }
         throw new Error("Server returned unexpected response format");
       }
-
-      if (!response.ok) {
-        throw new Error(data?.message || `HTTP ${response.status}`);
-      }
-
-      return data.data as GuestComplaintResponse;
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to submit complaint",
@@ -638,11 +653,32 @@ const guestSlice = createSlice({
           break;
         case 4:
           // Review step - validate all previous steps
+          const step1Errors = validateStep1(state.formData);
+          const step2Errors = validateStep2(state.formData);
+          const step3Errors = validateStep3(state.formData);
+
           errors = {
+            ...step1Errors,
+            ...step2Errors,
+            ...step3Errors,
+          };
+
+          // Update previous steps' validity
+          state.steps[0].isValid = Object.keys(step1Errors).length === 0;
+          state.steps[0].isCompleted = state.steps[0].isValid;
+          state.steps[1].isValid = Object.keys(step2Errors).length === 0;
+          state.steps[1].isCompleted = state.steps[1].isValid;
+          state.steps[2].isValid = Object.keys(step3Errors).length === 0;
+          state.steps[2].isCompleted = state.steps[2].isValid;
+          break;
+        case 5:
+          // Submit step - validate all previous steps
+          const allStepErrors = {
             ...validateStep1(state.formData),
             ...validateStep2(state.formData),
             ...validateStep3(state.formData),
           };
+          errors = allStepErrors;
           break;
       }
 

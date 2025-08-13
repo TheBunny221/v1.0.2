@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from "../store/hooks";
 import {
   selectAuth,
   getDashboardRouteForRole,
+  setCredentials,
 } from "../store/slices/authSlice";
 import { createComplaint } from "../store/slices/complaintsSlice";
 import {
@@ -29,6 +30,8 @@ import {
   selectImagePreview,
   FileAttachment,
   GuestComplaintData,
+  resendOTP,
+  verifyOTPAndRegister,
 } from "../store/slices/guestSlice";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
@@ -221,6 +224,9 @@ const UnifiedComplaintForm: React.FC = () => {
     isAuthenticated ? "citizen" : "guest",
   );
 
+  // OTP state
+  const [otpCode, setOtpCode] = useState("");
+
   // Prefill form data for authenticated users
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -350,6 +356,45 @@ const UnifiedComplaintForm: React.FC = () => {
     [dispatch],
   );
 
+  // Handle OTP input change
+  const handleOtpChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+      setOtpCode(value);
+
+      // Clear OTP validation error when user starts typing
+      if (validationErrors.otpCode) {
+        dispatch(updateGuestFormData({})); // Trigger validation update
+      }
+    },
+    [dispatch, validationErrors.otpCode],
+  );
+
+  // Handle OTP resend
+  const handleResendOtp = useCallback(async () => {
+    if (!complaintId || !formData.email) return;
+
+    try {
+      // Call resend OTP API - this should be implemented in the guest slice
+      await dispatch(
+        resendOTP({ email: formData.email, complaintId }),
+      ).unwrap();
+
+      toast({
+        title: "Verification Code Resent",
+        description: "A new verification code has been sent to your email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Resend",
+        description:
+          error.message ||
+          "Failed to resend verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [dispatch, complaintId, formData.email, toast]);
+
   // Handle form navigation
   const handleNext = useCallback(() => {
     dispatch(validateCurrentStep());
@@ -377,11 +422,11 @@ const UnifiedComplaintForm: React.FC = () => {
     [dispatch, currentStep],
   );
 
-  // Handle form submission - unified for both citizen and guest
-  const handleSubmit = useCallback(async () => {
+  // Handle initial complaint submission (step 5 - send OTP)
+  const handleSendOtp = useCallback(async () => {
     dispatch(validateCurrentStep());
 
-    // Final validation
+    // Final validation of all previous steps
     const hasErrors = Object.keys(validationErrors).length > 0;
     if (hasErrors) {
       toast({
@@ -423,7 +468,7 @@ const UnifiedComplaintForm: React.FC = () => {
         dispatch(clearGuestData());
         navigate(getDashboardRouteForRole(user?.role || "CITIZEN"));
       } else {
-        // Guest flow: Submit to guest API and trigger OTP
+        // Guest flow: Submit complaint and send OTP
         const files: FileAttachment[] =
           formData.attachments
             ?.map((attachment) => {
@@ -437,28 +482,9 @@ const UnifiedComplaintForm: React.FC = () => {
         ).unwrap();
 
         if (result.complaintId && result.trackingNumber) {
-          // Open unified OTP dialog for guest verification
-          openOtpFlow({
-            context: "guestComplaint",
-            email: formData.email,
-            complaintId: result.complaintId,
-            trackingNumber: result.trackingNumber,
-            title: "Verify Your Complaint",
-            description:
-              "Enter the verification code sent to your email to complete your complaint submission and create your citizen account",
-            onSuccess: () => {
-              toast({
-                title: "Success!",
-                description:
-                  "Your complaint has been verified and your citizen account has been created successfully.",
-              });
-              navigate("/dashboard");
-            },
-          });
-
           toast({
-            title: "Complaint Submitted",
-            description: `Tracking number: ${result.trackingNumber}. Please check your email for the verification code.`,
+            title: "Verification Code Sent",
+            description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
           });
         }
       }
@@ -479,9 +505,90 @@ const UnifiedComplaintForm: React.FC = () => {
     isAuthenticated,
     user,
     fileMap,
-    openOtpFlow,
     toast,
     navigate,
+  ]);
+
+  // Handle OTP verification and final submission
+  const handleVerifyAndSubmit = useCallback(async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter a valid 6-digit verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!complaintId) {
+      toast({
+        title: "Error",
+        description: "Complaint ID not found. Please try submitting again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Verify OTP and auto-register user
+      const result = await dispatch(
+        verifyOTPAndRegister({
+          email: formData.email,
+          otpCode,
+          complaintId,
+        }),
+      ).unwrap();
+
+      // Store auth token and user data
+      if (result.token && result.user) {
+        dispatch(
+          setCredentials({
+            token: result.token,
+            user: result.user,
+          }),
+        );
+        localStorage.setItem("token", result.token);
+      }
+
+      toast({
+        title: "Success!",
+        description: result.isNewUser
+          ? "Your complaint has been verified and your citizen account has been created successfully!"
+          : "Your complaint has been verified and you've been logged in successfully!",
+      });
+
+      // Clear form data and navigate to dashboard
+      dispatch(clearGuestData());
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description:
+          error.message || "Invalid verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [otpCode, complaintId, formData.email, dispatch, toast, navigate]);
+
+  // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
+  const handleSubmit = useCallback(() => {
+    if (currentStep === 5) {
+      if (submissionMode === "citizen") {
+        return handleSendOtp();
+      } else if (!complaintId) {
+        return handleSendOtp();
+      } else {
+        return handleVerifyAndSubmit();
+      }
+    }
+    return handleSendOtp();
+  }, [
+    currentStep,
+    submissionMode,
+    complaintId,
+    handleSendOtp,
+    handleVerifyAndSubmit,
   ]);
 
   // Calculate progress
@@ -586,6 +693,12 @@ const UnifiedComplaintForm: React.FC = () => {
               {currentStep === 2 && <MapPin className="h-5 w-5" />}
               {currentStep === 3 && <Camera className="h-5 w-5" />}
               {currentStep === 4 && <CheckCircle className="h-5 w-5" />}
+              {currentStep === 5 &&
+                (submissionMode === "citizen" ? (
+                  <Shield className="h-5 w-5" />
+                ) : (
+                  <Mail className="h-5 w-5" />
+                ))}
               {steps[currentStep - 1]?.title}
             </CardTitle>
             <CardDescription>
@@ -595,6 +708,10 @@ const UnifiedComplaintForm: React.FC = () => {
               {currentStep === 3 &&
                 "Add images to help us understand the issue (optional)"}
               {currentStep === 4 && "Review all information before submitting"}
+              {currentStep === 5 &&
+                (submissionMode === "citizen"
+                  ? "Submit your complaint to the authorities"
+                  : "Verify your email and submit your complaint")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -1227,6 +1344,127 @@ const UnifiedComplaintForm: React.FC = () => {
               </div>
             )}
 
+            {/* Step 5: Submit with OTP */}
+            {currentStep === 5 && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold">Verify and Submit</h3>
+
+                {submissionMode === "citizen" ? (
+                  // Citizen users: Direct submission without OTP
+                  <div className="space-y-4">
+                    <Alert className="border-blue-200 bg-blue-50">
+                      <Shield className="h-4 w-4" />
+                      <AlertDescription className="text-blue-800">
+                        <strong>Citizen Account Detected:</strong> As a verified
+                        citizen, your complaint will be submitted immediately
+                        without requiring additional verification.
+                      </AlertDescription>
+                    </Alert>
+
+                    <div className="text-center py-8">
+                      <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+                      <h4 className="text-lg font-semibold mb-2">
+                        Ready to Submit
+                      </h4>
+                      <p className="text-gray-600 mb-6">
+                        Your complaint is ready to be submitted to the relevant
+                        authorities.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  // Guest users: OTP verification required
+                  <div className="space-y-4">
+                    {!complaintId ? (
+                      // Step 5a: Send OTP
+                      <div className="space-y-4">
+                        <Alert className="border-green-200 bg-green-50">
+                          <Mail className="h-4 w-4" />
+                          <AlertDescription className="text-green-800">
+                            <strong>Email Verification Required:</strong> We'll
+                            send a verification code to{" "}
+                            <strong>{formData.email}</strong> to secure your
+                            complaint submission and create your citizen
+                            account.
+                          </AlertDescription>
+                        </Alert>
+
+                        <div className="text-center py-8">
+                          <Mail className="mx-auto h-16 w-16 text-blue-500 mb-4" />
+                          <h4 className="text-lg font-semibold mb-2">
+                            Send Verification Code
+                          </h4>
+                          <p className="text-gray-600 mb-6">
+                            Click below to send a verification code to your
+                            email address.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      // Step 5b: Enter OTP
+                      <div className="space-y-4">
+                        <Alert className="border-orange-200 bg-orange-50">
+                          <Clock className="h-4 w-4" />
+                          <AlertDescription className="text-orange-800">
+                            <strong>Verification Code Sent:</strong> Please
+                            check your email and enter the 6-digit verification
+                            code below.
+                          </AlertDescription>
+                        </Alert>
+
+                        <div className="max-w-md mx-auto space-y-4">
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="otpCode"
+                              className="text-center block"
+                            >
+                              Enter Verification Code
+                            </Label>
+                            <Input
+                              id="otpCode"
+                              name="otpCode"
+                              type="text"
+                              placeholder="Enter 6-digit code"
+                              maxLength={6}
+                              className="text-center text-xl font-mono tracking-widest"
+                              value={otpCode}
+                              onChange={handleOtpChange}
+                              autoComplete="one-time-code"
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">
+                              Code sent to: {formData.email}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              onClick={handleResendOtp}
+                              disabled={isSubmitting}
+                              className="text-blue-600 p-0"
+                            >
+                              Resend Code
+                            </Button>
+                          </div>
+
+                          {validationErrors.otpCode && (
+                            <p
+                              className="text-sm text-red-600 text-center"
+                              role="alert"
+                            >
+                              {validationErrors.otpCode}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Navigation Buttons */}
             <div className="flex justify-between pt-6">
               <Button
@@ -1249,23 +1487,69 @@ const UnifiedComplaintForm: React.FC = () => {
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !canProceed}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
+                // Step 5 submission buttons
+                <div className="flex gap-2">
+                  {submissionMode === "citizen" ? (
+                    // Citizen: Direct submit
+                    <Button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit Complaint
+                          <CheckCircle className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  ) : !complaintId ? (
+                    // Guest: Send OTP first
+                    <Button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sending Code...
+                        </>
+                      ) : (
+                        <>
+                          Send Verification Code
+                          <Mail className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
                   ) : (
-                    <>
-                      Submit Complaint
-                      <CheckCircle className="h-4 w-4 ml-2" />
-                    </>
+                    // Guest: Verify OTP and submit
+                    <Button
+                      type="button"
+                      onClick={handleVerifyAndSubmit}
+                      disabled={
+                        isSubmitting || !otpCode || otpCode.length !== 6
+                      }
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          Verify & Submit
+                          <CheckCircle className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
               )}
             </div>
           </CardContent>
