@@ -1112,10 +1112,7 @@ const GuestComplaintForm: React.FC = () => {
                     <CardContent className="space-y-2">
                       <p>
                         <strong>Ward:</strong>{" "}
-                        {
-                          WARDS.find((ward) => ward.id === formData.wardId)
-                            ?.name
-                        }
+                        {selectedWard?.name || formData.wardId}
                       </p>
                       <p>
                         <strong>Sub-Zone:</strong> {formData.subZoneId}
