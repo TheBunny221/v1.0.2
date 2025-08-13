@@ -1448,23 +1448,67 @@ const UnifiedComplaintForm: React.FC = () => {
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !canProceed}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
+                // Step 5 submission buttons
+                <div className="flex gap-2">
+                  {submissionMode === "citizen" ? (
+                    // Citizen: Direct submit
+                    <Button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit Complaint
+                          <CheckCircle className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  ) : !complaintId ? (
+                    // Guest: Send OTP first
+                    <Button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sending Code...
+                        </>
+                      ) : (
+                        <>
+                          Send Verification Code
+                          <Mail className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
                   ) : (
-                    <>
-                      Submit Complaint
-                      <CheckCircle className="h-4 w-4 ml-2" />
-                    </>
+                    // Guest: Verify OTP and submit
+                    <Button
+                      type="button"
+                      onClick={handleVerifyAndSubmit}
+                      disabled={isSubmitting || !otpCode || otpCode.length !== 6}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          Verify & Submit
+                          <CheckCircle className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
               )}
             </div>
           </CardContent>
