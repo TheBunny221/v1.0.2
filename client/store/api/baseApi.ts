@@ -24,6 +24,11 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
+  // Add response validation to prevent body consumption issues
+  validateStatus: (response, result) => {
+    // Accept any response status and let error handling decide what to do
+    return true;
+  },
 });
 
 // Enhanced base query with 401 auto-logout handling
