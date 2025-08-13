@@ -919,9 +919,9 @@ const Index: React.FC = () => {
                       </Button>
                       <Separator className="my-3" />
                       <Button asChild variant="outline" className="w-full">
-                        <Link to="/guest/complaint">
+                        <Link to="/complaint">
                           {translations?.guest?.guestSubmission ||
-                            "Guest Complaint"}
+                            "Submit Complaint"}
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
