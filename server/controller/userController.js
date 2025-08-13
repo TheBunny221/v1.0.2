@@ -215,7 +215,6 @@ export const createUser = asyncHandler(async (req, res) => {
 
   const user = await prisma.user.create({
     data: userData,
-    include: { ward: true },
     select: {
       id: true,
       fullName: true,
@@ -229,7 +228,13 @@ export const createUser = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
-      ward: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
     },
   });
 
