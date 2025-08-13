@@ -22,6 +22,14 @@ export default defineConfig(({ mode }) => ({
           "Connection": "keep-alive"
         }
       }
+    },
+    hmr: {
+      port: 3001,
+      overlay: false
+    },
+    watch: {
+      usePolling: false,
+      interval: 1000
     }
   },
   build: {
