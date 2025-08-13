@@ -538,7 +538,10 @@ const Profile: React.FC = () => {
               </div>
 
               <Button onClick={handleChangePassword} className="w-full">
-                {translations.profile.changePassword}
+                {requiresPasswordSetup
+                  ? "Set Up Password"
+                  : (translations?.profile?.changePassword || "Change Password")
+                }
               </Button>
             </CardContent>
           </Card>
