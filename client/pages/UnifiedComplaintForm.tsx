@@ -475,7 +475,6 @@ const UnifiedComplaintForm: React.FC = () => {
         ).unwrap();
 
         if (result.complaintId && result.trackingNumber) {
-          setOtpSent(true);
           toast({
             title: "Verification Code Sent",
             description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
