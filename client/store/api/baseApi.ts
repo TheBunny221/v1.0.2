@@ -50,9 +50,6 @@ const customBaseQuery: BaseQueryFn<
 
     clearTimeout(timeoutId);
 
-    // Clone response to avoid body consumption issues
-    const responseClone = response.clone();
-
     let data;
     const contentType = response.headers.get("content-type") || "";
 
@@ -64,17 +61,17 @@ const customBaseQuery: BaseQueryFn<
         try {
           data = JSON.parse(text);
         } catch {
-          data = { message: text };
+          data = { message: text || "Response received" };
         }
       }
-    } catch (parseError) {
-      // If JSON parsing fails, try with the cloned response
-      try {
-        const text = await responseClone.text();
-        data = { message: text || "Response received" };
-      } catch {
-        data = { message: "Failed to parse response" };
-      }
+    } catch (parseError: any) {
+      console.warn("Response parsing error:", parseError);
+      // Don't use clone, just provide a safe fallback
+      data = {
+        message: "Failed to parse response",
+        error: parseError.message,
+        status: response.status
+      };
     }
 
     if (!response.ok) {
