@@ -1,4 +1,4 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type {
   BaseQueryFn,
   FetchArgs,
@@ -6,8 +6,6 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
-// Revert to using RTK Query's fetchBaseQuery with proper configuration
-import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
