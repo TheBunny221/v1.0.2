@@ -41,7 +41,10 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
         // Handle auto-login based on token and user query result
         if (hasValidToken) {
-          if (userResponse?.data?.user) {
+          if (isAlreadyAuthenticated) {
+            // Already authenticated, no need to do anything
+            console.log("Already authenticated, skipping initialization");
+          } else if (userResponse?.data?.user) {
             // Token is valid and we have user data - set credentials
             dispatch(
               setCredentials({
@@ -53,6 +56,10 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
             // Token is invalid or expired - clear it
             dispatch(clearCredentials());
             console.warn("Invalid token removed:", userError);
+          } else if (token && !reduxAuth.token) {
+            // Have token in localStorage but not in Redux - sync it
+            console.log("Syncing token from localStorage to Redux");
+            // This will trigger the getCurrentUser query
           }
           // If still loading, we'll wait for the query to complete
         }
