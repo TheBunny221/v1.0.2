@@ -1,7 +1,10 @@
 import express from "express";
 import { sendEmail, sendOTPEmail } from "../utils/emailService.js";
+import { getPrisma } from "../db/connection.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
+const prisma = getPrisma();
 
 // Test email endpoint (development only)
 router.post("/test-email", async (req, res) => {
