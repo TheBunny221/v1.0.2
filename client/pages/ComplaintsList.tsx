@@ -85,14 +85,6 @@ const ComplaintsList: React.FC = () => {
     }
   }, [complaints, cacheComplaintsList]);
 
-  // Debug logging
-  console.log('ComplaintsList Debug:', {
-    complaintsResponse,
-    complaintsCount: complaints.length,
-    isLoading,
-    error,
-    queryParams
-  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
