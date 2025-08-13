@@ -74,6 +74,13 @@ const CitizenDashboard: React.FC = () => {
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
   const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
+  const pagination = complaintsResponse?.data?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNext: false,
+    hasPrev: false,
+  };
   const isLoading = complaintsLoading;
 
   const [dashboardStats, setDashboardStats] = useState({
