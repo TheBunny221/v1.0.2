@@ -84,57 +84,38 @@ const Profile: React.FC = () => {
     setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSendOTP = async () => {
+  const handleSendPasswordSetupEmail = async () => {
     try {
-      await sendPasswordSetupEmail({ email: user?.email || "" }).unwrap();
-      setOtpStep("sent");
+      const response = await sendPasswordSetupEmail({ email: user?.email || "" }).unwrap();
+      setEmailStep("sent");
       dispatch(
         addNotification({
           type: "success",
-          title: "OTP Sent",
-          message: "OTP has been sent to your email address",
+          title: "Email Sent",
+          message: "Password setup link has been sent to your email address",
         }),
       );
+
+      // In development, show the token for testing
+      if (process.env.NODE_ENV === "development" && response.data?.resetUrl) {
+        const token = response.data.resetUrl.split('/').pop();
+        if (token) {
+          setSetupToken(token);
+          dispatch(
+            addNotification({
+              type: "info",
+              title: "Development Mode",
+              message: `For testing, you can use token: ${token}`,
+            }),
+          );
+        }
+      }
     } catch (error: any) {
       dispatch(
         addNotification({
           type: "error",
           title: "Error",
-          message: error?.data?.message || "Failed to send OTP",
-        }),
-      );
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (!otpCode.trim()) {
-      dispatch(
-        addNotification({
-          type: "error",
-          title: "Error",
-          message: "Please enter the OTP code",
-        }),
-      );
-      return;
-    }
-
-    // Mock OTP verification - in real implementation, this would call an API
-    if (otpCode === "123456") { // Mock OTP for demo
-      setIsOtpVerified(true);
-      setOtpStep("verified");
-      dispatch(
-        addNotification({
-          type: "success",
-          title: "Success",
-          message: "OTP verified successfully! You can now set your password.",
-        }),
-      );
-    } else {
-      dispatch(
-        addNotification({
-          type: "error",
-          title: "Error",
-          message: "Invalid OTP code. Please try again.",
+          message: error?.data?.message || "Failed to send password setup email",
         }),
       );
     }
