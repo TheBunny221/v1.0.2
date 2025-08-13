@@ -127,4 +127,120 @@ router.get("/email-config", (req, res) => {
   });
 });
 
+// Seed admin user endpoint (development only)
+router.post("/seed-admin", async (req, res) => {
+  // Only allow in development
+  if (process.env.NODE_ENV === "production") {
+    return res.status(403).json({
+      success: false,
+      message: "Test endpoints are not available in production",
+    });
+  }
+
+  try {
+    console.log("🌱 Seeding admin user...");
+
+    // Check if admin user already exists
+    const existingAdmin = await prisma.user.findFirst({
+      where: {
+        role: "ADMINISTRATOR"
+      }
+    });
+
+    if (existingAdmin) {
+      return res.json({
+        success: true,
+        message: "Admin user already exists",
+        data: {
+          email: existingAdmin.email,
+          role: existingAdmin.role
+        }
+      });
+    }
+
+    // Create admin user
+    const hashedPassword = await bcrypt.hash("admin123", 12);
+
+    const adminUser = await prisma.user.create({
+      data: {
+        fullName: "System Administrator",
+        email: "admin@cochinsmart.gov.in",
+        phoneNumber: "+91 9876543210",
+        password: hashedPassword,
+        role: "ADMINISTRATOR",
+        isActive: true,
+        department: "Administration"
+      }
+    });
+
+    // Also create some test users
+    const users = [];
+
+    // Create a ward officer
+    const wardOfficerPassword = await bcrypt.hash("ward123", 12);
+    const wardOfficer = await prisma.user.create({
+      data: {
+        fullName: "Ward Officer Test",
+        email: "ward@cochinsmart.gov.in",
+        phoneNumber: "+91 9876543211",
+        password: wardOfficerPassword,
+        role: "WARD_OFFICER",
+        isActive: true,
+        department: "Ward Management"
+      }
+    });
+    users.push({ email: wardOfficer.email, password: "ward123", role: wardOfficer.role });
+
+    // Create a maintenance user
+    const maintenancePassword = await bcrypt.hash("maintenance123", 12);
+    const maintenanceUser = await prisma.user.create({
+      data: {
+        fullName: "Maintenance Team Lead",
+        email: "maintenance@cochinsmart.gov.in",
+        phoneNumber: "+91 9876543212",
+        password: maintenancePassword,
+        role: "MAINTENANCE_TEAM",
+        isActive: true,
+        department: "Maintenance"
+      }
+    });
+    users.push({ email: maintenanceUser.email, password: "maintenance123", role: maintenanceUser.role });
+
+    // Create a regular citizen
+    const citizenPassword = await bcrypt.hash("citizen123", 12);
+    const citizen = await prisma.user.create({
+      data: {
+        fullName: "Test Citizen",
+        email: "citizen@example.com",
+        phoneNumber: "+91 9876543213",
+        password: citizenPassword,
+        role: "CITIZEN",
+        isActive: true
+      }
+    });
+    users.push({ email: citizen.email, password: "citizen123", role: citizen.role });
+
+    res.json({
+      success: true,
+      message: "Admin user and test users created successfully",
+      data: {
+        admin: {
+          email: adminUser.email,
+          password: "admin123",
+          role: adminUser.role
+        },
+        testUsers: users
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Error seeding admin user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to seed admin user",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
 export default router;
