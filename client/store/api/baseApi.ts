@@ -7,45 +7,94 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: "/api",
-  timeout: 30000, // 30 seconds timeout to prevent hanging requests
-  prepareHeaders: (headers, { getState }) => {
-    const state = getState() as any;
-    const token = state.auth.token;
-    const localStorageToken = localStorage.getItem("token");
+// Custom base query implementation to prevent response body consumption issues
+const customBaseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const state = api.getState() as any;
+  const token = state.auth.token;
+  const localStorageToken = localStorage.getItem("token");
+  const activeToken = token || localStorageToken;
 
-    // Use token from Redux state, fallback to localStorage if Redux token is not available
-    const activeToken = token || localStorageToken;
+  // Prepare request
+  const url = typeof args === "string" ? args : args.url;
+  const method = typeof args === "string" ? "GET" : (args.method || "GET");
+  const body = typeof args === "string" ? undefined : args.body;
 
-    // Debug token availability
-    if (process.env.NODE_ENV === "development") {
-      console.log("BaseQuery Debug:", {
-        reduxToken: token ? `${token.substring(0, 10)}...` : "null",
-        localStorageToken: localStorageToken
-          ? `${localStorageToken.substring(0, 10)}...`
-          : "null",
-        activeToken: activeToken
-          ? `${activeToken.substring(0, 10)}...`
-          : "null",
-        isAuthenticated: state.auth.isAuthenticated,
-        hasUser: !!state.auth.user,
-      });
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (activeToken) {
+    headers.authorization = `Bearer ${activeToken}`;
+  }
+
+  // Handle FormData requests
+  if (body instanceof FormData) {
+    delete headers["Content-Type"];
+  }
+
+  try {
+    const response = await fetch(`/api${url.startsWith("/") ? url : `/${url}`}`, {
+      method,
+      headers,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
+      signal: AbortSignal.timeout(30000), // 30 second timeout
+    });
+
+    // Clone response to avoid body consumption issues
+    const responseClone = response.clone();
+
+    let data;
+    const contentType = response.headers.get("content-type") || "";
+
+    try {
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { message: text };
+        }
+      }
+    } catch (parseError) {
+      // If JSON parsing fails, try with the cloned response
+      try {
+        const text = await responseClone.text();
+        data = { message: text || "Response received" };
+      } catch {
+        data = { message: "Failed to parse response" };
+      }
     }
 
-    if (activeToken) {
-      headers.set("authorization", `Bearer ${activeToken}`);
+    if (!response.ok) {
+      return {
+        error: {
+          status: response.status,
+          data,
+        },
+      };
     }
 
-    // Don't set content-type for FormData requests
-    if (!headers.has("content-type")) {
-      headers.set("content-type", "application/json");
-    }
+    return { data };
+  } catch (error: any) {
+    console.error("Custom base query error:", error);
 
-    return headers;
-  },
-  // Use default RTK Query response handling to prevent body consumption conflicts
-});
+    return {
+      error: {
+        status: "FETCH_ERROR",
+        error: error.message || "Network error",
+        data: { message: "Network request failed" },
+      },
+    };
+  }
+};
+
+const baseQuery = customBaseQuery;
 
 // Enhanced base query with 401 auto-logout handling and error handling
 const baseQueryWithReauth: BaseQueryFn<
