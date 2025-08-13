@@ -48,7 +48,7 @@ const ComplaintDetails: React.FC = () => {
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
-  const { updateStatus } = useStatusTracking();
+  const { updateStatus: updateComplaintStatus } = useStatusTracking();
 
   // Use RTK Query to fetch complaint details
   const {
