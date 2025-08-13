@@ -25,9 +25,9 @@ export default defineConfig(({ mode }) => ({
     },
     hmr: {
       overlay: false,
-      // For cloud environments, use the same port as the server
-      port: mode === "development" ? 3001 : undefined,
-      clientPort: mode === "development" ? 3001 : undefined,
+      // Disable WebSocket in production to avoid connection issues
+      port: mode === "development" ? 3001 : false,
+      clientPort: mode === "development" ? 3001 : false,
     },
     watch: {
       usePolling: false,
