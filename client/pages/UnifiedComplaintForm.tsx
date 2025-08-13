@@ -354,6 +354,38 @@ const UnifiedComplaintForm: React.FC = () => {
     [dispatch],
   );
 
+  // Handle OTP input change
+  const handleOtpChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setOtpCode(value);
+
+    // Clear OTP validation error when user starts typing
+    if (validationErrors.otpCode) {
+      dispatch(updateGuestFormData({})); // Trigger validation update
+    }
+  }, [dispatch, validationErrors.otpCode]);
+
+  // Handle OTP resend
+  const handleResendOtp = useCallback(async () => {
+    if (!complaintId || !formData.email) return;
+
+    try {
+      // Call resend OTP API - this should be implemented in the guest slice
+      await dispatch(resendOTP({ email: formData.email, complaintId })).unwrap();
+
+      toast({
+        title: "Verification Code Resent",
+        description: "A new verification code has been sent to your email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Resend",
+        description: error.message || "Failed to resend verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [dispatch, complaintId, formData.email, toast]);
+
   // Handle form navigation
   const handleNext = useCallback(() => {
     dispatch(validateCurrentStep());
