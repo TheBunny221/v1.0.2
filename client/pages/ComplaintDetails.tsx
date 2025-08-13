@@ -211,7 +211,7 @@ const ComplaintDetails: React.FC = () => {
               <div>
                 <h3 className="font-medium mb-2">Type</h3>
                 <p className="text-gray-600">
-                  {complaint.type.replace("_", " ")}
+                  {complaint?.type?.replace("_", " ") || 'Unknown Type'}
                 </p>
               </div>
               <div>
