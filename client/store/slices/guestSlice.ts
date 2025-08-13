@@ -104,7 +104,7 @@ export interface GuestState {
   isSubmitting: boolean;
   isVerifying: boolean;
   otpSent: boolean;
-  otpExpiry: Date | null;
+  otpExpiry: string | null;
   submissionStep: "form" | "otp" | "success";
   currentFormStep: number;
   formValidation: Record<string, string>;
