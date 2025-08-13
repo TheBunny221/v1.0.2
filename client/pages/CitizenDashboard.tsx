@@ -203,6 +203,10 @@ const CitizenDashboard: React.FC = () => {
     return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  const isResolved = (status: string) => {
+    return status === "RESOLVED" || status === "CLOSED";
+  };
+
   const recentComplaints = complaints.slice(0, 5);
 
   // Show error state if there's an authentication error
