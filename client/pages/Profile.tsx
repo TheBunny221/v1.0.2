@@ -200,15 +200,14 @@ const Profile: React.FC = () => {
         }),
       );
 
-      // Reset form and OTP state
+      // Reset form and email state
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
-      setOtpStep("none");
-      setOtpCode("");
-      setIsOtpVerified(false);
+      setEmailStep("none");
+      setSetupToken("");
 
     } catch (error: any) {
       dispatch(
