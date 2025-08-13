@@ -85,6 +85,62 @@ const Profile: React.FC = () => {
     setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSendOTP = async () => {
+    try {
+      await sendPasswordSetupEmail({ email: user?.email || "" }).unwrap();
+      setOtpStep("sent");
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "OTP Sent",
+          message: "OTP has been sent to your email address",
+        }),
+      );
+    } catch (error: any) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: error?.data?.message || "Failed to send OTP",
+        }),
+      );
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!otpCode.trim()) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: "Please enter the OTP code",
+        }),
+      );
+      return;
+    }
+
+    // Mock OTP verification - in real implementation, this would call an API
+    if (otpCode === "123456") { // Mock OTP for demo
+      setIsOtpVerified(true);
+      setOtpStep("verified");
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "Success",
+          message: "OTP verified successfully! You can now set your password.",
+        }),
+      );
+    } else {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: "Invalid OTP code. Please try again.",
+        }),
+      );
+    }
+  };
+
   const handleSaveProfile = async () => {
     try {
       await dispatch(updateProfile(formData)).unwrap();
