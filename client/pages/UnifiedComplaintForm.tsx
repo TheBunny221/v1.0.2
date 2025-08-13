@@ -969,11 +969,17 @@ const UnifiedComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
-                          {WARDS.map((ward) => (
-                            <SelectItem key={ward.id} value={ward.id}>
-                              {ward.name}
-                            </SelectItem>
-                          ))}
+                          {wardsLoading ? (
+                            <SelectItem value="" disabled>Loading wards...</SelectItem>
+                          ) : wardsError ? (
+                            <SelectItem value="" disabled>Error loading wards</SelectItem>
+                          ) : (
+                            wards.map((ward) => (
+                              <SelectItem key={ward.id} value={ward.id}>
+                                {ward.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
