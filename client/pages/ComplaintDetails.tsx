@@ -178,7 +178,7 @@ const ComplaintDetails: React.FC = () => {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              Complaint #{complaint.id.slice(-6)}
+              Complaint #{complaint?.id?.slice(-6) || 'Unknown'}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
