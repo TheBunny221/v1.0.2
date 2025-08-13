@@ -419,40 +419,42 @@ const Profile: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">
-                  {translations.profile.currentPassword}
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="currentPassword"
-                    type={showPasswords.current ? "text" : "password"}
-                    value={passwordData.currentPassword}
-                    onChange={(e) =>
-                      handlePasswordChange("currentPassword", e.target.value)
-                    }
-                    placeholder="Enter current password"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                    onClick={() =>
-                      setShowPasswords((prev) => ({
-                        ...prev,
-                        current: !prev.current,
-                      }))
-                    }
-                  >
-                    {showPasswords.current ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
+              {!requiresPasswordSetup && (
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">
+                    {translations?.profile?.currentPassword || "Current Password"}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showPasswords.current ? "text" : "password"}
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        handlePasswordChange("currentPassword", e.target.value)
+                      }
+                      placeholder="Enter current password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      onClick={() =>
+                        setShowPasswords((prev) => ({
+                          ...prev,
+                          current: !prev.current,
+                        }))
+                      }
+                    >
+                      {showPasswords.current ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="newPassword">
