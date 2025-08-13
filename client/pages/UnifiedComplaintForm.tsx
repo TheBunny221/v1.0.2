@@ -1356,7 +1356,7 @@ const UnifiedComplaintForm: React.FC = () => {
                 ) : (
                   // Guest users: OTP verification required
                   <div className="space-y-4">
-                    {!complaintId || !otpSent ? (
+                    {!complaintId ? (
                       // Step 5a: Send OTP
                       <div className="space-y-4">
                         <Alert className="border-green-200 bg-green-50">
