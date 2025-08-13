@@ -455,14 +455,60 @@ const ComplaintDetails: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Image className="h-5 w-5 mr-2" />
-                Attachments
+                Attachments ({complaint?.attachments?.length || 0})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-4">
-                <Image className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">No attachments</p>
-              </div>
+              {complaint?.attachments && complaint.attachments.length > 0 ? (
+                <div className="space-y-3">
+                  {complaint.attachments.map((attachment: any) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3">
+                        {attachment.mimeType?.startsWith('image/') ? (
+                          <Image className="h-5 w-5 text-blue-500" />
+                        ) : (
+                          <FileText className="h-5 w-5 text-gray-500" />
+                        )}
+                        <div>
+                          <p className="font-medium text-sm">
+                            {attachment.originalName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {(attachment.size / 1024).toFixed(1)} KB •{' '}
+                            {new Date(attachment.uploadedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(attachment.url, '_blank')}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {attachment.mimeType?.startsWith('image/') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(attachment.url, '_blank')}
+                          >
+                            View
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Image className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">No attachments</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
