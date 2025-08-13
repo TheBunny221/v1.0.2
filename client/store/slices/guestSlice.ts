@@ -656,6 +656,15 @@ const guestSlice = createSlice({
           state.steps[2].isValid = Object.keys(step3Errors).length === 0;
           state.steps[2].isCompleted = state.steps[2].isValid;
           break;
+        case 5:
+          // Submit step - validate all previous steps
+          const allStepErrors = {
+            ...validateStep1(state.formData),
+            ...validateStep2(state.formData),
+            ...validateStep3(state.formData),
+          };
+          errors = allStepErrors;
+          break;
       }
 
       state.validationErrors = errors;
