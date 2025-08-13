@@ -410,7 +410,12 @@ const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Lock className="h-5 w-5" />
-                <span>{translations.profile.changePassword}</span>
+                <span>
+                  {requiresPasswordSetup
+                    ? "Set Up Password"
+                    : (translations?.profile?.changePassword || "Change Password")
+                  }
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
