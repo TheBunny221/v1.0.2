@@ -125,6 +125,26 @@ const ComplaintDetails: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <FileText className="h-12 w-12 mx-auto text-red-400 mb-4" />
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Error Loading Complaint
+        </h2>
+        <p className="text-gray-600 mb-4">
+          Failed to load complaint details. Please try again.
+        </p>
+        <Link to="/complaints">
+          <Button>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Complaints
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
   if (!complaint) {
     return (
       <div className="text-center py-12">
