@@ -27,6 +27,7 @@ import {
   updateProfile,
 } from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
+import { useSendPasswordSetupEmailMutation, useSetPasswordMutation } from "../store/api/authApi";
 import {
   User,
   Mail,
