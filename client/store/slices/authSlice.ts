@@ -19,6 +19,7 @@ export interface User {
   isActive: boolean;
   lastLogin?: string;
   joinedOn: string;
+  hasPassword?: boolean;
   ward?: {
     id: string;
     name: string;
