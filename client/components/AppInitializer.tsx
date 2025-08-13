@@ -78,14 +78,14 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         };
       } finally {
         // Only set initialized when we're done with the user query (or don't need it)
-        if (!hasValidToken || userResponse || userError) {
+        if (!hasValidToken || isAlreadyAuthenticated || userResponse || userError) {
           setIsInitialized(true);
         }
       }
     };
 
     initializeApp();
-  }, [dispatch, hasValidToken, userResponse, userError, token]);
+  }, [dispatch, hasValidToken, userResponse, userError, token, isAlreadyAuthenticated, reduxAuth.token]);
 
   // Show loading screen while initializing or checking user
   if (!isInitialized || (hasValidToken && isLoadingUser)) {
