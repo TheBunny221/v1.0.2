@@ -87,11 +87,23 @@ const customBaseQuery: BaseQueryFn<
   } catch (error: any) {
     console.error("Custom base query error:", error);
 
+    let errorMessage = "Network request failed";
+    let errorStatus = "FETCH_ERROR";
+
+    if (error.name === "AbortError") {
+      errorMessage = "Request timed out. Please try again.";
+      errorStatus = "TIMEOUT_ERROR";
+    } else if (error.message?.includes("Failed to fetch")) {
+      errorMessage = "Network connection failed. Please check your internet connection.";
+    } else if (error.message?.includes("TypeError")) {
+      errorMessage = "Request failed due to a network issue.";
+    }
+
     return {
       error: {
-        status: "FETCH_ERROR",
+        status: errorStatus,
         error: error.message || "Network error",
-        data: { message: "Network request failed" },
+        data: { message: errorMessage },
       },
     };
   }
