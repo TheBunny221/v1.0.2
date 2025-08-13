@@ -266,11 +266,24 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
   if (isJson) {
     try {
       data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || `HTTP ${response.status}`);
+      }
+
+      return data;
     } catch (error) {
+      if (error.message.includes("HTTP ")) {
+        throw error; // Re-throw our custom error
+      }
       throw new Error("Failed to parse server response");
     }
   } else {
     // Non-JSON response (likely HTML error page)
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Server error occurred. Please try again later.`);
+    }
+
     const text = await response.text();
     if (text.includes("<!doctype") || text.includes("<html")) {
       throw new Error("Server error occurred. Please try again later.");
@@ -278,12 +291,6 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
       throw new Error("Server returned unexpected response format");
     }
   }
-
-  if (!response.ok) {
-    throw new Error(data?.message || `HTTP ${response.status}`);
-  }
-
-  return data;
 };
 
 // Async thunks
