@@ -51,82 +51,43 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  let result;
+
   try {
-    const result = await baseQuery(args, api, extraOptions);
+    result = await baseQuery(args, api, extraOptions);
+  } catch (networkError: any) {
+    // Handle network errors that occur before response is received
+    console.error("BaseQuery network error:", networkError);
 
-    if (result.error && result.error.status === 401) {
-      // Check if this is an auth-related endpoint to avoid logout loops
-      const endpoint = typeof args === "string" ? args : args.url;
-      const isAuthEndpoint =
-        typeof endpoint === "string" &&
-        (endpoint.includes("/auth/login") ||
-          endpoint.includes("/auth/register") ||
-          endpoint.includes("/auth/verify-otp") ||
-          endpoint.includes("/auth/login-otp"));
+    // Check for specific error types that indicate response body issues
+    if (networkError?.message?.includes("Response body") ||
+        networkError?.message?.includes("already used") ||
+        networkError?.message?.includes("disturbed")) {
 
-      if (!isAuthEndpoint) {
-        // Only auto-logout for non-auth endpoints
-        console.warn(
-          "401 Unauthorized detected for non-auth endpoint:",
-          endpoint,
-        );
-
-        // Clear auth state
-        api.dispatch(logout());
-
-        // Show toast notification (avoid multiple toasts)
-        try {
-          toast({
-            title: "Session Expired",
-            description: "Please login again to continue.",
-            variant: "destructive",
-          });
-        } catch (toastError) {
-          console.warn("Toast notification failed:", toastError);
-        }
-      }
-    } else if (result.error) {
-      // Log error for analytics without trying to access error data
-      const endpoint = typeof args === "string" ? args : args.url;
-      console.warn("API Error:", {
-        endpoint,
-        status: result.error.status,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Set error in auth slice for global error handling (only for server errors)
-      if (result.error.status && result.error.status >= 500) {
-        try {
-          api.dispatch(
-            setError("A server error occurred. Please try again later."),
-          );
-        } catch (dispatchError) {
-          console.error("Failed to dispatch error:", dispatchError);
-        }
-      }
+      return {
+        error: {
+          status: "FETCH_ERROR",
+          error: "Network communication error",
+          data: { message: "A network error occurred. Please try again." },
+        },
+      };
     }
 
-    return result;
-  } catch (error: any) {
-    console.error("BaseQuery error caught:", error);
-
-    // Provide more specific error messages based on error type
+    // Handle other network errors
     let errorMessage = "A network error occurred. Please try again.";
-    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" =
-      "FETCH_ERROR";
+    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" = "FETCH_ERROR";
 
-    if (error?.name === "TypeError" && error?.message?.includes("fetch")) {
-      errorMessage =
-        "Network connection failed. Please check your internet connection.";
+    if (networkError?.name === "TypeError" && networkError?.message?.includes("fetch")) {
+      errorMessage = "Network connection failed. Please check your internet connection.";
     } else if (
-      error?.message?.includes("timeout") ||
-      error?.message?.includes("Timeout")
+      networkError?.message?.includes("timeout") ||
+      networkError?.message?.includes("Timeout")
     ) {
       errorMessage = "Request timed out. Please try again.";
       errorStatus = "TIMEOUT_ERROR";
     } else if (
-      error?.message?.includes("JSON") ||
-      error?.message?.includes("parse")
+      networkError?.message?.includes("JSON") ||
+      networkError?.message?.includes("parse")
     ) {
       errorMessage = "Invalid response from server. Please try again.";
       errorStatus = "PARSING_ERROR";
@@ -135,11 +96,66 @@ const baseQueryWithReauth: BaseQueryFn<
     return {
       error: {
         status: errorStatus,
-        error: error.message || "Network error",
+        error: networkError.message || "Network error",
         data: { message: errorMessage },
       },
     };
   }
+
+  // Handle successful response or API errors
+  if (result.error && result.error.status === 401) {
+    // Check if this is an auth-related endpoint to avoid logout loops
+    const endpoint = typeof args === "string" ? args : args.url;
+    const isAuthEndpoint =
+      typeof endpoint === "string" &&
+      (endpoint.includes("/auth/login") ||
+        endpoint.includes("/auth/register") ||
+        endpoint.includes("/auth/verify-otp") ||
+        endpoint.includes("/auth/login-otp"));
+
+    if (!isAuthEndpoint) {
+      // Only auto-logout for non-auth endpoints
+      console.warn(
+        "401 Unauthorized detected for non-auth endpoint:",
+        endpoint,
+      );
+
+      // Clear auth state
+      api.dispatch(logout());
+
+      // Show toast notification (avoid multiple toasts)
+      try {
+        toast({
+          title: "Session Expired",
+          description: "Please login again to continue.",
+          variant: "destructive",
+        });
+      } catch (toastError) {
+        console.warn("Toast notification failed:", toastError);
+      }
+    }
+  } else if (result.error) {
+    // Log error for analytics without trying to access error data
+    const endpoint = typeof args === "string" ? args : args.url;
+    console.warn("API Error:", {
+      endpoint,
+      status: result.error.status,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Set error in auth slice for global error handling (only for server errors)
+    if (result.error.status && result.error.status >= 500) {
+      try {
+        api.dispatch(
+          setError("A server error occurred. Please try again later."),
+        );
+      } catch (dispatchError) {
+        console.error("Failed to dispatch error:", dispatchError);
+      }
+    }
+  }
+
+  return result;
 };
 
 // Helper function to extract error messages (simplified to avoid response body consumption)
