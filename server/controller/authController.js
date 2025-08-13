@@ -636,7 +636,7 @@ export const getMe = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "User details retrieved successfully",
-    data: { user },
+    data: { user: userResponse },
   });
 });
 
