@@ -27,67 +27,90 @@ const baseQuery = fetchBaseQuery({
   timeout: 10000,
 });
 
-// Enhanced base query with 401 auto-logout handling
+// Enhanced base query with 401 auto-logout handling and retry logic
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  try {
-    const result = await baseQuery(args, api, extraOptions);
+  const maxRetries = 2;
+  let attempt = 0;
 
-    if (result.error && result.error.status === 401) {
-      // Unauthorized - clear auth state
-      api.dispatch(logout());
+  while (attempt <= maxRetries) {
+    try {
+      const result = await baseQuery(args, api, extraOptions);
 
-      // Show toast notification
-      toast({
-        title: "Session Expired",
-        description: "Please login again to continue.",
-        variant: "destructive",
-      });
-    } else if (result.error) {
-      // Log error for analytics
-      console.error("API Error:", {
-        endpoint: typeof args === "string" ? args : args.url,
-        status: result.error.status,
-        timestamp: new Date().toISOString(),
-      });
+      if (result.error && result.error.status === 401) {
+        // Unauthorized - clear auth state
+        api.dispatch(logout());
 
-      // Set error in auth slice for global error handling
-      if (result.error.status && result.error.status >= 500) {
-        api.dispatch(
-          setError("A server error occurred. Please try again later."),
-        );
+        // Show toast notification
+        toast({
+          title: "Session Expired",
+          description: "Please login again to continue.",
+          variant: "destructive",
+        });
+      } else if (result.error) {
+        // Log error for analytics
+        console.error("API Error:", {
+          endpoint: typeof args === "string" ? args : args.url,
+          status: result.error.status,
+          timestamp: new Date().toISOString(),
+          attempt,
+        });
+
+        // Set error in auth slice for global error handling
+        if (result.error.status && result.error.status >= 500) {
+          api.dispatch(
+            setError("A server error occurred. Please try again later."),
+          );
+        }
       }
-    }
 
-    return result;
-  } catch (error: any) {
-    // Handle "Response body is already used" and other fetch errors
-    console.error("BaseQuery error caught:", error);
+      return result;
+    } catch (error: any) {
+      console.error(`BaseQuery error on attempt ${attempt + 1}:`, error);
 
-    // Check if this is the specific "Response body is already used" error
-    if (error?.message?.includes("Response body") || error?.message?.includes("already used")) {
-      console.warn("Response body consumption error caught, returning fallback");
+      // Check if this is the specific "Response body is already used" error
+      if (error?.message?.includes("Response body") || error?.message?.includes("already used")) {
+        // If this is not the last attempt, wait and retry
+        if (attempt < maxRetries) {
+          console.warn(`Response body error on attempt ${attempt + 1}, retrying...`);
+          attempt++;
+          // Small delay before retry (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 100));
+          continue;
+        } else {
+          console.warn("Response body error after all retries, returning fallback");
+          return {
+            error: {
+              status: 'FETCH_ERROR' as const,
+              error: 'Response parsing error',
+              data: { message: 'A network error occurred after retries. Please refresh and try again.' }
+            }
+          };
+        }
+      }
+
+      // For other errors, don't retry, return immediately
       return {
         error: {
           status: 'FETCH_ERROR' as const,
-          error: 'Response parsing error',
-          data: { message: 'A network error occurred. Please try again.' }
+          error: error.message || 'Unknown error',
+          data: { message: 'An unexpected error occurred. Please try again.' }
         }
       };
     }
-
-    // For other errors, return a generic error response
-    return {
-      error: {
-        status: 'FETCH_ERROR' as const,
-        error: error.message || 'Unknown error',
-        data: { message: 'An unexpected error occurred. Please try again.' }
-      }
-    };
   }
+
+  // This should never be reached, but just in case
+  return {
+    error: {
+      status: 'FETCH_ERROR' as const,
+      error: 'Max retries exceeded',
+      data: { message: 'Request failed after multiple attempts. Please try again.' }
+    }
+  };
 };
 
 // Helper function to extract error messages (simplified to avoid response body consumption)
