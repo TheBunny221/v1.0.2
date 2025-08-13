@@ -1244,7 +1244,9 @@ const UnifiedComplaintForm: React.FC = () => {
                       </p>
                       <p>
                         <strong>Sub-Zone:</strong>{" "}
-                        {formData.subZoneId || "Not specified"}
+                        {
+                          availableSubZones.find(sz => sz.id === formData.subZoneId)?.name || formData.subZoneId || "Not specified"
+                        }
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}
