@@ -24,10 +24,10 @@ export default defineConfig(({ mode }) => ({
       },
     },
     hmr: {
-      port: 3001,
       overlay: false,
-      clientPort: mode === "production" ? 443 : 3001,
-      host: mode === "production" ? true : "localhost",
+      // For cloud environments, use the same port as the server
+      port: mode === "development" ? 3001 : undefined,
+      clientPort: mode === "development" ? 3001 : undefined,
     },
     watch: {
       usePolling: false,
