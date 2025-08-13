@@ -272,14 +272,21 @@ const Index: React.FC = () => {
             </p>
 
             <div className="flex justify-center space-x-4 flex-wrap gap-4 mb-8">
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+                <Link to="/complaint">
+                  <FileText className="mr-2 h-5 w-5" />
+                  {translations?.complaints?.registerComplaint ||
+                    "Register Complaint"}
+                </Link>
+              </Button>
+
               <Button
                 onClick={() => setIsFormExpanded(!isFormExpanded)}
                 size="lg"
-                className="bg-primary hover:bg-primary/90"
+                variant="outline"
               >
                 <FileText className="mr-2 h-5 w-5" />
-                {translations?.complaints?.registerComplaint ||
-                  "Register Complaint"}
+                Quick Form
               </Button>
 
               {!isAuthenticated ? (
