@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Switch } from "../components/ui/switch";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import {
   updateProfile,
