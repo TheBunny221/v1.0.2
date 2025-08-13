@@ -78,6 +78,9 @@ const specs = swaggerJsdoc(swaggerOptions);
 export function createApp() {
   const app = express();
 
+  // Trust proxy for cloud deployments (fixes rate limiting X-Forwarded-For issue)
+  app.set('trust proxy', true);
+
   // Security middleware
   app.use(
     helmet({
