@@ -25,7 +25,6 @@ import {
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import {
   updateProfile,
-  updateUserPreferences,
 } from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
 import {
