@@ -125,14 +125,20 @@ const ComplaintsList: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Complaints</h1>
           <p className="text-gray-600">Manage and track all complaints</p>
         </div>
-        {user?.role === "CITIZEN" && (
-          <Link to="/complaints/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Complaint
-            </Button>
-          </Link>
-        )}
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()}>
+            <FileText className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          {user?.role === "CITIZEN" && (
+            <Link to="/complaints/new">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                New Complaint
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
