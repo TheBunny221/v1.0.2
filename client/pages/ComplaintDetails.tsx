@@ -63,6 +63,13 @@ const ComplaintDetails: React.FC = () => {
 
   const complaint = complaintResponse?.data?.complaint;
 
+  // Cache complaint details when loaded
+  useEffect(() => {
+    if (complaint && id) {
+      cacheComplaintDetails(id, complaint);
+    }
+  }, [complaint, id, cacheComplaintDetails]);
+
   // Debug logging
   console.log('ComplaintDetails Debug:', {
     complaintResponse,
