@@ -867,7 +867,7 @@ const guestSlice = createSlice({
         state.error = null;
       })
       .addCase(resendOTP.fulfilled, (state, action) => {
-        state.otpExpiry = new Date(action.payload.expiresAt);
+        state.otpExpiry = action.payload.expiresAt;
         state.sessionId = action.payload.sessionId;
         state.error = null;
       })
