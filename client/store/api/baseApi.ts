@@ -57,16 +57,19 @@ const baseQueryWithReauth: BaseQueryFn<
     if (result.error && result.error.status === 401) {
       // Check if this is an auth-related endpoint to avoid logout loops
       const endpoint = typeof args === "string" ? args : args.url;
-      const isAuthEndpoint = typeof endpoint === 'string' && (
-        endpoint.includes('/auth/login') ||
-        endpoint.includes('/auth/register') ||
-        endpoint.includes('/auth/verify-otp') ||
-        endpoint.includes('/auth/login-otp')
-      );
+      const isAuthEndpoint =
+        typeof endpoint === "string" &&
+        (endpoint.includes("/auth/login") ||
+          endpoint.includes("/auth/register") ||
+          endpoint.includes("/auth/verify-otp") ||
+          endpoint.includes("/auth/login-otp"));
 
       if (!isAuthEndpoint) {
         // Only auto-logout for non-auth endpoints
-        console.warn("401 Unauthorized detected for non-auth endpoint:", endpoint);
+        console.warn(
+          "401 Unauthorized detected for non-auth endpoint:",
+          endpoint,
+        );
 
         // Clear auth state
         api.dispatch(logout());
@@ -109,14 +112,22 @@ const baseQueryWithReauth: BaseQueryFn<
 
     // Provide more specific error messages based on error type
     let errorMessage = "A network error occurred. Please try again.";
-    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" = "FETCH_ERROR";
+    let errorStatus: "FETCH_ERROR" | "PARSING_ERROR" | "TIMEOUT_ERROR" =
+      "FETCH_ERROR";
 
     if (error?.name === "TypeError" && error?.message?.includes("fetch")) {
-      errorMessage = "Network connection failed. Please check your internet connection.";
-    } else if (error?.message?.includes("timeout") || error?.message?.includes("Timeout")) {
+      errorMessage =
+        "Network connection failed. Please check your internet connection.";
+    } else if (
+      error?.message?.includes("timeout") ||
+      error?.message?.includes("Timeout")
+    ) {
       errorMessage = "Request timed out. Please try again.";
       errorStatus = "TIMEOUT_ERROR";
-    } else if (error?.message?.includes("JSON") || error?.message?.includes("parse")) {
+    } else if (
+      error?.message?.includes("JSON") ||
+      error?.message?.includes("parse")
+    ) {
       errorMessage = "Invalid response from server. Please try again.";
       errorStatus = "PARSING_ERROR";
     }

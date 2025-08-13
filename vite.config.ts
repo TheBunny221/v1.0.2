@@ -19,18 +19,18 @@ export default defineConfig(({ mode }) => ({
         secure: false,
         timeout: 10000,
         headers: {
-          "Connection": "keep-alive"
-        }
-      }
+          Connection: "keep-alive",
+        },
+      },
     },
     hmr: {
       port: 3001,
-      overlay: false
+      overlay: false,
     },
     watch: {
       usePolling: false,
-      interval: 1000
-    }
+      interval: 1000,
+    },
   },
   build: {
     outDir: "dist/spa",
@@ -39,8 +39,8 @@ export default defineConfig(({ mode }) => ({
     react({
       // Configure React fast refresh
       fastRefresh: true,
-      jsxRuntime: 'automatic'
-    })
+      jsxRuntime: "automatic",
+    }),
   ],
   resolve: {
     alias: {
@@ -53,6 +53,6 @@ export default defineConfig(({ mode }) => ({
     global: "globalThis",
   },
   optimizeDeps: {
-    include: ["react", "react-dom"]
-  }
+    include: ["react", "react-dom"],
+  },
 }));

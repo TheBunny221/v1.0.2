@@ -35,8 +35,10 @@ async function startServer() {
       const dbStatus = await getDatabaseStatus();
       res.status(dbStatus.healthy ? 200 : 503).json({
         success: dbStatus.healthy,
-        message: dbStatus.healthy ? "All systems operational" : "System issues detected",
-        data: dbStatus
+        message: dbStatus.healthy
+          ? "All systems operational"
+          : "System issues detected",
+        data: dbStatus,
       });
     });
 
@@ -48,7 +50,9 @@ async function startServer() {
       console.log(`🌐 Server URL: http://${HOST}:${PORT}`);
       console.log(`📖 API Documentation: http://${HOST}:${PORT}/api-docs`);
       console.log(`🔍 Health Check: http://${HOST}:${PORT}/api/health`);
-      console.log(`📊 Detailed Health: http://${HOST}:${PORT}/api/health/detailed`);
+      console.log(
+        `📊 Detailed Health: http://${HOST}:${PORT}/api/health/detailed`,
+      );
       console.log("=".repeat(50));
 
       if (process.env.NODE_ENV === "development") {
@@ -95,7 +99,6 @@ async function startServer() {
     // Register shutdown handlers
     process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
     process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-
   } catch (error) {
     console.error("\n❌ Server startup failed:");
     console.error("Error:", error.message);
@@ -154,7 +157,8 @@ if (process.env.NODE_ENV === "development") {
     const usedMB = Math.round(usage.heapUsed / 1024 / 1024);
     const totalMB = Math.round(usage.heapTotal / 1024 / 1024);
 
-    if (usedMB > 500) { // Warn if using more than 500MB
+    if (usedMB > 500) {
+      // Warn if using more than 500MB
       console.warn(`⚠️ High memory usage: ${usedMB}MB / ${totalMB}MB`);
     }
   }, 60000); // Check every minute

@@ -32,7 +32,7 @@ export const protect = asyncHandler(async (req, res, next) => {
       message: "Access denied. No token provided.",
       data: {
         code: "NO_TOKEN",
-        action: "LOGIN_REQUIRED"
+        action: "LOGIN_REQUIRED",
       },
     });
   }
@@ -40,7 +40,9 @@ export const protect = asyncHandler(async (req, res, next) => {
   try {
     // Check if JWT_SECRET is properly configured
     if (!process.env.JWT_SECRET) {
-      console.error("❌ JWT_SECRET not configured - this is a critical security issue");
+      console.error(
+        "❌ JWT_SECRET not configured - this is a critical security issue",
+      );
       return res.status(500).json({
         success: false,
         message: "Server configuration error",
@@ -50,8 +52,8 @@ export const protect = asyncHandler(async (req, res, next) => {
 
     // Verify token with enhanced validation
     const decoded = jwt.verify(token, process.env.JWT_SECRET, {
-      algorithms: ['HS256'], // Explicitly specify allowed algorithms
-      maxAge: process.env.JWT_EXPIRE || '7d', // Validate token age
+      algorithms: ["HS256"], // Explicitly specify allowed algorithms
+      maxAge: process.env.JWT_EXPIRE || "7d", // Validate token age
       clockTolerance: 60, // Allow 60 seconds clock skew
     });
 
@@ -80,13 +82,16 @@ export const protect = asyncHandler(async (req, res, next) => {
     } catch (dbError) {
       console.error("❌ Database error during auth:", dbError);
 
-      if (dbError.message.includes("readonly") || dbError.message.includes("READONLY")) {
+      if (
+        dbError.message.includes("readonly") ||
+        dbError.message.includes("READONLY")
+      ) {
         return res.status(503).json({
           success: false,
           message: "Service temporarily unavailable. Please try again later.",
           data: {
             code: "DATABASE_READONLY",
-            retryAfter: 60
+            retryAfter: 60,
           },
         });
       }
@@ -104,7 +109,7 @@ export const protect = asyncHandler(async (req, res, next) => {
         message: "Invalid token. User not found.",
         data: {
           code: "USER_NOT_FOUND",
-          action: "LOGIN_REQUIRED"
+          action: "LOGIN_REQUIRED",
         },
       });
     }
@@ -115,7 +120,7 @@ export const protect = asyncHandler(async (req, res, next) => {
         message: "Account is deactivated. Please contact support.",
         data: {
           code: "ACCOUNT_DEACTIVATED",
-          action: "CONTACT_SUPPORT"
+          action: "CONTACT_SUPPORT",
         },
       });
     }
@@ -130,7 +135,7 @@ export const protect = asyncHandler(async (req, res, next) => {
       message: "Invalid or expired token",
       data: {
         code: "TOKEN_INVALID",
-        action: "LOGIN_REQUIRED"
+        action: "LOGIN_REQUIRED",
       },
     };
 
@@ -159,7 +164,7 @@ export const authorize = (...roles) => {
         message: "Authentication required for role-based access",
         data: {
           code: "AUTH_REQUIRED",
-          action: "LOGIN_REQUIRED"
+          action: "LOGIN_REQUIRED",
         },
       });
     }
@@ -167,11 +172,11 @@ export const authorize = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Access denied. Required roles: ${roles.join(', ')}. Your role: ${req.user.role}`,
+        message: `Access denied. Required roles: ${roles.join(", ")}. Your role: ${req.user.role}`,
         data: {
           code: "INSUFFICIENT_ROLE",
           requiredRoles: roles,
-          userRole: req.user.role
+          userRole: req.user.role,
         },
       });
     }
@@ -219,12 +224,18 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
           req.user = user;
         }
       } catch (dbError) {
-        console.warn("⚠️ Database error in optional auth, continuing without user:", dbError.message);
+        console.warn(
+          "⚠️ Database error in optional auth, continuing without user:",
+          dbError.message,
+        );
         // Continue without user for optional auth
       }
     } catch (error) {
       // Token invalid, continue without user
-      console.debug("Token invalid in optional auth, continuing without user:", error.message);
+      console.debug(
+        "Token invalid in optional auth, continuing without user:",
+        error.message,
+      );
     }
   }
 
@@ -245,8 +256,8 @@ export const checkTokenExpiry = asyncHandler(async (req, res, next) => {
 
         // If token expires in less than 1 hour, add warning header
         if (timeToExpiry < 3600) {
-          res.set('X-Token-Warning', 'Token expires soon');
-          res.set('X-Token-Expiry', decoded.exp.toString());
+          res.set("X-Token-Warning", "Token expires soon");
+          res.set("X-Token-Expiry", decoded.exp.toString());
         }
       } catch (error) {
         // Ignore decode errors

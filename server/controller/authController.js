@@ -231,21 +231,33 @@ export const login = asyncHandler(async (req, res) => {
         updateSuccess = true;
       } catch (updateError) {
         retryCount++;
-        console.warn(`Login update attempt ${retryCount} failed:`, updateError.message);
+        console.warn(
+          `Login update attempt ${retryCount} failed:`,
+          updateError.message,
+        );
 
-        if (updateError.message.includes("readonly") || updateError.message.includes("READONLY")) {
+        if (
+          updateError.message.includes("readonly") ||
+          updateError.message.includes("READONLY")
+        ) {
           // For readonly database, continue with login but log the issue
-          console.error("��� Database is readonly - cannot update last login timestamp");
-          console.error("🔧 This indicates a database permission issue that needs immediate attention");
+          console.error(
+            "��� Database is readonly - cannot update last login timestamp",
+          );
+          console.error(
+            "🔧 This indicates a database permission issue that needs immediate attention",
+          );
           break; // Don't retry for readonly errors
         }
 
         if (retryCount >= maxRetries) {
-          console.error(`❌ Failed to update last login after ${maxRetries} attempts`);
+          console.error(
+            `❌ Failed to update last login after ${maxRetries} attempts`,
+          );
           // Continue with login even if update fails
         } else {
           // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+          await new Promise((resolve) => setTimeout(resolve, 100 * retryCount));
         }
       }
     }
@@ -262,20 +274,26 @@ export const login = asyncHandler(async (req, res) => {
       data: {
         user: userResponse,
         token,
-        ...(updateSuccess ? {} : { warning: "Login successful but user data update failed" })
+        ...(updateSuccess
+          ? {}
+          : { warning: "Login successful but user data update failed" }),
       },
     });
   } catch (error) {
     console.error("❌ Login error:", error);
 
     // Handle specific database errors
-    if (error.message.includes("readonly") || error.message.includes("READONLY")) {
+    if (
+      error.message.includes("readonly") ||
+      error.message.includes("READONLY")
+    ) {
       return res.status(503).json({
         success: false,
-        message: "Service temporarily unavailable due to database maintenance. Please try again later.",
+        message:
+          "Service temporarily unavailable due to database maintenance. Please try again later.",
         data: {
           error: "DATABASE_READONLY",
-          retryAfter: 60 // seconds
+          retryAfter: 60, // seconds
         },
       });
     }

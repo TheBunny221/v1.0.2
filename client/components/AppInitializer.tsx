@@ -8,12 +8,12 @@ import { useGetCurrentUserQuery } from "../store/api/authApi";
 // Error logging utility
 const logAuthError = (context: string, error: any) => {
   console.group(`🔐 Auth Error - ${context}`);
-  console.error('Error:', error);
+  console.error("Error:", error);
   if (error?.data) {
-    console.error('Error Data:', error.data);
+    console.error("Error Data:", error.data);
   }
   if (error?.status) {
-    console.error('HTTP Status:', error.status);
+    console.error("HTTP Status:", error.status);
   }
   console.groupEnd();
 };
@@ -77,18 +77,24 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           } else if (userError) {
             // Handle different types of auth errors
             const error = userError as any;
-            const errorData = 'data' in error ? error.data : null;
+            const errorData = "data" in error ? error.data : null;
 
             logAuthError("User Query Failed", error);
 
             // Handle specific error types
             const errorCode = errorData?.data?.code;
             const isServerError = error.status >= 500;
-            const isDatabaseError = errorCode === "DATABASE_READONLY" || errorCode === "DATABASE_ERROR";
+            const isDatabaseError =
+              errorCode === "DATABASE_READONLY" ||
+              errorCode === "DATABASE_ERROR";
 
             if (isDatabaseError || isServerError) {
-              console.warn("🚨 Server/Database issue detected - not clearing user credentials");
-              console.log("User can continue with cached data until server recovers");
+              console.warn(
+                "🚨 Server/Database issue detected - not clearing user credentials",
+              );
+              console.log(
+                "User can continue with cached data until server recovers",
+              );
 
               // Don't clear credentials for server issues - user might be able to continue
               // with cached data until the server recovers
@@ -153,7 +159,10 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           window.addEventListener("online", handleOnline);
           window.addEventListener("offline", handleOffline);
         } catch (listenerError) {
-          console.warn("Failed to add online/offline listeners:", listenerError);
+          console.warn(
+            "Failed to add online/offline listeners:",
+            listenerError,
+          );
         }
 
         // Cleanup function
