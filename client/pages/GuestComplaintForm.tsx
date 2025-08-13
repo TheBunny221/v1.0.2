@@ -174,7 +174,7 @@ const GuestComplaintForm: React.FC = () => {
 
   // Fetch wards from API
   const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
-  const wards = wardsResponse?.data || [];
+  const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // RTK Query mutation for form submission
   const [submitComplaintMutation] = useSubmitGuestComplaintMutation();
