@@ -193,7 +193,15 @@ const ComplaintsList: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {error ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 mx-auto text-red-400 mb-4" />
+              <p className="text-red-500 mb-2">Failed to load complaints</p>
+              <Button variant="outline" onClick={() => refetch()}>
+                Try Again
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
@@ -205,7 +213,12 @@ const ComplaintsList: React.FC = () => {
           ) : filteredComplaints.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500">No complaints found</p>
+              <p className="text-gray-500 mb-2">No complaints found</p>
+              <p className="text-sm text-gray-400">
+                {searchTerm || statusFilter !== "all" || priorityFilter !== "all"
+                  ? "Try adjusting your filters or search terms"
+                  : "Submit your first complaint to get started"}
+              </p>
             </div>
           ) : (
             <Table>
