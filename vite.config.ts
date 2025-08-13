@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       port: 3001,
       overlay: false,
+      clientPort: mode === 'production' ? 443 : 3001,
+      host: mode === 'production' ? true : 'localhost',
     },
     watch: {
       usePolling: false,
