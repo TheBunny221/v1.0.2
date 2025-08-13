@@ -25,9 +25,16 @@ export default defineConfig(({ mode }) => ({
     },
     hmr: {
       overlay: false,
-      // Disable WebSocket in production to avoid connection issues
-      port: mode === "development" ? 3001 : false,
-      clientPort: mode === "development" ? 3001 : false,
+      // Configure HMR for different environments
+      ...(mode === "production" ? {
+        // Disable HMR completely in production/cloud environments
+        port: false,
+        clientPort: false,
+      } : {
+        // Development configuration
+        port: 3001,
+        clientPort: 3001,
+      }),
     },
     watch: {
       usePolling: false,
