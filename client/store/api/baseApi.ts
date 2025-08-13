@@ -7,118 +7,21 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Custom base query implementation to prevent response body consumption issues
-const customBaseQuery: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  const state = api.getState() as any;
-  const token = state.auth.token;
-  const localStorageToken = localStorage.getItem("token");
-  const activeToken = token || localStorageToken;
+// Use standard fetchBaseQuery with proper auth handling
+const baseQuery = fetchBaseQuery({
+  baseUrl: '/api/',
+  prepareHeaders: (headers, { getState }) => {
+    const state = getState() as any;
+    const token = state.auth.token || localStorage.getItem("token");
 
-  // Prepare request
-  const url = typeof args === "string" ? args : args.url;
-  const method = typeof args === "string" ? "GET" : args.method || "GET";
-  const body = typeof args === "string" ? undefined : args.body;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (activeToken) {
-    headers.authorization = `Bearer ${activeToken}`;
-  }
-
-  // Handle FormData requests
-  if (body instanceof FormData) {
-    delete headers["Content-Type"];
-  }
-
-  try {
-    // Create abort controller for timeout handling
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-    const response = await fetch(
-      `/api${url.startsWith("/") ? url : `/${url}`}`,
-      {
-        method,
-        headers,
-        body:
-          body instanceof FormData
-            ? body
-            : body
-              ? JSON.stringify(body)
-              : undefined,
-        signal: controller.signal,
-      },
-    );
-
-    clearTimeout(timeoutId);
-
-    let data;
-    const contentType = response.headers.get("content-type") || "";
-
-    try {
-      if (contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { message: text || "Response received" };
-        }
-      }
-    } catch (parseError: any) {
-      console.warn("Response parsing error:", parseError);
-      // Don't use clone, just provide a safe fallback
-      data = {
-        message: "Failed to parse response",
-        error: parseError.message,
-        status: response.status,
-      };
+    if (token) {
+      headers.set('authorization', `Bearer ${token}`);
     }
 
-    if (!response.ok) {
-      return {
-        error: {
-          status: response.status,
-          data,
-        },
-      };
-    }
-
-    return { data };
-  } catch (error: any) {
-    console.error("Custom base query error:", error);
-
-    let errorMessage = "Network request failed";
-    let errorStatus = "FETCH_ERROR";
-
-    if (error.name === "AbortError") {
-      errorMessage = "Request timed out. Please try again.";
-      errorStatus = "TIMEOUT_ERROR";
-    } else if (error.message?.includes("Failed to fetch")) {
-      errorMessage =
-        "Network connection failed. Please check your internet connection.";
-    } else if (error.message?.includes("TypeError")) {
-      errorMessage = "Request failed due to a network issue.";
-    }
-
-    return {
-      error: {
-        status: errorStatus,
-        error: error.message || "Network error",
-        data: { message: errorMessage },
-      },
-    };
-  }
-};
-
-const baseQuery = customBaseQuery;
+    return headers;
+  },
+  timeout: 30000,
+});
 
 // Enhanced base query with 401 auto-logout handling and error handling
 const baseQueryWithReauth: BaseQueryFn<
