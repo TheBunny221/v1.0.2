@@ -173,7 +173,7 @@ const UnifiedComplaintForm: React.FC = () => {
 
   // Fetch wards from API
   const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
-  const wards = wardsResponse?.data || [];
+  const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Use guest form state as the canonical source for form management
   const currentStep = useAppSelector(selectCurrentStep);
