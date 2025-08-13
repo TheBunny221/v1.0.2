@@ -826,7 +826,7 @@ const guestSlice = createSlice({
         state.sessionId = action.payload.sessionId;
         state.userEmail = action.payload.email;
         state.otpSent = true;
-        state.otpExpiry = new Date(action.payload.expiresAt);
+        state.otpExpiry = action.payload.expiresAt;
         state.submissionStep = "otp";
         state.error = null;
 
