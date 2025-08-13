@@ -357,15 +357,18 @@ const UnifiedComplaintForm: React.FC = () => {
   );
 
   // Handle OTP input change
-  const handleOtpChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-    setOtpCode(value);
+  const handleOtpChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+      setOtpCode(value);
 
-    // Clear OTP validation error when user starts typing
-    if (validationErrors.otpCode) {
-      dispatch(updateGuestFormData({})); // Trigger validation update
-    }
-  }, [dispatch, validationErrors.otpCode]);
+      // Clear OTP validation error when user starts typing
+      if (validationErrors.otpCode) {
+        dispatch(updateGuestFormData({})); // Trigger validation update
+      }
+    },
+    [dispatch, validationErrors.otpCode],
+  );
 
   // Handle OTP resend
   const handleResendOtp = useCallback(async () => {
@@ -373,7 +376,9 @@ const UnifiedComplaintForm: React.FC = () => {
 
     try {
       // Call resend OTP API - this should be implemented in the guest slice
-      await dispatch(resendOTP({ email: formData.email, complaintId })).unwrap();
+      await dispatch(
+        resendOTP({ email: formData.email, complaintId }),
+      ).unwrap();
 
       toast({
         title: "Verification Code Resent",
@@ -382,7 +387,9 @@ const UnifiedComplaintForm: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Failed to Resend",
-        description: error.message || "Failed to resend verification code. Please try again.",
+        description:
+          error.message ||
+          "Failed to resend verification code. Please try again.",
         variant: "destructive",
       });
     }
@@ -557,18 +564,12 @@ const UnifiedComplaintForm: React.FC = () => {
       console.error("OTP verification error:", error);
       toast({
         title: "Verification Failed",
-        description: error.message || "Invalid verification code. Please try again.",
+        description:
+          error.message || "Invalid verification code. Please try again.",
         variant: "destructive",
       });
     }
-  }, [
-    otpCode,
-    complaintId,
-    formData.email,
-    dispatch,
-    toast,
-    navigate,
-  ]);
+  }, [otpCode, complaintId, formData.email, dispatch, toast, navigate]);
 
   // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
   const handleSubmit = useCallback(() => {
@@ -582,7 +583,13 @@ const UnifiedComplaintForm: React.FC = () => {
       }
     }
     return handleSendOtp();
-  }, [currentStep, submissionMode, complaintId, handleSendOtp, handleVerifyAndSubmit]);
+  }, [
+    currentStep,
+    submissionMode,
+    complaintId,
+    handleSendOtp,
+    handleVerifyAndSubmit,
+  ]);
 
   // Calculate progress
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
@@ -686,7 +693,12 @@ const UnifiedComplaintForm: React.FC = () => {
               {currentStep === 2 && <MapPin className="h-5 w-5" />}
               {currentStep === 3 && <Camera className="h-5 w-5" />}
               {currentStep === 4 && <CheckCircle className="h-5 w-5" />}
-              {currentStep === 5 && (submissionMode === "citizen" ? <Shield className="h-5 w-5" /> : <Mail className="h-5 w-5" />)}
+              {currentStep === 5 &&
+                (submissionMode === "citizen" ? (
+                  <Shield className="h-5 w-5" />
+                ) : (
+                  <Mail className="h-5 w-5" />
+                ))}
               {steps[currentStep - 1]?.title}
             </CardTitle>
             <CardDescription>
@@ -1343,14 +1355,21 @@ const UnifiedComplaintForm: React.FC = () => {
                     <Alert className="border-blue-200 bg-blue-50">
                       <Shield className="h-4 w-4" />
                       <AlertDescription className="text-blue-800">
-                        <strong>Citizen Account Detected:</strong> As a verified citizen, your complaint will be submitted immediately without requiring additional verification.
+                        <strong>Citizen Account Detected:</strong> As a verified
+                        citizen, your complaint will be submitted immediately
+                        without requiring additional verification.
                       </AlertDescription>
                     </Alert>
 
                     <div className="text-center py-8">
                       <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-                      <h4 className="text-lg font-semibold mb-2">Ready to Submit</h4>
-                      <p className="text-gray-600 mb-6">Your complaint is ready to be submitted to the relevant authorities.</p>
+                      <h4 className="text-lg font-semibold mb-2">
+                        Ready to Submit
+                      </h4>
+                      <p className="text-gray-600 mb-6">
+                        Your complaint is ready to be submitted to the relevant
+                        authorities.
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -1362,14 +1381,23 @@ const UnifiedComplaintForm: React.FC = () => {
                         <Alert className="border-green-200 bg-green-50">
                           <Mail className="h-4 w-4" />
                           <AlertDescription className="text-green-800">
-                            <strong>Email Verification Required:</strong> We'll send a verification code to <strong>{formData.email}</strong> to secure your complaint submission and create your citizen account.
+                            <strong>Email Verification Required:</strong> We'll
+                            send a verification code to{" "}
+                            <strong>{formData.email}</strong> to secure your
+                            complaint submission and create your citizen
+                            account.
                           </AlertDescription>
                         </Alert>
 
                         <div className="text-center py-8">
                           <Mail className="mx-auto h-16 w-16 text-blue-500 mb-4" />
-                          <h4 className="text-lg font-semibold mb-2">Send Verification Code</h4>
-                          <p className="text-gray-600 mb-6">Click below to send a verification code to your email address.</p>
+                          <h4 className="text-lg font-semibold mb-2">
+                            Send Verification Code
+                          </h4>
+                          <p className="text-gray-600 mb-6">
+                            Click below to send a verification code to your
+                            email address.
+                          </p>
                         </div>
                       </div>
                     ) : (
@@ -1378,13 +1406,18 @@ const UnifiedComplaintForm: React.FC = () => {
                         <Alert className="border-orange-200 bg-orange-50">
                           <Clock className="h-4 w-4" />
                           <AlertDescription className="text-orange-800">
-                            <strong>Verification Code Sent:</strong> Please check your email and enter the 6-digit verification code below.
+                            <strong>Verification Code Sent:</strong> Please
+                            check your email and enter the 6-digit verification
+                            code below.
                           </AlertDescription>
                         </Alert>
 
                         <div className="max-w-md mx-auto space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="otpCode" className="text-center block">
+                            <Label
+                              htmlFor="otpCode"
+                              className="text-center block"
+                            >
                               Enter Verification Code
                             </Label>
                             <Input
@@ -1417,7 +1450,10 @@ const UnifiedComplaintForm: React.FC = () => {
                           </div>
 
                           {validationErrors.otpCode && (
-                            <p className="text-sm text-red-600 text-center" role="alert">
+                            <p
+                              className="text-sm text-red-600 text-center"
+                              role="alert"
+                            >
                               {validationErrors.otpCode}
                             </p>
                           )}
@@ -1496,7 +1532,9 @@ const UnifiedComplaintForm: React.FC = () => {
                     <Button
                       type="button"
                       onClick={handleVerifyAndSubmit}
-                      disabled={isSubmitting || !otpCode || otpCode.length !== 6}
+                      disabled={
+                        isSubmitting || !otpCode || otpCode.length !== 6
+                      }
                     >
                       {isSubmitting ? (
                         <>

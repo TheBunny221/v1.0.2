@@ -281,7 +281,9 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
   } else {
     // Non-JSON response (likely HTML error page)
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: Server error occurred. Please try again later.`);
+      throw new Error(
+        `HTTP ${response.status}: Server error occurred. Please try again later.`,
+      );
     }
 
     const text = await response.text();
@@ -358,7 +360,9 @@ export const submitGuestComplaint = createAsyncThunk(
       } else {
         // Non-JSON response handling
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Server returned unexpected response format`);
+          throw new Error(
+            `HTTP ${response.status}: Server returned unexpected response format`,
+          );
         }
         throw new Error("Server returned unexpected response format");
       }
