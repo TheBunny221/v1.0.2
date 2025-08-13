@@ -5,6 +5,7 @@ import {
   useGetComplaintsQuery,
   useGetComplaintStatisticsQuery,
 } from "../store/api/complaintsApi";
+import { formatDate } from "../lib/dateUtils";
 import {
   Card,
   CardContent,
