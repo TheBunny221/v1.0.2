@@ -106,18 +106,8 @@ const ComplaintsList: React.FC = () => {
     }
   };
 
-  // Since filtering is now done server-side via query params, we don't need client-side filtering
-  // But we can still apply search term filtering for immediate feedback
-  const filteredComplaints = searchTerm
-    ? complaints.filter(
-        (complaint) =>
-          complaint.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          complaint.id.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : complaints;
+  // Use all complaints since filtering is done server-side
+  const filteredComplaints = complaints;
 
   return (
     <div className="space-y-6">
