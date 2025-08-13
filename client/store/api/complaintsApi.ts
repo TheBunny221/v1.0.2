@@ -31,7 +31,15 @@ export interface Complaint {
   address: string;
   mobile: string;
   email?: string;
-  attachments: string[];
+  attachments: Array<{
+    id: string;
+    fileName: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    url: string;
+    uploadedAt: string;
+  }>;
   remarks?: string;
   feedback?: string;
   rating?: number;
