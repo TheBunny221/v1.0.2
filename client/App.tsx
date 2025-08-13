@@ -185,7 +185,7 @@ const App: React.FC = () => {
                                   path="/complaints/new"
                                   element={
                                     <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                                      <CreateComplaint />
+                                      <UnifiedComplaintForm />
                                     </RoleBasedRoute>
                                   }
                                 />
