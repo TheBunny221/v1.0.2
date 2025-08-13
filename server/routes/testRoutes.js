@@ -143,8 +143,8 @@ router.post("/seed-admin", async (req, res) => {
     // Check if admin user already exists
     const existingAdmin = await prisma.user.findFirst({
       where: {
-        role: "ADMINISTRATOR"
-      }
+        role: "ADMINISTRATOR",
+      },
     });
 
     if (existingAdmin) {
@@ -153,8 +153,8 @@ router.post("/seed-admin", async (req, res) => {
         message: "Admin user already exists",
         data: {
           email: existingAdmin.email,
-          role: existingAdmin.role
-        }
+          role: existingAdmin.role,
+        },
       });
     }
 
@@ -169,8 +169,8 @@ router.post("/seed-admin", async (req, res) => {
         password: hashedPassword,
         role: "ADMINISTRATOR",
         isActive: true,
-        department: "Administration"
-      }
+        department: "Administration",
+      },
     });
 
     // Also create some test users
@@ -186,10 +186,14 @@ router.post("/seed-admin", async (req, res) => {
         password: wardOfficerPassword,
         role: "WARD_OFFICER",
         isActive: true,
-        department: "Ward Management"
-      }
+        department: "Ward Management",
+      },
     });
-    users.push({ email: wardOfficer.email, password: "ward123", role: wardOfficer.role });
+    users.push({
+      email: wardOfficer.email,
+      password: "ward123",
+      role: wardOfficer.role,
+    });
 
     // Create a maintenance user
     const maintenancePassword = await bcrypt.hash("maintenance123", 12);
@@ -201,10 +205,14 @@ router.post("/seed-admin", async (req, res) => {
         password: maintenancePassword,
         role: "MAINTENANCE_TEAM",
         isActive: true,
-        department: "Maintenance"
-      }
+        department: "Maintenance",
+      },
     });
-    users.push({ email: maintenanceUser.email, password: "maintenance123", role: maintenanceUser.role });
+    users.push({
+      email: maintenanceUser.email,
+      password: "maintenance123",
+      role: maintenanceUser.role,
+    });
 
     // Create a regular citizen
     const citizenPassword = await bcrypt.hash("citizen123", 12);
@@ -215,10 +223,14 @@ router.post("/seed-admin", async (req, res) => {
         phoneNumber: "+91 9876543213",
         password: citizenPassword,
         role: "CITIZEN",
-        isActive: true
-      }
+        isActive: true,
+      },
     });
-    users.push({ email: citizen.email, password: "citizen123", role: citizen.role });
+    users.push({
+      email: citizen.email,
+      password: "citizen123",
+      role: citizen.role,
+    });
 
     res.json({
       success: true,
@@ -227,12 +239,11 @@ router.post("/seed-admin", async (req, res) => {
         admin: {
           email: adminUser.email,
           password: "admin123",
-          role: adminUser.role
+          role: adminUser.role,
         },
-        testUsers: users
-      }
+        testUsers: users,
+      },
     });
-
   } catch (error) {
     console.error("❌ Error seeding admin user:", error);
     res.status(500).json({

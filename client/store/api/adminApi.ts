@@ -121,10 +121,10 @@ export const adminApi = baseApi.injectEndpoints({
           limit: limit.toString(),
           status,
         });
-        
+
         if (role) params.append("role", role);
         if (ward) params.append("ward", ward);
-        
+
         return `/admin/users?${params.toString()}`;
       },
       transformResponse: transformResponse<UsersResponse>,
@@ -225,11 +225,11 @@ export const adminApi = baseApi.injectEndpoints({
     >({
       query: ({ startDate, endDate, ward }) => {
         const params = new URLSearchParams();
-        
+
         if (startDate) params.append("startDate", startDate);
         if (endDate) params.append("endDate", endDate);
         if (ward) params.append("ward", ward);
-        
+
         return `/admin/analytics?${params.toString()}`;
       },
       transformResponse: transformResponse<AnalyticsResponse>,

@@ -233,7 +233,9 @@ const AdminUsers: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Active Users
+                </p>
                 <p className="text-2xl font-bold text-green-600">
                   {isLoadingStats ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
@@ -255,7 +257,8 @@ const AdminUsers: React.FC = () => {
                   {isLoadingStats ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
                   ) : (
-                    stats?.usersByRole?.find((role) => role.role === "CITIZEN")?._count || 0
+                    stats?.usersByRole?.find((role) => role.role === "CITIZEN")
+                      ?._count || 0
                   )}
                 </p>
               </div>
@@ -274,7 +277,9 @@ const AdminUsers: React.FC = () => {
                   {isLoadingStats ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
                   ) : (
-                    stats?.usersByRole?.find((role) => role.role === "WARD_OFFICER")?._count || 0
+                    stats?.usersByRole?.find(
+                      (role) => role.role === "WARD_OFFICER",
+                    )?._count || 0
                   )}
                 </p>
               </div>
@@ -291,7 +296,9 @@ const AdminUsers: React.FC = () => {
                   {isLoadingStats ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
                   ) : (
-                    stats?.usersByRole?.find((role) => role.role === "MAINTENANCE_TEAM")?._count || 0
+                    stats?.usersByRole?.find(
+                      (role) => role.role === "MAINTENANCE_TEAM",
+                    )?._count || 0
                   )}
                 </p>
               </div>
@@ -395,7 +402,9 @@ const AdminUsers: React.FC = () => {
                         </span>
                       </Badge>
                     </TableCell>
-                    <TableCell>{user.ward?.name || "No ward assigned"}</TableCell>
+                    <TableCell>
+                      {user.ward?.name || "No ward assigned"}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         className={
@@ -409,7 +418,9 @@ const AdminUsers: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>Submitted: {user._count?.submittedComplaints || 0}</p>
+                        <p>
+                          Submitted: {user._count?.submittedComplaints || 0}
+                        </p>
                         <p>Assigned: {user._count?.assignedComplaints || 0}</p>
                       </div>
                     </TableCell>
@@ -454,9 +465,9 @@ const AdminUsers: React.FC = () => {
           {pagination && pagination.pages > 1 && (
             <div className="flex items-center justify-between space-x-2 py-4">
               <div className="text-sm text-gray-500">
-                Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
-                {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-                {pagination.total} entries
+                Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                of {pagination.total} entries
               </div>
               <div className="flex space-x-2">
                 <Button

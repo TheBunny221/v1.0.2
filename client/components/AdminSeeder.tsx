@@ -19,7 +19,7 @@ const AdminSeeder: React.FC = () => {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         setSeedResult(result);
         toast({
@@ -53,12 +53,8 @@ const AdminSeeder: React.FC = () => {
         <p className="text-sm text-gray-600">
           This tool creates test users for development and testing purposes.
         </p>
-        
-        <Button 
-          onClick={seedAdminUser} 
-          disabled={isSeeding}
-          className="w-full"
-        >
+
+        <Button onClick={seedAdminUser} disabled={isSeeding} className="w-full">
           {isSeeding ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -74,16 +70,26 @@ const AdminSeeder: React.FC = () => {
 
         {seedResult && (
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-            <h4 className="font-semibold text-green-800 mb-2">Test Users Created:</h4>
+            <h4 className="font-semibold text-green-800 mb-2">
+              Test Users Created:
+            </h4>
             <div className="space-y-2 text-sm">
               <div className="bg-white p-2 rounded border">
-                <p><strong>Admin:</strong> {seedResult.data.admin.email}</p>
-                <p><strong>Password:</strong> {seedResult.data.admin.password}</p>
+                <p>
+                  <strong>Admin:</strong> {seedResult.data.admin.email}
+                </p>
+                <p>
+                  <strong>Password:</strong> {seedResult.data.admin.password}
+                </p>
               </div>
               {seedResult.data.testUsers?.map((user: any, index: number) => (
                 <div key={index} className="bg-white p-2 rounded border">
-                  <p><strong>{user.role}:</strong> {user.email}</p>
-                  <p><strong>Password:</strong> {user.password}</p>
+                  <p>
+                    <strong>{user.role}:</strong> {user.email}
+                  </p>
+                  <p>
+                    <strong>Password:</strong> {user.password}
+                  </p>
                 </div>
               ))}
             </div>

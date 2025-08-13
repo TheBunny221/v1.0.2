@@ -218,21 +218,23 @@ const UnifiedComplaintForm: React.FC = () => {
   } | null>(null);
   const [fileMap, setFileMap] = useState<Map<string, File>>(new Map());
   const [submissionMode, setSubmissionMode] = useState<"citizen" | "guest">(
-    isAuthenticated ? "citizen" : "guest"
+    isAuthenticated ? "citizen" : "guest",
   );
 
   // Prefill form data for authenticated users
   useEffect(() => {
     if (isAuthenticated && user) {
       setSubmissionMode("citizen");
-      
+
       // Pre-fill user data for citizen mode
-      dispatch(updateGuestFormData({
-        fullName: user.fullName,
-        email: user.email,
-        phoneNumber: user.phoneNumber || "",
-        wardId: user.wardId || "",
-      }));
+      dispatch(
+        updateGuestFormData({
+          fullName: user.fullName,
+          email: user.email,
+          phoneNumber: user.phoneNumber || "",
+          wardId: user.wardId || "",
+        }),
+      );
     } else {
       setSubmissionMode("guest");
     }
@@ -394,7 +396,7 @@ const UnifiedComplaintForm: React.FC = () => {
       if (submissionMode === "citizen" && isAuthenticated) {
         // Citizen flow: Submit directly to authenticated API
         const complaintData = {
-          title: `${COMPLAINT_TYPES.find(t => t.value === formData.type)?.label} - ${formData.area}`,
+          title: `${COMPLAINT_TYPES.find((t) => t.value === formData.type)?.label} - ${formData.area}`,
           description: formData.description,
           type: formData.type as any,
           priority: formData.priority as any,
@@ -411,7 +413,7 @@ const UnifiedComplaintForm: React.FC = () => {
         };
 
         const result = await dispatch(createComplaint(complaintData)).unwrap();
-        
+
         toast({
           title: "Complaint Submitted Successfully!",
           description: `Your complaint has been registered with ID: ${result.id}. You can track its progress from your dashboard.`,
@@ -420,7 +422,6 @@ const UnifiedComplaintForm: React.FC = () => {
         // Clear form and navigate to dashboard
         dispatch(clearGuestData());
         navigate(getDashboardRouteForRole(user?.role || "CITIZEN"));
-        
       } else {
         // Guest flow: Submit to guest API and trigger OTP
         const files: FileAttachment[] =
@@ -448,7 +449,8 @@ const UnifiedComplaintForm: React.FC = () => {
             onSuccess: () => {
               toast({
                 title: "Success!",
-                description: "Your complaint has been verified and your citizen account has been created successfully.",
+                description:
+                  "Your complaint has been verified and your citizen account has been created successfully.",
               });
               navigate("/dashboard");
             },
@@ -464,11 +466,23 @@ const UnifiedComplaintForm: React.FC = () => {
       console.error("Complaint submission error:", error);
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit complaint. Please try again.",
+        description:
+          error.message || "Failed to submit complaint. Please try again.",
         variant: "destructive",
       });
     }
-  }, [dispatch, formData, validationErrors, submissionMode, isAuthenticated, user, fileMap, openOtpFlow, toast, navigate]);
+  }, [
+    dispatch,
+    formData,
+    validationErrors,
+    submissionMode,
+    isAuthenticated,
+    user,
+    fileMap,
+    openOtpFlow,
+    toast,
+    navigate,
+  ]);
 
   // Calculate progress
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
@@ -486,10 +500,9 @@ const UnifiedComplaintForm: React.FC = () => {
             Submit a Complaint
           </h1>
           <p className="text-gray-600">
-            {submissionMode === "citizen" 
+            {submissionMode === "citizen"
               ? "Report civic issues using your citizen account"
-              : "Report civic issues and get them resolved quickly"
-            }
+              : "Report civic issues and get them resolved quickly"}
           </p>
         </div>
 
@@ -500,15 +513,17 @@ const UnifiedComplaintForm: React.FC = () => {
             <AlertDescription className="text-blue-800">
               <strong>Logged in as:</strong> {user.fullName} ({user.email})
               <br />
-              Your personal information is automatically filled. This complaint will be linked to your citizen account.
+              Your personal information is automatically filled. This complaint
+              will be linked to your citizen account.
             </AlertDescription>
           </Alert>
         ) : (
           <Alert className="border-green-200 bg-green-50">
             <UserPlus className="h-4 w-4" />
             <AlertDescription className="text-green-800">
-              <strong>Guest Submission:</strong> After submitting, you'll receive an email with a verification code. 
-              Verifying will automatically create your citizen account for future use.
+              <strong>Guest Submission:</strong> After submitting, you'll
+              receive an email with a verification code. Verifying will
+              automatically create your citizen account for future use.
             </AlertDescription>
           </Alert>
         )}
@@ -702,7 +717,8 @@ const UnifiedComplaintForm: React.FC = () => {
                   {submissionMode === "citizen" && (
                     <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
                       <Info className="h-4 w-4 inline mr-2" />
-                      These details are from your citizen account. To update them, visit your profile settings.
+                      These details are from your citizen account. To update
+                      them, visit your profile settings.
                     </div>
                   )}
                 </div>
@@ -1131,7 +1147,8 @@ const UnifiedComplaintForm: React.FC = () => {
                         }
                       </p>
                       <p>
-                        <strong>Sub-Zone:</strong> {formData.subZoneId || "Not specified"}
+                        <strong>Sub-Zone:</strong>{" "}
+                        {formData.subZoneId || "Not specified"}
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}
@@ -1174,20 +1191,34 @@ const UnifiedComplaintForm: React.FC = () => {
                   )}
 
                   {/* Submission Type Info */}
-                  <Alert className={submissionMode === "citizen" ? "border-blue-200 bg-blue-50" : "border-green-200 bg-green-50"}>
+                  <Alert
+                    className={
+                      submissionMode === "citizen"
+                        ? "border-blue-200 bg-blue-50"
+                        : "border-green-200 bg-green-50"
+                    }
+                  >
                     <CheckCircle className="h-4 w-4" />
-                    <AlertDescription className={submissionMode === "citizen" ? "text-blue-800" : "text-green-800"}>
+                    <AlertDescription
+                      className={
+                        submissionMode === "citizen"
+                          ? "text-blue-800"
+                          : "text-green-800"
+                      }
+                    >
                       {submissionMode === "citizen" ? (
                         <>
-                          <strong>Citizen Submission:</strong> Your complaint will be
-                          immediately registered and linked to your account. You'll receive
-                          email notifications and can track progress from your dashboard.
+                          <strong>Citizen Submission:</strong> Your complaint
+                          will be immediately registered and linked to your
+                          account. You'll receive email notifications and can
+                          track progress from your dashboard.
                         </>
                       ) : (
                         <>
-                          <strong>Guest Submission:</strong> After submitting, you'll
-                          receive a verification email. Verifying will create your citizen
-                          account and activate your complaint tracking.
+                          <strong>Guest Submission:</strong> After submitting,
+                          you'll receive a verification email. Verifying will
+                          create your citizen account and activate your
+                          complaint tracking.
                         </>
                       )}
                     </AlertDescription>

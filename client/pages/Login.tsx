@@ -377,9 +377,7 @@ const Login: React.FC = () => {
         </Card>
 
         {/* Admin Seeder */}
-        {process.env.NODE_ENV === "development" && (
-          <AdminSeeder />
-        )}
+        {process.env.NODE_ENV === "development" && <AdminSeeder />}
 
         {/* Demo Credentials */}
         {process.env.NODE_ENV === "development" && (

@@ -19,7 +19,8 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
   // Check if Redux already has auth state
   const reduxAuth = useAppSelector((state) => state.auth);
-  const isAlreadyAuthenticated = reduxAuth.isAuthenticated && reduxAuth.user && reduxAuth.token;
+  const isAlreadyAuthenticated =
+    reduxAuth.isAuthenticated && reduxAuth.user && reduxAuth.token;
 
   // Use RTK Query to get current user if we have a token but are not already authenticated
   const {
@@ -78,17 +79,33 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         };
       } finally {
         // Only set initialized when we're done with the user query (or don't need it)
-        if (!hasValidToken || isAlreadyAuthenticated || userResponse || userError) {
+        if (
+          !hasValidToken ||
+          isAlreadyAuthenticated ||
+          userResponse ||
+          userError
+        ) {
           setIsInitialized(true);
         }
       }
     };
 
     initializeApp();
-  }, [dispatch, hasValidToken, userResponse, userError, token, isAlreadyAuthenticated, reduxAuth.token]);
+  }, [
+    dispatch,
+    hasValidToken,
+    userResponse,
+    userError,
+    token,
+    isAlreadyAuthenticated,
+    reduxAuth.token,
+  ]);
 
   // Show loading screen while initializing or checking user (but not if already authenticated)
-  if (!isInitialized || (hasValidToken && !isAlreadyAuthenticated && isLoadingUser)) {
+  if (
+    !isInitialized ||
+    (hasValidToken && !isAlreadyAuthenticated && isLoadingUser)
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">

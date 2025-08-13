@@ -272,7 +272,11 @@ const Index: React.FC = () => {
             </p>
 
             <div className="flex justify-center space-x-4 flex-wrap gap-4 mb-8">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+              <Button
+                asChild
+                size="lg"
+                className="bg-primary hover:bg-primary/90"
+              >
                 <Link to="/complaint">
                   <FileText className="mr-2 h-5 w-5" />
                   {translations?.complaints?.registerComplaint ||
@@ -727,10 +731,7 @@ const Index: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Button
-                    asChild
-                    className="w-full justify-start"
-                  >
+                  <Button asChild className="w-full justify-start">
                     <Link to="/complaint">
                       <FileText className="mr-2 h-4 w-4" />
                       {translations?.complaints?.registerComplaint ||

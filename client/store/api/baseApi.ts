@@ -21,8 +21,12 @@ const baseQuery = fetchBaseQuery({
     if (process.env.NODE_ENV === "development") {
       console.log("BaseQuery Debug:", {
         reduxToken: token ? `${token.substring(0, 10)}...` : "null",
-        localStorageToken: localStorageToken ? `${localStorageToken.substring(0, 10)}...` : "null",
-        activeToken: activeToken ? `${activeToken.substring(0, 10)}...` : "null",
+        localStorageToken: localStorageToken
+          ? `${localStorageToken.substring(0, 10)}...`
+          : "null",
+        activeToken: activeToken
+          ? `${activeToken.substring(0, 10)}...`
+          : "null",
         isAuthenticated: state.auth.isAuthenticated,
         hasUser: !!state.auth.user,
       });
@@ -84,10 +88,10 @@ const baseQueryWithReauth: BaseQueryFn<
     // This includes "Response body is already used" errors
     return {
       error: {
-        status: 'FETCH_ERROR' as const,
-        error: error.message || 'Network error',
-        data: { message: 'A network error occurred. Please try again.' }
-      }
+        status: "FETCH_ERROR" as const,
+        error: error.message || "Network error",
+        data: { message: "A network error occurred. Please try again." },
+      },
     };
   }
 };
@@ -180,7 +184,11 @@ export const transformResponse = <T>(response: any): ApiResponse<T> => {
     }
 
     // If response is already in our expected format, return it
-    if (typeof response === 'object' && 'success' in response && 'data' in response) {
+    if (
+      typeof response === "object" &&
+      "success" in response &&
+      "data" in response
+    ) {
       return response as ApiResponse<T>;
     }
 

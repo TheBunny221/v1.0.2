@@ -10,8 +10,8 @@ async function seedAdminUser() {
     // Check if admin user already exists
     const existingAdmin = await prisma.user.findFirst({
       where: {
-        role: "ADMINISTRATOR"
-      }
+        role: "ADMINISTRATOR",
+      },
     });
 
     if (existingAdmin) {
@@ -21,7 +21,7 @@ async function seedAdminUser() {
 
     // Create admin user
     const hashedPassword = await bcrypt.hash("admin123", 12);
-    
+
     const adminUser = await prisma.user.create({
       data: {
         fullName: "System Administrator",
@@ -30,8 +30,8 @@ async function seedAdminUser() {
         password: hashedPassword,
         role: "ADMINISTRATOR",
         isActive: true,
-        department: "Administration"
-      }
+        department: "Administration",
+      },
     });
 
     console.log("✅ Admin user created successfully:");
@@ -52,8 +52,8 @@ async function seedAdminUser() {
         password: wardOfficerPassword,
         role: "WARD_OFFICER",
         isActive: true,
-        department: "Ward Management"
-      }
+        department: "Ward Management",
+      },
     });
 
     // Create a maintenance user
@@ -66,8 +66,8 @@ async function seedAdminUser() {
         password: maintenancePassword,
         role: "MAINTENANCE_TEAM",
         isActive: true,
-        department: "Maintenance"
-      }
+        department: "Maintenance",
+      },
     });
 
     // Create a regular citizen
@@ -79,15 +79,18 @@ async function seedAdminUser() {
         phoneNumber: "+91 9876543213",
         password: citizenPassword,
         role: "CITIZEN",
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     console.log("✅ Additional test users created:");
-    console.log("Ward Officer - email: ward@cochinsmart.gov.in, password: ward123");
-    console.log("Maintenance - email: maintenance@cochinsmart.gov.in, password: maintenance123");
+    console.log(
+      "Ward Officer - email: ward@cochinsmart.gov.in, password: ward123",
+    );
+    console.log(
+      "Maintenance - email: maintenance@cochinsmart.gov.in, password: maintenance123",
+    );
     console.log("Citizen - email: citizen@example.com, password: citizen123");
-
   } catch (error) {
     console.error("❌ Error seeding admin user:", error);
   } finally {
