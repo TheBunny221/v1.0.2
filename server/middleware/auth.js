@@ -62,7 +62,6 @@ export const protect = asyncHandler(async (req, res, next) => {
     try {
       user = await prisma.user.findUnique({
         where: { id: decoded.id },
-        include: { ward: true },
         select: {
           id: true,
           fullName: true,
@@ -76,7 +75,13 @@ export const protect = asyncHandler(async (req, res, next) => {
           isActive: true,
           lastLogin: true,
           joinedOn: true,
-          ward: true,
+          ward: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
         },
       });
     } catch (dbError) {
@@ -202,7 +207,6 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
       try {
         const user = await prisma.user.findUnique({
           where: { id: decoded.id },
-          include: { ward: true },
           select: {
             id: true,
             fullName: true,
@@ -216,7 +220,13 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
             isActive: true,
             lastLogin: true,
             joinedOn: true,
-            ward: true,
+            ward: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+              },
+            },
           },
         });
 
