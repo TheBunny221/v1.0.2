@@ -10,12 +10,18 @@ import { toast } from "../../components/ui/use-toast";
 // Use standard fetchBaseQuery with proper auth handling
 const baseQuery = fetchBaseQuery({
   baseUrl: '/api/',
-  prepareHeaders: (headers, { getState }) => {
+  prepareHeaders: (headers, { getState, extra, endpoint, type, arg }) => {
     const state = getState() as any;
     const token = state.auth.token || localStorage.getItem("token");
 
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
+    }
+
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    if (arg && arg instanceof FormData) {
+      // Remove any Content-Type header for FormData requests
+      headers.delete('content-type');
     }
 
     return headers;
