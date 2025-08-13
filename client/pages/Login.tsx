@@ -31,6 +31,7 @@ import { Badge } from "../components/ui/badge";
 import { Eye, EyeOff, Mail, Lock, Home } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { useOtpFlow } from "../contexts/OtpContext";
+import AdminSeeder from "../components/AdminSeeder";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -374,6 +375,9 @@ const Login: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Admin Seeder */}
+        {process.env.NODE_ENV === "development" && <AdminSeeder />}
 
         {/* Demo Credentials */}
         {process.env.NODE_ENV === "development" && (

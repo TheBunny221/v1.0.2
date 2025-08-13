@@ -203,6 +203,9 @@ const Navigation: React.FC = () => {
               <Link to="/login">
                 <Button variant="outline">{translations.nav.login}</Button>
               </Link>
+              <Link to="/complaint">
+                <Button variant="outline">Submit Complaint</Button>
+              </Link>
               <Link to="/register">
                 <Button>{translations.nav.register}</Button>
               </Link>

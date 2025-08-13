@@ -6,18 +6,37 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
-// Define base query with JWT auto-inclusion - keep it simple to avoid cloning issues
+
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api",
   prepareHeaders: (headers, { getState }) => {
-    // Get token from auth state
-    const token = (getState() as any).auth.token;
+    const state = getState() as any;
+    const token = state.auth.token;
+    const localStorageToken = localStorage.getItem("token");
 
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+    // Use token from Redux state, fallback to localStorage if Redux token is not available
+    const activeToken = token || localStorageToken;
+
+    // Debug token availability
+    if (process.env.NODE_ENV === "development") {
+      console.log("BaseQuery Debug:", {
+        reduxToken: token ? `${token.substring(0, 10)}...` : "null",
+        localStorageToken: localStorageToken
+          ? `${localStorageToken.substring(0, 10)}...`
+          : "null",
+        activeToken: activeToken
+          ? `${activeToken.substring(0, 10)}...`
+          : "null",
+        isAuthenticated: state.auth.isAuthenticated,
+        hasUser: !!state.auth.user,
+      });
     }
 
-    // Set content type if not already set
+    if (activeToken) {
+      headers.set("authorization", `Bearer ${activeToken}`);
+    }
+
+    // Don't set content-type for FormData requests
     if (!headers.has("content-type")) {
       headers.set("content-type", "application/json");
     }
@@ -26,41 +45,55 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Enhanced base query with 401 auto-logout handling
+// Enhanced base query with 401 auto-logout handling and error handling
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions);
+  try {
+    const result = await baseQuery(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401) {
-    // Unauthorized - clear auth state
-    api.dispatch(logout());
+    if (result.error && result.error.status === 401) {
+      // Unauthorized - clear auth state
+      api.dispatch(logout());
 
-    // Show toast notification
-    toast({
-      title: "Session Expired",
-      description: "Please login again to continue.",
-      variant: "destructive",
-    });
-  } else if (result.error) {
-    // Log error for analytics without trying to read error data
-    console.error("API Error:", {
-      endpoint: typeof args === "string" ? args : args.url,
-      status: result.error.status,
-      timestamp: new Date().toISOString(),
-    });
+      // Show toast notification
+      toast({
+        title: "Session Expired",
+        description: "Please login again to continue.",
+        variant: "destructive",
+      });
+    } else if (result.error) {
+      // Log error for analytics without trying to access error data
+      console.error("API Error:", {
+        endpoint: typeof args === "string" ? args : args.url,
+        status: result.error.status,
+        timestamp: new Date().toISOString(),
+      });
 
-    // Set error in auth slice for global error handling
-    if (result.error.status && result.error.status >= 500) {
-      api.dispatch(
-        setError("A server error occurred. Please try again later."),
-      );
+      // Set error in auth slice for global error handling
+      if (result.error.status && result.error.status >= 500) {
+        api.dispatch(
+          setError("A server error occurred. Please try again later."),
+        );
+      }
     }
-  }
 
-  return result;
+    return result;
+  } catch (error: any) {
+    console.error("BaseQuery error caught:", error);
+
+    // Handle any errors that occur during the baseQuery execution
+    // This includes "Response body is already used" errors
+    return {
+      error: {
+        status: "FETCH_ERROR" as const,
+        error: error.message || "Network error",
+        data: { message: "A network error occurred. Please try again." },
+      },
+    };
+  }
 };
 
 // Helper function to extract error messages (simplified to avoid response body consumption)
@@ -140,12 +173,40 @@ export interface ApiResponse<T = any> {
 
 // Helper for transforming API responses
 export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  return {
-    success: response?.success ?? true,
-    data: response?.data ?? response,
-    message: response?.message,
-    meta: response?.meta,
-  };
+  try {
+    // Handle null or undefined responses
+    if (response == null) {
+      return {
+        success: false,
+        data: {} as T,
+        message: "No response received",
+      };
+    }
+
+    // If response is already in our expected format, return it
+    if (
+      typeof response === "object" &&
+      "success" in response &&
+      "data" in response
+    ) {
+      return response as ApiResponse<T>;
+    }
+
+    // Transform raw response to our format
+    return {
+      success: response?.success ?? true,
+      data: response?.data ?? response,
+      message: response?.message,
+      meta: response?.meta,
+    };
+  } catch (error) {
+    console.warn("Error transforming response:", error);
+    return {
+      success: false,
+      data: {} as T,
+      message: "Response transformation error",
+    };
+  }
 };
 
 // Helper for handling optimistic updates

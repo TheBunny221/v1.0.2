@@ -37,6 +37,7 @@ const ComplaintDetails = lazy(() => import("./pages/ComplaintDetails"));
 const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
 const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
 const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
+const UnifiedComplaintForm = lazy(() => import("./pages/UnifiedComplaintForm"));
 const GuestTrackComplaint = lazy(() => import("./pages/GuestTrackComplaint"));
 const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
 const GuestDashboard = lazy(() => import("./pages/GuestDashboard"));
@@ -93,6 +94,10 @@ const App: React.FC = () => {
                     <Route
                       path="/guest/complaint"
                       element={<GuestComplaintForm />}
+                    />
+                    <Route
+                      path="/complaint"
+                      element={<UnifiedComplaintForm />}
                     />
                     <Route
                       path="/guest/track"
@@ -172,7 +177,7 @@ const App: React.FC = () => {
                                   path="/complaints/citizen-form"
                                   element={
                                     <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                                      <CitizenComplaintForm />
+                                      <UnifiedComplaintForm />
                                     </RoleBasedRoute>
                                   }
                                 />
@@ -180,7 +185,7 @@ const App: React.FC = () => {
                                   path="/complaints/new"
                                   element={
                                     <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                                      <CreateComplaint />
+                                      <UnifiedComplaintForm />
                                     </RoleBasedRoute>
                                   }
                                 />

@@ -44,10 +44,20 @@ export interface AuthState {
   };
 }
 
+// Get initial token from localStorage
+const getInitialToken = () => {
+  try {
+    const token = localStorage.getItem("token");
+    return token && token !== "null" && token !== "undefined" ? token : null;
+  } catch {
+    return null;
+  }
+};
+
 // Initial state
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem("token"),
+  token: getInitialToken(),
   isLoading: false,
   isAuthenticated: false,
   error: null,
