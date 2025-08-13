@@ -182,14 +182,14 @@ const ComplaintDetails: React.FC = () => {
             </h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge className={getStatusColor(complaint.status)}>
-              {complaint.status.replace("_", " ")}
+            <Badge className={getStatusColor(complaint?.status || '')}>
+              {complaint?.status?.replace("_", " ") || 'Unknown'}
             </Badge>
-            <Badge className={getPriorityColor(complaint.priority)}>
-              {complaint.priority} Priority
+            <Badge className={getPriorityColor(complaint?.priority || '')}>
+              {complaint?.priority || 'Unknown'} Priority
             </Badge>
             <span className="text-sm text-gray-500">
-              Created {new Date(complaint.submittedOn).toLocaleDateString()}
+              Created {complaint?.submittedOn ? new Date(complaint.submittedOn).toLocaleDateString() : 'Unknown'}
             </span>
           </div>
         </div>
