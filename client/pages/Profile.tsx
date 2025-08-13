@@ -118,7 +118,19 @@ const Profile: React.FC = () => {
       return;
     }
 
-    // Mock password change
+    // Validate current password is provided (only for password change, not setup)
+    if (!requiresPasswordSetup && !passwordData.currentPassword) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: translations?.common?.error || "Error",
+          message: "Current password is required",
+        }),
+      );
+      return;
+    }
+
+    // Mock password change/setup
     dispatch(
       addNotification({
         type: "success",
