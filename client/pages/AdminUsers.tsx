@@ -32,58 +32,52 @@ import {
   UserCheck,
   Shield,
   Settings,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
+import {
+  useGetAllUsersQuery,
+  useGetUserStatsQuery,
+  useActivateUserMutation,
+  useDeactivateUserMutation,
+  useDeleteUserMutation,
+} from "../store/api/adminApi";
+import { toast } from "../components/ui/use-toast";
 
 const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
-  const mockUsers = [
-    {
-      id: "1",
-      fullName: "John Doe",
-      email: "john.doe@example.com",
-      phoneNumber: "+91 9876543210",
-      role: "CITIZEN",
-      ward: "Ward 1",
-      isActive: true,
-      lastLogin: "2024-01-10",
-      joinedOn: "2023-06-15",
-    },
-    {
-      id: "2",
-      fullName: "Sarah Wilson",
-      email: "sarah.wilson@ward2.gov.in",
-      phoneNumber: "+91 9876543211",
-      role: "WARD_OFFICER",
-      ward: "Ward 2",
-      isActive: true,
-      lastLogin: "2024-01-09",
-      joinedOn: "2023-03-20",
-    },
-    {
-      id: "3",
-      fullName: "Mike Johnson",
-      email: "mike.johnson@maintenance.gov.in",
-      phoneNumber: "+91 9876543212",
-      role: "MAINTENANCE_TEAM",
-      ward: "Ward 1",
-      isActive: true,
-      lastLogin: "2024-01-08",
-      joinedOn: "2023-01-10",
-    },
-    {
-      id: "4",
-      fullName: "Admin User",
-      email: "admin@cochinsmart.gov.in",
-      phoneNumber: "+91 9876543213",
-      role: "ADMINISTRATOR",
-      ward: "All Wards",
-      isActive: true,
-      lastLogin: "2024-01-11",
-      joinedOn: "2022-12-01",
-    },
-  ];
+  // API queries
+  const {
+    data: usersResponse,
+    isLoading: isLoadingUsers,
+    error: usersError,
+    refetch: refetchUsers,
+  } = useGetAllUsersQuery({
+    page,
+    limit,
+    role: roleFilter !== "all" ? roleFilter : undefined,
+    status: statusFilter,
+  });
+
+  const {
+    data: statsResponse,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = useGetUserStatsQuery();
+
+  // Mutations
+  const [activateUser] = useActivateUserMutation();
+  const [deactivateUser] = useDeactivateUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
+
+  const users = usersResponse?.data?.users || [];
+  const pagination = usersResponse?.data?.pagination;
+  const stats = statsResponse?.data;
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -115,22 +109,92 @@ const AdminUsers: React.FC = () => {
     }
   };
 
-  const filteredUsers = mockUsers.filter((user) => {
+  const handleActivateUser = async (userId: string) => {
+    try {
+      await activateUser(userId).unwrap();
+      toast({
+        title: "Success",
+        description: "User activated successfully",
+      });
+      refetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to activate user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeactivateUser = async (userId: string) => {
+    try {
+      await deactivateUser(userId).unwrap();
+      toast({
+        title: "Success",
+        description: "User deactivated successfully",
+      });
+      refetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to deactivate user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await deleteUser(userId).unwrap();
+        toast({
+          title: "Success",
+          description: "User deleted successfully",
+        });
+        refetchUsers();
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error?.data?.message || "Failed to delete user",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setRoleFilter("all");
+    setStatusFilter("all");
+    setPage(1);
+  };
+
+  // Filter users locally based on search term
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+    return matchesSearch;
   });
 
-  const userStats = {
-    total: mockUsers.length,
-    citizens: mockUsers.filter((u) => u.role === "CITIZEN").length,
-    wardOfficers: mockUsers.filter((u) => u.role === "WARD_OFFICER").length,
-    maintenance: mockUsers.filter((u) => u.role === "MAINTENANCE_TEAM").length,
-    admins: mockUsers.filter((u) => u.role === "ADMINISTRATOR").length,
-    active: mockUsers.filter((u) => u.isActive).length,
-  };
+  if (usersError || statsError) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Error Loading Data
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Failed to load user data. Please try again.
+            </p>
+            <Button onClick={() => refetchUsers()}>Retry</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -153,7 +217,13 @@ const AdminUsers: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold">{userStats.total}</p>
+                <p className="text-2xl font-bold">
+                  {isLoadingStats ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    stats?.totalUsers || 0
+                  )}
+                </p>
               </div>
               <Users className="h-8 w-8 text-blue-600" />
             </div>
@@ -163,8 +233,34 @@ const AdminUsers: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Active Users
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {isLoadingStats ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    stats?.activeUsers || 0
+                  )}
+                </p>
+              </div>
+              <UserCheck className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-sm font-medium text-gray-600">Citizens</p>
-                <p className="text-2xl font-bold">{userStats.citizens}</p>
+                <p className="text-2xl font-bold">
+                  {isLoadingStats ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    stats?.usersByRole?.find((role) => role.role === "CITIZEN")
+                      ?._count || 0
+                  )}
+                </p>
               </div>
               <Users className="h-8 w-8 text-gray-600" />
             </div>
@@ -177,7 +273,15 @@ const AdminUsers: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">
                   Ward Officers
                 </p>
-                <p className="text-2xl font-bold">{userStats.wardOfficers}</p>
+                <p className="text-2xl font-bold">
+                  {isLoadingStats ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    stats?.usersByRole?.find(
+                      (role) => role.role === "WARD_OFFICER",
+                    )?._count || 0
+                  )}
+                </p>
               </div>
               <UserCheck className="h-8 w-8 text-blue-600" />
             </div>
@@ -188,22 +292,17 @@ const AdminUsers: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Maintenance</p>
-                <p className="text-2xl font-bold">{userStats.maintenance}</p>
-              </div>
-              <Settings className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {userStats.active}
+                <p className="text-2xl font-bold">
+                  {isLoadingStats ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    stats?.usersByRole?.find(
+                      (role) => role.role === "MAINTENANCE_TEAM",
+                    )?._count || 0
+                  )}
                 </p>
               </div>
-              <UserCheck className="h-8 w-8 text-green-600" />
+              <Settings className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -212,7 +311,7 @@ const AdminUsers: React.FC = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -236,7 +335,19 @@ const AdminUsers: React.FC = () => {
                 <SelectItem value="ADMINISTRATOR">Administrators</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">Reset Filters</Button>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={handleResetFilters}>
+              Reset Filters
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -246,77 +357,138 @@ const AdminUsers: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Users className="h-5 w-5 mr-2" />
-            Users ({filteredUsers.length})
+            Users ({pagination?.total || 0})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Ward</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{user.fullName}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                      <p className="text-sm text-gray-500">
-                        {user.phoneNumber}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getRoleColor(user.role)}>
-                      <span className="flex items-center">
-                        {getRoleIcon(user.role)}
-                        <span className="ml-1">
-                          {user.role.replace("_", " ")}
-                        </span>
-                      </span>
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{user.ward}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className={
-                        user.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }
-                    >
-                      {user.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="text-sm">{user.lastLogin}</p>
-                      <p className="text-xs text-gray-500">
-                        Joined: {user.joinedOn}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {isLoadingUsers ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading users...</span>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Ward</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Complaints</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{user.fullName}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
+                        {user.phoneNumber && (
+                          <p className="text-sm text-gray-500">
+                            {user.phoneNumber}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getRoleColor(user.role)}>
+                        <span className="flex items-center">
+                          {getRoleIcon(user.role)}
+                          <span className="ml-1">
+                            {user.role.replace("_", " ")}
+                          </span>
+                        </span>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {user.ward?.name || "No ward assigned"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          user.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {user.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <p>
+                          Submitted: {user._count?.submittedComplaints || 0}
+                        </p>
+                        <p>Assigned: {user._count?.assignedComplaints || 0}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        {user.isActive ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeactivateUser(user.id)}
+                          >
+                            Deactivate
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleActivateUser(user.id)}
+                          >
+                            Activate
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          {/* Pagination */}
+          {pagination && pagination.pages > 1 && (
+            <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="text-sm text-gray-500">
+                Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                of {pagination.total} entries
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page >= pagination.pages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -59,10 +59,12 @@ export const useCustomRegister = () => {
         headers: Object.fromEntries(response.headers.entries()),
       });
 
-      // Parse response as JSON
+      // Parse response as JSON - use clone to avoid "body already used" errors
       let result;
       try {
-        const responseText = await response.text();
+        // Clone the response to avoid conflicts with RTK Query or other consumers
+        const responseClone = response.clone();
+        const responseText = await responseClone.text();
         console.log("Raw response text:", responseText);
 
         result = JSON.parse(responseText);

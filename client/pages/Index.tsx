@@ -272,13 +272,24 @@ const Index: React.FC = () => {
 
             <div className="flex justify-center space-x-4 flex-wrap gap-4 mb-8">
               <Button
-                onClick={() => setIsFormExpanded(!isFormExpanded)}
+                asChild
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
               >
+                <Link to="/complaint">
+                  <FileText className="mr-2 h-5 w-5" />
+                  {translations?.complaints?.registerComplaint ||
+                    "Register Complaint"}
+                </Link>
+              </Button>
+
+              <Button
+                onClick={() => setIsFormExpanded(!isFormExpanded)}
+                size="lg"
+                variant="outline"
+              >
                 <FileText className="mr-2 h-5 w-5" />
-                {translations?.complaints?.registerComplaint ||
-                  "Register Complaint"}
+                Quick Form
               </Button>
 
               {!isAuthenticated ? (
@@ -716,13 +727,12 @@ const Index: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Button
-                    onClick={() => setIsFormExpanded(true)}
-                    className="w-full justify-start"
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    {translations?.complaints?.registerComplaint ||
-                      "Submit New Complaint"}
+                  <Button asChild className="w-full justify-start">
+                    <Link to="/complaint">
+                      <FileText className="mr-2 h-4 w-4" />
+                      {translations?.complaints?.registerComplaint ||
+                        "Submit New Complaint"}
+                    </Link>
                   </Button>
                   <Button
                     asChild
@@ -904,9 +914,9 @@ const Index: React.FC = () => {
                       </Button>
                       <Separator className="my-3" />
                       <Button asChild variant="outline" className="w-full">
-                        <Link to="/guest/complaint">
+                        <Link to="/complaint">
                           {translations?.guest?.guestSubmission ||
-                            "Guest Complaint"}
+                            "Submit Complaint"}
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
