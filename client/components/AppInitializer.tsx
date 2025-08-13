@@ -13,9 +13,13 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Get token from localStorage to determine if we should try to auto-login
+  // Get token from localStorage and check Redux state
   const token = localStorage.getItem("token");
   const hasValidToken = token && token !== "null" && token !== "undefined";
+
+  // Check if Redux already has auth state
+  const reduxAuth = useAppSelector((state) => state.auth);
+  const isAlreadyAuthenticated = reduxAuth.isAuthenticated && reduxAuth.user && reduxAuth.token;
 
   // Use RTK Query to get current user if we have a token
   const {
