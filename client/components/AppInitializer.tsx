@@ -87,8 +87,8 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     initializeApp();
   }, [dispatch, hasValidToken, userResponse, userError, token, isAlreadyAuthenticated, reduxAuth.token]);
 
-  // Show loading screen while initializing or checking user
-  if (!isInitialized || (hasValidToken && isLoadingUser)) {
+  // Show loading screen while initializing or checking user (but not if already authenticated)
+  if (!isInitialized || (hasValidToken && !isAlreadyAuthenticated && isLoadingUser)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
