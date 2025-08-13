@@ -58,6 +58,15 @@ const ComplaintDetails: React.FC = () => {
 
   const complaint = complaintResponse?.data;
 
+  // Debug logging
+  console.log('ComplaintDetails Debug:', {
+    complaintResponse,
+    complaint,
+    isLoading,
+    error,
+    id
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "REGISTERED":
