@@ -44,6 +44,7 @@ import {
   Bell,
   Lock,
   Globe,
+  AlertTriangle,
 } from "lucide-react";
 
 const Profile: React.FC = () => {
