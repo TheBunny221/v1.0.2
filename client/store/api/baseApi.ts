@@ -62,37 +62,6 @@ const baseQueryWithReauth: BaseQueryFn<
   return result;
 };
 
-// Helper function to extract error messages (simplified to avoid response body consumption)
-function getErrorMessage(error: FetchBaseQueryError): string {
-  if ("status" in error) {
-    switch (error.status) {
-      case 400:
-        return "Bad request - please check your input";
-      case 401:
-        return "Unauthorized - please login again";
-      case 403:
-        return "Forbidden - you do not have permission";
-      case 404:
-        return "Resource not found";
-      case 409:
-        return "Conflict - resource already exists";
-      case 422:
-        return "Validation error - please check your input";
-      case 429:
-        return "Too many requests - please try again later";
-      case 500:
-        return "Internal server error - please try again later";
-      case 502:
-        return "Bad gateway - service temporarily unavailable";
-      case 503:
-        return "Service unavailable - please try again later";
-      default:
-        return `An error occurred (${error.status})`;
-    }
-  }
-
-  return "An unexpected error occurred";
-}
 
 // Create the base API slice
 export const baseApi = createApi({
