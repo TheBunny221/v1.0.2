@@ -46,6 +46,10 @@ const ComplaintDetails: React.FC = () => {
   const [statusComment, setStatusComment] = useState("");
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
+  // Data management hooks
+  const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
+  const { updateStatus } = useStatusTracking();
+
   // Use RTK Query to fetch complaint details
   const {
     data: complaintResponse,
