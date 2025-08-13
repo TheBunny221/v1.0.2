@@ -37,12 +37,18 @@ const customBaseQuery: BaseQueryFn<
   }
 
   try {
+    // Create abort controller for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     const response = await fetch(`/api${url.startsWith("/") ? url : `/${url}`}`, {
       method,
       headers,
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
-      signal: AbortSignal.timeout(30000), // 30 second timeout
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     // Clone response to avoid body consumption issues
     const responseClone = response.clone();
