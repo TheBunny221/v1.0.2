@@ -357,10 +357,13 @@ export const getApiErrorMessage = (error: any): string => {
   if (
     error?.name === "TypeError" ||
     error?.message?.includes("Response body") ||
-    error?.message?.includes("clone")
+    error?.message?.includes("already used") ||
+    error?.message?.includes("clone") ||
+    error?.message?.includes("disturbed")
   ) {
-    // This is a cloning/network error - try to provide a helpful message
-    return "Registration failed. This email address may already be registered. Please try using a different email or attempt to log in instead.";
+    // This is a cloning/network error - provide a generic helpful message
+    console.warn("Response body or cloning error detected in getApiErrorMessage");
+    return "Request failed due to a network issue. Please try again.";
   }
 
   // Handle RTK Query FetchBaseQueryError structure
