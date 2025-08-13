@@ -43,6 +43,28 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
+  // Add response handler to prevent body consumption issues
+  responseHandler: async (response) => {
+    const contentType = response.headers.get("content-type");
+
+    // Handle non-JSON responses
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { message: text || "Response received" };
+      }
+    }
+
+    // Handle JSON responses safely
+    try {
+      return await response.json();
+    } catch (error) {
+      console.warn("Failed to parse JSON response:", error);
+      return { message: "Invalid JSON response" };
+    }
+  },
 });
 
 // Enhanced base query with 401 auto-logout handling and error handling
