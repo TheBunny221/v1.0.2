@@ -737,7 +737,7 @@ const Index: React.FC = () => {
               <CardTitle className="text-lg flex items-center space-x-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
                 <span>
-                  {translations?.dashboard?.quickActions || "Key Features"}
+                  {translations?.features?.keyFeatures || "Key Features"}
                 </span>
               </CardTitle>
             </CardHeader>
