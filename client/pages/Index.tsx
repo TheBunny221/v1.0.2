@@ -747,11 +747,11 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {translations?.nav?.trackStatus || "Real-time Tracking"}
+                      {translations?.features?.trackStatus || "Track Status"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {translations?.guest?.trackingDescription ||
-                        "Monitor complaint progress in real-time"}
+                      {translations?.features?.trackStatusDescription ||
+                        "Monitor complaint progress in real time with instant updates"}
                     </div>
                   </div>
                 </div>
@@ -759,11 +759,11 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {translations?.common?.upload || "Photo Upload"}
+                      {translations?.features?.quickRegistration || "Quick Complaint Registration"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {translations?.complaints?.files ||
-                        "Attach evidence and images to support your complaint"}
+                      {translations?.features?.quickRegistrationDescription ||
+                        "Log issues in under a minute with type, photo, and location"}
                     </div>
                   </div>
                 </div>
@@ -771,11 +771,11 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {translations?.auth?.emailAlerts || "SMS/Email Alerts"}
+                      {translations?.features?.emailAlerts || "Email Alerts"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {translations?.auth?.notifications ||
-                        "Get instant notifications on complaint updates"}
+                      {translations?.features?.emailAlertsDescription ||
+                        "Get notified at each stage — from registration to resolution"}
                     </div>
                   </div>
                 </div>
@@ -783,11 +783,11 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {translations?.auth?.language || "Multi-language Support"}
+                      {translations?.features?.multilingualSupport || "Multilingual Support"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {translations?.guest?.languageSupport ||
-                        `Available in local languages (${currentLanguage.toUpperCase()})`}
+                      {translations?.features?.multilingualSupportDescription ||
+                        "Available in English, Malayalam, and Hindi"}
                     </div>
                   </div>
                 </div>
