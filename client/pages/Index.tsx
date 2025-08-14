@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { createComplaint, ComplaintType, Priority } from "../store/slices/complaintsSlice";
+import {
+  createComplaint,
+  ComplaintType,
+  Priority,
+} from "../store/slices/complaintsSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -189,12 +193,15 @@ const Index: React.FC = () => {
         landmark: formData.location,
         address: formData.address,
         contactName: isAuthenticated && user ? user.fullName : "Guest",
-        contactEmail: formData.email || (isAuthenticated && user ? user.email : ""),
+        contactEmail:
+          formData.email || (isAuthenticated && user ? user.email : ""),
         contactPhone: formData.mobile,
         isAnonymous: !isAuthenticated,
       };
 
-      const result = await dispatch(createComplaint(complaintDataForAPI)).unwrap();
+      const result = await dispatch(
+        createComplaint(complaintDataForAPI),
+      ).unwrap();
 
       dispatch(
         showSuccessToast(
@@ -693,7 +700,9 @@ const Index: React.FC = () => {
                     <div className="font-medium">
                       {translations?.auth?.email || "Email Support"}
                     </div>
-                    <div className="text-sm text-gray-600">support@cochinsmartcity.in</div>
+                    <div className="text-sm text-gray-600">
+                      support@cochinsmartcity.in
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -702,7 +711,9 @@ const Index: React.FC = () => {
                     <div className="font-medium">
                       {translations?.common?.time || "Office Hours"}
                     </div>
-                    <div className="text-sm text-gray-600">Monday - Friday: 9 AM - 6 PM</div>
+                    <div className="text-sm text-gray-600">
+                      Monday - Friday: 9 AM - 6 PM
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -711,7 +722,9 @@ const Index: React.FC = () => {
                     <div className="font-medium">
                       {translations?.complaints?.location || "Office Location"}
                     </div>
-                    <div className="text-sm text-gray-600">Cochin Corporation Office</div>
+                    <div className="text-sm text-gray-600">
+                      Cochin Corporation Office
+                    </div>
                   </div>
                 </div>
               </div>
@@ -737,7 +750,8 @@ const Index: React.FC = () => {
                       {translations?.nav?.trackStatus || "Real-time Tracking"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {translations?.guest?.trackingDescription || "Monitor complaint progress in real-time"}
+                      {translations?.guest?.trackingDescription ||
+                        "Monitor complaint progress in real-time"}
                     </div>
                   </div>
                 </div>
@@ -772,7 +786,8 @@ const Index: React.FC = () => {
                       {translations?.auth?.language || "Multi-language Support"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {translations?.guest?.languageSupport || `Available in local languages (${currentLanguage.toUpperCase()})`}
+                      {translations?.guest?.languageSupport ||
+                        `Available in local languages (${currentLanguage.toUpperCase()})`}
                     </div>
                   </div>
                 </div>
