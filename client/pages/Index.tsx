@@ -750,9 +750,11 @@ const Index: React.FC = () => {
                       {translations?.complaints?.trackStatus || "Track Status"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {currentLanguage === "hi" ? "वास्तविक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें" :
-                       currentLanguage === "ml" ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക" :
-                       "Monitor complaint progress in real time with instant updates"}
+                      {currentLanguage === "hi"
+                        ? "वास्तविक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
+                        : currentLanguage === "ml"
+                          ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
+                          : "Monitor complaint progress in real time with instant updates"}
                     </div>
                   </div>
                 </div>
@@ -760,12 +762,15 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {translations?.complaints?.registerComplaint || "Quick Complaint Registration"}
+                      {translations?.complaints?.registerComplaint ||
+                        "Quick Complaint Registration"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {currentLanguage === "hi" ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे लॉग करें" :
-                       currentLanguage === "ml" ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ രേഖപ്പെടുത്തുക" :
-                       "Log issues in under a minute with type, photo, and location"}
+                      {currentLanguage === "hi"
+                        ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे लॉग करें"
+                        : currentLanguage === "ml"
+                          ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ രേഖപ്പെടുത്തുക"
+                          : "Log issues in under a minute with type, photo, and location"}
                     </div>
                   </div>
                 </div>
@@ -773,14 +778,18 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {currentLanguage === "hi" ? "ईमेल अलर्ट" :
-                       currentLanguage === "ml" ? "ഇമെയിൽ അലേർട്ടുകൾ" :
-                       "Email Alerts"}
+                      {currentLanguage === "hi"
+                        ? "ईमेल अलर्ट"
+                        : currentLanguage === "ml"
+                          ? "ഇമെയിൽ അലേർട്ടുകൾ"
+                          : "Email Alerts"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {currentLanguage === "hi" ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें" :
-                       currentLanguage === "ml" ? "രജിസ്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക" :
-                       "Get notified at each stage — from registration to resolution"}
+                      {currentLanguage === "hi"
+                        ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
+                        : currentLanguage === "ml"
+                          ? "രജിസ്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
+                          : "Get notified at each stage — from registration to resolution"}
                     </div>
                   </div>
                 </div>
@@ -788,14 +797,18 @@ const Index: React.FC = () => {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="font-medium">
-                      {currentLanguage === "hi" ? "बहुभाषी सहायता" :
-                       currentLanguage === "ml" ? "ബഹുഭാഷാ പിന്തുണ" :
-                       "Multilingual Support"}
+                      {currentLanguage === "hi"
+                        ? "बहुभाषी सहायता"
+                        : currentLanguage === "ml"
+                          ? "ബഹുഭാഷാ പിന്തുണ"
+                          : "Multilingual Support"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {currentLanguage === "hi" ? "अंग्रेजी, मलयालम और हिंदी में उपलब्ध" :
-                       currentLanguage === "ml" ? "ഇംഗ്ലീഷ്, മലയാളം, ഹിന്ദി എന്നിവയിൽ ലഭ്യമാണ്" :
-                       "Available in English, Malayalam, and Hindi"}
+                      {currentLanguage === "hi"
+                        ? "अंग्रेजी, मलयालम और हिंदी में उपलब्ध"
+                        : currentLanguage === "ml"
+                          ? "ഇംഗ്ലീഷ്, മലയാളം, ഹിന്ദി എന്നിവയിൽ ലഭ്യമാണ്"
+                          : "Available in English, Malayalam, and Hindi"}
                     </div>
                   </div>
                 </div>

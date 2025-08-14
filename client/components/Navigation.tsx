@@ -223,7 +223,10 @@ const Navigation: React.FC = () => {
               </DropdownMenu>
               <Link to="/complaint">
                 <Button variant="outline" size="sm">
-                  <span className="hidden lg:inline">{translations?.complaints?.registerComplaint || "Register Complaint"}</span>
+                  <span className="hidden lg:inline">
+                    {translations?.complaints?.registerComplaint ||
+                      "Register Complaint"}
+                  </span>
                   <span className="lg:hidden">Complaint</span>
                 </Button>
               </Link>
@@ -238,7 +241,9 @@ const Navigation: React.FC = () => {
               <Link to="/register">
                 <Button size="sm">
                   <span className="hidden lg:inline">
-                    {translations?.auth?.signUp || translations.nav.register || "Sign Up"}
+                    {translations?.auth?.signUp ||
+                      translations.nav.register ||
+                      "Sign Up"}
                   </span>
                   <span className="lg:hidden">Sign Up</span>
                 </Button>
@@ -284,7 +289,8 @@ const Navigation: React.FC = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Button variant="outline" className="w-full">
-                    {translations?.complaints?.registerComplaint || "Register Complaint"}
+                    {translations?.complaints?.registerComplaint ||
+                      "Register Complaint"}
                   </Button>
                 </Link>
                 <Link
@@ -302,7 +308,9 @@ const Navigation: React.FC = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Button className="w-full">
-                    {translations?.auth?.signUp || translations.nav.register || "Sign Up"}
+                    {translations?.auth?.signUp ||
+                      translations.nav.register ||
+                      "Sign Up"}
                   </Button>
                 </Link>
               </div>
