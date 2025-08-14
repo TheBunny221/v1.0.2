@@ -5,7 +5,10 @@ export type Language = "en" | "hi" | "ml";
 
 // Translation interface
 export interface Translation {
+  settings: any;
   nav: {
+    ward: string;
+    profile: string;
     home: string;
     complaints: string;
     myComplaints: string;
@@ -122,6 +125,7 @@ export interface Translation {
     };
   };
   auth: {
+    signUp: string;
     login: string;
     register: string;
     logout: string;
@@ -376,7 +380,8 @@ const translations: Record<Language, Translation> = {
       },
     },
     auth: {
-      login: "Login",
+        login: "Login",
+      signUp: "Sign Up",
       register: "Register",
       logout: "Logout",
       email: "Email Address",
@@ -630,7 +635,8 @@ const translations: Record<Language, Translation> = {
       },
     },
     auth: {
-      login: "लॉगिन",
+        login: "लॉगिन",
+        signUp: "साइन अप करें",
       register: "पंजीकरण",
       logout: "लॉगआउट",
       email: "ईमेल पता",
@@ -884,7 +890,8 @@ const translations: Record<Language, Translation> = {
       },
     },
     auth: {
-      login: "ലോഗിൻ",
+        login: "ലോഗിൻ",
+        signUp: "സൈൻ അപ്പ് ചെയ്യുക",
       register: "രജിസ്റ്റർ",
       logout: "ലോഗൗട്ട്",
       email: "ഇമെയിൽ വിലാസം",

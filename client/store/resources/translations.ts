@@ -63,6 +63,7 @@ export interface Translation {
     sessionExpired: string;
     guestMode: string;
     continueAsGuest: string;
+      signUp: string;
   };
 
   // Complaints
@@ -361,7 +362,8 @@ export const englishTranslations: Translation = {
     invalidCredentials: "Invalid email or password",
     sessionExpired: "Session expired. Please login again.",
     guestMode: "Guest Mode",
-    continueAsGuest: "Continue as Guest",
+      continueAsGuest: "Continue as Guest",
+      signUp: "Sign Up",
   },
   complaints: {
     registerComplaint: "Register Complaint",
@@ -638,10 +640,11 @@ export const hindiTranslations: Translation = {
     rememberMe: "मुझे याद रख���ं",
     loginSuccess: "लॉगिन सफल",
     loginError: "लॉगिन असफल",
-    invalidCredentials: "गलत ईमेल ��ा पासवर्ड",
-    sessionExpired: "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करे��।",
+    invalidCredentials: "गलत ईमेल पासवर्ड",
+    sessionExpired: "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करे।",
     guestMode: "अतिथि मोड",
-    continueAsGuest: "अतिथि के रूप में जारी रखें",
+      continueAsGuest: "अतिथि के रूप में जारी रखें",
+      signUp: "साइन अप करें"
   },
   complaints: {
     registerComplaint: "शिकायत दर्ज करें",
@@ -820,7 +823,8 @@ export const malayalamTranslations: Translation = {
     invalidCredentials: "തെറ്റായ ഇമെയിൽ അല്ലെങ്കിൽ പാസ്��വേഡ്",
     sessionExpired: "സെഷൻ കാലഹരണപ്പെട്ടു. ദയവായി വീണ്ടും ലോഗിൻ ചെയ്യുക.",
     guestMode: "അതിഥി ��ോഡ്",
-    continueAsGuest: "അതിഥിയായി തുടരുക",
+      continueAsGuest: "അതിഥിയായി തുടരുക",
+      signUp: "സൈൻ അപ്പ് ചെയ്യുക",
   },
   complaints: {
     registerComplaint: "പരാതി രജിസ്റ്റർ ചെയ്യുക",
