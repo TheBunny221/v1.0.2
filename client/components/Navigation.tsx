@@ -176,17 +176,35 @@ const Navigation: React.FC = () => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
                 <Shield className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-xl font-bold text-gray-900 hidden sm:inline">
                   Cochin Smart City
+                </span>
+                <span className="text-lg font-bold text-gray-900 sm:hidden">
+                  CSC
                 </span>
               </Link>
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* Mobile menu button for unauthenticated users */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Desktop Navigation for unauthenticated users */}
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Globe className="h-4 w-4 mr-2" />
-                    {currentLanguage.toUpperCase()}
+                    <Globe className="h-4 w-4 mr-1 lg:mr-2" />
+                    <span className="hidden lg:inline">{currentLanguage.toUpperCase()}</span>
+                    <span className="lg:hidden">{currentLanguage}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -197,21 +215,84 @@ const Navigation: React.FC = () => {
                     हिंदी
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
-                    മലയാളം
+                    മלയാളം
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Link to="/login">
-                <Button variant="outline">{translations.nav.login}</Button>
+                <Button variant="outline" size="sm">
+                  <span className="hidden lg:inline">{translations.nav.login}</span>
+                  <span className="lg:hidden">Login</span>
+                </Button>
               </Link>
               <Link to="/complaint">
-                <Button variant="outline">Submit Complaint</Button>
+                <Button variant="outline" size="sm">
+                  <span className="hidden lg:inline">Submit Complaint</span>
+                  <span className="lg:hidden">Complaint</span>
+                </Button>
               </Link>
               <Link to="/register">
-                <Button>{translations.nav.register}</Button>
+                <Button size="sm">
+                  <span className="hidden lg:inline">{translations.nav.register}</span>
+                  <span className="lg:hidden">Register</span>
+                </Button>
               </Link>
             </div>
           </div>
+
+          {/* Mobile Navigation Menu for unauthenticated users */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 bg-white">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-center mb-3">
+                      <Globe className="h-4 w-4 mr-2" />
+                      {currentLanguage.toUpperCase()}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                      English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                      हिंदी
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                      മലयാळം
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Link
+                  to="/login"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
+                    {translations.nav.login}
+                  </Button>
+                </Link>
+                <Link
+                  to="/complaint"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
+                    Submit Complaint
+                  </Button>
+                </Link>
+                <Link
+                  to="/register"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button className="w-full">
+                    {translations.nav.register}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
     );
