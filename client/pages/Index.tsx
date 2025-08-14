@@ -30,19 +30,10 @@ import {
   Phone,
   Mail,
   User,
-  AlertCircle,
   CheckCircle,
   Clock,
   BarChart3,
   Shield,
-  Home,
-  Settings,
-  Globe,
-  TrendingUp,
-  Users,
-  Zap,
-  Wrench,
-  Droplets,
 } from "lucide-react";
 
 const Index: React.FC = () => {
