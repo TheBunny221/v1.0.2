@@ -34,6 +34,10 @@ import {
   Clock,
   BarChart3,
   Shield,
+  AlertCircle,
+  Zap,
+  Wrench,
+  Droplets,
 } from "lucide-react";
 
 const Index: React.FC = () => {
