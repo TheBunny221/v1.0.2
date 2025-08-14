@@ -5,6 +5,7 @@ import {
   useGetComplaintQuery,
   useUpdateComplaintStatusMutation,
 } from "../store/api/complaintsApi";
+import { useDataManager, useStatusTracking } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import {
   Card,
@@ -45,6 +46,10 @@ const ComplaintDetails: React.FC = () => {
   const [statusComment, setStatusComment] = useState("");
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
+  // Data management hooks
+  const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
+  const { updateStatus: updateComplaintStatus } = useStatusTracking();
+
   // Use RTK Query to fetch complaint details
   const {
     data: complaintResponse,
@@ -56,7 +61,15 @@ const ComplaintDetails: React.FC = () => {
   const [updateStatus, { isLoading: isUpdatingStatus }] =
     useUpdateComplaintStatusMutation();
 
-  const complaint = complaintResponse?.data;
+  const complaint = complaintResponse?.data?.complaint;
+
+  // Cache complaint details when loaded
+  useEffect(() => {
+    if (complaint && id) {
+      cacheComplaintDetails(id, complaint);
+    }
+  }, [complaint, id, cacheComplaintDetails]);
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -93,11 +106,16 @@ const ComplaintDetails: React.FC = () => {
   const handleStatusUpdate = async (newStatus: string) => {
     if (id) {
       try {
+        // Update via API
         await updateStatus({
           id,
           status: newStatus as any,
           remarks: statusComment,
         }).unwrap();
+
+        // Update centralized store
+        updateComplaintStatus(id, newStatus, statusComment);
+
         setStatusComment("");
       } catch (error) {
         console.error("Failed to update status:", error);
@@ -121,6 +139,26 @@ const ComplaintDetails: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <FileText className="h-12 w-12 mx-auto text-red-400 mb-4" />
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Error Loading Complaint
+        </h2>
+        <p className="text-gray-600 mb-4">
+          Failed to load complaint details. Please try again.
+        </p>
+        <Link to="/complaints">
+          <Button>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Complaints
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -158,18 +196,18 @@ const ComplaintDetails: React.FC = () => {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              Complaint #{complaint.id.slice(-6)}
+              Complaint #{complaint?.id?.slice(-6) || 'Unknown'}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge className={getStatusColor(complaint.status)}>
-              {complaint.status.replace("_", " ")}
+            <Badge className={getStatusColor(complaint?.status || '')}>
+              {complaint?.status?.replace("_", " ") || 'Unknown'}
             </Badge>
-            <Badge className={getPriorityColor(complaint.priority)}>
-              {complaint.priority} Priority
+            <Badge className={getPriorityColor(complaint?.priority || '')}>
+              {complaint?.priority || 'Unknown'} Priority
             </Badge>
             <span className="text-sm text-gray-500">
-              Created {new Date(complaint.submittedOn).toLocaleDateString()}
+              Created {complaint?.submittedOn ? new Date(complaint.submittedOn).toLocaleDateString() : 'Unknown'}
             </span>
           </div>
         </div>
@@ -191,12 +229,12 @@ const ComplaintDetails: React.FC = () => {
               <div>
                 <h3 className="font-medium mb-2">Type</h3>
                 <p className="text-gray-600">
-                  {complaint.type.replace("_", " ")}
+                  {complaint?.type?.replace("_", " ") || 'Unknown Type'}
                 </p>
               </div>
               <div>
                 <h3 className="font-medium mb-2">Description</h3>
-                <p className="text-gray-600">{complaint.description}</p>
+                <p className="text-gray-600">{complaint?.description || 'No description available'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -417,14 +455,60 @@ const ComplaintDetails: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Image className="h-5 w-5 mr-2" />
-                Attachments
+                Attachments ({complaint?.attachments?.length || 0})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-4">
-                <Image className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">No attachments</p>
-              </div>
+              {complaint?.attachments && complaint.attachments.length > 0 ? (
+                <div className="space-y-3">
+                  {complaint.attachments.map((attachment: any) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3">
+                        {attachment.mimeType?.startsWith('image/') ? (
+                          <Image className="h-5 w-5 text-blue-500" />
+                        ) : (
+                          <FileText className="h-5 w-5 text-gray-500" />
+                        )}
+                        <div>
+                          <p className="font-medium text-sm">
+                            {attachment.originalName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {(attachment.size / 1024).toFixed(1)} KB •{' '}
+                            {new Date(attachment.uploadedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(attachment.url, '_blank')}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {attachment.mimeType?.startsWith('image/') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(attachment.url, '_blank')}
+                          >
+                            View
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Image className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">No attachments</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

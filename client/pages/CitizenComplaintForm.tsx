@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { selectAuth } from "../store/slices/authSlice";
 import { useToast } from "../hooks/use-toast";
+import { useUploadComplaintAttachmentMutation, useCreateComplaintMutation } from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -213,6 +214,12 @@ const CitizenComplaintForm: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [fileUploadErrors, setFileUploadErrors] = useState<string[]>([]);
+
+  // API mutation hooks
+  const [createComplaint] = useCreateComplaintMutation();
+  const [uploadAttachment] = useUploadComplaintAttachmentMutation();
 
   const steps = [
     { id: 1, title: "Details", icon: FileText, isCompleted: false },
@@ -319,26 +326,124 @@ const CitizenComplaintForm: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call to submit complaint
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Create complaint
+      const complaintData = {
+        title: `${formData.type} complaint`,
+        description: formData.description,
+        type: formData.type,
+        priority: formData.priority,
+        wardId: formData.wardId,
+        subZoneId: formData.subZoneId,
+        area: formData.area,
+        landmark: formData.landmark,
+        address: formData.address,
+        coordinates: formData.coordinates,
+        contactName: formData.fullName,
+        contactEmail: formData.email,
+        contactPhone: formData.phoneNumber,
+        isAnonymous: false,
+      };
+
+      const complaintResponse = await createComplaint(complaintData).unwrap();
+      const complaintId = complaintResponse.data.complaint.id;
+
+      // Upload attachments if any
+      if (formData.attachments && formData.attachments.length > 0) {
+        setUploadingFiles(true);
+        for (const file of formData.attachments) {
+          try {
+            await uploadAttachment({ complaintId, file }).unwrap();
+          } catch (uploadError) {
+            console.error("Failed to upload file:", file.name, uploadError);
+            // Don't fail the entire submission for file upload errors
+          }
+        }
+        setUploadingFiles(false);
+      }
 
       toast({
         title: "Complaint Submitted Successfully!",
-        description:
-          "Your complaint has been registered and assigned a tracking number. You will receive updates via email and in-app notifications.",
+        description: `Your complaint has been registered with ID: ${complaintId.slice(-6).toUpperCase()}. You will receive updates via email and in-app notifications.`,
       });
 
-      navigate("/dashboard");
-    } catch (error) {
+      navigate("/complaints");
+    } catch (error: any) {
+      console.error("Submission error:", error);
       toast({
         title: "Submission Failed",
-        description:
-          "There was an error submitting your complaint. Please try again.",
+        description: error?.data?.message || "There was an error submitting your complaint. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
+      setUploadingFiles(false);
     }
+  };
+
+  // File upload handlers
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // Validate file count
+    const currentFileCount = formData.attachments?.length || 0;
+    if (currentFileCount + files.length > 5) {
+      toast({
+        title: "Too many files",
+        description: "You can upload a maximum of 5 files",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validFiles = [];
+    const errors = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        errors.push(`${file.name}: File size too large (max 10MB)`);
+        continue;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        errors.push(`${file.name}: Invalid file type (only images allowed)`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (errors.length > 0) {
+      setFileUploadErrors(errors);
+      toast({
+        title: "File validation errors",
+        description: `${errors.length} file(s) were rejected`,
+        variant: "destructive",
+      });
+    }
+
+    if (validFiles.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        attachments: [...(prev.attachments || []), ...validFiles]
+      }));
+      setFileUploadErrors([]);
+    }
+
+    // Clear the input
+    event.target.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: prev.attachments?.filter((_, i) => i !== index) || []
+    }));
   };
 
   const selectedComplaintType = COMPLAINT_TYPES.find(
@@ -762,6 +867,7 @@ const CitizenComplaintForm: React.FC = () => {
                       accept="image/*"
                       className="hidden"
                       id="file-upload"
+                      onChange={handleFileUpload}
                     />
                     <Label
                       htmlFor="file-upload"
@@ -778,6 +884,49 @@ const CitizenComplaintForm: React.FC = () => {
                         </p>
                       </div>
                     </Label>
+
+                    {/* Display uploaded files */}
+                    {formData.attachments && formData.attachments.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm text-gray-700">
+                          Uploaded Files ({formData.attachments.length}/5)
+                        </h4>
+                        <div className="space-y-2">
+                          {formData.attachments.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <Image className="h-5 w-5 text-blue-500" />
+                                <div>
+                                  <p className="text-sm font-medium">{file.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {(file.size / 1024).toFixed(1)} KB
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFile(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File upload errors */}
+                    {fileUploadErrors.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm text-red-700">Upload Errors:</h4>
+                        {fileUploadErrors.map((error, index) => (
+                          <p key={index} className="text-sm text-red-600">{error}</p>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">
@@ -894,6 +1043,33 @@ const CitizenComplaintForm: React.FC = () => {
                     </CardContent>
                   </Card>
 
+                  {/* Attachments */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Attachments</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {formData.attachments && formData.attachments.length > 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-600 mb-3">
+                            {formData.attachments.length} file(s) will be uploaded with your complaint:
+                          </p>
+                          {formData.attachments.map((file, index) => (
+                            <div key={index} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                              <Image className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm">{file.name}</span>
+                              <span className="text-xs text-gray-500">
+                                ({(file.size / 1024).toFixed(1)} KB)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No attachments</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   <Alert className="border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription className="text-green-800">
@@ -928,12 +1104,12 @@ const CitizenComplaintForm: React.FC = () => {
                 <Button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || uploadingFiles}
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || uploadingFiles ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
+                      {uploadingFiles ? "Uploading files..." : "Submitting..."}
                     </>
                   ) : (
                     <>

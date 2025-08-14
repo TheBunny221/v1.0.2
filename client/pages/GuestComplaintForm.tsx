@@ -28,7 +28,6 @@ import {
   validateCurrentStep,
   setImagePreview,
   clearGuestData,
-  submitGuestComplaint,
   verifyOTPAndRegister,
   resendOTP,
   clearError,
@@ -38,6 +37,7 @@ import {
 } from "../store/slices/guestSlice";
 import { getApiErrorMessage } from "../store/api/baseApi";
 import { useOtpFlow } from "../contexts/OtpContext";
+import { useGetWardsQuery, useSubmitGuestComplaintMutation } from "../store/api/guestApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -89,39 +89,6 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-// Mock data - in real app this would come from API
-const WARDS = [
-  {
-    id: "ward-1",
-    name: "Fort Kochi",
-    subZones: ["Marine Drive", "Parade Ground", "Princess Street"],
-  },
-  {
-    id: "ward-2",
-    name: "Mattancherry",
-    subZones: ["Jew Town", "Dutch Palace", "Spice Market"],
-  },
-  {
-    id: "ward-3",
-    name: "Ernakulam South",
-    subZones: ["MG Road", "Broadway", "Shanmugham Road"],
-  },
-  {
-    id: "ward-4",
-    name: "Ernakulam North",
-    subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"],
-  },
-  {
-    id: "ward-5",
-    name: "Kadavanthra",
-    subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"],
-  },
-  {
-    id: "ward-6",
-    name: "Thevara",
-    subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"],
-  },
-];
 
 const COMPLAINT_TYPES = [
   {
@@ -204,6 +171,13 @@ const GuestComplaintForm: React.FC = () => {
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
+
+  // Fetch wards from API
+  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
+
+  // RTK Query mutation for form submission
+  const [submitComplaintMutation] = useSubmitGuestComplaintMutation();
 
   // Guest form state
   const currentStep = useAppSelector(selectCurrentStep);
@@ -398,9 +372,36 @@ const GuestComplaintForm: React.FC = () => {
           })
           .filter((f): f is FileAttachment => f !== null) || [];
 
-      const result = await dispatch(
-        submitGuestComplaint({ complaintData: formData, files }),
-      ).unwrap();
+      // Create FormData for file uploads
+      const submissionData = new FormData();
+
+      // Add text data
+      submissionData.append("fullName", formData.fullName);
+      submissionData.append("email", formData.email);
+      submissionData.append("phoneNumber", formData.phoneNumber);
+      submissionData.append("type", formData.type);
+      submissionData.append("description", formData.description);
+      submissionData.append("priority", formData.priority || "MEDIUM");
+      submissionData.append("wardId", formData.wardId);
+      if (formData.subZoneId) submissionData.append("subZoneId", formData.subZoneId);
+      submissionData.append("area", formData.area);
+      if (formData.landmark) submissionData.append("landmark", formData.landmark);
+      if (formData.address) submissionData.append("address", formData.address);
+
+      // Add coordinates
+      if (formData.coordinates) {
+        submissionData.append("coordinates", JSON.stringify(formData.coordinates));
+      }
+
+      // Add attachments
+      if (files && files.length > 0) {
+        files.forEach((fileAttachment) => {
+          submissionData.append("attachments", fileAttachment.file);
+        });
+      }
+
+      const response = await submitComplaintMutation(submissionData).unwrap();
+      const result = response.data;
 
       if (result.complaintId && result.trackingNumber) {
         // Open unified OTP dialog
@@ -440,8 +441,8 @@ const GuestComplaintForm: React.FC = () => {
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   // Get available sub-zones based on selected ward
-  const availableSubZones =
-    WARDS.find((ward) => ward.id === formData.wardId)?.subZones || [];
+  const selectedWard = wards.find((ward) => ward.id === formData.wardId);
+  const availableSubZones = selectedWard?.subZones || [];
 
   // Success page
   if (submissionStep === "success") {
@@ -866,11 +867,17 @@ const GuestComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
-                          {WARDS.map((ward) => (
-                            <SelectItem key={ward.id} value={ward.id}>
-                              {ward.name}
-                            </SelectItem>
-                          ))}
+                          {wardsLoading ? (
+                            <SelectItem value="loading" disabled>Loading wards...</SelectItem>
+                          ) : wardsError ? (
+                            <SelectItem value="error" disabled>Error loading wards</SelectItem>
+                          ) : (
+                            wards.map((ward) => (
+                              <SelectItem key={ward.id} value={ward.id}>
+                                {ward.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
@@ -901,11 +908,15 @@ const GuestComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select sub-zone" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableSubZones.map((subZone, index) => (
-                            <SelectItem key={index} value={subZone}>
-                              {subZone}
-                            </SelectItem>
-                          ))}
+                          {availableSubZones.length === 0 ? (
+                            <SelectItem value="no-subzones" disabled>No sub-zones available</SelectItem>
+                          ) : (
+                            availableSubZones.map((subZone) => (
+                              <SelectItem key={subZone.id} value={subZone.id}>
+                                {subZone.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       {validationErrors.subZoneId && (
@@ -1134,13 +1145,12 @@ const GuestComplaintForm: React.FC = () => {
                     <CardContent className="space-y-2">
                       <p>
                         <strong>Ward:</strong>{" "}
-                        {
-                          WARDS.find((ward) => ward.id === formData.wardId)
-                            ?.name
-                        }
+                        {selectedWard?.name || formData.wardId}
                       </p>
                       <p>
-                        <strong>Sub-Zone:</strong> {formData.subZoneId}
+                        <strong>Sub-Zone:</strong> {
+                          availableSubZones.find(sz => sz.id === formData.subZoneId)?.name || formData.subZoneId || "Not specified"
+                        }
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}

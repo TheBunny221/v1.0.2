@@ -5,6 +5,7 @@ import {
   useGetComplaintsQuery,
   useGetComplaintStatisticsQuery,
 } from "../store/api/complaintsApi";
+import { formatDate } from "../lib/dateUtils";
 import {
   Card,
   CardContent,
@@ -72,7 +73,14 @@ const CitizenDashboard: React.FC = () => {
     refetch: refetchStats,
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
-  const complaints = complaintsResponse?.data || [];
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
+  const pagination = complaintsResponse?.data?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNext: false,
+    hasPrev: false,
+  };
   const isLoading = complaintsLoading;
 
   const [dashboardStats, setDashboardStats] = useState({
@@ -195,6 +203,15 @@ const CitizenDashboard: React.FC = () => {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const getComplaintTypeLabel = (type: string) => {
+    // Convert type to readable format
+    return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const isResolved = (status: string) => {
+    return status === "RESOLVED" || status === "CLOSED";
   };
 
   const recentComplaints = complaints.slice(0, 5);

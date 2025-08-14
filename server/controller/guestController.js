@@ -313,6 +313,44 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     where: { email },
   });
 
+  // Validate wardId exists
+  const ward = await prisma.ward.findUnique({
+    where: { id: wardId },
+    include: { subZones: true }
+  });
+
+  if (!ward) {
+    return res.status(400).json({
+      success: false,
+      message: `Ward with ID ${wardId} does not exist`,
+      data: null,
+    });
+  }
+
+  // Validate subZoneId if provided
+  if (subZoneId) {
+    const subZone = await prisma.subZone.findUnique({
+      where: { id: subZoneId },
+    });
+
+    if (!subZone) {
+      return res.status(400).json({
+        success: false,
+        message: `Sub-zone with ID ${subZoneId} does not exist`,
+        data: null,
+      });
+    }
+
+    // Check if sub-zone belongs to the specified ward
+    if (subZone.wardId !== wardId) {
+      return res.status(400).json({
+        success: false,
+        message: `Sub-zone ${subZoneId} does not belong to ward ${wardId}`,
+        data: null,
+      });
+    }
+  }
+
   // Set deadline based on priority
   const priorityHours = {
     LOW: 72,
@@ -815,6 +853,15 @@ export const getPublicWards = asyncHandler(async (req, res) => {
       id: true,
       name: true,
       description: true,
+      subZones: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+        orderBy: { name: "asc" },
+      },
     },
     orderBy: { name: "asc" },
   });

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setPassword, clearError, selectAuth } from "../store/slices/authSlice";
+import { clearError, selectAuth } from "../store/slices/authSlice";
+import { useSetPasswordMutation } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -22,7 +23,8 @@ const SetPassword: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
 
-  const { isLoading, error, isAuthenticated } = useAppSelector(selectAuth);
+  const { error, isAuthenticated } = useAppSelector(selectAuth);
+  const [setPasswordMutation, { isLoading }] = useSetPasswordMutation();
 
   const [formData, setFormData] = useState({
     password: "",
@@ -109,19 +111,24 @@ const SetPassword: React.FC = () => {
     }
 
     try {
-      await dispatch(
-        setPassword({
-          token,
-          password,
-        }),
-      ).unwrap();
+      await setPasswordMutation({
+        token: token!,
+        password,
+      }).unwrap();
 
       toast({
         title: "Password Set Successfully",
         description: "You are now logged in and can access your account.",
       });
+
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (error: any) {
-      // Error is handled by the reducer
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to set password. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

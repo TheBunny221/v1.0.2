@@ -7,126 +7,29 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Custom base query implementation to prevent response body consumption issues
-const customBaseQuery: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  const state = api.getState() as any;
-  const token = state.auth.token;
-  const localStorageToken = localStorage.getItem("token");
-  const activeToken = token || localStorageToken;
-
-  // Prepare request
-  const url = typeof args === "string" ? args : args.url;
-  const method = typeof args === "string" ? "GET" : args.method || "GET";
-  const body = typeof args === "string" ? undefined : args.body;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (activeToken) {
-    headers.authorization = `Bearer ${activeToken}`;
-  }
-
-  // Handle FormData requests
-  if (body instanceof FormData) {
-    delete headers["Content-Type"];
-  }
-
-  try {
-    // Create abort controller for timeout handling
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-    const response = await fetch(
-      `/api${url.startsWith("/") ? url : `/${url}`}`,
-      {
-        method,
-        headers,
-        body:
-          body instanceof FormData
-            ? body
-            : body
-              ? JSON.stringify(body)
-              : undefined,
-        signal: controller.signal,
-      },
-    );
-
-    clearTimeout(timeoutId);
-
-    let data;
-    const contentType = response.headers.get("content-type") || "";
-
-    try {
-      if (contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { message: text || "Response received" };
-        }
-      }
-    } catch (parseError: any) {
-      console.warn("Response parsing error:", parseError);
-      // Don't use clone, just provide a safe fallback
-      data = {
-        message: "Failed to parse response",
-        error: parseError.message,
-        status: response.status,
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        error: {
-          status: response.status,
-          data,
-        },
-      };
-    }
-
-    return { data };
-  } catch (error: any) {
-    console.error("Custom base query error:", error);
-
-    let errorMessage = "Network request failed";
-    let errorStatus = "FETCH_ERROR";
-
-    if (error.name === "AbortError") {
-      errorMessage = "Request timed out. Please try again.";
-      errorStatus = "TIMEOUT_ERROR";
-    } else if (error.message?.includes("Failed to fetch")) {
-      errorMessage =
-        "Network connection failed. Please check your internet connection.";
-    } else if (error.message?.includes("TypeError")) {
-      errorMessage = "Request failed due to a network issue.";
-    }
-
-    return {
-      error: {
-        status: errorStatus,
-        error: error.message || "Network error",
-        data: { message: errorMessage },
-      },
-    };
-  }
-};
-
-const baseQuery = customBaseQuery;
-
-// Enhanced base query with 401 auto-logout handling and error handling
+// Robust base query that handles all edge cases properly
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
+  // Use the built-in fetchBaseQuery for each request to avoid response body conflicts
+  const baseQuery = fetchBaseQuery({
+    baseUrl: '/api/',
+    prepareHeaders: (headers) => {
+      const state = api.getState() as any;
+      const token = state.auth.token || localStorage.getItem("token");
+
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
+      return headers;
+    },
+    timeout: 30000,
+  });
+
+  let result = await baseQuery(args, api, extraOptions);
 
   // Handle 401 unauthorized responses
   if (result.error && result.error.status === 401) {
@@ -134,22 +37,16 @@ const baseQueryWithReauth: BaseQueryFn<
     const endpoint = typeof args === "string" ? args : args.url;
     const isAuthEndpoint =
       typeof endpoint === "string" &&
-      (endpoint.includes("/auth/login") ||
-        endpoint.includes("/auth/register") ||
-        endpoint.includes("/auth/verify-otp") ||
-        endpoint.includes("/auth/login-otp"));
+      (endpoint.includes("auth/login") ||
+        endpoint.includes("auth/register") ||
+        endpoint.includes("auth/verify-otp") ||
+        endpoint.includes("auth/login-otp"));
 
     if (!isAuthEndpoint) {
-      // Only auto-logout for non-auth endpoints
-      console.warn(
-        "401 Unauthorized detected for non-auth endpoint:",
-        endpoint,
-      );
-
       // Clear auth state
       api.dispatch(logout());
 
-      // Show toast notification (avoid multiple toasts)
+      // Show toast notification
       try {
         toast({
           title: "Session Expired",
@@ -160,61 +57,11 @@ const baseQueryWithReauth: BaseQueryFn<
         console.warn("Toast notification failed:", toastError);
       }
     }
-  } else if (result.error) {
-    // Log error for analytics
-    const endpoint = typeof args === "string" ? args : args.url;
-    console.warn("API Error:", {
-      endpoint,
-      status: result.error.status,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Set error in auth slice for global error handling (only for server errors)
-    if (typeof result.error.status === "number" && result.error.status >= 500) {
-      try {
-        api.dispatch(
-          setError("A server error occurred. Please try again later."),
-        );
-      } catch (dispatchError) {
-        console.error("Failed to dispatch error:", dispatchError);
-      }
-    }
   }
 
   return result;
 };
 
-// Helper function to extract error messages (simplified to avoid response body consumption)
-function getErrorMessage(error: FetchBaseQueryError): string {
-  if ("status" in error) {
-    switch (error.status) {
-      case 400:
-        return "Bad request - please check your input";
-      case 401:
-        return "Unauthorized - please login again";
-      case 403:
-        return "Forbidden - you do not have permission";
-      case 404:
-        return "Resource not found";
-      case 409:
-        return "Conflict - resource already exists";
-      case 422:
-        return "Validation error - please check your input";
-      case 429:
-        return "Too many requests - please try again later";
-      case 500:
-        return "Internal server error - please try again later";
-      case 502:
-        return "Bad gateway - service temporarily unavailable";
-      case 503:
-        return "Service unavailable - please try again later";
-      default:
-        return `An error occurred (${error.status})`;
-    }
-  }
-
-  return "An unexpected error occurred";
-}
 
 // Create the base API slice
 export const baseApi = createApi({
@@ -321,36 +168,13 @@ export const rollbackUpdate = <T>(
 
 // Helper to extract error message from RTK Query error
 export const getApiErrorMessage = (error: any): string => {
-  console.log(
-    "Processing error in getApiErrorMessage:",
-    JSON.stringify(error, null, 2),
-  );
+  // Handle RTK Query FetchBaseQueryError structure
+  if (error?.data?.message) {
+    return error.data.message;
+  }
 
-  // Handle custom fetch errors from useCustomRegister hook
-  if (error?.status && error?.data) {
-    console.log("Handling custom fetch error with status:", error.status);
-    console.log("Error data:", error.data);
-
-    // Server error response with message - prioritize server message
-    if (typeof error.data === "object" && error.data.message) {
-      console.log("Found message in error.data:", error.data.message);
-      return error.data.message;
-    }
-
-    // Server error response as string
-    if (typeof error.data === "string") {
-      try {
-        const parsed = JSON.parse(error.data);
-        if (parsed.message) {
-          return parsed.message;
-        }
-      } catch {
-        return error.data;
-      }
-    }
-
-    // Only use fallback messages if server didn't provide a specific message
-    console.log("No server message found, using status-based fallback");
+  // Handle status-based errors
+  if (error?.status) {
     switch (error.status) {
       case 400:
         return "Bad request - please check your input";
@@ -361,7 +185,7 @@ export const getApiErrorMessage = (error: any): string => {
       case 404:
         return "Resource not found";
       case 409:
-        return "This email address is already registered. Please use a different email or try logging in.";
+        return "Conflict - resource already exists";
       case 422:
         return "Validation error - please check your input";
       case 429:
@@ -373,77 +197,10 @@ export const getApiErrorMessage = (error: any): string => {
     }
   }
 
-  // Handle RTK Query SerializedError (when response cloning fails or other errors)
-  if (
-    error?.name === "TypeError" ||
-    error?.message?.includes("Response body") ||
-    error?.message?.includes("already used") ||
-    error?.message?.includes("clone") ||
-    error?.message?.includes("disturbed")
-  ) {
-    // This is a cloning/network error - provide a generic helpful message
-    console.warn(
-      "Response body or cloning error detected in getApiErrorMessage",
-    );
-    return "Request failed due to a network issue. Please try again.";
+  // Handle network errors
+  if (error?.message?.includes("Failed to fetch")) {
+    return "Network connection failed. Please check your internet connection.";
   }
 
-  // Handle RTK Query FetchBaseQueryError structure
-  if (error?.data) {
-    // Server error response with message
-    if (typeof error.data === "object" && error.data.message) {
-      return error.data.message;
-    }
-
-    // Server error response as string
-    if (typeof error.data === "string") {
-      try {
-        const parsed = JSON.parse(error.data);
-        if (parsed.message) {
-          return parsed.message;
-        }
-      } catch {
-        return error.data;
-      }
-    }
-  }
-
-  // Handle SerializedError structure
-  if (error?.message && typeof error.message === "string") {
-    // Skip generic error messages that aren't helpful
-    if (
-      !error.message.includes("Response body") &&
-      !error.message.includes("clone") &&
-      !error.message.includes("TypeError")
-    ) {
-      return error.message;
-    }
-  }
-
-  // Fallback to status-based message
-  if (error?.status) {
-    switch (error.status) {
-      case 400:
-        return "This email address is already registered. Please use a different email or try logging in.";
-      case 401:
-        return "Unauthorized - please login again";
-      case 403:
-        return "Forbidden - you do not have permission";
-      case 404:
-        return "Resource not found";
-      case 409:
-        return "This email address is already registered. Please use a different email or try logging in.";
-      case 422:
-        return "Validation error - please check your input";
-      case 429:
-        return "Too many requests - please try again later";
-      case 500:
-        return "Internal server error - please try again later";
-      default:
-        return `An error occurred (${error.status})`;
-    }
-  }
-
-  console.log("No specific error pattern matched, using fallback");
-  return "Registration failed. Please check your information and try again.";
+  return "An unexpected error occurred. Please try again.";
 };

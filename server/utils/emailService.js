@@ -22,7 +22,8 @@ const createTransporter = () => {
       "Email transporter created for development:",
       process.env.EMAIL_SERVICE,
     );
-    return nodemailer.createTransport({
+    
+  return nodemailer.createTransport({
       host: process.env.EMAIL_SERVICE,
       port: process.env.EMAIL_PORT || 587,
       secure: false, // true if using port 465
@@ -52,8 +53,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_FROM ||
-        "Cochin Smart City <noreply@cochinsmartcity.gov.in>",
+        "Cochin Smart City ",
       to,
       subject,
       text,

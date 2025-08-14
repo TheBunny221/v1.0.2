@@ -9,8 +9,6 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { Badge } from "../components/ui/badge";
 import {
   Tabs,
   TabsContent,
@@ -24,32 +22,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Switch } from "../components/ui/switch";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import {
   updateProfile,
-  updateUserPreferences,
 } from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
+import { useSendPasswordSetupEmailMutation, useSetPasswordMutation } from "../store/api/authApi";
 import {
   User,
   Mail,
   Phone,
   MapPin,
   Shield,
-  Camera,
   Save,
   Eye,
   EyeOff,
-  Bell,
   Lock,
-  Globe,
+  AlertTriangle,
 } from "lucide-react";
 
 const Profile: React.FC = () => {
   const dispatch = useAppDispatch();
   const { user, isLoading } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+
+  // API mutations
+  const [sendPasswordSetupEmail] = useSendPasswordSetupEmailMutation();
+  const [setPassword] = useSetPasswordMutation();
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
@@ -74,6 +73,8 @@ const Profile: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
+  const [emailStep, setEmailStep] = useState<"none" | "sent">("none");
+  const [setupToken, setSetupToken] = useState("");
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -83,14 +84,51 @@ const Profile: React.FC = () => {
     setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSendPasswordSetupEmail = async () => {
+    try {
+      const response = await sendPasswordSetupEmail({ email: user?.email || "" }).unwrap();
+      setEmailStep("sent");
+      dispatch(
+        addNotification({
+          type: "success",
+          title: "Email Sent",
+          message: "Password setup link has been sent to your email address",
+        }),
+      );
+
+      // In development, show the token for testing
+      if (process.env.NODE_ENV === "development" && response.data?.resetUrl) {
+        const token = response.data.resetUrl.split('/').pop();
+        if (token) {
+          setSetupToken(token);
+          dispatch(
+            addNotification({
+              type: "info",
+              title: "Development Mode",
+              message: `For testing, you can use token: ${token}`,
+            }),
+          );
+        }
+      }
+    } catch (error: any) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: error?.data?.message || "Failed to send password setup email",
+        }),
+      );
+    }
+  };
+
   const handleSaveProfile = async () => {
     try {
       await dispatch(updateProfile(formData)).unwrap();
       dispatch(
         addNotification({
           type: "success",
-          title: translations.common.success,
-          message: translations.profile.profileUpdated,
+          title: translations?.common?.success || "Success",
+          message: translations?.profile?.profileUpdated || "Profile updated successfully",
         }),
       );
       setIsEditing(false);
@@ -98,67 +136,90 @@ const Profile: React.FC = () => {
       dispatch(
         addNotification({
           type: "error",
-          title: translations.common.error,
+          title: translations?.common?.error || "Error",
           message: error instanceof Error ? error.message : "Update failed",
         }),
       );
     }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       dispatch(
         addNotification({
           type: "error",
-          title: translations.common.error,
-          message: translations.profile.passwordMismatch,
+          title: translations?.common?.error || "Error",
+          message: translations?.profile?.passwordMismatch || "Passwords do not match",
         }),
       );
       return;
     }
 
-    // Mock password change
-    dispatch(
-      addNotification({
-        type: "success",
-        title: translations.common.success,
-        message: translations.profile.passwordChanged,
-      }),
-    );
+    // For password setup, require token
+    if (!user?.hasPassword && !setupToken) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Token Required",
+          message: "Please get the setup token from your email first",
+        }),
+      );
+      return;
+    }
 
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-  };
+    // Validate current password is provided (only for password change, not setup)
+    if (user?.hasPassword && !passwordData.currentPassword) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: translations?.common?.error || "Error",
+          message: "Current password is required",
+        }),
+      );
+      return;
+    }
 
-  const handlePreferenceChange = (key: string, value: any) => {
-    dispatch(updateUserPreferences({ [key]: value }));
-  };
+    try {
+      if (!user?.hasPassword) {
+        // Password setup with token
+        await setPassword({
+          token: setupToken,
+          password: passwordData.newPassword,
+        }).unwrap();
+      } else {
+        // Regular password change - mock implementation
+      }
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-purple-100 text-purple-800";
-      case "ward-officer":
-        return "bg-blue-100 text-blue-800";
-      case "maintenance":
-        return "bg-green-100 text-green-800";
-      case "citizen":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      dispatch(
+        addNotification({
+          type: "success",
+          title: translations?.common?.success || "Success",
+          message: !user?.hasPassword
+            ? "Password set up successfully"
+            : (translations?.profile?.passwordChanged || "Password changed successfully"),
+        }),
+      );
+
+      // Reset form and email state
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setEmailStep("none");
+      setSetupToken("");
+
+    } catch (error: any) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: error?.data?.message || "Failed to set password",
+        }),
+      );
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
 
   if (!user) {
     return (
@@ -170,13 +231,8 @@ const Profile: React.FC = () => {
     );
   }
 
-  // Show loading state if translations are not loaded yet
-  if (
-    !translations ||
-    !translations.profile ||
-    !translations.nav ||
-    !translations.common
-  ) {
+  // Show loading state only if user is still loading
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -201,16 +257,43 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
+      {/* Password Setup Alert */}
+      {!user?.hasPassword && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-orange-800">
+                  Password Setup Required
+                </h3>
+                <p className="mt-1 text-sm text-orange-700">
+                  Your account was created without a password. Please set up a password to secure your account.
+                </p>
+                <div className="mt-4">
+                  <Button
+                    onClick={() => setActiveTab("security")}
+                    className="bg-orange-600 hover:bg-orange-700"
+                    size="sm"
+                  >
+                    Set Up Password Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="personal">
             {translations?.profile?.personalInformation ||
               "Personal Information"}
           </TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="preferences">
-            {translations.profile.preferences}
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="space-y-6">
@@ -218,45 +301,25 @@ const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <User className="h-5 w-5" />
-                <span>{translations.profile.personalInformation}</span>
+                <span>{translations?.profile?.personalInformation || "Personal Information"}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Avatar Section */}
-              <div className="flex items-center space-x-6">
-                <div className="relative">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback className="text-lg">
-                      {getInitials(user.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">{user.fullName}</h3>
-                  <Badge className={getRoleColor(user.role)}>
-                    {user.role.replace("_", " ").toUpperCase()}
-                  </Badge>
-                  {user.ward && (
-                    <p className="text-sm text-muted-foreground flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {user.ward.name}
-                    </p>
-                  )}
-                  {user.department && (
-                    <p className="text-sm text-muted-foreground flex items-center">
-                      <Shield className="h-4 w-4 mr-1" />
-                      {user.department}
-                    </p>
-                  )}
-                </div>
+              {/* User Info Section */}
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">{user.fullName}</h3>
+                {user.ward && (
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {user.ward.name}
+                  </p>
+                )}
+                {user.department && (
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <Shield className="h-4 w-4 mr-1" />
+                    {user.department}
+                  </p>
+                )}
               </div>
 
               {/* Form Fields */}
@@ -362,16 +425,16 @@ const Profile: React.FC = () => {
                         });
                       }}
                     >
-                      {translations.common.cancel}
+                      {translations?.common?.cancel || "Cancel"}
                     </Button>
                     <Button onClick={handleSaveProfile} disabled={isLoading}>
                       <Save className="h-4 w-4 mr-2" />
-                      {translations.common.save}
+                      {translations?.common?.save || "Save"}
                     </Button>
                   </>
                 ) : (
                   <Button onClick={() => setIsEditing(true)}>
-                    {translations.common.edit} Profile
+                    {translations?.common?.edit || "Edit"} Profile
                   </Button>
                 )}
               </div>
@@ -384,48 +447,105 @@ const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Lock className="h-5 w-5" />
-                <span>{translations.profile.changePassword}</span>
+                <span>
+                  {!user?.hasPassword
+                    ? "Set Up Password"
+                    : (translations?.profile?.changePassword || "Change Password")
+                  }
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">
-                  {translations.profile.currentPassword}
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="currentPassword"
-                    type={showPasswords.current ? "text" : "password"}
-                    value={passwordData.currentPassword}
-                    onChange={(e) =>
-                      handlePasswordChange("currentPassword", e.target.value)
-                    }
-                    placeholder="Enter current password"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                    onClick={() =>
-                      setShowPasswords((prev) => ({
-                        ...prev,
-                        current: !prev.current,
-                      }))
-                    }
-                  >
-                    {showPasswords.current ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
+              {/* Email Setup for Password Setup */}
+              {!user?.hasPassword && (
+                <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-blue-900">Password Setup Required</h4>
+                    <p className="text-sm text-blue-700">
+                      We'll send you a secure link to set up your password.
+                    </p>
+                  </div>
+
+                  {emailStep === "none" && (
+                    <Button
+                      onClick={handleSendPasswordSetupEmail}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                    >
+                      Send Setup Link to {user?.email}
+                    </Button>
+                  )}
+
+                  {emailStep === "sent" && (
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-green-700">
+                        <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Setup link sent! Check your email.</span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="setupToken">Setup Token (from email)</Label>
+                        <Input
+                          id="setupToken"
+                          value={setupToken}
+                          onChange={(e) => setSetupToken(e.target.value)}
+                          placeholder="Enter token from email link"
+                          className="w-full"
+                        />
+                        <p className="text-xs text-gray-500">
+                          You can either click the link in your email to go to the setup page, or copy the token from the link and paste it here.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSendPasswordSetupEmail}
+                          className="mt-2"
+                        >
+                          Resend Email
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
+              {user?.hasPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">
+                    {translations?.profile?.currentPassword || "Current Password"}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showPasswords.current ? "text" : "password"}
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        handlePasswordChange("currentPassword", e.target.value)
+                      }
+                      placeholder="Enter current password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      onClick={() =>
+                        setShowPasswords((prev) => ({
+                          ...prev,
+                          current: !prev.current,
+                        }))
+                      }
+                    >
+                      {showPasswords.current ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="newPassword">
-                  {translations.profile.newPassword}
+                  {translations?.profile?.newPassword || "New Password"}
                 </Label>
                 <div className="relative">
                   <Input
@@ -436,6 +556,7 @@ const Profile: React.FC = () => {
                       handlePasswordChange("newPassword", e.target.value)
                     }
                     placeholder="Enter new password"
+                    disabled={!user?.hasPassword && !setupToken}
                   />
                   <Button
                     type="button"
@@ -457,7 +578,7 @@ const Profile: React.FC = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">
-                  {translations.profile.confirmPassword}
+                  {translations?.profile?.confirmPassword || "Confirm Password"}
                 </Label>
                 <div className="relative">
                   <Input
@@ -468,6 +589,7 @@ const Profile: React.FC = () => {
                       handlePasswordChange("confirmPassword", e.target.value)
                     }
                     placeholder="Confirm new password"
+                    disabled={!user?.hasPassword && !setupToken}
                   />
                   <Button
                     type="button"
@@ -491,81 +613,15 @@ const Profile: React.FC = () => {
               </div>
 
               <Button onClick={handleChangePassword} className="w-full">
-                {translations.profile.changePassword}
+                {!user?.hasPassword
+                  ? "Set Up Password"
+                  : (translations?.profile?.changePassword || "Change Password")
+                }
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="preferences" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bell className="h-5 w-5" />
-                <span>{translations.profile.preferences}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">
-                      {translations.settings.notifications}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive notifications about complaint updates
-                    </p>
-                  </div>
-                  <Switch
-                    defaultChecked={true}
-                    onCheckedChange={(checked) =>
-                      handlePreferenceChange("notifications", checked)
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">
-                      Email Alerts
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get email notifications for important updates
-                    </p>
-                  </div>
-                  <Switch
-                    defaultChecked={true}
-                    onCheckedChange={(checked) =>
-                      handlePreferenceChange("emailAlerts", checked)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-base font-medium flex items-center">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Language
-                  </Label>
-                  <Select
-                    value={formData.language}
-                    onValueChange={(value) =>
-                      handleInputChange("language", value)
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="hi">हिन्दी</SelectItem>
-                      <SelectItem value="ml">മലയാളം</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

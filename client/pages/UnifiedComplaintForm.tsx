@@ -33,6 +33,7 @@ import {
   resendOTP,
   verifyOTPAndRegister,
 } from "../store/slices/guestSlice";
+import { useGetWardsQuery } from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -87,39 +88,6 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-// Mock data - in real app this would come from API
-const WARDS = [
-  {
-    id: "ward-1",
-    name: "Fort Kochi",
-    subZones: ["Marine Drive", "Parade Ground", "Princess Street"],
-  },
-  {
-    id: "ward-2",
-    name: "Mattancherry",
-    subZones: ["Jew Town", "Dutch Palace", "Spice Market"],
-  },
-  {
-    id: "ward-3",
-    name: "Ernakulam South",
-    subZones: ["MG Road", "Broadway", "Shanmugham Road"],
-  },
-  {
-    id: "ward-4",
-    name: "Ernakulam North",
-    subZones: ["Kadavanthra", "Panampilly Nagar", "Kaloor"],
-  },
-  {
-    id: "ward-5",
-    name: "Kadavanthra",
-    subZones: ["NH Bypass", "Rajaji Road", "Pipeline Road"],
-  },
-  {
-    id: "ward-6",
-    name: "Thevara",
-    subZones: ["Thevara Ferry", "Pipeline", "NGO Quarters"],
-  },
-];
 
 const COMPLAINT_TYPES = [
   {
@@ -202,6 +170,10 @@ const UnifiedComplaintForm: React.FC = () => {
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
+
+  // Fetch wards from API
+  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Use guest form state as the canonical source for form management
   const currentStep = useAppSelector(selectCurrentStep);
@@ -595,8 +567,8 @@ const UnifiedComplaintForm: React.FC = () => {
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   // Get available sub-zones based on selected ward
-  const availableSubZones =
-    WARDS.find((ward) => ward.id === formData.wardId)?.subZones || [];
+  const selectedWard = wards.find((ward) => ward.id === formData.wardId);
+  const availableSubZones = selectedWard?.subZones || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
@@ -997,11 +969,17 @@ const UnifiedComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
-                          {WARDS.map((ward) => (
-                            <SelectItem key={ward.id} value={ward.id}>
-                              {ward.name}
-                            </SelectItem>
-                          ))}
+                          {wardsLoading ? (
+                            <SelectItem value="loading" disabled>Loading wards...</SelectItem>
+                          ) : wardsError ? (
+                            <SelectItem value="error" disabled>Error loading wards</SelectItem>
+                          ) : (
+                            wards.map((ward) => (
+                              <SelectItem key={ward.id} value={ward.id}>
+                                {ward.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       {validationErrors.wardId && (
@@ -1024,11 +1002,15 @@ const UnifiedComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select sub-zone" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableSubZones.map((subZone, index) => (
-                            <SelectItem key={index} value={subZone}>
-                              {subZone}
-                            </SelectItem>
-                          ))}
+                          {availableSubZones.length === 0 ? (
+                            <SelectItem value="no-subzones" disabled>No sub-zones available</SelectItem>
+                          ) : (
+                            availableSubZones.map((subZone) => (
+                              <SelectItem key={subZone.id} value={subZone.id}>
+                                {subZone.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1258,14 +1240,13 @@ const UnifiedComplaintForm: React.FC = () => {
                     <CardContent className="space-y-2">
                       <p>
                         <strong>Ward:</strong>{" "}
-                        {
-                          WARDS.find((ward) => ward.id === formData.wardId)
-                            ?.name
-                        }
+                        {selectedWard?.name || formData.wardId}
                       </p>
                       <p>
                         <strong>Sub-Zone:</strong>{" "}
-                        {formData.subZoneId || "Not specified"}
+                        {
+                          availableSubZones.find(sz => sz.id === formData.subZoneId)?.name || formData.subZoneId || "Not specified"
+                        }
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
+import { useDataManager } from "../hooks/useDataManager";
 import {
   Card,
   CardContent,
@@ -44,21 +45,46 @@ const ComplaintsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Build query parameters
-  const queryParams: any = { page: 1, limit: 100 };
-  if (statusFilter !== "all") queryParams.status = statusFilter;
-  if (priorityFilter !== "all") queryParams.priority = priorityFilter;
-  if (searchTerm.trim()) queryParams.search = searchTerm.trim();
+  // Data management
+  const { cacheComplaintsList } = useDataManager();
+
+  // Debounce search term for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Build query parameters for server-side filtering
+  const queryParams = useMemo(() => {
+    const params: any = { page: 1, limit: 100 };
+    if (statusFilter !== "all") params.status = statusFilter.toUpperCase();
+    if (priorityFilter !== "all") params.priority = priorityFilter.toUpperCase();
+    if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
+    return params;
+  }, [statusFilter, priorityFilter, debouncedSearchTerm]);
 
   // Use RTK Query for better authentication handling
   const {
     data: complaintsResponse,
     isLoading,
     error,
+    refetch,
   } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
-  const complaints = complaintsResponse?.data || [];
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
+
+  // Cache complaints data when loaded
+  useEffect(() => {
+    if (complaints.length > 0) {
+      cacheComplaintsList(complaints);
+    }
+  }, [complaints, cacheComplaintsList]);
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -92,18 +118,16 @@ const ComplaintsList: React.FC = () => {
     }
   };
 
-  // Since filtering is now done server-side via query params, we don't need client-side filtering
-  // But we can still apply search term filtering for immediate feedback
-  const filteredComplaints = searchTerm
-    ? complaints.filter(
-        (complaint) =>
-          complaint.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          complaint.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          complaint.id.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : complaints;
+  // Use all complaints since filtering is done server-side
+  const filteredComplaints = complaints;
+
+  // Clear all filters and refetch data
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setDebouncedSearchTerm("");
+  };
 
   return (
     <div className="space-y-6">
@@ -113,14 +137,20 @@ const ComplaintsList: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Complaints</h1>
           <p className="text-gray-600">Manage and track all complaints</p>
         </div>
-        {user?.role === "CITIZEN" && (
-          <Link to="/complaints/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Complaint
-            </Button>
-          </Link>
-        )}
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()}>
+            <FileText className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          {user?.role === "CITIZEN" && (
+            <Link to="/complaints/new">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                New Complaint
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -163,11 +193,7 @@ const ComplaintsList: React.FC = () => {
             </Select>
             <Button
               variant="outline"
-              onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("all");
-                setPriorityFilter("all");
-              }}
+              onClick={clearFilters}
             >
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
@@ -185,7 +211,15 @@ const ComplaintsList: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {error ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 mx-auto text-red-400 mb-4" />
+              <p className="text-red-500 mb-2">Failed to load complaints</p>
+              <Button variant="outline" onClick={() => refetch()}>
+                Try Again
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
@@ -197,7 +231,12 @@ const ComplaintsList: React.FC = () => {
           ) : filteredComplaints.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500">No complaints found</p>
+              <p className="text-gray-500 mb-2">No complaints found</p>
+              <p className="text-sm text-gray-400">
+                {searchTerm || statusFilter !== "all" || priorityFilter !== "all"
+                  ? "Try adjusting your filters or search terms"
+                  : "Submit your first complaint to get started"}
+              </p>
             </div>
           ) : (
             <Table>
