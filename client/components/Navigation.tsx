@@ -279,6 +279,15 @@ const Navigation: React.FC = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Link
+                  to="/complaint"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
+                    {translations?.complaints?.registerComplaint || "Register Complaint"}
+                  </Button>
+                </Link>
+                <Link
                   to="/login"
                   className="block"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -288,21 +297,12 @@ const Navigation: React.FC = () => {
                   </Button>
                 </Link>
                 <Link
-                  to="/complaint"
-                  className="block"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button variant="outline" className="w-full">
-                    Submit Complaint
-                  </Button>
-                </Link>
-                <Link
                   to="/register"
                   className="block"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Button className="w-full">
-                    {translations.nav.register}
+                    {translations?.auth?.signUp || translations.nav.register || "Sign Up"}
                   </Button>
                 </Link>
               </div>
