@@ -221,6 +221,12 @@ const Navigation: React.FC = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Link to="/complaint">
+                <Button variant="outline" size="sm">
+                  <span className="hidden lg:inline">{translations?.complaints?.registerComplaint || "Register Complaint"}</span>
+                  <span className="lg:hidden">Complaint</span>
+                </Button>
+              </Link>
               <Link to="/login">
                 <Button variant="outline" size="sm">
                   <span className="hidden lg:inline">
@@ -229,18 +235,12 @@ const Navigation: React.FC = () => {
                   <span className="lg:hidden">Login</span>
                 </Button>
               </Link>
-              <Link to="/complaint">
-                <Button variant="outline" size="sm">
-                  <span className="hidden lg:inline">Submit Complaint</span>
-                  <span className="lg:hidden">Complaint</span>
-                </Button>
-              </Link>
               <Link to="/register">
                 <Button size="sm">
                   <span className="hidden lg:inline">
-                    {translations.nav.register}
+                    {translations?.auth?.signUp || translations.nav.register || "Sign Up"}
                   </span>
-                  <span className="lg:hidden">Register</span>
+                  <span className="lg:hidden">Sign Up</span>
                 </Button>
               </Link>
             </div>
