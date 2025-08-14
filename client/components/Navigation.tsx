@@ -355,7 +355,7 @@ const Navigation: React.FC = () => {
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -405,8 +405,9 @@ const Navigation: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <Globe className="h-4 w-4 mr-2" />
-                  {currentLanguage.toUpperCase()}
+                  <Globe className="h-4 w-4 mr-1 lg:mr-2" />
+                  <span className="hidden lg:inline">{currentLanguage.toUpperCase()}</span>
+                  <span className="lg:hidden">{currentLanguage}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -425,14 +426,14 @@ const Navigation: React.FC = () => {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
+                <Button variant="ghost" className="flex items-center space-x-2" size="sm">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar} />
                     <AvatarFallback>
                       {user?.fullName?.charAt(0)?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden md:block text-left">
+                  <div className="hidden lg:block text-left">
                     <p className="text-sm font-medium">{user?.fullName}</p>
                     <Badge
                       className={`text-xs ${getRoleColor(user?.role || "")}`}
