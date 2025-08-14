@@ -203,7 +203,9 @@ const Navigation: React.FC = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Globe className="h-4 w-4 mr-1 lg:mr-2" />
-                    <span className="hidden lg:inline">{currentLanguage.toUpperCase()}</span>
+                    <span className="hidden lg:inline">
+                      {currentLanguage.toUpperCase()}
+                    </span>
                     <span className="lg:hidden">{currentLanguage}</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -221,7 +223,9 @@ const Navigation: React.FC = () => {
               </DropdownMenu>
               <Link to="/login">
                 <Button variant="outline" size="sm">
-                  <span className="hidden lg:inline">{translations.nav.login}</span>
+                  <span className="hidden lg:inline">
+                    {translations.nav.login}
+                  </span>
                   <span className="lg:hidden">Login</span>
                 </Button>
               </Link>
@@ -233,7 +237,9 @@ const Navigation: React.FC = () => {
               </Link>
               <Link to="/register">
                 <Button size="sm">
-                  <span className="hidden lg:inline">{translations.nav.register}</span>
+                  <span className="hidden lg:inline">
+                    {translations.nav.register}
+                  </span>
                   <span className="lg:hidden">Register</span>
                 </Button>
               </Link>
@@ -246,19 +252,28 @@ const Navigation: React.FC = () => {
               <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 bg-white">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full justify-center mb-3">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center mb-3"
+                    >
                       <Globe className="h-4 w-4 mr-2" />
                       {currentLanguage.toUpperCase()}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange("en")}
+                    >
                       English
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange("hi")}
+                    >
                       हिंदी
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange("ml")}
+                    >
                       മലयാळം
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -406,7 +421,9 @@ const Navigation: React.FC = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
                   <Globe className="h-4 w-4 mr-1 lg:mr-2" />
-                  <span className="hidden lg:inline">{currentLanguage.toUpperCase()}</span>
+                  <span className="hidden lg:inline">
+                    {currentLanguage.toUpperCase()}
+                  </span>
                   <span className="lg:hidden">{currentLanguage}</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -426,7 +443,11 @@ const Navigation: React.FC = () => {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2" size="sm">
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2"
+                  size="sm"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar} />
                     <AvatarFallback>
@@ -541,7 +562,9 @@ const Navigation: React.FC = () => {
                           </Badge>
                         )}
                       </div>
-                      <span>{translations?.auth?.notifications || "Notifications"}</span>
+                      <span>
+                        {translations?.auth?.notifications || "Notifications"}
+                      </span>
                     </div>
                   </button>
                 </DropdownMenuTrigger>
