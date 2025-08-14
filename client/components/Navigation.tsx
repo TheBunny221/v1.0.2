@@ -305,8 +305,11 @@ const Navigation: React.FC = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Shield className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900 hidden sm:inline">
                 Cochin Smart City
+              </span>
+              <span className="text-lg font-bold text-gray-900 sm:hidden">
+                CSC
               </span>
             </Link>
           </div>
