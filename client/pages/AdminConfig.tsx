@@ -12,6 +12,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
+import { Checkbox } from "../components/ui/checkbox";
 import {
   Tabs,
   TabsContent,
@@ -660,14 +661,13 @@ const AdminConfig: React.FC = () => {
                                     />
                                   </div>
                                   <div className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
+                                    <Checkbox
                                       id="editWardActive"
                                       checked={editingWard.isActive}
-                                      onChange={(e) =>
+                                      onCheckedChange={(checked) =>
                                         setEditingWard({
                                           ...editingWard,
-                                          isActive: e.target.checked,
+                                          isActive: !!checked,
                                         })
                                       }
                                     />
@@ -963,14 +963,13 @@ const AdminConfig: React.FC = () => {
                                     />
                                   </div>
                                   <div className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
+                                    <Checkbox
                                       id="editTypeActive"
                                       checked={editingComplaintType.isActive}
-                                      onChange={(e) =>
+                                      onCheckedChange={(checked) =>
                                         setEditingComplaintType({
                                           ...editingComplaintType,
-                                          isActive: e.target.checked,
+                                          isActive: !!checked,
                                         })
                                       }
                                     />
