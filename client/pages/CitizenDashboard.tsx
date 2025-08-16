@@ -49,7 +49,7 @@ import {
   ArrowUpRight,
   RefreshCw,
 } from "lucide-react";
-import { FeedbackDialog } from "../components/FeedbackDialog";
+import FeedbackDialog from "../components/FeedbackDialog";
 
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
