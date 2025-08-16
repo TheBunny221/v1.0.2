@@ -290,25 +290,33 @@ export const adminApi = baseApi.injectEndpoints({
     }),
 
     // Get dashboard analytics
-    getDashboardAnalytics: builder.query<ApiResponse<DashboardAnalyticsResponse>, void>({
+    getDashboardAnalytics: builder.query<
+      ApiResponse<DashboardAnalyticsResponse>,
+      void
+    >({
       query: () => "/admin/dashboard/analytics",
       transformResponse: transformResponse<DashboardAnalyticsResponse>,
       providesTags: ["Analytics"],
     }),
 
     // Get recent activity
-    getRecentActivity: builder.query<ApiResponse<RecentActivity[]>, { limit?: number }>({
+    getRecentActivity: builder.query<
+      ApiResponse<RecentActivity[]>,
+      { limit?: number }
+    >({
       query: ({ limit = 5 }) => `/admin/dashboard/activity?limit=${limit}`,
       transformResponse: transformResponse<RecentActivity[]>,
       providesTags: ["Analytics"],
     }),
 
     // Get dashboard statistics
-    getDashboardStats: builder.query<ApiResponse<DashboardStatsResponse>, void>({
-      query: () => "/admin/dashboard/stats",
-      transformResponse: transformResponse<DashboardStatsResponse>,
-      providesTags: ["Analytics"],
-    }),
+    getDashboardStats: builder.query<ApiResponse<DashboardStatsResponse>, void>(
+      {
+        query: () => "/admin/dashboard/stats",
+        transformResponse: transformResponse<DashboardStatsResponse>,
+        providesTags: ["Analytics"],
+      },
+    ),
   }),
 });
 

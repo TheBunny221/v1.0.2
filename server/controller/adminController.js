@@ -483,13 +483,13 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 
   // Get complaints by type
   const complaintsByType = await prisma.complaint.groupBy({
-    by: ['type'],
+    by: ["type"],
     _count: true,
     orderBy: {
       _count: {
-        type: 'desc'
-      }
-    }
+        type: "desc",
+      },
+    },
   });
 
   // Get ward performance
@@ -513,74 +513,87 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   // Calculate averages and metrics
   const totalComplaints = await prisma.complaint.count();
   const resolvedComplaints = await prisma.complaint.count({
-    where: { status: 'RESOLVED' }
+    where: { status: "RESOLVED" },
   });
 
   // Calculate average resolution time (in days)
   const resolvedWithDates = await prisma.complaint.findMany({
     where: {
-      status: 'RESOLVED'
+      status: "RESOLVED",
     },
     select: {
       submittedOn: true,
-      resolvedOn: true
-    }
+      resolvedOn: true,
+    },
   });
 
-  const validResolutions = resolvedWithDates.filter(c => c.resolvedOn && c.submittedOn);
-  const avgResolutionTime = validResolutions.length > 0
-    ? validResolutions.reduce((acc, complaint) => {
-        const resolutionTime = (new Date(complaint.resolvedOn) - new Date(complaint.submittedOn)) / (1000 * 60 * 60 * 24);
-        return acc + resolutionTime;
-      }, 0) / validResolutions.length
-    : 0;
+  const validResolutions = resolvedWithDates.filter(
+    (c) => c.resolvedOn && c.submittedOn,
+  );
+  const avgResolutionTime =
+    validResolutions.length > 0
+      ? validResolutions.reduce((acc, complaint) => {
+          const resolutionTime =
+            (new Date(complaint.resolvedOn) - new Date(complaint.submittedOn)) /
+            (1000 * 60 * 60 * 24);
+          return acc + resolutionTime;
+        }, 0) / validResolutions.length
+      : 0;
 
   // Calculate SLA compliance percentage
-  const slaCompliance = totalComplaints > 0
-    ? Math.round((resolvedComplaints / totalComplaints) * 100)
-    : 0;
+  const slaCompliance =
+    totalComplaints > 0
+      ? Math.round((resolvedComplaints / totalComplaints) * 100)
+      : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
     where: {
       rating: {
-        gt: 0
-      }
+        gt: 0,
+      },
     },
     _avg: {
-      rating: true
-    }
+      rating: true,
+    },
   });
 
   const citizenSatisfaction = satisfactionResult._avg.rating || 0;
 
   res.status(200).json({
     success: true,
-    message: 'Dashboard analytics retrieved successfully',
+    message: "Dashboard analytics retrieved successfully",
     data: {
-      complaintTrends: complaintTrends.map(trend => ({
-        month: new Date(trend.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+      complaintTrends: complaintTrends.map((trend) => ({
+        month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
+          month: "short",
+        }),
         complaints: Number(trend.complaints),
-        resolved: Number(trend.resolved)
+        resolved: Number(trend.resolved),
       })),
-      complaintsByType: complaintsByType.map(item => ({
-        name: item.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      complaintsByType: complaintsByType.map((item) => ({
+        name: item.type
+          .replace("_", " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase()),
         value: item._count,
-        color: getTypeColor(item.type)
+        color: getTypeColor(item.type),
       })),
-      wardPerformance: wardPerformance.map(ward => ({
+      wardPerformance: wardPerformance.map((ward) => ({
         ward: ward.ward,
         complaints: Number(ward.complaints),
         resolved: Number(ward.resolved),
-        sla: Number(ward.sla) || 0
+        sla: Number(ward.sla) || 0,
       })),
       metrics: {
         avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
         slaCompliance,
         citizenSatisfaction: Math.round(citizenSatisfaction * 10) / 10,
-        resolutionRate: totalComplaints > 0 ? Math.round((resolvedComplaints / totalComplaints) * 100) : 0
-      }
-    }
+        resolutionRate:
+          totalComplaints > 0
+            ? Math.round((resolvedComplaints / totalComplaints) * 100)
+            : 0,
+      },
+    },
   });
 });
 
@@ -593,74 +606,74 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
   // Get recent complaints
   const recentComplaints = await prisma.complaint.findMany({
     take: parseInt(limit),
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     include: {
       ward: { select: { name: true } },
-      submittedBy: { select: { fullName: true } }
-    }
+      submittedBy: { select: { fullName: true } },
+    },
   });
 
   // Get recent status updates
   const recentStatusUpdates = await prisma.statusLog.findMany({
     take: parseInt(limit),
-    orderBy: { timestamp: 'desc' },
+    orderBy: { timestamp: "desc" },
     include: {
       complaint: {
         select: {
           id: true,
           type: true,
-          ward: { select: { name: true } }
-        }
+          ward: { select: { name: true } },
+        },
       },
-      user: { select: { fullName: true, role: true } }
-    }
+      user: { select: { fullName: true, role: true } },
+    },
   });
 
   // Get recent user registrations
   const recentUsers = await prisma.user.findMany({
     take: parseInt(limit),
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     where: {
-      role: { in: ['WARD_OFFICER', 'MAINTENANCE_TEAM'] }
+      role: { in: ["WARD_OFFICER", "MAINTENANCE_TEAM"] },
     },
     select: {
       id: true,
       fullName: true,
       role: true,
-      createdAt: true
-    }
+      createdAt: true,
+    },
   });
 
   // Combine and format activities
   const activities = [];
 
   // Add complaint activities
-  recentComplaints.forEach(complaint => {
+  recentComplaints.forEach((complaint) => {
     activities.push({
       id: `complaint-${complaint.id}`,
-      type: 'complaint',
-      message: `New ${complaint.type.toLowerCase().replace('_', ' ')} complaint in ${complaint.ward?.name || 'Unknown Ward'}`,
-      time: formatTimeAgo(complaint.createdAt)
+      type: "complaint",
+      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
+      time: formatTimeAgo(complaint.createdAt),
     });
   });
 
   // Add status update activities
-  recentStatusUpdates.forEach(log => {
+  recentStatusUpdates.forEach((log) => {
     activities.push({
       id: `status-${log.id}`,
       type: getActivityType(log.toStatus),
       message: getStatusMessage(log.toStatus, log.complaint, log.user),
-      time: formatTimeAgo(log.timestamp)
+      time: formatTimeAgo(log.timestamp),
     });
   });
 
   // Add user registration activities
-  recentUsers.forEach(user => {
+  recentUsers.forEach((user) => {
     activities.push({
       id: `user-${user.id}`,
-      type: 'user',
-      message: `New ${user.role.toLowerCase().replace('_', ' ')} registered`,
-      time: formatTimeAgo(user.createdAt)
+      type: "user",
+      message: `New ${user.role.toLowerCase().replace("_", " ")} registered`,
+      time: formatTimeAgo(user.createdAt),
     });
   });
 
@@ -673,8 +686,8 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Recent activity retrieved successfully',
-    data: activities.slice(0, parseInt(limit))
+    message: "Recent activity retrieved successfully",
+    data: activities.slice(0, parseInt(limit)),
   });
 });
 
@@ -685,38 +698,44 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
   const [userStats, complaintStats] = await Promise.all([
     // User statistics by role
     prisma.user.groupBy({
-      by: ['role'],
+      by: ["role"],
       where: { isActive: true },
-      _count: true
+      _count: true,
     }),
     // Complaint statistics
     prisma.complaint.groupBy({
-      by: ['status'],
-      _count: true
-    })
+      by: ["status"],
+      _count: true,
+    }),
   ]);
 
-  const wardOfficers = userStats.find(s => s.role === 'WARD_OFFICER')?._count || 0;
-  const maintenanceTeam = userStats.find(s => s.role === 'MAINTENANCE_TEAM')?._count || 0;
+  const wardOfficers =
+    userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
+  const maintenanceTeam =
+    userStats.find((s) => s.role === "MAINTENANCE_TEAM")?._count || 0;
   const totalUsers = userStats.reduce((sum, stat) => sum + stat._count, 0);
 
-  const totalComplaints = complaintStats.reduce((sum, stat) => sum + stat._count, 0);
+  const totalComplaints = complaintStats.reduce(
+    (sum, stat) => sum + stat._count,
+    0,
+  );
   const activeComplaints = complaintStats
-    .filter(s => ['REGISTERED', 'ASSIGNED', 'IN_PROGRESS'].includes(s.status))
+    .filter((s) => ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(s.status))
     .reduce((sum, stat) => sum + stat._count, 0);
-  const resolvedComplaints = complaintStats.find(s => s.status === 'RESOLVED')?._count || 0;
+  const resolvedComplaints =
+    complaintStats.find((s) => s.status === "RESOLVED")?._count || 0;
 
   // Get overdue complaints
   const overdueComplaints = await prisma.complaint.count({
     where: {
       deadline: { lt: new Date() },
-      status: { notIn: ['RESOLVED', 'CLOSED'] }
-    }
+      status: { notIn: ["RESOLVED", "CLOSED"] },
+    },
   });
 
   res.status(200).json({
     success: true,
-    message: 'Dashboard statistics retrieved successfully',
+    message: "Dashboard statistics retrieved successfully",
     data: {
       totalComplaints,
       totalUsers,
@@ -724,43 +743,47 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       resolvedComplaints,
       overdue: overdueComplaints,
       wardOfficers,
-      maintenanceTeam
-    }
+      maintenanceTeam,
+    },
   });
 });
 
 // Helper functions
 function getTypeColor(type) {
   const colors = {
-    'WATER_SUPPLY': '#3B82F6',
-    'ELECTRICITY': '#EF4444',
-    'ROAD_REPAIR': '#10B981',
-    'GARBAGE': '#F59E0B',
-    'SEWAGE': '#8B5CF6',
-    'STREET_LIGHT': '#F97316'
+    WATER_SUPPLY: "#3B82F6",
+    ELECTRICITY: "#EF4444",
+    ROAD_REPAIR: "#10B981",
+    GARBAGE: "#F59E0B",
+    SEWAGE: "#8B5CF6",
+    STREET_LIGHT: "#F97316",
   };
-  return colors[type] || '#6B7280';
+  return colors[type] || "#6B7280";
 }
 
 function getActivityType(status) {
   switch (status) {
-    case 'RESOLVED': return 'resolution';
-    case 'ASSIGNED': return 'assignment';
-    case 'IN_PROGRESS': return 'progress';
-    default: return 'update';
+    case "RESOLVED":
+      return "resolution";
+    case "ASSIGNED":
+      return "assignment";
+    case "IN_PROGRESS":
+      return "progress";
+    default:
+      return "update";
   }
 }
 
 function getStatusMessage(status, complaint, user) {
-  const type = complaint.type.toLowerCase().replace('_', ' ');
-  const ward = complaint.ward?.name || 'Unknown Ward';
+  const type = complaint.type.toLowerCase().replace("_", " ");
+  const ward = complaint.ward?.name || "Unknown Ward";
 
   switch (status) {
-    case 'RESOLVED':
+    case "RESOLVED":
       return `${type} issue resolved in ${ward}`;
-    case 'ASSIGNED':
-      return `Complaint assigned to ${user.role.toLowerCase().replace('_', ' ')}`;
-    case 'IN_PROGRESS':
+    case "ASSIGNED":
+      return `Complaint assigned to ${user.role.toLowerCase().replace("_", " ")}`;
+    case "IN_PROGRESS":
       return `Work started on ${type} complaint in ${ward}`;
     default:
       return `Complaint status updated to ${status.toLowerCase()}`;
@@ -784,10 +807,10 @@ function formatTimeAgo(date) {
 }
 
 function parseTimeAgo(timeStr) {
-  const value = parseInt(timeStr.split(' ')[0]);
-  if (timeStr.includes('mins')) return value;
-  if (timeStr.includes('hours')) return value * 60;
-  if (timeStr.includes('days')) return value * 60 * 24;
+  const value = parseInt(timeStr.split(" ")[0]);
+  if (timeStr.includes("mins")) return value;
+  if (timeStr.includes("hours")) return value * 60;
+  if (timeStr.includes("days")) return value * 60 * 24;
   return 0;
 }
 

@@ -168,9 +168,7 @@ const AdminDashboard: React.FC = () => {
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">
-              {metrics.slaCompliance}%
-            </div>
+            <div className="text-2xl font-bold">{metrics.slaCompliance}%</div>
             <div className="text-sm text-purple-200">SLA Compliance</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
@@ -321,7 +319,10 @@ const AdminDashboard: React.FC = () => {
                     </ResponsiveContainer>
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       {complaintsByType.map((item, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
                           <div
                             className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: item.color }}
@@ -360,7 +361,9 @@ const AdminDashboard: React.FC = () => {
                     >
                       {getActivityIcon(activity.type)}
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{activity.message}</p>
+                        <p className="text-sm font-medium">
+                          {activity.message}
+                        </p>
                         <p className="text-xs text-gray-500">{activity.time}</p>
                       </div>
                     </div>
@@ -390,7 +393,11 @@ const AdminDashboard: React.FC = () => {
                       <XAxis dataKey="ward" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="complaints" fill="#3B82F6" name="Complaints" />
+                      <Bar
+                        dataKey="complaints"
+                        fill="#3B82F6"
+                        name="Complaints"
+                      />
                       <Bar dataKey="resolved" fill="#10B981" name="Resolved" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -413,7 +420,9 @@ const AdminDashboard: React.FC = () => {
                     {wardPerformance.map((ward, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">{ward.ward}</span>
+                          <span className="text-sm font-medium">
+                            {ward.ward}
+                          </span>
                           <span className="text-sm text-gray-600">
                             {ward.sla}%
                           </span>
@@ -447,11 +456,16 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 24h</span>
                     <span>
-                      {metrics.avgResolutionTime < 1 ? "On target" : "Needs improvement"}
+                      {metrics.avgResolutionTime < 1
+                        ? "On target"
+                        : "Needs improvement"}
                     </span>
                   </div>
                   <Progress
-                    value={Math.min((1 / Math.max(metrics.avgResolutionTime, 0.1)) * 100, 100)}
+                    value={Math.min(
+                      (1 / Math.max(metrics.avgResolutionTime, 0.1)) * 100,
+                      100,
+                    )}
                     className="h-2"
                   />
                 </div>
@@ -492,10 +506,15 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 4.0</span>
                     <span>
-                      {metrics.citizenSatisfaction >= 4.0 ? "Above target" : "Below target"}
+                      {metrics.citizenSatisfaction >= 4.0
+                        ? "Above target"
+                        : "Below target"}
                     </span>
                   </div>
-                  <Progress value={(metrics.citizenSatisfaction / 5) * 100} className="h-2" />
+                  <Progress
+                    value={(metrics.citizenSatisfaction / 5) * 100}
+                    className="h-2"
+                  />
                 </div>
               </CardContent>
             </Card>
