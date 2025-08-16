@@ -520,8 +520,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const resolvedWithDates = await prisma.complaint.findMany({
     where: {
       status: 'RESOLVED',
-      resolvedOn: { not: null },
-      submittedOn: { not: null }
+      resolvedOn: { not: null }
     },
     select: {
       submittedOn: true,
