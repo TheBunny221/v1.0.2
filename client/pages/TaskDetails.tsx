@@ -284,8 +284,10 @@ const TaskDetails: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Assigned By</p>
                 <p className="text-gray-600">
-                  {typeof task.submittedBy === 'object' && task.submittedBy
-                    ? task.submittedBy.fullName || task.submittedBy.name || 'Unknown'
+                  {typeof task.submittedBy === "object" && task.submittedBy
+                    ? task.submittedBy.fullName ||
+                      task.submittedBy.name ||
+                      "Unknown"
                     : task.submittedBy}
                 </p>
               </div>

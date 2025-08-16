@@ -74,7 +74,9 @@ const CitizenDashboard: React.FC = () => {
     refetch: refetchStats,
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
-  const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints)
+    ? complaintsResponse.data.complaints
+    : [];
   const pagination = complaintsResponse?.data?.pagination || {
     currentPage: 1,
     totalPages: 1,
@@ -208,7 +210,7 @@ const CitizenDashboard: React.FC = () => {
 
   const getComplaintTypeLabel = (type: string) => {
     // Convert type to readable format
-    return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    return type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const isResolved = (status: string) => {
