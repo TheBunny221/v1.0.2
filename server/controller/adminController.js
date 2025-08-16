@@ -543,7 +543,9 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
     where: {
-      rating: { not: null }
+      rating: {
+        not: null
+      }
     },
     _avg: {
       rating: true
