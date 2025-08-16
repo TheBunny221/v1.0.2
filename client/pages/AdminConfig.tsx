@@ -1240,13 +1240,33 @@ const AdminConfig: React.FC = () => {
                 {systemSettings.map((setting) => (
                   <div key={setting.key} className="border rounded-lg p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-medium">{setting.key}</h3>
                         <p className="text-sm text-gray-600">
                           {setting.description}
                         </p>
                       </div>
-                      <Badge variant="secondary">{setting.type}</Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary">{setting.type}</Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingSetting(setting);
+                            setIsSettingDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteSystemSetting(setting.key)}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="mt-3">
                       {setting.type === "boolean" ? (
