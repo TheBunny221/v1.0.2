@@ -110,6 +110,8 @@ const AdminConfig: React.FC = () => {
   const [dataLoading, setDataLoading] = useState(true);
   const [isWardDialogOpen, setIsWardDialogOpen] = useState(false);
   const [isComplaintTypeDialogOpen, setIsComplaintTypeDialogOpen] = useState(false);
+  const [isSettingDialogOpen, setIsSettingDialogOpen] = useState(false);
+  const [editingSetting, setEditingSetting] = useState<SystemSetting | null>(null);
 
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -424,6 +426,84 @@ const AdminConfig: React.FC = () => {
         showErrorToast(
           "Update Failed",
           error.message || "Failed to update system setting. Please try again."
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveSystemSetting = async (setting: SystemSetting) => {
+    setIsLoading(true);
+    try {
+      const settingData = {
+        key: setting.key,
+        value: setting.value,
+        description: setting.description,
+        type: setting.type,
+      };
+
+      let response;
+      const existingSetting = systemSettings.find(s => s.key === setting.key);
+
+      if (existingSetting) {
+        // Update existing setting
+        response = await apiCall(`/system-config/${setting.key}`, {
+          method: "PUT",
+          body: JSON.stringify({ value: setting.value, description: setting.description }),
+        });
+        setSystemSettings((prev) =>
+          prev.map((s) => (s.key === setting.key ? { ...setting, ...response.data } : s))
+        );
+      } else {
+        // Create new setting
+        response = await apiCall("/system-config", {
+          method: "POST",
+          body: JSON.stringify(settingData),
+        });
+        setSystemSettings((prev) => [...prev, response.data]);
+      }
+
+      setEditingSetting(null);
+      setIsSettingDialogOpen(false);
+      dispatch(
+        showSuccessToast(
+          "Setting Saved",
+          `System setting "${setting.key}" has been saved successfully.`
+        )
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save system setting. Please try again."
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSystemSetting = async (key: string) => {
+    if (!confirm("Are you sure you want to delete this system setting?"))
+      return;
+
+    setIsLoading(true);
+    try {
+      await apiCall(`/system-config/${key}`, { method: "DELETE" });
+      setSystemSettings((prev) => prev.filter((s) => s.key !== key));
+
+      dispatch(
+        showSuccessToast(
+          "Setting Deleted",
+          "System setting has been deleted successfully."
+        )
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Delete Failed",
+          error.message || "Failed to delete system setting. Please try again."
         )
       );
     } finally {
