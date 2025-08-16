@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { createComplaint, ComplaintType, Priority } from "../store/slices/complaintsSlice";
+import {
+  createComplaint,
+  ComplaintType,
+  Priority,
+} from "../store/slices/complaintsSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -30,16 +34,11 @@ import {
   Phone,
   Mail,
   User,
-  AlertCircle,
   CheckCircle,
   Clock,
   BarChart3,
   Shield,
-  Home,
-  Settings,
-  Globe,
-  TrendingUp,
-  Users,
+  AlertCircle,
   Zap,
   Wrench,
   Droplets,
@@ -194,12 +193,15 @@ const Index: React.FC = () => {
         landmark: formData.location,
         address: formData.address,
         contactName: isAuthenticated && user ? user.fullName : "Guest",
-        contactEmail: formData.email || (isAuthenticated && user ? user.email : ""),
+        contactEmail:
+          formData.email || (isAuthenticated && user ? user.email : ""),
         contactPhone: formData.mobile,
         isAnonymous: !isAuthenticated,
       };
 
-      const result = await dispatch(createComplaint(complaintDataForAPI)).unwrap();
+      const result = await dispatch(
+        createComplaint(complaintDataForAPI),
+      ).unwrap();
 
       dispatch(
         showSuccessToast(
@@ -289,7 +291,7 @@ const Index: React.FC = () => {
                 variant="outline"
               >
                 <FileText className="mr-2 h-5 w-5" />
-                Quick Form
+                {translations?.forms?.quickForm || "Quick Form"}
               </Button>
 
               {!isAuthenticated ? (
@@ -669,324 +671,150 @@ const Index: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Stats */}
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span>
-                    {translations?.dashboard?.statistics || "System Statistics"}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>
-                      Total Complaints
-                      :
-                    </span>
-                    <span className="font-semibold">12,456</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      Resolved This Month
-                      :
-                    </span>
-                    <span className="font-semibold text-green-600">1,234</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      Average Resolution:
-                    </span>
-                    <span className="font-semibold">
-                      3.2 {translations?.common?.date || "days"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      Success Rate
-                      :
-                    </span>
-                    <span className="font-semibold text-blue-600">94.2%</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Phone className="h-5 w-5 text-green-500" />
+                <span>
+                  {translations?.guest?.supportContact ||
+                    "Need Help? Contact Us"}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Phone className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {translations?.guest?.supportContact || "Helpline"}
+                    </div>
+                    <div className="text-sm text-gray-600">1800-XXX-XXXX</div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center space-x-3">
+                  <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {translations?.auth?.email || "Email Support"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      support@cochinsmartcity.in
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Clock className="h-5 w-5 text-orange-500 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {translations?.common?.time || "Office Hours"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Monday - Friday: 9 AM - 6 PM
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <MapPin className="h-5 w-5 text-purple-500 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {translations?.complaints?.location || "Office Location"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Cochin Corporation Office
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <AlertCircle className="h-5 w-5 text-blue-500" />
-                  <span>
-                    {translations?.dashboard?.quickActions || "Quick Actions"}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button asChild className="w-full justify-start">
-                    <Link to="/complaint">
-                      <FileText className="mr-2 h-4 w-4" />
+          {/* Service Features */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <span>
+                  {translations?.features?.keyFeatures || "Key Features"}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {translations?.complaints?.trackStatus || "Track Status"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {currentLanguage === "hi"
+                        ? "वास्तविक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
+                        : currentLanguage === "ml"
+                          ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
+                          : "Monitor complaint progress in real time with instant updates"}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
                       {translations?.complaints?.registerComplaint ||
-                        "Submit New Complaint"}
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <Link to="/guest/track">
-                      <Clock className="mr-2 h-4 w-4" />
-                      {translations?.nav?.trackStatus ||
-                        "Track Existing Complaint"}
-                    </Link>
-                  </Button>
-                  {!isAuthenticated && (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="w-full justify-start"
-                    >
-                      <Link to="/register">
-                        <User className="mr-2 h-4 w-4" />
-                        {translations?.auth?.register || "Create Account"}
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-orange-500" />
-                  <span>
-                    {translations?.dashboard?.trends ||
-                      "Popular Complaint Types"}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      {translations?.complaints?.types?.Water_Supply ||
-                        "Water Supply Issues"}
-                    </span>
-                    <span className="text-gray-500">23%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      {translations?.complaints?.types?.Road_Repair ||
-                        "Road Repairs"}
-                    </span>
-                    <span className="text-gray-500">19%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      {translations?.complaints?.types?.Electricity ||
-                        "Electricity Problems"}
-                    </span>
-                    <span className="text-gray-500">15%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      {translations?.complaints?.types?.Garbage_Collection ||
-                        "Garbage Collection"}
-                    </span>
-                    <span className="text-gray-500">12%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      {translations?.complaints?.types?.Others ||
-                        "Other Issues"}
-                    </span>
-                    <span className="text-gray-500">31%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Phone className="h-5 w-5 text-green-500" />
-                  <span>
-                    {translations?.guest?.supportContact ||
-                      "Contact Information"}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      {translations?.guest?.supportContact || "Helpline"}:
-                      1800-XXX-XXXX
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm">support@cochinsmartcity.in</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm">
-                      Office Hours
-                      : 9 AM - 6 PM
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm">Cochin Corporation Office</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* User Status Sidebar */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {isAuthenticated
-                    ? `${translations?.guest?.welcomeBack || "Welcome"}, ${user?.fullName || "User"}`
-                    : `${translations?.guest?.welcomeBack || "Welcome"}, Guest`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="text-sm text-gray-600">
-                      <span>{translations?.auth?.role || "Role"}: </span>
-                      <Badge variant="outline">
-                        {user?.role?.replace("_", " ") || "User"}
-                      </Badge>
+                        "Quick Complaint Registration"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      <span>{translations?.complaints?.ward || "Ward"}: </span>
-                      <span className="font-medium">
-                        {user?.ward?.name ||
-                          "Not assigned"}
-                      </span>
-                    </div>
-                    <div className="space-y-2 pt-2">
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/complaints">
-                          {translations?.nav?.myComplaints || "My Complaints"}
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/dashboard">
-                          {translations?.nav?.dashboard || "Dashboard"}
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/profile">
-                          Profile
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600">
-                      {translations?.guest?.guestSubmissionDescription ||
-                        "Submit complaints as a guest or login for enhanced features and tracking."}
-                    </p>
-                    <div className="space-y-2">
-                      <Button asChild className="w-full">
-                        <Link to="/login">
-                          {translations?.nav?.login || "Login"}
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/register">
-                          {translations?.auth?.register || "Create Account"}
-                        </Link>
-                      </Button>
-                      <Separator className="my-3" />
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/complaint">
-                          {translations?.guest?.guestSubmission ||
-                            "Submit Complaint"}
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/guest/track">
-                          {translations?.nav?.trackStatus || "Track Status"}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Service Features */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {translations?.dashboard?.quickActions || "Key Features"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <div>
-                      <div className="font-medium">
-                        {translations?.nav?.trackStatus || "Real-time Tracking"}
-                      </div>
-                      <div className="text-gray-600">
-                        Monitor complaint progress
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <div>
-                      <div className="font-medium">
-                        {translations?.common?.upload || "Photo Upload"}
-                      </div>
-                      <div className="text-gray-600">
-                        {translations?.complaints?.files ||
-                          "Attach evidence and images"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <div>
-                      <div className="font-medium">
-                        {translations?.auth?.emailAlerts || "SMS/Email Alerts"}
-                      </div>
-                      <div className="text-gray-600">
-                        {translations?.auth?.notifications ||
-                          "Get update notifications"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <div>
-                      <div className="font-medium">
-                        {translations?.auth?.language || "Multi-language"}
-                      </div>
-                      <div className="text-gray-600">{`Available in local languages (${currentLanguage.toUpperCase()})`}</div>
+                      {currentLanguage === "hi"
+                        ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे लॉग करें"
+                        : currentLanguage === "ml"
+                          ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ രേഖപ്പെടുത്തുക"
+                          : "Log issues in under a minute with type, photo, and location"}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {currentLanguage === "hi"
+                        ? "ईमेल अलर्ट"
+                        : currentLanguage === "ml"
+                          ? "ഇമെയിൽ അലേർട്ടുകൾ"
+                          : "Email Alerts"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {currentLanguage === "hi"
+                        ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
+                        : currentLanguage === "ml"
+                          ? "രജിസ്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
+                          : "Get notified at each stage — from registration to resolution"}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">
+                      {currentLanguage === "hi"
+                        ? "बहुभाषी सहायता"
+                        : currentLanguage === "ml"
+                          ? "ബഹുഭാഷാ പിന്തുണ"
+                          : "Multilingual Support"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {currentLanguage === "hi"
+                        ? "अंग्रेजी, मलयालम और हिंदी में उपलब्ध"
+                        : currentLanguage === "ml"
+                          ? "ഇംഗ്ലീഷ്, മലയാളം, ഹിന്ദി എന്നിവയിൽ ലഭ്യമാണ്"
+                          : "Available in English, Malayalam, and Hindi"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

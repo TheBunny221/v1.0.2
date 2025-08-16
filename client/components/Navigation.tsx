@@ -176,17 +176,37 @@ const Navigation: React.FC = () => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
                 <Shield className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-xl font-bold text-gray-900 hidden sm:inline">
                   Cochin Smart City
+                </span>
+                <span className="text-lg font-bold text-gray-900 sm:hidden">
+                  CSC
                 </span>
               </Link>
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* Mobile menu button for unauthenticated users */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Desktop Navigation for unauthenticated users */}
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Globe className="h-4 w-4 mr-2" />
-                    {currentLanguage.toUpperCase()}
+                    <Globe className="h-4 w-4 mr-1 lg:mr-2" />
+                    <span className="hidden lg:inline">
+                      {currentLanguage.toUpperCase()}
+                    </span>
+                    <span className="lg:hidden">{currentLanguage}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -197,21 +217,105 @@ const Navigation: React.FC = () => {
                     हिंदी
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
-                    മലയാളം
+                    മלയാളം
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link to="/login">
-                <Button variant="outline">{translations.nav.login}</Button>
-              </Link>
               <Link to="/complaint">
-                <Button variant="outline">Submit Complaint</Button>
+                <Button variant="outline" size="sm">
+                  <span className="hidden lg:inline">
+                    {translations?.complaints?.registerComplaint ||
+                      "Register Complaint"}
+                  </span>
+                  <span className="lg:hidden">Complaint</span>
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button variant="outline" size="sm">
+                  <span className="hidden lg:inline">
+                    {translations.nav.login}
+                  </span>
+                  <span className="lg:hidden">Login</span>
+                </Button>
               </Link>
               <Link to="/register">
-                <Button>{translations.nav.register}</Button>
+                <Button size="sm">
+                  <span className="hidden lg:inline">
+                    {translations?.auth?.signUp ||
+                      translations.nav.register ||
+                      "Sign Up"}
+                  </span>
+                  <span className="lg:hidden">Sign Up</span>
+                </Button>
               </Link>
             </div>
           </div>
+
+          {/* Mobile Navigation Menu for unauthenticated users */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 bg-white">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center mb-3"
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      {currentLanguage.toUpperCase()}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange("en")}
+                    >
+                      English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange("hi")}
+                    >
+                      हिंदी
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange("ml")}
+                    >
+                      മലयാळം
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Link
+                  to="/complaint"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
+                    {translations?.complaints?.registerComplaint ||
+                      "Register Complaint"}
+                  </Button>
+                </Link>
+                <Link
+                  to="/login"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
+                    {translations.nav.login}
+                  </Button>
+                </Link>
+                <Link
+                  to="/register"
+                  className="block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button className="w-full">
+                    {translations?.auth?.signUp ||
+                      translations.nav.register ||
+                      "Sign Up"}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
     );
@@ -224,8 +328,11 @@ const Navigation: React.FC = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Shield className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900 hidden sm:inline">
                 Cochin Smart City
+              </span>
+              <span className="text-lg font-bold text-gray-900 sm:hidden">
+                CSC
               </span>
             </Link>
           </div>
@@ -271,7 +378,7 @@ const Navigation: React.FC = () => {
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -321,8 +428,11 @@ const Navigation: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <Globe className="h-4 w-4 mr-2" />
-                  {currentLanguage.toUpperCase()}
+                  <Globe className="h-4 w-4 mr-1 lg:mr-2" />
+                  <span className="hidden lg:inline">
+                    {currentLanguage.toUpperCase()}
+                  </span>
+                  <span className="lg:hidden">{currentLanguage}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -341,14 +451,18 @@ const Navigation: React.FC = () => {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2"
+                  size="sm"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar} />
                     <AvatarFallback>
                       {user?.fullName?.charAt(0)?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden md:block text-left">
+                  <div className="hidden lg:block text-left">
                     <p className="text-sm font-medium">{user?.fullName}</p>
                     <Badge
                       className={`text-xs ${getRoleColor(user?.role || "")}`}
@@ -415,6 +529,84 @@ const Navigation: React.FC = () => {
               </Link>
             ))}
 
+            {/* Mobile utility menu items */}
+            <div className="border-t border-gray-200 pt-3 space-y-1">
+              {/* Mobile Language Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                    <div className="flex items-center space-x-3">
+                      <Globe className="h-4 w-4" />
+                      <span>Language: {currentLanguage.toUpperCase()}</span>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                    हिंदी
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                    മലയാളം
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Mobile Notifications */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <Bell className="h-4 w-4" />
+                        {getUnreadNotificationCount() > 0 && (
+                          <Badge
+                            variant="destructive"
+                            className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
+                          >
+                            {getUnreadNotificationCount()}
+                          </Badge>
+                        )}
+                      </div>
+                      <span>
+                        {translations?.auth?.notifications || "Notifications"}
+                      </span>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <div className="p-2">
+                    <h3 className="font-semibold text-sm mb-2">
+                      {translations?.auth?.notifications || "Notifications"}
+                    </h3>
+                    {notifications.length === 0 ? (
+                      <p className="text-sm text-gray-500">
+                        {translations?.common?.noData || "No notifications"}
+                      </p>
+                    ) : (
+                      notifications.slice(0, 5).map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-2 rounded-md mb-2 ${
+                            notification.isRead ? "bg-gray-50" : "bg-blue-50"
+                          }`}
+                        >
+                          <p className="text-sm font-medium">
+                            {notification.title}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {notification.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
             {/* Mobile user menu items */}
             <div className="border-t border-gray-200 pt-3">
               <Link
@@ -424,7 +616,7 @@ const Navigation: React.FC = () => {
               >
                 <div className="flex items-center space-x-3">
                   <User className="h-4 w-4" />
-                  <span>{translations.nav.profile}</span>
+                  <span>{translations?.nav?.profile || "Profile"}</span>
                 </div>
               </Link>
               <Link
