@@ -475,7 +475,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
       strftime('%Y-%m', createdAt) as month,
       COUNT(*) as complaints,
       COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
-    FROM Complaint
+    FROM complaints
     WHERE createdAt >= datetime('now', '-6 months')
     GROUP BY strftime('%Y-%m', createdAt)
     ORDER BY month ASC
@@ -503,8 +503,8 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
         NULLIF(COUNT(c.id), 0),
         2
       ) as sla
-    FROM Ward w
-    LEFT JOIN Complaint c ON w.id = c.wardId
+    FROM wards w
+    LEFT JOIN complaints c ON w.id = c.wardId
     WHERE w.isActive = 1
     GROUP BY w.id, w.name
     ORDER BY w.name
