@@ -1112,10 +1112,128 @@ const AdminConfig: React.FC = () => {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="h-5 w-5 mr-2" />
-                System Settings
-              </CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  System Settings
+                </CardTitle>
+                <Dialog open={isSettingDialogOpen} onOpenChange={setIsSettingDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      onClick={() => {
+                        setEditingSetting({
+                          key: "",
+                          value: "",
+                          description: "",
+                          type: "string",
+                        });
+                        setIsSettingDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Setting
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingSetting?.key && systemSettings.find(s => s.key === editingSetting.key) ? "Edit System Setting" : "Add New System Setting"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    {editingSetting && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="settingKey">Setting Key</Label>
+                          <Input
+                            id="settingKey"
+                            value={editingSetting.key}
+                            onChange={(e) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                key: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
+                              })
+                            }
+                            placeholder="SETTING_KEY"
+                            disabled={!!systemSettings.find(s => s.key === editingSetting.key)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="settingValue">Value</Label>
+                          <Input
+                            id="settingValue"
+                            value={editingSetting.value}
+                            onChange={(e) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                value: e.target.value,
+                              })
+                            }
+                            placeholder="Setting value"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="settingDescription">Description</Label>
+                          <Textarea
+                            id="settingDescription"
+                            value={editingSetting.description}
+                            onChange={(e) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                description: e.target.value,
+                              })
+                            }
+                            placeholder="Setting description"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="settingType">Type</Label>
+                          <Select
+                            value={editingSetting.type}
+                            onValueChange={(value: "string" | "number" | "boolean" | "json") =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                type: value,
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="string">String</SelectItem>
+                              <SelectItem value="number">Number</SelectItem>
+                              <SelectItem value="boolean">Boolean</SelectItem>
+                              <SelectItem value="json">JSON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setEditingSetting(null);
+                              setIsSettingDialogOpen(false);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={() => handleSaveSystemSetting(editingSetting)}
+                            disabled={isLoading || !editingSetting.key || !editingSetting.value}
+                          >
+                            {isLoading ? (
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
