@@ -410,11 +410,11 @@ export const getAnalytics = asyncHandler(async (req, res) => {
 
   // Get monthly trends
   const monthlyTrends = await prisma.$queryRaw`
-    SELECT 
+    SELECT
       strftime('%Y-%m', createdAt) as month,
       COUNT(*) as count,
       status
-    FROM Complaint
+    FROM complaints
     WHERE createdAt >= datetime('now', '-12 months')
     GROUP BY month, status
     ORDER BY month DESC
