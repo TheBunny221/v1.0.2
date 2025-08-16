@@ -101,6 +101,48 @@ export interface ManageRolesRequest {
   wardId?: string;
 }
 
+export interface DashboardAnalyticsResponse {
+  complaintTrends: Array<{
+    month: string;
+    complaints: number;
+    resolved: number;
+  }>;
+  complaintsByType: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+  wardPerformance: Array<{
+    ward: string;
+    complaints: number;
+    resolved: number;
+    sla: number;
+  }>;
+  metrics: {
+    avgResolutionTime: number;
+    slaCompliance: number;
+    citizenSatisfaction: number;
+    resolutionRate: number;
+  };
+}
+
+export interface RecentActivity {
+  id: string;
+  type: string;
+  message: string;
+  time: string;
+}
+
+export interface DashboardStatsResponse {
+  totalComplaints: number;
+  totalUsers: number;
+  activeComplaints: number;
+  resolvedComplaints: number;
+  overdue: number;
+  wardOfficers: number;
+  maintenanceTeam: number;
+}
+
 // Admin API slice
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -246,6 +288,35 @@ export const adminApi = baseApi.injectEndpoints({
       transformResponse: transformResponse<AdminUser>,
       invalidatesTags: ["User"],
     }),
+
+    // Get dashboard analytics
+    getDashboardAnalytics: builder.query<
+      ApiResponse<DashboardAnalyticsResponse>,
+      void
+    >({
+      query: () => "/admin/dashboard/analytics",
+      transformResponse: transformResponse<DashboardAnalyticsResponse>,
+      providesTags: ["Analytics"],
+    }),
+
+    // Get recent activity
+    getRecentActivity: builder.query<
+      ApiResponse<RecentActivity[]>,
+      { limit?: number }
+    >({
+      query: ({ limit = 5 }) => `/admin/dashboard/activity?limit=${limit}`,
+      transformResponse: transformResponse<RecentActivity[]>,
+      providesTags: ["Analytics"],
+    }),
+
+    // Get dashboard statistics
+    getDashboardStats: builder.query<ApiResponse<DashboardStatsResponse>, void>(
+      {
+        query: () => "/admin/dashboard/stats",
+        transformResponse: transformResponse<DashboardStatsResponse>,
+        providesTags: ["Analytics"],
+      },
+    ),
   }),
 });
 
@@ -263,6 +334,9 @@ export const {
   useGetSystemStatsQuery,
   useGetAnalyticsQuery,
   useManageRolesMutation,
+  useGetDashboardAnalyticsQuery,
+  useGetRecentActivityQuery,
+  useGetDashboardStatsQuery,
 } = adminApi;
 
 // Re-export for convenience
@@ -279,4 +353,7 @@ export const useAdminApi = {
   useGetSystemStatsQuery,
   useGetAnalyticsQuery,
   useManageRolesMutation,
+  useGetDashboardAnalyticsQuery,
+  useGetRecentActivityQuery,
+  useGetDashboardStatsQuery,
 };

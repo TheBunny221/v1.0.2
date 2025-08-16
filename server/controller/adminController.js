@@ -410,11 +410,11 @@ export const getAnalytics = asyncHandler(async (req, res) => {
 
   // Get monthly trends
   const monthlyTrends = await prisma.$queryRaw`
-    SELECT 
+    SELECT
       strftime('%Y-%m', createdAt) as month,
       COUNT(*) as count,
       status
-    FROM Complaint
+    FROM complaints
     WHERE createdAt >= datetime('now', '-12 months')
     GROUP BY month, status
     ORDER BY month DESC
@@ -460,6 +460,359 @@ export const manageRoles = asyncHandler(async (req, res) => {
     data: user,
   });
 });
+
+// @desc    Get dashboard analytics data
+// @route   GET /api/admin/dashboard/analytics
+// @access  Private (Admin only)
+export const getDashboardAnalytics = asyncHandler(async (req, res) => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+
+  // Get complaint trends for last 6 months
+  const complaintTrends = await prisma.$queryRaw`
+    SELECT
+      strftime('%Y-%m', createdAt) as month,
+      COUNT(*) as complaints,
+      COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
+    FROM complaints
+    WHERE createdAt >= datetime('now', '-6 months')
+    GROUP BY strftime('%Y-%m', createdAt)
+    ORDER BY month ASC
+  `;
+
+  // Get complaints by type
+  const complaintsByType = await prisma.complaint.groupBy({
+    by: ["type"],
+    _count: true,
+    orderBy: {
+      _count: {
+        type: "desc",
+      },
+    },
+  });
+
+  // Get ward performance
+  const wardPerformance = await prisma.$queryRaw`
+    SELECT
+      w.name as ward,
+      COUNT(c.id) as complaints,
+      COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) as resolved,
+      ROUND(
+        (COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) * 100.0) /
+        NULLIF(COUNT(c.id), 0),
+        2
+      ) as sla
+    FROM wards w
+    LEFT JOIN complaints c ON w.id = c.wardId
+    WHERE w.isActive = 1
+    GROUP BY w.id, w.name
+    ORDER BY w.name
+  `;
+
+  // Calculate averages and metrics
+  const totalComplaints = await prisma.complaint.count();
+  const resolvedComplaints = await prisma.complaint.count({
+    where: { status: "RESOLVED" },
+  });
+
+  // Calculate average resolution time (in days)
+  const resolvedWithDates = await prisma.complaint.findMany({
+    where: {
+      status: "RESOLVED",
+    },
+    select: {
+      submittedOn: true,
+      resolvedOn: true,
+    },
+  });
+
+  const validResolutions = resolvedWithDates.filter(
+    (c) => c.resolvedOn && c.submittedOn,
+  );
+  const avgResolutionTime =
+    validResolutions.length > 0
+      ? validResolutions.reduce((acc, complaint) => {
+          const resolutionTime =
+            (new Date(complaint.resolvedOn) - new Date(complaint.submittedOn)) /
+            (1000 * 60 * 60 * 24);
+          return acc + resolutionTime;
+        }, 0) / validResolutions.length
+      : 0;
+
+  // Calculate SLA compliance percentage
+  const slaCompliance =
+    totalComplaints > 0
+      ? Math.round((resolvedComplaints / totalComplaints) * 100)
+      : 0;
+
+  // Get citizen satisfaction (average rating)
+  const satisfactionResult = await prisma.complaint.aggregate({
+    where: {
+      rating: {
+        gt: 0,
+      },
+    },
+    _avg: {
+      rating: true,
+    },
+  });
+
+  const citizenSatisfaction = satisfactionResult._avg.rating || 0;
+
+  res.status(200).json({
+    success: true,
+    message: "Dashboard analytics retrieved successfully",
+    data: {
+      complaintTrends: complaintTrends.map((trend) => ({
+        month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
+          month: "short",
+        }),
+        complaints: Number(trend.complaints),
+        resolved: Number(trend.resolved),
+      })),
+      complaintsByType: complaintsByType.map((item) => ({
+        name: item.type
+          .replace("_", " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase()),
+        value: item._count,
+        color: getTypeColor(item.type),
+      })),
+      wardPerformance: wardPerformance.map((ward) => ({
+        ward: ward.ward,
+        complaints: Number(ward.complaints),
+        resolved: Number(ward.resolved),
+        sla: Number(ward.sla) || 0,
+      })),
+      metrics: {
+        avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
+        slaCompliance,
+        citizenSatisfaction: Math.round(citizenSatisfaction * 10) / 10,
+        resolutionRate:
+          totalComplaints > 0
+            ? Math.round((resolvedComplaints / totalComplaints) * 100)
+            : 0,
+      },
+    },
+  });
+});
+
+// @desc    Get recent system activity
+// @route   GET /api/admin/dashboard/activity
+// @access  Private (Admin only)
+export const getRecentActivity = asyncHandler(async (req, res) => {
+  const { limit = 5 } = req.query;
+
+  // Get recent complaints
+  const recentComplaints = await prisma.complaint.findMany({
+    take: parseInt(limit),
+    orderBy: { createdAt: "desc" },
+    include: {
+      ward: { select: { name: true } },
+      submittedBy: { select: { fullName: true } },
+    },
+  });
+
+  // Get recent status updates
+  const recentStatusUpdates = await prisma.statusLog.findMany({
+    take: parseInt(limit),
+    orderBy: { timestamp: "desc" },
+    include: {
+      complaint: {
+        select: {
+          id: true,
+          type: true,
+          ward: { select: { name: true } },
+        },
+      },
+      user: { select: { fullName: true, role: true } },
+    },
+  });
+
+  // Get recent user registrations
+  const recentUsers = await prisma.user.findMany({
+    take: parseInt(limit),
+    orderBy: { createdAt: "desc" },
+    where: {
+      role: { in: ["WARD_OFFICER", "MAINTENANCE_TEAM"] },
+    },
+    select: {
+      id: true,
+      fullName: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  // Combine and format activities
+  const activities = [];
+
+  // Add complaint activities
+  recentComplaints.forEach((complaint) => {
+    activities.push({
+      id: `complaint-${complaint.id}`,
+      type: "complaint",
+      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
+      time: formatTimeAgo(complaint.createdAt),
+    });
+  });
+
+  // Add status update activities
+  recentStatusUpdates.forEach((log) => {
+    activities.push({
+      id: `status-${log.id}`,
+      type: getActivityType(log.toStatus),
+      message: getStatusMessage(log.toStatus, log.complaint, log.user),
+      time: formatTimeAgo(log.timestamp),
+    });
+  });
+
+  // Add user registration activities
+  recentUsers.forEach((user) => {
+    activities.push({
+      id: `user-${user.id}`,
+      type: "user",
+      message: `New ${user.role.toLowerCase().replace("_", " ")} registered`,
+      time: formatTimeAgo(user.createdAt),
+    });
+  });
+
+  // Sort by time and limit
+  activities.sort((a, b) => {
+    const timeA = parseTimeAgo(a.time);
+    const timeB = parseTimeAgo(b.time);
+    return timeA - timeB;
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Recent activity retrieved successfully",
+    data: activities.slice(0, parseInt(limit)),
+  });
+});
+
+// @desc    Get enhanced system statistics
+// @route   GET /api/admin/dashboard/stats
+// @access  Private (Admin only)
+export const getDashboardStats = asyncHandler(async (req, res) => {
+  const [userStats, complaintStats] = await Promise.all([
+    // User statistics by role
+    prisma.user.groupBy({
+      by: ["role"],
+      where: { isActive: true },
+      _count: true,
+    }),
+    // Complaint statistics
+    prisma.complaint.groupBy({
+      by: ["status"],
+      _count: true,
+    }),
+  ]);
+
+  const wardOfficers =
+    userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
+  const maintenanceTeam =
+    userStats.find((s) => s.role === "MAINTENANCE_TEAM")?._count || 0;
+  const totalUsers = userStats.reduce((sum, stat) => sum + stat._count, 0);
+
+  const totalComplaints = complaintStats.reduce(
+    (sum, stat) => sum + stat._count,
+    0,
+  );
+  const activeComplaints = complaintStats
+    .filter((s) => ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(s.status))
+    .reduce((sum, stat) => sum + stat._count, 0);
+  const resolvedComplaints =
+    complaintStats.find((s) => s.status === "RESOLVED")?._count || 0;
+
+  // Get overdue complaints
+  const overdueComplaints = await prisma.complaint.count({
+    where: {
+      deadline: { lt: new Date() },
+      status: { notIn: ["RESOLVED", "CLOSED"] },
+    },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Dashboard statistics retrieved successfully",
+    data: {
+      totalComplaints,
+      totalUsers,
+      activeComplaints,
+      resolvedComplaints,
+      overdue: overdueComplaints,
+      wardOfficers,
+      maintenanceTeam,
+    },
+  });
+});
+
+// Helper functions
+function getTypeColor(type) {
+  const colors = {
+    WATER_SUPPLY: "#3B82F6",
+    ELECTRICITY: "#EF4444",
+    ROAD_REPAIR: "#10B981",
+    GARBAGE: "#F59E0B",
+    SEWAGE: "#8B5CF6",
+    STREET_LIGHT: "#F97316",
+  };
+  return colors[type] || "#6B7280";
+}
+
+function getActivityType(status) {
+  switch (status) {
+    case "RESOLVED":
+      return "resolution";
+    case "ASSIGNED":
+      return "assignment";
+    case "IN_PROGRESS":
+      return "progress";
+    default:
+      return "update";
+  }
+}
+
+function getStatusMessage(status, complaint, user) {
+  const type = complaint.type.toLowerCase().replace("_", " ");
+  const ward = complaint.ward?.name || "Unknown Ward";
+
+  switch (status) {
+    case "RESOLVED":
+      return `${type} issue resolved in ${ward}`;
+    case "ASSIGNED":
+      return `Complaint assigned to ${user.role.toLowerCase().replace("_", " ")}`;
+    case "IN_PROGRESS":
+      return `Work started on ${type} complaint in ${ward}`;
+    default:
+      return `Complaint status updated to ${status.toLowerCase()}`;
+  }
+}
+
+function formatTimeAgo(date) {
+  const now = new Date();
+  const diffMs = now - new Date(date);
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 60) {
+    return `${diffMins} mins ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hours ago`;
+  } else {
+    return `${diffDays} days ago`;
+  }
+}
+
+function parseTimeAgo(timeStr) {
+  const value = parseInt(timeStr.split(" ")[0]);
+  if (timeStr.includes("mins")) return value;
+  if (timeStr.includes("hours")) return value * 60;
+  if (timeStr.includes("days")) return value * 60 * 24;
+  return 0;
+}
 
 // Helper function to send password setup email
 async function sendPasswordSetupEmail(user) {

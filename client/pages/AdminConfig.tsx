@@ -12,6 +12,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
+import { Checkbox } from "../components/ui/checkbox";
 import {
   Tabs,
   TabsContent,
@@ -104,9 +105,17 @@ const AdminConfig: React.FC = () => {
   const [complaintTypes, setComplaintTypes] = useState<ComplaintType[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
   const [editingWard, setEditingWard] = useState<Ward | null>(null);
-  const [editingComplaintType, setEditingComplaintType] = useState<ComplaintType | null>(null);
+  const [editingComplaintType, setEditingComplaintType] =
+    useState<ComplaintType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+  const [isWardDialogOpen, setIsWardDialogOpen] = useState(false);
+  const [isComplaintTypeDialogOpen, setIsComplaintTypeDialogOpen] =
+    useState(false);
+  const [isSettingDialogOpen, setIsSettingDialogOpen] = useState(false);
+  const [editingSetting, setEditingSetting] = useState<SystemSetting | null>(
+    null,
+  );
 
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -131,7 +140,7 @@ const AdminConfig: React.FC = () => {
       status: response.status,
       statusText: response.statusText,
       contentType,
-      isJson
+      isJson,
     });
 
     if (!response.ok) {
@@ -144,14 +153,20 @@ const AdminConfig: React.FC = () => {
           console.log(`[AdminConfig] Error response for ${url}:`, error);
         } catch {
           // Failed to parse JSON error response
-          console.log(`[AdminConfig] Failed to parse JSON error response for ${url}`);
+          console.log(
+            `[AdminConfig] Failed to parse JSON error response for ${url}`,
+          );
         }
       } else {
         // Non-JSON response (likely HTML error page)
         const text = await response.text();
-        console.log(`[AdminConfig] Non-JSON error response for ${url}:`, text.substring(0, 200));
+        console.log(
+          `[AdminConfig] Non-JSON error response for ${url}:`,
+          text.substring(0, 200),
+        );
         if (text.includes("<!doctype") || text.includes("<html")) {
-          errorMessage = "Server returned an error page. Please check your authentication and try again.";
+          errorMessage =
+            "Server returned an error page. Please check your authentication and try again.";
         } else {
           errorMessage = text.substring(0, 100) || errorMessage;
         }
@@ -162,14 +177,19 @@ const AdminConfig: React.FC = () => {
 
     if (!isJson) {
       const text = await response.text();
-      console.log(`[AdminConfig] Non-JSON success response for ${url}:`, text.substring(0, 200));
+      console.log(
+        `[AdminConfig] Non-JSON success response for ${url}:`,
+        text.substring(0, 200),
+      );
       throw new Error("Server returned non-JSON response. Expected JSON data.");
     }
 
     const data = await response.json();
     console.log(`[AdminConfig] Success response for ${url}:`, {
       success: data?.success,
-      dataLength: Array.isArray(data?.data) ? data.data.length : typeof data?.data
+      dataLength: Array.isArray(data?.data)
+        ? data.data.length
+        : typeof data?.data,
     });
 
     return data;
@@ -180,7 +200,10 @@ const AdminConfig: React.FC = () => {
     // Check if user is authenticated and has admin role
     if (!user) {
       dispatch(
-        showErrorToast("Authentication Required", "Please log in to access this page.")
+        showErrorToast(
+          "Authentication Required",
+          "Please log in to access this page.",
+        ),
       );
       setDataLoading(false);
       return;
@@ -188,7 +211,10 @@ const AdminConfig: React.FC = () => {
 
     if (user.role !== "ADMINISTRATOR") {
       dispatch(
-        showErrorToast("Access Denied", "Administrator privileges required to access this page.")
+        showErrorToast(
+          "Access Denied",
+          "Administrator privileges required to access this page.",
+        ),
       );
       setDataLoading(false);
       return;
@@ -228,22 +254,30 @@ const AdminConfig: React.FC = () => {
         setSystemSettings(settingsResponse.data || []);
       } catch (error: any) {
         console.error("Failed to load system settings:", error);
-        if (error.message.includes("Not authorized") || error.message.includes("Authentication")) {
+        if (
+          error.message.includes("Not authorized") ||
+          error.message.includes("Authentication")
+        ) {
           // This is expected for non-admin users, don't show error
           setSystemSettings([]);
         } else {
           // Unexpected error, show it
           dispatch(
-            showErrorToast("Settings Load Failed", `Failed to load system settings: ${error.message}`)
+            showErrorToast(
+              "Settings Load Failed",
+              `Failed to load system settings: ${error.message}`,
+            ),
           );
           setSystemSettings([]);
         }
       }
-
     } catch (error: any) {
       console.error("Unexpected error during data loading:", error);
       dispatch(
-        showErrorToast("Load Failed", "An unexpected error occurred while loading data.")
+        showErrorToast(
+          "Load Failed",
+          "An unexpected error occurred while loading data.",
+        ),
       );
     } finally {
       setDataLoading(false);
@@ -268,7 +302,9 @@ const AdminConfig: React.FC = () => {
           body: JSON.stringify(wardData),
         });
         setWards((prev) =>
-          prev.map((w) => (w.id === ward.id ? { ...ward, ...response.data } : w))
+          prev.map((w) =>
+            w.id === ward.id ? { ...ward, ...response.data } : w,
+          ),
         );
       } else {
         // Create new ward
@@ -280,15 +316,19 @@ const AdminConfig: React.FC = () => {
       }
 
       setEditingWard(null);
+      setIsWardDialogOpen(false);
       dispatch(
         showSuccessToast(
           "Ward Saved",
-          `Ward "${ward.name}" has been saved successfully.`
-        )
+          `Ward "${ward.name}" has been saved successfully.`,
+        ),
       );
     } catch (error: any) {
       dispatch(
-        showErrorToast("Save Failed", error.message || "Failed to save ward. Please try again.")
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save ward. Please try again.",
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -304,14 +344,14 @@ const AdminConfig: React.FC = () => {
       setWards((prev) => prev.filter((w) => w.id !== wardId));
 
       dispatch(
-        showSuccessToast("Ward Deleted", "Ward has been deleted successfully.")
+        showSuccessToast("Ward Deleted", "Ward has been deleted successfully."),
       );
     } catch (error: any) {
       dispatch(
         showErrorToast(
           "Delete Failed",
-          error.message || "Failed to delete ward. Please try again."
-        )
+          error.message || "Failed to delete ward. Please try again.",
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -338,7 +378,9 @@ const AdminConfig: React.FC = () => {
           body: JSON.stringify(typeData),
         });
         setComplaintTypes((prev) =>
-          prev.map((t) => (t.id === type.id ? { ...type, ...response.data } : t))
+          prev.map((t) =>
+            t.id === type.id ? { ...type, ...response.data } : t,
+          ),
         );
       } else {
         // Create new type
@@ -350,18 +392,19 @@ const AdminConfig: React.FC = () => {
       }
 
       setEditingComplaintType(null);
+      setIsComplaintTypeDialogOpen(false);
       dispatch(
         showSuccessToast(
           "Complaint Type Saved",
-          `Complaint type "${type.name}" has been saved successfully.`
-        )
+          `Complaint type "${type.name}" has been saved successfully.`,
+        ),
       );
     } catch (error: any) {
       dispatch(
         showErrorToast(
           "Save Failed",
-          error.message || "Failed to save complaint type. Please try again."
-        )
+          error.message || "Failed to save complaint type. Please try again.",
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -380,15 +423,15 @@ const AdminConfig: React.FC = () => {
       dispatch(
         showSuccessToast(
           "Complaint Type Deleted",
-          "Complaint type has been deleted successfully."
-        )
+          "Complaint type has been deleted successfully.",
+        ),
       );
     } catch (error: any) {
       dispatch(
         showErrorToast(
           "Delete Failed",
-          error.message || "Failed to delete complaint type. Please try again."
-        )
+          error.message || "Failed to delete complaint type. Please try again.",
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -405,21 +448,104 @@ const AdminConfig: React.FC = () => {
       });
 
       setSystemSettings((prev) =>
-        prev.map((s) => (s.key === key ? { ...s, value } : s))
+        prev.map((s) => (s.key === key ? { ...s, value } : s)),
       );
 
       dispatch(
         showSuccessToast(
           "Setting Updated",
-          `System setting "${key}" has been updated.`
-        )
+          `System setting "${key}" has been updated.`,
+        ),
       );
     } catch (error: any) {
       dispatch(
         showErrorToast(
           "Update Failed",
-          error.message || "Failed to update system setting. Please try again."
-        )
+          error.message || "Failed to update system setting. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveSystemSetting = async (setting: SystemSetting) => {
+    setIsLoading(true);
+    try {
+      const settingData = {
+        key: setting.key,
+        value: setting.value,
+        description: setting.description,
+        type: setting.type,
+      };
+
+      let response;
+      const existingSetting = systemSettings.find((s) => s.key === setting.key);
+
+      if (existingSetting) {
+        // Update existing setting
+        response = await apiCall(`/system-config/${setting.key}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            value: setting.value,
+            description: setting.description,
+          }),
+        });
+        setSystemSettings((prev) =>
+          prev.map((s) =>
+            s.key === setting.key ? { ...setting, ...response.data } : s,
+          ),
+        );
+      } else {
+        // Create new setting
+        response = await apiCall("/system-config", {
+          method: "POST",
+          body: JSON.stringify(settingData),
+        });
+        setSystemSettings((prev) => [...prev, response.data]);
+      }
+
+      setEditingSetting(null);
+      setIsSettingDialogOpen(false);
+      dispatch(
+        showSuccessToast(
+          "Setting Saved",
+          `System setting "${setting.key}" has been saved successfully.`,
+        ),
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save system setting. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSystemSetting = async (key: string) => {
+    if (!confirm("Are you sure you want to delete this system setting?"))
+      return;
+
+    setIsLoading(true);
+    try {
+      await apiCall(`/system-config/${key}`, { method: "DELETE" });
+      setSystemSettings((prev) => prev.filter((s) => s.key !== key));
+
+      dispatch(
+        showSuccessToast(
+          "Setting Deleted",
+          "System setting has been deleted successfully.",
+        ),
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Delete Failed",
+          error.message || "Failed to delete system setting. Please try again.",
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -446,8 +572,12 @@ const AdminConfig: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
-          <p className="text-gray-600">Please log in to access the system configuration.</p>
+          <h2 className="text-xl font-semibold mb-2">
+            Authentication Required
+          </h2>
+          <p className="text-gray-600">
+            Please log in to access the system configuration.
+          </p>
         </div>
       </div>
     );
@@ -459,7 +589,9 @@ const AdminConfig: React.FC = () => {
         <div className="text-center">
           <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-          <p className="text-gray-600">Administrator privileges required to access this page.</p>
+          <p className="text-gray-600">
+            Administrator privileges required to access this page.
+          </p>
         </div>
       </div>
     );
@@ -503,18 +635,22 @@ const AdminConfig: React.FC = () => {
                   <MapPin className="h-5 w-5 mr-2" />
                   Ward Management
                 </CardTitle>
-                <Dialog>
+                <Dialog
+                  open={isWardDialogOpen}
+                  onOpenChange={setIsWardDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button
-                      onClick={() =>
+                      onClick={() => {
                         setEditingWard({
                           id: "",
                           name: "",
                           description: "",
                           isActive: true,
                           subZones: [],
-                        })
-                      }
+                        });
+                        setIsWardDialogOpen(true);
+                      }}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Ward
@@ -615,17 +751,102 @@ const AdminConfig: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingWard(ward)}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingWard(ward)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Edit Ward</DialogTitle>
+                              </DialogHeader>
+                              {editingWard && editingWard.id === ward.id && (
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="editWardName">
+                                      Ward Name
+                                    </Label>
+                                    <Input
+                                      id="editWardName"
+                                      value={editingWard.name}
+                                      onChange={(e) =>
+                                        setEditingWard({
+                                          ...editingWard,
+                                          name: e.target.value,
+                                        })
+                                      }
+                                      placeholder="Enter ward name"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="editWardDescription">
+                                      Description
+                                    </Label>
+                                    <Textarea
+                                      id="editWardDescription"
+                                      value={editingWard.description}
+                                      onChange={(e) =>
+                                        setEditingWard({
+                                          ...editingWard,
+                                          description: e.target.value,
+                                        })
+                                      }
+                                      placeholder="Enter ward description"
+                                    />
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id="editWardActive"
+                                      checked={editingWard.isActive}
+                                      onCheckedChange={(checked) =>
+                                        setEditingWard({
+                                          ...editingWard,
+                                          isActive: !!checked,
+                                        })
+                                      }
+                                    />
+                                    <Label htmlFor="editWardActive">
+                                      Active
+                                    </Label>
+                                  </div>
+                                  <div className="flex justify-end space-x-2">
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingWard(null);
+                                        setIsWardDialogOpen(false);
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      onClick={() =>
+                                        handleSaveWard(editingWard)
+                                      }
+                                      disabled={isLoading || !editingWard.name}
+                                    >
+                                      {isLoading ? (
+                                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                      ) : (
+                                        <Save className="h-4 w-4 mr-2" />
+                                      )}
+                                      Save
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleDeleteWard(ward.id)}
+                            disabled={isLoading}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -648,10 +869,13 @@ const AdminConfig: React.FC = () => {
                   <FileText className="h-5 w-5 mr-2" />
                   Complaint Type Management
                 </CardTitle>
-                <Dialog>
+                <Dialog
+                  open={isComplaintTypeDialogOpen}
+                  onOpenChange={setIsComplaintTypeDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button
-                      onClick={() =>
+                      onClick={() => {
                         setEditingComplaintType({
                           id: "",
                           name: "",
@@ -659,8 +883,9 @@ const AdminConfig: React.FC = () => {
                           priority: "MEDIUM",
                           slaHours: 48,
                           isActive: true,
-                        })
-                      }
+                        });
+                        setIsComplaintTypeDialogOpen(true);
+                      }}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Type
@@ -709,7 +934,7 @@ const AdminConfig: React.FC = () => {
                           <Select
                             value={editingComplaintType.priority}
                             onValueChange={(
-                              value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+                              value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
                             ) =>
                               setEditingComplaintType({
                                 ...editingComplaintType,
@@ -806,17 +1031,163 @@ const AdminConfig: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingComplaintType(type)}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingComplaintType(type)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Edit Complaint Type</DialogTitle>
+                              </DialogHeader>
+                              {editingComplaintType &&
+                                editingComplaintType.id === type.id && (
+                                  <div className="space-y-4">
+                                    <div>
+                                      <Label htmlFor="editTypeName">
+                                        Type Name
+                                      </Label>
+                                      <Input
+                                        id="editTypeName"
+                                        value={editingComplaintType.name}
+                                        onChange={(e) =>
+                                          setEditingComplaintType({
+                                            ...editingComplaintType,
+                                            name: e.target.value,
+                                          })
+                                        }
+                                        placeholder="Enter complaint type name"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="editTypeDescription">
+                                        Description
+                                      </Label>
+                                      <Textarea
+                                        id="editTypeDescription"
+                                        value={editingComplaintType.description}
+                                        onChange={(e) =>
+                                          setEditingComplaintType({
+                                            ...editingComplaintType,
+                                            description: e.target.value,
+                                          })
+                                        }
+                                        placeholder="Enter type description"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="editPriority">
+                                        Priority
+                                      </Label>
+                                      <Select
+                                        value={editingComplaintType.priority}
+                                        onValueChange={(
+                                          value:
+                                            | "LOW"
+                                            | "MEDIUM"
+                                            | "HIGH"
+                                            | "CRITICAL",
+                                        ) =>
+                                          setEditingComplaintType({
+                                            ...editingComplaintType,
+                                            priority: value,
+                                          })
+                                        }
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="LOW">
+                                            Low
+                                          </SelectItem>
+                                          <SelectItem value="MEDIUM">
+                                            Medium
+                                          </SelectItem>
+                                          <SelectItem value="HIGH">
+                                            High
+                                          </SelectItem>
+                                          <SelectItem value="CRITICAL">
+                                            Critical
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="editSlaHours">
+                                        SLA Hours
+                                      </Label>
+                                      <Input
+                                        id="editSlaHours"
+                                        type="number"
+                                        value={editingComplaintType.slaHours}
+                                        onChange={(e) =>
+                                          setEditingComplaintType({
+                                            ...editingComplaintType,
+                                            slaHours: parseInt(e.target.value),
+                                          })
+                                        }
+                                        placeholder="Enter SLA hours"
+                                      />
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        id="editTypeActive"
+                                        checked={editingComplaintType.isActive}
+                                        onCheckedChange={(checked) =>
+                                          setEditingComplaintType({
+                                            ...editingComplaintType,
+                                            isActive: !!checked,
+                                          })
+                                        }
+                                      />
+                                      <Label htmlFor="editTypeActive">
+                                        Active
+                                      </Label>
+                                    </div>
+                                    <div className="flex justify-end space-x-2">
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                          setEditingComplaintType(null);
+                                          setIsComplaintTypeDialogOpen(false);
+                                        }}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        onClick={() =>
+                                          handleSaveComplaintType(
+                                            editingComplaintType,
+                                          )
+                                        }
+                                        disabled={
+                                          isLoading ||
+                                          !editingComplaintType.name
+                                        }
+                                      >
+                                        {isLoading ? (
+                                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                        ) : (
+                                          <Save className="h-4 w-4 mr-2" />
+                                        )}
+                                        Save
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+                            </DialogContent>
+                          </Dialog>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleDeleteComplaintType(type.id)}
+                            disabled={isLoading}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -834,23 +1205,183 @@ const AdminConfig: React.FC = () => {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="h-5 w-5 mr-2" />
-                System Settings
-              </CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  System Settings
+                </CardTitle>
+                <Dialog
+                  open={isSettingDialogOpen}
+                  onOpenChange={setIsSettingDialogOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button
+                      onClick={() => {
+                        setEditingSetting({
+                          key: "",
+                          value: "",
+                          description: "",
+                          type: "string",
+                        });
+                        setIsSettingDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Setting
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingSetting?.key &&
+                        systemSettings.find((s) => s.key === editingSetting.key)
+                          ? "Edit System Setting"
+                          : "Add New System Setting"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    {editingSetting && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="settingKey">Setting Key</Label>
+                          <Input
+                            id="settingKey"
+                            value={editingSetting.key}
+                            onChange={(e) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                key: e.target.value
+                                  .toUpperCase()
+                                  .replace(/[^A-Z0-9_]/g, "_"),
+                              })
+                            }
+                            placeholder="SETTING_KEY"
+                            disabled={
+                              !!systemSettings.find(
+                                (s) => s.key === editingSetting.key,
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="settingValue">Value</Label>
+                          <Input
+                            id="settingValue"
+                            value={editingSetting.value}
+                            onChange={(e) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                value: e.target.value,
+                              })
+                            }
+                            placeholder="Setting value"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="settingDescription">
+                            Description
+                          </Label>
+                          <Textarea
+                            id="settingDescription"
+                            value={editingSetting.description}
+                            onChange={(e) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                description: e.target.value,
+                              })
+                            }
+                            placeholder="Setting description"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="settingType">Type</Label>
+                          <Select
+                            value={editingSetting.type}
+                            onValueChange={(
+                              value: "string" | "number" | "boolean" | "json",
+                            ) =>
+                              setEditingSetting({
+                                ...editingSetting,
+                                type: value,
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="string">String</SelectItem>
+                              <SelectItem value="number">Number</SelectItem>
+                              <SelectItem value="boolean">Boolean</SelectItem>
+                              <SelectItem value="json">JSON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setEditingSetting(null);
+                              setIsSettingDialogOpen(false);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              handleSaveSystemSetting(editingSetting)
+                            }
+                            disabled={
+                              isLoading ||
+                              !editingSetting.key ||
+                              !editingSetting.value
+                            }
+                          >
+                            {isLoading ? (
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {systemSettings.map((setting) => (
                   <div key={setting.key} className="border rounded-lg p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-medium">{setting.key}</h3>
                         <p className="text-sm text-gray-600">
                           {setting.description}
                         </p>
                       </div>
-                      <Badge variant="secondary">{setting.type}</Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary">{setting.type}</Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingSetting(setting);
+                            setIsSettingDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteSystemSetting(setting.key)}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="mt-3">
                       {setting.type === "boolean" ? (
@@ -874,7 +1405,7 @@ const AdminConfig: React.FC = () => {
                           onChange={(e) =>
                             handleUpdateSystemSetting(
                               setting.key,
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder="Enter JSON value"
@@ -887,7 +1418,7 @@ const AdminConfig: React.FC = () => {
                           onChange={(e) =>
                             handleUpdateSystemSetting(
                               setting.key,
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder={`Enter ${setting.type} value`}

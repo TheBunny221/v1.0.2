@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { fetchComplaints } from "../store/slices/complaintsSlice";
 import {
+  useGetDashboardAnalyticsQuery,
+  useGetRecentActivityQuery,
+  useGetDashboardStatsQuery,
+} from "../store/api/adminApi";
+import {
   Card,
   CardContent,
   CardHeader,
@@ -52,106 +57,71 @@ import {
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
 
-  const [systemStats, setSystemStats] = useState({
+  // Fetch real-time data using API queries
+  const {
+    data: dashboardStats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useGetDashboardStatsQuery();
+
+  const {
+    data: analyticsData,
+    isLoading: analyticsLoading,
+    error: analyticsError,
+  } = useGetDashboardAnalyticsQuery();
+
+  const {
+    data: recentActivityData,
+    isLoading: activityLoading,
+    error: activityError,
+  } = useGetRecentActivityQuery({ limit: 5 });
+
+  const systemStats = dashboardStats?.data || {
     totalComplaints: 0,
     totalUsers: 0,
     activeComplaints: 0,
     resolvedComplaints: 0,
     overdue: 0,
-    slaCompliance: 87,
-    avgResolutionTime: 2.3,
-    citizenSatisfaction: 4.2,
-    wardOfficers: 12,
-    maintenanceTeam: 28,
-  });
+    wardOfficers: 0,
+    maintenanceTeam: 0,
+  };
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
+  const analytics = analyticsData?.data;
+  const recentActivity = recentActivityData?.data || [];
+  const isLoading = statsLoading || analyticsLoading || activityLoading;
 
-  useEffect(() => {
-    // Calculate system statistics
-    const totalComplaints = complaints.length;
-    const activeComplaints = complaints.filter((c) =>
-      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(c.status),
-    ).length;
-    const resolvedComplaints = complaints.filter(
-      (c) => c.status === "RESOLVED",
-    ).length;
-    const overdue = complaints.filter((c) => {
-      if (!c.deadline) return false;
-      return new Date(c.deadline) < new Date() && c.status !== "RESOLVED";
-    }).length;
+  // Use real data from APIs with fallbacks
+  const complaintTrends = analytics?.complaintTrends || [];
+  const complaintsByType = analytics?.complaintsByType || [];
+  const wardPerformance = analytics?.wardPerformance || [];
+  const metrics = analytics?.metrics || {
+    avgResolutionTime: 0,
+    slaCompliance: 0,
+    citizenSatisfaction: 0,
+    resolutionRate: 0,
+  };
 
-    setSystemStats((prev) => ({
-      ...prev,
-      totalComplaints,
-      activeComplaints,
-      resolvedComplaints,
-      overdue,
-    }));
-  }, [complaints]);
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg">Loading dashboard data...</div>
+      </div>
+    );
+  }
 
-  // Mock data for charts
-  const complaintTrends = [
-    { month: "Jan", complaints: 45, resolved: 40 },
-    { month: "Feb", complaints: 52, resolved: 48 },
-    { month: "Mar", complaints: 61, resolved: 55 },
-    { month: "Apr", complaints: 38, resolved: 42 },
-    { month: "May", complaints: 67, resolved: 61 },
-    { month: "Jun", complaints: 74, resolved: 69 },
-  ];
-
-  const complaintsByType = [
-    { name: "Water Supply", value: 35, color: "#3B82F6" },
-    { name: "Electricity", value: 28, color: "#EF4444" },
-    { name: "Road Repair", value: 22, color: "#10B981" },
-    { name: "Garbage", value: 15, color: "#F59E0B" },
-  ];
-
-  const wardPerformance = [
-    { ward: "Ward 1", complaints: 45, resolved: 42, sla: 93 },
-    { ward: "Ward 2", complaints: 38, resolved: 35, sla: 92 },
-    { ward: "Ward 3", complaints: 52, resolved: 46, sla: 88 },
-    { ward: "Ward 4", complaints: 29, resolved: 28, sla: 97 },
-    { ward: "Ward 5", complaints: 41, resolved: 37, sla: 90 },
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: "complaint",
-      message: "New complaint registered in Ward 3",
-      time: "2 mins ago",
-    },
-    {
-      id: 2,
-      type: "resolution",
-      message: "Water supply issue resolved in Ward 1",
-      time: "15 mins ago",
-    },
-    {
-      id: 3,
-      type: "assignment",
-      message: "Complaint assigned to maintenance team",
-      time: "1 hour ago",
-    },
-    {
-      id: 4,
-      type: "user",
-      message: "New ward officer registered",
-      time: "2 hours ago",
-    },
-    {
-      id: 5,
-      type: "alert",
-      message: "SLA breach alert for Ward 3",
-      time: "3 hours ago",
-    },
-  ];
+  // Show error state
+  if (statsError || analyticsError || activityError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-red-600">
+          Error loading dashboard data. Please try refreshing the page.
+        </div>
+      </div>
+    );
+  }
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -198,14 +168,12 @@ const AdminDashboard: React.FC = () => {
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">
-              {systemStats.slaCompliance}%
-            </div>
+            <div className="text-2xl font-bold">{metrics.slaCompliance}%</div>
             <div className="text-sm text-purple-200">SLA Compliance</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
             <div className="text-2xl font-bold">
-              {systemStats.citizenSatisfaction}/5
+              {metrics.citizenSatisfaction}/5
             </div>
             <div className="text-sm text-purple-200">Satisfaction</div>
           </div>
@@ -267,7 +235,7 @@ const AdminDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {systemStats.avgResolutionTime}d
+              {metrics.avgResolutionTime}d
             </div>
             <p className="text-xs text-muted-foreground">Target: 3 days</p>
           </CardContent>
@@ -292,26 +260,34 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaint Trends (Last 6 Months)</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={complaintTrends}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="complaints"
-                      stroke="#3B82F6"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="resolved"
-                      stroke="#10B981"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {complaintTrends.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={complaintTrends}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="complaints"
+                        stroke="#3B82F6"
+                        strokeWidth={2}
+                        name="Complaints"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="resolved"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        name="Resolved"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No complaint trend data available
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -321,37 +297,48 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaints by Type</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={complaintsByType}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {complaintsByType.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                {complaintsByType.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={complaintsByType}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {complaintsByType.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [value, "Count"]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {complaintsByType.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          ></div>
+                          <span className="text-sm">
+                            {item.name} ({item.value})
+                          </span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {complaintsByType.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      ></div>
-                      <span className="text-sm">
-                        {item.name} ({item.value}%)
-                      </span>
                     </div>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No complaint type data available
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -365,20 +352,28 @@ const AdminDashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
-                  >
-                    {getActivityIcon(activity.type)}
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{activity.message}</p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
+              {recentActivity.length > 0 ? (
+                <div className="space-y-4">
+                  {recentActivity.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                    >
+                      {getActivityIcon(activity.type)}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">
+                          {activity.message}
+                        </p>
+                        <p className="text-xs text-gray-500">{activity.time}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-gray-500">
+                  No recent activity available
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -391,16 +386,26 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Ward Performance Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={wardPerformance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="ward" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="complaints" fill="#3B82F6" />
-                    <Bar dataKey="resolved" fill="#10B981" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {wardPerformance.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={wardPerformance}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="ward" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar
+                        dataKey="complaints"
+                        fill="#3B82F6"
+                        name="Complaints"
+                      />
+                      <Bar dataKey="resolved" fill="#10B981" name="Resolved" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No ward performance data available
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -410,19 +415,27 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>SLA Compliance by Ward</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {wardPerformance.map((ward, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{ward.ward}</span>
-                        <span className="text-sm text-gray-600">
-                          {ward.sla}%
-                        </span>
+                {wardPerformance.length > 0 ? (
+                  <div className="space-y-4">
+                    {wardPerformance.map((ward, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">
+                            {ward.ward}
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            {ward.sla}%
+                          </span>
+                        </div>
+                        <Progress value={ward.sla} className="h-2" />
                       </div>
-                      <Progress value={ward.sla} className="h-2" />
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-gray-500">
+                    No ward performance data available
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -435,14 +448,26 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Response Time</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">2.1h</div>
-                <p className="text-sm text-gray-600">Average first response</p>
+                <div className="text-3xl font-bold text-blue-600">
+                  {(metrics.avgResolutionTime * 24).toFixed(1)}h
+                </div>
+                <p className="text-sm text-gray-600">Average response time</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Target: 4h</span>
-                    <span>52% improvement</span>
+                    <span>Target: 24h</span>
+                    <span>
+                      {metrics.avgResolutionTime < 1
+                        ? "On target"
+                        : "Needs improvement"}
+                    </span>
                   </div>
-                  <Progress value={88} className="h-2" />
+                  <Progress
+                    value={Math.min(
+                      (1 / Math.max(metrics.avgResolutionTime, 0.1)) * 100,
+                      100,
+                    )}
+                    className="h-2"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -452,14 +477,18 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Resolution Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">94.2%</div>
+                <div className="text-3xl font-bold text-green-600">
+                  {metrics.resolutionRate}%
+                </div>
                 <p className="text-sm text-gray-600">Complaints resolved</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>This month</span>
-                    <span>+5.2%</span>
+                    <span>Resolution rate</span>
+                    <span>
+                      {metrics.resolutionRate >= 90 ? "Excellent" : "Good"}
+                    </span>
                   </div>
-                  <Progress value={94} className="h-2" />
+                  <Progress value={metrics.resolutionRate} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -469,14 +498,23 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Satisfaction Score</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-yellow-600">4.2/5</div>
+                <div className="text-3xl font-bold text-yellow-600">
+                  {metrics.citizenSatisfaction}/5
+                </div>
                 <p className="text-sm text-gray-600">Citizen feedback</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 4.0</span>
-                    <span>Above target</span>
+                    <span>
+                      {metrics.citizenSatisfaction >= 4.0
+                        ? "Above target"
+                        : "Below target"}
+                    </span>
                   </div>
-                  <Progress value={84} className="h-2" />
+                  <Progress
+                    value={(metrics.citizenSatisfaction / 5) * 100}
+                    className="h-2"
+                  />
                 </div>
               </CardContent>
             </Card>

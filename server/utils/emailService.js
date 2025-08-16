@@ -22,16 +22,7 @@ const createTransporter = () => {
       "Email transporter created for development:",
       process.env.EMAIL_SERVICE,
     );
-    
-  return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE,
-      port: process.env.EMAIL_PORT || 587,
-      secure: false, // true if using port 465
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+  
     // return nodemailer.createTransport({
     //   host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
     //   port: parseInt(process.env.EMAIL_PORT) || 587,
