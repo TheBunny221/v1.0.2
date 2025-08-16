@@ -108,6 +108,8 @@ const AdminConfig: React.FC = () => {
   const [editingComplaintType, setEditingComplaintType] = useState<ComplaintType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+  const [isWardDialogOpen, setIsWardDialogOpen] = useState(false);
+  const [isComplaintTypeDialogOpen, setIsComplaintTypeDialogOpen] = useState(false);
 
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -281,6 +283,7 @@ const AdminConfig: React.FC = () => {
       }
 
       setEditingWard(null);
+      setIsWardDialogOpen(false);
       dispatch(
         showSuccessToast(
           "Ward Saved",
@@ -351,6 +354,7 @@ const AdminConfig: React.FC = () => {
       }
 
       setEditingComplaintType(null);
+      setIsComplaintTypeDialogOpen(false);
       dispatch(
         showSuccessToast(
           "Complaint Type Saved",
@@ -504,18 +508,19 @@ const AdminConfig: React.FC = () => {
                   <MapPin className="h-5 w-5 mr-2" />
                   Ward Management
                 </CardTitle>
-                <Dialog>
+                <Dialog open={isWardDialogOpen} onOpenChange={setIsWardDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
-                      onClick={() =>
+                      onClick={() => {
                         setEditingWard({
                           id: "",
                           name: "",
                           description: "",
                           isActive: true,
                           subZones: [],
-                        })
-                      }
+                        });
+                        setIsWardDialogOpen(true);
+                      }}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Ward
@@ -676,7 +681,10 @@ const AdminConfig: React.FC = () => {
                                   <div className="flex justify-end space-x-2">
                                     <Button
                                       variant="outline"
-                                      onClick={() => setEditingWard(null)}
+                                      onClick={() => {
+                                        setEditingWard(null);
+                                        setIsWardDialogOpen(false);
+                                      }}
                                     >
                                       Cancel
                                     </Button>
@@ -723,10 +731,10 @@ const AdminConfig: React.FC = () => {
                   <FileText className="h-5 w-5 mr-2" />
                   Complaint Type Management
                 </CardTitle>
-                <Dialog>
+                <Dialog open={isComplaintTypeDialogOpen} onOpenChange={setIsComplaintTypeDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
-                      onClick={() =>
+                      onClick={() => {
                         setEditingComplaintType({
                           id: "",
                           name: "",
@@ -734,8 +742,9 @@ const AdminConfig: React.FC = () => {
                           priority: "MEDIUM",
                           slaHours: 48,
                           isActive: true,
-                        })
-                      }
+                        });
+                        setIsComplaintTypeDialogOpen(true);
+                      }}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Type
@@ -978,7 +987,10 @@ const AdminConfig: React.FC = () => {
                                   <div className="flex justify-end space-x-2">
                                     <Button
                                       variant="outline"
-                                      onClick={() => setEditingComplaintType(null)}
+                                      onClick={() => {
+                                        setEditingComplaintType(null);
+                                        setIsComplaintTypeDialogOpen(false);
+                                      }}
                                     >
                                       Cancel
                                     </Button>
