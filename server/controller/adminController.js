@@ -519,8 +519,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   // Calculate average resolution time (in days)
   const resolvedWithDates = await prisma.complaint.findMany({
     where: {
-      status: 'RESOLVED',
-      resolvedOn: { not: null }
+      status: 'RESOLVED'
     },
     select: {
       submittedOn: true,
@@ -528,11 +527,12 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     }
   });
 
-  const avgResolutionTime = resolvedWithDates.length > 0
-    ? resolvedWithDates.reduce((acc, complaint) => {
+  const validResolutions = resolvedWithDates.filter(c => c.resolvedOn && c.submittedOn);
+  const avgResolutionTime = validResolutions.length > 0
+    ? validResolutions.reduce((acc, complaint) => {
         const resolutionTime = (new Date(complaint.resolvedOn) - new Date(complaint.submittedOn)) / (1000 * 60 * 60 * 24);
         return acc + resolutionTime;
-      }, 0) / resolvedWithDates.length
+      }, 0) / validResolutions.length
     : 0;
 
   // Calculate SLA compliance percentage
@@ -544,7 +544,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const satisfactionResult = await prisma.complaint.aggregate({
     where: {
       rating: {
-        not: null
+        gt: 0
       }
     },
     _avg: {
