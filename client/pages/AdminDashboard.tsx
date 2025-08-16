@@ -262,26 +262,34 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaint Trends (Last 6 Months)</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={complaintTrends}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="complaints"
-                      stroke="#3B82F6"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="resolved"
-                      stroke="#10B981"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {complaintTrends.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={complaintTrends}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="complaints"
+                        stroke="#3B82F6"
+                        strokeWidth={2}
+                        name="Complaints"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="resolved"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        name="Resolved"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No complaint trend data available
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -291,37 +299,45 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaints by Type</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={complaintsByType}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {complaintsByType.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                {complaintsByType.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={complaintsByType}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {complaintsByType.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [value, "Count"]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {complaintsByType.map((item, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          ></div>
+                          <span className="text-sm">
+                            {item.name} ({item.value})
+                          </span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {complaintsByType.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      ></div>
-                      <span className="text-sm">
-                        {item.name} ({item.value}%)
-                      </span>
                     </div>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No complaint type data available
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -361,16 +377,22 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Ward Performance Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={wardPerformance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="ward" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="complaints" fill="#3B82F6" />
-                    <Bar dataKey="resolved" fill="#10B981" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {wardPerformance.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={wardPerformance}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="ward" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="complaints" fill="#3B82F6" name="Complaints" />
+                      <Bar dataKey="resolved" fill="#10B981" name="Resolved" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No ward performance data available
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -380,19 +402,25 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>SLA Compliance by Ward</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {wardPerformance.map((ward, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{ward.ward}</span>
-                        <span className="text-sm text-gray-600">
-                          {ward.sla}%
-                        </span>
+                {wardPerformance.length > 0 ? (
+                  <div className="space-y-4">
+                    {wardPerformance.map((ward, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">{ward.ward}</span>
+                          <span className="text-sm text-gray-600">
+                            {ward.sla}%
+                          </span>
+                        </div>
+                        <Progress value={ward.sla} className="h-2" />
                       </div>
-                      <Progress value={ward.sla} className="h-2" />
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-gray-500">
+                    No ward performance data available
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
