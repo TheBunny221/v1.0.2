@@ -436,7 +436,11 @@ const ComplaintDetails: React.FC = () => {
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm font-medium">Assigned To</p>
-                  <p className="text-gray-600">{complaint.assignedTo}</p>
+                  <p className="text-gray-600">
+                    {typeof complaint.assignedTo === 'object' && complaint.assignedTo
+                      ? complaint.assignedTo.fullName
+                      : complaint.assignedTo}
+                  </p>
                 </div>
                 {complaint.deadline && (
                   <div>
