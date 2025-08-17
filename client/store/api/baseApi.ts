@@ -7,28 +7,29 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Robust base query that handles all edge cases properly
+// Create the base query once to avoid response body conflicts
+const baseQuery = fetchBaseQuery({
+  baseUrl: '/api/',
+  prepareHeaders: (headers) => {
+    // Get token from localStorage directly for consistency
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      headers.set('authorization', `Bearer ${token}`);
+    }
+
+    return headers;
+  },
+  timeout: 30000,
+});
+
+// Enhanced base query with authentication handling
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Use the built-in fetchBaseQuery for each request to avoid response body conflicts
-  const baseQuery = fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers) => {
-      const state = api.getState() as any;
-      const token = state.auth.token || localStorage.getItem("token");
-
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
-      }
-
-      return headers;
-    },
-    timeout: 30000,
-  });
-
+  // Make the initial request
   let result = await baseQuery(args, api, extraOptions);
 
   // Handle 401 unauthorized responses
@@ -40,10 +41,12 @@ const baseQueryWithReauth: BaseQueryFn<
       (endpoint.includes("auth/login") ||
         endpoint.includes("auth/register") ||
         endpoint.includes("auth/verify-otp") ||
-        endpoint.includes("auth/login-otp"));
+        endpoint.includes("auth/login-otp") ||
+        endpoint.includes("auth/set-password"));
 
     if (!isAuthEndpoint) {
-      // Clear auth state
+      // Clear auth state and localStorage
+      localStorage.removeItem("token");
       api.dispatch(logout());
 
       // Show toast notification
