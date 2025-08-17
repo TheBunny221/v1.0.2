@@ -188,6 +188,7 @@ const CitizenComplaintForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { user, isAuthenticated } = useAppSelector(selectAuth);
+  const { complaintTypeOptions, isLoading: complaintTypesLoading } = useComplaintTypes();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
