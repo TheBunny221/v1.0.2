@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   createComplaint,
   ComplaintType,
@@ -753,7 +754,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "वास्���व��क समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
+                        ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
                         : currentLanguage === "ml"
                           ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
                           : "Monitor complaint progress in real time with instant updates"}
