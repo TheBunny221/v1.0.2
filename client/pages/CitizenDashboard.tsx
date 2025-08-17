@@ -74,9 +74,23 @@ const CitizenDashboard: React.FC = () => {
     refetch: refetchStats,
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
+  // Debug: Log raw API responses
+  console.log('Raw API responses:', {
+    complaintsResponse,
+    statsResponse,
+    complaintsResponseKeys: complaintsResponse ? Object.keys(complaintsResponse) : null,
+    statsResponseKeys: statsResponse ? Object.keys(statsResponse) : null
+  });
+
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
     ? complaintsResponse.data.complaints
+    : Array.isArray(complaintsResponse?.data)
+    ? complaintsResponse.data
+    : Array.isArray(complaintsResponse)
+    ? complaintsResponse
     : [];
+
+  console.log('Extracted complaints:', complaints);
   const pagination = complaintsResponse?.data?.pagination || {
     currentPage: 1,
     totalPages: 1,
