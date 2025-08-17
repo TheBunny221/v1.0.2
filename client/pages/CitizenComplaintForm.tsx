@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import { selectAuth } from "../store/slices/authSlice";
 import { useToast } from "../hooks/use-toast";
 import { useUploadComplaintAttachmentMutation, useCreateComplaintMutation } from "../store/api/complaintsApi";
