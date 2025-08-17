@@ -39,6 +39,7 @@ import {
   EyeOff,
   Lock,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 
 const Profile: React.FC = () => {
@@ -668,7 +669,7 @@ const Profile: React.FC = () => {
               >
                 {isChangingPassword ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     {!user?.hasPassword ? "Setting Up..." : "Changing..."}
                   </div>
                 ) : (
