@@ -29,6 +29,9 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const { appName } = useSystemConfig();
 
+  // Set document title
+  useDocumentTitle();
+
   // Get token from localStorage and check Redux state
   const token = localStorage.getItem("token");
   const hasValidToken = token && token !== "null" && token !== "undefined";
