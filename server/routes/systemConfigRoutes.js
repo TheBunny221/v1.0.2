@@ -15,6 +15,9 @@ import { handleValidationErrors } from "../middleware/validation.js";
 
 const router = express.Router();
 
+// Public route (no authentication required)
+router.get("/public", getPublicSystemSettings);
+
 // Validation middleware for system settings
 const validateSystemSetting = [
   body("key")
