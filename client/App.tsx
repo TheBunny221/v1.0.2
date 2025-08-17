@@ -13,6 +13,7 @@ import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
 import Navigation from "./components/Navigation";
 import OtpProvider from "./contexts/OtpContext";
+import { SystemConfigProvider } from "./contexts/SystemConfigContext";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
 import { Loader2 } from "lucide-react";
