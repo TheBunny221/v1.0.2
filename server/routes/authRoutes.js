@@ -251,7 +251,7 @@ router.post("/register", validateRegistration, register);
  *       401:
  *         description: Authentication failed
  */
-router.post("/login", validateLogin, login);
+router.post("/login", authLimiter, validateLogin, login);
 /**
  * @swagger
  * /api/auth/login-otp:
