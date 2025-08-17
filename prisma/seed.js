@@ -510,7 +510,7 @@ async function main() {
       });
     }
 
-    // 8. Create Sample Notifications
+    // 9. Create Sample Notifications
     console.log("🔔 Creating sample notifications...");
     for (const citizen of citizens.slice(0, 3)) {
       await prisma.notification.create({
