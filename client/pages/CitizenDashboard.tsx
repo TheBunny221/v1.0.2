@@ -144,6 +144,14 @@ const CitizenDashboard: React.FC = () => {
 
   // Fetch complaints when user is available or filters change
   useEffect(() => {
+    // Debug: Log the actual data we're receiving
+    console.log('Dashboard data debug:', {
+      statsResponse: statsResponse?.data,
+      complaintsCount: complaints.length,
+      complaintStatuses: complaints.map(c => c.status),
+      complaintsData: complaints.slice(0, 2) // Log first 2 complaints for inspection
+    });
+
     // Calculate dashboard statistics from complaints or use stats API
     if (statsResponse?.data) {
       // Use API stats if available
@@ -153,6 +161,8 @@ const CitizenDashboard: React.FC = () => {
       const inProgress = stats.byStatus?.in_progress || stats.byStatus?.IN_PROGRESS || 0;
       const resolved = stats.byStatus?.resolved || stats.byStatus?.RESOLVED || 0;
       const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+      console.log('Using API stats:', { total, pending, inProgress, resolved, resolutionRate });
 
       setDashboardStats({
         total,
@@ -175,6 +185,8 @@ const CitizenDashboard: React.FC = () => {
         (c) => c.status === "resolved" || c.status === "RESOLVED" || c.status === "closed" || c.status === "CLOSED",
       ).length;
       const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+      console.log('Using fallback calculation:', { total, pending, inProgress, resolved, resolutionRate });
 
       setDashboardStats({
         total,
