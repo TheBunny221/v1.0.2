@@ -345,7 +345,9 @@ const CitizenComplaintForm: React.FC = () => {
       };
 
       const complaintResponse = await createComplaint(complaintData).unwrap();
-      const complaintId = complaintResponse.data.complaint.id;
+      const complaint = complaintResponse.data.complaint;
+      const complaintId = complaint.id;
+      const displayId = complaint.complaintId || complaintId.slice(-6).toUpperCase();
 
       // Upload attachments if any
       if (formData.attachments && formData.attachments.length > 0) {
