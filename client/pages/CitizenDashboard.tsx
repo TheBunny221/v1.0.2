@@ -191,6 +191,13 @@ const CitizenDashboard: React.FC = () => {
     } else {
       // Calculate from complaints list as fallback
       const total = complaints.length;
+
+      console.log('Fallback calculation - analyzing complaints:', complaints.map(c => ({
+        id: c.id,
+        status: c.status,
+        type: typeof c.status
+      })));
+
       const pending = complaints.filter(
         (c) => c.status === "registered" || c.status === "REGISTERED",
       ).length;
