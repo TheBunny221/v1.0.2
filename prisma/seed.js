@@ -328,8 +328,13 @@ async function main() {
         priorities[Math.floor(Math.random() * priorities.length)];
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
+      // Generate complaint ID
+      const complaintNumber = (i + 1).toString().padStart(4, '0');
+      const complaintId = `KSC${complaintNumber}`;
+
       const complaint = await prisma.complaint.create({
         data: {
+          complaintId: complaintId,
           title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
           description: `Sample complaint regarding ${complaintType.toLowerCase().replace("_", " ")} issue that needs immediate attention.`,
           type: complaintType,
