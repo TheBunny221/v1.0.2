@@ -22,14 +22,60 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
   }
 };
 
-// Helper function to generate complaint ID
-const generateComplaintId = () => {
-  const prefix = "CSC";
-  const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 1000)
-    .toString()
-    .padStart(3, "0");
-  return `${prefix}${timestamp}${random}`;
+// Helper function to generate complaint ID with configurable prefix and sequential numbering
+const generateComplaintId = async () => {
+  try {
+    // Get complaint ID configuration from system settings
+    const config = await prisma.systemConfig.findMany({
+      where: {
+        key: {
+          in: ['COMPLAINT_ID_PREFIX', 'COMPLAINT_ID_START_NUMBER', 'COMPLAINT_ID_LENGTH']
+        }
+      }
+    });
+
+    const settings = config.reduce((acc, setting) => {
+      acc[setting.key] = setting.value;
+      return acc;
+    }, {});
+
+    const prefix = settings.COMPLAINT_ID_PREFIX || 'KSC';
+    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || '1');
+    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || '4');
+
+    // Get the last complaint ID to determine next number
+    const lastComplaint = await prisma.complaint.findFirst({
+      where: {
+        complaintId: {
+          startsWith: prefix
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        complaintId: true
+      }
+    });
+
+    let nextNumber = startNumber;
+    if (lastComplaint && lastComplaint.complaintId) {
+      // Extract number from last complaint ID
+      const lastNumber = parseInt(lastComplaint.complaintId.replace(prefix, ''));
+      if (!isNaN(lastNumber)) {
+        nextNumber = lastNumber + 1;
+      }
+    }
+
+    // Format the number with leading zeros
+    const formattedNumber = nextNumber.toString().padStart(idLength, '0');
+    return `${prefix}${formattedNumber}`;
+  } catch (error) {
+    console.error('Error generating complaint ID:', error);
+    // Fallback to default format
+    const timestamp = Date.now().toString().slice(-6);
+    return `KSC${timestamp}`;
+  }
 };
 
 // @desc    Create a new complaint
@@ -65,8 +111,12 @@ export const createComplaint = asyncHandler(async (req, res) => {
     Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
   );
 
+  // Generate unique complaint ID
+  const complaintId = await generateComplaintId();
+
   const complaint = await prisma.complaint.create({
     data: {
+      complaintId,
       title: title || `${type} complaint`,
       description,
       type,
