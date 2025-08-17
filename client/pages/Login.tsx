@@ -42,6 +42,9 @@ const Login: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { appName, appLogoUrl } = useSystemConfig();
 
+  // Set document title
+  useDocumentTitle("Login");
+
   const { isLoading, error, isAuthenticated, user } =
     useAppSelector(selectAuth);
   const requiresPasswordSetup = useAppSelector(selectRequiresPasswordSetup);
