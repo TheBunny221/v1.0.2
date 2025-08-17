@@ -365,7 +365,7 @@ const CitizenComplaintForm: React.FC = () => {
 
       toast({
         title: "Complaint Submitted Successfully!",
-        description: `Your complaint has been registered with ID: ${complaintId.slice(-6).toUpperCase()}. You will receive updates via email and in-app notifications.`,
+        description: `Your complaint has been registered with ID: ${displayId}. You will receive updates via email and in-app notifications.`,
       });
 
       navigate("/complaints");
