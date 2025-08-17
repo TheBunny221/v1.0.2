@@ -23,6 +23,7 @@ const SetPassword: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
+  const { appName } = useSystemConfig();
 
   const { error, isAuthenticated } = useAppSelector(selectAuth);
   const [setPasswordMutation, { isLoading }] = useSetPasswordMutation();
