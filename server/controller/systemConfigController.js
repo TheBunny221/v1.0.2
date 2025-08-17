@@ -344,6 +344,61 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get public system settings (non-sensitive settings only)
+// @route   GET /api/system-config/public
+// @access  Public
+export const getPublicSystemSettings = asyncHandler(async (req, res) => {
+  // Only return non-sensitive settings
+  const publicKeys = [
+    'APP_NAME',
+    'APP_LOGO_URL',
+    'COMPLAINT_ID_PREFIX',
+    'MAX_FILE_SIZE_MB',
+    'CITIZEN_REGISTRATION_ENABLED',
+    'SYSTEM_MAINTENANCE',
+  ];
+
+  const settings = await prisma.systemConfig.findMany({
+    where: {
+      key: {
+        in: publicKeys,
+      },
+      isActive: true,
+    },
+    orderBy: {
+      key: "asc",
+    },
+  });
+
+  // Transform data to match frontend interface
+  const transformedSettings = settings.map((setting) => {
+    let type = "string";
+    let value = setting.value;
+
+    // Determine type based on value
+    if (value === "true" || value === "false") {
+      type = "boolean";
+    } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+      type = "number";
+    } else if (value.startsWith("{") || value.startsWith("[")) {
+      type = "json";
+    }
+
+    return {
+      key: setting.key,
+      value: setting.value,
+      description: setting.description,
+      type: type,
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Public system settings retrieved successfully",
+    data: transformedSettings,
+  });
+});
+
 // @desc    Get system health check
 // @route   GET /api/system-config/health
 // @access  Private (Admin only)
