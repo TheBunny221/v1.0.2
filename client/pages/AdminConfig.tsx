@@ -258,15 +258,7 @@ const AdminConfig: React.FC = () => {
         setWards([]);
       }
 
-      // Load complaint types (public endpoint)
-      let typesResponse;
-      try {
-        typesResponse = await apiCall("/complaint-types");
-        setComplaintTypes(typesResponse.data || []);
-      } catch (error: any) {
-        console.error("Failed to load complaint types:", error);
-        setComplaintTypes([]);
-      }
+      // Complaint types are loaded via RTK Query hooks
 
       // Load system settings (admin-only endpoint)
       let settingsResponse;
