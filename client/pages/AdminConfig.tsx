@@ -486,25 +486,15 @@ const AdminConfig: React.FC = () => {
         isActive: type.isActive,
       };
 
-      let response;
       if (type.id && type.id !== "") {
         // Update existing type
-        response = await apiCall(`/complaint-types/${type.id}`, {
-          method: "PUT",
-          body: JSON.stringify(typeData),
-        });
-        setComplaintTypes((prev) =>
-          prev.map((t) =>
-            t.id === type.id ? { ...type, ...response.data } : t,
-          ),
-        );
+        await updateComplaintType({
+          id: type.id,
+          data: typeData,
+        }).unwrap();
       } else {
         // Create new type
-        response = await apiCall("/complaint-types", {
-          method: "POST",
-          body: JSON.stringify(typeData),
-        });
-        setComplaintTypes((prev) => [...prev, response.data]);
+        await createComplaintType(typeData).unwrap();
       }
 
       setEditingComplaintType(null);
@@ -533,8 +523,7 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await apiCall(`/complaint-types/${typeId}`, { method: "DELETE" });
-      setComplaintTypes((prev) => prev.filter((t) => t.id !== typeId));
+      await deleteComplaintType(typeId).unwrap();
 
       dispatch(
         showSuccessToast(
