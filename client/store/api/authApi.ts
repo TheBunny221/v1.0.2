@@ -118,7 +118,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<LoginResponse>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -132,7 +132,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
     }),
 
     // Send password setup email
@@ -145,7 +145,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
     }),
 
     // Set password
@@ -158,7 +158,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: { password },
       }),
-      transformResponse: transformResponse<LoginResponse>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -189,7 +189,7 @@ export const authApi = baseApi.injectEndpoints({
     // Get current user
     getCurrentUser: builder.query<ApiResponse<{ user: User }>, void>({
       query: () => "/auth/me",
-      transformResponse: transformResponse<{ user: User }>,
+      // Let RTK Query handle response naturally
       providesTags: ["Auth"],
     }),
 
@@ -203,7 +203,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<{ user: User }>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth", "User"],
       // Optimistic update
       onQueryStarted: async (patch, { dispatch, queryFulfilled, getState }) => {
@@ -229,7 +229,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -239,7 +239,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/refresh",
         method: "POST",
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
   }),
