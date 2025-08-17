@@ -36,7 +36,7 @@ const baseQueryWithReauth: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const endpoint = typeof args === "string" ? args : args.url;
-
+  
   try {
     // Make the initial request
     let result = await baseQuery(args, api, extraOptions);
@@ -64,7 +64,7 @@ const baseQueryWithReauth: BaseQueryFn<
 
       if (!isAuthEndpoint) {
         console.log("Session expired, logging out user");
-
+        
         // Clear auth state and localStorage
         localStorage.removeItem("token");
         api.dispatch(logout());
@@ -85,7 +85,7 @@ const baseQueryWithReauth: BaseQueryFn<
     return result;
   } catch (error) {
     console.error(`API Error for ${endpoint}:`, error);
-
+    
     // Return a proper error response if something goes wrong
     return {
       error: {
