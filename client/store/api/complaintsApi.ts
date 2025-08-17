@@ -306,7 +306,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         });
         return `/complaints/stats?${searchParams.toString()}`;
       },
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       providesTags: ["Analytics"],
     }),
   }),
