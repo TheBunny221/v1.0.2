@@ -148,23 +148,33 @@ const CitizenDashboard: React.FC = () => {
     if (statsResponse?.data) {
       // Use API stats if available
       const stats = statsResponse.data;
+      const total = stats.total || 0;
+      const pending = stats.byStatus?.registered || stats.byStatus?.REGISTERED || 0;
+      const inProgress = stats.byStatus?.in_progress || stats.byStatus?.IN_PROGRESS || 0;
+      const resolved = stats.byStatus?.resolved || stats.byStatus?.RESOLVED || 0;
+      const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
       setDashboardStats({
-        total: stats.total,
-        pending: stats.byStatus?.REGISTERED || 0,
-        inProgress: stats.byStatus?.IN_PROGRESS || 0,
-        resolved: stats.byStatus?.RESOLVED || 0,
+        total,
+        pending,
+        inProgress,
+        resolved,
         avgResolutionTime: stats.avgResolutionTime || 0,
+        resolutionRate,
       });
     } else {
       // Calculate from complaints list as fallback
       const total = complaints.length;
       const pending = complaints.filter(
-        (c) => c.status === "REGISTERED",
+        (c) => c.status === "registered" || c.status === "REGISTERED",
       ).length;
       const inProgress = complaints.filter(
-        (c) => c.status === "IN_PROGRESS",
+        (c) => c.status === "in_progress" || c.status === "IN_PROGRESS",
       ).length;
-      const resolved = complaints.filter((c) => c.status === "RESOLVED").length;
+      const resolved = complaints.filter(
+        (c) => c.status === "resolved" || c.status === "RESOLVED" || c.status === "closed" || c.status === "CLOSED",
+      ).length;
+      const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
       setDashboardStats({
         total,
@@ -172,6 +182,7 @@ const CitizenDashboard: React.FC = () => {
         inProgress,
         resolved,
         avgResolutionTime: 0, // Will be calculated by backend stats API
+        resolutionRate,
       });
     }
   }, [complaints, statsResponse]);
