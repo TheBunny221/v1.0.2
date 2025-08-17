@@ -11,6 +11,8 @@ import {
 import { Shield, AlertTriangle, Home, LogIn } from "lucide-react";
 
 const Unauthorized: React.FC = () => {
+  const { appName } = useSystemConfig();
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
