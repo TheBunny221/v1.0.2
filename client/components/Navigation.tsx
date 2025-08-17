@@ -59,6 +59,7 @@ const Navigation: React.FC = () => {
     (state) => state.language,
   );
   const { notifications } = useAppSelector((state) => state.ui);
+  const { appName, appLogoUrl } = useSystemConfig();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const navigationItems: NavigationItem[] = [
