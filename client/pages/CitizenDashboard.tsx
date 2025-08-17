@@ -56,6 +56,9 @@ const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
+  // Set document title
+  useDocumentTitle("Dashboard");
+
   // Debug: Log authentication state
   console.log('Authentication state:', { user: !!user, isAuthenticated, userId: user?.id });
   const [searchParams] = useSearchParams();
