@@ -177,7 +177,7 @@ const Navigation: React.FC = () => {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                {appLogoUrl && appLogoUrl !== '/logo.png' ? (
+                {appLogoUrl && appLogoUrl !== "/logo.png" ? (
                   <img src={appLogoUrl} alt={appName} className="h-8 w-8" />
                 ) : (
                   <Shield className="h-8 w-8 text-primary" />
@@ -186,7 +186,10 @@ const Navigation: React.FC = () => {
                   {appName}
                 </span>
                 <span className="text-lg font-bold text-gray-900 sm:hidden">
-                  {appName.split(' ').map(word => word[0]).join('')}
+                  {appName
+                    .split(" ")
+                    .map((word) => word[0])
+                    .join("")}
                 </span>
               </Link>
             </div>
@@ -333,7 +336,7 @@ const Navigation: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              {appLogoUrl && appLogoUrl !== '/logo.png' ? (
+              {appLogoUrl && appLogoUrl !== "/logo.png" ? (
                 <img src={appLogoUrl} alt={appName} className="h-8 w-8" />
               ) : (
                 <Shield className="h-8 w-8 text-primary" />
@@ -342,7 +345,10 @@ const Navigation: React.FC = () => {
                 {appName}
               </span>
               <span className="text-lg font-bold text-gray-900 sm:hidden">
-                {appName.split(' ').map(word => word[0]).join('')}
+                {appName
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")}
               </span>
             </Link>
           </div>

@@ -128,7 +128,8 @@ const SetPassword: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error?.data?.message || "Failed to set password. Please try again.",
+        description:
+          error?.data?.message || "Failed to set password. Please try again.",
         variant: "destructive",
       });
     }

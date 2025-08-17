@@ -350,12 +350,12 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
 export const getPublicSystemSettings = asyncHandler(async (req, res) => {
   // Only return non-sensitive settings
   const publicKeys = [
-    'APP_NAME',
-    'APP_LOGO_URL',
-    'COMPLAINT_ID_PREFIX',
-    'MAX_FILE_SIZE_MB',
-    'CITIZEN_REGISTRATION_ENABLED',
-    'SYSTEM_MAINTENANCE',
+    "APP_NAME",
+    "APP_LOGO_URL",
+    "COMPLAINT_ID_PREFIX",
+    "MAX_FILE_SIZE_MB",
+    "CITIZEN_REGISTRATION_ENABLED",
+    "SYSTEM_MAINTENANCE",
   ];
 
   const settings = await prisma.systemConfig.findMany({

@@ -114,7 +114,11 @@ const AdminConfig: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   // API queries
-  const { data: complaintTypesResponse, isLoading: complaintTypesLoading, error: complaintTypesError } = useGetComplaintTypesQuery();
+  const {
+    data: complaintTypesResponse,
+    isLoading: complaintTypesLoading,
+    error: complaintTypesError,
+  } = useGetComplaintTypesQuery();
   const [createComplaintType] = useCreateComplaintTypeMutation();
   const [updateComplaintType] = useUpdateComplaintTypeMutation();
   const [deleteComplaintType] = useDeleteComplaintTypeMutation();
@@ -961,14 +965,19 @@ const AdminConfig: React.FC = () => {
                     </TableRow>
                   ) : complaintTypesError ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-red-600">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-4 text-red-600"
+                      >
                         Failed to load complaint types. Please try again.
                       </TableCell>
                     </TableRow>
                   ) : complaintTypesResponse?.data?.length ? (
                     complaintTypesResponse.data.map((type) => (
                       <TableRow key={type.id}>
-                        <TableCell className="font-medium">{type.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {type.name}
+                        </TableCell>
                         <TableCell>{type.description}</TableCell>
                         <TableCell>
                           <Badge className={getPriorityColor(type.priority)}>
@@ -1013,7 +1022,10 @@ const AdminConfig: React.FC = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-4 text-gray-500"
+                      >
                         No complaint types found. Create one to get started.
                       </TableCell>
                     </TableRow>
@@ -1058,208 +1070,39 @@ const AdminConfig: React.FC = () => {
                     Application Settings
                   </h3>
                   <div className="space-y-4">
-                    {systemSettings.filter(s => ['APP_NAME', 'APP_LOGO_URL'].includes(s.key)).map((setting) => (
-                      <div key={setting.key} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{setting.key}</h4>
-                            <p className="text-sm text-gray-600">
-                              {setting.description}
-                            </p>
+                    {systemSettings
+                      .filter((s) =>
+                        ["APP_NAME", "APP_LOGO_URL"].includes(s.key),
+                      )
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="secondary">{setting.type}</Badge>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingSetting(setting);
-                                setIsSettingDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <Input
-                            type="text"
-                            value={setting.value}
-                            onChange={(e) =>
-                              setSystemSettings((prev) =>
-                                prev.map((s) =>
-                                  s.key === setting.key
-                                    ? { ...s, value: e.target.value }
-                                    : s,
-                                ),
-                              )
-                            }
-                            onBlur={(e) =>
-                              handleUpdateSystemSetting(
-                                setting.key,
-                                e.target.value,
-                              )
-                            }
-                            placeholder={`Enter ${setting.type} value`}
-                            className="max-w-md"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Complaint ID Configuration */}
-                <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center">
-                    <FileText className="h-5 w-5 mr-2" />
-                    Complaint ID Configuration
-                  </h3>
-                  <div className="space-y-4">
-                    {systemSettings.filter(s => s.key.startsWith('COMPLAINT_ID')).map((setting) => (
-                      <div key={setting.key} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{setting.key}</h4>
-                            <p className="text-sm text-gray-600">
-                              {setting.description}
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="secondary">{setting.type}</Badge>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingSetting(setting);
-                                setIsSettingDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <Input
-                            type={setting.type === "number" ? "number" : "text"}
-                            value={setting.value}
-                            onChange={(e) =>
-                              setSystemSettings((prev) =>
-                                prev.map((s) =>
-                                  s.key === setting.key
-                                    ? { ...s, value: e.target.value }
-                                    : s,
-                                ),
-                              )
-                            }
-                            onBlur={(e) =>
-                              handleUpdateSystemSetting(
-                                setting.key,
-                                e.target.value,
-                              )
-                            }
-                            placeholder={`Enter ${setting.type} value`}
-                            className="max-w-md"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start">
-                        <AlertTriangle className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
-                        <div>
-                          <h4 className="font-medium text-blue-900">Complaint ID Preview</h4>
-                          <p className="text-sm text-blue-700 mt-1">
-                            With current settings, new complaint IDs will look like:
-                            <span className="font-mono bg-white px-2 py-1 rounded border ml-2">
-                              {systemSettings.find(s => s.key === 'COMPLAINT_ID_PREFIX')?.value || 'KSC'}
-                              {(parseInt(systemSettings.find(s => s.key === 'COMPLAINT_ID_START_NUMBER')?.value) || 1).toString().padStart(parseInt(systemSettings.find(s => s.key === 'COMPLAINT_ID_LENGTH')?.value) || 4, '0')}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Other Settings */}
-                <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center">
-                    <Settings className="h-5 w-5 mr-2" />
-                    Other Settings
-                  </h3>
-                  <div className="space-y-4">
-                    {systemSettings.filter(s => !['APP_NAME', 'APP_LOGO_URL'].includes(s.key) && !s.key.startsWith('COMPLAINT_ID')).map((setting) => (
-                      <div key={setting.key} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{setting.key}</h4>
-                            <p className="text-sm text-gray-600">
-                              {setting.description}
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="secondary">{setting.type}</Badge>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingSetting(setting);
-                                setIsSettingDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteSystemSetting(setting.key)}
-                              disabled={isLoading}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          {setting.type === "boolean" ? (
-                            <Select
-                              value={setting.value}
-                              onValueChange={(value) =>
-                                handleUpdateSystemSetting(setting.key, value)
-                              }
-                            >
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="true">True</SelectItem>
-                                <SelectItem value="false">False</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          ) : setting.type === "json" ? (
-                            <Textarea
-                              value={setting.value}
-                              onChange={(e) =>
-                                setSystemSettings((prev) =>
-                                  prev.map((s) =>
-                                    s.key === setting.key
-                                      ? { ...s, value: e.target.value }
-                                      : s,
-                                  ),
-                                )
-                              }
-                              onBlur={(e) =>
-                                handleUpdateSystemSetting(
-                                  setting.key,
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Enter JSON value"
-                              rows={3}
-                            />
-                          ) : (
+                          <div className="mt-3">
                             <Input
-                              type={setting.type === "number" ? "number" : "text"}
+                              type="text"
                               value={setting.value}
                               onChange={(e) =>
                                 setSystemSettings((prev) =>
@@ -1279,10 +1122,227 @@ const AdminConfig: React.FC = () => {
                               placeholder={`Enter ${setting.type} value`}
                               className="max-w-md"
                             />
-                          )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Complaint ID Configuration */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Complaint ID Configuration
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter((s) => s.key.startsWith("COMPLAINT_ID"))
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Input
+                              type={
+                                setting.type === "number" ? "number" : "text"
+                              }
+                              value={setting.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) =>
+                                  prev.map((s) =>
+                                    s.key === setting.key
+                                      ? { ...s, value: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              onBlur={(e) =>
+                                handleUpdateSystemSetting(
+                                  setting.key,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={`Enter ${setting.type} value`}
+                              className="max-w-md"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <AlertTriangle className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-blue-900">
+                            Complaint ID Preview
+                          </h4>
+                          <p className="text-sm text-blue-700 mt-1">
+                            With current settings, new complaint IDs will look
+                            like:
+                            <span className="font-mono bg-white px-2 py-1 rounded border ml-2">
+                              {systemSettings.find(
+                                (s) => s.key === "COMPLAINT_ID_PREFIX",
+                              )?.value || "KSC"}
+                              {(
+                                parseInt(
+                                  systemSettings.find(
+                                    (s) =>
+                                      s.key === "COMPLAINT_ID_START_NUMBER",
+                                  )?.value,
+                                ) || 1
+                              )
+                                .toString()
+                                .padStart(
+                                  parseInt(
+                                    systemSettings.find(
+                                      (s) => s.key === "COMPLAINT_ID_LENGTH",
+                                    )?.value,
+                                  ) || 4,
+                                  "0",
+                                )}
+                            </span>
+                          </p>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Other Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Settings className="h-5 w-5 mr-2" />
+                    Other Settings
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter(
+                        (s) =>
+                          !["APP_NAME", "APP_LOGO_URL"].includes(s.key) &&
+                          !s.key.startsWith("COMPLAINT_ID"),
+                      )
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  handleDeleteSystemSetting(setting.key)
+                                }
+                                disabled={isLoading}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            {setting.type === "boolean" ? (
+                              <Select
+                                value={setting.value}
+                                onValueChange={(value) =>
+                                  handleUpdateSystemSetting(setting.key, value)
+                                }
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="true">True</SelectItem>
+                                  <SelectItem value="false">False</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : setting.type === "json" ? (
+                              <Textarea
+                                value={setting.value}
+                                onChange={(e) =>
+                                  setSystemSettings((prev) =>
+                                    prev.map((s) =>
+                                      s.key === setting.key
+                                        ? { ...s, value: e.target.value }
+                                        : s,
+                                    ),
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  handleUpdateSystemSetting(
+                                    setting.key,
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Enter JSON value"
+                                rows={3}
+                              />
+                            ) : (
+                              <Input
+                                type={
+                                  setting.type === "number" ? "number" : "text"
+                                }
+                                value={setting.value}
+                                onChange={(e) =>
+                                  setSystemSettings((prev) =>
+                                    prev.map((s) =>
+                                      s.key === setting.key
+                                        ? { ...s, value: e.target.value }
+                                        : s,
+                                    ),
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  handleUpdateSystemSetting(
+                                    setting.key,
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={`Enter ${setting.type} value`}
+                                className="max-w-md"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>

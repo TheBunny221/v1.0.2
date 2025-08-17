@@ -25,9 +25,7 @@ const validateSystemSetting = [
     .withMessage("Key is required")
     .matches(/^[A-Z_][A-Z0-9_]*$/)
     .withMessage("Key must be uppercase letters and underscores only"),
-  body("value")
-    .notEmpty()
-    .withMessage("Value is required"),
+  body("value").notEmpty().withMessage("Value is required"),
   body("description")
     .optional()
     .isLength({ max: 500 })

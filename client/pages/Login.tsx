@@ -122,9 +122,11 @@ const Login: React.FC = () => {
 
     try {
       // Request OTP first
-      console.log('Requesting OTP for email:', formData.email);
-      const response = await requestOTPLogin({ email: formData.email }).unwrap();
-      console.log('OTP response:', response);
+      console.log("Requesting OTP for email:", formData.email);
+      const response = await requestOTPLogin({
+        email: formData.email,
+      }).unwrap();
+      console.log("OTP response:", response);
 
       // Open the unified OTP dialog
       openOtpFlow({
@@ -195,15 +197,13 @@ const Login: React.FC = () => {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-3 mb-2">
-            {appLogoUrl && appLogoUrl !== '/logo.png' ? (
+            {appLogoUrl && appLogoUrl !== "/logo.png" ? (
               <img src={appLogoUrl} alt={appName} className="h-12 w-12" />
             ) : (
               <Home className="h-12 w-12 text-blue-600" />
             )}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {appName}
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">{appName}</h1>
           <p className="text-gray-600">E-Governance Portal</p>
         </div>
 

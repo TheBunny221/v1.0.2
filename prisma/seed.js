@@ -44,7 +44,8 @@ async function main() {
         {
           key: "COMPLAINT_ID_PREFIX",
           value: "KSC",
-          description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+          description:
+            "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
         },
         {
           key: "COMPLAINT_ID_START_NUMBER",
@@ -304,14 +305,16 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WATER_SUPPLY",
         name: "Water Supply",
-        description: "Issues related to water supply, quality, pressure, or leakage",
+        description:
+          "Issues related to water supply, quality, pressure, or leakage",
         priority: "HIGH",
         slaHours: 24,
       },
       {
         key: "COMPLAINT_TYPE_ELECTRICITY",
         name: "Electricity",
-        description: "Power outages, faulty connections, or street lighting issues",
+        description:
+          "Power outages, faulty connections, or street lighting issues",
         priority: "HIGH",
         slaHours: 12,
       },
@@ -325,7 +328,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WASTE_MANAGEMENT",
         name: "Waste Management",
-        description: "Garbage collection, waste disposal, and sanitation issues",
+        description:
+          "Garbage collection, waste disposal, and sanitation issues",
         priority: "MEDIUM",
         slaHours: 48,
       },
@@ -353,7 +357,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_TREE_CUTTING",
         name: "Tree Cutting",
-        description: "Tree trimming, removal of dangerous branches, or fallen trees",
+        description:
+          "Tree trimming, removal of dangerous branches, or fallen trees",
         priority: "MEDIUM",
         slaHours: 72,
       },
@@ -407,7 +412,7 @@ async function main() {
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
       // Generate complaint ID
-      const complaintNumber = (i + 1).toString().padStart(4, '0');
+      const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
 
       const complaint = await prisma.complaint.create({

@@ -198,15 +198,13 @@ const Register: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            {appLogoUrl && appLogoUrl !== '/logo.png' ? (
+            {appLogoUrl && appLogoUrl !== "/logo.png" ? (
               <img src={appLogoUrl} alt={appName} className="h-12 w-12 mr-3" />
             ) : (
               <Shield className="h-12 w-12 text-blue-600 mr-3" />
             )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {appName}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">{appName}</h1>
               <p className="text-gray-600">Create Your Account</p>
             </div>
           </div>

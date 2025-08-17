@@ -1,10 +1,10 @@
-import { baseApi } from './baseApi';
+import { baseApi } from "./baseApi";
 
 export interface ComplaintType {
   id: string;
   name: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   slaHours: number;
   isActive: boolean;
   updatedAt: string;
@@ -13,7 +13,7 @@ export interface ComplaintType {
 export interface CreateComplaintTypeRequest {
   name: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   slaHours: number;
 }
 
@@ -28,8 +28,8 @@ export const complaintTypesApi = baseApi.injectEndpoints({
       { success: boolean; data: ComplaintType[] },
       void
     >({
-      query: () => '/complaint-types',
-      providesTags: ['ComplaintType'],
+      query: () => "/complaint-types",
+      providesTags: ["ComplaintType"],
     }),
 
     // Get complaint type by ID
@@ -38,7 +38,7 @@ export const complaintTypesApi = baseApi.injectEndpoints({
       string
     >({
       query: (id) => `/complaint-types/${id}`,
-      providesTags: (_result, _error, id) => [{ type: 'ComplaintType', id }],
+      providesTags: (_result, _error, id) => [{ type: "ComplaintType", id }],
     }),
 
     // Create complaint type (admin only)
@@ -47,11 +47,11 @@ export const complaintTypesApi = baseApi.injectEndpoints({
       CreateComplaintTypeRequest
     >({
       query: (body) => ({
-        url: '/complaint-types',
-        method: 'POST',
+        url: "/complaint-types",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['ComplaintType'],
+      invalidatesTags: ["ComplaintType"],
     }),
 
     // Update complaint type (admin only)
@@ -61,10 +61,10 @@ export const complaintTypesApi = baseApi.injectEndpoints({
     >({
       query: ({ id, data }) => ({
         url: `/complaint-types/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['ComplaintType'],
+      invalidatesTags: ["ComplaintType"],
     }),
 
     // Delete complaint type (admin only)
@@ -74,9 +74,9 @@ export const complaintTypesApi = baseApi.injectEndpoints({
     >({
       query: (id) => ({
         url: `/complaint-types/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['ComplaintType'],
+      invalidatesTags: ["ComplaintType"],
     }),
 
     // Get complaint type statistics
@@ -84,8 +84,8 @@ export const complaintTypesApi = baseApi.injectEndpoints({
       { success: boolean; data: Array<{ type: string; count: number }> },
       void
     >({
-      query: () => '/complaint-types/stats',
-      providesTags: ['ComplaintType'],
+      query: () => "/complaint-types/stats",
+      providesTags: ["ComplaintType"],
     }),
   }),
 });

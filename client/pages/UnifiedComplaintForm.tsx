@@ -89,7 +89,6 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-
 const COMPLAINT_TYPES = [
   {
     value: "WATER_SUPPLY",
@@ -173,7 +172,11 @@ const UnifiedComplaintForm: React.FC = () => {
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // Fetch wards from API
-  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const {
+    data: wardsResponse,
+    isLoading: wardsLoading,
+    error: wardsError,
+  } = useGetWardsQuery();
   const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Use guest form state as the canonical source for form management
@@ -971,9 +974,13 @@ const UnifiedComplaintForm: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {wardsLoading ? (
-                            <SelectItem value="loading" disabled>Loading wards...</SelectItem>
+                            <SelectItem value="loading" disabled>
+                              Loading wards...
+                            </SelectItem>
                           ) : wardsError ? (
-                            <SelectItem value="error" disabled>Error loading wards</SelectItem>
+                            <SelectItem value="error" disabled>
+                              Error loading wards
+                            </SelectItem>
                           ) : (
                             wards.map((ward) => (
                               <SelectItem key={ward.id} value={ward.id}>
@@ -1004,7 +1011,9 @@ const UnifiedComplaintForm: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {availableSubZones.length === 0 ? (
-                            <SelectItem value="no-subzones" disabled>No sub-zones available</SelectItem>
+                            <SelectItem value="no-subzones" disabled>
+                              No sub-zones available
+                            </SelectItem>
                           ) : (
                             availableSubZones.map((subZone) => (
                               <SelectItem key={subZone.id} value={subZone.id}>
@@ -1245,9 +1254,11 @@ const UnifiedComplaintForm: React.FC = () => {
                       </p>
                       <p>
                         <strong>Sub-Zone:</strong>{" "}
-                        {
-                          availableSubZones.find(sz => sz.id === formData.subZoneId)?.name || formData.subZoneId || "Not specified"
-                        }
+                        {availableSubZones.find(
+                          (sz) => sz.id === formData.subZoneId,
+                        )?.name ||
+                          formData.subZoneId ||
+                          "Not specified"}
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}

@@ -1,8 +1,4 @@
-import {
-  baseApi,
-  ApiResponse,
-  optimisticUpdate,
-} from "./baseApi";
+import { baseApi, ApiResponse, optimisticUpdate } from "./baseApi";
 
 // Types for complaint operations
 export interface Complaint {
@@ -104,10 +100,10 @@ export const complaintsApi = baseApi.injectEndpoints({
               }
             }
           });
-        return `/complaints?${searchParams.toString()}`;
-      },
-      // Let RTK Query handle response naturally
-      providesTags: (result) =>
+          return `/complaints?${searchParams.toString()}`;
+        },
+        // Let RTK Query handle response naturally
+        providesTags: (result) =>
           result?.data && Array.isArray(result.data)
             ? [
                 ...result.data.map(({ id }) => ({
@@ -257,7 +253,13 @@ export const complaintsApi = baseApi.injectEndpoints({
 
     // Upload complaint attachments
     uploadComplaintAttachment: builder.mutation<
-      ApiResponse<{ fileName: string; url: string; id: string; originalName: string; size: number }>,
+      ApiResponse<{
+        fileName: string;
+        url: string;
+        id: string;
+        originalName: string;
+        size: number;
+      }>,
       { complaintId: string; file: File }
     >({
       query: ({ complaintId, file }) => {
@@ -271,7 +273,9 @@ export const complaintsApi = baseApi.injectEndpoints({
         };
       },
       // Let RTK Query handle response naturally
-      invalidatesTags: (result, error, { complaintId }) => [{ type: "Complaint", id: complaintId }],
+      invalidatesTags: (result, error, { complaintId }) => [
+        { type: "Complaint", id: complaintId },
+      ],
     }),
 
     // Get complaint types

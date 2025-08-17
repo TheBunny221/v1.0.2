@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useGetComplaintTypesQuery } from '../store/api/complaintTypesApi';
+import { useMemo } from "react";
+import { useGetComplaintTypesQuery } from "../store/api/complaintTypesApi";
 
 export interface ComplaintTypeOption {
   value: string;
@@ -19,10 +19,10 @@ export const useComplaintTypes = () => {
 
   const complaintTypeOptions = useMemo(() => {
     if (!response?.data) return [];
-    
+
     return response.data
-      .filter(type => type.isActive)
-      .map(type => ({
+      .filter((type) => type.isActive)
+      .map((type) => ({
         value: type.id.toUpperCase(),
         label: type.name,
         description: type.description,
@@ -32,11 +32,11 @@ export const useComplaintTypes = () => {
   }, [response]);
 
   const getComplaintTypeById = (id: string) => {
-    return complaintTypes.find(type => type.id === id);
+    return complaintTypes.find((type) => type.id === id);
   };
 
   const getComplaintTypeByName = (name: string) => {
-    return complaintTypes.find(type => type.name === name);
+    return complaintTypes.find((type) => type.name === name);
   };
 
   return {

@@ -39,7 +39,10 @@ import {
 } from "../store/slices/guestSlice";
 import { getApiErrorMessage } from "../store/api/baseApi";
 import { useOtpFlow } from "../contexts/OtpContext";
-import { useGetWardsQuery, useSubmitGuestComplaintMutation } from "../store/api/guestApi";
+import {
+  useGetWardsQuery,
+  useSubmitGuestComplaintMutation,
+} from "../store/api/guestApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -90,7 +93,6 @@ import {
   Check,
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
-
 
 const COMPLAINT_TYPES = [
   {
@@ -176,7 +178,11 @@ const GuestComplaintForm: React.FC = () => {
   const { appName } = useSystemConfig();
 
   // Fetch wards from API
-  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const {
+    data: wardsResponse,
+    isLoading: wardsLoading,
+    error: wardsError,
+  } = useGetWardsQuery();
   const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // RTK Query mutation for form submission
@@ -386,14 +392,19 @@ const GuestComplaintForm: React.FC = () => {
       submissionData.append("description", formData.description);
       submissionData.append("priority", formData.priority || "MEDIUM");
       submissionData.append("wardId", formData.wardId);
-      if (formData.subZoneId) submissionData.append("subZoneId", formData.subZoneId);
+      if (formData.subZoneId)
+        submissionData.append("subZoneId", formData.subZoneId);
       submissionData.append("area", formData.area);
-      if (formData.landmark) submissionData.append("landmark", formData.landmark);
+      if (formData.landmark)
+        submissionData.append("landmark", formData.landmark);
       if (formData.address) submissionData.append("address", formData.address);
 
       // Add coordinates
       if (formData.coordinates) {
-        submissionData.append("coordinates", JSON.stringify(formData.coordinates));
+        submissionData.append(
+          "coordinates",
+          JSON.stringify(formData.coordinates),
+        );
       }
 
       // Add attachments
@@ -871,9 +882,13 @@ const GuestComplaintForm: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {wardsLoading ? (
-                            <SelectItem value="loading" disabled>Loading wards...</SelectItem>
+                            <SelectItem value="loading" disabled>
+                              Loading wards...
+                            </SelectItem>
                           ) : wardsError ? (
-                            <SelectItem value="error" disabled>Error loading wards</SelectItem>
+                            <SelectItem value="error" disabled>
+                              Error loading wards
+                            </SelectItem>
                           ) : (
                             wards.map((ward) => (
                               <SelectItem key={ward.id} value={ward.id}>
@@ -912,7 +927,9 @@ const GuestComplaintForm: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {availableSubZones.length === 0 ? (
-                            <SelectItem value="no-subzones" disabled>No sub-zones available</SelectItem>
+                            <SelectItem value="no-subzones" disabled>
+                              No sub-zones available
+                            </SelectItem>
                           ) : (
                             availableSubZones.map((subZone) => (
                               <SelectItem key={subZone.id} value={subZone.id}>
@@ -1151,9 +1168,12 @@ const GuestComplaintForm: React.FC = () => {
                         {selectedWard?.name || formData.wardId}
                       </p>
                       <p>
-                        <strong>Sub-Zone:</strong> {
-                          availableSubZones.find(sz => sz.id === formData.subZoneId)?.name || formData.subZoneId || "Not specified"
-                        }
+                        <strong>Sub-Zone:</strong>{" "}
+                        {availableSubZones.find(
+                          (sz) => sz.id === formData.subZoneId,
+                        )?.name ||
+                          formData.subZoneId ||
+                          "Not specified"}
                       </p>
                       <p>
                         <strong>Area:</strong> {formData.area}

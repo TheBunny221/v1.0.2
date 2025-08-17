@@ -29,9 +29,13 @@ const generateComplaintId = async () => {
     const config = await prisma.systemConfig.findMany({
       where: {
         key: {
-          in: ['COMPLAINT_ID_PREFIX', 'COMPLAINT_ID_START_NUMBER', 'COMPLAINT_ID_LENGTH']
-        }
-      }
+          in: [
+            "COMPLAINT_ID_PREFIX",
+            "COMPLAINT_ID_START_NUMBER",
+            "COMPLAINT_ID_LENGTH",
+          ],
+        },
+      },
     });
 
     const settings = config.reduce((acc, setting) => {
@@ -39,39 +43,41 @@ const generateComplaintId = async () => {
       return acc;
     }, {});
 
-    const prefix = settings.COMPLAINT_ID_PREFIX || 'KSC';
-    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || '1');
-    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || '4');
+    const prefix = settings.COMPLAINT_ID_PREFIX || "KSC";
+    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
+    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
 
     // Get the last complaint ID to determine next number
     const lastComplaint = await prisma.complaint.findFirst({
       where: {
         complaintId: {
-          startsWith: prefix
-        }
+          startsWith: prefix,
+        },
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: "desc",
       },
       select: {
-        complaintId: true
-      }
+        complaintId: true,
+      },
     });
 
     let nextNumber = startNumber;
     if (lastComplaint && lastComplaint.complaintId) {
       // Extract number from last complaint ID
-      const lastNumber = parseInt(lastComplaint.complaintId.replace(prefix, ''));
+      const lastNumber = parseInt(
+        lastComplaint.complaintId.replace(prefix, ""),
+      );
       if (!isNaN(lastNumber)) {
         nextNumber = lastNumber + 1;
       }
     }
 
     // Format the number with leading zeros
-    const formattedNumber = nextNumber.toString().padStart(idLength, '0');
+    const formattedNumber = nextNumber.toString().padStart(idLength, "0");
     return `${prefix}${formattedNumber}`;
   } catch (error) {
-    console.error('Error generating complaint ID:', error);
+    console.error("Error generating complaint ID:", error);
     // Fallback to default format
     const timestamp = Date.now().toString().slice(-6);
     return `KSC${timestamp}`;
@@ -219,7 +225,11 @@ export const getComplaints = asyncHandler(async (req, res) => {
   const warn = (...args) => {
     if (shouldDebug) {
       // eslint-disable-next-line no-console
-      console.warn("[gpt5][getComplaints][warn]", `req=${correlationId}`, ...args);
+      console.warn(
+        "[gpt5][getComplaints][warn]",
+        `req=${correlationId}`,
+        ...args,
+      );
     }
   };
 
@@ -298,8 +308,10 @@ export const getComplaints = asyncHandler(async (req, res) => {
   }
 
   // --- date range filter with validation ---
-  const validFrom = dateFrom && !Number.isNaN(Date.parse(dateFrom)) ? new Date(dateFrom) : null;
-  const validTo = dateTo && !Number.isNaN(Date.parse(dateTo)) ? new Date(dateTo) : null;
+  const validFrom =
+    dateFrom && !Number.isNaN(Date.parse(dateFrom)) ? new Date(dateFrom) : null;
+  const validTo =
+    dateTo && !Number.isNaN(Date.parse(dateTo)) ? new Date(dateTo) : null;
   if (dateFrom && !validFrom) warn("invalid dateFrom ignored", { dateFrom });
   if (dateTo && !validTo) warn("invalid dateTo ignored", { dateTo });
   if (validFrom || validTo) {
@@ -331,10 +343,20 @@ export const getComplaints = asyncHandler(async (req, res) => {
           ward: true,
           subZone: true,
           submittedBy: {
-            select: { id: true, fullName: true, email: true, phoneNumber: true },
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phoneNumber: true,
+            },
           },
           assignedTo: {
-            select: { id: true, fullName: true, email: true, phoneNumber: true },
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phoneNumber: true,
+            },
           },
           attachments: true,
           statusLogs: {
@@ -387,7 +409,6 @@ export const getComplaints = asyncHandler(async (req, res) => {
     throw err;
   }
 });
-
 
 // @desc    Get single complaint
 // @route   GET /api/complaints/:id

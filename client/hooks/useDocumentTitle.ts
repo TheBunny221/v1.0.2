@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useSystemConfig } from '../contexts/SystemConfigContext';
+import { useEffect } from "react";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 
 export const useDocumentTitle = (pageTitle?: string) => {
   const { appName } = useSystemConfig();

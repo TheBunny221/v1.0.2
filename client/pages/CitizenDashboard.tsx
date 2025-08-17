@@ -62,7 +62,11 @@ const CitizenDashboard: React.FC = () => {
   useDocumentTitle("Dashboard");
 
   // Debug: Log authentication state
-  console.log('Authentication state:', { user: !!user, isAuthenticated, userId: user?.id });
+  console.log("Authentication state:", {
+    user: !!user,
+    isAuthenticated,
+    userId: user?.id,
+  });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -84,11 +88,13 @@ const CitizenDashboard: React.FC = () => {
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
   // Debug: Log raw API responses
-  console.log('Raw API responses:', {
+  console.log("Raw API responses:", {
     complaintsResponse,
     statsResponse,
-    complaintsResponseKeys: complaintsResponse ? Object.keys(complaintsResponse) : null,
-    statsResponseKeys: statsResponse ? Object.keys(statsResponse) : null
+    complaintsResponseKeys: complaintsResponse
+      ? Object.keys(complaintsResponse)
+      : null,
+    statsResponseKeys: statsResponse ? Object.keys(statsResponse) : null,
   });
 
   // Extract complaints from the actual API response structure
@@ -97,8 +103,8 @@ const CitizenDashboard: React.FC = () => {
     ? complaintsResponse.data.complaints
     : [];
 
-  console.log('Extracted complaints:', complaints);
-  console.log('Complaints count:', complaints.length);
+  console.log("Extracted complaints:", complaints);
+  console.log("Complaints count:", complaints.length);
   const pagination = complaintsResponse?.data?.pagination || {
     currentPage: 1,
     totalPages: 1,
@@ -167,11 +173,11 @@ const CitizenDashboard: React.FC = () => {
   // Fetch complaints when user is available or filters change
   useEffect(() => {
     // Debug: Log the actual data we're receiving
-    console.log('Dashboard data debug:', {
+    console.log("Dashboard data debug:", {
       statsResponse: statsResponse?.data,
       complaintsCount: complaints.length,
-      complaintStatuses: complaints.map(c => c.status),
-      complaintsData: complaints.slice(0, 2) // Log first 2 complaints for inspection
+      complaintStatuses: complaints.map((c) => c.status),
+      complaintsData: complaints.slice(0, 2), // Log first 2 complaints for inspection
     });
 
     // Calculate dashboard statistics from complaints or use stats API
@@ -179,12 +185,23 @@ const CitizenDashboard: React.FC = () => {
       // Use API stats if available
       const stats = statsResponse.data.stats;
       const total = stats.total || 0;
-      const pending = stats.byStatus?.REGISTERED || stats.byStatus?.registered || 0;
-      const inProgress = stats.byStatus?.IN_PROGRESS || stats.byStatus?.in_progress || 0;
-      const resolved = stats.byStatus?.RESOLVED || stats.byStatus?.resolved || 0;
-      const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+      const pending =
+        stats.byStatus?.REGISTERED || stats.byStatus?.registered || 0;
+      const inProgress =
+        stats.byStatus?.IN_PROGRESS || stats.byStatus?.in_progress || 0;
+      const resolved =
+        stats.byStatus?.RESOLVED || stats.byStatus?.resolved || 0;
+      const resolutionRate =
+        total > 0 ? Math.round((resolved / total) * 100) : 0;
 
-      console.log('Using API stats:', { stats, total, pending, inProgress, resolved, resolutionRate });
+      console.log("Using API stats:", {
+        stats,
+        total,
+        pending,
+        inProgress,
+        resolved,
+        resolutionRate,
+      });
 
       setDashboardStats({
         total,
@@ -198,11 +215,14 @@ const CitizenDashboard: React.FC = () => {
       // Calculate from complaints list as fallback
       const total = complaints.length;
 
-      console.log('Fallback calculation - analyzing complaints:', complaints.map(c => ({
-        id: c.id,
-        status: c.status,
-        type: typeof c.status
-      })));
+      console.log(
+        "Fallback calculation - analyzing complaints:",
+        complaints.map((c) => ({
+          id: c.id,
+          status: c.status,
+          type: typeof c.status,
+        })),
+      );
 
       const pending = complaints.filter(
         (c) => c.status === "registered" || c.status === "REGISTERED",
@@ -211,11 +231,22 @@ const CitizenDashboard: React.FC = () => {
         (c) => c.status === "in_progress" || c.status === "IN_PROGRESS",
       ).length;
       const resolved = complaints.filter(
-        (c) => c.status === "resolved" || c.status === "RESOLVED" || c.status === "closed" || c.status === "CLOSED",
+        (c) =>
+          c.status === "resolved" ||
+          c.status === "RESOLVED" ||
+          c.status === "closed" ||
+          c.status === "CLOSED",
       ).length;
-      const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+      const resolutionRate =
+        total > 0 ? Math.round((resolved / total) * 100) : 0;
 
-      console.log('Using fallback calculation:', { total, pending, inProgress, resolved, resolutionRate });
+      console.log("Using fallback calculation:", {
+        total,
+        pending,
+        inProgress,
+        resolved,
+        resolutionRate,
+      });
 
       setDashboardStats({
         total,

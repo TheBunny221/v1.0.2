@@ -172,7 +172,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }),
       // Let RTK Query handle response naturally
@@ -181,7 +181,7 @@ export const authApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.error('Change password error details:', error);
+          console.error("Change password error details:", error);
         }
       },
     }),

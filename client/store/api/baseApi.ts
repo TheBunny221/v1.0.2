@@ -9,19 +9,19 @@ import { toast } from "../../components/ui/use-toast";
 
 // Create the base query without response interference
 const baseQuery = fetchBaseQuery({
-  baseUrl: '/api/',
+  baseUrl: "/api/",
   prepareHeaders: (headers, { getState }) => {
     // Try to get token from Redux state first, then localStorage
     const state = getState() as any;
     const token = state?.auth?.token || localStorage.getItem("token");
 
     if (token) {
-      headers.set('authorization', `Bearer ${token}`);
+      headers.set("authorization", `Bearer ${token}`);
     }
 
     // Ensure content-type is set for JSON requests
-    if (!headers.get('content-type')) {
-      headers.set('content-type', 'application/json');
+    if (!headers.get("content-type")) {
+      headers.set("content-type", "application/json");
     }
 
     return headers;
@@ -41,12 +41,12 @@ const baseQueryWithReauth: BaseQueryFn<
   let result = await baseQuery(args, api, extraOptions);
 
   // Log for debugging
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.log(`API Request to ${endpoint}:`, {
       args,
-      result: result.error ? 'ERROR' : 'SUCCESS',
+      result: result.error ? "ERROR" : "SUCCESS",
       status: result.error?.status,
-      hasData: !!result.data
+      hasData: !!result.data,
     });
   }
 
@@ -85,7 +85,6 @@ const baseQueryWithReauth: BaseQueryFn<
 
   return result;
 };
-
 
 // Create the base API slice
 export const baseApi = createApi({
@@ -143,8 +142,8 @@ export const transformResponse = <T>(response: any): ApiResponse<T> => {
     }
 
     // Log response for debugging in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Transforming response:', response);
+    if (process.env.NODE_ENV === "development") {
+      console.log("Transforming response:", response);
     }
 
     // If response is already in our expected format, return it
