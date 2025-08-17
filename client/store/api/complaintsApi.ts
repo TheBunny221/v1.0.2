@@ -123,7 +123,7 @@ export const complaintsApi = baseApi.injectEndpoints({
     // Get single complaint
     getComplaint: builder.query<ApiResponse<Complaint>, string>({
       query: (id) => `/complaints/${id}`,
-      transformResponse: transformResponse<Complaint>,
+      // Let RTK Query handle response naturally
       providesTags: (result, error, id) => [{ type: "Complaint", id }],
     }),
 
@@ -137,7 +137,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<Complaint>,
+      // Let RTK Query handle response naturally
       invalidatesTags: [{ type: "Complaint", id: "LIST" }],
       // Optimistic update for immediate feedback
       onQueryStarted: async (newComplaint, { dispatch, queryFulfilled }) => {
@@ -270,7 +270,7 @@ export const complaintsApi = baseApi.injectEndpoints({
           formData: true,
         };
       },
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: (result, error, { complaintId }) => [{ type: "Complaint", id: complaintId }],
     }),
 
@@ -282,7 +282,7 @@ export const complaintsApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/complaint-types",
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       providesTags: ["ComplaintType"],
     }),
 
