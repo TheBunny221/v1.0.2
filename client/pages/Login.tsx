@@ -116,7 +116,9 @@ const Login: React.FC = () => {
 
     try {
       // Request OTP first
-      await requestOTPLogin({ email: formData.email }).unwrap();
+      console.log('Requesting OTP for email:', formData.email);
+      const response = await requestOTPLogin({ email: formData.email }).unwrap();
+      console.log('OTP response:', response);
 
       // Open the unified OTP dialog
       openOtpFlow({
