@@ -298,7 +298,85 @@ async function main() {
       citizens.push(citizen);
     }
 
-    // 6. Create Sample Complaints
+    // 6. Create Complaint Types
+    console.log("🏷️ Creating complaint types...");
+    const complaintTypesData = [
+      {
+        key: "COMPLAINT_TYPE_WATER_SUPPLY",
+        name: "Water Supply",
+        description: "Issues related to water supply, quality, pressure, or leakage",
+        priority: "HIGH",
+        slaHours: 24,
+      },
+      {
+        key: "COMPLAINT_TYPE_ELECTRICITY",
+        name: "Electricity",
+        description: "Power outages, faulty connections, or street lighting issues",
+        priority: "HIGH",
+        slaHours: 12,
+      },
+      {
+        key: "COMPLAINT_TYPE_ROAD_REPAIR",
+        name: "Road Repair",
+        description: "Damaged roads, potholes, or infrastructure maintenance",
+        priority: "MEDIUM",
+        slaHours: 72,
+      },
+      {
+        key: "COMPLAINT_TYPE_WASTE_MANAGEMENT",
+        name: "Waste Management",
+        description: "Garbage collection, waste disposal, and sanitation issues",
+        priority: "MEDIUM",
+        slaHours: 48,
+      },
+      {
+        key: "COMPLAINT_TYPE_STREET_LIGHTING",
+        name: "Street Lighting",
+        description: "Non-functional street lights or poor lighting conditions",
+        priority: "LOW",
+        slaHours: 48,
+      },
+      {
+        key: "COMPLAINT_TYPE_DRAINAGE",
+        name: "Drainage",
+        description: "Blocked drains, flooding, or sewage issues",
+        priority: "HIGH",
+        slaHours: 24,
+      },
+      {
+        key: "COMPLAINT_TYPE_PUBLIC_TOILET",
+        name: "Public Toilet",
+        description: "Maintenance and cleanliness of public toilet facilities",
+        priority: "LOW",
+        slaHours: 48,
+      },
+      {
+        key: "COMPLAINT_TYPE_TREE_CUTTING",
+        name: "Tree Cutting",
+        description: "Tree trimming, removal of dangerous branches, or fallen trees",
+        priority: "MEDIUM",
+        slaHours: 72,
+      },
+    ];
+
+    // Create complaint types in SystemConfig
+    for (const typeData of complaintTypesData) {
+      await prisma.systemConfig.create({
+        data: {
+          key: typeData.key,
+          value: JSON.stringify({
+            name: typeData.name,
+            description: typeData.description,
+            priority: typeData.priority,
+            slaHours: typeData.slaHours,
+          }),
+          description: `Complaint type configuration for ${typeData.name}`,
+          isActive: true,
+        },
+      });
+    }
+
+    // 7. Create Sample Complaints
     console.log("📝 Creating sample complaints...");
     const complaintTypes = [
       "WATER_SUPPLY",
