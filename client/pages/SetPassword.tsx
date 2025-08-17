@@ -164,7 +164,7 @@ const SetPassword: React.FC = () => {
             Set Your Password
           </h1>
           <p className="text-gray-600">
-            Create a secure password for your Cochin Smart City account
+            Create a secure password for your {appName} account
           </p>
         </div>
 
