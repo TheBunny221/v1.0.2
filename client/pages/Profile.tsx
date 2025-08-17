@@ -73,6 +73,7 @@ const Profile: React.FC = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
   const [emailStep, setEmailStep] = useState<"none" | "sent">("none");
   const [setupToken, setSetupToken] = useState("");
@@ -194,6 +195,8 @@ const Profile: React.FC = () => {
       return;
     }
 
+    setIsChangingPassword(true);
+
     try {
       if (!user?.hasPassword) {
         // Password setup with token
@@ -250,6 +253,8 @@ const Profile: React.FC = () => {
           message: errorMessage,
         }),
       );
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -656,7 +661,11 @@ const Profile: React.FC = () => {
                 </ul>
               </div>
 
-              <Button onClick={handleChangePassword} className="w-full" disabled={isLoading}>
+              <Button
+                onClick={handleChangePassword}
+                className="w-full"
+                disabled={isChangingPassword || (!user?.hasPassword && !setupToken) || (user?.hasPassword && !passwordData.currentPassword) || !passwordData.newPassword || !passwordData.confirmPassword}
+              >
                 {!user?.hasPassword
                   ? "Set Up Password"
                   : (translations?.profile?.changePassword || "Change Password")
