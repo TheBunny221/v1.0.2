@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   selectAuth,
   getDashboardRouteForRole,
