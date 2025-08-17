@@ -105,10 +105,10 @@ export const complaintsApi = baseApi.injectEndpoints({
               }
             }
           });
-          return `/complaints?${searchParams.toString()}`;
-        },
-        transformResponse: transformResponse<Complaint[]>,
-        providesTags: (result) =>
+        return `/complaints?${searchParams.toString()}`;
+      },
+      // Let RTK Query handle response naturally
+      providesTags: (result) =>
           result?.data && Array.isArray(result.data)
             ? [
                 ...result.data.map(({ id }) => ({
