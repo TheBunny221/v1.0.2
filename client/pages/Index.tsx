@@ -54,6 +54,7 @@ const Index: React.FC = () => {
   );
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName } = useSystemConfig();
+  const { complaintTypeOptions } = useComplaintTypes();
 
   // Form state
   const [formData, setFormData] = useState({
