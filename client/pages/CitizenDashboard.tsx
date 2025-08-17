@@ -546,7 +546,7 @@ const CitizenDashboard: React.FC = () => {
                             {complaint.title}
                           </h4>
                           <p className="text-xs text-gray-500 mt-1">
-                            ID: {complaint.id}
+                            ID: {complaint.complaintId || complaint.id}
                           </p>
                         </div>
                         <Badge className={getStatusColor(complaint.status)}>
