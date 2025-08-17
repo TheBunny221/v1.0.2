@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { clearError, selectAuth } from "../store/slices/authSlice";
 import { useSetPasswordMutation } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
