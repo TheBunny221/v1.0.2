@@ -255,7 +255,7 @@ const ComplaintsList: React.FC = () => {
                 {filteredComplaints.map((complaint) => (
                   <TableRow key={complaint.id}>
                     <TableCell className="font-medium">
-                      #{complaint.id.slice(-6)}
+                      #{complaint.complaintId || complaint.id.slice(-6)}
                     </TableCell>
                     <TableCell>
                       <div className="max-w-xs">
