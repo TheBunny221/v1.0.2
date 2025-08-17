@@ -624,23 +624,37 @@ const CitizenComplaintForm: React.FC = () => {
                         <SelectValue placeholder="Select complaint type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {COMPLAINT_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">
-                                  {type.label}
-                                </span>
-                                <Badge variant="outline" className="text-xs">
-                                  {type.urgency}
-                                </Badge>
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {type.description}
-                              </span>
-                            </div>
+                        {complaintTypesLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading complaint types...
                           </SelectItem>
-                        ))}
+                        ) : complaintTypeOptions.length > 0 ? (
+                          complaintTypeOptions.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">
+                                    {type.label}
+                                  </span>
+                                  {type.priority && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {type.priority}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {type.description && (
+                                  <span className="text-xs text-gray-500">
+                                    {type.description}
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No complaint types available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     {validationErrors.type && (
