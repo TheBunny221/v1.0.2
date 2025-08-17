@@ -26,6 +26,7 @@ interface AppInitializerProps {
 const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
+  const { appName } = useSystemConfig();
 
   // Get token from localStorage and check Redux state
   const token = localStorage.getItem("token");
