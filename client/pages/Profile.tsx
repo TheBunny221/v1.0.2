@@ -145,12 +145,26 @@ const Profile: React.FC = () => {
   };
 
   const handleChangePassword = async () => {
+    // Validate password match
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       dispatch(
         addNotification({
           type: "error",
           title: translations?.common?.error || "Error",
           message: translations?.profile?.passwordMismatch || "Passwords do not match",
+        }),
+      );
+      return;
+    }
+
+    // Validate password strength
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(passwordData.newPassword)) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Invalid Password",
+          message: "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one number.",
         }),
       );
       return;
