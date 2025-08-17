@@ -229,11 +229,25 @@ const Profile: React.FC = () => {
       setSetupToken("");
 
     } catch (error: any) {
+      console.error("Password change error:", error);
+
+      let errorMessage = "Failed to change password";
+
+      // Handle different error types
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.data?.errors && Array.isArray(error.data.errors)) {
+        // Handle validation errors
+        errorMessage = error.data.errors.map((err: any) => err.message).join(", ");
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
       dispatch(
         addNotification({
           type: "error",
-          title: "Error",
-          message: error?.data?.message || "Failed to set password",
+          title: "Password Change Failed",
+          message: errorMessage,
         }),
       );
     }
