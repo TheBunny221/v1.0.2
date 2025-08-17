@@ -226,7 +226,8 @@ const CitizenDashboard: React.FC = () => {
   };
 
   const isResolved = (status: string) => {
-    return status === "RESOLVED" || status === "CLOSED";
+    const normalizedStatus = status.toUpperCase();
+    return normalizedStatus === "RESOLVED" || normalizedStatus === "CLOSED";
   };
 
   const recentComplaints = complaints.slice(0, 5);
