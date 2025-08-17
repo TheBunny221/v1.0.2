@@ -188,7 +188,8 @@ const CitizenDashboard: React.FC = () => {
   }, [complaints, statsResponse]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
       case "REGISTERED":
         return "bg-yellow-100 text-yellow-800";
       case "ASSIGNED":
