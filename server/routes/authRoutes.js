@@ -272,7 +272,7 @@ router.post("/login", authLimiter, validateLogin, login);
  *       400:
  *         description: Invalid email or user not found
  */
-router.post("/login-otp", validateOTPRequest, loginWithOTP);
+router.post("/login-otp", authLimiter, validateOTPRequest, loginWithOTP);
 
 /**
  * @swagger
