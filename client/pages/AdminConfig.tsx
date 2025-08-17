@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import {
+  useGetComplaintTypesQuery,
+  useCreateComplaintTypeMutation,
+  useUpdateComplaintTypeMutation,
+  useDeleteComplaintTypeMutation,
+} from "../store/api/complaintTypesApi";
+import {
   Card,
   CardContent,
   CardHeader,
