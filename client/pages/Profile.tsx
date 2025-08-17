@@ -666,10 +666,16 @@ const Profile: React.FC = () => {
                 className="w-full"
                 disabled={isChangingPassword || (!user?.hasPassword && !setupToken) || (user?.hasPassword && !passwordData.currentPassword) || !passwordData.newPassword || !passwordData.confirmPassword}
               >
-                {!user?.hasPassword
-                  ? "Set Up Password"
-                  : (translations?.profile?.changePassword || "Change Password")
-                }
+                {isChangingPassword ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {!user?.hasPassword ? "Setting Up..." : "Changing..."}
+                  </div>
+                ) : (
+                  !user?.hasPassword
+                    ? "Set Up Password"
+                    : (translations?.profile?.changePassword || "Change Password")
+                )}
               </Button>
             </CardContent>
           </Card>
