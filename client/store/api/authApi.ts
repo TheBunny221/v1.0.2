@@ -171,9 +171,19 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/change-password",
         method: "PUT",
         body: data,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }),
       transformResponse: transformResponse,
       invalidatesTags: ["Auth"],
+      onQueryStarted: async (data, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error('Change password error details:', error);
+        }
+      },
     }),
 
     // Get current user
