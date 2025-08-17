@@ -153,6 +153,11 @@ export const transformResponse = <T>(response: any): ApiResponse<T> => {
       };
     }
 
+    // Log response for debugging in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Transforming response:', response);
+    }
+
     // If response is already in our expected format, return it
     if (
       typeof response === "object" &&
