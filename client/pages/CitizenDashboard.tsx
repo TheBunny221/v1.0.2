@@ -169,23 +169,23 @@ const CitizenDashboard: React.FC = () => {
     });
 
     // Calculate dashboard statistics from complaints or use stats API
-    if (statsResponse?.data) {
+    if (statsResponse?.data?.stats) {
       // Use API stats if available
-      const stats = statsResponse.data;
+      const stats = statsResponse.data.stats;
       const total = stats.total || 0;
-      const pending = stats.byStatus?.registered || stats.byStatus?.REGISTERED || 0;
-      const inProgress = stats.byStatus?.in_progress || stats.byStatus?.IN_PROGRESS || 0;
-      const resolved = stats.byStatus?.resolved || stats.byStatus?.RESOLVED || 0;
+      const pending = stats.byStatus?.REGISTERED || stats.byStatus?.registered || 0;
+      const inProgress = stats.byStatus?.IN_PROGRESS || stats.byStatus?.in_progress || 0;
+      const resolved = stats.byStatus?.RESOLVED || stats.byStatus?.resolved || 0;
       const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
-      console.log('Using API stats:', { total, pending, inProgress, resolved, resolutionRate });
+      console.log('Using API stats:', { stats, total, pending, inProgress, resolved, resolutionRate });
 
       setDashboardStats({
         total,
         pending,
         inProgress,
         resolved,
-        avgResolutionTime: stats.avgResolutionTime || 0,
+        avgResolutionTime: stats.avgResolutionTimeHours || 0,
         resolutionRate,
       });
     } else {
