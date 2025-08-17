@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import {
   createComplaint,
   ComplaintType,
