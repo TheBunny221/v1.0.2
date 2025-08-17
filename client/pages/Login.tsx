@@ -39,6 +39,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const { appName, appLogoUrl } = useSystemConfig();
 
   const { isLoading, error, isAuthenticated, user } =
     useAppSelector(selectAuth);
