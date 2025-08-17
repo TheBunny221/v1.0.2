@@ -27,7 +27,7 @@ import {
   updateProfile,
 } from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
-import { useSendPasswordSetupEmailMutation, useSetPasswordMutation } from "../store/api/authApi";
+import { useSendPasswordSetupEmailMutation, useSetPasswordMutation, useChangePasswordMutation } from "../store/api/authApi";
 import {
   User,
   Mail,
@@ -49,6 +49,7 @@ const Profile: React.FC = () => {
   // API mutations
   const [sendPasswordSetupEmail] = useSendPasswordSetupEmailMutation();
   const [setPassword] = useSetPasswordMutation();
+  const [changePassword] = useChangePasswordMutation();
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
@@ -187,7 +188,11 @@ const Profile: React.FC = () => {
           password: passwordData.newPassword,
         }).unwrap();
       } else {
-        // Regular password change - mock implementation
+        // Regular password change
+        await changePassword({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }).unwrap();
       }
 
       dispatch(
