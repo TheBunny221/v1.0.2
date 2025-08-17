@@ -175,7 +175,7 @@ export const authApi = baseApi.injectEndpoints({
           'Content-Type': 'application/json',
         },
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
       onQueryStarted: async (data, { queryFulfilled }) => {
         try {
