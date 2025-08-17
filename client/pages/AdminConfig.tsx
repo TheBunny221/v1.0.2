@@ -952,51 +952,72 @@ const AdminConfig: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {complaintTypes.map((type) => (
-                    <TableRow key={type.id}>
-                      <TableCell className="font-medium">{type.name}</TableCell>
-                      <TableCell>{type.description}</TableCell>
-                      <TableCell>
-                        <Badge className={getPriorityColor(type.priority)}>
-                          {type.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{type.slaHours}h</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            type.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }
-                        >
-                          {type.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingComplaintType(type);
-                              setIsComplaintTypeDialogOpen(true);
-                            }}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteComplaintType(type.id)}
-                            disabled={isLoading}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                  {complaintTypesLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4">
+                        <RefreshCw className="h-4 w-4 animate-spin mx-auto mb-2" />
+                        Loading complaint types...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : complaintTypesError ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-red-600">
+                        Failed to load complaint types. Please try again.
+                      </TableCell>
+                    </TableRow>
+                  ) : complaintTypesResponse?.data?.length ? (
+                    complaintTypesResponse.data.map((type) => (
+                      <TableRow key={type.id}>
+                        <TableCell className="font-medium">{type.name}</TableCell>
+                        <TableCell>{type.description}</TableCell>
+                        <TableCell>
+                          <Badge className={getPriorityColor(type.priority)}>
+                            {type.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{type.slaHours}h</TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              type.isActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }
+                          >
+                            {type.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingComplaintType(type);
+                                setIsComplaintTypeDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteComplaintType(type.id)}
+                              disabled={isLoading}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                        No complaint types found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
