@@ -7,6 +7,7 @@ import {
   deleteSystemSetting,
   resetSystemSettings,
   getSystemHealth,
+  getPublicSystemSettings,
 } from "../controller/systemConfigController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { body, param } from "express-validator";
