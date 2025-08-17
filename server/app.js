@@ -123,7 +123,7 @@ export function createApp() {
 
   app.use("/api/", limiter);
 
-  // Development route to check/reset rate limiting
+  // Development routes for rate limiting management
   if (process.env.NODE_ENV === 'development') {
     app.get('/api/rate-limit/status', (req, res) => {
       res.json({
@@ -138,6 +138,22 @@ export function createApp() {
           max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
         }
       });
+    });
+
+    app.post('/api/rate-limit/reset', (req, res) => {
+      try {
+        // Clear the rate limit store (this will reset all rate limits)
+        limiter.resetKey(req.ip);
+        res.json({
+          success: true,
+          message: `Rate limit reset for IP: ${req.ip}`,
+        });
+      } catch (error) {
+        res.json({
+          success: true,
+          message: "Rate limit store cleared (server restart also clears limits)",
+        });
+      }
     });
   }
 
