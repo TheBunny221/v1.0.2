@@ -54,6 +54,9 @@ import FeedbackDialog from "../components/FeedbackDialog";
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Debug: Log authentication state
+  console.log('Authentication state:', { user: !!user, isAuthenticated, userId: user?.id });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
