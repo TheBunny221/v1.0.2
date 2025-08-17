@@ -29,40 +29,66 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Make the initial request
-  let result = await baseQuery(args, api, extraOptions);
+  const endpoint = typeof args === "string" ? args : args.url;
 
-  // Handle 401 unauthorized responses
-  if (result.error && result.error.status === 401) {
-    // Check if this is an auth-related endpoint to avoid logout loops
-    const endpoint = typeof args === "string" ? args : args.url;
-    const isAuthEndpoint =
-      typeof endpoint === "string" &&
-      (endpoint.includes("auth/login") ||
-        endpoint.includes("auth/register") ||
-        endpoint.includes("auth/verify-otp") ||
-        endpoint.includes("auth/login-otp") ||
-        endpoint.includes("auth/set-password"));
+  try {
+    // Make the initial request
+    let result = await baseQuery(args, api, extraOptions);
 
-    if (!isAuthEndpoint) {
-      // Clear auth state and localStorage
-      localStorage.removeItem("token");
-      api.dispatch(logout());
+    // Log for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`API Request to ${endpoint}:`, {
+        args,
+        result: result.error ? 'ERROR' : 'SUCCESS',
+        status: result.error?.status,
+        hasData: !!result.data
+      });
+    }
 
-      // Show toast notification
-      try {
-        toast({
-          title: "Session Expired",
-          description: "Please login again to continue.",
-          variant: "destructive",
-        });
-      } catch (toastError) {
-        console.warn("Toast notification failed:", toastError);
+    // Handle 401 unauthorized responses
+    if (result.error && result.error.status === 401) {
+      // Check if this is an auth-related endpoint to avoid logout loops
+      const isAuthEndpoint =
+        typeof endpoint === "string" &&
+        (endpoint.includes("auth/login") ||
+          endpoint.includes("auth/register") ||
+          endpoint.includes("auth/verify-otp") ||
+          endpoint.includes("auth/login-otp") ||
+          endpoint.includes("auth/set-password"));
+
+      if (!isAuthEndpoint) {
+        console.log("Session expired, logging out user");
+
+        // Clear auth state and localStorage
+        localStorage.removeItem("token");
+        api.dispatch(logout());
+
+        // Show toast notification
+        try {
+          toast({
+            title: "Session Expired",
+            description: "Please login again to continue.",
+            variant: "destructive",
+          });
+        } catch (toastError) {
+          console.warn("Toast notification failed:", toastError);
+        }
       }
     }
-  }
 
-  return result;
+    return result;
+  } catch (error) {
+    console.error(`API Error for ${endpoint}:`, error);
+
+    // Return a proper error response if something goes wrong
+    return {
+      error: {
+        status: 'FETCH_ERROR',
+        error: 'Network or parsing error occurred',
+        data: error
+      }
+    };
+  }
 };
 
 
