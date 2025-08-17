@@ -104,7 +104,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
