@@ -79,8 +79,8 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <ErrorBoundary>
-        <AppInitializer>
-          <SystemConfigProvider>
+        <SystemConfigProvider>
+          <AppInitializer>
             <OtpProvider>
               <Router>
               <div className="min-h-screen bg-gray-50">
@@ -386,8 +386,8 @@ const App: React.FC = () => {
               <GlobalMessageHandler />
               </Router>
             </OtpProvider>
-          </SystemConfigProvider>
-        </AppInitializer>
+          </AppInitializer>
+        </SystemConfigProvider>
       </ErrorBoundary>
     </Provider>
   );
