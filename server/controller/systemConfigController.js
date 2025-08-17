@@ -265,6 +265,31 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
   // Create default settings
   const defaultSettings = [
     {
+      key: "APP_NAME",
+      value: "Kochi Smart City",
+      description: "Application name displayed across the system",
+    },
+    {
+      key: "APP_LOGO_URL",
+      value: "/logo.png",
+      description: "URL for the application logo",
+    },
+    {
+      key: "COMPLAINT_ID_PREFIX",
+      value: "KSC",
+      description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+    },
+    {
+      key: "COMPLAINT_ID_START_NUMBER",
+      value: "1",
+      description: "Starting number for complaint ID sequence",
+    },
+    {
+      key: "COMPLAINT_ID_LENGTH",
+      value: "4",
+      description: "Length of the numeric part in complaint IDs",
+    },
+    {
       key: "OTP_EXPIRY_MINUTES",
       value: "5",
       description: "OTP expiration time in minutes",
