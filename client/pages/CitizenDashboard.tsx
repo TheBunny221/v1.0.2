@@ -56,6 +56,7 @@ import FeedbackDialog from "../components/FeedbackDialog";
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const { complaintTypeOptions } = useComplaintTypes();
 
   // Set document title
   useDocumentTitle("Dashboard");
