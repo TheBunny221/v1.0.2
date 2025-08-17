@@ -85,15 +85,14 @@ const CitizenDashboard: React.FC = () => {
     statsResponseKeys: statsResponse ? Object.keys(statsResponse) : null
   });
 
+  // Extract complaints from the actual API response structure
+  // Backend returns: { success: true, data: { complaints: [...], pagination: {...} } }
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
     ? complaintsResponse.data.complaints
-    : Array.isArray(complaintsResponse?.data)
-    ? complaintsResponse.data
-    : Array.isArray(complaintsResponse)
-    ? complaintsResponse
     : [];
 
   console.log('Extracted complaints:', complaints);
+  console.log('Complaints count:', complaints.length);
   const pagination = complaintsResponse?.data?.pagination || {
     currentPage: 1,
     totalPages: 1,
