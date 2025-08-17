@@ -460,7 +460,7 @@ const GuestComplaintForm: React.FC = () => {
 
                 <div>
                   <h2 className="text-2xl font-bold text-green-800">
-                    Welcome to Cochin Smart City!
+                    Welcome to {appName}!
                   </h2>
                   <p className="text-green-700 mt-2">
                     Your complaint has been verified and you've been registered
