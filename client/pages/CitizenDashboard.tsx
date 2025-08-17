@@ -469,19 +469,11 @@ const CitizenDashboard: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="WATER_SUPPLY">Water Supply</SelectItem>
-                  <SelectItem value="ELECTRICITY">Electricity</SelectItem>
-                  <SelectItem value="ROAD_REPAIR">Road Repair</SelectItem>
-                  <SelectItem value="GARBAGE_COLLECTION">
-                    Garbage Collection
-                  </SelectItem>
-                  <SelectItem value="STREET_LIGHTING">
-                    Street Lighting
-                  </SelectItem>
-                  <SelectItem value="SEWERAGE">Sewerage</SelectItem>
-                  <SelectItem value="PUBLIC_HEALTH">Public Health</SelectItem>
-                  <SelectItem value="TRAFFIC">Traffic</SelectItem>
-                  <SelectItem value="OTHERS">Others</SelectItem>
+                  {complaintTypeOptions.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
