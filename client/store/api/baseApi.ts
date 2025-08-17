@@ -7,7 +7,7 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Create the base query with enhanced error handling
+// Create the base query without response interference
 const baseQuery = fetchBaseQuery({
   baseUrl: '/api/',
   prepareHeaders: (headers, { getState }) => {
@@ -27,18 +27,6 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
   timeout: 30000,
-  // Handle response errors more gracefully
-  responseHandler: (response) => {
-    // Let RTK Query handle the response parsing naturally
-    return response.text().then(text => {
-      try {
-        return text ? JSON.parse(text) : {};
-      } catch {
-        // If JSON parsing fails, return the text as is
-        return { message: text || 'Unknown response' };
-      }
-    });
-  },
 });
 
 // Enhanced base query with authentication handling
