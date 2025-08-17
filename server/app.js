@@ -123,6 +123,24 @@ export function createApp() {
 
   app.use("/api/", limiter);
 
+  // Development route to check/reset rate limiting
+  if (process.env.NODE_ENV === 'development') {
+    app.get('/api/rate-limit/status', (req, res) => {
+      res.json({
+        success: true,
+        ip: req.ip,
+        headers: {
+          'x-forwarded-for': req.headers['x-forwarded-for'],
+          'x-real-ip': req.headers['x-real-ip'],
+        },
+        rateLimit: {
+          windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+          max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
+        }
+      });
+    });
+  }
+
   // CORS configuration
   app.use(
     cors({
