@@ -105,16 +105,20 @@ export function createApp() {
     }),
   );
 
-  // Rate limiting
+  // Rate limiting - more lenient for development
   const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // limit each IP to 100 requests per windowMs
+    max: parseInt(process.env.RATE_LIMIT_MAX) || (process.env.NODE_ENV === 'development' ? 1000 : 100), // Higher limit for development
     message: {
       success: false,
       message: "Too many requests from this IP, please try again later.",
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Skip rate limiting for certain conditions in development
+    skip: (req) => {
+      return process.env.NODE_ENV === 'development' && req.ip === '127.0.0.1';
+    },
   });
 
   app.use("/api/", limiter);
