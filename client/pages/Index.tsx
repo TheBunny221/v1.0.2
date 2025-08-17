@@ -266,7 +266,7 @@ const Index: React.FC = () => {
             <div className="flex items-center justify-center mb-4">
               <Shield className="h-12 w-12 text-primary mr-3" />
               <h1 className="text-4xl font-bold text-gray-900">
-                {translations?.nav?.home || "Cochin Smart City Portal"}
+                {translations?.nav?.home || `${appName} Portal`}
               </h1>
             </div>
             <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
@@ -755,7 +755,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
                         : currentLanguage === "ml"
-                          ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
+                          ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ���പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
                           : "Monitor complaint progress in real time with instant updates"}
                     </div>
                   </div>
