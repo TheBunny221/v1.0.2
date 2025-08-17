@@ -10,12 +10,18 @@ import { toast } from "../../components/ui/use-toast";
 // Create the base query once to avoid response body conflicts
 const baseQuery = fetchBaseQuery({
   baseUrl: '/api/',
-  prepareHeaders: (headers) => {
-    // Get token from localStorage directly for consistency
-    const token = localStorage.getItem("token");
+  prepareHeaders: (headers, { getState }) => {
+    // Try to get token from Redux state first, then localStorage
+    const state = getState() as any;
+    const token = state?.auth?.token || localStorage.getItem("token");
 
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
+    }
+
+    // Ensure content-type is set for JSON requests
+    if (!headers.get('content-type')) {
+      headers.set('content-type', 'application/json');
     }
 
     return headers;
