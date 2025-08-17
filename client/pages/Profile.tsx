@@ -645,7 +645,18 @@ const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <Button onClick={handleChangePassword} className="w-full">
+              {/* Password Requirements */}
+              <div className="text-sm text-gray-600 space-y-1">
+                <p className="font-medium">Password Requirements:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>At least 6 characters long</li>
+                  <li>Contains at least one uppercase letter (A-Z)</li>
+                  <li>Contains at least one lowercase letter (a-z)</li>
+                  <li>Contains at least one number (0-9)</li>
+                </ul>
+              </div>
+
+              <Button onClick={handleChangePassword} className="w-full" disabled={isLoading}>
                 {!user?.hasPassword
                   ? "Set Up Password"
                   : (translations?.profile?.changePassword || "Change Password")
