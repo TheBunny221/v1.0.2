@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import {
   Card,
   CardContent,
