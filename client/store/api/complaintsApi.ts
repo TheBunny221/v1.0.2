@@ -167,7 +167,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<Complaint>,
+      // Let RTK Query handle response naturally
       invalidatesTags: (result, error, { id }) => [
         { type: "Complaint", id },
         { type: "Complaint", id: "LIST" },
@@ -214,7 +214,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { assignedTo, remarks },
       }),
-      transformResponse: transformResponse<Complaint>,
+      // Let RTK Query handle response naturally
       invalidatesTags: (result, error, { id }) => [
         { type: "Complaint", id },
         { type: "Complaint", id: "LIST" },
@@ -231,7 +231,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { status, remarks },
       }),
-      transformResponse: transformResponse<Complaint>,
+      // Let RTK Query handle response naturally
       invalidatesTags: (result, error, { id }) => [
         { type: "Complaint", id },
         { type: "Complaint", id: "LIST" },
@@ -248,7 +248,7 @@ export const complaintsApi = baseApi.injectEndpoints({
         method: "POST",
         body: { citizenFeedback: feedback, rating },
       }),
-      transformResponse: transformResponse<Complaint>,
+      // Let RTK Query handle response naturally
       invalidatesTags: (result, error, { id }) => [
         { type: "Complaint", id },
         { type: "Complaint", id: "LIST" },
