@@ -113,9 +113,14 @@ const AdminConfig: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
 
+  // API queries
+  const { data: complaintTypesResponse, isLoading: complaintTypesLoading, error: complaintTypesError } = useGetComplaintTypesQuery();
+  const [createComplaintType] = useCreateComplaintTypeMutation();
+  const [updateComplaintType] = useUpdateComplaintTypeMutation();
+  const [deleteComplaintType] = useDeleteComplaintTypeMutation();
+
   // State management
   const [wards, setWards] = useState<Ward[]>([]);
-  const [complaintTypes, setComplaintTypes] = useState<ComplaintType[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
   const [editingWard, setEditingWard] = useState<Ward | null>(null);
   const [editingSubZone, setEditingSubZone] = useState<SubZone | null>(null);
