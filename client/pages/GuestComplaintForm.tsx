@@ -172,6 +172,7 @@ const GuestComplaintForm: React.FC = () => {
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
+  const { appName } = useSystemConfig();
 
   // Fetch wards from API
   const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
