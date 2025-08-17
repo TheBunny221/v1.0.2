@@ -299,7 +299,7 @@ router.post("/login-otp", authLimiter, validateOTPRequest, loginWithOTP);
  *       400:
  *         description: Invalid or expired OTP
  */
-router.post("/verify-otp", validateOTP, verifyOTPLogin);
+router.post("/verify-otp", authLimiter, validateOTP, verifyOTPLogin);
 
 /**
  * @swagger
