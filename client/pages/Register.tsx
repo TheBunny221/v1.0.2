@@ -37,6 +37,7 @@ const Register: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { handleApiError } = useApiErrorHandler();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
+  const { appName, appLogoUrl } = useSystemConfig();
 
   // API hooks
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
