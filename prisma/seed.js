@@ -461,7 +461,7 @@ async function main() {
       }
     }
 
-    // 7. Create Sample Service Requests
+    // 8. Create Sample Service Requests
     console.log("🔧 Creating sample service requests...");
     const serviceTypes = [
       "BIRTH_CERTIFICATE",
