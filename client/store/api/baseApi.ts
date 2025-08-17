@@ -36,40 +36,40 @@ const baseQueryWithReauth: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const endpoint = typeof args === "string" ? args : args.url;
-  
-  try {
-    // Make the initial request
-    let result = await baseQuery(args, api, extraOptions);
 
-    // Log for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`API Request to ${endpoint}:`, {
-        args,
-        result: result.error ? 'ERROR' : 'SUCCESS',
-        status: result.error?.status,
-        hasData: !!result.data
-      });
-    }
+  // Make the initial request without try-catch to avoid interfering with response stream
+  let result = await baseQuery(args, api, extraOptions);
 
-    // Handle 401 unauthorized responses
-    if (result.error && result.error.status === 401) {
-      // Check if this is an auth-related endpoint to avoid logout loops
-      const isAuthEndpoint =
-        typeof endpoint === "string" &&
-        (endpoint.includes("auth/login") ||
-          endpoint.includes("auth/register") ||
-          endpoint.includes("auth/verify-otp") ||
-          endpoint.includes("auth/login-otp") ||
-          endpoint.includes("auth/set-password"));
+  // Log for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`API Request to ${endpoint}:`, {
+      args,
+      result: result.error ? 'ERROR' : 'SUCCESS',
+      status: result.error?.status,
+      hasData: !!result.data
+    });
+  }
 
-      if (!isAuthEndpoint) {
-        console.log("Session expired, logging out user");
-        
-        // Clear auth state and localStorage
-        localStorage.removeItem("token");
-        api.dispatch(logout());
+  // Handle 401 unauthorized responses
+  if (result.error && result.error.status === 401) {
+    // Check if this is an auth-related endpoint to avoid logout loops
+    const isAuthEndpoint =
+      typeof endpoint === "string" &&
+      (endpoint.includes("auth/login") ||
+        endpoint.includes("auth/register") ||
+        endpoint.includes("auth/verify-otp") ||
+        endpoint.includes("auth/login-otp") ||
+        endpoint.includes("auth/set-password"));
 
-        // Show toast notification
+    if (!isAuthEndpoint) {
+      console.log("Session expired, logging out user");
+
+      // Clear auth state and localStorage
+      localStorage.removeItem("token");
+      api.dispatch(logout());
+
+      // Show toast notification in a non-blocking way
+      setTimeout(() => {
         try {
           toast({
             title: "Session Expired",
@@ -79,22 +79,11 @@ const baseQueryWithReauth: BaseQueryFn<
         } catch (toastError) {
           console.warn("Toast notification failed:", toastError);
         }
-      }
+      }, 0);
     }
-
-    return result;
-  } catch (error) {
-    console.error(`API Error for ${endpoint}:`, error);
-    
-    // Return a proper error response if something goes wrong
-    return {
-      error: {
-        status: 'FETCH_ERROR',
-        error: 'Network or parsing error occurred',
-        data: error
-      }
-    };
   }
+
+  return result;
 };
 
 
