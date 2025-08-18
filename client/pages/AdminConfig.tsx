@@ -141,6 +141,9 @@ const AdminConfig: React.FC = () => {
     null,
   );
   const [expandedWards, setExpandedWards] = useState<Set<string>>(new Set());
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUploadMode, setLogoUploadMode] = useState<'url' | 'file'>('url');
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
