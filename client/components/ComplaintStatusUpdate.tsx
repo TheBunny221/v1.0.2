@@ -71,13 +71,13 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
 
   const isLoading = isUpdatingStatus || isAssigning;
 
-  // Mock team members - in real app, fetch from API
-  const teamMembers = [
-    { id: 'maintenance-1', name: 'John Smith - Electrical' },
-    { id: 'maintenance-2', name: 'Sarah Johnson - Water Works' },
-    { id: 'maintenance-3', name: 'Mike Davis - Road Maintenance' },
-    { id: 'maintenance-4', name: 'Lisa Wong - Sanitation' },
-  ];
+  // Fetch team members for the current ward
+  const { data: teamResponse, isLoading: teamLoading } = useGetWardTeamMembersQuery(
+    user?.wardId || '',
+    { skip: !user?.wardId || user?.role !== "WARD_OFFICER" }
+  );
+
+  const teamMembers = teamResponse?.data?.teamMembers || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
