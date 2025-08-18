@@ -542,6 +542,44 @@ const AdminConfig: React.FC = () => {
     }
   };
 
+  // Quick toggle for active status
+  const handleToggleComplaintTypeStatus = async (type: ComplaintType) => {
+    try {
+      const updatedData = {
+        name: type.name,
+        description: type.description,
+        priority: type.priority,
+        slaHours: type.slaHours,
+        isActive: !type.isActive, // Toggle the status
+      };
+
+      console.log(`Toggling complaint type ${type.name} to ${!type.isActive ? 'Active' : 'Inactive'}`);
+
+      await updateComplaintType({
+        id: type.id,
+        data: updatedData,
+      }).unwrap();
+
+      // Force a refetch to ensure UI is updated
+      await refetchComplaintTypes();
+
+      dispatch(
+        showSuccessToast(
+          "Status Updated",
+          `${type.name} is now ${!type.isActive ? 'Active' : 'Inactive'}`,
+        ),
+      );
+    } catch (error: any) {
+      console.error('Error toggling complaint type status:', error);
+      dispatch(
+        showErrorToast(
+          "Update Failed",
+          error.message || "Failed to update complaint type status. Please try again.",
+        ),
+      );
+    }
+  };
+
   const handleDeleteComplaintType = async (typeId: string) => {
     if (!confirm("Are you sure you want to delete this complaint type?"))
       return;
