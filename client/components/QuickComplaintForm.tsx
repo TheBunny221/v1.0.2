@@ -739,11 +739,29 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                 *
               </h3>
               <div className="flex items-center space-x-4">
-                <div className="bg-gray-100 px-4 py-2 rounded border font-mono text-lg tracking-wider">
-                  {captchaValue}
+                <div className="bg-gray-100 p-2 rounded border min-h-[60px] flex items-center justify-center">
+                  {captchaLoading ? (
+                    <div className="text-sm text-gray-500">Loading CAPTCHA...</div>
+                  ) : captchaError ? (
+                    <div className="text-sm text-red-500">Error loading CAPTCHA</div>
+                  ) : captchaData?.success && captchaData.data ? (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: captchaData.data.captchaSvg }}
+                      className="captcha-svg"
+                    />
+                  ) : (
+                    <div className="text-sm text-gray-500">Click refresh to load CAPTCHA</div>
+                  )}
                 </div>
-                <Button type="button" variant="outline" size="icon">
-                  <RefreshCw className="h-4 w-4" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleRefreshCaptcha}
+                  disabled={captchaLoading}
+                  title="Refresh CAPTCHA"
+                >
+                  <RefreshCw className={`h-4 w-4 ${captchaLoading ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
               <Input
