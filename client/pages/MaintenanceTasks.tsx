@@ -441,32 +441,6 @@ const MaintenanceTasks: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Field Tools</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="w-full">
-              <Camera className="h-4 w-4 mr-2" />
-              Photo Report
-            </Button>
-            <Button variant="outline" className="w-full">
-              <Navigation className="h-4 w-4 mr-2" />
-              GPS Tools
-            </Button>
-            <Button variant="outline" className="w-full">
-              <Clock className="h-4 w-4 mr-2" />
-              Time Tracker
-            </Button>
-            <Button variant="outline" className="w-full">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Report Issue
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Mark as Resolved Dialog */}
       <Dialog open={isMarkResolvedOpen} onOpenChange={setIsMarkResolvedOpen}>
