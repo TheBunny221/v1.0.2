@@ -14,6 +14,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
+import { Logo } from "./ui/logo";
 import {
   Home,
   FileText,
@@ -308,7 +309,7 @@ const Navigation: React.FC = () => {
                     <DropdownMenuItem
                       onClick={() => handleLanguageChange("ml")}
                     >
-                      മലयാळം
+                      ���ലयാळം
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
