@@ -132,6 +132,25 @@ const Index: React.FC = () => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleLocationSelect = (location: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    area?: string;
+    landmark?: string;
+  }) => {
+    setFormData((prev) => ({
+      ...prev,
+      location: location.landmark || location.address || '',
+      area: location.area || prev.area,
+      address: location.address || prev.address,
+      coordinates: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    }));
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
