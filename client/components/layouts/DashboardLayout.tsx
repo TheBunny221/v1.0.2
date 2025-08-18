@@ -1,5 +1,4 @@
 import React from "react";
-import Navigation from "../Navigation";
 import SidebarNav from "../ui/sidebar-nav";
 import { cn } from "../../lib/utils";
 
