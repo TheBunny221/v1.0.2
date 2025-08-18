@@ -83,7 +83,7 @@ const generateCaptchaSVG = (text) => {
   `;
 };
 
-exports.generateCaptcha = async (req, res) => {
+export const generateCaptcha = async (req, res) => {
   try {
     const captchaText = generateCaptchaText();
     const captchaId = crypto.randomUUID();
