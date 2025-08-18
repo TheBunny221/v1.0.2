@@ -41,7 +41,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
-  const { appName, appLogoUrl } = useSystemConfig();
+  const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
 
   // Set document title
   useDocumentTitle("Login");
