@@ -226,21 +226,25 @@ const App: React.FC = () => {
                       <Route
                         path="/tasks"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["WARD_OFFICER"]}
-                          >
-                            <WardTasks />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["WARD_OFFICER"]}
+                            >
+                              <WardTasks />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/ward"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["WARD_OFFICER"]}
-                          >
-                            <WardManagement />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["WARD_OFFICER"]}
+                            >
+                              <WardManagement />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
@@ -248,21 +252,25 @@ const App: React.FC = () => {
                       <Route
                         path="/maintenance"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["MAINTENANCE_TEAM"]}
-                          >
-                            <MaintenanceTasks />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["MAINTENANCE_TEAM"]}
+                            >
+                              <MaintenanceTasks />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/tasks/:id"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["MAINTENANCE_TEAM"]}
-                          >
-                            <TaskDetails />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["MAINTENANCE_TEAM"]}
+                            >
+                              <TaskDetails />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
