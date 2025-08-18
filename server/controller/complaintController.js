@@ -935,7 +935,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
       userId: req.user.id,
       fromStatus: complaint.status,
       toStatus: "ASSIGNED",
-      comment: `Assigned to ${assignee.fullName}`,
+      comment: remarks || `Assigned to ${assignee.fullName}`,
     },
   });
 
