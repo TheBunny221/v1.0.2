@@ -121,3 +121,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* CAPTCHA styling */
+.captcha-svg svg {
+  width: 160px;
+  height: 60px;
+  display: block;
+  border-radius: 4px;
+}
