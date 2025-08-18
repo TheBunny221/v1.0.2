@@ -64,6 +64,34 @@ const Navigation: React.FC = () => {
   const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
+  // Close mobile menu on escape key
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isMobileMenuOpen) {
+        const target = e.target as Element;
+        const nav = target.closest('nav');
+        if (!nav) {
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMobileMenuOpen]);
+
   const navigationItems: NavigationItem[] = [
     {
       label: translations.nav.home,
