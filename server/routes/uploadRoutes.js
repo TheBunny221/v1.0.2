@@ -33,6 +33,8 @@ const storage = multer.diskStorage({
       uploadPath = path.join(uploadDir, "profiles");
     } else if (file.fieldname === "complaintAttachment") {
       uploadPath = path.join(uploadDir, "complaints");
+    } else if (file.fieldname === "logo") {
+      uploadPath = path.join(uploadDir, "logos");
     }
 
     // Ensure directory exists
