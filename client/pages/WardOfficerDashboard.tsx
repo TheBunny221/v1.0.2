@@ -132,7 +132,8 @@ const WardOfficerDashboard: React.FC = () => {
   const recentComplaints = wardComplaints.slice(0, 5);
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
@@ -474,7 +475,8 @@ const WardOfficerDashboard: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
