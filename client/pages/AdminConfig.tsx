@@ -980,7 +980,7 @@ const AdminConfig: React.FC = () => {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => window.location.reload()}
+                    onClick={() => refetchComplaintTypes()}
                     size="sm"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
