@@ -426,10 +426,12 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     });
     setFiles([]);
     setCaptcha("");
+    setCaptchaId(null);
     setOtpCode("");
     setComplaintId(null);
     setShowOtpInput(false);
-  }, [isAuthenticated, user]);
+    handleRefreshCaptcha();
+  }, [isAuthenticated, user, handleRefreshCaptcha]);
 
   return (
     <div className="max-w-4xl mx-auto">
