@@ -22,7 +22,7 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
       <div className="flex">
         {/* Sidebar Navigation */}
         <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
-          <SidebarNav defaultCollapsed={sidebarCollapsed} />
+          <SimplifiedSidebarNav defaultCollapsed={sidebarCollapsed} />
         </div>
         
         {/* Main Content */}
