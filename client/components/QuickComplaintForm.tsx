@@ -103,7 +103,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   });
   const [files, setFiles] = useState<File[]>([]);
   const [captcha, setCaptcha] = useState("");
-  const [captchaValue] = useState("A3X7M"); // Mock captcha
+  const [captchaId, setCaptchaId] = useState<string | null>(null);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [submissionMode, setSubmissionMode] = useState<"citizen" | "guest">(
     isAuthenticated ? "citizen" : "guest"
