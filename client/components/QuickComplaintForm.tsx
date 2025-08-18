@@ -135,6 +135,25 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     }
   }, [isAuthenticated, user]);
 
+  // Generate CAPTCHA on component mount
+  useEffect(() => {
+    handleRefreshCaptcha();
+  }, []);
+
+  // Update CAPTCHA ID when new CAPTCHA is generated
+  useEffect(() => {
+    if (captchaData?.success && captchaData.data) {
+      setCaptchaId(captchaData.data.captchaId);
+    }
+  }, [captchaData]);
+
+  // Handle CAPTCHA refresh
+  const handleRefreshCaptcha = useCallback(() => {
+    setCaptcha("");
+    setCaptchaId(null);
+    generateCaptcha();
+  }, [generateCaptcha]);
+
   // Icon mapping for different complaint types
   const getIconForComplaintType = (type: string) => {
     const iconMap: { [key: string]: React.ReactNode } = {
