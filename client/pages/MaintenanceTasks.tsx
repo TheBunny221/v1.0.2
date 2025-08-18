@@ -257,51 +257,79 @@ const MaintenanceTasks: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      {/* Task Count Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("all")}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Today's Tasks
-                </p>
-                <p className="text-2xl font-bold">5</p>
+                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                <p className="text-2xl font-bold text-blue-600">{taskCounts.total}</p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <ListTodo className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "pending" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("pending")}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-2xl font-bold text-orange-600">2</p>
+                <p className="text-sm font-medium text-gray-600">Pending Tasks</p>
+                <p className="text-2xl font-bold text-blue-600">{taskCounts.pending}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
+              <Clock className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "overdue" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("overdue")}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-green-600">8</p>
+                <p className="text-sm font-medium text-gray-600">Overdue Tasks</p>
+                <p className="text-2xl font-bold text-red-600">{taskCounts.overdue}</p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("resolved")}
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Resolved Tasks</p>
+                <p className="text-2xl font-bold text-green-600">{taskCounts.resolved}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "reopened" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("reopened")}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Efficiency</p>
-                <p className="text-2xl font-bold text-purple-600">94%</p>
+                <p className="text-sm font-medium text-gray-600">Reopened Tasks</p>
+                <p className="text-2xl font-bold text-purple-600">{taskCounts.reopened}</p>
               </div>
-              <Wrench className="h-8 w-8 text-purple-600" />
+              <RotateCcw className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
