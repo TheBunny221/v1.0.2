@@ -976,22 +976,32 @@ const AdminConfig: React.FC = () => {
                   <FileText className="h-5 w-5 mr-2" />
                   Complaint Type Management
                 </CardTitle>
-                <Button
-                  onClick={() => {
-                    setEditingComplaintType({
-                      id: "",
-                      name: "",
-                      description: "",
-                      priority: "MEDIUM",
-                      slaHours: 48,
-                      isActive: true,
-                    });
-                    setIsComplaintTypeDialogOpen(true);
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Type
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => window.location.reload()}
+                    size="sm"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setEditingComplaintType({
+                        id: "",
+                        name: "",
+                        description: "",
+                        priority: "MEDIUM",
+                        slaHours: 48,
+                        isActive: true,
+                      });
+                      setIsComplaintTypeDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Type
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
