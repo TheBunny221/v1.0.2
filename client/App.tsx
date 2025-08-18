@@ -187,7 +187,7 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                              <UnifiedComplaintForm />
+                              <QuickComplaintPage />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
@@ -197,7 +197,7 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                              <UnifiedComplaintForm />
+                              <QuickComplaintPage />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
