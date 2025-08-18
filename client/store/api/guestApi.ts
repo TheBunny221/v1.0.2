@@ -152,7 +152,7 @@ export const guestApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/guest/wards",
-      transformResponse: transformResponse,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Ward"],
     }),
   }),
