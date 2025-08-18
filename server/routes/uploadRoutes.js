@@ -188,6 +188,51 @@ router.post(
 
 /**
  * @swagger
+ * /api/uploads/logo:
+ *   post:
+ *     summary: Upload application logo
+ *     tags: [Uploads]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               logo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Logo image file (JPEG, PNG, GIF, WEBP, SVG)
+ *     responses:
+ *       200:
+ *         description: Logo uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/FileUpload'
+ *       400:
+ *         description: Invalid file or upload error
+ *       401:
+ *         description: Unauthorized
+ *       413:
+ *         description: File too large
+ */
+router.post(
+  "/logo",
+  protect,
+  upload.single("logo"),
+  uploadLogo,
+);
+
+/**
+ * @swagger
  * /api/uploads/{id}:
  *   get:
  *     summary: Get uploaded file
