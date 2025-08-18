@@ -43,6 +43,7 @@ import {
   Eye,
   Info,
   UserCheck,
+  Image,
 } from "lucide-react";
 
 interface CitizenComplaintData {
