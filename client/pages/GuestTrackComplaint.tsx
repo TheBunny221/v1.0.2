@@ -419,9 +419,12 @@ const GuestTrackComplaint: React.FC = () => {
                 <p className="text-sm text-gray-600 mb-3">
                   Have another issue? Submit a new complaint.
                 </p>
-                <Link to="/guest/complaint">
-                  <Button variant="outline">New Complaint</Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsQuickFormOpen(true)}
+                >
+                  New Complaint
+                </Button>
               </div>
               <div>
                 <h3 className="font-medium mb-2">Contact Support</h3>
