@@ -37,6 +37,7 @@ import {
   Image,
   Download,
 } from "lucide-react";
+import jsPDF from "jspdf";
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
