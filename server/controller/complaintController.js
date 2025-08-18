@@ -321,11 +321,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
   }
 
   // --- search filter ---
+  // Note: SQLite doesn't support mode: "insensitive". For case-insensitive search in SQLite,
+  // we would need to use raw SQL or convert to lowercase on both sides.
+  // For now, using case-sensitive search for SQLite compatibility.
   if (search) {
     filters.OR = [
-      { title: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-      { area: { contains: search, mode: "insensitive" } },
+      { title: { contains: search } },
+      { description: { contains: search } },
+      { area: { contains: search } },
     ];
   }
 
