@@ -72,6 +72,7 @@ const Index: React.FC = () => {
   const [captcha, setCaptcha] = useState("");
   const [captchaValue] = useState("A3X7M"); // Mock captcha
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   // Pre-fill user data if authenticated
   useEffect(() => {
