@@ -278,9 +278,12 @@ const Navigation: React.FC = () => {
           </div>
 
           {/* Mobile Navigation Menu for unauthenticated users */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 bg-white">
+          <div
+            className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+              isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <div className="px-4 pt-3 pb-4 space-y-3 border-t border-gray-200 bg-white shadow-lg">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -339,9 +342,8 @@ const Navigation: React.FC = () => {
                       "Sign Up"}
                   </Button>
                 </Link>
-              </div>
             </div>
-          )}
+          </div>
         </div>
       </nav>
     );
