@@ -7,15 +7,23 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Create a simple base query without any custom response handling
+// Create the most basic possible base query
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api/",
   prepareHeaders: (headers, { getState }) => {
-    const state = getState() as any;
-    const token = state?.auth?.token || localStorage.getItem("token");
+    try {
+      const state = getState() as any;
+      const token = state?.auth?.token || localStorage.getItem("token");
 
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+    } catch (error) {
+      // Silently handle any state access errors
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
     }
 
     return headers;
