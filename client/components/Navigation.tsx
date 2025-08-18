@@ -61,7 +61,7 @@ const Navigation: React.FC = () => {
     (state) => state.language,
   );
   const { notifications } = useAppSelector((state) => state.ui);
-  const { appName, appLogoUrl } = useSystemConfig();
+  const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const navigationItems: NavigationItem[] = [
@@ -309,7 +309,7 @@ const Navigation: React.FC = () => {
                     <DropdownMenuItem
                       onClick={() => handleLanguageChange("ml")}
                     >
-                      ���ലयാळം
+                      മലयാळം
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
