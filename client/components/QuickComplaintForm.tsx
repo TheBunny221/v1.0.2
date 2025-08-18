@@ -14,6 +14,8 @@ import {
 import {
   useGetWardsQuery,
   useVerifyGuestOtpMutation,
+  useGenerateCaptchaQuery,
+  useLazyGenerateCaptchaQuery,
 } from "../store/api/guestApi";
 import {
   selectAuth,
