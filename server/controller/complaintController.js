@@ -93,6 +93,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     description,
     type,
     priority,
+    slaHours,
     wardId,
     subZoneId,
     area,
@@ -105,16 +106,20 @@ export const createComplaint = asyncHandler(async (req, res) => {
     isAnonymous,
   } = req.body;
 
-  // Set deadline based on priority (in hours)
-  const priorityHours = {
-    LOW: 72,
-    MEDIUM: 48,
-    HIGH: 24,
-    CRITICAL: 8,
-  };
+  // Use provided slaHours or fallback to priority-based hours
+  let deadlineHours = slaHours;
+  if (!deadlineHours) {
+    const priorityHours = {
+      LOW: 72,
+      MEDIUM: 48,
+      HIGH: 24,
+      CRITICAL: 8,
+    };
+    deadlineHours = priorityHours[priority || "MEDIUM"];
+  }
 
   const deadline = new Date(
-    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
+    Date.now() + deadlineHours * 60 * 60 * 1000,
   );
 
   // Generate unique complaint ID
