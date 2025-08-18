@@ -467,6 +467,70 @@ const MaintenanceTasks: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Mark as Resolved Dialog */}
+      <Dialog open={isMarkResolvedOpen} onOpenChange={setIsMarkResolvedOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark Task as Resolved</DialogTitle>
+          </DialogHeader>
+          {selectedTask && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium">{selectedTask.title}</h4>
+                <p className="text-sm text-gray-600">{selectedTask.location}</p>
+              </div>
+
+              <div>
+                <Label htmlFor="resolveComment">Completion Notes</Label>
+                <Textarea
+                  id="resolveComment"
+                  value={resolveComment}
+                  onChange={(e) => setResolveComment(e.target.value)}
+                  placeholder="Add notes about the work completed..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="resolvePhoto">Upload Completion Photo</Label>
+                <Input
+                  id="resolvePhoto"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setResolvePhoto(e.target.files?.[0] || null)}
+                />
+                {resolvePhoto && (
+                  <p className="text-sm text-green-600 mt-1">
+                    Photo selected: {resolvePhoto.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsMarkResolvedOpen(false);
+                    setResolveComment("");
+                    setResolvePhoto(null);
+                    setSelectedTask(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={submitMarkResolved}
+                  disabled={!resolveComment.trim()}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Mark Resolved
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
