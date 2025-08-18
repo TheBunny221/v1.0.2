@@ -200,7 +200,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                   <SelectValue placeholder="Select team member" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {teamLoading ? (
                     <SelectItem value="loading" disabled>
                       Loading team members...
