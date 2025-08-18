@@ -1090,15 +1090,27 @@ const AdminConfig: React.FC = () => {
                         </TableCell>
                         <TableCell>{type.slaHours}h</TableCell>
                         <TableCell>
-                          <Badge
-                            className={
-                              type.isActive
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                            }
-                          >
-                            {type.isActive ? "Active" : "Inactive"}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              className={
+                                type.isActive
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {type.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleToggleComplaintTypeStatus(type)}
+                              disabled={isLoading}
+                              className="h-6 w-6 p-0"
+                              title={`Make ${type.isActive ? 'Inactive' : 'Active'}`}
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
