@@ -1087,13 +1087,25 @@ const UnifiedComplaintForm: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="landmark">Landmark (Optional)</Label>
-                      <Input
-                        id="landmark"
-                        name="landmark"
-                        placeholder="Nearby landmark"
-                        value={formData.landmark}
-                        onChange={handleInputChange}
-                      />
+                      <div className="flex space-x-2">
+                        <Input
+                          id="landmark"
+                          name="landmark"
+                          placeholder="Nearby landmark"
+                          value={formData.landmark}
+                          onChange={handleInputChange}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setIsMapDialogOpen(true)}
+                          title="Select location on map"
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
