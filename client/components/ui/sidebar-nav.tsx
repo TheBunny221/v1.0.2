@@ -30,6 +30,9 @@ import {
   Wrench,
   Shield,
   UserCheck,
+  LogOut,
+  Globe,
+  User,
 } from "lucide-react";
 
 interface SidebarNavItem {
