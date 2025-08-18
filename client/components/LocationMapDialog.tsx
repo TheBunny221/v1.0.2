@@ -1,0 +1,289 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { MapPin, Navigation, Search } from 'lucide-react';
+
+// Fix for default markers in react-leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+  area?: string;
+  landmark?: string;
+}
+
+interface LocationMapDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLocationSelect: (location: LocationData) => void;
+  initialLocation?: LocationData;
+}
+
+// Custom hook for map click events
+function LocationMarker({ position, onPositionChange }: {
+  position: [number, number];
+  onPositionChange: (position: [number, number]) => void;
+}) {
+  const map = useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      onPositionChange([lat, lng]);
+    },
+  });
+
+  return position ? <Marker position={position} /> : null;
+}
+
+const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
+  isOpen,
+  onClose,
+  onLocationSelect,
+  initialLocation,
+}) => {
+  // Default to Kochi, India coordinates
+  const defaultPosition: [number, number] = [9.9312, 76.2673];
+  const [position, setPosition] = useState<[number, number]>(
+    initialLocation ? [initialLocation.latitude, initialLocation.longitude] : defaultPosition
+  );
+  const [address, setAddress] = useState(initialLocation?.address || '');
+  const [area, setArea] = useState(initialLocation?.area || '');
+  const [landmark, setLandmark] = useState(initialLocation?.landmark || '');
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const mapRef = useRef<L.Map>(null);
+
+  // Get current location
+  const getCurrentLocation = () => {
+    setIsLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newPos: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setPosition(newPos);
+          reverseGeocode(newPos);
+          setIsLoadingLocation(false);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setIsLoadingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+      );
+    } else {
+      setIsLoadingLocation(false);
+      alert('Geolocation is not supported by this browser.');
+    }
+  };
+
+  // Reverse geocoding to get address from coordinates
+  const reverseGeocode = async (coords: [number, number]) => {
+    try {
+      // Using OpenStreetMap Nominatim API for reverse geocoding
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${coords[0]}&lon=${coords[1]}&format=json&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.display_name) {
+        setAddress(data.display_name);
+        
+        // Extract area information
+        const addressComponents = data.address;
+        if (addressComponents) {
+          const detectedArea = addressComponents.neighbourhood || 
+                              addressComponents.suburb || 
+                              addressComponents.city_district || 
+                              addressComponents.state_district ||
+                              addressComponents.city ||
+                              '';
+          setArea(detectedArea);
+        }
+      }
+    } catch (error) {
+      console.error('Error in reverse geocoding:', error);
+    }
+  };
+
+  // Search for a location
+  const searchLocation = async () => {
+    if (!searchQuery.trim()) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ', Kochi, Kerala, India')}&format=json&limit=1&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const result = data[0];
+        const newPos: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)];
+        setPosition(newPos);
+        setAddress(result.display_name);
+        
+        // Extract area information
+        const addressComponents = result.address;
+        if (addressComponents) {
+          const detectedArea = addressComponents.neighbourhood || 
+                              addressComponents.suburb || 
+                              addressComponents.city_district || 
+                              addressComponents.state_district ||
+                              addressComponents.city ||
+                              '';
+          setArea(detectedArea);
+        }
+        
+        // Fly to the new position
+        if (mapRef.current) {
+          mapRef.current.flyTo(newPos, 16);
+        }
+      } else {
+        alert('Location not found. Please try a different search term.');
+      }
+    } catch (error) {
+      console.error('Error searching location:', error);
+      alert('Error searching for location. Please try again.');
+    }
+  };
+
+  const handlePositionChange = (newPosition: [number, number]) => {
+    setPosition(newPosition);
+    reverseGeocode(newPosition);
+  };
+
+  const handleConfirm = () => {
+    onLocationSelect({
+      latitude: position[0],
+      longitude: position[1],
+      address: address.trim(),
+      area: area.trim(),
+      landmark: landmark.trim(),
+    });
+    onClose();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      searchLocation();
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Select Location on Map
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Search and Current Location */}
+          <div className="flex gap-2">
+            <div className="flex-1 flex gap-2">
+              <Input
+                placeholder="Search for a location in Kochi..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+              />
+              <Button onClick={searchLocation} variant="outline" size="icon">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              onClick={getCurrentLocation}
+              variant="outline"
+              disabled={isLoadingLocation}
+              className="flex items-center gap-2"
+            >
+              <Navigation className="h-4 w-4" />
+              {isLoadingLocation ? 'Getting...' : 'Current Location'}
+            </Button>
+          </div>
+
+          {/* Map */}
+          <div className="h-96 w-full rounded-lg overflow-hidden border">
+            <MapContainer
+              center={position}
+              zoom={13}
+              style={{ height: '100%', width: '100%' }}
+              ref={mapRef}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationMarker position={position} onPositionChange={handlePositionChange} />
+            </MapContainer>
+          </div>
+
+          {/* Location Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="detected-area">Detected Area</Label>
+              <Input
+                id="detected-area"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="Area/Locality"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="landmark">Landmark (Optional)</Label>
+              <Input
+                id="landmark"
+                value={landmark}
+                onChange={(e) => setLandmark(e.target.value)}
+                placeholder="Nearby landmark"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="detected-address">Detected Address</Label>
+              <Input
+                id="detected-address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Full address"
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Coordinates Display */}
+          <div className="text-sm text-muted-foreground">
+            Selected coordinates: {position[0].toFixed(6)}, {position[1].toFixed(6)}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm}>
+            Confirm Location
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default LocationMapDialog;
