@@ -31,8 +31,6 @@ import {
   selectImagePreview,
   FileAttachment,
   GuestComplaintData,
-  resendOTP,
-  verifyOTPAndRegister,
 } from "../store/slices/guestSlice";
 import { useGetWardsQuery } from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";

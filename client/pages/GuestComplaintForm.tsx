@@ -30,8 +30,6 @@ import {
   validateCurrentStep,
   setImagePreview,
   clearGuestData,
-  verifyOTPAndRegister,
-  resendOTP,
   clearError,
   AttachmentFile,
   FileAttachment,
