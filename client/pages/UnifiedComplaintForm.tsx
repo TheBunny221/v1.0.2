@@ -32,7 +32,7 @@ import {
   FileAttachment,
   GuestComplaintData,
 } from "../store/slices/guestSlice";
-import { useGetWardsQuery } from "../store/api/guestApi";
+import { useGetWardsQuery, useVerifyGuestOtpMutation } from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
