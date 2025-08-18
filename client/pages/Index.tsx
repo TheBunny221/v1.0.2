@@ -28,6 +28,7 @@ import {
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Separator } from "../components/ui/separator";
+import LocationMapDialog from "../components/LocationMapDialog";
 import {
   MapPin,
   Upload,
@@ -760,7 +761,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "ईमेल अलर्ट"
                         : currentLanguage === "ml"
-                          ? "ഇമെയിൽ അലേർട്ടുകൾ"
+                          ? "ഇമെയി��� അലേർട്ടുകൾ"
                           : "Email Alerts"}
                     </div>
                     <div className="text-sm text-gray-600">
