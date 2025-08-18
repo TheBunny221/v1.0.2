@@ -65,116 +65,6 @@ const Index: React.FC = () => {
   const [isFormExpanded, setIsFormExpanded] = useState(false);
 
 
-  const handleLocationSelect = (location: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-    area?: string;
-    landmark?: string;
-  }) => {
-    setFormData((prev) => ({
-      ...prev,
-      location: location.landmark || location.address || '',
-      area: location.area || prev.area,
-      address: location.address || prev.address,
-      coordinates: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-      },
-    }));
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (captcha !== captchaValue) {
-      dispatch(
-        showErrorToast(
-          translations?.forms?.invalidCaptcha || "Invalid CAPTCHA",
-          translations?.forms?.enterCaptcha ||
-            "Please enter the correct CAPTCHA code",
-        ),
-      );
-      return;
-    }
-
-    if (
-      !formData.mobile ||
-      !formData.problemType ||
-      !formData.ward ||
-      !formData.area ||
-      !formData.description
-    ) {
-      dispatch(
-        showErrorToast(
-          translations?.forms?.requiredField || "Required Field",
-          translations?.forms?.requiredField ||
-            "Please fill all required fields",
-        ),
-      );
-      return;
-    }
-
-    try {
-      const complaintDataForAPI = {
-        title: `${formData.problemType} complaint`,
-        description: formData.description,
-        type: formData.problemType as ComplaintType,
-        priority: "MEDIUM" as Priority,
-        wardId: formData.ward,
-        area: formData.area,
-        landmark: formData.location,
-        address: formData.address,
-        coordinates: formData.coordinates ? JSON.stringify(formData.coordinates) : undefined,
-        contactName: isAuthenticated && user ? user.fullName : "Guest",
-        contactEmail:
-          formData.email || (isAuthenticated && user ? user.email : ""),
-        contactPhone: formData.mobile,
-        isAnonymous: !isAuthenticated,
-      };
-
-      const result = await dispatch(
-        createComplaint(complaintDataForAPI),
-      ).unwrap();
-
-      dispatch(
-        showSuccessToast(
-          translations?.forms?.complaintSubmitted || "Complaint Submitted",
-          `${translations?.forms?.complaintSubmitted || "Complaint registered successfully"} ID: ${result.id}`,
-        ),
-      );
-
-      // Reset form
-      resetForm();
-      setIsFormExpanded(false);
-    } catch (error) {
-      dispatch(
-        showErrorToast(
-          translations?.forms?.complaintSubmissionError || "Submission Failed",
-          error instanceof Error
-            ? error.message
-            : translations?.forms?.complaintSubmissionError ||
-                "Failed to submit complaint",
-        ),
-      );
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      mobile: isAuthenticated && user ? user.phoneNumber || "" : "",
-      email: isAuthenticated && user ? user.email || "" : "",
-      problemType: "",
-      ward: "",
-      area: "",
-      location: "",
-      address: "",
-      description: "",
-      coordinates: null,
-    });
-    setFiles([]);
-    setCaptcha("");
-  };
 
   // Show loading if translations not ready
   if (!translations) {
@@ -393,7 +283,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे ल��ग करें"
                         : currentLanguage === "ml"
-                          ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ ��േഖപ്പെടുത്തുക"
+                          ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ���റിനുള്ളിൽ പ്രശ്നങ്ങൾ ��േഖപ്പെടുത്തുക"
                           : "Log issues in under a minute with type, photo, and location"}
                     </div>
                   </div>
