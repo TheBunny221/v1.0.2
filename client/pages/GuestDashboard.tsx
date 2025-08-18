@@ -45,6 +45,7 @@ import {
   TrendingUp,
   History,
 } from "lucide-react";
+import QuickComplaintModal from "../components/QuickComplaintModal";
 
 // Mock data - in real app this would come from API
 const mockProfile = {
