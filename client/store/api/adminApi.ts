@@ -1,4 +1,4 @@
-import { baseApi, ApiResponse, transformResponse } from "./baseApi";
+import { baseApi, ApiResponse } from "./baseApi";
 
 // Admin API types
 export interface AdminUser {
@@ -169,7 +169,7 @@ export const adminApi = baseApi.injectEndpoints({
 
         return `/admin/users?${params.toString()}`;
       },
-      transformResponse: transformResponse<UsersResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["User"],
     }),
 
@@ -180,7 +180,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -194,7 +194,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -204,7 +204,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}`,
         method: "DELETE",
       }),
-      transformResponse: transformResponse<null>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
