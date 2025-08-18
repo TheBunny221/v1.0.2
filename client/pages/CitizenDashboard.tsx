@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   useGetComplaintsQuery,
   useGetComplaintStatisticsQuery,
