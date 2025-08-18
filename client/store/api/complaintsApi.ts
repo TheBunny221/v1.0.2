@@ -41,6 +41,17 @@ export interface Complaint {
   escalationLevel: number;
   slaStatus: "ontime" | "warning" | "overdue" | "completed";
   timeElapsed: number;
+  statusLogs?: Array<{
+    id: string;
+    fromStatus?: string;
+    toStatus: string;
+    comment?: string;
+    timestamp: string;
+    user?: {
+      fullName: string;
+      role: string;
+    };
+  }>;
 }
 
 export interface CreateComplaintRequest {
