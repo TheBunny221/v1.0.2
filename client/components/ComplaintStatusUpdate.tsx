@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppSelector } from '../store/hooks';
 import { useUpdateComplaintStatusMutation, useAssignComplaintMutation } from '../store/api/complaintsApi';
+import { useGetWardTeamMembersQuery } from '../store/api/wardApi';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
