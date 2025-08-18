@@ -113,7 +113,7 @@ export const generateCaptcha = async (req, res) => {
   }
 };
 
-exports.verifyCaptcha = async (req, res) => {
+export const verifyCaptcha = async (req, res) => {
   try {
     const { captchaId, captchaText } = req.body;
     
