@@ -115,6 +115,24 @@ const AdminUsers: React.FC = () => {
     error: statsError,
   } = useGetUserStatsQuery();
 
+  // Fetch wards for form dropdowns
+  const [wards, setWards] = useState<Array<{id: string; name: string}>>([]);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      try {
+        const response = await fetch('/api/wards');
+        const data = await response.json();
+        if (data.success) {
+          setWards(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch wards:', error);
+      }
+    };
+    fetchWards();
+  }, []);
+
   // Mutations
   const [activateUser] = useActivateUserMutation();
   const [deactivateUser] = useDeactivateUserMutation();
