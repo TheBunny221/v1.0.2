@@ -105,7 +105,7 @@ export const guestApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+      // Removed transformResponse to prevent response body conflicts
     }),
 
     // Track complaint (public endpoint)
