@@ -1948,9 +1948,43 @@ const AdminConfig: React.FC = () => {
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => handleSaveSystemSetting(editingSetting)}
+                  onClick={async () => {
+                    if (editingSetting.key === 'APP_LOGO_URL' && logoUploadMode === 'file' && logoFile) {
+                      try {
+                        setIsLoading(true);
+                        await handleLogoFileUpload(logoFile);
+                        // Reset file upload state
+                        setLogoFile(null);
+                        setLogoPreview(null);
+                        setLogoUploadMode('url');
+                        setEditingSetting(null);
+                        setIsSettingDialogOpen(false);
+                        dispatch(
+                          showSuccessToast(
+                            "Logo Uploaded",
+                            "App logo has been uploaded and updated successfully.",
+                          ),
+                        );
+                        // Refresh system settings
+                        await fetchSystemSettings();
+                      } catch (error: any) {
+                        dispatch(
+                          showErrorToast(
+                            "Upload Failed",
+                            error.message || "Failed to upload logo. Please try again.",
+                          ),
+                        );
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    } else {
+                      await handleSaveSystemSetting(editingSetting);
+                    }
+                  }}
                   disabled={
-                    isLoading || !editingSetting.key || !editingSetting.value
+                    isLoading ||
+                    !editingSetting.key ||
+                    (logoUploadMode === 'file' && editingSetting.key === 'APP_LOGO_URL' ? !logoFile : !editingSetting.value)
                   }
                 >
                   {isLoading ? (
