@@ -7,6 +7,28 @@ const prisma = getPrisma();
 // @route   GET /api/system-config
 // @access  Private (Admin only)
 export const getSystemSettings = asyncHandler(async (req, res) => {
+  // First, ensure essential settings exist
+  const essentialSettings = [
+    {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      description: "Size of the application logo (small, medium, large)",
+    },
+  ];
+
+  for (const setting of essentialSettings) {
+    const exists = await prisma.systemConfig.findUnique({
+      where: { key: setting.key }
+    });
+
+    if (!exists) {
+      await prisma.systemConfig.create({
+        data: setting
+      });
+      console.log(`✅ Added missing system setting: ${setting.key}`);
+    }
+  }
+
   const settings = await prisma.systemConfig.findMany({
     where: {
       key: {
