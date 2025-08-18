@@ -27,11 +27,12 @@ export const getUsers = asyncHandler(async (req, res) => {
   if (isActive !== undefined) filters.isActive = isActive === "true";
 
   // Search filter
+  // Note: SQLite doesn't support mode: "insensitive". Using case-sensitive search for compatibility.
   if (search) {
     filters.OR = [
-      { fullName: { contains: search, mode: "insensitive" } },
-      { email: { contains: search, mode: "insensitive" } },
-      { phoneNumber: { contains: search, mode: "insensitive" } },
+      { fullName: { contains: search } },
+      { email: { contains: search } },
+      { phoneNumber: { contains: search } },
     ];
   }
 

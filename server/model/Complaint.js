@@ -241,10 +241,11 @@ class ComplaintModel {
         where.submittedById = filters.submittedById;
       }
       if (filters.search) {
+        // Note: SQLite doesn't support mode: "insensitive". Using case-sensitive search for compatibility.
         where.OR = [
-          { complaintId: { contains: filters.search, mode: "insensitive" } },
-          { description: { contains: filters.search, mode: "insensitive" } },
-          { area: { contains: filters.search, mode: "insensitive" } },
+          { complaintId: { contains: filters.search } },
+          { description: { contains: filters.search } },
+          { area: { contains: filters.search } },
         ];
       }
 

@@ -194,10 +194,11 @@ class UserModel {
         where.isActive = filters.isActive;
       }
       if (filters.search) {
+        // Note: SQLite doesn't support mode: "insensitive". Using case-sensitive search for compatibility.
         where.OR = [
-          { name: { contains: filters.search, mode: "insensitive" } },
-          { email: { contains: filters.search, mode: "insensitive" } },
-          { phone: { contains: filters.search, mode: "insensitive" } },
+          { name: { contains: filters.search } },
+          { email: { contains: filters.search } },
+          { phone: { contains: filters.search } },
         ];
       }
 
