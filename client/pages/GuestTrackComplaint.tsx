@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Shield,
 } from "lucide-react";
+import QuickComplaintModal from "../components/QuickComplaintModal";
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
