@@ -223,39 +223,88 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         ))}
       </nav>
 
-      {/* User section at bottom */}
+      {/* User section at bottom with dropdown */}
       {user && (
         <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-          <div
-            className={cn(
-              "flex items-center",
-              isCollapsed ? "justify-center" : "justify-start",
-            )}
-          >
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                {user.role === "ADMINISTRATOR" ? (
-                  <Shield className="h-4 w-4 text-white" />
-                ) : user.role === "WARD_OFFICER" ? (
-                  <UserCheck className="h-4 w-4 text-white" />
-                ) : (
-                  <span className="text-xs font-medium text-white">
-                    {user.fullName.charAt(0)}
-                  </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full h-auto p-2 justify-start hover:bg-gray-200",
+                  isCollapsed && "justify-center p-2"
                 )}
-              </div>
-            </div>
-            {!isCollapsed && (
-              <div className="ml-3 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.fullName}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user.role.replace("_", " ").toLowerCase()}
-                </p>
-              </div>
-            )}
-          </div>
+              >
+                <div className="flex items-center w-full">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                      {user.role === "ADMINISTRATOR" ? (
+                        <Shield className="h-4 w-4 text-white" />
+                      ) : user.role === "WARD_OFFICER" ? (
+                        <UserCheck className="h-4 w-4 text-white" />
+                      ) : (
+                        <span className="text-xs font-medium text-white">
+                          {user.fullName.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {!isCollapsed && (
+                    <div className="ml-3 min-w-0 text-left">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user.fullName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.role.replace("_", " ").toLowerCase()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="flex items-center">
+                  <User className="h-4 w-4 mr-2" />
+                  {translations.nav?.profile || "Profile"}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="flex items-center">
+                  <Settings className="h-4 w-4 mr-2" />
+                  {translations.nav?.settings || "Settings"}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <DropdownMenuItem className="flex items-center">
+                    <Globe className="h-4 w-4 mr-2" />
+                    {translations.nav?.language || "Language"}
+                  </DropdownMenuItem>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="right">
+                  <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                    हिंदी
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                    മലയാളം
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-red-600 focus:text-red-600"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {translations.nav?.logout || "Logout"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
     </div>
