@@ -46,8 +46,17 @@ const baseQueryWithReauth: BaseQueryFn<
       (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
 
     if (!isAuthEndpoint) {
-      // Only clear localStorage, don't dispatch logout to avoid potential conflicts
+      // Clear token first
       localStorage.removeItem("token");
+
+      // Safely dispatch logout in next tick to avoid any potential timing conflicts
+      setTimeout(() => {
+        try {
+          api.dispatch(logout());
+        } catch (err) {
+          console.warn("Error dispatching logout:", err);
+        }
+      }, 0);
     }
   }
 
