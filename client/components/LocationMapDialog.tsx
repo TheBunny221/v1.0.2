@@ -238,15 +238,20 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
           {/* Map */}
           <div className="h-96 w-full rounded-lg overflow-hidden border">
             <MapContainer
+              key={`map-${position[0]}-${position[1]}`}
               center={position}
               zoom={13}
               style={{ height: '100%', width: '100%' }}
-              ref={mapRef}
+              scrollWheelZoom={true}
+              whenCreated={(mapInstance) => {
+                mapRef.current = mapInstance;
+              }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
+              <MapUpdater center={position} />
               <LocationMarker position={position} onPositionChange={handlePositionChange} />
             </MapContainer>
           </div>
