@@ -7,6 +7,28 @@ const prisma = getPrisma();
 // @route   GET /api/system-config
 // @access  Private (Admin only)
 export const getSystemSettings = asyncHandler(async (req, res) => {
+  // First, ensure essential settings exist
+  const essentialSettings = [
+    {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      description: "Size of the application logo (small, medium, large)",
+    },
+  ];
+
+  for (const setting of essentialSettings) {
+    const exists = await prisma.systemConfig.findUnique({
+      where: { key: setting.key },
+    });
+
+    if (!exists) {
+      await prisma.systemConfig.create({
+        data: setting,
+      });
+      console.log(`✅ Added missing system setting: ${setting.key}`);
+    }
+  }
+
   const settings = await prisma.systemConfig.findMany({
     where: {
       key: {
@@ -275,6 +297,11 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
       description: "URL for the application logo",
     },
     {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      description: "Size of the application logo (small, medium, large)",
+    },
+    {
       key: "COMPLAINT_ID_PREFIX",
       value: "KSC",
       description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
@@ -348,10 +375,33 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
 // @route   GET /api/system-config/public
 // @access  Public
 export const getPublicSystemSettings = asyncHandler(async (req, res) => {
+  // First, ensure essential settings exist
+  const essentialSettings = [
+    {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      description: "Size of the application logo (small, medium, large)",
+    },
+  ];
+
+  for (const setting of essentialSettings) {
+    const exists = await prisma.systemConfig.findUnique({
+      where: { key: setting.key },
+    });
+
+    if (!exists) {
+      await prisma.systemConfig.create({
+        data: setting,
+      });
+      console.log(`✅ Added missing system setting: ${setting.key}`);
+    }
+  }
+
   // Only return non-sensitive settings
   const publicKeys = [
     "APP_NAME",
     "APP_LOGO_URL",
+    "APP_LOGO_SIZE",
     "COMPLAINT_ID_PREFIX",
     "MAX_FILE_SIZE_MB",
     "CITIZEN_REGISTRATION_ENABLED",

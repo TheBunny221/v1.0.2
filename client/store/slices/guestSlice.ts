@@ -248,52 +248,8 @@ const clearFormDataFromSession = () => {
   }
 };
 
-// Helper function to make API calls
-const apiCall = async (url: string, options: RequestInit = {}) => {
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    ...options,
-  });
-
-  // Check if response is JSON
-  const contentType = response.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
-
-  let data = null;
-  if (isJson) {
-    try {
-      data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || `HTTP ${response.status}`);
-      }
-
-      return data;
-    } catch (error) {
-      if (error.message.includes("HTTP ")) {
-        throw error; // Re-throw our custom error
-      }
-      throw new Error("Failed to parse server response");
-    }
-  } else {
-    // Non-JSON response (likely HTML error page)
-    if (!response.ok) {
-      throw new Error(
-        `HTTP ${response.status}: Server error occurred. Please try again later.`,
-      );
-    }
-
-    const text = await response.text();
-    if (text.includes("<!doctype") || text.includes("<html")) {
-      throw new Error("Server error occurred. Please try again later.");
-    } else {
-      throw new Error("Server returned unexpected response format");
-    }
-  }
-};
+// Note: OTP verification is now handled by RTK Query hooks in guestApi.ts
+// No need for custom API call helper for OTP operations
 
 // Async thunks
 export const submitGuestComplaint = createAsyncThunk(
@@ -374,56 +330,11 @@ export const submitGuestComplaint = createAsyncThunk(
   },
 );
 
-export const verifyOTPAndRegister = createAsyncThunk(
-  "guest/verifyOTPAndRegister",
-  async (
-    {
-      email,
-      otpCode,
-      complaintId,
-    }: { email: string; otpCode: string; complaintId: string },
-    { rejectWithValue },
-  ) => {
-    try {
-      const data = await apiCall("/api/guest/verify-otp", {
-        method: "POST",
-        body: JSON.stringify({ email, otpCode, complaintId }),
-      });
+// OTP verification is now handled by RTK Query hooks in guestApi.ts
+// Use useVerifyGuestOtpMutation() hook instead
 
-      // Store token in localStorage for auto-login
-      if (data.data.token) {
-        localStorage.setItem("token", data.data.token);
-      }
-
-      return data.data as OTPVerificationResponse;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "OTP verification failed",
-      );
-    }
-  },
-);
-
-export const resendOTP = createAsyncThunk(
-  "guest/resendOTP",
-  async (
-    { email, complaintId }: { email: string; complaintId: string },
-    { rejectWithValue },
-  ) => {
-    try {
-      const data = await apiCall("/api/guest/resend-otp", {
-        method: "POST",
-        body: JSON.stringify({ email, complaintId }),
-      });
-
-      return data.data;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to resend OTP",
-      );
-    }
-  },
-);
+// OTP resend is now handled by RTK Query hooks in guestApi.ts
+// Use useResendGuestOtpMutation() hook instead
 
 export const trackGuestComplaint = createAsyncThunk(
   "guest/trackComplaint",
@@ -839,41 +750,10 @@ const guestSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Verify OTP and Auto-Register
-      .addCase(verifyOTPAndRegister.pending, (state) => {
-        state.isVerifying = true;
-        state.error = null;
-      })
-      .addCase(verifyOTPAndRegister.fulfilled, (state, action) => {
-        state.isVerifying = false;
-        state.submissionStep = "success";
-        state.newUserRegistered = action.payload.isNewUser;
-        state.error = null;
+      // OTP verification is now handled by RTK Query hooks
+      // State management for verification status is handled in OtpContext
 
-        // Clear sessionStorage as process is complete
-        try {
-          sessionStorage.removeItem("guestComplaintDraft");
-        } catch (error) {
-          console.warn("Failed to clear draft from sessionStorage:", error);
-        }
-      })
-      .addCase(verifyOTPAndRegister.rejected, (state, action) => {
-        state.isVerifying = false;
-        state.error = action.payload as string;
-      })
-
-      // Resend OTP
-      .addCase(resendOTP.pending, (state) => {
-        state.error = null;
-      })
-      .addCase(resendOTP.fulfilled, (state, action) => {
-        state.otpExpiry = action.payload.expiresAt;
-        state.sessionId = action.payload.sessionId;
-        state.error = null;
-      })
-      .addCase(resendOTP.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
+      // OTP resend is now handled by RTK Query hooks in guestApi.ts
 
       // Track Guest Complaint
       .addCase(trackGuestComplaint.pending, (state) => {

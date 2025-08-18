@@ -141,6 +141,16 @@ const AdminConfig: React.FC = () => {
     null,
   );
   const [expandedWards, setExpandedWards] = useState<Set<string>>(new Set());
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUploadMode, setLogoUploadMode] = useState<"url" | "file">("url");
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Reset logo upload state
+  const resetLogoUploadState = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setLogoUploadMode("url");
+  };
 
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -575,6 +585,41 @@ const AdminConfig: React.FC = () => {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handle Logo File Upload
+  const handleLogoFileUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/uploads/logo", {
+        method: "POST",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload failed");
+      }
+
+      const data = await response.json();
+
+      // Update the APP_LOGO_URL setting with the new file URL
+      const logoSetting = systemSettings.find((s) => s.key === "APP_LOGO_URL");
+      if (logoSetting) {
+        const updatedSetting = { ...logoSetting, value: data.data.url };
+        await handleSaveSystemSetting(updatedSetting);
+      }
+
+      return data.data.url;
+    } catch (error: any) {
+      throw error;
     }
   };
 
@@ -1072,7 +1117,9 @@ const AdminConfig: React.FC = () => {
                   <div className="space-y-4">
                     {systemSettings
                       .filter((s) =>
-                        ["APP_NAME", "APP_LOGO_URL"].includes(s.key),
+                        ["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(
+                          s.key,
+                        ),
                       )
                       .map((setting) => (
                         <div
@@ -1239,7 +1286,11 @@ const AdminConfig: React.FC = () => {
                     {systemSettings
                       .filter(
                         (s) =>
-                          !["APP_NAME", "APP_LOGO_URL"].includes(s.key) &&
+                          ![
+                            "APP_NAME",
+                            "APP_LOGO_URL",
+                            "APP_LOGO_SIZE",
+                          ].includes(s.key) &&
                           !s.key.startsWith("COMPLAINT_ID"),
                       )
                       .map((setting) => (
@@ -1763,17 +1814,128 @@ const AdminConfig: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="settingValue">Value</Label>
-                <Input
-                  id="settingValue"
-                  value={editingSetting.value || ""}
-                  onChange={(e) =>
-                    setEditingSetting({
-                      ...editingSetting,
-                      value: e.target.value,
-                    })
-                  }
-                  placeholder="Setting value"
-                />
+                {editingSetting.key === "APP_LOGO_URL" ? (
+                  <div className="space-y-4">
+                    {/* Mode Selection */}
+                    <div className="flex gap-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          value="url"
+                          checked={logoUploadMode === "url"}
+                          onChange={(e) =>
+                            setLogoUploadMode(e.target.value as "url" | "file")
+                          }
+                          className="form-radio"
+                        />
+                        <span>URL</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          value="file"
+                          checked={logoUploadMode === "file"}
+                          onChange={(e) =>
+                            setLogoUploadMode(e.target.value as "url" | "file")
+                          }
+                          className="form-radio"
+                        />
+                        <span>Upload File</span>
+                      </label>
+                    </div>
+
+                    {logoUploadMode === "url" ? (
+                      <Input
+                        id="settingValue"
+                        value={editingSetting.value}
+                        onChange={(e) =>
+                          setEditingSetting({
+                            ...editingSetting,
+                            value: e.target.value,
+                          })
+                        }
+                        placeholder="Enter logo URL (e.g., https://example.com/logo.png)"
+                      />
+                    ) : (
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setLogoFile(file);
+                              // Create preview
+                              const reader = new FileReader();
+                              reader.onload = (e) => {
+                                setLogoPreview(e.target?.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                        />
+                        {logoPreview && (
+                          <div className="mt-2">
+                            <img
+                              src={logoPreview}
+                              alt="Logo preview"
+                              className="h-16 w-16 object-contain border rounded"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Current logo preview */}
+                    {editingSetting.value &&
+                      editingSetting.value !== "/logo.png" && (
+                        <div className="mt-2">
+                          <Label>Current Logo:</Label>
+                          <img
+                            src={editingSetting.value}
+                            alt="Current logo"
+                            className="h-16 w-16 object-contain border rounded mt-1"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
+                            }}
+                          />
+                        </div>
+                      )}
+                  </div>
+                ) : editingSetting.key === "APP_LOGO_SIZE" ? (
+                  <Select
+                    value={editingSetting.value}
+                    onValueChange={(value) =>
+                      setEditingSetting({
+                        ...editingSetting,
+                        value: value,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select logo size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id="settingValue"
+                    value={editingSetting.value}
+                    onChange={(e) =>
+                      setEditingSetting({
+                        ...editingSetting,
+                        value: e.target.value,
+                      })
+                    }
+                    placeholder="Setting value"
+                  />
+                )}
               </div>
               <div>
                 <Label htmlFor="settingDescription">Description</Label>
@@ -1819,14 +1981,57 @@ const AdminConfig: React.FC = () => {
                   onClick={() => {
                     setEditingSetting(null);
                     setIsSettingDialogOpen(false);
+                    resetLogoUploadState();
                   }}
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => handleSaveSystemSetting(editingSetting)}
+                  onClick={async () => {
+                    if (
+                      editingSetting.key === "APP_LOGO_URL" &&
+                      logoUploadMode === "file" &&
+                      logoFile
+                    ) {
+                      try {
+                        setIsLoading(true);
+                        await handleLogoFileUpload(logoFile);
+                        // Reset file upload state
+                        setLogoFile(null);
+                        setLogoPreview(null);
+                        setLogoUploadMode("url");
+                        setEditingSetting(null);
+                        setIsSettingDialogOpen(false);
+                        dispatch(
+                          showSuccessToast(
+                            "Logo Uploaded",
+                            "App logo has been uploaded and updated successfully.",
+                          ),
+                        );
+                        // Refresh system settings
+                        await fetchSystemSettings();
+                      } catch (error: any) {
+                        dispatch(
+                          showErrorToast(
+                            "Upload Failed",
+                            error.message ||
+                              "Failed to upload logo. Please try again.",
+                          ),
+                        );
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    } else {
+                      await handleSaveSystemSetting(editingSetting);
+                    }
+                  }}
                   disabled={
-                    isLoading || !editingSetting.key || !editingSetting.value
+                    isLoading ||
+                    !editingSetting.key ||
+                    (logoUploadMode === "file" &&
+                    editingSetting.key === "APP_LOGO_URL"
+                      ? !logoFile
+                      : !editingSetting.value)
                   }
                 >
                   {isLoading ? (

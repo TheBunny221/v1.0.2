@@ -8,6 +8,7 @@ interface SystemConfigContextType {
   config: SystemConfig;
   appName: string;
   appLogoUrl: string;
+  appLogoSize: string;
   isLoading: boolean;
   refreshConfig: () => Promise<void>;
   getConfig: (key: string, defaultValue?: string) => string;
@@ -59,6 +60,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         setConfig({
           APP_NAME: "Kochi Smart City",
           APP_LOGO_URL: "/logo.png",
+          APP_LOGO_SIZE: "medium",
           COMPLAINT_ID_PREFIX: "KSC",
           COMPLAINT_ID_START_NUMBER: "1",
           COMPLAINT_ID_LENGTH: "4",
@@ -70,6 +72,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
       setConfig({
         APP_NAME: "Kochi Smart City",
         APP_LOGO_URL: "/logo.png",
+        APP_LOGO_SIZE: "medium",
         COMPLAINT_ID_PREFIX: "KSC",
         COMPLAINT_ID_START_NUMBER: "1",
         COMPLAINT_ID_LENGTH: "4",
@@ -93,11 +96,13 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
 
   const appName = getConfig("APP_NAME", "Kochi Smart City");
   const appLogoUrl = getConfig("APP_LOGO_URL", "/logo.png");
+  const appLogoSize = getConfig("APP_LOGO_SIZE", "medium");
 
   const value: SystemConfigContextType = {
     config,
     appName,
     appLogoUrl,
+    appLogoSize,
     isLoading,
     refreshConfig,
     getConfig,

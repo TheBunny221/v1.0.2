@@ -37,15 +37,15 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const endpoint = typeof args === "string" ? args : args.url;
 
-  // Make the initial request without try-catch to avoid interfering with response stream
+  // Make the initial request without any try-catch to avoid interfering with response processing
   let result = await baseQuery(args, api, extraOptions);
 
-  // Log for debugging
+  // Log for debugging - only log metadata, never access response body
   if (process.env.NODE_ENV === "development") {
     console.log(`API Request to ${endpoint}:`, {
-      args,
-      result: result.error ? "ERROR" : "SUCCESS",
-      status: result.error?.status,
+      method: typeof args === "object" ? args.method : "GET",
+      status: result.error?.status || "SUCCESS",
+      hasError: !!result.error,
       hasData: !!result.data,
     });
   }
@@ -131,45 +131,32 @@ export interface ApiResponse<T = any> {
 
 // Helper for transforming API responses
 export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  try {
-    // Handle null or undefined responses
-    if (response == null) {
-      return {
-        success: false,
-        data: {} as T,
-        message: "No response received",
-      };
-    }
-
-    // Log response for debugging in development
-    if (process.env.NODE_ENV === "development") {
-      console.log("Transforming response:", response);
-    }
-
-    // If response is already in our expected format, return it
-    if (
-      typeof response === "object" &&
-      "success" in response &&
-      "data" in response
-    ) {
-      return response as ApiResponse<T>;
-    }
-
-    // Transform raw response to our format
-    return {
-      success: response?.success ?? true,
-      data: response?.data ?? response,
-      message: response?.message,
-      meta: response?.meta,
-    };
-  } catch (error) {
-    console.warn("Error transforming response:", error);
+  // Handle null or undefined responses
+  if (response == null) {
     return {
       success: false,
       data: {} as T,
-      message: "Response transformation error",
+      message: "No response received",
     };
   }
+
+  // If response is already in our expected format, return it as-is
+  if (
+    typeof response === "object" &&
+    response !== null &&
+    "success" in response &&
+    "data" in response
+  ) {
+    return response as ApiResponse<T>;
+  }
+
+  // Transform raw response to our format
+  return {
+    success: response?.success ?? true,
+    data: response?.data ?? response,
+    message: response?.message,
+    meta: response?.meta,
+  };
 };
 
 // Helper for handling optimistic updates

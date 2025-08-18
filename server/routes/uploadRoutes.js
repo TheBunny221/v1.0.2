@@ -8,6 +8,7 @@ import {
   getAttachment,
   deleteAttachment,
   uploadProfilePicture,
+  uploadLogo,
 } from "../controller/uploadController.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
 
@@ -32,6 +33,8 @@ const storage = multer.diskStorage({
       uploadPath = path.join(uploadDir, "profiles");
     } else if (file.fieldname === "complaintAttachment") {
       uploadPath = path.join(uploadDir, "complaints");
+    } else if (file.fieldname === "logo") {
+      uploadPath = path.join(uploadDir, "logos");
     }
 
     // Ensure directory exists
@@ -56,6 +59,7 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = {
     profilePicture: /jpeg|jpg|png|gif/,
     complaintAttachment: /jpeg|jpg|png|gif|pdf|doc|docx/,
+    logo: /jpeg|jpg|png|gif|webp|svg/,
   };
 
   const fileExtension = path
@@ -185,6 +189,62 @@ router.post(
 
 /**
  * @swagger
+ * /api/uploads/logo:
+ *   post:
+ *     summary: Upload application logo
+ *     tags: [Uploads]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               logo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Logo image file (JPEG, PNG, GIF, WEBP, SVG)
+ *     responses:
+ *       200:
+ *         description: Logo uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/FileUpload'
+ *       400:
+ *         description: Invalid file or upload error
+ *       401:
+ *         description: Unauthorized
+ *       413:
+ *         description: File too large
+ */
+router.post(
+  "/logo",
+  protect,
+  // Check for admin role
+  (req, res, next) => {
+    if (req.user.role !== "ADMINISTRATOR") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Administrator role required.",
+        data: null,
+      });
+    }
+    next();
+  },
+  upload.single("logo"),
+  uploadLogo,
+);
+
+/**
+ * @swagger
  * /api/uploads/{id}:
  *   get:
  *     summary: Get uploaded file
@@ -207,6 +267,31 @@ router.post(
  *         description: File not found
  */
 router.get("/:filename", getAttachment);
+
+/**
+ * @swagger
+ * /api/uploads/logo/{filename}:
+ *   get:
+ *     summary: Get uploaded logo file
+ *     tags: [Uploads]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Logo file content
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Logo file not found
+ */
+router.get("/logo/:filename", getAttachment);
 
 /**
  * @swagger

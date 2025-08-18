@@ -103,7 +103,8 @@ const initialState: UIState = {
   loadingText: undefined,
   isOnline: navigator.onLine,
   isSidebarOpen: true,
-  isSidebarCollapsed: false,
+  isSidebarCollapsed:
+    localStorage.getItem("sidebarCollapsed") === "true" || false,
   theme:
     (localStorage.getItem("theme") as "light" | "dark" | "system") || "system",
   modals: [],
@@ -149,9 +150,14 @@ const uiSlice = createSlice({
     },
     toggleSidebarCollapsed: (state) => {
       state.isSidebarCollapsed = !state.isSidebarCollapsed;
+      localStorage.setItem(
+        "sidebarCollapsed",
+        state.isSidebarCollapsed.toString(),
+      );
     },
     setSidebarCollapsed: (state, action: PayloadAction<boolean>) => {
       state.isSidebarCollapsed = action.payload;
+      localStorage.setItem("sidebarCollapsed", action.payload.toString());
     },
 
     // Theme
@@ -171,6 +177,13 @@ const uiSlice = createSlice({
       } else {
         state.theme = "system";
         localStorage.setItem("theme", "system");
+      }
+    },
+    initializeSidebar: (state) => {
+      // Initialize sidebar state from localStorage
+      const savedSidebarCollapsed = localStorage.getItem("sidebarCollapsed");
+      if (savedSidebarCollapsed !== null) {
+        state.isSidebarCollapsed = savedSidebarCollapsed === "true";
       }
     },
 
@@ -353,6 +366,7 @@ export const {
   setSidebarCollapsed,
   setTheme,
   initializeTheme,
+  initializeSidebar,
   setOnlineStatus,
   showModal,
   hideModal,

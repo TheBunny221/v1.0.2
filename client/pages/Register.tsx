@@ -21,6 +21,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Logo } from "../components/ui/logo";
 import {
   Select,
   SelectContent,
@@ -37,7 +38,7 @@ const Register: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { handleApiError } = useApiErrorHandler();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
-  const { appName, appLogoUrl } = useSystemConfig();
+  const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
 
   // API hooks
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
@@ -198,11 +199,15 @@ const Register: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            {appLogoUrl && appLogoUrl !== "/logo.png" ? (
-              <img src={appLogoUrl} alt={appName} className="h-12 w-12 mr-3" />
-            ) : (
-              <Shield className="h-12 w-12 text-blue-600 mr-3" />
-            )}
+            <Logo
+              logoUrl={appLogoUrl}
+              appName={appName}
+              size={appLogoSize}
+              context="auth"
+              fallbackIcon={Shield}
+              showText={false}
+              className="mr-3"
+            />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{appName}</h1>
               <p className="text-gray-600">Create Your Account</p>

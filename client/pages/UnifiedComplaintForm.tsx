@@ -31,10 +31,11 @@ import {
   selectImagePreview,
   FileAttachment,
   GuestComplaintData,
-  resendOTP,
-  verifyOTPAndRegister,
 } from "../store/slices/guestSlice";
-import { useGetWardsQuery } from "../store/api/guestApi";
+import {
+  useGetWardsQuery,
+  useVerifyGuestOtpMutation,
+} from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -169,6 +170,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const [verifyGuestOtp] = useVerifyGuestOtpMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // Fetch wards from API
@@ -506,29 +508,28 @@ const UnifiedComplaintForm: React.FC = () => {
     }
 
     try {
-      // Verify OTP and auto-register user
-      const result = await dispatch(
-        verifyOTPAndRegister({
-          email: formData.email,
-          otpCode,
-          complaintId,
-        }),
-      ).unwrap();
+      // Use RTK Query mutation for OTP verification
+      const result = await verifyGuestOtp({
+        email: formData.email,
+        otpCode,
+        complaintId,
+        createAccount: true,
+      }).unwrap();
 
       // Store auth token and user data
-      if (result.token && result.user) {
+      if (result.data?.token && result.data?.user) {
         dispatch(
           setCredentials({
-            token: result.token,
-            user: result.user,
+            token: result.data.token,
+            user: result.data.user,
           }),
         );
-        localStorage.setItem("token", result.token);
+        localStorage.setItem("token", result.data.token);
       }
 
       toast({
         title: "Success!",
-        description: result.isNewUser
+        description: result.data?.isNewUser
           ? "Your complaint has been verified and your citizen account has been created successfully!"
           : "Your complaint has been verified and you've been logged in successfully!",
       });
@@ -541,11 +542,21 @@ const UnifiedComplaintForm: React.FC = () => {
       toast({
         title: "Verification Failed",
         description:
-          error.message || "Invalid verification code. Please try again.",
+          error?.data?.message ||
+          error?.message ||
+          "Invalid verification code. Please try again.",
         variant: "destructive",
       });
     }
-  }, [otpCode, complaintId, formData.email, dispatch, toast, navigate]);
+  }, [
+    otpCode,
+    complaintId,
+    formData.email,
+    verifyGuestOtp,
+    dispatch,
+    toast,
+    navigate,
+  ]);
 
   // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
   const handleSubmit = useCallback(() => {
