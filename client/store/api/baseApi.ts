@@ -30,30 +30,27 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Absolute minimal base query - no response body access at all
+// Ultra-minimal base query - absolutely no response processing
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // First attempt
-  let result = await baseQuery(args, api, extraOptions);
+  // Just call the base query and return the result immediately
+  const result = await baseQuery(args, api, extraOptions);
 
-  // Handle 401 errors for re-authentication, but avoid ANY response body access
+  // Minimal 401 handling without any response body access
   if (result.error?.status === 401) {
-    // Check if this is an auth endpoint to avoid logout loops
     const endpoint = typeof args === "string" ? args : args.url;
     const isAuthEndpoint = typeof endpoint === "string" &&
       (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
 
     if (!isAuthEndpoint) {
-      // Clear token and logout without accessing response body
+      // Only clear localStorage, don't dispatch logout to avoid potential conflicts
       localStorage.removeItem("token");
-      api.dispatch(logout());
     }
   }
 
-  // Return the original result without any modifications
   return result;
 };
 
