@@ -7,7 +7,6 @@ import {
   useGetRecentActivityQuery,
   useGetDashboardStatsQuery,
 } from "../store/api/adminApi";
-import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
@@ -142,7 +141,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
@@ -693,7 +691,6 @@ const AdminDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
   );
 };
 
