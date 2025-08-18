@@ -214,6 +214,105 @@ const AdminUsers: React.FC = () => {
     setRoleFilter("all");
     setStatusFilter("all");
     setPage(1);
+    // Update URL parameters
+    setSearchParams({});
+  };
+
+  // Handle filter changes and update URL
+  const handleRoleFilterChange = (role: string) => {
+    setRoleFilter(role);
+    const newParams = new URLSearchParams(searchParams);
+    if (role !== "all") {
+      newParams.set("role", role);
+    } else {
+      newParams.delete("role");
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleStatusFilterChange = (status: string) => {
+    setStatusFilter(status);
+    const newParams = new URLSearchParams(searchParams);
+    if (status !== "all") {
+      newParams.set("status", status);
+    } else {
+      newParams.delete("status");
+    }
+    setSearchParams(newParams);
+  };
+
+  // Form handlers
+  const handleOpenAddDialog = () => {
+    setFormData({
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      role: "CITIZEN",
+      wardId: "",
+      department: "",
+    });
+    setIsAddDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (user: AdminUser) => {
+    setEditingUser(user);
+    setFormData({
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber || "",
+      role: user.role,
+      wardId: user.wardId || "",
+      department: user.department || "",
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleCloseDialogs = () => {
+    setIsAddDialogOpen(false);
+    setIsEditDialogOpen(false);
+    setEditingUser(null);
+    setFormData({
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      role: "CITIZEN",
+      wardId: "",
+      department: "",
+    });
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingUser) {
+        // Update user
+        await updateUser({
+          id: editingUser.id,
+          data: formData,
+        }).unwrap();
+        toast({
+          title: "Success",
+          description: "User updated successfully",
+        });
+      } else {
+        // Create user
+        await createUser(formData).unwrap();
+        toast({
+          title: "Success",
+          description: "User created successfully",
+        });
+      }
+
+      handleCloseDialogs();
+      refetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || `Failed to ${editingUser ? "update" : "create"} user`,
+        variant: "destructive",
+      });
+    }
   };
 
   // Filter users locally based on search term
