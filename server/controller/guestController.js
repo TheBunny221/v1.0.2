@@ -294,7 +294,19 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     landmark,
     address,
     coordinates,
+    captchaId,
+    captchaText,
   } = req.body;
+
+  // Verify CAPTCHA for guest complaint submissions
+  try {
+    await verifyCaptchaForComplaint(captchaId, captchaText);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "CAPTCHA verification failed",
+    });
+  }
 
   // Parse coordinates if it's a string
   let parsedCoordinates = coordinates;
