@@ -169,10 +169,10 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
             key={item.path}
             to={item.path}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200",
+              "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group",
               isActiveRoute(item.path)
-                ? "bg-primary/10 text-primary border-r-2 border-primary"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm",
               isCollapsed ? "justify-center" : "justify-start"
             )}
             title={isCollapsed ? item.label : undefined}
