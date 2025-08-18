@@ -152,6 +152,7 @@ const GuestDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
