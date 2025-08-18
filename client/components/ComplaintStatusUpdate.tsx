@@ -94,7 +94,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       if (mode === 'assign' || (mode === 'both' && formData.assignedTo && formData.assignedTo !== complaint.assignedTo?.id)) {
         await assignComplaint({
           id: complaint.id,
-          assignedTo: formData.assignedTo,
+          assignedTo: formData.assignedTo === 'unassigned' ? '' : formData.assignedTo,
           remarks: formData.remarks || undefined,
         }).unwrap();
       }
