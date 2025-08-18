@@ -749,6 +749,27 @@ const AdminUsers: React.FC = () => {
               </Select>
             </div>
             <div>
+              <Label htmlFor="ward">Ward</Label>
+              <Select
+                value={formData.wardId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, wardId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ward (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No ward assigned</SelectItem>
+                  {wards.map((ward) => (
+                    <SelectItem key={ward.id} value={ward.id}>
+                      {ward.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label htmlFor="department">Department</Label>
               <Input
                 id="department"
