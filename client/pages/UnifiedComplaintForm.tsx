@@ -1619,7 +1619,7 @@ const UnifiedComplaintForm: React.FC = () => {
         )}
 
         {/* Location Map Dialog */}
-        <LocationMapDialog
+        <SimpleLocationMapDialog
           isOpen={isMapDialogOpen}
           onClose={() => setIsMapDialogOpen(false)}
           onLocationSelect={handleLocationSelect}
