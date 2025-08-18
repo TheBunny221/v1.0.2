@@ -881,6 +881,16 @@ const CitizenDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Refresh data after successful submission
+          handleRefresh();
+        }}
+      />
     </div>
   );
 };
