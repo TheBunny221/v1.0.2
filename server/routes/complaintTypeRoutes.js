@@ -33,6 +33,10 @@ const validateComplaintType = [
     .optional()
     .isInt({ min: 1, max: 168 })
     .withMessage("SLA hours must be between 1 and 168 (1 week)"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean value"),
   handleValidationErrors,
 ];
 
