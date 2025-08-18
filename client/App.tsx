@@ -295,14 +295,16 @@ const App: React.FC = () => {
                       <Route
                         path="/reports"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "WARD_OFFICER",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <AdminReports />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "WARD_OFFICER",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <AdminReports />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
@@ -310,54 +312,64 @@ const App: React.FC = () => {
                       <Route
                         path="/admin/users"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["ADMINISTRATOR"]}
-                          >
-                            <AdminUsers />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["ADMINISTRATOR"]}
+                            >
+                              <AdminUsers />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/admin/config"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["ADMINISTRATOR"]}
-                          >
-                            <AdminConfig />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["ADMINISTRATOR"]}
+                            >
+                              <AdminConfig />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/admin/languages"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["ADMINISTRATOR"]}
-                          >
-                            <AdminLanguages />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["ADMINISTRATOR"]}
+                            >
+                              <AdminLanguages />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/admin/analytics"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["ADMINISTRATOR"]}
-                          >
-                            <AdminAnalytics />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["ADMINISTRATOR"]}
+                            >
+                              <AdminAnalytics />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/admin/reports-analytics"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "ADMINISTRATOR",
-                              "WARD_OFFICER",
-                            ]}
-                          >
-                            <ReportsAnalytics />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "ADMINISTRATOR",
+                                "WARD_OFFICER",
+                              ]}
+                            >
+                              <ReportsAnalytics />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
