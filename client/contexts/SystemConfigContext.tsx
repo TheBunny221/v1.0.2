@@ -8,6 +8,7 @@ interface SystemConfigContextType {
   config: SystemConfig;
   appName: string;
   appLogoUrl: string;
+  appLogoSize: string;
   isLoading: boolean;
   refreshConfig: () => Promise<void>;
   getConfig: (key: string, defaultValue?: string) => string;
