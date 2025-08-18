@@ -149,9 +149,11 @@ const uiSlice = createSlice({
     },
     toggleSidebarCollapsed: (state) => {
       state.isSidebarCollapsed = !state.isSidebarCollapsed;
+      localStorage.setItem("sidebarCollapsed", state.isSidebarCollapsed.toString());
     },
     setSidebarCollapsed: (state, action: PayloadAction<boolean>) => {
       state.isSidebarCollapsed = action.payload;
+      localStorage.setItem("sidebarCollapsed", action.payload.toString());
     },
 
     // Theme
