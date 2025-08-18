@@ -28,7 +28,7 @@ import {
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Separator } from "../components/ui/separator";
-import LocationMapDialog from "../components/LocationMapDialog";
+import SimpleLocationMapDialog from "../components/SimpleLocationMapDialog";
 import {
   MapPin,
   Upload,
