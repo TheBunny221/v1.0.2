@@ -122,6 +122,109 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
+  const handleExportDetails = () => {
+    if (!complaint) {
+      console.error("No complaint data available for export");
+      return;
+    }
+
+    try {
+      // Prepare export data with language context
+      const exportData = {
+        complaintDetails: {
+          id: complaint.id,
+          complaintId: complaint.complaintId || complaint.id,
+          type: complaint.type,
+          title: complaint.title,
+          description: complaint.description,
+          status: complaint.status,
+          priority: complaint.priority,
+          area: complaint.area,
+          location: complaint.location,
+          address: complaint.address,
+          mobile: complaint.mobile,
+          email: complaint.email,
+          submittedOn: complaint.submittedOn,
+          lastUpdated: complaint.lastUpdated,
+          resolvedDate: complaint.resolvedDate,
+          slaDeadline: complaint.slaDeadline,
+          escalationLevel: complaint.escalationLevel,
+          slaStatus: complaint.slaStatus,
+          timeElapsed: complaint.timeElapsed,
+          remarks: complaint.remarks,
+          feedback: complaint.feedback,
+          rating: complaint.rating,
+        },
+        submittedBy: complaint.submittedBy ? {
+          id: complaint.submittedBy.id,
+          fullName: complaint.submittedBy.fullName,
+          email: complaint.submittedBy.email,
+          phoneNumber: complaint.submittedBy.phoneNumber,
+        } : null,
+        assignedTo: complaint.assignedTo ? {
+          id: complaint.assignedTo.id,
+          fullName: complaint.assignedTo.fullName,
+          email: complaint.assignedTo.email,
+          phoneNumber: complaint.assignedTo.phoneNumber,
+        } : null,
+        ward: complaint.ward ? {
+          id: complaint.ward.id,
+          name: complaint.ward.name,
+          wardNumber: complaint.ward.wardNumber,
+        } : null,
+        subZone: complaint.subZone ? {
+          id: complaint.subZone.id,
+          name: complaint.subZone.name,
+        } : null,
+        attachments: complaint.attachments?.map(attachment => ({
+          id: attachment.id,
+          fileName: attachment.fileName,
+          originalName: attachment.originalName,
+          mimeType: attachment.mimeType,
+          size: attachment.size,
+          uploadedAt: attachment.uploadedAt,
+        })) || [],
+        statusLogs: complaint.statusLogs?.map(log => ({
+          id: log.id,
+          status: log.status,
+          remarks: log.remarks,
+          timestamp: log.timestamp,
+          user: log.user ? {
+            fullName: log.user.fullName,
+            role: log.user.role,
+          } : null,
+        })) || [],
+        language: {
+          currentLanguage: user?.language || 'en',
+          availableLanguages: Object.keys(translations || {}),
+          translations: translations || {},
+        },
+        exportMetadata: {
+          exportedAt: new Date().toISOString(),
+          exportedBy: user?.fullName || 'Anonymous',
+          exportFormat: 'JSON',
+          version: '1.0',
+        },
+      };
+
+      // Create and download file
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `complaint-${complaint.complaintId || complaint.id}-details-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log("Complaint details exported successfully");
+    } catch (error) {
+      console.error("Failed to export complaint details:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
