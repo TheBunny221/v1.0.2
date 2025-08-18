@@ -193,6 +193,7 @@ const Index: React.FC = () => {
         area: formData.area,
         landmark: formData.location,
         address: formData.address,
+        coordinates: formData.coordinates,
         contactName: isAuthenticated && user ? user.fullName : "Guest",
         contactEmail:
           formData.email || (isAuthenticated && user ? user.email : ""),
