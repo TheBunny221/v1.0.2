@@ -14,21 +14,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   sidebarCollapsed = false,
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation */}
-      <Navigation />
-
-      <div className="flex">
-        {/* Sidebar Navigation */}
-        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
-          <SidebarNav defaultCollapsed={sidebarCollapsed} />
-        </div>
-
-        {/* Main Content */}
-        <main className={cn("flex-1 p-6 overflow-auto", className)}>
-          {children}
-        </main>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar Navigation */}
+      <div className="sticky top-0 h-screen overflow-y-auto">
+        <SidebarNav defaultCollapsed={sidebarCollapsed} />
       </div>
+
+      {/* Main Content */}
+      <main className={cn("flex-1 p-6 overflow-auto", className)}>
+        {children}
+      </main>
     </div>
   );
 };
