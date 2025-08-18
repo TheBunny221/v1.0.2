@@ -509,7 +509,13 @@ const Index: React.FC = () => {
                           placeholder={`${translations?.complaints?.landmark || "Specific location or landmark"}`}
                           className="flex-1"
                         />
-                        <Button type="button" variant="outline" size="icon">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setIsMapDialogOpen(true)}
+                          title="Select location on map"
+                        >
                           <MapPin className="h-4 w-4" />
                         </Button>
                       </div>
