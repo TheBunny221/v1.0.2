@@ -21,7 +21,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       <div className="flex pt-16">
         {/* Sidebar Navigation */}
-        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
           <SimplifiedSidebarNav defaultCollapsed={sidebarCollapsed} />
         </div>
 
