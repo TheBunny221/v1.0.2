@@ -513,23 +513,50 @@ const ComplaintDetails: React.FC = () => {
                       }
                     };
 
+                    // Get citizen-friendly status messages
+                    const getCitizenStatusMessage = (status, log) => {
+                      switch (status) {
+                        case "REGISTERED": return "Your complaint has been successfully registered and is under review.";
+                        case "ASSIGNED": return "Your complaint has been assigned to our maintenance team for resolution.";
+                        case "IN_PROGRESS": return "Our team is actively working on resolving your complaint.";
+                        case "RESOLVED": return "Your complaint has been resolved. Please verify and provide feedback.";
+                        case "CLOSED": return "Your complaint has been completed and closed.";
+                        default: return `Your complaint status has been updated to ${status.toLowerCase().replace('_', ' ')}.`;
+                      }
+                    };
+
+                    // Check if user is a citizen
+                    const isCitizen = user?.role === "CITIZEN";
+
                     return (
                       <div key={log.id || index} className={`border-l-4 ${getStatusColor(log.toStatus)} pl-4 py-2`}>
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-medium">{getStatusLabel(log.toStatus)}</p>
-                              {log.user && (
+                              {/* Show staff details only to non-citizens */}
+                              {!isCitizen && log.user && (
                                 <Badge variant="outline" className="text-xs">
                                   {log.user.fullName} ({log.user.role})
                                 </Badge>
                               )}
                             </div>
-                            {log.comment && (
+
+                            {/* Show appropriate message based on user role */}
+                            {isCitizen ? (
                               <p className="text-sm text-gray-600 mb-1">
-                                <strong>Remarks:</strong> {log.comment}
+                                {getCitizenStatusMessage(log.toStatus, log)}
                               </p>
+                            ) : (
+                              <>
+                                {log.comment && (
+                                  <p className="text-sm text-gray-600 mb-1">
+                                    <strong>Remarks:</strong> {log.comment}
+                                  </p>
+                                )}
+                              </>
                             )}
+
                             {log.fromStatus && (
                               <p className="text-xs text-gray-500">
                                 Status changed from <span className="font-medium">{log.fromStatus}</span> to <span className="font-medium">{log.toStatus}</span>
