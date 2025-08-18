@@ -1653,7 +1653,7 @@ const AdminConfig: React.FC = () => {
               <div>
                 <Label htmlFor="priority">Priority</Label>
                 <Select
-                  value={editingComplaintType.priority}
+                  value={editingComplaintType.priority || "MEDIUM"}
                   onValueChange={(
                     value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
                   ) =>
@@ -1679,11 +1679,11 @@ const AdminConfig: React.FC = () => {
                 <Input
                   id="slaHours"
                   type="number"
-                  value={editingComplaintType.slaHours}
+                  value={editingComplaintType.slaHours || ""}
                   onChange={(e) =>
                     setEditingComplaintType({
                       ...editingComplaintType,
-                      slaHours: parseInt(e.target.value),
+                      slaHours: parseInt(e.target.value) || 0,
                     })
                   }
                   placeholder="Enter SLA hours"
