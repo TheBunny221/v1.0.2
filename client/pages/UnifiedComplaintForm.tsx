@@ -1617,6 +1617,20 @@ const UnifiedComplaintForm: React.FC = () => {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Location Map Dialog */}
+        <LocationMapDialog
+          isOpen={isMapDialogOpen}
+          onClose={() => setIsMapDialogOpen(false)}
+          onLocationSelect={handleLocationSelect}
+          initialLocation={formData.coordinates ? {
+            latitude: formData.coordinates.latitude,
+            longitude: formData.coordinates.longitude,
+            address: formData.address,
+            area: formData.area,
+            landmark: formData.landmark,
+          } : undefined}
+        />
       </div>
     </div>
   );
