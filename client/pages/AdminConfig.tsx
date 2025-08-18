@@ -531,10 +531,21 @@ const AdminConfig: React.FC = () => {
       );
     } catch (error: any) {
       console.error('Error saving complaint type:', error);
+
+      // Handle RTK Query error properly
+      let errorMessage = "Failed to save complaint type. Please try again.";
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.status) {
+        errorMessage = `Request failed with status ${error.status}`;
+      }
+
       dispatch(
         showErrorToast(
           "Save Failed",
-          error.message || "Failed to save complaint type. Please try again.",
+          errorMessage,
         ),
       );
     } finally {
