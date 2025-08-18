@@ -828,6 +828,16 @@ const GuestDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Could add refresh logic here if needed
+          setActiveTab("complaints");
+        }}
+      />
     </div>
   );
 };
