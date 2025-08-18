@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAppSelector } from "../../store/hooks";
-import { useSystemConfig } from "../../contexts/SystemConfigContext";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { toggleSidebarCollapsed } from "../../store/slices/uiSlice";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
 import {
@@ -36,10 +36,14 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
   className,
   defaultCollapsed = false,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const { isSidebarCollapsed } = useAppSelector((state) => state.ui);
+
+  // Use UI slice state instead of local state
+  const isCollapsed = isSidebarCollapsed;
 
   const navigationItems: SidebarNavItem[] = [
     {
@@ -151,7 +155,7 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={() => dispatch(toggleSidebarCollapsed())}
           className="p-1.5 hover:bg-gray-100 rounded-md ml-auto"
         >
           {isCollapsed ? (
