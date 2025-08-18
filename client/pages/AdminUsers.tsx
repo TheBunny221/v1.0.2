@@ -119,20 +119,26 @@ const AdminUsers: React.FC = () => {
   const [wards, setWards] = useState<Array<{id: string; name: string}>>([]);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchWards = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) {
+          setWards([]);
+          return;
+        }
+
         const response = await fetch('/api/wards', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` }),
+            'Authorization': `Bearer ${token}`,
           },
+          signal: abortController.signal,
         });
 
         if (!response.ok) {
-          // If it's a 401, it means the user is not authenticated, which is expected
-          // during logout or initial load
           if (response.status === 401) {
             console.warn('Not authenticated for wards fetch');
             setWards([]);
@@ -142,23 +148,26 @@ const AdminUsers: React.FC = () => {
         }
 
         const data = await response.json();
-        if (data.success && data.data) {
+        if (data.success && Array.isArray(data.data)) {
           setWards(data.data);
         } else {
           setWards([]);
         }
       } catch (error) {
-        console.error('Failed to fetch wards:', error);
-        // Set empty array as fallback so the component doesn't break
+        // Don't log errors if the request was aborted (component unmounted)
+        if (error.name !== 'AbortError') {
+          console.error('Failed to fetch wards:', error);
+        }
         setWards([]);
       }
     };
 
-    // Only fetch wards when component mounts and user is likely authenticated
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchWards();
-    }
+    fetchWards();
+
+    // Cleanup function to abort the request if component unmounts
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   // Mutations
