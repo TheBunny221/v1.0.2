@@ -539,11 +539,11 @@ const Navigation: React.FC = () => {
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${
           isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white shadow-lg">
+        <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
             {filteredNavItems.map((item) => (
               <Link
                 key={item.path}
