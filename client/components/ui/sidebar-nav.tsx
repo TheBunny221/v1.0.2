@@ -162,7 +162,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       </div>
 
       {/* Navigation Items */}
-      <nav className="p-2 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {filteredNavItems.map((item) => (
           <Link
             key={item.path}
