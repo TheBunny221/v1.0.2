@@ -1,51 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
-import { useComplaintTypes } from "../hooks/useComplaintTypes";
-import {
-  createComplaint,
-  ComplaintType,
-  Priority,
-} from "../store/slices/complaintsSlice";
-import { useGetWardsQuery } from "../store/api/guestApi";
-import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Separator } from "../components/ui/separator";
-import SimpleLocationMapDialog from "../components/SimpleLocationMapDialog";
 import {
-  MapPin,
-  Upload,
-  RefreshCw,
   FileText,
   Phone,
   Mail,
   User,
-  CheckCircle,
   Clock,
   BarChart3,
   Shield,
-  AlertCircle,
-  Zap,
-  Wrench,
-  Droplets,
 } from "lucide-react";
 import QuickComplaintForm from "../components/QuickComplaintForm";
 
