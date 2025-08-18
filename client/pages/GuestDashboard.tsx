@@ -464,7 +464,7 @@ const GuestDashboard: React.FC = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">My Complaints</CardTitle>
-                  <Button onClick={() => navigate("/guest/complaint")}>
+                  <Button onClick={() => setIsQuickFormOpen(true)}>
                     <PlusCircle className="h-4 w-4 mr-2" />
                     New Complaint
                   </Button>
