@@ -222,12 +222,12 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     async (event: React.FormEvent) => {
       event.preventDefault();
 
-      if (captcha !== captchaValue) {
+      if (!captcha || !captchaId) {
         dispatch(
           showErrorToast(
             translations?.forms?.invalidCaptcha || "Invalid CAPTCHA",
             translations?.forms?.enterCaptcha ||
-              "Please enter the correct CAPTCHA code"
+              "Please enter the CAPTCHA code"
           )
         );
         return;
