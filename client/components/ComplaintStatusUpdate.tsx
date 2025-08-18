@@ -65,7 +65,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
   
   const [formData, setFormData] = useState({
     status: complaint.status,
-    assignedTo: complaint.assignedTo?.id || '',
+    assignedTo: complaint.assignedTo?.id || 'unassigned',
     remarks: '',
   });
 
