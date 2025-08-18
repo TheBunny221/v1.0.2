@@ -17,10 +17,7 @@ import {
   useGenerateCaptchaQuery,
   useLazyGenerateCaptchaQuery,
 } from "../store/api/guestApi";
-import {
-  selectAuth,
-  setCredentials,
-} from "../store/slices/authSlice";
+import { selectAuth, setCredentials } from "../store/slices/authSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
@@ -34,12 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import SimpleLocationMapDialog from "./SimpleLocationMapDialog";
@@ -106,7 +98,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const [captchaId, setCaptchaId] = useState<string | null>(null);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [submissionMode, setSubmissionMode] = useState<"citizen" | "guest">(
-    isAuthenticated ? "citizen" : "guest"
+    isAuthenticated ? "citizen" : "guest",
   );
   const [otpCode, setOtpCode] = useState("");
   const [complaintId, setComplaintId] = useState<string | null>(null);
@@ -114,11 +106,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
   const { toast } = useToast();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
-  const [generateCaptcha, {
-    data: captchaData,
-    isLoading: captchaLoading,
-    error: captchaError
-  }] = useLazyGenerateCaptchaQuery();
+  const [
+    generateCaptcha,
+    { data: captchaData, isLoading: captchaLoading, error: captchaError },
+  ] = useLazyGenerateCaptchaQuery();
 
   // Pre-fill user data if authenticated and set submission mode
   useEffect(() => {
@@ -189,7 +180,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       const selectedFiles = Array.from(event.target.files || []);
       setFiles((prev) => [...prev, ...selectedFiles]);
     },
-    []
+    [],
   );
 
   const removeFile = useCallback((index: number) => {
@@ -215,7 +206,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         },
       }));
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -227,8 +218,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           showErrorToast(
             translations?.forms?.invalidCaptcha || "Invalid CAPTCHA",
             translations?.forms?.enterCaptcha ||
-              "Please enter the CAPTCHA code"
-          )
+              "Please enter the CAPTCHA code",
+          ),
         );
         return;
       }
@@ -244,8 +235,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           showErrorToast(
             translations?.forms?.requiredField || "Required Field",
             translations?.forms?.requiredField ||
-              "Please fill all required fields"
-          )
+              "Please fill all required fields",
+          ),
         );
         return;
       }
@@ -271,7 +262,9 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             captchaText: captcha,
           };
 
-          const result = await dispatch(createComplaint(complaintData)).unwrap();
+          const result = await dispatch(
+            createComplaint(complaintData),
+          ).unwrap();
 
           toast({
             title: "Complaint Submitted Successfully!",
@@ -300,16 +293,18 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           };
 
           // Convert files to FileAttachment format
-          const fileAttachments: FileAttachment[] = files.map((file, index) => ({
-            id: `file-${index}-${Date.now()}`,
-            file,
-          }));
+          const fileAttachments: FileAttachment[] = files.map(
+            (file, index) => ({
+              id: `file-${index}-${Date.now()}`,
+              file,
+            }),
+          );
 
           const result = await dispatch(
             submitGuestComplaint({
               complaintData: guestFormData,
-              files: fileAttachments
-            })
+              files: fileAttachments,
+            }),
           ).unwrap();
 
           if (result.complaintId && result.trackingNumber) {
@@ -343,7 +338,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       translations,
       toast,
       onSuccess,
-    ]
+    ],
   );
 
   // Handle OTP verification and final submission
@@ -381,7 +376,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           setCredentials({
             token: result.data.token,
             user: result.data.user,
-          })
+          }),
         );
         localStorage.setItem("token", result.data.token);
       }
@@ -410,7 +405,15 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         variant: "destructive",
       });
     }
-  }, [otpCode, complaintId, formData.email, verifyGuestOtp, dispatch, toast, onSuccess]);
+  }, [
+    otpCode,
+    complaintId,
+    formData.email,
+    verifyGuestOtp,
+    dispatch,
+    toast,
+    onSuccess,
+  ]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -492,9 +495,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) =>
-                      handleInputChange("email", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder={`${translations?.common?.optional || "Enter your"} ${translations?.auth?.email || "email address"}`}
                     disabled={isAuthenticated && !!user?.email}
                   />
@@ -707,11 +708,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {files.map((file, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="pr-1"
-                      >
+                      <Badge key={index} variant="secondary" className="pr-1">
                         {file.name}
                         <Button
                           type="button"
@@ -741,16 +738,24 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               <div className="flex items-center space-x-4">
                 <div className="bg-gray-100 p-2 rounded border min-h-[60px] flex items-center justify-center">
                   {captchaLoading ? (
-                    <div className="text-sm text-gray-500">Loading CAPTCHA...</div>
+                    <div className="text-sm text-gray-500">
+                      Loading CAPTCHA...
+                    </div>
                   ) : captchaError ? (
-                    <div className="text-sm text-red-500">Error loading CAPTCHA</div>
+                    <div className="text-sm text-red-500">
+                      Error loading CAPTCHA
+                    </div>
                   ) : captchaData?.success && captchaData.data ? (
                     <div
-                      dangerouslySetInnerHTML={{ __html: captchaData.data.captchaSvg }}
+                      dangerouslySetInnerHTML={{
+                        __html: captchaData.data.captchaSvg,
+                      }}
                       className="captcha-svg"
                     />
                   ) : (
-                    <div className="text-sm text-gray-500">Click refresh to load CAPTCHA</div>
+                    <div className="text-sm text-gray-500">
+                      Click refresh to load CAPTCHA
+                    </div>
                   )}
                 </div>
                 <Button
@@ -761,7 +766,9 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                   disabled={captchaLoading}
                   title="Refresh CAPTCHA"
                 >
-                  <RefreshCw className={`h-4 w-4 ${captchaLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-4 w-4 ${captchaLoading ? "animate-spin" : ""}`}
+                  />
                 </Button>
               </div>
               <Input
@@ -780,9 +787,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               <>
                 <Separator />
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">
-                    Email Verification
-                  </h3>
+                  <h3 className="text-lg font-medium">Email Verification</h3>
                   <div className="max-w-md mx-auto space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="otpCode" className="text-center block">
@@ -796,7 +801,11 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                         maxLength={6}
                         className="text-center text-xl font-mono tracking-widest"
                         value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        onChange={(e) =>
+                          setOtpCode(
+                            e.target.value.replace(/\D/g, "").slice(0, 6),
+                          )
+                        }
                         autoComplete="one-time-code"
                       />
                     </div>
@@ -840,8 +849,9 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                   {isLoading
                     ? translations?.common?.loading || "Submitting..."
                     : submissionMode === "citizen"
-                    ? translations?.forms?.submitComplaint || "Submit Complaint"
-                    : "Submit & Send Verification"}
+                      ? translations?.forms?.submitComplaint ||
+                        "Submit Complaint"
+                      : "Submit & Send Verification"}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   {translations?.forms?.resetForm || "Reset Form"}

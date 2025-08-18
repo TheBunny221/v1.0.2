@@ -174,7 +174,10 @@ export const guestApi = baseApi.injectEndpoints({
     }),
 
     // Verify CAPTCHA (optional standalone endpoint)
-    verifyCaptcha: builder.mutation<ApiResponse<{ message: string }>, CaptchaVerifyRequest>({
+    verifyCaptcha: builder.mutation<
+      ApiResponse<{ message: string }>,
+      CaptchaVerifyRequest
+    >({
       query: (data) => ({
         url: "/captcha/verify",
         method: "POST",

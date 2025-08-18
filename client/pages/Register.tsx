@@ -43,8 +43,14 @@ const Register: React.FC = () => {
 
   // API hooks
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
-  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
-  const wardsData = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
+  const {
+    data: wardsResponse,
+    isLoading: wardsLoading,
+    error: wardsError,
+  } = useGetWardsQuery();
+  const wardsData = Array.isArray(wardsResponse?.data)
+    ? wardsResponse.data
+    : [];
 
   // Clear registration state on component mount
   useEffect(() => {
@@ -70,9 +76,9 @@ const Register: React.FC = () => {
   });
 
   // Transform wards data for the form
-  const wards = wardsData.map(ward => ({
+  const wards = wardsData.map((ward) => ({
     value: ward.id,
-    label: ward.name
+    label: ward.name,
   }));
 
   const handleSubmit = async (e: React.FormEvent) => {

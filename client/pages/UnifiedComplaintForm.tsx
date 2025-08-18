@@ -278,15 +278,17 @@ const UnifiedComplaintForm: React.FC = () => {
       area?: string;
       landmark?: string;
     }) => {
-      dispatch(updateGuestFormData({
-        landmark: location.landmark || location.address || '',
-        area: location.area || formData.area,
-        address: location.address || formData.address,
-        coordinates: {
-          latitude: location.latitude,
-          longitude: location.longitude,
-        },
-      }));
+      dispatch(
+        updateGuestFormData({
+          landmark: location.landmark || location.address || "",
+          area: location.area || formData.area,
+          address: location.address || formData.address,
+          coordinates: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        }),
+      );
     },
     [dispatch, formData.area, formData.address],
   );
@@ -1623,13 +1625,17 @@ const UnifiedComplaintForm: React.FC = () => {
           isOpen={isMapDialogOpen}
           onClose={() => setIsMapDialogOpen(false)}
           onLocationSelect={handleLocationSelect}
-          initialLocation={formData.coordinates ? {
-            latitude: formData.coordinates.latitude,
-            longitude: formData.coordinates.longitude,
-            address: formData.address,
-            area: formData.area,
-            landmark: formData.landmark,
-          } : undefined}
+          initialLocation={
+            formData.coordinates
+              ? {
+                  latitude: formData.coordinates.latitude,
+                  longitude: formData.coordinates.longitude,
+                  address: formData.address,
+                  area: formData.area,
+                  landmark: formData.landmark,
+                }
+              : undefined
+          }
         />
       </div>
     </div>

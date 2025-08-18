@@ -28,8 +28,6 @@ const Index: React.FC = () => {
   // Form state
   const [isFormExpanded, setIsFormExpanded] = useState(false);
 
-
-
   // Show loading if translations not ready
   if (!translations) {
     return (

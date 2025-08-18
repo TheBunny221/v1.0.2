@@ -94,7 +94,6 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-
   const handleExportDetails = () => {
     if (!complaint) {
       console.error("No complaint data available for export");
@@ -114,20 +113,21 @@ const ComplaintDetails: React.FC = () => {
       // Helper function to add text with word wrapping
       const addText = (text: string, fontSize = 10, isBold = false) => {
         if (isBold) {
-          doc.setFont('helvetica', 'bold');
+          doc.setFont("helvetica", "bold");
         } else {
-          doc.setFont('helvetica', 'normal');
+          doc.setFont("helvetica", "normal");
         }
         doc.setFontSize(fontSize);
 
         // Simple word wrapping for long text
         const pageWidth = doc.internal.pageSize.getWidth();
         const margin = 20;
-        const maxWidth = pageWidth - (2 * margin);
+        const maxWidth = pageWidth - 2 * margin;
         const lines = doc.splitTextToSize(text, maxWidth);
 
         lines.forEach((line: string) => {
-          if (yPosition > 280) { // Check if we need a new page
+          if (yPosition > 280) {
+            // Check if we need a new page
             doc.addPage();
             yPosition = 20;
           }
@@ -169,7 +169,8 @@ const ComplaintDetails: React.FC = () => {
       if (complaint.status) {
         addText(t.complaints?.status || "Status", 12, true);
         // Translate status if available
-        const statusKey = complaint.status.toLowerCase() as keyof typeof t.complaints;
+        const statusKey =
+          complaint.status.toLowerCase() as keyof typeof t.complaints;
         const translatedStatus = t.complaints?.[statusKey] || complaint.status;
         addText(translatedStatus);
         yPosition += sectionSpacing;
@@ -178,8 +179,10 @@ const ComplaintDetails: React.FC = () => {
       if (complaint.priority) {
         addText(t.complaints?.priority || "Priority", 12, true);
         // Translate priority if available
-        const priorityKey = complaint.priority.toLowerCase() as keyof typeof t.complaints;
-        const translatedPriority = t.complaints?.[priorityKey] || complaint.priority;
+        const priorityKey =
+          complaint.priority.toLowerCase() as keyof typeof t.complaints;
+        const translatedPriority =
+          t.complaints?.[priorityKey] || complaint.priority;
         addText(translatedPriority);
         yPosition += sectionSpacing;
       }
@@ -296,14 +299,19 @@ const ComplaintDetails: React.FC = () => {
         yPosition += sectionSpacing;
 
         complaint.attachments.forEach((attachment, index) => {
-          addText(`${index + 1}. ${attachment.originalName || attachment.fileName}`);
+          addText(
+            `${index + 1}. ${attachment.originalName || attachment.fileName}`,
+          );
         });
         yPosition += sectionSpacing;
       }
 
       // Footer with export information
       yPosition += sectionSpacing * 2;
-      addText(`${t.common?.export || "Exported"}: ${new Date().toLocaleString()}`, 8);
+      addText(
+        `${t.common?.export || "Exported"}: ${new Date().toLocaleString()}`,
+        8,
+      );
       if (user?.fullName) {
         addText(`${t.common?.by || "By"}: ${user.fullName}`, 8);
       }
@@ -483,7 +491,9 @@ const ComplaintDetails: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2" />
-                {user?.role === "CITIZEN" ? "Status Updates" : "Status Updates & Comments"}
+                {user?.role === "CITIZEN"
+                  ? "Status Updates"
+                  : "Status Updates & Comments"}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -493,35 +503,53 @@ const ComplaintDetails: React.FC = () => {
                   complaint.statusLogs.map((log, index) => {
                     const getStatusColor = (status) => {
                       switch (status) {
-                        case "REGISTERED": return "border-blue-500";
-                        case "ASSIGNED": return "border-yellow-500";
-                        case "IN_PROGRESS": return "border-orange-500";
-                        case "RESOLVED": return "border-green-500";
-                        case "CLOSED": return "border-gray-500";
-                        default: return "border-gray-400";
+                        case "REGISTERED":
+                          return "border-blue-500";
+                        case "ASSIGNED":
+                          return "border-yellow-500";
+                        case "IN_PROGRESS":
+                          return "border-orange-500";
+                        case "RESOLVED":
+                          return "border-green-500";
+                        case "CLOSED":
+                          return "border-gray-500";
+                        default:
+                          return "border-gray-400";
                       }
                     };
 
                     const getStatusLabel = (status) => {
                       switch (status) {
-                        case "REGISTERED": return "Complaint Registered";
-                        case "ASSIGNED": return "Complaint Assigned";
-                        case "IN_PROGRESS": return "Work in Progress";
-                        case "RESOLVED": return "Complaint Resolved";
-                        case "CLOSED": return "Complaint Closed";
-                        default: return `Status: ${status}`;
+                        case "REGISTERED":
+                          return "Complaint Registered";
+                        case "ASSIGNED":
+                          return "Complaint Assigned";
+                        case "IN_PROGRESS":
+                          return "Work in Progress";
+                        case "RESOLVED":
+                          return "Complaint Resolved";
+                        case "CLOSED":
+                          return "Complaint Closed";
+                        default:
+                          return `Status: ${status}`;
                       }
                     };
 
                     // Get citizen-friendly status messages
                     const getCitizenStatusMessage = (status, log) => {
                       switch (status) {
-                        case "REGISTERED": return "Your complaint has been successfully registered and is under review.";
-                        case "ASSIGNED": return "Your complaint has been assigned to our maintenance team for resolution.";
-                        case "IN_PROGRESS": return "Our team is actively working on resolving your complaint.";
-                        case "RESOLVED": return "Your complaint has been resolved. Please verify and provide feedback.";
-                        case "CLOSED": return "Your complaint has been completed and closed.";
-                        default: return `Your complaint status has been updated to ${status.toLowerCase().replace('_', ' ')}.`;
+                        case "REGISTERED":
+                          return "Your complaint has been successfully registered and is under review.";
+                        case "ASSIGNED":
+                          return "Your complaint has been assigned to our maintenance team for resolution.";
+                        case "IN_PROGRESS":
+                          return "Our team is actively working on resolving your complaint.";
+                        case "RESOLVED":
+                          return "Your complaint has been resolved. Please verify and provide feedback.";
+                        case "CLOSED":
+                          return "Your complaint has been completed and closed.";
+                        default:
+                          return `Your complaint status has been updated to ${status.toLowerCase().replace("_", " ")}.`;
                       }
                     };
 
@@ -529,11 +557,16 @@ const ComplaintDetails: React.FC = () => {
                     const isCitizen = user?.role === "CITIZEN";
 
                     return (
-                      <div key={log.id || index} className={`border-l-4 ${getStatusColor(log.toStatus)} pl-4 py-2`}>
+                      <div
+                        key={log.id || index}
+                        className={`border-l-4 ${getStatusColor(log.toStatus)} pl-4 py-2`}
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="font-medium">{getStatusLabel(log.toStatus)}</p>
+                              <p className="font-medium">
+                                {getStatusLabel(log.toStatus)}
+                              </p>
                               {/* Show staff details only to non-citizens */}
                               {!isCitizen && log.user && (
                                 <Badge variant="outline" className="text-xs">
@@ -559,7 +592,14 @@ const ComplaintDetails: React.FC = () => {
 
                             {log.fromStatus && (
                               <p className="text-xs text-gray-500">
-                                Status changed from <span className="font-medium">{log.fromStatus}</span> to <span className="font-medium">{log.toStatus}</span>
+                                Status changed from{" "}
+                                <span className="font-medium">
+                                  {log.fromStatus}
+                                </span>{" "}
+                                to{" "}
+                                <span className="font-medium">
+                                  {log.toStatus}
+                                </span>
                               </p>
                             )}
                           </div>
@@ -573,7 +613,11 @@ const ComplaintDetails: React.FC = () => {
                 ) : (
                   <div className="text-center py-4 text-gray-500">
                     <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>{user?.role === "CITIZEN" ? "No updates available for your complaint yet" : "No status updates available"}</p>
+                    <p>
+                      {user?.role === "CITIZEN"
+                        ? "No updates available for your complaint yet"
+                        : "No status updates available"}
+                    </p>
                   </div>
                 )}
               </div>
@@ -591,12 +635,13 @@ const ComplaintDetails: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{complaint.remarks}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {complaint.remarks}
+                  </p>
                 </div>
               </CardContent>
             </Card>
           )}
-
         </div>
 
         {/* Right Column - Contact & Meta Info */}
@@ -730,7 +775,8 @@ const ComplaintDetails: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               {/* Status update button for Ward Officers and Administrators */}
-              {(user?.role === "WARD_OFFICER" || user?.role === "ADMINISTRATOR") && (
+              {(user?.role === "WARD_OFFICER" ||
+                user?.role === "ADMINISTRATOR") && (
                 <Button
                   className="w-full justify-start"
                   onClick={() => setShowStatusDialog(true)}

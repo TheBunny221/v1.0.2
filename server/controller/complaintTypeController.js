@@ -79,7 +79,7 @@ export const getComplaintTypeById = asyncHandler(async (req, res) => {
 // @route   POST /api/complaint-types
 // @access  Private (Admin only)
 export const createComplaintType = asyncHandler(async (req, res) => {
-  console.log('Creating complaint type with body:', req.body);
+  console.log("Creating complaint type with body:", req.body);
   const { name, description, priority, slaHours, isActive } = req.body;
 
   // Generate a unique ID

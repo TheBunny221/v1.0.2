@@ -1,27 +1,36 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from './ui/dialog';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { MapPin, Navigation, Search } from 'lucide-react';
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { MapPin, Navigation, Search } from "lucide-react";
 
 // Fix for default markers in react-leaflet
 const DefaultIcon = L.icon({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
 L.Marker.prototype.options.icon = DefaultIcon;
@@ -53,7 +62,10 @@ function MapUpdater({ center }: { center: [number, number] }) {
 }
 
 // Custom component for map click events
-function LocationMarker({ position, onPositionChange }: {
+function LocationMarker({
+  position,
+  onPositionChange,
+}: {
   position: [number, number];
   onPositionChange: (position: [number, number]) => void;
 }) {
@@ -76,13 +88,15 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   // Default to Kochi, India coordinates
   const defaultPosition: [number, number] = [9.9312, 76.2673];
   const [position, setPosition] = useState<[number, number]>(
-    initialLocation ? [initialLocation.latitude, initialLocation.longitude] : defaultPosition
+    initialLocation
+      ? [initialLocation.latitude, initialLocation.longitude]
+      : defaultPosition,
   );
-  const [address, setAddress] = useState(initialLocation?.address || '');
-  const [area, setArea] = useState(initialLocation?.area || '');
-  const [landmark, setLandmark] = useState(initialLocation?.landmark || '');
+  const [address, setAddress] = useState(initialLocation?.address || "");
+  const [area, setArea] = useState(initialLocation?.area || "");
+  const [landmark, setLandmark] = useState(initialLocation?.landmark || "");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const mapRef = useRef<L.Map>(null);
 
   // Get current location
@@ -91,20 +105,23 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const newPos: [number, number] = [position.coords.latitude, position.coords.longitude];
+          const newPos: [number, number] = [
+            position.coords.latitude,
+            position.coords.longitude,
+          ];
           setPosition(newPos);
           reverseGeocode(newPos);
           setIsLoadingLocation(false);
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting location:", error);
           setIsLoadingLocation(false);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
       );
     } else {
       setIsLoadingLocation(false);
-      alert('Geolocation is not supported by this browser.');
+      alert("Geolocation is not supported by this browser.");
     }
   };
 
@@ -113,27 +130,28 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     try {
       // Using OpenStreetMap Nominatim API for reverse geocoding
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${coords[0]}&lon=${coords[1]}&format=json&addressdetails=1`
+        `https://nominatim.openstreetmap.org/reverse?lat=${coords[0]}&lon=${coords[1]}&format=json&addressdetails=1`,
       );
       const data = await response.json();
-      
+
       if (data && data.display_name) {
         setAddress(data.display_name);
-        
+
         // Extract area information
         const addressComponents = data.address;
         if (addressComponents) {
-          const detectedArea = addressComponents.neighbourhood || 
-                              addressComponents.suburb || 
-                              addressComponents.city_district || 
-                              addressComponents.state_district ||
-                              addressComponents.city ||
-                              '';
+          const detectedArea =
+            addressComponents.neighbourhood ||
+            addressComponents.suburb ||
+            addressComponents.city_district ||
+            addressComponents.state_district ||
+            addressComponents.city ||
+            "";
           setArea(detectedArea);
         }
       }
     } catch (error) {
-      console.error('Error in reverse geocoding:', error);
+      console.error("Error in reverse geocoding:", error);
     }
   };
 
@@ -143,38 +161,42 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ', Kochi, Kerala, India')}&format=json&limit=1&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", Kochi, Kerala, India")}&format=json&limit=1&addressdetails=1`,
       );
       const data = await response.json();
-      
+
       if (data && data.length > 0) {
         const result = data[0];
-        const newPos: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)];
+        const newPos: [number, number] = [
+          parseFloat(result.lat),
+          parseFloat(result.lon),
+        ];
         setPosition(newPos);
         setAddress(result.display_name);
-        
+
         // Extract area information
         const addressComponents = result.address;
         if (addressComponents) {
-          const detectedArea = addressComponents.neighbourhood || 
-                              addressComponents.suburb || 
-                              addressComponents.city_district || 
-                              addressComponents.state_district ||
-                              addressComponents.city ||
-                              '';
+          const detectedArea =
+            addressComponents.neighbourhood ||
+            addressComponents.suburb ||
+            addressComponents.city_district ||
+            addressComponents.state_district ||
+            addressComponents.city ||
+            "";
           setArea(detectedArea);
         }
-        
+
         // Fly to the new position
         if (mapRef.current) {
           mapRef.current.flyTo(newPos, 16);
         }
       } else {
-        alert('Location not found. Please try a different search term.');
+        alert("Location not found. Please try a different search term.");
       }
     } catch (error) {
-      console.error('Error searching location:', error);
-      alert('Error searching for location. Please try again.');
+      console.error("Error searching location:", error);
+      alert("Error searching for location. Please try again.");
     }
   };
 
@@ -195,7 +217,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       searchLocation();
     }
   };
@@ -231,7 +253,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
               className="flex items-center gap-2"
             >
               <Navigation className="h-4 w-4" />
-              {isLoadingLocation ? 'Getting...' : 'Current Location'}
+              {isLoadingLocation ? "Getting..." : "Current Location"}
             </Button>
           </div>
 
@@ -241,7 +263,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
               key={`map-${position[0]}-${position[1]}`}
               center={position}
               zoom={13}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: "100%", width: "100%" }}
               scrollWheelZoom={true}
               whenCreated={(mapInstance) => {
                 mapRef.current = mapInstance;
@@ -252,7 +274,10 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <MapUpdater center={position} />
-              <LocationMarker position={position} onPositionChange={handlePositionChange} />
+              <LocationMarker
+                position={position}
+                onPositionChange={handlePositionChange}
+              />
             </MapContainer>
           </div>
 
@@ -290,7 +315,8 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
 
           {/* Coordinates Display */}
           <div className="text-sm text-muted-foreground">
-            Selected coordinates: {position[0].toFixed(6)}, {position[1].toFixed(6)}
+            Selected coordinates: {position[0].toFixed(6)},{" "}
+            {position[1].toFixed(6)}
           </div>
         </div>
 
@@ -298,9 +324,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm}>
-            Confirm Location
-          </Button>
+          <Button onClick={handleConfirm}>Confirm Location</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

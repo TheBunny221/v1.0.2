@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { ScrollArea } from "./ui/scroll-area";
 import QuickComplaintForm from "./QuickComplaintForm";
 import { useAppSelector } from "../store/hooks";
@@ -32,14 +27,12 @@ const QuickComplaintModal: React.FC<QuickComplaintModalProps> = ({
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>
-            {translations?.complaints?.registerComplaint || "Quick Complaint Form"}
+            {translations?.complaints?.registerComplaint ||
+              "Quick Complaint Form"}
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[calc(90vh-80px)] pr-4">
-          <QuickComplaintForm
-            onSuccess={handleSuccess}
-            onClose={onClose}
-          />
+          <QuickComplaintForm onSuccess={handleSuccess} onClose={onClose} />
         </ScrollArea>
       </DialogContent>
     </Dialog>

@@ -451,10 +451,7 @@ const CitizenDashboard: React.FC = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button
-                onClick={() => setIsQuickFormOpen(true)}
-                size="sm"
-              >
+              <Button onClick={() => setIsQuickFormOpen(true)} size="sm">
                 <PlusCircle className="h-4 w-4 mr-2" />
                 New Complaint
               </Button>

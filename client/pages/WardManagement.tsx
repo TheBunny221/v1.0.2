@@ -47,11 +47,11 @@ const WardManagement: React.FC = () => {
   const {
     data: complaintsResponse,
     isLoading: complaintsLoading,
-    refetch: refetchComplaints
+    refetch: refetchComplaints,
   } = useGetComplaintsQuery({
     page: 1,
     limit: 100,
-    wardId: user?.wardId
+    wardId: user?.wardId,
   });
 
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
@@ -61,17 +61,31 @@ const WardManagement: React.FC = () => {
   // Calculate real stats from complaint data
   const wardStats = {
     totalComplaints: complaints.length,
-    resolved: complaints.filter(c => c.status === 'RESOLVED' || c.status === 'CLOSED').length,
-    pending: complaints.filter(c => c.status === 'REGISTERED' || c.status === 'ASSIGNED' || c.status === 'IN_PROGRESS').length,
-    inProgress: complaints.filter(c => c.status === 'IN_PROGRESS').length,
-    resolutionRate: complaints.length > 0
-      ? Math.round((complaints.filter(c => c.status === 'RESOLVED' || c.status === 'CLOSED').length / complaints.length) * 100)
-      : 0,
+    resolved: complaints.filter(
+      (c) => c.status === "RESOLVED" || c.status === "CLOSED",
+    ).length,
+    pending: complaints.filter(
+      (c) =>
+        c.status === "REGISTERED" ||
+        c.status === "ASSIGNED" ||
+        c.status === "IN_PROGRESS",
+    ).length,
+    inProgress: complaints.filter((c) => c.status === "IN_PROGRESS").length,
+    resolutionRate:
+      complaints.length > 0
+        ? Math.round(
+            (complaints.filter(
+              (c) => c.status === "RESOLVED" || c.status === "CLOSED",
+            ).length /
+              complaints.length) *
+              100,
+          )
+        : 0,
   };
 
   // Group complaints by sub-zone if available
   const complaintsByArea = complaints.reduce((acc: any, complaint) => {
-    const area = complaint.area || 'Unknown Area';
+    const area = complaint.area || "Unknown Area";
     if (!acc[area]) {
       acc[area] = {
         name: area,
@@ -81,7 +95,7 @@ const WardManagement: React.FC = () => {
       };
     }
     acc[area].complaints++;
-    if (complaint.status === 'RESOLVED' || complaint.status === 'CLOSED') {
+    if (complaint.status === "RESOLVED" || complaint.status === "CLOSED") {
       acc[area].resolved++;
     } else {
       acc[area].pending++;
@@ -92,10 +106,14 @@ const WardManagement: React.FC = () => {
   const subZones = Object.values(complaintsByArea);
 
   // Priority complaints that need attention
-  const priorityComplaints = complaints.filter(c =>
-    c.priority === 'HIGH' || c.priority === 'CRITICAL' ||
-    c.status === 'REGISTERED'
-  ).slice(0, 10);
+  const priorityComplaints = complaints
+    .filter(
+      (c) =>
+        c.priority === "HIGH" ||
+        c.priority === "CRITICAL" ||
+        c.status === "REGISTERED",
+    )
+    .slice(0, 10);
 
   if (complaintsLoading) {
     return (
@@ -120,7 +138,7 @@ const WardManagement: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Ward Management</h1>
           <p className="text-gray-600">
-            Overview and management of {user?.ward?.name || 'your ward'}
+            Overview and management of {user?.ward?.name || "your ward"}
           </p>
         </div>
         <div className="flex gap-2">
@@ -185,7 +203,9 @@ const WardManagement: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-2xl font-bold text-orange-600">{wardStats.inProgress}</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {wardStats.inProgress}
+                </p>
               </div>
               <Clock className="h-8 w-8 text-orange-600" />
             </div>
@@ -229,7 +249,11 @@ const WardManagement: React.FC = () => {
       </Card>
 
       {/* Tabbed Interface */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="priority">Priority Complaints</TabsTrigger>
@@ -253,19 +277,28 @@ const WardManagement: React.FC = () => {
                       <span>Resolution Rate</span>
                       <span>{wardStats.resolutionRate}%</span>
                     </div>
-                    <Progress value={wardStats.resolutionRate} className="h-2" />
+                    <Progress
+                      value={wardStats.resolutionRate}
+                      className="h-2"
+                    />
                   </div>
                   <div className="grid grid-cols-3 gap-4 mt-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{wardStats.totalComplaints}</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {wardStats.totalComplaints}
+                      </div>
                       <p className="text-sm text-gray-600">Total Complaints</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">{wardStats.resolved}</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {wardStats.resolved}
+                      </div>
                       <p className="text-sm text-gray-600">Resolved</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600">{wardStats.pending}</div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {wardStats.pending}
+                      </div>
                       <p className="text-sm text-gray-600">Pending</p>
                     </div>
                   </div>
@@ -286,7 +319,12 @@ const WardManagement: React.FC = () => {
                   <Link to="/complaints?status=REGISTERED">
                     <Button variant="outline" className="w-full justify-start">
                       <AlertTriangle className="h-4 w-4 mr-2" />
-                      New Complaints ({complaints.filter(c => c.status === 'REGISTERED').length})
+                      New Complaints (
+                      {
+                        complaints.filter((c) => c.status === "REGISTERED")
+                          .length
+                      }
+                      )
                     </Button>
                   </Link>
                   <Link to="/complaints?status=IN_PROGRESS">
@@ -298,7 +336,14 @@ const WardManagement: React.FC = () => {
                   <Link to="/complaints?priority=HIGH,CRITICAL">
                     <Button variant="outline" className="w-full justify-start">
                       <AlertTriangle className="h-4 w-4 mr-2" />
-                      High Priority ({complaints.filter(c => c.priority === 'HIGH' || c.priority === 'CRITICAL').length})
+                      High Priority (
+                      {
+                        complaints.filter(
+                          (c) =>
+                            c.priority === "HIGH" || c.priority === "CRITICAL",
+                        ).length
+                      }
+                      )
                     </Button>
                   </Link>
                   <Link to="/complaints">
@@ -325,7 +370,9 @@ const WardManagement: React.FC = () => {
               {priorityComplaints.length === 0 ? (
                 <div className="text-center py-8">
                   <CheckCircle className="h-12 w-12 mx-auto text-green-400 mb-4" />
-                  <p className="text-gray-500">No priority complaints requiring attention</p>
+                  <p className="text-gray-500">
+                    No priority complaints requiring attention
+                  </p>
                 </div>
               ) : (
                 <Table>
@@ -346,22 +393,38 @@ const WardManagement: React.FC = () => {
                         <TableCell className="font-medium">
                           #{complaint.complaintId || complaint.id.slice(-6)}
                         </TableCell>
-                        <TableCell>{complaint.type.replace('_', ' ')}</TableCell>
+                        <TableCell>
+                          {complaint.type.replace("_", " ")}
+                        </TableCell>
                         <TableCell>{complaint.area}</TableCell>
                         <TableCell>
-                          <Badge className={complaint.status === 'REGISTERED' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}>
-                            {complaint.status.replace('_', ' ')}
+                          <Badge
+                            className={
+                              complaint.status === "REGISTERED"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800"
+                            }
+                          >
+                            {complaint.status.replace("_", " ")}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge className={complaint.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}>
+                          <Badge
+                            className={
+                              complaint.priority === "CRITICAL"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-orange-100 text-orange-800"
+                            }
+                          >
                             {complaint.priority}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center text-sm">
                             <Calendar className="h-3 w-3 mr-1" />
-                            {new Date(complaint.submittedOn).toLocaleDateString()}
+                            {new Date(
+                              complaint.submittedOn,
+                            ).toLocaleDateString()}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -416,23 +479,35 @@ const WardManagement: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-600">Total: {zone.complaints}</p>
+                          <p className="text-gray-600">
+                            Total: {zone.complaints}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Resolved: {zone.resolved}</p>
+                          <p className="text-gray-600">
+                            Resolved: {zone.resolved}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Pending: {zone.pending}</p>
+                          <p className="text-gray-600">
+                            Pending: {zone.pending}
+                          </p>
                         </div>
                       </div>
                       <div className="mt-2">
                         <Progress
-                          value={zone.complaints > 0 ? (zone.resolved / zone.complaints) * 100 : 0}
+                          value={
+                            zone.complaints > 0
+                              ? (zone.resolved / zone.complaints) * 100
+                              : 0
+                          }
                           className="h-2"
                         />
                       </div>
                       <div className="mt-3 flex justify-end">
-                        <Link to={`/complaints?area=${encodeURIComponent(zone.name)}`}>
+                        <Link
+                          to={`/complaints?area=${encodeURIComponent(zone.name)}`}
+                        >
                           <Button variant="outline" size="sm">
                             View Complaints
                           </Button>
@@ -446,7 +521,6 @@ const WardManagement: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
-
     </div>
   );
 };

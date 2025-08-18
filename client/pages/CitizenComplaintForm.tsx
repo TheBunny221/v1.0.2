@@ -71,7 +71,6 @@ interface CitizenComplaintData {
   attachments?: any[];
 }
 
-
 const PRIORITIES = [
   {
     value: "LOW",
@@ -241,7 +240,9 @@ const CitizenComplaintForm: React.FC = () => {
 
       // Auto-assign priority and SLA hours when complaint type changes
       if (name === "type") {
-        const selectedType = complaintTypeOptions.find(type => type.value === value);
+        const selectedType = complaintTypeOptions.find(
+          (type) => type.value === value,
+        );
         if (selectedType) {
           updatedData.priority = selectedType.priority || "MEDIUM";
           updatedData.slaHours = selectedType.slaHours || 48;
@@ -676,17 +677,25 @@ const CitizenComplaintForm: React.FC = () => {
                             Auto-assigned Details
                           </h4>
                           <p className="text-sm text-gray-600">
-                            Based on your complaint type, the following have been automatically set:
+                            Based on your complaint type, the following have
+                            been automatically set:
                           </p>
                         </div>
                       </div>
                       <div className="mt-3 grid grid-cols-2 gap-4">
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${
-                            PRIORITIES.find(p => p.value === formData.priority)?.color || 'bg-gray-500'
-                          }`} />
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              PRIORITIES.find(
+                                (p) => p.value === formData.priority,
+                              )?.color || "bg-gray-500"
+                            }`}
+                          />
                           <span className="text-sm font-medium">
-                            Priority: {PRIORITIES.find(p => p.value === formData.priority)?.label || formData.priority}
+                            Priority:{" "}
+                            {PRIORITIES.find(
+                              (p) => p.value === formData.priority,
+                            )?.label || formData.priority}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">

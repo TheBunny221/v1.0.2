@@ -21,7 +21,11 @@ const baseQueryWithReauth: BaseQueryFn<
   let contentType = "application/json";
 
   // Handle different body types with comprehensive logic
-  if (typeof args !== "string" && args.body !== undefined && args.body !== null) {
+  if (
+    typeof args !== "string" &&
+    args.body !== undefined &&
+    args.body !== null
+  ) {
     // Check for FormData first (most specific)
     if (args.body instanceof FormData) {
       body = args.body;
@@ -30,7 +34,11 @@ const baseQueryWithReauth: BaseQueryFn<
     // Check if it's already a JSON string
     else if (typeof args.body === "string") {
       // Check if it looks like JSON or if it's already serialized
-      if (args.body.startsWith("{") || args.body.startsWith("[") || args.body === "null") {
+      if (
+        args.body.startsWith("{") ||
+        args.body.startsWith("[") ||
+        args.body === "null"
+      ) {
         body = args.body; // Already JSON
       } else {
         // Non-JSON string, wrap it
@@ -58,13 +66,16 @@ const baseQueryWithReauth: BaseQueryFn<
 
   // Build request options carefully
   const baseOptions: RequestInit = {
-    method: typeof args === "string" ? "GET" : (args.method || "GET"),
-    headers: typeof args === "string" ? {} : (args.headers || {}),
+    method: typeof args === "string" ? "GET" : args.method || "GET",
+    headers: typeof args === "string" ? {} : args.headers || {},
   };
 
   // Only add body for methods that support it
   const methodsWithBody = ["POST", "PUT", "PATCH", "DELETE"];
-  if (body !== undefined && methodsWithBody.includes(baseOptions.method!.toUpperCase())) {
+  if (
+    body !== undefined &&
+    methodsWithBody.includes(baseOptions.method!.toUpperCase())
+  ) {
     baseOptions.body = body;
   }
 
@@ -77,7 +88,7 @@ const baseQueryWithReauth: BaseQueryFn<
     if (token) {
       const headers: Record<string, string> = {
         ...options.headers,
-        "authorization": `Bearer ${token}`,
+        authorization: `Bearer ${token}`,
       };
 
       // Only add content-type for JSON requests (not FormData)
@@ -92,7 +103,7 @@ const baseQueryWithReauth: BaseQueryFn<
     if (token) {
       const headers: Record<string, string> = {
         ...options.headers,
-        "authorization": `Bearer ${token}`,
+        authorization: `Bearer ${token}`,
       };
 
       // Only add content-type for JSON requests (not FormData)
@@ -106,11 +117,15 @@ const baseQueryWithReauth: BaseQueryFn<
 
   try {
     // Use native fetch to avoid RTK Query's internal response handling
-    const response = await fetch(`/api${url.startsWith("/") ? "" : "/"}${url}`, options);
+    const response = await fetch(
+      `/api${url.startsWith("/") ? "" : "/"}${url}`,
+      options,
+    );
 
     // Handle 401 errors before parsing response
     if (response.status === 401) {
-      const isAuthEndpoint = url.includes("auth/login") || url.includes("auth/register");
+      const isAuthEndpoint =
+        url.includes("auth/login") || url.includes("auth/register");
       if (!isAuthEndpoint) {
         localStorage.removeItem("token");
         setTimeout(() => {

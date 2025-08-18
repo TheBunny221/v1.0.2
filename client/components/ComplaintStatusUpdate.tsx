@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
-import { useAppSelector } from '../store/hooks';
-import { useUpdateComplaintStatusMutation, useAssignComplaintMutation } from '../store/api/complaintsApi';
-import { useGetWardTeamMembersQuery } from '../store/api/wardApi';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
+import React, { useState } from "react";
+import { useAppSelector } from "../store/hooks";
+import {
+  useUpdateComplaintStatusMutation,
+  useAssignComplaintMutation,
+} from "../store/api/complaintsApi";
+import { useGetWardTeamMembersQuery } from "../store/api/wardApi";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from "./ui/select";
 import {
   Dialog,
   DialogContent,
@@ -20,10 +23,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
-import { Badge } from './ui/badge';
-import { useToast } from '../hooks/use-toast';
-import { AlertCircle, CheckCircle, Clock, User, UserCheck } from 'lucide-react';
+} from "./ui/dialog";
+import { Badge } from "./ui/badge";
+import { useToast } from "../hooks/use-toast";
+import { AlertCircle, CheckCircle, Clock, User, UserCheck } from "lucide-react";
 
 interface ComplaintStatusUpdateProps {
   complaint: {
@@ -39,15 +42,40 @@ interface ComplaintStatusUpdateProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  mode?: 'status' | 'assign' | 'both';
+  mode?: "status" | "assign" | "both";
 }
 
 const COMPLAINT_STATUSES = [
-  { value: 'REGISTERED', label: 'Registered', icon: AlertCircle, color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'ASSIGNED', label: 'Assigned', icon: User, color: 'bg-blue-100 text-blue-800' },
-  { value: 'IN_PROGRESS', label: 'In Progress', icon: Clock, color: 'bg-orange-100 text-orange-800' },
-  { value: 'RESOLVED', label: 'Resolved', icon: CheckCircle, color: 'bg-green-100 text-green-800' },
-  { value: 'CLOSED', label: 'Closed', icon: CheckCircle, color: 'bg-gray-100 text-gray-800' },
+  {
+    value: "REGISTERED",
+    label: "Registered",
+    icon: AlertCircle,
+    color: "bg-yellow-100 text-yellow-800",
+  },
+  {
+    value: "ASSIGNED",
+    label: "Assigned",
+    icon: User,
+    color: "bg-blue-100 text-blue-800",
+  },
+  {
+    value: "IN_PROGRESS",
+    label: "In Progress",
+    icon: Clock,
+    color: "bg-orange-100 text-orange-800",
+  },
+  {
+    value: "RESOLVED",
+    label: "Resolved",
+    icon: CheckCircle,
+    color: "bg-green-100 text-green-800",
+  },
+  {
+    value: "CLOSED",
+    label: "Closed",
+    icon: CheckCircle,
+    color: "bg-gray-100 text-gray-800",
+  },
 ];
 
 const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
@@ -55,55 +83,65 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  mode = 'both'
+  mode = "both",
 }) => {
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
-  
-  const [updateComplaintStatus, { isLoading: isUpdatingStatus }] = useUpdateComplaintStatusMutation();
-  const [assignComplaint, { isLoading: isAssigning }] = useAssignComplaintMutation();
-  
+
+  const [updateComplaintStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateComplaintStatusMutation();
+  const [assignComplaint, { isLoading: isAssigning }] =
+    useAssignComplaintMutation();
+
   const [formData, setFormData] = useState({
     status: complaint.status,
-    assignedTo: complaint.assignedTo?.id || 'unassigned',
-    remarks: '',
+    assignedTo: complaint.assignedTo?.id || "unassigned",
+    remarks: "",
   });
 
   const isLoading = isUpdatingStatus || isAssigning;
 
   // Fetch team members for the current ward
-  const { data: teamResponse, isLoading: teamLoading } = useGetWardTeamMembersQuery(
-    user?.wardId || '',
-    { skip: !user?.wardId || user?.role !== "WARD_OFFICER" }
-  );
+  const { data: teamResponse, isLoading: teamLoading } =
+    useGetWardTeamMembersQuery(user?.wardId || "", {
+      skip: !user?.wardId || user?.role !== "WARD_OFFICER",
+    });
 
   const teamMembers = teamResponse?.data?.teamMembers || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      if (mode === 'status' || (mode === 'both' && formData.status !== complaint.status)) {
+      if (
+        mode === "status" ||
+        (mode === "both" && formData.status !== complaint.status)
+      ) {
         await updateComplaintStatus({
           id: complaint.id,
           status: formData.status as any,
           remarks: formData.remarks || undefined,
         }).unwrap();
       }
-      
-      if (mode === 'assign' || (mode === 'both' && formData.assignedTo !== (complaint.assignedTo?.id || 'unassigned'))) {
+
+      if (
+        mode === "assign" ||
+        (mode === "both" &&
+          formData.assignedTo !== (complaint.assignedTo?.id || "unassigned"))
+      ) {
         await assignComplaint({
           id: complaint.id,
-          assignedTo: formData.assignedTo === 'unassigned' ? '' : formData.assignedTo,
+          assignedTo:
+            formData.assignedTo === "unassigned" ? "" : formData.assignedTo,
           remarks: formData.remarks || undefined,
         }).unwrap();
       }
-      
+
       toast({
         title: "Success",
         description: "Complaint updated successfully",
       });
-      
+
       onSuccess?.();
       onClose();
     } catch (error: any) {
@@ -116,7 +154,10 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
   };
 
   const getStatusInfo = (status: string) => {
-    return COMPLAINT_STATUSES.find(s => s.value === status) || COMPLAINT_STATUSES[0];
+    return (
+      COMPLAINT_STATUSES.find((s) => s.value === status) ||
+      COMPLAINT_STATUSES[0]
+    );
   };
 
   const currentStatusInfo = getStatusInfo(complaint.status);
@@ -140,9 +181,15 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
           <div className="p-4 bg-gray-50 rounded-lg">
             <h3 className="font-medium mb-2">Complaint Summary</h3>
             <div className="space-y-2 text-sm">
-              <p><strong>Type:</strong> {complaint.type.replace('_', ' ')}</p>
-              <p><strong>Area:</strong> {complaint.area}</p>
-              <p><strong>Description:</strong> {complaint.description}</p>
+              <p>
+                <strong>Type:</strong> {complaint.type.replace("_", " ")}
+              </p>
+              <p>
+                <strong>Area:</strong> {complaint.area}
+              </p>
+              <p>
+                <strong>Description:</strong> {complaint.description}
+              </p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge className={currentStatusInfo.color}>
                   {currentStatusInfo.label}
@@ -158,12 +205,14 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
           </div>
 
           {/* Status Update */}
-          {(mode === 'status' || mode === 'both') && (
+          {(mode === "status" || mode === "both") && (
             <div className="space-y-2">
               <Label htmlFor="status">Update Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, status: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -179,22 +228,26 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-              
+
               {formData.status !== complaint.status && (
                 <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
-                  Status will change from <strong>{currentStatusInfo.label}</strong> to <strong>{newStatusInfo.label}</strong>
+                  Status will change from{" "}
+                  <strong>{currentStatusInfo.label}</strong> to{" "}
+                  <strong>{newStatusInfo.label}</strong>
                 </div>
               )}
             </div>
           )}
 
           {/* Assignment */}
-          {(mode === 'assign' || mode === 'both') && (
+          {(mode === "assign" || mode === "both") && (
             <div className="space-y-2">
               <Label htmlFor="assignedTo">Assign to Team Member</Label>
               <Select
                 value={formData.assignedTo}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, assignedTo: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select team member" />
@@ -228,7 +281,9 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
             <Textarea
               id="remarks"
               value={formData.remarks}
-              onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, remarks: e.target.value }))
+              }
               placeholder="Add any comments about this update..."
               rows={3}
             />
@@ -238,8 +293,8 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
               className="min-w-[100px]"
             >

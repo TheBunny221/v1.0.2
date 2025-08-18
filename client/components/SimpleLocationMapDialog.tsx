@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from './ui/dialog';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { MapPin, Navigation, Search, AlertCircle } from 'lucide-react';
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
 
 interface LocationData {
   latitude: number;
@@ -35,13 +35,15 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   // Default to Kochi, India coordinates
   const defaultPosition = { lat: 9.9312, lng: 76.2673 };
   const [position, setPosition] = useState(
-    initialLocation ? { lat: initialLocation.latitude, lng: initialLocation.longitude } : defaultPosition
+    initialLocation
+      ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
+      : defaultPosition,
   );
-  const [address, setAddress] = useState(initialLocation?.address || '');
-  const [area, setArea] = useState(initialLocation?.area || '');
-  const [landmark, setLandmark] = useState(initialLocation?.landmark || '');
+  const [address, setAddress] = useState(initialLocation?.address || "");
+  const [area, setArea] = useState(initialLocation?.area || "");
+  const [landmark, setLandmark] = useState(initialLocation?.landmark || "");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [mapError, setMapError] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
@@ -53,17 +55,20 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     const initializeMap = async () => {
       try {
         // Dynamically import leaflet only when needed
-        const L = await import('leaflet');
-        
+        const L = await import("leaflet");
+
         // Set up the default icon
         const DefaultIcon = L.icon({
-          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          iconRetinaUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
           iconSize: [25, 41],
           iconAnchor: [12, 41],
           popupAnchor: [1, -34],
-          shadowSize: [41, 41]
+          shadowSize: [41, 41],
         });
 
         // Create map if it doesn't exist
@@ -75,27 +80,29 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           });
 
           // Add tile layer
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           }).addTo(leafletMapRef.current);
 
           // Add marker
-          const marker = L.marker([position.lat, position.lng], { icon: DefaultIcon })
-            .addTo(leafletMapRef.current);
+          const marker = L.marker([position.lat, position.lng], {
+            icon: DefaultIcon,
+          }).addTo(leafletMapRef.current);
 
           // Handle map clicks
-          leafletMapRef.current.on('click', (e: any) => {
+          leafletMapRef.current.on("click", (e: any) => {
             const { lat, lng } = e.latlng;
             setPosition({ lat, lng });
             marker.setLatLng([lat, lng]);
             reverseGeocode({ lat, lng });
           });
         }
-        
+
         setMapError(null);
       } catch (error) {
-        console.error('Error initializing map:', error);
-        setMapError('Failed to load map. Please refresh and try again.');
+        console.error("Error initializing map:", error);
+        setMapError("Failed to load map. Please refresh and try again.");
       }
     };
 
@@ -117,32 +124,39 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          const newPos = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
           setPosition(newPos);
           reverseGeocode(newPos);
-          
+
           // Update map view
           if (leafletMapRef.current) {
             leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
             // Update marker if it exists
-            const markers = Object.values(leafletMapRef.current._layers).filter((layer: any) => layer instanceof L.Marker);
+            const markers = Object.values(leafletMapRef.current._layers).filter(
+              (layer: any) => layer instanceof L.Marker,
+            );
             if (markers.length > 0) {
               (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
             }
           }
-          
+
           setIsLoadingLocation(false);
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting location:", error);
           setIsLoadingLocation(false);
-          alert('Could not get your location. Please ensure location access is enabled.');
+          alert(
+            "Could not get your location. Please ensure location access is enabled.",
+          );
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
       );
     } else {
       setIsLoadingLocation(false);
-      alert('Geolocation is not supported by this browser.');
+      alert("Geolocation is not supported by this browser.");
     }
   }, []);
 
@@ -150,27 +164,28 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   const reverseGeocode = async (coords: { lat: number; lng: number }) => {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&addressdetails=1`
+        `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&addressdetails=1`,
       );
       const data = await response.json();
-      
+
       if (data && data.display_name) {
         setAddress(data.display_name);
-        
+
         // Extract area information
         const addressComponents = data.address;
         if (addressComponents) {
-          const detectedArea = addressComponents.neighbourhood || 
-                              addressComponents.suburb || 
-                              addressComponents.city_district || 
-                              addressComponents.state_district ||
-                              addressComponents.city ||
-                              '';
+          const detectedArea =
+            addressComponents.neighbourhood ||
+            addressComponents.suburb ||
+            addressComponents.city_district ||
+            addressComponents.state_district ||
+            addressComponents.city ||
+            "";
           setArea(detectedArea);
         }
       }
     } catch (error) {
-      console.error('Error in reverse geocoding:', error);
+      console.error("Error in reverse geocoding:", error);
     }
   };
 
@@ -180,43 +195,49 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ', Kochi, Kerala, India')}&format=json&limit=1&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", Kochi, Kerala, India")}&format=json&limit=1&addressdetails=1`,
       );
       const data = await response.json();
-      
+
       if (data && data.length > 0) {
         const result = data[0];
-        const newPos = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) };
+        const newPos = {
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon),
+        };
         setPosition(newPos);
         setAddress(result.display_name);
-        
+
         // Extract area information
         const addressComponents = result.address;
         if (addressComponents) {
-          const detectedArea = addressComponents.neighbourhood || 
-                              addressComponents.suburb || 
-                              addressComponents.city_district || 
-                              addressComponents.state_district ||
-                              addressComponents.city ||
-                              '';
+          const detectedArea =
+            addressComponents.neighbourhood ||
+            addressComponents.suburb ||
+            addressComponents.city_district ||
+            addressComponents.state_district ||
+            addressComponents.city ||
+            "";
           setArea(detectedArea);
         }
-        
+
         // Update map view
         if (leafletMapRef.current) {
           leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
           // Update marker if it exists
-          const markers = Object.values(leafletMapRef.current._layers).filter((layer: any) => layer instanceof L.Marker);
+          const markers = Object.values(leafletMapRef.current._layers).filter(
+            (layer: any) => layer instanceof L.Marker,
+          );
           if (markers.length > 0) {
             (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
           }
         }
       } else {
-        alert('Location not found. Please try a different search term.');
+        alert("Location not found. Please try a different search term.");
       }
     } catch (error) {
-      console.error('Error searching location:', error);
-      alert('Error searching for location. Please try again.');
+      console.error("Error searching location:", error);
+      alert("Error searching for location. Please try again.");
     }
   };
 
@@ -232,7 +253,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       searchLocation();
     }
   };
@@ -268,7 +289,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
               className="flex items-center gap-2"
             >
               <Navigation className="h-4 w-4" />
-              {isLoadingLocation ? 'Getting...' : 'Current Location'}
+              {isLoadingLocation ? "Getting..." : "Current Location"}
             </Button>
           </div>
 
@@ -279,10 +300,10 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                 <div className="text-center">
                   <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                   <p className="text-red-600">{mapError}</p>
-                  <Button 
-                    onClick={() => window.location.reload()} 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    size="sm"
                     className="mt-2"
                   >
                     Refresh Page
@@ -290,10 +311,10 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                 </div>
               </div>
             ) : (
-              <div 
-                ref={mapRef} 
+              <div
+                ref={mapRef}
                 className="h-full w-full"
-                style={{ minHeight: '384px' }}
+                style={{ minHeight: "384px" }}
               />
             )}
           </div>
@@ -332,7 +353,8 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
 
           {/* Coordinates Display */}
           <div className="text-sm text-muted-foreground">
-            Selected coordinates: {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
+            Selected coordinates: {position.lat.toFixed(6)},{" "}
+            {position.lng.toFixed(6)}
           </div>
         </div>
 
@@ -340,9 +362,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm}>
-            Confirm Location
-          </Button>
+          <Button onClick={handleConfirm}>Confirm Location</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

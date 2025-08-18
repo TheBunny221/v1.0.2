@@ -502,7 +502,7 @@ const AdminConfig: React.FC = () => {
         isActive: type.isActive,
       };
 
-      console.log('Saving complaint type with data:', typeData);
+      console.log("Saving complaint type with data:", typeData);
 
       let result;
       if (type.id && type.id !== "") {
@@ -511,11 +511,11 @@ const AdminConfig: React.FC = () => {
           id: type.id,
           data: typeData,
         }).unwrap();
-        console.log('Update result:', result);
+        console.log("Update result:", result);
       } else {
         // Create new type
         result = await createComplaintType(typeData).unwrap();
-        console.log('Create result:', result);
+        console.log("Create result:", result);
       }
 
       setEditingComplaintType(null);
@@ -527,20 +527,15 @@ const AdminConfig: React.FC = () => {
       dispatch(
         showSuccessToast(
           "Complaint Type Saved",
-          `Complaint type "${type.name}" has been saved successfully. Active status: ${type.isActive ? 'Active' : 'Inactive'}`,
+          `Complaint type "${type.name}" has been saved successfully. Active status: ${type.isActive ? "Active" : "Inactive"}`,
         ),
       );
     } catch (error: any) {
-      console.error('Error saving complaint type:', error);
+      console.error("Error saving complaint type:", error);
 
       const errorMessage = getApiErrorMessage(error);
 
-      dispatch(
-        showErrorToast(
-          "Save Failed",
-          errorMessage,
-        ),
-      );
+      dispatch(showErrorToast("Save Failed", errorMessage));
     } finally {
       setIsLoading(false);
     }
@@ -557,7 +552,9 @@ const AdminConfig: React.FC = () => {
         isActive: !type.isActive, // Toggle the status
       };
 
-      console.log(`Toggling complaint type ${type.name} to ${!type.isActive ? 'Active' : 'Inactive'}`);
+      console.log(
+        `Toggling complaint type ${type.name} to ${!type.isActive ? "Active" : "Inactive"}`,
+      );
 
       await updateComplaintType({
         id: type.id,
@@ -570,20 +567,15 @@ const AdminConfig: React.FC = () => {
       dispatch(
         showSuccessToast(
           "Status Updated",
-          `${type.name} is now ${!type.isActive ? 'Active' : 'Inactive'}`,
+          `${type.name} is now ${!type.isActive ? "Active" : "Inactive"}`,
         ),
       );
     } catch (error: any) {
-      console.error('Error toggling complaint type status:', error);
+      console.error("Error toggling complaint type status:", error);
 
       const errorMessage = getApiErrorMessage(error);
 
-      dispatch(
-        showErrorToast(
-          "Update Failed",
-          errorMessage,
-        ),
-      );
+      dispatch(showErrorToast("Update Failed", errorMessage));
     }
   };
 
@@ -1110,10 +1102,12 @@ const AdminConfig: React.FC = () => {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleToggleComplaintTypeStatus(type)}
+                              onClick={() =>
+                                handleToggleComplaintTypeStatus(type)
+                              }
                               disabled={isLoading}
                               className="h-6 w-6 p-0"
-                              title={`Make ${type.isActive ? 'Inactive' : 'Active'}`}
+                              title={`Make ${type.isActive ? "Inactive" : "Active"}`}
                             >
                               <RefreshCw className="h-3 w-3" />
                             </Button>

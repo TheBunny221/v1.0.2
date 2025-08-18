@@ -8,7 +8,7 @@ const prisma = getPrisma();
 // @access  Private (Ward Officer, Administrator)
 export const getWardTeamMembers = asyncHandler(async (req, res) => {
   const { wardId } = req.params;
-  
+
   // Authorization check
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
@@ -60,7 +60,7 @@ export const getWardTeamMembers = asyncHandler(async (req, res) => {
       phoneNumber: member.phoneNumber,
       department: member.department,
       activeAssignments: member.assignedComplaints.length,
-      displayName: `${member.fullName} - ${member.department || 'General'}`,
+      displayName: `${member.fullName} - ${member.department || "General"}`,
     }));
 
     res.status(200).json({
@@ -86,7 +86,7 @@ export const getWardTeamMembers = asyncHandler(async (req, res) => {
 // @access  Private (Ward Officer, Administrator)
 export const getWardStats = asyncHandler(async (req, res) => {
   const { wardId } = req.params;
-  
+
   // Authorization check
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
@@ -187,8 +187,10 @@ export const getWardStats = asyncHandler(async (req, res) => {
           totalComplaints,
           resolvedComplaints,
           pendingComplaints,
-          resolutionRate: totalComplaints > 0 ? 
-            Math.round((resolvedComplaints / totalComplaints) * 100) : 0,
+          resolutionRate:
+            totalComplaints > 0
+              ? Math.round((resolvedComplaints / totalComplaints) * 100)
+              : 0,
         },
         complaintsByStatus: complaintStats.reduce((acc, stat) => {
           const key = `${stat.status}_${stat.priority}`;

@@ -246,7 +246,8 @@ const Profile: React.FC = () => {
       console.error("Password change error:", error);
 
       // Use safe error message extraction to avoid response body issues
-      const errorMessage = getApiErrorMessage(error) || "Failed to change password";
+      const errorMessage =
+        getApiErrorMessage(error) || "Failed to change password";
 
       dispatch(
         addNotification({

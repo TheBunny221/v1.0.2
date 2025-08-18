@@ -34,7 +34,8 @@ const QuickComplaintPage: React.FC = () => {
         {/* Header */}
         <div className="text-center space-y-2 mb-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            {translations?.complaints?.registerComplaint || "Submit a Complaint"}
+            {translations?.complaints?.registerComplaint ||
+              "Submit a Complaint"}
           </h1>
           <p className="text-gray-600">
             {isAuthenticated
@@ -44,10 +45,7 @@ const QuickComplaintPage: React.FC = () => {
         </div>
 
         {/* Quick Complaint Form */}
-        <QuickComplaintForm
-          onSuccess={handleSuccess}
-          onClose={handleClose}
-        />
+        <QuickComplaintForm onSuccess={handleSuccess} onClose={handleClose} />
       </div>
     </div>
   );

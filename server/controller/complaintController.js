@@ -131,9 +131,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     deadlineHours = priorityHours[priority || "MEDIUM"];
   }
 
-  const deadline = new Date(
-    Date.now() + deadlineHours * 60 * 60 * 1000,
-  );
+  const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
 
   // Generate unique complaint ID
   const complaintId = await generateComplaintId();

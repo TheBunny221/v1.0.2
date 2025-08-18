@@ -60,7 +60,4 @@ export const wardApi = baseApi.injectEndpoints({
 });
 
 // Export hooks
-export const {
-  useGetWardTeamMembersQuery,
-  useGetWardStatsQuery,
-} = wardApi;
+export const { useGetWardTeamMembersQuery, useGetWardStatsQuery } = wardApi;

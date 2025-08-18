@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from './ui/dropdown-menu';
-import ComplaintStatusUpdate from './ComplaintStatusUpdate';
-import { 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  UserPlus, 
-  CheckCircle, 
-  Clock, 
+} from "./ui/dropdown-menu";
+import ComplaintStatusUpdate from "./ComplaintStatusUpdate";
+import {
+  MoreHorizontal,
+  Eye,
+  Edit,
+  UserPlus,
+  CheckCircle,
+  Clock,
   AlertTriangle,
   FileText,
-  MapPin
-} from 'lucide-react';
+  MapPin,
+} from "lucide-react";
 
 interface ComplaintQuickActionsProps {
   complaint: {
@@ -42,33 +42,45 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   complaint,
   userRole,
   showDetails = true,
-  onUpdate
+  onUpdate,
 }) => {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "REGISTERED": return "bg-yellow-100 text-yellow-800";
-      case "ASSIGNED": return "bg-blue-100 text-blue-800";
-      case "IN_PROGRESS": return "bg-orange-100 text-orange-800";
-      case "RESOLVED": return "bg-green-100 text-green-800";
-      case "CLOSED": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "REGISTERED":
+        return "bg-yellow-100 text-yellow-800";
+      case "ASSIGNED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "RESOLVED":
+        return "bg-green-100 text-green-800";
+      case "CLOSED":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "LOW": return "bg-green-100 text-green-800";
-      case "MEDIUM": return "bg-yellow-100 text-yellow-800";
-      case "HIGH": return "bg-orange-100 text-orange-800";
-      case "CRITICAL": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "LOW":
+        return "bg-green-100 text-green-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "HIGH":
+        return "bg-orange-100 text-orange-800";
+      case "CRITICAL":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const canManageComplaint = userRole === "WARD_OFFICER" || userRole === "ADMINISTRATOR";
+  const canManageComplaint =
+    userRole === "WARD_OFFICER" || userRole === "ADMINISTRATOR";
   const canAssign = userRole === "WARD_OFFICER" || userRole === "ADMINISTRATOR";
 
   return (
@@ -77,10 +89,16 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
         {/* Quick Status Indicator */}
         {showDetails && (
           <div className="flex flex-col gap-1">
-            <Badge className={getStatusColor(complaint.status)} variant="secondary">
-              {complaint.status.replace('_', ' ')}
+            <Badge
+              className={getStatusColor(complaint.status)}
+              variant="secondary"
+            >
+              {complaint.status.replace("_", " ")}
             </Badge>
-            <Badge className={getPriorityColor(complaint.priority)} variant="outline">
+            <Badge
+              className={getPriorityColor(complaint.priority)}
+              variant="outline"
+            >
               {complaint.priority}
             </Badge>
           </div>
@@ -99,8 +117,8 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
           {canManageComplaint && (
             <>
               {complaint.status === "REGISTERED" && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => setAssignDialogOpen(true)}
                   title="Assign Complaint"
@@ -109,10 +127,10 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                   <UserPlus className="h-3 w-3" />
                 </Button>
               )}
-              
+
               {complaint.status === "ASSIGNED" && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => setStatusDialogOpen(true)}
                   title="Start Progress"
@@ -121,10 +139,10 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                   <Clock className="h-3 w-3" />
                 </Button>
               )}
-              
+
               {complaint.status === "IN_PROGRESS" && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => setStatusDialogOpen(true)}
                   title="Mark Resolved"
@@ -149,16 +167,16 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                   <Edit className="h-4 w-4 mr-2" />
                   Update Status
                 </DropdownMenuItem>
-                
+
                 {canAssign && (
                   <DropdownMenuItem onClick={() => setAssignDialogOpen(true)}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Reassign
                   </DropdownMenuItem>
                 )}
-                
+
                 <DropdownMenuSeparator />
-                
+
                 <DropdownMenuItem asChild>
                   <Link to={`/complaints/${complaint.id}`}>
                     <FileText className="h-4 w-4 mr-2" />

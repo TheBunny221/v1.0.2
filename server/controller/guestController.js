@@ -342,7 +342,7 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
   // Validate wardId exists
   const ward = await prisma.ward.findUnique({
     where: { id: wardId },
-    include: { subZones: true }
+    include: { subZones: true },
   });
 
   if (!ward) {

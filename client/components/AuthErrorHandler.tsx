@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
-import { useToast } from '../hooks/use-toast';
+import React, { useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { logout } from "../store/slices/authSlice";
+import { useToast } from "../hooks/use-toast";
 
 const AuthErrorHandler: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -11,54 +11,59 @@ const AuthErrorHandler: React.FC = () => {
   useEffect(() => {
     // Listen for authentication errors from the global error state
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'auth_error' && e.newValue) {
+      if (e.key === "auth_error" && e.newValue) {
         const error = JSON.parse(e.newValue);
-        
-        if (error.code === 'USER_NOT_FOUND' || error.code === 'TOKEN_INVALID') {
+
+        if (error.code === "USER_NOT_FOUND" || error.code === "TOKEN_INVALID") {
           // Clear the error
-          localStorage.removeItem('auth_error');
-          
+          localStorage.removeItem("auth_error");
+
           // Force logout
           dispatch(logout());
-          localStorage.removeItem('token');
-          
+          localStorage.removeItem("token");
+
           toast({
             title: "Session Invalid",
-            description: "Your session is no longer valid. Please log in again.",
+            description:
+              "Your session is no longer valid. Please log in again.",
             variant: "destructive",
           });
         }
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
+    window.addEventListener("storage", handleStorageChange);
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [dispatch, toast]);
 
   // Check for existing authentication errors on mount
   useEffect(() => {
     const checkForAuthError = () => {
-      const authError = localStorage.getItem('auth_error');
+      const authError = localStorage.getItem("auth_error");
       if (authError && isAuthenticated) {
         try {
           const error = JSON.parse(authError);
-          if (error.code === 'USER_NOT_FOUND' || error.code === 'TOKEN_INVALID') {
-            localStorage.removeItem('auth_error');
+          if (
+            error.code === "USER_NOT_FOUND" ||
+            error.code === "TOKEN_INVALID"
+          ) {
+            localStorage.removeItem("auth_error");
             dispatch(logout());
-            localStorage.removeItem('token');
-            
+            localStorage.removeItem("token");
+
             toast({
-              title: "Session Invalid", 
-              description: "Your session is no longer valid. Please log in again.",
+              title: "Session Invalid",
+              description:
+                "Your session is no longer valid. Please log in again.",
               variant: "destructive",
             });
           }
         } catch (e) {
-          console.warn('Failed to parse auth error:', e);
-          localStorage.removeItem('auth_error');
+          console.warn("Failed to parse auth error:", e);
+          localStorage.removeItem("auth_error");
         }
       }
     };
