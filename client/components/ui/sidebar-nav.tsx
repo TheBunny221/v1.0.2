@@ -150,6 +150,14 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     return location.pathname.startsWith(path);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
+  const handleLanguageChange = (language: "en" | "hi" | "ml") => {
+    dispatch(setLanguage(language));
+  };
+
   return (
     <div
       className={cn(
