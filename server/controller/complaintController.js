@@ -105,7 +105,19 @@ export const createComplaint = asyncHandler(async (req, res) => {
     contactEmail,
     contactPhone,
     isAnonymous,
+    captchaId,
+    captchaText,
   } = req.body;
+
+  // Verify CAPTCHA for all complaint submissions
+  try {
+    await verifyCaptchaForComplaint(captchaId, captchaText);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "CAPTCHA verification failed",
+    });
+  }
 
   // Use provided slaHours or fallback to priority-based hours
   let deadlineHours = slaHours;
