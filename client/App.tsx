@@ -157,10 +157,10 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "CITIZEN",
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
-                                          "ADMINISTRATOR",
+                              "CITIZEN",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
+                              "ADMINISTRATOR",
                                         ]}
                                       >
                                         <CreateComplaint />
@@ -192,10 +192,10 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "CITIZEN",
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
-                                          "ADMINISTRATOR",
+                              "CITIZEN",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
+                              "ADMINISTRATOR",
                                         ]}
                                       >
                                         <ComplaintDetails />
@@ -253,8 +253,8 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
                                         ]}
                                       >
                                         <Messages />
@@ -268,8 +268,8 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "WARD_OFFICER",
-                                          "ADMINISTRATOR",
+                              "WARD_OFFICER",
+                              "ADMINISTRATOR",
                                         ]}
                                       >
                                         <AdminReports />
@@ -323,8 +323,8 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "ADMINISTRATOR",
-                                          "WARD_OFFICER",
+                              "ADMINISTRATOR",
+                              "WARD_OFFICER",
                                         ]}
                                       >
                                         <ReportsAnalytics />
@@ -338,10 +338,10 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "CITIZEN",
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
-                                          "ADMINISTRATOR",
+                              "CITIZEN",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
+                              "ADMINISTRATOR",
                                         ]}
                                       >
                                         <Profile />
@@ -353,10 +353,10 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={[
-                                          "CITIZEN",
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
-                                          "ADMINISTRATOR",
+                              "CITIZEN",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
+                              "ADMINISTRATOR",
                                         ]}
                                       >
                                         <Settings />
