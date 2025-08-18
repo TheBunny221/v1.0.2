@@ -302,19 +302,21 @@ const ComplaintsList: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
-                        <Link to={`/complaints/${complaint.id}`}>
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                        {(user?.role === "WARD_OFFICER" ||
-                          user?.role === "ADMINISTRATOR") && (
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
+                      <ComplaintQuickActions
+                        complaint={{
+                          id: complaint.id,
+                          complaintId: complaint.complaintId,
+                          status: complaint.status,
+                          priority: complaint.priority,
+                          type: complaint.type,
+                          description: complaint.description,
+                          area: complaint.area,
+                          assignedTo: complaint.assignedTo,
+                        }}
+                        userRole={user?.role || ""}
+                        showDetails={false}
+                        onUpdate={() => refetch()}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
