@@ -564,66 +564,6 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Status Update Form (for authorized users) */}
-          {(user?.role === "WARD_OFFICER" ||
-            user?.role === "MAINTENANCE_TEAM" ||
-            user?.role === "ADMINISTRATOR") && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Update Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="statusComment">Add Comment</Label>
-                  <Textarea
-                    id="statusComment"
-                    value={statusComment}
-                    onChange={(e) => setStatusComment(e.target.value)}
-                    placeholder="Add a status update or comment..."
-                    rows={3}
-                  />
-                </div>
-                <div className="flex space-x-2">
-                  {complaint.status === "REGISTERED" &&
-                    user?.role === "WARD_OFFICER" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("ASSIGNED")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Assigning..." : "Assign"}
-                      </Button>
-                    )}
-                  {complaint.status === "ASSIGNED" &&
-                    user?.role === "MAINTENANCE_TEAM" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("IN_PROGRESS")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Starting..." : "Start Work"}
-                      </Button>
-                    )}
-                  {complaint.status === "IN_PROGRESS" &&
-                    user?.role === "MAINTENANCE_TEAM" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("RESOLVED")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Resolving..." : "Mark Resolved"}
-                      </Button>
-                    )}
-                  {complaint.status === "RESOLVED" &&
-                    user?.role === "WARD_OFFICER" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("CLOSED")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Closing..." : "Close Complaint"}
-                      </Button>
-                    )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* Right Column - Contact & Meta Info */}
