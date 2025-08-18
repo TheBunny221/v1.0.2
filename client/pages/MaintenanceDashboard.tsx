@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   fetchComplaints,
   updateComplaintStatus,
