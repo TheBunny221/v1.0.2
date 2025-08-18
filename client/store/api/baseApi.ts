@@ -16,12 +16,31 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   // Build URL and options
   const url = typeof args === "string" ? args : args.url;
+
+  let body: string | FormData | undefined = undefined;
+  let contentType = "application/json";
+
+  // Handle different body types properly
+  if (typeof args !== "string" && args.body !== undefined) {
+    if (args.body instanceof FormData) {
+      // FormData should not be JSON stringified and should not have content-type set
+      body = args.body;
+      contentType = ""; // Let browser set multipart/form-data
+    } else if (typeof args.body === "string") {
+      // Already a string, use as-is
+      body = args.body;
+    } else if (typeof args.body === "object") {
+      // Object needs to be JSON stringified
+      body = JSON.stringify(args.body);
+    }
+  }
+
   const options: RequestInit = typeof args === "string"
     ? { method: "GET" }
     : {
         method: args.method || "GET",
         headers: args.headers || {},
-        body: args.body ? JSON.stringify(args.body) : undefined,
+        body,
         ...args,
       };
 
