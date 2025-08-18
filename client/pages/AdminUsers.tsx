@@ -572,7 +572,11 @@ const AdminUsers: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleOpenEditDialog(user)}
+                        >
                           <Edit className="h-3 w-3" />
                         </Button>
                         {user.isActive ? (
