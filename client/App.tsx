@@ -164,7 +164,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <CreateComplaint />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -174,7 +174,7 @@ const App: React.FC = () => {
                             allowedRoles={["CITIZEN"]}
                           >
                             <UnifiedComplaintForm />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -184,7 +184,7 @@ const App: React.FC = () => {
                             allowedRoles={["CITIZEN"]}
                           >
                             <UnifiedComplaintForm />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -199,7 +199,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <ComplaintDetails />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
@@ -211,7 +211,7 @@ const App: React.FC = () => {
                             allowedRoles={["WARD_OFFICER"]}
                           >
                             <WardTasks />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -221,7 +221,7 @@ const App: React.FC = () => {
                             allowedRoles={["WARD_OFFICER"]}
                           >
                             <WardManagement />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
@@ -233,7 +233,7 @@ const App: React.FC = () => {
                             allowedRoles={["MAINTENANCE_TEAM"]}
                           >
                             <MaintenanceTasks />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -243,7 +243,7 @@ const App: React.FC = () => {
                             allowedRoles={["MAINTENANCE_TEAM"]}
                           >
                             <TaskDetails />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
@@ -258,7 +258,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <Messages />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
@@ -273,7 +273,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <AdminReports />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
@@ -285,7 +285,7 @@ const App: React.FC = () => {
                             allowedRoles={["ADMINISTRATOR"]}
                           >
                             <AdminUsers />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -295,7 +295,7 @@ const App: React.FC = () => {
                             allowedRoles={["ADMINISTRATOR"]}
                           >
                             <AdminConfig />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -305,7 +305,7 @@ const App: React.FC = () => {
                             allowedRoles={["ADMINISTRATOR"]}
                           >
                             <AdminLanguages />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -315,7 +315,7 @@ const App: React.FC = () => {
                             allowedRoles={["ADMINISTRATOR"]}
                           >
                             <AdminAnalytics />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -328,7 +328,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <ReportsAnalytics />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
@@ -345,7 +345,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <Profile />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
                       <Route
@@ -360,7 +360,7 @@ const App: React.FC = () => {
                             ]}
                           >
                             <Settings />
-                                      </RoleBasedRoute>
+                          </RoleBasedRoute>
                                     }
                                   />
 
