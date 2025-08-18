@@ -142,7 +142,7 @@ export const guestApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/guest/complaint-types",
-      transformResponse: transformResponse,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["ComplaintType"],
     }),
 
