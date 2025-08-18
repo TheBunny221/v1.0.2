@@ -119,13 +119,14 @@ const AdminUsers: React.FC = () => {
   const [wards, setWards] = useState<Array<{id: string; name: string}>>([]);
 
   useEffect(() => {
+    let isMounted = true;
     const abortController = new AbortController();
 
     const fetchWards = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          setWards([]);
+        if (!token || !isMounted) {
+          if (isMounted) setWards([]);
           return;
         }
 
@@ -138,6 +139,8 @@ const AdminUsers: React.FC = () => {
           signal: abortController.signal,
         });
 
+        if (!isMounted) return;
+
         if (!response.ok) {
           if (response.status === 401) {
             console.warn('Not authenticated for wards fetch');
@@ -148,24 +151,27 @@ const AdminUsers: React.FC = () => {
         }
 
         const data = await response.json();
-        if (data.success && Array.isArray(data.data)) {
-          setWards(data.data);
-        } else {
+        if (isMounted) {
+          if (data.success && Array.isArray(data.data)) {
+            setWards(data.data);
+          } else {
+            setWards([]);
+          }
+        }
+      } catch (error: any) {
+        // Only log errors if the component is still mounted and it's not an abort error
+        if (isMounted && error.name !== 'AbortError') {
+          console.error('Failed to fetch wards:', error);
           setWards([]);
         }
-      } catch (error) {
-        // Don't log errors if the request was aborted (component unmounted)
-        if (error.name !== 'AbortError') {
-          console.error('Failed to fetch wards:', error);
-        }
-        setWards([]);
       }
     };
 
     fetchWards();
 
-    // Cleanup function to abort the request if component unmounts
+    // Cleanup function
     return () => {
+      isMounted = false;
       abortController.abort();
     };
   }, []);
