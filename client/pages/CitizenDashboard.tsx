@@ -139,6 +139,7 @@ const CitizenDashboard: React.FC = () => {
   const [sortOrder, setSortOrder] = useState(
     searchParams.get("order") || "desc",
   );
+  const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
   // Handler functions
   const handleRefresh = () => {
