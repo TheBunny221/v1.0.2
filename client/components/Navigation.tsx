@@ -538,6 +538,35 @@ const Navigation: React.FC = () => {
         }`}
       >
         <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
+          {/* Mobile Navigation Items */}
+          <div className="space-y-1 mb-4">
+            {filteredNavItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  location.pathname === item.path
+                    ? "bg-primary text-primary-foreground"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="flex items-center space-x-3">
+                  {item.icon}
+                  <span>{item.label}</span>
+                  {item.badge && item.badge > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="h-5 w-5 p-0 flex items-center justify-center text-xs ml-auto"
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+
           {/* Mobile Language Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
