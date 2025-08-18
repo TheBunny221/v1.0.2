@@ -37,6 +37,7 @@ import {
   Eye,
   Edit,
 } from "lucide-react";
+import ComplaintQuickActions from "../components/ComplaintQuickActions";
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
