@@ -3,7 +3,6 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
-import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   useGetComplaintsQuery,
   useGetComplaintStatisticsQuery,
@@ -325,7 +324,6 @@ const CitizenDashboard: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
@@ -882,7 +880,6 @@ const CitizenDashboard: React.FC = () => {
         </Card>
       </div>
       </div>
-    </DashboardLayout>
   );
 };
 
