@@ -8,6 +8,7 @@ import {
   getAttachment,
   deleteAttachment,
   uploadProfilePicture,
+  uploadLogo,
 } from "../controller/uploadController.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
 
