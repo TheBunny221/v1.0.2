@@ -20,43 +20,55 @@ const baseQueryWithReauth: BaseQueryFn<
   let body: string | FormData | undefined = undefined;
   let contentType = "application/json";
 
-  // Handle different body types properly
-  if (typeof args !== "string" && args.body !== undefined) {
-    console.log("Body type:", typeof args.body);
-    console.log("Body value:", args.body);
-    console.log("Body constructor:", args.body.constructor.name);
-
+  // Handle different body types with comprehensive logic
+  if (typeof args !== "string" && args.body !== undefined && args.body !== null) {
+    // Check for FormData first (most specific)
     if (args.body instanceof FormData) {
-      // FormData should not be JSON stringified and should not have content-type set
       body = args.body;
-      contentType = ""; // Let browser set multipart/form-data
-    } else if (typeof args.body === "string") {
-      // Already a string, use as-is
-      body = args.body;
-    } else if (args.body !== null && typeof args.body === "object") {
-      // Object needs to be JSON stringified - be very explicit
-      try {
+      contentType = ""; // Let browser set multipart/form-data boundary
+    }
+    // Check if it's already a JSON string
+    else if (typeof args.body === "string") {
+      // Check if it looks like JSON or if it's already serialized
+      if (args.body.startsWith("{") || args.body.startsWith("[") || args.body === "null") {
+        body = args.body; // Already JSON
+      } else {
+        // Non-JSON string, wrap it
         body = JSON.stringify(args.body);
-        console.log("Serialized body:", body);
-      } catch (error) {
-        console.error("Failed to stringify body:", error);
-        body = "{}";
       }
-    } else {
-      // Fallback for other types
-      body = String(args.body);
+    }
+    // Handle all object types (including arrays, dates, etc.)
+    else if (typeof args.body === "object") {
+      // Safety check for circular references and ensure it's serializable
+      try {
+        // Deep clone to avoid any reference issues and ensure clean serialization
+        const cleanBody = JSON.parse(JSON.stringify(args.body));
+        body = JSON.stringify(cleanBody);
+      } catch (error) {
+        // Fallback for objects that can't be serialized
+        console.warn("Failed to serialize request body:", error);
+        body = JSON.stringify({ error: "Failed to serialize request data" });
+      }
+    }
+    // Handle primitives (numbers, booleans)
+    else {
+      body = JSON.stringify(args.body);
     }
   }
 
-  // Build options WITHOUT spreading args to avoid overriding our body
-  const options: RequestInit = typeof args === "string"
-    ? { method: "GET" }
-    : {
-        method: args.method || "GET",
-        headers: args.headers || {},
-        body,
-        // Remove ...args spread to prevent overriding our carefully prepared body
-      };
+  // Build request options carefully
+  const baseOptions: RequestInit = {
+    method: typeof args === "string" ? "GET" : (args.method || "GET"),
+    headers: typeof args === "string" ? {} : (args.headers || {}),
+  };
+
+  // Only add body for methods that support it
+  const methodsWithBody = ["POST", "PUT", "PATCH", "DELETE"];
+  if (body !== undefined && methodsWithBody.includes(baseOptions.method!.toUpperCase())) {
+    baseOptions.body = body;
+  }
+
+  const options: RequestInit = baseOptions;
 
   // Add auth headers manually
   try {
