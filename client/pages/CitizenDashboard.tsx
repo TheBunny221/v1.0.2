@@ -452,7 +452,7 @@ const CitizenDashboard: React.FC = () => {
                 Refresh
               </Button>
               <Button
-                onClick={() => navigate("/complaints/citizen-form")}
+                onClick={() => setIsQuickFormOpen(true)}
                 size="sm"
               >
                 <PlusCircle className="h-4 w-4 mr-2" />
