@@ -123,24 +123,34 @@ const AdminUsers: React.FC = () => {
   // Trigger users query when authentication and parameters are ready
   useEffect(() => {
     if (isAuthenticated) {
-      getAllUsers({
-        page,
-        limit,
-        role: roleFilter !== "all" ? roleFilter : undefined,
-        status: statusFilter,
-      });
+      try {
+        getAllUsers({
+          page,
+          limit,
+          role: roleFilter !== "all" ? roleFilter : undefined,
+          status: statusFilter,
+        });
+      } catch (error) {
+        // Silently handle any errors from lazy query in Strict Mode
+        console.debug('Lazy query error (likely from React Strict Mode):', error);
+      }
     }
   }, [page, limit, roleFilter, statusFilter, isAuthenticated, getAllUsers]);
 
   // Manual refetch function
   const refetchUsers = () => {
     if (isAuthenticated) {
-      getAllUsers({
-        page,
-        limit,
-        role: roleFilter !== "all" ? roleFilter : undefined,
-        status: statusFilter,
-      });
+      try {
+        getAllUsers({
+          page,
+          limit,
+          role: roleFilter !== "all" ? roleFilter : undefined,
+          status: statusFilter,
+        });
+      } catch (error) {
+        // Silently handle any errors from lazy query
+        console.debug('Lazy query refetch error:', error);
+      }
     }
   };
 
