@@ -392,26 +392,40 @@ const MaintenanceTasks: React.FC = () => {
 
                 <div className="flex justify-between items-center">
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleNavigate(task.address)}
+                    >
                       <Navigation className="h-3 w-3 mr-1" />
                       Navigate
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewPhoto(task.photo)}
+                    >
                       <Camera className="h-3 w-3 mr-1" />
                       Photo
                     </Button>
                   </div>
                   <div className="flex space-x-2">
                     {task.status === "ASSIGNED" && (
-                      <Button size="sm">
+                      <Button
+                        size="sm"
+                        onClick={() => handleStartWork(task.id)}
+                      >
                         <Play className="h-3 w-3 mr-1" />
                         Start Work
                       </Button>
                     )}
                     {task.status === "IN_PROGRESS" && (
-                      <Button size="sm">
+                      <Button
+                        size="sm"
+                        onClick={() => handleMarkResolved(task)}
+                      >
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Complete
+                        Mark as Resolved
                       </Button>
                     )}
                     <Link to={`/tasks/${task.id}`}>
