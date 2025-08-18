@@ -269,6 +269,28 @@ const UnifiedComplaintForm: React.FC = () => {
     [dispatch],
   );
 
+  // Handle location selection from map
+  const handleLocationSelect = useCallback(
+    (location: {
+      latitude: number;
+      longitude: number;
+      address?: string;
+      area?: string;
+      landmark?: string;
+    }) => {
+      dispatch(updateGuestFormData({
+        landmark: location.landmark || location.address || '',
+        area: location.area || formData.area,
+        address: location.address || formData.address,
+        coordinates: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+      }));
+    },
+    [dispatch, formData.area, formData.address],
+  );
+
   // Handle file upload
   const handleFileUpload = useCallback(
     (files: FileList | null) => {
