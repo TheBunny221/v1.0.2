@@ -211,8 +211,10 @@ const MaintenanceTasks: React.FC = () => {
         return "bg-blue-100 text-blue-800";
       case "IN_PROGRESS":
         return "bg-orange-100 text-orange-800";
-      case "COMPLETED":
+      case "RESOLVED":
         return "bg-green-100 text-green-800";
+      case "REOPENED":
+        return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -224,8 +226,10 @@ const MaintenanceTasks: React.FC = () => {
         return <Clock className="h-4 w-4" />;
       case "IN_PROGRESS":
         return <AlertTriangle className="h-4 w-4" />;
-      case "COMPLETED":
+      case "RESOLVED":
         return <CheckCircle className="h-4 w-4" />;
+      case "REOPENED":
+        return <RotateCcw className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
     }
