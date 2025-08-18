@@ -129,16 +129,18 @@ const App: React.FC = () => {
                       <Route
                         path="/dashboard"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <RoleBasedDashboard />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <RoleBasedDashboard />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
