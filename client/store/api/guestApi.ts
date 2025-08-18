@@ -194,6 +194,9 @@ export const {
   useGetPublicStatsQuery,
   useGetPublicComplaintTypesQuery,
   useGetWardsQuery,
+  useGenerateCaptchaQuery,
+  useLazyGenerateCaptchaQuery,
+  useVerifyCaptchaMutation,
 } = guestApi;
 
 // Re-export for backward compatibility and convenience
