@@ -258,14 +258,16 @@ const App: React.FC = () => {
                       <Route
                         path="/messages"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                            ]}
-                          >
-                            <Messages />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                              ]}
+                            >
+                              <Messages />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
