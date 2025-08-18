@@ -78,7 +78,7 @@ export const guestApi = baseApi.injectEndpoints({
         method: "POST",
         body: complaintData,
       }),
-      transformResponse: transformResponse<GuestComplaintResponse>,
+      // Removed transformResponse to prevent response body conflicts
     }),
 
     // Verify guest OTP and create account
