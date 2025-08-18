@@ -115,6 +115,83 @@ const MaintenanceTasks: React.FC = () => {
     },
   ]);
 
+  // Calculate task counts
+  const taskCounts = {
+    total: tasks.length,
+    pending: tasks.filter(t => t.status === "ASSIGNED").length,
+    overdue: tasks.filter(t => t.isOverdue).length,
+    resolved: tasks.filter(t => t.status === "RESOLVED").length,
+    reopened: tasks.filter(t => t.status === "REOPENED").length,
+    inProgress: tasks.filter(t => t.status === "IN_PROGRESS").length,
+  };
+
+  // Filter tasks based on active filter
+  const filteredTasks = tasks.filter(task => {
+    switch (activeFilter) {
+      case "pending":
+        return task.status === "ASSIGNED";
+      case "overdue":
+        return task.isOverdue;
+      case "resolved":
+        return task.status === "RESOLVED";
+      case "reopened":
+        return task.status === "REOPENED";
+      case "inProgress":
+        return task.status === "IN_PROGRESS";
+      default:
+        return true;
+    }
+  });
+
+  // Handle task status updates
+  const handleStartWork = (taskId: string) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { ...task, status: "IN_PROGRESS" }
+          : task
+      )
+    );
+  };
+
+  const handleMarkResolved = (task: any) => {
+    setSelectedTask(task);
+    setIsMarkResolvedOpen(true);
+  };
+
+  const submitMarkResolved = () => {
+    if (selectedTask) {
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === selectedTask.id
+            ? {
+                ...task,
+                status: "RESOLVED",
+                resolvedAt: new Date().toISOString(),
+                resolveComment,
+                resolvePhoto: resolvePhoto?.name
+              }
+            : task
+        )
+      );
+      setIsMarkResolvedOpen(false);
+      setResolveComment("");
+      setResolvePhoto(null);
+      setSelectedTask(null);
+    }
+  };
+
+  // Handle navigation
+  const handleNavigate = (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+  };
+
+  // Handle photo view
+  const handleViewPhoto = (photoUrl: string) => {
+    window.open(photoUrl, '_blank');
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "HIGH":
