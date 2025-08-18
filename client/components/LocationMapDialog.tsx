@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import {
   Dialog,
@@ -14,12 +14,17 @@ import { Label } from './ui/label';
 import { MapPin, Navigation, Search } from 'lucide-react';
 
 // Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
+const DefaultIcon = L.icon({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface LocationData {
   latitude: number;
@@ -36,19 +41,30 @@ interface LocationMapDialogProps {
   initialLocation?: LocationData;
 }
 
-// Custom hook for map click events
+// Component to handle map updates
+function MapUpdater({ center }: { center: [number, number] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, map.getZoom());
+  }, [center, map]);
+
+  return null;
+}
+
+// Custom component for map click events
 function LocationMarker({ position, onPositionChange }: {
   position: [number, number];
   onPositionChange: (position: [number, number]) => void;
 }) {
-  const map = useMapEvents({
+  useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
       onPositionChange([lat, lng]);
     },
   });
 
-  return position ? <Marker position={position} /> : null;
+  return <Marker position={position} icon={DefaultIcon} />;
 }
 
 const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
