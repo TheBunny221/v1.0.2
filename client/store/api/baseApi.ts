@@ -48,8 +48,6 @@ const baseQueryWithReauth: BaseQueryFn<
         status: result.error?.status || "SUCCESS",
         hasError: !!result.error,
         hasData: !!result.data,
-        // Safely log error data without consuming the response
-        errorType: result.error ? typeof result.error.data : 'none'
       });
     }
 
