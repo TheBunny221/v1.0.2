@@ -6,6 +6,7 @@ import {
   assignComplaint,
   updateComplaintStatus,
 } from "../store/slices/complaintsSlice";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
