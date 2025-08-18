@@ -517,7 +517,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, comment, assignedToId } = req.body;
+  const { status, remarks, assignedToId } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
