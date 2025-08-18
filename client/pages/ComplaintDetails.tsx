@@ -130,99 +130,219 @@ const ComplaintDetails: React.FC = () => {
     }
 
     try {
-      // Prepare export data with language context
-      const exportData = {
-        complaintDetails: {
-          id: complaint.id,
-          complaintId: complaint.complaintId || complaint.id,
-          type: complaint.type,
-          title: complaint.title,
-          description: complaint.description,
-          status: complaint.status,
-          priority: complaint.priority,
-          area: complaint.area,
-          location: complaint.location,
-          address: complaint.address,
-          mobile: complaint.mobile,
-          email: complaint.email,
-          submittedOn: complaint.submittedOn,
-          lastUpdated: complaint.lastUpdated,
-          resolvedDate: complaint.resolvedDate,
-          slaDeadline: complaint.slaDeadline,
-          escalationLevel: complaint.escalationLevel,
-          slaStatus: complaint.slaStatus,
-          timeElapsed: complaint.timeElapsed,
-          remarks: complaint.remarks,
-          feedback: complaint.feedback,
-          rating: complaint.rating,
-        },
-        submittedBy: complaint.submittedBy ? {
-          id: complaint.submittedBy.id,
-          fullName: complaint.submittedBy.fullName,
-          email: complaint.submittedBy.email,
-          phoneNumber: complaint.submittedBy.phoneNumber,
-        } : null,
-        assignedTo: complaint.assignedTo ? {
-          id: complaint.assignedTo.id,
-          fullName: complaint.assignedTo.fullName,
-          email: complaint.assignedTo.email,
-          phoneNumber: complaint.assignedTo.phoneNumber,
-        } : null,
-        ward: complaint.ward ? {
-          id: complaint.ward.id,
-          name: complaint.ward.name,
-          wardNumber: complaint.ward.wardNumber,
-        } : null,
-        subZone: complaint.subZone ? {
-          id: complaint.subZone.id,
-          name: complaint.subZone.name,
-        } : null,
-        attachments: complaint.attachments?.map(attachment => ({
-          id: attachment.id,
-          fileName: attachment.fileName,
-          originalName: attachment.originalName,
-          mimeType: attachment.mimeType,
-          size: attachment.size,
-          uploadedAt: attachment.uploadedAt,
-        })) || [],
-        statusLogs: complaint.statusLogs?.map(log => ({
-          id: log.id,
-          status: log.status,
-          remarks: log.remarks,
-          timestamp: log.timestamp,
-          user: log.user ? {
-            fullName: log.user.fullName,
-            role: log.user.role,
-          } : null,
-        })) || [],
-        language: {
-          currentLanguage: user?.language || 'en',
-          availableLanguages: Object.keys(translations || {}),
-          translations: translations || {},
-        },
-        exportMetadata: {
-          exportedAt: new Date().toISOString(),
-          exportedBy: user?.fullName || 'Anonymous',
-          exportFormat: 'JSON',
-          version: '1.0',
-        },
+      // Get current translations for the user's language
+      const t = translations || {};
+
+      // Create PDF document
+      const doc = new jsPDF();
+      let yPosition = 20;
+      const lineHeight = 10;
+      const sectionSpacing = 5;
+
+      // Helper function to add text with word wrapping
+      const addText = (text: string, fontSize = 10, isBold = false) => {
+        if (isBold) {
+          doc.setFont('helvetica', 'bold');
+        } else {
+          doc.setFont('helvetica', 'normal');
+        }
+        doc.setFontSize(fontSize);
+
+        // Simple word wrapping for long text
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        const maxWidth = pageWidth - (2 * margin);
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        lines.forEach((line: string) => {
+          if (yPosition > 280) { // Check if we need a new page
+            doc.addPage();
+            yPosition = 20;
+          }
+          doc.text(line, margin, yPosition);
+          yPosition += lineHeight;
+        });
+
+        return yPosition;
       };
 
-      // Create and download file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `complaint-${complaint.complaintId || complaint.id}-details-${new Date().toISOString().split("T")[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Header
+      addText(t.common?.export || "Export Details", 16, true);
+      yPosition += sectionSpacing;
 
-      console.log("Complaint details exported successfully");
+      // Complaint Information Section
+      yPosition += sectionSpacing;
+      addText(t.complaints?.complaintId || "Complaint ID", 12, true);
+      addText(complaint.complaintId || complaint.id);
+      yPosition += sectionSpacing;
+
+      if (complaint.type) {
+        addText(t.complaints?.complaintType || "Complaint Type", 12, true);
+        addText(complaint.type);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.title) {
+        addText(t.complaints?.title || "Title", 12, true);
+        addText(complaint.title);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.description) {
+        addText(t.complaints?.description || "Description", 12, true);
+        addText(complaint.description);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.status) {
+        addText(t.complaints?.status || "Status", 12, true);
+        // Translate status if available
+        const statusKey = complaint.status.toLowerCase() as keyof typeof t.complaints;
+        const translatedStatus = t.complaints?.[statusKey] || complaint.status;
+        addText(translatedStatus);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.priority) {
+        addText(t.complaints?.priority || "Priority", 12, true);
+        // Translate priority if available
+        const priorityKey = complaint.priority.toLowerCase() as keyof typeof t.complaints;
+        const translatedPriority = t.complaints?.[priorityKey] || complaint.priority;
+        addText(translatedPriority);
+        yPosition += sectionSpacing;
+      }
+
+      // Location Information
+      yPosition += sectionSpacing;
+      addText(t.complaints?.locationDetails || "Location Details", 14, true);
+      yPosition += sectionSpacing;
+
+      if (complaint.ward?.name) {
+        addText(t.complaints?.ward || "Ward", 12, true);
+        addText(complaint.ward.name);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.area) {
+        addText(t.complaints?.area || "Area", 12, true);
+        addText(complaint.area);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.location) {
+        addText(t.complaints?.location || "Location", 12, true);
+        addText(complaint.location);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.address) {
+        addText(t.complaints?.address || "Address", 12, true);
+        addText(complaint.address);
+        yPosition += sectionSpacing;
+      }
+
+      // Contact Information
+      yPosition += sectionSpacing;
+      addText(t.forms?.contactInformation || "Contact Information", 14, true);
+      yPosition += sectionSpacing;
+
+      if (complaint.submittedBy?.fullName) {
+        addText(t.complaints?.submittedBy || "Submitted By", 12, true);
+        addText(complaint.submittedBy.fullName);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.mobile) {
+        addText(t.complaints?.mobile || "Mobile", 12, true);
+        addText(complaint.mobile);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.email) {
+        addText(t.auth?.email || "Email", 12, true);
+        addText(complaint.email);
+        yPosition += sectionSpacing;
+      }
+
+      // Dates
+      yPosition += sectionSpacing;
+      addText(t.common?.dates || "Important Dates", 14, true);
+      yPosition += sectionSpacing;
+
+      if (complaint.submittedOn) {
+        addText(t.complaints?.submittedDate || "Submitted Date", 12, true);
+        addText(new Date(complaint.submittedOn).toLocaleDateString());
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.lastUpdated) {
+        addText(t.complaints?.lastUpdated || "Last Updated", 12, true);
+        addText(new Date(complaint.lastUpdated).toLocaleDateString());
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.resolvedDate) {
+        addText(t.complaints?.resolvedDate || "Resolved Date", 12, true);
+        addText(new Date(complaint.resolvedDate).toLocaleDateString());
+        yPosition += sectionSpacing;
+      }
+
+      // Assignment Information
+      if (complaint.assignedTo?.fullName) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.assignedTo || "Assigned To", 12, true);
+        addText(complaint.assignedTo.fullName);
+        yPosition += sectionSpacing;
+      }
+
+      // Remarks and Feedback
+      if (complaint.remarks) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.remarks || "Remarks", 12, true);
+        addText(complaint.remarks);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.feedback) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.feedback || "Feedback", 12, true);
+        addText(complaint.feedback);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.rating) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.rating || "Rating", 12, true);
+        addText(`${complaint.rating}/5`);
+        yPosition += sectionSpacing;
+      }
+
+      // Attachments
+      if (complaint.attachments && complaint.attachments.length > 0) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.attachments || "Attachments", 14, true);
+        yPosition += sectionSpacing;
+
+        complaint.attachments.forEach((attachment, index) => {
+          addText(`${index + 1}. ${attachment.originalName || attachment.fileName}`);
+        });
+        yPosition += sectionSpacing;
+      }
+
+      // Footer with export information
+      yPosition += sectionSpacing * 2;
+      addText(`${t.common?.export || "Exported"}: ${new Date().toLocaleString()}`, 8);
+      if (user?.fullName) {
+        addText(`${t.common?.by || "By"}: ${user.fullName}`, 8);
+      }
+
+      // Save PDF
+      const fileName = `complaint-${complaint.complaintId || complaint.id}-${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+
+      console.log("Complaint details exported as PDF successfully");
     } catch (error) {
-      console.error("Failed to export complaint details:", error);
+      console.error("Failed to export complaint details as PDF:", error);
     }
   };
 
