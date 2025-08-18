@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 // In-memory store for CAPTCHA codes (in production, use Redis or database)
 const captchaStore = new Map();
