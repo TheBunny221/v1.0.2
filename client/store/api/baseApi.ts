@@ -29,37 +29,91 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Ultra-minimal base query - absolutely no response processing
+// Completely custom base query to avoid all RTK Query response body conflicts
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Just call the base query and return the result immediately
-  const result = await baseQuery(args, api, extraOptions);
+  // Build URL and options
+  const url = typeof args === "string" ? args : args.url;
+  const options: RequestInit = typeof args === "string"
+    ? { method: "GET" }
+    : {
+        method: args.method || "GET",
+        headers: args.headers || {},
+        body: args.body ? JSON.stringify(args.body) : undefined,
+        ...args,
+      };
 
-  // Minimal 401 handling without any response body access
-  if (result.error?.status === 401) {
-    const endpoint = typeof args === "string" ? args : args.url;
-    const isAuthEndpoint = typeof endpoint === "string" &&
-      (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
-
-    if (!isAuthEndpoint) {
-      // Clear token first
-      localStorage.removeItem("token");
-
-      // Safely dispatch logout in next tick to avoid any potential timing conflicts
-      setTimeout(() => {
-        try {
-          api.dispatch(logout());
-        } catch (err) {
-          console.warn("Error dispatching logout:", err);
-        }
-      }, 0);
+  // Add auth headers manually
+  try {
+    const state = api.getState() as any;
+    const token = state?.auth?.token || localStorage.getItem("token");
+    if (token) {
+      options.headers = {
+        ...options.headers,
+        "authorization": `Bearer ${token}`,
+        "content-type": "application/json",
+      };
+    }
+  } catch (error) {
+    const token = localStorage.getItem("token");
+    if (token) {
+      options.headers = {
+        ...options.headers,
+        "authorization": `Bearer ${token}`,
+        "content-type": "application/json",
+      };
     }
   }
 
-  return result;
+  try {
+    // Use native fetch to avoid RTK Query's internal response handling
+    const response = await fetch(`/api${url.startsWith("/") ? "" : "/"}${url}`, options);
+
+    // Handle 401 errors before parsing response
+    if (response.status === 401) {
+      const isAuthEndpoint = url.includes("auth/login") || url.includes("auth/register");
+      if (!isAuthEndpoint) {
+        localStorage.removeItem("token");
+        setTimeout(() => {
+          try {
+            api.dispatch(logout());
+          } catch (err) {
+            console.warn("Error dispatching logout:", err);
+          }
+        }, 0);
+      }
+    }
+
+    // Parse response only once
+    let data;
+    try {
+      const text = await response.text();
+      data = text ? JSON.parse(text) : null;
+    } catch (parseError) {
+      data = null;
+    }
+
+    if (response.ok) {
+      return { data };
+    } else {
+      return {
+        error: {
+          status: response.status,
+          data: data,
+        } as FetchBaseQueryError,
+      };
+    }
+  } catch (error) {
+    return {
+      error: {
+        status: "FETCH_ERROR",
+        error: String(error),
+      } as FetchBaseQueryError,
+    };
+  }
 };
 
 // Create the base API slice
