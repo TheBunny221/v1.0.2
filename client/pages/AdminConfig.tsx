@@ -1892,6 +1892,25 @@ const AdminConfig: React.FC = () => {
                       </div>
                     )}
                   </div>
+                ) : editingSetting.key === 'APP_LOGO_SIZE' ? (
+                  <Select
+                    value={editingSetting.value}
+                    onValueChange={(value) =>
+                      setEditingSetting({
+                        ...editingSetting,
+                        value: value,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select logo size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <Input
                     id="settingValue"
