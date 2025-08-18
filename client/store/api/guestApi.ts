@@ -65,6 +65,16 @@ export interface PublicStatsResponse {
   byStatus: Record<string, number>;
 }
 
+export interface CaptchaResponse {
+  captchaId: string;
+  captchaSvg: string;
+}
+
+export interface CaptchaVerifyRequest {
+  captchaId: string;
+  captchaText: string;
+}
+
 // Guest API slice
 export const guestApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
