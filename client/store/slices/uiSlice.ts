@@ -362,6 +362,7 @@ export const {
   setSidebarCollapsed,
   setTheme,
   initializeTheme,
+  initializeSidebar,
   setOnlineStatus,
   showModal,
   hideModal,
