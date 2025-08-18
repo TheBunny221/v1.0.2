@@ -437,6 +437,16 @@ const GuestTrackComplaint: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Could automatically set the tracking ID to show the new complaint
+          setComplaintId(complaintId);
+        }}
+      />
     </div>
   );
 };
