@@ -678,7 +678,7 @@ const Index: React.FC = () => {
       )}
 
       {/* Location Map Dialog */}
-      <LocationMapDialog
+      <SimpleLocationMapDialog
         isOpen={isMapDialogOpen}
         onClose={() => setIsMapDialogOpen(false)}
         onLocationSelect={handleLocationSelect}
@@ -773,7 +773,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
+                        ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत ���ी प्रगति की निगरानी करें"
                         : currentLanguage === "ml"
                           ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
                           : "Monitor complaint progress in real time with instant updates"}
@@ -810,7 +810,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
                         : currentLanguage === "ml"
-                          ? "രജിസ്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
+                          ? "രജി��്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
                           : "Get notified at each stage — from registration to resolution"}
                     </div>
                   </div>
