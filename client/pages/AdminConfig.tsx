@@ -500,15 +500,20 @@ const AdminConfig: React.FC = () => {
         isActive: type.isActive,
       };
 
+      console.log('Saving complaint type with data:', typeData);
+
+      let result;
       if (type.id && type.id !== "") {
         // Update existing type
-        await updateComplaintType({
+        result = await updateComplaintType({
           id: type.id,
           data: typeData,
         }).unwrap();
+        console.log('Update result:', result);
       } else {
         // Create new type
-        await createComplaintType(typeData).unwrap();
+        result = await createComplaintType(typeData).unwrap();
+        console.log('Create result:', result);
       }
 
       setEditingComplaintType(null);
@@ -516,10 +521,11 @@ const AdminConfig: React.FC = () => {
       dispatch(
         showSuccessToast(
           "Complaint Type Saved",
-          `Complaint type "${type.name}" has been saved successfully.`,
+          `Complaint type "${type.name}" has been saved successfully. Active status: ${type.isActive ? 'Active' : 'Inactive'}`,
         ),
       );
     } catch (error: any) {
+      console.error('Error saving complaint type:', error);
       dispatch(
         showErrorToast(
           "Save Failed",
