@@ -4,8 +4,7 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-import { logout, setError } from "../slices/authSlice";
-import { toast } from "../../components/ui/use-toast";
+import { logout } from "../slices/authSlice";
 
 // Create the most basic possible base query
 const baseQuery = fetchBaseQuery({
