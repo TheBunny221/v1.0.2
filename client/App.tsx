@@ -11,6 +11,7 @@ import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
+import AuthErrorHandler from "./components/AuthErrorHandler";
 import UnifiedLayout from "./components/layouts/UnifiedLayout";
 import OtpProvider from "./contexts/OtpContext";
 import { SystemConfigProvider } from "./contexts/SystemConfigContext";
@@ -390,6 +391,7 @@ const App: React.FC = () => {
                 </div>
                 <Toaster />
                 <GlobalMessageHandler />
+                <AuthErrorHandler />
               </Router>
             </OtpProvider>
           </AppInitializer>
