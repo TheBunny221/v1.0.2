@@ -49,20 +49,32 @@ const baseQueryWithReauth: BaseQueryFn<
     const state = api.getState() as any;
     const token = state?.auth?.token || localStorage.getItem("token");
     if (token) {
-      options.headers = {
+      const headers: Record<string, string> = {
         ...options.headers,
         "authorization": `Bearer ${token}`,
-        "content-type": "application/json",
       };
+
+      // Only add content-type for JSON requests (not FormData)
+      if (contentType) {
+        headers["content-type"] = contentType;
+      }
+
+      options.headers = headers;
     }
   } catch (error) {
     const token = localStorage.getItem("token");
     if (token) {
-      options.headers = {
+      const headers: Record<string, string> = {
         ...options.headers,
         "authorization": `Bearer ${token}`,
-        "content-type": "application/json",
       };
+
+      // Only add content-type for JSON requests (not FormData)
+      if (contentType) {
+        headers["content-type"] = contentType;
+      }
+
+      options.headers = headers;
     }
   }
 
