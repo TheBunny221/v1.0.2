@@ -350,7 +350,7 @@ const AdminUsers: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600">Manage all users in the system</p>
         </div>
-        <Button>
+        <Button onClick={handleOpenAddDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Add New User
         </Button>
