@@ -22,7 +22,7 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Minimal base query wrapper - just handle auth, don't touch responses
+// Ultra-minimal base query wrapper - avoid all response body access
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -30,15 +30,20 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
 
-  // Only handle 401s for logout - don't access error.data
+  // Only handle 401s for logout - absolutely no response body access
   if (result.error?.status === 401) {
-    const endpoint = typeof args === "string" ? args : args.url;
-    const isAuthEndpoint = typeof endpoint === "string" &&
-      (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
+    try {
+      const endpoint = typeof args === "string" ? args : args.url;
+      const isAuthEndpoint = typeof endpoint === "string" &&
+        (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
 
-    if (!isAuthEndpoint) {
-      localStorage.removeItem("token");
-      api.dispatch(logout());
+      if (!isAuthEndpoint) {
+        localStorage.removeItem("token");
+        api.dispatch(logout());
+      }
+    } catch (err) {
+      // Ignore any errors in logout handling to prevent cascading issues
+      console.warn("Error during logout handling:", err);
     }
   }
 
