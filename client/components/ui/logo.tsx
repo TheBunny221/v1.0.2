@@ -125,11 +125,8 @@ interface AppLogoProps {
 }
 
 export const AppLogo: React.FC<AppLogoProps> = (props) => {
-  // This will need to be connected to the SystemConfigContext
-  // For now, we'll use placeholder values
-  const appName = "App Name"; // Will be replaced with useSystemConfig()
-  const appLogoUrl = "/logo.png"; // Will be replaced with useSystemConfig()
-  const appLogoSize = "medium"; // Will be replaced with useSystemConfig()
+  // Import the hook at the top of the file
+  const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
 
   return (
     <Logo
