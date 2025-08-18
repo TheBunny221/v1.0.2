@@ -377,31 +377,35 @@ const App: React.FC = () => {
                       <Route
                         path="/profile"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <Profile />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Profile />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/settings"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <Settings />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Settings />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
