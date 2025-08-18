@@ -1543,7 +1543,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="subZoneName">Sub-Zone Name</Label>
                 <Input
                   id="subZoneName"
-                  value={editingSubZone.name}
+                  value={editingSubZone.name || ""}
                   onChange={(e) =>
                     setEditingSubZone({
                       ...editingSubZone,
@@ -1557,7 +1557,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="subZoneDescription">Description</Label>
                 <Textarea
                   id="subZoneDescription"
-                  value={editingSubZone.description}
+                  value={editingSubZone.description || ""}
                   onChange={(e) =>
                     setEditingSubZone({
                       ...editingSubZone,
