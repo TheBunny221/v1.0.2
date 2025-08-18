@@ -137,7 +137,7 @@ export const guestApi = baseApi.injectEndpoints({
     }),
 
     // Get complaint types (public endpoint)
-    getComplaintTypes: builder.query<
+    getPublicComplaintTypes: builder.query<
       ApiResponse<Array<{ id: string; name: string; description?: string }>>,
       void
     >({
