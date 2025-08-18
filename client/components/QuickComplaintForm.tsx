@@ -267,6 +267,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             contactEmail: formData.email,
             contactPhone: formData.mobile,
             isAnonymous: false,
+            captchaId,
+            captchaText: captcha,
           };
 
           const result = await dispatch(createComplaint(complaintData)).unwrap();
