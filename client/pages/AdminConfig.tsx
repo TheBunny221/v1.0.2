@@ -1072,7 +1072,7 @@ const AdminConfig: React.FC = () => {
                   <div className="space-y-4">
                     {systemSettings
                       .filter((s) =>
-                        ["APP_NAME", "APP_LOGO_URL"].includes(s.key),
+                        ["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(s.key),
                       )
                       .map((setting) => (
                         <div
