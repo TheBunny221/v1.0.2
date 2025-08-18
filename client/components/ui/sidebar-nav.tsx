@@ -53,8 +53,10 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const location = useLocation();
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
 
   const navigationItems: SidebarNavItem[] = [
     {
