@@ -12,6 +12,7 @@ import { useToast } from "../hooks/use-toast";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 import { useRegisterMutation } from "../store/api/authApi";
 import { useOtpFlow } from "../contexts/OtpContext";
+import { useGetWardsQuery } from "../store/api/guestApi";
 import {
   Card,
   CardContent,
@@ -42,6 +43,8 @@ const Register: React.FC = () => {
 
   // API hooks
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
+  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const wardsData = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Clear registration state on component mount
   useEffect(() => {
@@ -66,13 +69,11 @@ const Register: React.FC = () => {
     wardId: "",
   });
 
-  const wards = [
-    { value: "ward-1", label: "Ward 1 - Central Zone" },
-    { value: "ward-2", label: "Ward 2 - North Zone" },
-    { value: "ward-3", label: "Ward 3 - South Zone" },
-    { value: "ward-4", label: "Ward 4 - East Zone" },
-    { value: "ward-5", label: "Ward 5 - West Zone" },
-  ];
+  // Transform wards data for the form
+  const wards = wardsData.map(ward => ({
+    value: ward.id,
+    label: ward.name
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,11 +291,21 @@ const Register: React.FC = () => {
                     <SelectValue placeholder="Select your ward" />
                   </SelectTrigger>
                   <SelectContent>
-                    {wards.map((ward) => (
-                      <SelectItem key={ward.value} value={ward.value}>
-                        {ward.label}
+                    {wardsLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Loading wards...
                       </SelectItem>
-                    ))}
+                    ) : wardsError ? (
+                      <SelectItem value="error" disabled>
+                        Error loading wards
+                      </SelectItem>
+                    ) : (
+                      wards.map((ward) => (
+                        <SelectItem key={ward.value} value={ward.value}>
+                          {ward.label}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
