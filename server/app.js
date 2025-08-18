@@ -23,6 +23,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
+import captchaRoutes from "./routes/captchaRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
 
 // Import middleware
