@@ -88,51 +88,8 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// Safe transform function that doesn't access response data
-export const safeTransformResponse = <T>(response: any): T => {
-  // Just return the response as-is to avoid any body consumption issues
-  return response;
-};
-
-// Helper for transforming API responses - defensive implementation
-export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  try {
-    // Handle null or undefined responses
-    if (response == null) {
-      return {
-        success: false,
-        data: {} as T,
-        message: "No response received",
-      };
-    }
-
-    // If response is already in our expected format, return it as-is
-    if (
-      typeof response === "object" &&
-      response !== null &&
-      "success" in response &&
-      "data" in response
-    ) {
-      return response as ApiResponse<T>;
-    }
-
-    // Transform raw response to our format
-    return {
-      success: response?.success ?? true,
-      data: response?.data ?? response,
-      message: response?.message,
-      meta: response?.meta,
-    };
-  } catch (error) {
-    console.warn("Error in transformResponse:", error);
-    // Return a safe fallback response if transformation fails
-    return {
-      success: false,
-      data: response as T,
-      message: "Response transformation failed",
-    };
-  }
-};
+// Note: transformResponse functions were removed to prevent "Response body is already used" errors
+// in RTK Query. The backend now returns ApiResponse<T> format directly.
 
 // Helper for handling optimistic updates
 export const optimisticUpdate = <T>(
