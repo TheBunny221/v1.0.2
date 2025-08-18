@@ -81,20 +81,16 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           } else if (userError) {
             // Handle different types of auth errors
             const error = userError as any;
-            const errorData = "data" in error ? error.data : null;
 
             logAuthError("User Query Failed", error);
 
-            // Handle specific error types
-            const errorCode = errorData?.data?.code;
+            // Handle specific error types - avoid accessing error.data
             const isServerError = error.status >= 500;
-            const isDatabaseError =
-              errorCode === "DATABASE_READONLY" ||
-              errorCode === "DATABASE_ERROR";
+            const isUnauthorized = error.status === 401;
 
-            if (isDatabaseError || isServerError) {
+            if (isServerError) {
               console.warn(
-                "🚨 Server/Database issue detected - not clearing user credentials",
+                "🚨 Server issue detected - not clearing user credentials",
               );
               console.log(
                 "User can continue with cached data until server recovers",
@@ -106,8 +102,10 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
               return;
             }
 
-            // Clear invalid credentials for client errors
-            dispatch(clearCredentials());
+            // Clear invalid credentials for unauthorized or other client errors
+            if (isUnauthorized || error.status < 500) {
+              dispatch(clearCredentials());
+            }
             localStorage.removeItem("token");
 
             // Log specific error types for debugging
