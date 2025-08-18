@@ -149,7 +149,6 @@ const AdminUsers: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    const abortController = new AbortController();
 
     const fetchWards = async () => {
       try {
@@ -165,7 +164,6 @@ const AdminUsers: React.FC = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          signal: abortController.signal,
         });
 
         if (!isMounted) return;
@@ -173,7 +171,7 @@ const AdminUsers: React.FC = () => {
         if (!response.ok) {
           if (response.status === 401) {
             console.warn('Not authenticated for wards fetch');
-            setWards([]);
+            if (isMounted) setWards([]);
             return;
           }
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -188,8 +186,8 @@ const AdminUsers: React.FC = () => {
           }
         }
       } catch (error: any) {
-        // Only log errors if the component is still mounted and it's not an abort error
-        if (isMounted && error.name !== 'AbortError') {
+        // Only log errors if the component is still mounted
+        if (isMounted) {
           console.error('Failed to fetch wards:', error);
           setWards([]);
         }
@@ -201,7 +199,6 @@ const AdminUsers: React.FC = () => {
     // Cleanup function
     return () => {
       isMounted = false;
-      abortController.abort();
     };
   }, []);
 
