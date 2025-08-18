@@ -4,7 +4,6 @@ import { useAppSelector } from "../../store/hooks";
 import { useSystemConfig } from "../../contexts/SystemConfigContext";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
-import { Logo } from "./logo";
 import {
   ChevronLeft,
   ChevronRight,
@@ -41,7 +40,6 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
   const location = useLocation();
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
-  const { appName, appLogoUrl, appLogoSize } = useSystemConfig();
 
   const navigationItems: SidebarNavItem[] = [
     {
@@ -138,36 +136,23 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
   return (
     <div
       className={cn(
-        "bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col h-full",
+        "bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out flex flex-col h-full",
         isCollapsed ? "w-16" : "w-64",
         className,
       )}
     >
-      {/* Header with logo and toggle button */}
+      {/* Header with toggle button only */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {!isCollapsed && (
-          <Logo
-            logoUrl={appLogoUrl}
-            appName={appName}
-            size={appLogoSize}
-            context="nav"
-            showText={true}
-          />
-        )}
-        {isCollapsed && (
-          <Logo
-            logoUrl={appLogoUrl}
-            appName={appName}
-            size={appLogoSize}
-            context="nav"
-            showText={false}
-          />
+          <h2 className="text-sm font-semibold text-gray-700 tracking-wide uppercase">
+            Navigation
+          </h2>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 hover:bg-gray-100"
+          className="p-1.5 hover:bg-gray-100 ml-auto"
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -178,7 +163,7 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {filteredNavItems.map((item) => (
           <Link
             key={item.path}
