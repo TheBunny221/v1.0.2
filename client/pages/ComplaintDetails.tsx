@@ -706,6 +706,26 @@ const ComplaintDetails: React.FC = () => {
         </div>
       </div>
 
+      {/* Status Update Dialog */}
+      <ComplaintStatusUpdate
+        complaint={{
+          id: complaint.id,
+          complaintId: complaint.complaintId,
+          status: complaint.status,
+          priority: complaint.priority,
+          type: complaint.type,
+          description: complaint.description,
+          area: complaint.area,
+          assignedTo: complaint.assignedTo,
+        }}
+        isOpen={showStatusDialog}
+        onClose={() => setShowStatusDialog(false)}
+        onSuccess={() => {
+          setShowStatusDialog(false);
+          // The complaint data will be automatically updated by RTK Query
+        }}
+      />
+
       {/* Feedback Dialog */}
       <ComplaintFeedbackDialog
         complaintId={complaint.id}
