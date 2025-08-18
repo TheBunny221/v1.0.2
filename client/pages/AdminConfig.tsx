@@ -1465,7 +1465,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="wardName">Ward Name</Label>
                 <Input
                   id="wardName"
-                  value={editingWard.name}
+                  value={editingWard.name || ""}
                   onChange={(e) =>
                     setEditingWard({
                       ...editingWard,
@@ -1479,7 +1479,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="wardDescription">Description</Label>
                 <Textarea
                   id="wardDescription"
-                  value={editingWard.description}
+                  value={editingWard.description || ""}
                   onChange={(e) =>
                     setEditingWard({
                       ...editingWard,
