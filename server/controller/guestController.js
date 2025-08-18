@@ -1,6 +1,7 @@
 import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { sendEmail } from "../utils/emailService.js";
+import { verifyCaptchaForComplaint } from "./captchaController.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
