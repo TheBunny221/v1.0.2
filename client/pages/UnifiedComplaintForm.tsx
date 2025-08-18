@@ -504,24 +504,46 @@ const UnifiedComplaintForm: React.FC = () => {
       return;
     }
 
-    // Use OtpContext to handle verification - it will automatically handle
-    // the RTK Query mutation, token storage, and navigation
-    openOtpFlow({
-      context: "guestComplaint",
-      email: formData.email,
-      complaintId,
-      title: "Verify Your Complaint",
-      description: "Enter the verification code sent to your email",
-      onSuccess: (data) => {
-        // Clear form data and navigate to dashboard
-        dispatch(clearGuestData());
-        navigate("/dashboard");
-      },
-      onCancel: () => {
-        // Handle cancellation if needed
-      },
-    });
-  }, [otpCode, complaintId, formData.email, openOtpFlow, dispatch, navigate, toast]);
+    try {
+      // Use RTK Query mutation for OTP verification
+      const result = await verifyGuestOtp({
+        email: formData.email,
+        otpCode,
+        complaintId,
+        createAccount: true,
+      }).unwrap();
+
+      // Store auth token and user data
+      if (result.data?.token && result.data?.user) {
+        dispatch(
+          setCredentials({
+            token: result.data.token,
+            user: result.data.user,
+          }),
+        );
+        localStorage.setItem("token", result.data.token);
+      }
+
+      toast({
+        title: "Success!",
+        description: result.data?.isNewUser
+          ? "Your complaint has been verified and your citizen account has been created successfully!"
+          : "Your complaint has been verified and you've been logged in successfully!",
+      });
+
+      // Clear form data and navigate to dashboard
+      dispatch(clearGuestData());
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description:
+          error?.data?.message || error?.message || "Invalid verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [otpCode, complaintId, formData.email, verifyGuestOtp, dispatch, toast, navigate]);
 
   // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
   const handleSubmit = useCallback(() => {
