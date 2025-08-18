@@ -101,7 +101,7 @@ const App: React.FC = () => {
                       />
                       <Route
                         path="/complaint"
-                        element={<UnifiedComplaintForm />}
+                        element={<QuickComplaintPage />}
                       />
                       <Route
                         path="/guest/track"
