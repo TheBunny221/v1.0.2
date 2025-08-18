@@ -245,16 +245,6 @@ const MaintenanceTasks: React.FC = () => {
           </h1>
           <p className="text-gray-600">Manage your assigned maintenance work</p>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <Camera className="h-4 w-4 mr-2" />
-            Quick Photo
-          </Button>
-          <Button>
-            <Navigation className="h-4 w-4 mr-2" />
-            Route Planner
-          </Button>
-        </div>
       </div>
 
       {/* Task Count Cards */}
