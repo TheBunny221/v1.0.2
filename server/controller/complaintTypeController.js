@@ -110,7 +110,7 @@ export const createComplaintType = asyncHandler(async (req, res) => {
       key,
       value: JSON.stringify(typeData),
       description: `Complaint type configuration for ${name}`,
-      isActive: true,
+      isActive: isActive !== undefined ? isActive : true,
     },
   });
 
