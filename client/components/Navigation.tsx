@@ -202,7 +202,7 @@ const Navigation: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -366,7 +366,7 @@ const Navigation: React.FC = () => {
   }
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -409,80 +409,8 @@ const Navigation: React.FC = () => {
             </Button>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {filteredNavItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  {item.icon}
-                  <span>{item.label}</span>
-                  {item.badge && item.badge > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="h-5 w-5 p-0 flex items-center justify-center text-xs"
-                    >
-                      {item.badge}
-                    </Badge>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
-            {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
-                  <Bell className="h-5 w-5" />
-                  {getUnreadNotificationCount() > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                    >
-                      {getUnreadNotificationCount()}
-                    </Badge>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2">
-                  <h3 className="font-semibold text-sm mb-2">
-                    {translations?.auth?.notifications || "Notifications"}
-                  </h3>
-                  {notifications.length === 0 ? (
-                    <p className="text-sm text-gray-500">
-                      {translations?.common?.noData || "No notifications"}
-                    </p>
-                  ) : (
-                    notifications.slice(0, 5).map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-2 rounded-md mb-2 ${
-                          notification.isRead ? "bg-gray-50" : "bg-blue-50"
-                        }`}
-                      >
-                        <p className="text-sm font-medium">
-                          {notification.title}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {notification.message}
-                        </p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
             {/* Language Selector */}
             <DropdownMenu>
@@ -566,109 +494,28 @@ const Navigation: React.FC = () => {
         }`}
       >
         <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
-          {filteredNavItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                location.pathname === item.path
-                  ? "bg-primary text-primary-foreground"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <div className="flex items-center space-x-3">
-                {item.icon}
-                <span>{item.label}</span>
-                {item.badge && item.badge > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="h-5 w-5 p-0 flex items-center justify-center text-xs ml-auto"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
-              </div>
-            </Link>
-          ))}
-
-          {/* Mobile utility menu items */}
-          <div className="border-t border-gray-200 pt-3 space-y-1">
-            {/* Mobile Language Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                  <div className="flex items-center space-x-3">
-                    <Globe className="h-4 w-4" />
-                    <span>Language: {currentLanguage.toUpperCase()}</span>
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
-                  English
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
-                  हिंदी
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
-                  മലയാളം
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Mobile Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <Bell className="h-4 w-4" />
-                      {getUnreadNotificationCount() > 0 && (
-                        <Badge
-                          variant="destructive"
-                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
-                        >
-                          {getUnreadNotificationCount()}
-                        </Badge>
-                      )}
-                    </div>
-                    <span>
-                      {translations?.auth?.notifications || "Notifications"}
-                    </span>
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2">
-                  <h3 className="font-semibold text-sm mb-2">
-                    {translations?.auth?.notifications || "Notifications"}
-                  </h3>
-                  {notifications.length === 0 ? (
-                    <p className="text-sm text-gray-500">
-                      {translations?.common?.noData || "No notifications"}
-                    </p>
-                  ) : (
-                    notifications.slice(0, 5).map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-2 rounded-md mb-2 ${
-                          notification.isRead ? "bg-gray-50" : "bg-blue-50"
-                        }`}
-                      >
-                        <p className="text-sm font-medium">
-                          {notification.title}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {notification.message}
-                        </p>
-                      </div>
-                    ))
-                  )}
+          {/* Mobile Language Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                <div className="flex items-center space-x-3">
+                  <Globe className="h-4 w-4" />
+                  <span>Language: {currentLanguage.toUpperCase()}</span>
                 </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                हिंदी
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                മലയാളം
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Mobile user menu items */}
           <div className="border-t border-gray-200 pt-3">
