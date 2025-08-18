@@ -612,7 +612,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       userId: req.user.id,
       fromStatus: complaint.status,
       toStatus: status,
-      comment: comment || `Status updated to ${status}`,
+      comment: remarks || `Status updated to ${status}`,
     },
   });
 
