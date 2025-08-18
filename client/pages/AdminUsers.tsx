@@ -58,6 +58,7 @@ import {
   type CreateUserRequest,
   type UpdateUserRequest,
 } from "../store/api/adminApi";
+import { useGetWardsQuery } from "../store/api/guestApi";
 import { toast } from "../components/ui/use-toast";
 
 const AdminUsers: React.FC = () => {
