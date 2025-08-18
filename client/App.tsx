@@ -11,7 +11,7 @@ import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
-import Navigation from "./components/Navigation";
+import UnifiedLayout from "./components/layouts/UnifiedLayout";
 import OtpProvider from "./contexts/OtpContext";
 import { SystemConfigProvider } from "./contexts/SystemConfigContext";
 import RoleBasedRoute from "./components/RoleBasedRoute";
