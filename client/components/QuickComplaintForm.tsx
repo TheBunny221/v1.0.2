@@ -114,6 +114,11 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
   const { toast } = useToast();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
+  const [generateCaptcha, {
+    data: captchaData,
+    isLoading: captchaLoading,
+    error: captchaError
+  }] = useLazyGenerateCaptchaQuery();
 
   // Pre-fill user data if authenticated and set submission mode
   useEffect(() => {
