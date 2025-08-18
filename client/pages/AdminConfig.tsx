@@ -1950,6 +1950,7 @@ const AdminConfig: React.FC = () => {
                   onClick={() => {
                     setEditingSetting(null);
                     setIsSettingDialogOpen(false);
+                    resetLogoUploadState();
                   }}
                 >
                   Cancel
