@@ -467,7 +467,7 @@ const AdminUsers: React.FC = () => {
                 className="pl-10"
               />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <Select value={roleFilter} onValueChange={handleRoleFilterChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
@@ -481,7 +481,7 @@ const AdminUsers: React.FC = () => {
                 <SelectItem value="ADMINISTRATOR">Administrators</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
