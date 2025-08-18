@@ -31,7 +31,8 @@ const router = express.Router();
 
 // Configure multer for guest complaint file uploads
 const uploadDir = process.env.UPLOAD_PATH || "./uploads";
-const guestUploadDir = path.join(uploadDir, "guest-complaints");
+// const guestUploadDir = path.join(uploadDir, "guest-complaints");
+const guestUploadDir = uploadDir;
 
 // Ensure upload directory exists
 if (!fs.existsSync(guestUploadDir)) {
