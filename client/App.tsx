@@ -119,22 +119,22 @@ const App: React.FC = () => {
                       {/* Home route */}
                       <Route path="/" element={<Index />} />
 
-                                  {/* Dashboard routes - Unified role-based routing */}
-                                  <Route
-                                    path="/dashboard"
-                                    element={
-                                      <RoleBasedRoute
-                                        allowedRoles={[
-                                          "CITIZEN",
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
-                                          "ADMINISTRATOR",
-                                        ]}
-                                      >
-                                        <RoleBasedDashboard />
-                                      </RoleBasedRoute>
-                                    }
-                                  />
+                      {/* Dashboard routes - Unified role-based routing */}
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <RoleBasedRoute
+                            allowedRoles={[
+                              "CITIZEN",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
+                              "ADMINISTRATOR",
+                            ]}
+                          >
+                            <RoleBasedDashboard />
+                          </RoleBasedRoute>
+                        }
+                      />
 
                                   {/* Complaint routes */}
                                   <Route
