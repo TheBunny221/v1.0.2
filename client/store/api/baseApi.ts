@@ -7,11 +7,10 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Create the base query
+// Create a simple base query without any custom response handling
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api/",
   prepareHeaders: (headers, { getState }) => {
-    // Try to get token from Redux state first, then localStorage
     const state = getState() as any;
     const token = state?.auth?.token || localStorage.getItem("token");
 
@@ -19,68 +18,27 @@ const baseQuery = fetchBaseQuery({
       headers.set("authorization", `Bearer ${token}`);
     }
 
-    // Ensure content-type is set for JSON requests
-    if (!headers.get("content-type")) {
-      headers.set("content-type", "application/json");
-    }
-
     return headers;
   },
-  timeout: 30000,
 });
 
-// Enhanced base query with authentication handling
+// Minimal base query wrapper - just handle auth, don't touch responses
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const endpoint = typeof args === "string" ? args : args.url;
-
-  // Make the initial request
   const result = await baseQuery(args, api, extraOptions);
 
-  // Simple logging without accessing response data
-  if (process.env.NODE_ENV === "development") {
-    console.log(`API Request to ${endpoint}: ${result.error?.status || "SUCCESS"}`);
-  }
-
-  // Handle 401 unauthorized responses - but avoid accessing error.data
-  if (result.error && result.error.status === 401) {
-    // Check if this is an auth-related endpoint to avoid logout loops
-    const isAuthEndpoint =
-      typeof endpoint === "string" &&
-      (endpoint.includes("auth/login") ||
-        endpoint.includes("auth/register") ||
-        endpoint.includes("auth/verify-otp") ||
-        endpoint.includes("auth/login-otp") ||
-        endpoint.includes("auth/set-password"));
+  // Only handle 401s for logout - don't access error.data
+  if (result.error?.status === 401) {
+    const endpoint = typeof args === "string" ? args : args.url;
+    const isAuthEndpoint = typeof endpoint === "string" &&
+      (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
 
     if (!isAuthEndpoint) {
-      console.log("Session expired, logging out user");
-
-      // Set a generic auth error without accessing response data
-      localStorage.setItem('auth_error', JSON.stringify({
-        code: 'SESSION_EXPIRED',
-        action: 'LOGIN_REQUIRED'
-      }));
-
-      // Clear auth state and localStorage
       localStorage.removeItem("token");
       api.dispatch(logout());
-
-      // Show toast notification
-      setTimeout(() => {
-        try {
-          toast({
-            title: "Session Expired",
-            description: "Please login again to continue.",
-            variant: "destructive",
-          });
-        } catch (toastError) {
-          console.warn("Toast notification failed:", toastError);
-        }
-      }, 0);
     }
   }
 
