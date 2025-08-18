@@ -580,8 +580,8 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* General Remarks */}
-          {complaint.remarks && (
+          {/* General Remarks - Hidden from citizens as they may contain internal notes */}
+          {complaint.remarks && user?.role !== "CITIZEN" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
