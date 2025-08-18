@@ -232,7 +232,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                 variant="ghost"
                 className={cn(
                   "w-full h-auto p-2 justify-start hover:bg-gray-200",
-                  isCollapsed && "justify-center p-2"
+                  isCollapsed && "justify-center p-2",
                 )}
               >
                 <div className="flex items-center w-full">

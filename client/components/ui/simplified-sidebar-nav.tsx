@@ -189,7 +189,7 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
               isActiveRoute(item.path)
                 ? "bg-primary text-white shadow-md"
                 : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm",
-              isCollapsed ? "justify-center" : "justify-start"
+              isCollapsed ? "justify-center" : "justify-start",
             )}
             title={isCollapsed ? item.label : undefined}
           >
@@ -197,14 +197,14 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
               {React.cloneElement(item.icon as React.ReactElement, {
                 className: cn(
                   "h-4 w-4",
-                  isActiveRoute(item.path) ? "text-white" : "text-gray-500 group-hover:text-gray-700"
-                )
+                  isActiveRoute(item.path)
+                    ? "text-white"
+                    : "text-gray-500 group-hover:text-gray-700",
+                ),
               })}
             </span>
             {!isCollapsed && (
-              <span className="ml-3 truncate font-medium">
-                {item.label}
-              </span>
+              <span className="ml-3 truncate font-medium">{item.label}</span>
             )}
           </Link>
         ))}

@@ -14,7 +14,7 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   className,
 }) => {
   const { isSidebarCollapsed } = useAppSelector((state) => state.ui);
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation - Fixed */}
@@ -25,14 +25,16 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
         <div className="hidden md:block sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
           <SimplifiedSidebarNav />
         </div>
-        
+
         {/* Main Content - Responsive margins */}
-        <main className={cn(
-          "flex-1 overflow-auto",
-          "p-4 md:p-6", // Responsive padding
-          "min-h-[calc(100vh-4rem)]", // Ensure full height
-          className
-        )}>
+        <main
+          className={cn(
+            "flex-1 overflow-auto",
+            "p-4 md:p-6", // Responsive padding
+            "min-h-[calc(100vh-4rem)]", // Ensure full height
+            className,
+          )}
+        >
           {children}
         </main>
       </div>

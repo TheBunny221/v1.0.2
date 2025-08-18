@@ -132,7 +132,7 @@ const MaintenanceDashboard: React.FC = () => {
   };
 
   return (
-      <div className="space-y-6">
+    <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">Maintenance Dashboard</h1>
@@ -565,7 +565,7 @@ const MaintenanceDashboard: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-      </div>
+    </div>
   );
 };
 

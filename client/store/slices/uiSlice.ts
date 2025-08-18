@@ -103,7 +103,8 @@ const initialState: UIState = {
   loadingText: undefined,
   isOnline: navigator.onLine,
   isSidebarOpen: true,
-  isSidebarCollapsed: localStorage.getItem("sidebarCollapsed") === "true" || false,
+  isSidebarCollapsed:
+    localStorage.getItem("sidebarCollapsed") === "true" || false,
   theme:
     (localStorage.getItem("theme") as "light" | "dark" | "system") || "system",
   modals: [],
@@ -149,7 +150,10 @@ const uiSlice = createSlice({
     },
     toggleSidebarCollapsed: (state) => {
       state.isSidebarCollapsed = !state.isSidebarCollapsed;
-      localStorage.setItem("sidebarCollapsed", state.isSidebarCollapsed.toString());
+      localStorage.setItem(
+        "sidebarCollapsed",
+        state.isSidebarCollapsed.toString(),
+      );
     },
     setSidebarCollapsed: (state, action: PayloadAction<boolean>) => {
       state.isSidebarCollapsed = action.payload;

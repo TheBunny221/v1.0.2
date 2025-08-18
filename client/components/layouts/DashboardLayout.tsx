@@ -24,10 +24,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
 
         {/* Main Content */}
-        <main className={cn(
-          "flex-1 p-6 overflow-auto",
-          className
-        )}>
+        <main className={cn("flex-1 p-6 overflow-auto", className)}>
           {children}
         </main>
       </div>

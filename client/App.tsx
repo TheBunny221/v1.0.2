@@ -184,9 +184,7 @@ const App: React.FC = () => {
                         path="/complaints/citizen-form"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["CITIZEN"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["CITIZEN"]}>
                               <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -196,9 +194,7 @@ const App: React.FC = () => {
                         path="/complaints/new"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["CITIZEN"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["CITIZEN"]}>
                               <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -222,14 +218,12 @@ const App: React.FC = () => {
                         }
                       />
 
-                                  {/* Ward Officer routes */}
+                      {/* Ward Officer routes */}
                       <Route
                         path="/tasks"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["WARD_OFFICER"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["WARD_OFFICER"]}>
                               <WardTasks />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -239,23 +233,19 @@ const App: React.FC = () => {
                         path="/ward"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["WARD_OFFICER"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["WARD_OFFICER"]}>
                               <WardManagement />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
                       />
 
-                                  {/* Maintenance Team routes */}
+                      {/* Maintenance Team routes */}
                       <Route
                         path="/maintenance"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["MAINTENANCE_TEAM"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["MAINTENANCE_TEAM"]}>
                               <MaintenanceTasks />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -265,16 +255,14 @@ const App: React.FC = () => {
                         path="/tasks/:id"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["MAINTENANCE_TEAM"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["MAINTENANCE_TEAM"]}>
                               <TaskDetails />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
                       />
 
-                                  {/* Communication routes */}
+                      {/* Communication routes */}
                       <Route
                         path="/messages"
                         element={
@@ -291,16 +279,13 @@ const App: React.FC = () => {
                         }
                       />
 
-                                  {/* Reports routes */}
+                      {/* Reports routes */}
                       <Route
                         path="/reports"
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute
-                              allowedRoles={[
-                                "WARD_OFFICER",
-                                "ADMINISTRATOR",
-                              ]}
+                              allowedRoles={["WARD_OFFICER", "ADMINISTRATOR"]}
                             >
                               <AdminReports />
                             </RoleBasedRoute>
@@ -308,14 +293,12 @@ const App: React.FC = () => {
                         }
                       />
 
-                                  {/* Admin routes */}
+                      {/* Admin routes */}
                       <Route
                         path="/admin/users"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["ADMINISTRATOR"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
                               <AdminUsers />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -325,9 +308,7 @@ const App: React.FC = () => {
                         path="/admin/config"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["ADMINISTRATOR"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
                               <AdminConfig />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -337,9 +318,7 @@ const App: React.FC = () => {
                         path="/admin/languages"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["ADMINISTRATOR"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
                               <AdminLanguages />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -349,9 +328,7 @@ const App: React.FC = () => {
                         path="/admin/analytics"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["ADMINISTRATOR"]}
-                            >
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
                               <AdminAnalytics />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -362,10 +339,7 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute
-                              allowedRoles={[
-                                "ADMINISTRATOR",
-                                "WARD_OFFICER",
-                              ]}
+                              allowedRoles={["ADMINISTRATOR", "WARD_OFFICER"]}
                             >
                               <ReportsAnalytics />
                             </RoleBasedRoute>
@@ -373,7 +347,7 @@ const App: React.FC = () => {
                         }
                       />
 
-                                  {/* Profile and Settings */}
+                      {/* Profile and Settings */}
                       <Route
                         path="/profile"
                         element={
@@ -409,11 +383,8 @@ const App: React.FC = () => {
                         }
                       />
 
-                                  {/* Catch all route */}
-                      <Route
-                        path="*"
-                        element={<Navigate to="/" replace />}
-                      />
+                      {/* Catch all route */}
+                      <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </Suspense>
                 </div>
