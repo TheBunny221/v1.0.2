@@ -118,41 +118,49 @@ export const rollbackUpdate = <T>(
   );
 };
 
-// Helper to extract error message from RTK Query error
+// Helper to extract error message from RTK Query error - defensive implementation
 export const getApiErrorMessage = (error: any): string => {
-  // Handle RTK Query FetchBaseQueryError structure
-  if (error?.data?.message) {
-    return error.data.message;
-  }
+  try {
+    // Avoid accessing error.data directly to prevent "Response body is already used" errors
+    // Instead, rely on status codes for user-friendly messages
 
-  // Handle status-based errors
-  if (error?.status) {
-    switch (error.status) {
-      case 400:
-        return "Bad request - please check your input";
-      case 401:
-        return "Unauthorized - please login again";
-      case 403:
-        return "Forbidden - you do not have permission";
-      case 404:
-        return "Resource not found";
-      case 409:
-        return "Conflict - resource already exists";
-      case 422:
-        return "Validation error - please check your input";
-      case 429:
-        return "Too many requests - please try again later";
-      case 500:
-        return "Internal server error - please try again later";
-      default:
-        return `An error occurred (${error.status})`;
+    // Handle status-based errors first
+    if (error?.status) {
+      switch (error.status) {
+        case 400:
+          return "Bad request - please check your input";
+        case 401:
+          return "Unauthorized - please login again";
+        case 403:
+          return "Forbidden - you do not have permission";
+        case 404:
+          return "Resource not found";
+        case 409:
+          return "Conflict - resource already exists";
+        case 422:
+          return "Validation error - please check your input";
+        case 429:
+          return "Too many requests - please try again later";
+        case 500:
+          return "Internal server error - please try again later";
+        default:
+          return `An error occurred (${error.status})`;
+      }
     }
-  }
 
-  // Handle network errors
-  if (error?.message?.includes("Failed to fetch")) {
-    return "Network connection failed. Please check your internet connection.";
-  }
+    // Handle network errors
+    if (error?.message?.includes("Failed to fetch")) {
+      return "Network connection failed. Please check your internet connection.";
+    }
 
-  return "An unexpected error occurred. Please try again.";
+    // Handle other error types without accessing data property
+    if (error?.error) {
+      return "Network error - please check your connection";
+    }
+
+    return "An unexpected error occurred. Please try again.";
+  } catch (err) {
+    console.warn("Error in getApiErrorMessage:", err);
+    return "An unexpected error occurred. Please try again.";
+  }
 };
