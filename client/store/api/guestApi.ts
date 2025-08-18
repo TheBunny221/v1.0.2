@@ -165,6 +165,22 @@ export const guestApi = baseApi.injectEndpoints({
       // Removed transformResponse to prevent response body conflicts
       providesTags: ["Ward"],
     }),
+
+    // Generate CAPTCHA
+    generateCaptcha: builder.query<ApiResponse<CaptchaResponse>, void>({
+      query: () => "/captcha/generate",
+      // Don't cache CAPTCHA as each should be unique
+      keepUnusedDataFor: 0,
+    }),
+
+    // Verify CAPTCHA (optional standalone endpoint)
+    verifyCaptcha: builder.mutation<ApiResponse<{ message: string }>, CaptchaVerifyRequest>({
+      query: (data) => ({
+        url: "/captcha/verify",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
