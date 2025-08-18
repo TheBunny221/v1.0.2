@@ -235,6 +235,7 @@ const Index: React.FC = () => {
       location: "",
       address: "",
       description: "",
+      coordinates: null,
     });
     setFiles([]);
     setCaptcha("");
