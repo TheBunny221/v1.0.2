@@ -753,18 +753,7 @@ const guestSlice = createSlice({
       // OTP verification is now handled by RTK Query hooks
       // State management for verification status is handled in OtpContext
 
-      // Resend OTP
-      .addCase(resendOTP.pending, (state) => {
-        state.error = null;
-      })
-      .addCase(resendOTP.fulfilled, (state, action) => {
-        state.otpExpiry = action.payload.expiresAt;
-        state.sessionId = action.payload.sessionId;
-        state.error = null;
-      })
-      .addCase(resendOTP.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
+      // OTP resend is now handled by RTK Query hooks in guestApi.ts
 
       // Track Guest Complaint
       .addCase(trackGuestComplaint.pending, (state) => {
