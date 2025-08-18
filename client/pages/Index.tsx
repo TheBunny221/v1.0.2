@@ -47,6 +47,7 @@ import {
   Wrench,
   Droplets,
 } from "lucide-react";
+import QuickComplaintForm from "../components/QuickComplaintForm";
 
 const Index: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -797,7 +798,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे लॉग करें"
+                        ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे ल��ग करें"
                         : currentLanguage === "ml"
                           ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ ��േഖപ്പെടുത്തുക"
                           : "Log issues in under a minute with type, photo, and location"}
