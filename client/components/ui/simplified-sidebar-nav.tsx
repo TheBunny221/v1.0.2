@@ -142,22 +142,22 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
       )}
     >
       {/* Header with toggle button only */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
         {!isCollapsed && (
-          <h2 className="text-sm font-semibold text-gray-700 tracking-wide uppercase">
-            Navigation
+          <h2 className="text-xs font-semibold text-gray-500 tracking-wider uppercase">
+            Menu
           </h2>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 hover:bg-gray-100 ml-auto"
+          className="p-1.5 hover:bg-gray-100 rounded-md ml-auto"
         >
           {isCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 text-gray-400" />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 text-gray-400" />
           )}
         </Button>
       </div>
