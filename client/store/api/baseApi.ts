@@ -98,6 +98,20 @@ const baseQueryWithReauth: BaseQueryFn<
   } catch (error) {
     // If there's an error in our handling, return it as an RTK Query error
     console.error("BaseQuery error:", error);
+
+    // Handle specific "Response body is already used" errors
+    if (error instanceof Error && error.message.includes("Response body is already used")) {
+      console.warn("Response body consumption error detected - this should not happen with the current implementation");
+      return {
+        error: {
+          status: "FETCH_ERROR",
+          data: {
+            message: "Request failed due to response handling error. Please try again.",
+          },
+        },
+      };
+    }
+
     return {
       error: {
         status: "CUSTOM_ERROR",
