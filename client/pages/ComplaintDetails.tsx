@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import {
-  useGetComplaintQuery,
-  useUpdateComplaintStatusMutation,
-} from "../store/api/complaintsApi";
-import { useDataManager, useStatusTracking } from "../hooks/useDataManager";
+import { useGetComplaintQuery } from "../store/api/complaintsApi";
+import { useDataManager } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import {
   Card,
@@ -44,12 +41,10 @@ const ComplaintDetails: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
-  const [statusComment, setStatusComment] = useState("");
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
-  const { updateStatus: updateComplaintStatus } = useStatusTracking();
 
   // Use RTK Query to fetch complaint details
   const {
@@ -57,10 +52,6 @@ const ComplaintDetails: React.FC = () => {
     isLoading,
     error,
   } = useGetComplaintQuery(id!, { skip: !id || !isAuthenticated });
-
-  // Use RTK Query mutation for status updates
-  const [updateStatus, { isLoading: isUpdatingStatus }] =
-    useUpdateComplaintStatusMutation();
 
   const complaint = complaintResponse?.data?.complaint;
 
@@ -103,25 +94,6 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string) => {
-    if (id) {
-      try {
-        // Update via API
-        await updateStatus({
-          id,
-          status: newStatus as any,
-          remarks: statusComment,
-        }).unwrap();
-
-        // Update centralized store
-        updateComplaintStatus(id, newStatus, statusComment);
-
-        setStatusComment("");
-      } catch (error) {
-        console.error("Failed to update status:", error);
-      }
-    }
-  };
 
   const handleExportDetails = () => {
     if (!complaint) {
