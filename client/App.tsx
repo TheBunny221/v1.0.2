@@ -116,9 +116,8 @@ const App: React.FC = () => {
                       <Route path="/unauthorized" element={<Unauthorized />} />
 
                       {/* Protected and Public Routes */}
-                                <Routes>
-                                  {/* Home route */}
-                                  <Route path="/" element={<Index />} />
+                      {/* Home route */}
+                      <Route path="/" element={<Index />} />
 
                                   {/* Dashboard routes - Unified role-based routing */}
                                   <Route
@@ -370,7 +369,6 @@ const App: React.FC = () => {
                                     path="*"
                                     element={<Navigate to="/" replace />}
                                   />
-                                </Routes>
                     </Routes>
                   </Suspense>
                 </div>
