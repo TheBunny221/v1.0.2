@@ -214,7 +214,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}/activate`,
         method: "PUT",
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -224,7 +224,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}/deactivate`,
         method: "PUT",
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -238,21 +238,21 @@ export const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<{ affectedCount: number }>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
     // Get user statistics
     getUserStats: builder.query<ApiResponse<UserStatsResponse>, void>({
       query: () => "/admin/stats/users",
-      transformResponse: transformResponse<UserStatsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
     // Get system statistics
     getSystemStats: builder.query<ApiResponse<SystemStatsResponse>, void>({
       query: () => "/admin/stats/system",
-      transformResponse: transformResponse<SystemStatsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
