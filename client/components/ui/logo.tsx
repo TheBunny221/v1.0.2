@@ -2,12 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { 
-  getLogoClasses, 
+import {
+  getLogoClasses,
   getResponsiveLogoClasses,
   getTextLogoClasses,
-  LogoProps 
+  LogoProps
 } from '../../lib/logoUtils';
+import { useSystemConfig } from '../../contexts/SystemConfigContext';
 
 interface ExtendedLogoProps extends LogoProps {
   to?: string;
