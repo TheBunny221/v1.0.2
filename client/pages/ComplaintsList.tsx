@@ -142,8 +142,14 @@ const ComplaintsList: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Complaints</h1>
-          <p className="text-gray-600">Manage and track all complaints</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {user?.role === "MAINTENANCE_TEAM" ? "My Complaints" : "Complaints"}
+          </h1>
+          <p className="text-gray-600">
+            {user?.role === "MAINTENANCE_TEAM"
+              ? "View and manage complaints you have submitted"
+              : "Manage and track all complaints"}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()}>
