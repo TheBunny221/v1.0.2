@@ -519,6 +519,10 @@ const AdminConfig: React.FC = () => {
 
       setEditingComplaintType(null);
       setIsComplaintTypeDialogOpen(false);
+
+      // Force a refetch to ensure UI is updated
+      await refetchComplaintTypes();
+
       dispatch(
         showSuccessToast(
           "Complaint Type Saved",
