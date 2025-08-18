@@ -48,7 +48,7 @@ import {
 } from "lucide-react";
 import {
   useLazyGetAllUsersQuery,
-  useLazyGetUserStatsQuery,
+  useGetUserStatsQuery,
   useActivateUserMutation,
   useDeactivateUserMutation,
   useDeleteUserMutation,
