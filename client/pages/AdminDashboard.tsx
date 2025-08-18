@@ -7,6 +7,7 @@ import {
   useGetRecentActivityQuery,
   useGetDashboardStatsQuery,
 } from "../store/api/adminApi";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
