@@ -178,22 +178,15 @@ const Navigation: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                {appLogoUrl && appLogoUrl !== "/logo.png" ? (
-                  <img src={appLogoUrl} alt={appName} className="h-8 w-8" />
-                ) : (
-                  <Shield className="h-8 w-8 text-primary" />
-                )}
-                <span className="text-xl font-bold text-gray-900 hidden sm:inline">
-                  {appName}
-                </span>
-                <span className="text-lg font-bold text-gray-900 sm:hidden">
-                  {appName
-                    .split(" ")
-                    .map((word) => word[0])
-                    .join("")}
-                </span>
-              </Link>
+              <Logo
+                logoUrl={appLogoUrl}
+                appName={appName}
+                size={appLogoSize}
+                context="nav"
+                to="/"
+                responsive
+                fallbackIcon={Shield}
+              />
             </div>
 
             {/* Mobile menu button for unauthenticated users */}
