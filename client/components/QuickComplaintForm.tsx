@@ -295,6 +295,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             address: formData.address,
             description: formData.description,
             coordinates: formData.coordinates,
+            captchaId,
+            captchaText: captcha,
           };
 
           // Convert files to FileAttachment format
