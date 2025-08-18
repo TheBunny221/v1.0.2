@@ -67,13 +67,13 @@ const Navigation: React.FC = () => {
   // Close mobile menu on escape key
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isMobileMenuOpen) {
+      if (e.key === "Escape" && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isMobileMenuOpen]);
 
   // Close mobile menu when clicking outside
@@ -81,15 +81,15 @@ const Navigation: React.FC = () => {
     const handleClickOutside = (e: MouseEvent) => {
       if (isMobileMenuOpen) {
         const target = e.target as Element;
-        const nav = target.closest('nav');
+        const nav = target.closest("nav");
         if (!nav) {
           setIsMobileMenuOpen(false);
         }
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, [isMobileMenuOpen]);
 
   const navigationItems: NavigationItem[] = [
@@ -230,15 +230,15 @@ const Navigation: React.FC = () => {
                   <Menu
                     className={`h-5 w-5 absolute transition-all duration-200 ${
                       isMobileMenuOpen
-                        ? 'rotate-180 opacity-0'
-                        : 'rotate-0 opacity-100'
+                        ? "rotate-180 opacity-0"
+                        : "rotate-0 opacity-100"
                     }`}
                   />
                   <X
                     className={`h-5 w-5 absolute transition-all duration-200 ${
                       isMobileMenuOpen
-                        ? 'rotate-0 opacity-100'
-                        : '-rotate-180 opacity-0'
+                        ? "rotate-0 opacity-100"
+                        : "-rotate-180 opacity-0"
                     }`}
                   />
                 </div>
@@ -302,68 +302,62 @@ const Navigation: React.FC = () => {
           {/* Mobile Navigation Menu for unauthenticated users */}
           <div
             className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${
-              isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+              isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
             }`}
           >
             <div className="px-4 pt-3 pb-4 space-y-3 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-center mb-3"
-                    >
-                      <Globe className="h-4 w-4 mr-2" />
-                      {currentLanguage.toUpperCase()}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={() => handleLanguageChange("en")}
-                    >
-                      English
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleLanguageChange("hi")}
-                    >
-                      हिंदी
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleLanguageChange("ml")}
-                    >
-                      മലयാळം
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Link
-                  to="/complaint"
-                  className="block"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button variant="outline" className="w-full">
-                    {translations?.complaints?.registerComplaint ||
-                      "Register Complaint"}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center mb-3"
+                  >
+                    <Globe className="h-4 w-4 mr-2" />
+                    {currentLanguage.toUpperCase()}
                   </Button>
-                </Link>
-                <Link
-                  to="/login"
-                  className="block"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button variant="outline" className="w-full">
-                    {translations.nav.login}
-                  </Button>
-                </Link>
-                <Link
-                  to="/register"
-                  className="block"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button className="w-full">
-                    {translations?.auth?.signUp ||
-                      translations.nav.register ||
-                      "Sign Up"}
-                  </Button>
-                </Link>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                    हिंदी
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                    മലयാळം
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Link
+                to="/complaint"
+                className="block"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Button variant="outline" className="w-full">
+                  {translations?.complaints?.registerComplaint ||
+                    "Register Complaint"}
+                </Button>
+              </Link>
+              <Link
+                to="/login"
+                className="block"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Button variant="outline" className="w-full">
+                  {translations.nav.login}
+                </Button>
+              </Link>
+              <Link
+                to="/register"
+                className="block"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Button className="w-full">
+                  {translations?.auth?.signUp ||
+                    translations.nav.register ||
+                    "Sign Up"}
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -400,15 +394,15 @@ const Navigation: React.FC = () => {
                 <Menu
                   className={`h-5 w-5 absolute transition-all duration-200 ${
                     isMobileMenuOpen
-                      ? 'rotate-180 opacity-0'
-                      : 'rotate-0 opacity-100'
+                      ? "rotate-180 opacity-0"
+                      : "rotate-0 opacity-100"
                   }`}
                 />
                 <X
                   className={`h-5 w-5 absolute transition-all duration-200 ${
                     isMobileMenuOpen
-                      ? 'rotate-0 opacity-100'
-                      : '-rotate-180 opacity-0'
+                      ? "rotate-0 opacity-100"
+                      : "-rotate-180 opacity-0"
                   }`}
                 />
               </div>
@@ -568,149 +562,149 @@ const Navigation: React.FC = () => {
       {/* Mobile Navigation Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${
-          isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+          isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
-            {filteredNavItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <div className="flex items-center space-x-3">
-                  {item.icon}
-                  <span>{item.label}</span>
-                  {item.badge && item.badge > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="h-5 w-5 p-0 flex items-center justify-center text-xs ml-auto"
-                    >
-                      {item.badge}
-                    </Badge>
+          {filteredNavItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                location.pathname === item.path
+                  ? "bg-primary text-primary-foreground"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <div className="flex items-center space-x-3">
+                {item.icon}
+                <span>{item.label}</span>
+                {item.badge && item.badge > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="h-5 w-5 p-0 flex items-center justify-center text-xs ml-auto"
+                  >
+                    {item.badge}
+                  </Badge>
+                )}
+              </div>
+            </Link>
+          ))}
+
+          {/* Mobile utility menu items */}
+          <div className="border-t border-gray-200 pt-3 space-y-1">
+            {/* Mobile Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <Globe className="h-4 w-4" />
+                    <span>Language: {currentLanguage.toUpperCase()}</span>
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
+                  हिंदी
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
+                  മലയാളം
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile Notifications */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <Bell className="h-4 w-4" />
+                      {getUnreadNotificationCount() > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
+                        >
+                          {getUnreadNotificationCount()}
+                        </Badge>
+                      )}
+                    </div>
+                    <span>
+                      {translations?.auth?.notifications || "Notifications"}
+                    </span>
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="p-2">
+                  <h3 className="font-semibold text-sm mb-2">
+                    {translations?.auth?.notifications || "Notifications"}
+                  </h3>
+                  {notifications.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      {translations?.common?.noData || "No notifications"}
+                    </p>
+                  ) : (
+                    notifications.slice(0, 5).map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-2 rounded-md mb-2 ${
+                          notification.isRead ? "bg-gray-50" : "bg-blue-50"
+                        }`}
+                      >
+                        <p className="text-sm font-medium">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {notification.message}
+                        </p>
+                      </div>
+                    ))
                   )}
                 </div>
-              </Link>
-            ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-            {/* Mobile utility menu items */}
-            <div className="border-t border-gray-200 pt-3 space-y-1">
-              {/* Mobile Language Selector */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <Globe className="h-4 w-4" />
-                      <span>Language: {currentLanguage.toUpperCase()}</span>
-                    </div>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
-                    English
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
-                    हिंदी
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
-                    മലയാളം
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Mobile Notifications */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="block w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <Bell className="h-4 w-4" />
-                        {getUnreadNotificationCount() > 0 && (
-                          <Badge
-                            variant="destructive"
-                            className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
-                          >
-                            {getUnreadNotificationCount()}
-                          </Badge>
-                        )}
-                      </div>
-                      <span>
-                        {translations?.auth?.notifications || "Notifications"}
-                      </span>
-                    </div>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <div className="p-2">
-                    <h3 className="font-semibold text-sm mb-2">
-                      {translations?.auth?.notifications || "Notifications"}
-                    </h3>
-                    {notifications.length === 0 ? (
-                      <p className="text-sm text-gray-500">
-                        {translations?.common?.noData || "No notifications"}
-                      </p>
-                    ) : (
-                      notifications.slice(0, 5).map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-2 rounded-md mb-2 ${
-                            notification.isRead ? "bg-gray-50" : "bg-blue-50"
-                          }`}
-                        >
-                          <p className="text-sm font-medium">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            {notification.message}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Mobile user menu items */}
-            <div className="border-t border-gray-200 pt-3">
-              <Link
-                to="/profile"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <div className="flex items-center space-x-3">
-                  <User className="h-4 w-4" />
-                  <span>{translations?.nav?.profile || "Profile"}</span>
-                </div>
-              </Link>
-              <Link
-                to="/settings"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <div className="flex items-center space-x-3">
-                  <Settings className="h-4 w-4" />
-                  <span>{translations.nav.settings}</span>
-                </div>
-              </Link>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
-              >
-                <div className="flex items-center space-x-3">
-                  <LogOut className="h-4 w-4" />
-                  <span>{translations.nav.logout}</span>
-                </div>
-              </button>
-            </div>
+          {/* Mobile user menu items */}
+          <div className="border-t border-gray-200 pt-3">
+            <Link
+              to="/profile"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <div className="flex items-center space-x-3">
+                <User className="h-4 w-4" />
+                <span>{translations?.nav?.profile || "Profile"}</span>
+              </div>
+            </Link>
+            <Link
+              to="/settings"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <div className="flex items-center space-x-3">
+                <Settings className="h-4 w-4" />
+                <span>{translations.nav.settings}</span>
+              </div>
+            </Link>
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsMobileMenuOpen(false);
+              }}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
+            >
+              <div className="flex items-center space-x-3">
+                <LogOut className="h-4 w-4" />
+                <span>{translations.nav.logout}</span>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </nav>

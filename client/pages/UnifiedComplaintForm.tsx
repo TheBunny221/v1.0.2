@@ -32,7 +32,10 @@ import {
   FileAttachment,
   GuestComplaintData,
 } from "../store/slices/guestSlice";
-import { useGetWardsQuery, useVerifyGuestOtpMutation } from "../store/api/guestApi";
+import {
+  useGetWardsQuery,
+  useVerifyGuestOtpMutation,
+} from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -539,11 +542,21 @@ const UnifiedComplaintForm: React.FC = () => {
       toast({
         title: "Verification Failed",
         description:
-          error?.data?.message || error?.message || "Invalid verification code. Please try again.",
+          error?.data?.message ||
+          error?.message ||
+          "Invalid verification code. Please try again.",
         variant: "destructive",
       });
     }
-  }, [otpCode, complaintId, formData.email, verifyGuestOtp, dispatch, toast, navigate]);
+  }, [
+    otpCode,
+    complaintId,
+    formData.email,
+    verifyGuestOtp,
+    dispatch,
+    toast,
+    navigate,
+  ]);
 
   // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
   const handleSubmit = useCallback(() => {

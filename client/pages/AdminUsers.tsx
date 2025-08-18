@@ -105,11 +105,10 @@ const AdminUsers: React.FC = () => {
   }, []);
 
   // API queries - use lazy for users to prevent AbortErrors
-  const [getAllUsers, {
-    data: usersResponse,
-    isLoading: isLoadingUsers,
-    error: usersError,
-  }] = useLazyGetAllUsersQuery();
+  const [
+    getAllUsers,
+    { data: usersResponse, isLoading: isLoadingUsers, error: usersError },
+  ] = useLazyGetAllUsersQuery();
 
   // Use regular hook with skip for stats
   const {
@@ -132,7 +131,10 @@ const AdminUsers: React.FC = () => {
         });
       } catch (error) {
         // Silently handle any errors from lazy query in Strict Mode
-        console.debug('Lazy query error (likely from React Strict Mode):', error);
+        console.debug(
+          "Lazy query error (likely from React Strict Mode):",
+          error,
+        );
       }
     }
   }, [page, limit, roleFilter, statusFilter, isAuthenticated, getAllUsers]);
@@ -149,13 +151,13 @@ const AdminUsers: React.FC = () => {
         });
       } catch (error) {
         // Silently handle any errors from lazy query
-        console.debug('Lazy query refetch error:', error);
+        console.debug("Lazy query refetch error:", error);
       }
     }
   };
 
   // Fetch wards for form dropdowns
-  const [wards, setWards] = useState<Array<{id: string; name: string}>>([]);
+  const [wards, setWards] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -168,11 +170,11 @@ const AdminUsers: React.FC = () => {
           return;
         }
 
-        const response = await fetch('/api/wards', {
-          method: 'GET',
+        const response = await fetch("/api/wards", {
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -180,7 +182,7 @@ const AdminUsers: React.FC = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            console.warn('Not authenticated for wards fetch');
+            console.warn("Not authenticated for wards fetch");
             if (isMounted) setWards([]);
             return;
           }
@@ -198,7 +200,7 @@ const AdminUsers: React.FC = () => {
       } catch (error: any) {
         // Only log errors if the component is still mounted
         if (isMounted) {
-          console.error('Failed to fetch wards:', error);
+          console.error("Failed to fetch wards:", error);
           setWards([]);
         }
       }
@@ -406,7 +408,9 @@ const AdminUsers: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error?.data?.message || `Failed to ${editingUser ? "update" : "create"} user`,
+        description:
+          error?.data?.message ||
+          `Failed to ${editingUser ? "update" : "create"} user`,
         variant: "destructive",
       });
     }
@@ -578,7 +582,10 @@ const AdminUsers: React.FC = () => {
                 <SelectItem value="ADMINISTRATOR">Administrators</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+            <Select
+              value={statusFilter}
+              onValueChange={handleStatusFilterChange}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -822,7 +829,9 @@ const AdminUsers: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="CITIZEN">Citizen</SelectItem>
                   <SelectItem value="WARD_OFFICER">Ward Officer</SelectItem>
-                  <SelectItem value="MAINTENANCE_TEAM">Maintenance Team</SelectItem>
+                  <SelectItem value="MAINTENANCE_TEAM">
+                    Maintenance Team
+                  </SelectItem>
                   <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
                 </SelectContent>
               </Select>
@@ -832,7 +841,10 @@ const AdminUsers: React.FC = () => {
               <Select
                 value={formData.wardId || "none"}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, wardId: value === "none" ? "" : value })
+                  setFormData({
+                    ...formData,
+                    wardId: value === "none" ? "" : value,
+                  })
                 }
               >
                 <SelectTrigger>
@@ -860,7 +872,11 @@ const AdminUsers: React.FC = () => {
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseDialogs}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseDialogs}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating}>
@@ -883,9 +899,7 @@ const AdminUsers: React.FC = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update user information.
-            </DialogDescription>
+            <DialogDescription>Update user information.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleFormSubmit} className="space-y-4">
             <div>
@@ -938,7 +952,9 @@ const AdminUsers: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="CITIZEN">Citizen</SelectItem>
                   <SelectItem value="WARD_OFFICER">Ward Officer</SelectItem>
-                  <SelectItem value="MAINTENANCE_TEAM">Maintenance Team</SelectItem>
+                  <SelectItem value="MAINTENANCE_TEAM">
+                    Maintenance Team
+                  </SelectItem>
                   <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
                 </SelectContent>
               </Select>
@@ -948,7 +964,10 @@ const AdminUsers: React.FC = () => {
               <Select
                 value={formData.wardId || "none"}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, wardId: value === "none" ? "" : value })
+                  setFormData({
+                    ...formData,
+                    wardId: value === "none" ? "" : value,
+                  })
                 }
               >
                 <SelectTrigger>
@@ -976,7 +995,11 @@ const AdminUsers: React.FC = () => {
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseDialogs}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseDialogs}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isUpdating}>

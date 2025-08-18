@@ -1,14 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Shield } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Shield } from "lucide-react";
+import { cn } from "../../lib/utils";
 import {
   getLogoClasses,
   getResponsiveLogoClasses,
   getTextLogoClasses,
-  LogoProps
-} from '../../lib/logoUtils';
-import { useSystemConfig } from '../../contexts/SystemConfigContext';
+  LogoProps,
+} from "../../lib/logoUtils";
+import { useSystemConfig } from "../../contexts/SystemConfigContext";
 
 interface ExtendedLogoProps extends LogoProps {
   to?: string;
@@ -22,8 +22,8 @@ interface ExtendedLogoProps extends LogoProps {
 export const Logo: React.FC<ExtendedLogoProps> = ({
   logoUrl,
   appName,
-  size = 'medium',
-  context = 'nav',
+  size = "medium",
+  context = "nav",
   className,
   showText = true,
   fallbackIcon: FallbackIcon = Shield,
@@ -31,61 +31,65 @@ export const Logo: React.FC<ExtendedLogoProps> = ({
   onClick,
   responsive = false,
 }) => {
-  const classes = responsive 
+  const classes = responsive
     ? getResponsiveLogoClasses(size)
     : getLogoClasses(size, context);
 
-  const hasCustomLogo = logoUrl && logoUrl !== '/logo.png';
+  const hasCustomLogo = logoUrl && logoUrl !== "/logo.png";
 
   const content = (
     <div className={cn(classes.container, className)}>
       {/* Logo Image or Fallback Icon */}
       {hasCustomLogo ? (
-        <img 
-          src={logoUrl} 
-          alt={appName} 
-          className={cn(classes.image, 'object-contain')}
+        <img
+          src={logoUrl}
+          alt={appName}
+          className={cn(classes.image, "object-contain")}
           onError={(e) => {
             // Fallback to icon if image fails to load
             const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
+            target.style.display = "none";
             const fallback = target.nextElementSibling as HTMLElement;
             if (fallback) {
-              fallback.style.display = 'block';
+              fallback.style.display = "block";
             }
           }}
         />
       ) : null}
-      
+
       {/* Fallback Icon */}
-      <FallbackIcon 
+      <FallbackIcon
         className={cn(
           classes.fallback,
-          'text-primary',
-          hasCustomLogo ? 'hidden' : 'block'
-        )} 
+          "text-primary",
+          hasCustomLogo ? "hidden" : "block",
+        )}
       />
 
       {/* App Name Text */}
       {showText && (
         <>
           {/* Full name on larger screens */}
-          <span className={cn(
-            getTextLogoClasses(size, false),
-            'text-gray-900 hidden sm:inline'
-          )}>
+          <span
+            className={cn(
+              getTextLogoClasses(size, false),
+              "text-gray-900 hidden sm:inline",
+            )}
+          >
             {appName}
           </span>
-          
+
           {/* Abbreviated name on mobile */}
-          <span className={cn(
-            getTextLogoClasses(size, true),
-            'text-gray-900 sm:hidden'
-          )}>
+          <span
+            className={cn(
+              getTextLogoClasses(size, true),
+              "text-gray-900 sm:hidden",
+            )}
+          >
             {appName
-              .split(' ')
+              .split(" ")
               .map((word) => word[0])
-              .join('')}
+              .join("")}
           </span>
         </>
       )}
@@ -117,7 +121,7 @@ export const Logo: React.FC<ExtendedLogoProps> = ({
  * App Logo component with system configuration
  */
 interface AppLogoProps {
-  context?: 'nav' | 'auth' | 'footer' | 'mobile';
+  context?: "nav" | "auth" | "footer" | "mobile";
   className?: string;
   showText?: boolean;
   to?: string;

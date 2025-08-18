@@ -155,7 +155,12 @@ export const transformResponse = <T>(response: any): ApiResponse<T> => {
 
     // Avoid logging full response in production to prevent potential issues
     if (process.env.NODE_ENV === "development") {
-      console.log("Transform response - type:", typeof response, "hasData:", !!response);
+      console.log(
+        "Transform response - type:",
+        typeof response,
+        "hasData:",
+        !!response,
+      );
     }
 
     // If response is already in our expected format, return it as-is
@@ -170,7 +175,9 @@ export const transformResponse = <T>(response: any): ApiResponse<T> => {
 
     // Handle case where response might be a Response object (shouldn't happen but defensive)
     if (response instanceof Response) {
-      console.warn("Received Response object in transformResponse - this should not happen");
+      console.warn(
+        "Received Response object in transformResponse - this should not happen",
+      );
       return {
         success: false,
         data: {} as T,

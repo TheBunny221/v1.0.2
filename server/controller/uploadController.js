@@ -165,7 +165,8 @@ export const uploadLogo = asyncHandler(async (req, res) => {
     fs.unlinkSync(req.file.path);
     return res.status(400).json({
       success: false,
-      message: "Invalid file type. Please upload a valid image file (JPEG, PNG, GIF, WEBP, SVG).",
+      message:
+        "Invalid file type. Please upload a valid image file (JPEG, PNG, GIF, WEBP, SVG).",
       data: null,
     });
   }
@@ -251,7 +252,10 @@ export const getAttachment = asyncHandler(async (req, res) => {
       ".gif": "image/gif",
       ".pdf": "application/pdf",
     };
-    res.setHeader("Content-Type", contentTypes[ext] || "application/octet-stream");
+    res.setHeader(
+      "Content-Type",
+      contentTypes[ext] || "application/octet-stream",
+    );
   }
 
   // Stream the file

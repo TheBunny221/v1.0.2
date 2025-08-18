@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../store/hooks';
-import { Button } from './button';
-import { cn } from '../../lib/utils';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAppSelector } from "../../store/hooks";
+import { Button } from "./button";
+import { cn } from "../../lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,7 +19,7 @@ import {
   Wrench,
   Shield,
   UserCheck,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface SidebarNavItem {
   label: string;
@@ -139,7 +139,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       className={cn(
         "bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col h-full",
         isCollapsed ? "w-16" : "w-64",
-        className
+        className,
       )}
     >
       {/* Header with toggle button */}
@@ -172,17 +172,13 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
               isActiveRoute(item.path)
                 ? "bg-primary/10 text-primary border-r-2 border-primary"
                 : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-              isCollapsed ? "justify-center" : "justify-start"
+              isCollapsed ? "justify-center" : "justify-start",
             )}
             title={isCollapsed ? item.label : undefined}
           >
-            <span className="flex-shrink-0">
-              {item.icon}
-            </span>
+            <span className="flex-shrink-0">{item.icon}</span>
             {!isCollapsed && (
-              <span className="ml-3 truncate">
-                {item.label}
-              </span>
+              <span className="ml-3 truncate">{item.label}</span>
             )}
           </Link>
         ))}
@@ -191,10 +187,12 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       {/* User section at bottom */}
       {user && (
         <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-          <div className={cn(
-            "flex items-center",
-            isCollapsed ? "justify-center" : "justify-start"
-          )}>
+          <div
+            className={cn(
+              "flex items-center",
+              isCollapsed ? "justify-center" : "justify-start",
+            )}
+          >
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 {user.role === "ADMINISTRATOR" ? (
@@ -214,7 +212,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                   {user.fullName}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {user.role.replace('_', ' ').toLowerCase()}
+                  {user.role.replace("_", " ").toLowerCase()}
                 </p>
               </div>
             )}

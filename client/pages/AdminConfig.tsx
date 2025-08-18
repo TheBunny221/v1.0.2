@@ -142,14 +142,14 @@ const AdminConfig: React.FC = () => {
   );
   const [expandedWards, setExpandedWards] = useState<Set<string>>(new Set());
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoUploadMode, setLogoUploadMode] = useState<'url' | 'file'>('url');
+  const [logoUploadMode, setLogoUploadMode] = useState<"url" | "file">("url");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Reset logo upload state
   const resetLogoUploadState = () => {
     setLogoFile(null);
     setLogoPreview(null);
-    setLogoUploadMode('url');
+    setLogoUploadMode("url");
   };
 
   // API calls
@@ -592,11 +592,11 @@ const AdminConfig: React.FC = () => {
   const handleLogoFileUpload = async (file: File) => {
     try {
       const formData = new FormData();
-      formData.append('logo', file);
+      formData.append("logo", file);
 
       const token = localStorage.getItem("token");
-      const response = await fetch('/api/uploads/logo', {
-        method: 'POST',
+      const response = await fetch("/api/uploads/logo", {
+        method: "POST",
         headers: {
           ...(token && { Authorization: `Bearer ${token}` }),
         },
@@ -605,13 +605,13 @@ const AdminConfig: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Upload failed');
+        throw new Error(errorData.message || "Upload failed");
       }
 
       const data = await response.json();
 
       // Update the APP_LOGO_URL setting with the new file URL
-      const logoSetting = systemSettings.find(s => s.key === 'APP_LOGO_URL');
+      const logoSetting = systemSettings.find((s) => s.key === "APP_LOGO_URL");
       if (logoSetting) {
         const updatedSetting = { ...logoSetting, value: data.data.url };
         await handleSaveSystemSetting(updatedSetting);
@@ -1117,7 +1117,9 @@ const AdminConfig: React.FC = () => {
                   <div className="space-y-4">
                     {systemSettings
                       .filter((s) =>
-                        ["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(s.key),
+                        ["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(
+                          s.key,
+                        ),
                       )
                       .map((setting) => (
                         <div
@@ -1284,7 +1286,11 @@ const AdminConfig: React.FC = () => {
                     {systemSettings
                       .filter(
                         (s) =>
-                          !["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(s.key) &&
+                          ![
+                            "APP_NAME",
+                            "APP_LOGO_URL",
+                            "APP_LOGO_SIZE",
+                          ].includes(s.key) &&
                           !s.key.startsWith("COMPLAINT_ID"),
                       )
                       .map((setting) => (
@@ -1808,7 +1814,7 @@ const AdminConfig: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="settingValue">Value</Label>
-                {editingSetting.key === 'APP_LOGO_URL' ? (
+                {editingSetting.key === "APP_LOGO_URL" ? (
                   <div className="space-y-4">
                     {/* Mode Selection */}
                     <div className="flex gap-4">
@@ -1816,8 +1822,10 @@ const AdminConfig: React.FC = () => {
                         <input
                           type="radio"
                           value="url"
-                          checked={logoUploadMode === 'url'}
-                          onChange={(e) => setLogoUploadMode(e.target.value as 'url' | 'file')}
+                          checked={logoUploadMode === "url"}
+                          onChange={(e) =>
+                            setLogoUploadMode(e.target.value as "url" | "file")
+                          }
                           className="form-radio"
                         />
                         <span>URL</span>
@@ -1826,15 +1834,17 @@ const AdminConfig: React.FC = () => {
                         <input
                           type="radio"
                           value="file"
-                          checked={logoUploadMode === 'file'}
-                          onChange={(e) => setLogoUploadMode(e.target.value as 'url' | 'file')}
+                          checked={logoUploadMode === "file"}
+                          onChange={(e) =>
+                            setLogoUploadMode(e.target.value as "url" | "file")
+                          }
                           className="form-radio"
                         />
                         <span>Upload File</span>
                       </label>
                     </div>
 
-                    {logoUploadMode === 'url' ? (
+                    {logoUploadMode === "url" ? (
                       <Input
                         id="settingValue"
                         value={editingSetting.value}
@@ -1878,21 +1888,23 @@ const AdminConfig: React.FC = () => {
                     )}
 
                     {/* Current logo preview */}
-                    {editingSetting.value && editingSetting.value !== '/logo.png' && (
-                      <div className="mt-2">
-                        <Label>Current Logo:</Label>
-                        <img
-                          src={editingSetting.value}
-                          alt="Current logo"
-                          className="h-16 w-16 object-contain border rounded mt-1"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
+                    {editingSetting.value &&
+                      editingSetting.value !== "/logo.png" && (
+                        <div className="mt-2">
+                          <Label>Current Logo:</Label>
+                          <img
+                            src={editingSetting.value}
+                            alt="Current logo"
+                            className="h-16 w-16 object-contain border rounded mt-1"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
+                            }}
+                          />
+                        </div>
+                      )}
                   </div>
-                ) : editingSetting.key === 'APP_LOGO_SIZE' ? (
+                ) : editingSetting.key === "APP_LOGO_SIZE" ? (
                   <Select
                     value={editingSetting.value}
                     onValueChange={(value) =>
@@ -1976,14 +1988,18 @@ const AdminConfig: React.FC = () => {
                 </Button>
                 <Button
                   onClick={async () => {
-                    if (editingSetting.key === 'APP_LOGO_URL' && logoUploadMode === 'file' && logoFile) {
+                    if (
+                      editingSetting.key === "APP_LOGO_URL" &&
+                      logoUploadMode === "file" &&
+                      logoFile
+                    ) {
                       try {
                         setIsLoading(true);
                         await handleLogoFileUpload(logoFile);
                         // Reset file upload state
                         setLogoFile(null);
                         setLogoPreview(null);
-                        setLogoUploadMode('url');
+                        setLogoUploadMode("url");
                         setEditingSetting(null);
                         setIsSettingDialogOpen(false);
                         dispatch(
@@ -1998,7 +2014,8 @@ const AdminConfig: React.FC = () => {
                         dispatch(
                           showErrorToast(
                             "Upload Failed",
-                            error.message || "Failed to upload logo. Please try again.",
+                            error.message ||
+                              "Failed to upload logo. Please try again.",
                           ),
                         );
                       } finally {
@@ -2011,7 +2028,10 @@ const AdminConfig: React.FC = () => {
                   disabled={
                     isLoading ||
                     !editingSetting.key ||
-                    (logoUploadMode === 'file' && editingSetting.key === 'APP_LOGO_URL' ? !logoFile : !editingSetting.value)
+                    (logoUploadMode === "file" &&
+                    editingSetting.key === "APP_LOGO_URL"
+                      ? !logoFile
+                      : !editingSetting.value)
                   }
                 >
                   {isLoading ? (

@@ -230,7 +230,7 @@ router.post(
   protect,
   // Check for admin role
   (req, res, next) => {
-    if (req.user.role !== 'ADMINISTRATOR') {
+    if (req.user.role !== "ADMINISTRATOR") {
       return res.status(403).json({
         success: false,
         message: "Access denied. Administrator role required.",

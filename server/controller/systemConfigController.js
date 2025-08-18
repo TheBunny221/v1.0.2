@@ -18,12 +18,12 @@ export const getSystemSettings = asyncHandler(async (req, res) => {
 
   for (const setting of essentialSettings) {
     const exists = await prisma.systemConfig.findUnique({
-      where: { key: setting.key }
+      where: { key: setting.key },
     });
 
     if (!exists) {
       await prisma.systemConfig.create({
-        data: setting
+        data: setting,
       });
       console.log(`✅ Added missing system setting: ${setting.key}`);
     }
@@ -386,12 +386,12 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
 
   for (const setting of essentialSettings) {
     const exists = await prisma.systemConfig.findUnique({
-      where: { key: setting.key }
+      where: { key: setting.key },
     });
 
     if (!exists) {
       await prisma.systemConfig.create({
-        data: setting
+        data: setting,
       });
       console.log(`✅ Added missing system setting: ${setting.key}`);
     }
