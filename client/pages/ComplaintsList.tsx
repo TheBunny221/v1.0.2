@@ -38,6 +38,7 @@ import {
   Edit,
 } from "lucide-react";
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
+import QuickComplaintModal from "../components/QuickComplaintModal";
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
