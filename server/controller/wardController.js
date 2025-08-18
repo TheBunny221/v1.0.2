@@ -3,409 +3,210 @@ import { asyncHandler } from "../middleware/errorHandler.js";
 
 const prisma = getPrisma();
 
-// @desc    Get all wards
-// @route   GET /api/wards
-// @access  Public
-export const getWards = asyncHandler(async (req, res) => {
-  const wards = await prisma.ward.findMany({
-    include: {
-      subZones: true,
-      _count: {
-        select: {
-          users: true,
-          complaints: true,
-        },
-      },
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+// @desc    Get ward team members
+// @route   GET /api/wards/:wardId/team
+// @access  Private (Ward Officer, Administrator)
+export const getWardTeamMembers = asyncHandler(async (req, res) => {
+  const { wardId } = req.params;
+  
+  // Authorization check
+  const isAuthorized =
+    req.user.role === "ADMINISTRATOR" ||
+    (req.user.role === "WARD_OFFICER" && req.user.wardId === wardId);
 
-  res.status(200).json({
-    success: true,
-    message: "Wards retrieved successfully",
-    data: wards,
-  });
-});
-
-// @desc    Get ward by ID
-// @route   GET /api/wards/:id
-// @access  Public
-export const getWardById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  const ward = await prisma.ward.findUnique({
-    where: { id },
-    include: {
-      subZones: true,
-      users: {
-        select: {
-          id: true,
-          fullName: true,
-          role: true,
-          isActive: true,
-        },
-      },
-      _count: {
-        select: {
-          complaints: true,
-        },
-      },
-    },
-  });
-
-  if (!ward) {
-    return res.status(404).json({
+  if (!isAuthorized) {
+    return res.status(403).json({
       success: false,
-      message: "Ward not found",
+      message: "Not authorized to access team information for this ward",
       data: null,
     });
   }
 
-  res.status(200).json({
-    success: true,
-    message: "Ward retrieved successfully",
-    data: ward,
-  });
-});
-
-// @desc    Create new ward
-// @route   POST /api/wards
-// @access  Private (Admin only)
-export const createWard = asyncHandler(async (req, res) => {
-  const { name, description, isActive = true } = req.body;
-
-  // Check if ward with same name exists
-  const existingWard = await prisma.ward.findFirst({
-    where: { name },
-  });
-
-  if (existingWard) {
-    return res.status(400).json({
-      success: false,
-      message: "Ward with this name already exists",
-      data: null,
-    });
-  }
-
-  const ward = await prisma.ward.create({
-    data: {
-      name,
-      description,
-      isActive,
-    },
-    include: {
-      subZones: true,
-      _count: {
-        select: {
-          users: true,
-          complaints: true,
-        },
-      },
-    },
-  });
-
-  res.status(201).json({
-    success: true,
-    message: "Ward created successfully",
-    data: ward,
-  });
-});
-
-// @desc    Update ward
-// @route   PUT /api/wards/:id
-// @access  Private (Admin only)
-export const updateWard = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { name, description, isActive } = req.body;
-
-  const ward = await prisma.ward.findUnique({
-    where: { id },
-  });
-
-  if (!ward) {
-    return res.status(404).json({
-      success: false,
-      message: "Ward not found",
-      data: null,
-    });
-  }
-
-  // Check if another ward with same name exists
-  if (name && name !== ward.name) {
-    const existingWard = await prisma.ward.findFirst({
+  try {
+    // Get maintenance team members who could be assigned to this ward
+    const teamMembers = await prisma.user.findMany({
       where: {
-        name,
-        id: { not: id },
+        role: "MAINTENANCE_TEAM",
+        isActive: true,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phoneNumber: true,
+        department: true,
+        // Count active assignments
+        assignedComplaints: {
+          where: {
+            status: {
+              in: ["ASSIGNED", "IN_PROGRESS"],
+            },
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+      orderBy: {
+        fullName: "asc",
       },
     });
 
-    if (existingWard) {
-      return res.status(400).json({
-        success: false,
-        message: "Ward with this name already exists",
-        data: null,
-      });
-    }
-  }
+    // Transform data to include workload information
+    const formattedTeamMembers = teamMembers.map((member) => ({
+      id: member.id,
+      fullName: member.fullName,
+      email: member.email,
+      phoneNumber: member.phoneNumber,
+      department: member.department,
+      activeAssignments: member.assignedComplaints.length,
+      displayName: `${member.fullName} - ${member.department || 'General'}`,
+    }));
 
-  const updatedWard = await prisma.ward.update({
-    where: { id },
-    data: {
-      ...(name && { name }),
-      ...(description && { description }),
-      ...(isActive !== undefined && { isActive }),
-    },
-    include: {
-      subZones: true,
-      _count: {
-        select: {
-          users: true,
-          complaints: true,
-        },
+    res.status(200).json({
+      success: true,
+      message: "Team members retrieved successfully",
+      data: {
+        teamMembers: formattedTeamMembers,
+        total: formattedTeamMembers.length,
       },
-    },
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Ward updated successfully",
-    data: updatedWard,
-  });
-});
-
-// @desc    Delete ward
-// @route   DELETE /api/wards/:id
-// @access  Private (Admin only)
-export const deleteWard = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  const ward = await prisma.ward.findUnique({
-    where: { id },
-    include: {
-      users: true,
-      complaints: true,
-    },
-  });
-
-  if (!ward) {
-    return res.status(404).json({
+    });
+  } catch (error) {
+    console.error("Error fetching ward team members:", error);
+    res.status(500).json({
       success: false,
-      message: "Ward not found",
+      message: "Failed to fetch team members",
       data: null,
     });
   }
-
-  // Check if ward has associated users or complaints
-  if (ward.users.length > 0 || ward.complaints.length > 0) {
-    return res.status(400).json({
-      success: false,
-      message: "Cannot delete ward with associated users or complaints",
-      data: null,
-    });
-  }
-
-  await prisma.ward.delete({
-    where: { id },
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Ward deleted successfully",
-    data: null,
-  });
-});
-
-// @desc    Get complaints for a ward
-// @route   GET /api/wards/:id/complaints
-// @access  Private (Ward Officer, Admin)
-export const getWardComplaints = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { status, priority, page = 1, limit = 10 } = req.query;
-
-  const skip = (parseInt(page) - 1) * parseInt(limit);
-
-  const whereClause = {
-    wardId: id,
-    ...(status && { status }),
-    ...(priority && { priority }),
-  };
-
-  const complaints = await prisma.complaint.findMany({
-    where: whereClause,
-    include: {
-      submittedBy: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-        },
-      },
-      assignedTo: {
-        select: {
-          id: true,
-          fullName: true,
-          role: true,
-        },
-      },
-      attachments: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    skip,
-    take: parseInt(limit),
-  });
-
-  const total = await prisma.complaint.count({
-    where: whereClause,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Ward complaints retrieved successfully",
-    data: {
-      complaints,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit)),
-      },
-    },
-  });
 });
 
 // @desc    Get ward statistics
-// @route   GET /api/wards/:id/stats
-// @access  Private (Ward Officer, Admin)
+// @route   GET /api/wards/:wardId/stats
+// @access  Private (Ward Officer, Administrator)
 export const getWardStats = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { wardId } = req.params;
+  
+  // Authorization check
+  const isAuthorized =
+    req.user.role === "ADMINISTRATOR" ||
+    (req.user.role === "WARD_OFFICER" && req.user.wardId === wardId);
 
-  const stats = await prisma.ward.findUnique({
-    where: { id },
-    include: {
-      _count: {
-        select: {
-          users: true,
-          complaints: true,
-        },
-      },
-    },
-  });
-
-  if (!stats) {
-    return res.status(404).json({
+  if (!isAuthorized) {
+    return res.status(403).json({
       success: false,
-      message: "Ward not found",
+      message: "Not authorized to access statistics for this ward",
       data: null,
     });
   }
 
-  // Get complaint status breakdown
-  const complaintStats = await prisma.complaint.groupBy({
-    by: ["status"],
-    where: { wardId: id },
-    _count: true,
-  });
+  try {
+    // Get ward information
+    const ward = await prisma.ward.findUnique({
+      where: { id: wardId },
+      include: {
+        subZones: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
-  // Get priority breakdown
-  const priorityStats = await prisma.complaint.groupBy({
-    by: ["priority"],
-    where: { wardId: id },
-    _count: true,
-  });
+    if (!ward) {
+      return res.status(404).json({
+        success: false,
+        message: "Ward not found",
+        data: null,
+      });
+    }
 
-  res.status(200).json({
-    success: true,
-    message: "Ward statistics retrieved successfully",
-    data: {
-      totalUsers: stats._count.users,
-      totalComplaints: stats._count.complaints,
-      complaintsByStatus: complaintStats,
-      complaintsByPriority: priorityStats,
-    },
-  });
-});
+    // Get complaint statistics
+    const complaintStats = await prisma.complaint.groupBy({
+      by: ["status", "priority"],
+      where: {
+        wardId: wardId,
+      },
+      _count: {
+        id: true,
+      },
+    });
 
-// @desc    Get sub-zones for a ward
-// @route   GET /api/wards/:id/subzones
-// @access  Public
-export const getSubZones = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+    // Calculate summary statistics
+    const totalComplaints = await prisma.complaint.count({
+      where: { wardId: wardId },
+    });
 
-  const subZones = await prisma.subZone.findMany({
-    where: { wardId: id },
-    orderBy: { name: "asc" },
-  });
+    const resolvedComplaints = await prisma.complaint.count({
+      where: {
+        wardId: wardId,
+        status: {
+          in: ["RESOLVED", "CLOSED"],
+        },
+      },
+    });
 
-  res.status(200).json({
-    success: true,
-    message: "Sub-zones retrieved successfully",
-    data: subZones,
-  });
-});
+    const pendingComplaints = await prisma.complaint.count({
+      where: {
+        wardId: wardId,
+        status: {
+          in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"],
+        },
+      },
+    });
 
-// @desc    Create sub-zone
-// @route   POST /api/wards/:id/subzones
-// @access  Private (Admin only)
-export const createSubZone = asyncHandler(async (req, res) => {
-  const { id: wardId } = req.params;
-  const { name, description, isActive = true } = req.body;
+    // Group by area
+    const complaintsByArea = await prisma.complaint.groupBy({
+      by: ["area"],
+      where: {
+        wardId: wardId,
+      },
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+    });
 
-  const subZone = await prisma.subZone.create({
-    data: {
-      name,
-      description,
-      isActive,
-      wardId,
-    },
-  });
-
-  res.status(201).json({
-    success: true,
-    message: "Sub-zone created successfully",
-    data: subZone,
-  });
-});
-
-// @desc    Update sub-zone
-// @route   PUT /api/wards/:wardId/subzones/:id
-// @access  Private (Admin only)
-export const updateSubZone = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { name, description, isActive } = req.body;
-
-  const subZone = await prisma.subZone.update({
-    where: { id },
-    data: {
-      ...(name && { name }),
-      ...(description && { description }),
-      ...(isActive !== undefined && { isActive }),
-    },
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Sub-zone updated successfully",
-    data: subZone,
-  });
-});
-
-// @desc    Delete sub-zone
-// @route   DELETE /api/wards/:wardId/subzones/:id
-// @access  Private (Admin only)
-export const deleteSubZone = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  await prisma.subZone.delete({
-    where: { id },
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Sub-zone deleted successfully",
-    data: null,
-  });
+    res.status(200).json({
+      success: true,
+      message: "Ward statistics retrieved successfully",
+      data: {
+        ward: {
+          id: ward.id,
+          name: ward.name,
+          description: ward.description,
+          subZones: ward.subZones,
+        },
+        summary: {
+          totalComplaints,
+          resolvedComplaints,
+          pendingComplaints,
+          resolutionRate: totalComplaints > 0 ? 
+            Math.round((resolvedComplaints / totalComplaints) * 100) : 0,
+        },
+        complaintsByStatus: complaintStats.reduce((acc, stat) => {
+          const key = `${stat.status}_${stat.priority}`;
+          acc[key] = stat._count.id;
+          return acc;
+        }, {}),
+        complaintsByArea: complaintsByArea.map((area) => ({
+          area: area.area,
+          count: area._count.id,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching ward statistics:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch ward statistics",
+      data: null,
+    });
+  }
 });
