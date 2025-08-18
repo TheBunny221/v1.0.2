@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import {
+  useGetComplaintTypesQuery,
+  useCreateComplaintTypeMutation,
+  useUpdateComplaintTypeMutation,
+  useDeleteComplaintTypeMutation,
+} from "../store/api/complaintTypesApi";
+import {
   Card,
   CardContent,
   CardHeader,
@@ -42,6 +48,11 @@ import {
   TableRow,
 } from "../components/ui/table";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../components/ui/collapsible";
+import {
   Settings,
   MapPin,
   FileText,
@@ -57,6 +68,8 @@ import {
   Globe,
   Shield,
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 interface Ward {
@@ -100,22 +113,34 @@ const AdminConfig: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
 
+  // API queries
+  const {
+    data: complaintTypesResponse,
+    isLoading: complaintTypesLoading,
+    error: complaintTypesError,
+  } = useGetComplaintTypesQuery();
+  const [createComplaintType] = useCreateComplaintTypeMutation();
+  const [updateComplaintType] = useUpdateComplaintTypeMutation();
+  const [deleteComplaintType] = useDeleteComplaintTypeMutation();
+
   // State management
   const [wards, setWards] = useState<Ward[]>([]);
-  const [complaintTypes, setComplaintTypes] = useState<ComplaintType[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
   const [editingWard, setEditingWard] = useState<Ward | null>(null);
+  const [editingSubZone, setEditingSubZone] = useState<SubZone | null>(null);
   const [editingComplaintType, setEditingComplaintType] =
     useState<ComplaintType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [isWardDialogOpen, setIsWardDialogOpen] = useState(false);
+  const [isSubZoneDialogOpen, setIsSubZoneDialogOpen] = useState(false);
   const [isComplaintTypeDialogOpen, setIsComplaintTypeDialogOpen] =
     useState(false);
   const [isSettingDialogOpen, setIsSettingDialogOpen] = useState(false);
   const [editingSetting, setEditingSetting] = useState<SystemSetting | null>(
     null,
   );
+  const [expandedWards, setExpandedWards] = useState<Set<string>>(new Set());
 
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -237,15 +262,7 @@ const AdminConfig: React.FC = () => {
         setWards([]);
       }
 
-      // Load complaint types (public endpoint)
-      let typesResponse;
-      try {
-        typesResponse = await apiCall("/complaint-types");
-        setComplaintTypes(typesResponse.data || []);
-      } catch (error: any) {
-        console.error("Failed to load complaint types:", error);
-        setComplaintTypes([]);
-      }
+      // Complaint types are loaded via RTK Query hooks
 
       // Load system settings (admin-only endpoint)
       let settingsResponse;
@@ -358,6 +375,109 @@ const AdminConfig: React.FC = () => {
     }
   };
 
+  // Sub-Zone Management Functions
+  const handleSaveSubZone = async (subZone: SubZone) => {
+    setIsLoading(true);
+    try {
+      const subZoneData = {
+        name: subZone.name,
+        description: subZone.description,
+        isActive: subZone.isActive,
+      };
+
+      let response;
+      if (subZone.id && subZone.id !== "") {
+        // Update existing sub-zone
+        response = await apiCall(
+          `/wards/${subZone.wardId}/subzones/${subZone.id}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(subZoneData),
+          },
+        );
+      } else {
+        // Create new sub-zone
+        response = await apiCall(`/wards/${subZone.wardId}/subzones`, {
+          method: "POST",
+          body: JSON.stringify(subZoneData),
+        });
+      }
+
+      // Update wards state to include the new/updated sub-zone
+      setWards((prev) =>
+        prev.map((ward) => {
+          if (ward.id === subZone.wardId) {
+            const updatedSubZones = subZone.id
+              ? ward.subZones.map((sz) =>
+                  sz.id === subZone.id ? response.data : sz,
+                )
+              : [...ward.subZones, response.data];
+            return { ...ward, subZones: updatedSubZones };
+          }
+          return ward;
+        }),
+      );
+
+      setEditingSubZone(null);
+      setIsSubZoneDialogOpen(false);
+      dispatch(
+        showSuccessToast(
+          "Sub-Zone Saved",
+          `Sub-zone "${subZone.name}" has been saved successfully.`,
+        ),
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save sub-zone. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSubZone = async (wardId: string, subZoneId: string) => {
+    if (!confirm("Are you sure you want to delete this sub-zone?")) return;
+
+    setIsLoading(true);
+    try {
+      await apiCall(`/wards/${wardId}/subzones/${subZoneId}`, {
+        method: "DELETE",
+      });
+
+      // Update wards state to remove the deleted sub-zone
+      setWards((prev) =>
+        prev.map((ward) => {
+          if (ward.id === wardId) {
+            return {
+              ...ward,
+              subZones: ward.subZones.filter((sz) => sz.id !== subZoneId),
+            };
+          }
+          return ward;
+        }),
+      );
+
+      dispatch(
+        showSuccessToast(
+          "Sub-Zone Deleted",
+          "Sub-zone has been deleted successfully.",
+        ),
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Delete Failed",
+          error.message || "Failed to delete sub-zone. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Complaint Type Management Functions
   const handleSaveComplaintType = async (type: ComplaintType) => {
     setIsLoading(true);
@@ -370,25 +490,15 @@ const AdminConfig: React.FC = () => {
         isActive: type.isActive,
       };
 
-      let response;
       if (type.id && type.id !== "") {
         // Update existing type
-        response = await apiCall(`/complaint-types/${type.id}`, {
-          method: "PUT",
-          body: JSON.stringify(typeData),
-        });
-        setComplaintTypes((prev) =>
-          prev.map((t) =>
-            t.id === type.id ? { ...type, ...response.data } : t,
-          ),
-        );
+        await updateComplaintType({
+          id: type.id,
+          data: typeData,
+        }).unwrap();
       } else {
         // Create new type
-        response = await apiCall("/complaint-types", {
-          method: "POST",
-          body: JSON.stringify(typeData),
-        });
-        setComplaintTypes((prev) => [...prev, response.data]);
+        await createComplaintType(typeData).unwrap();
       }
 
       setEditingComplaintType(null);
@@ -417,8 +527,7 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await apiCall(`/complaint-types/${typeId}`, { method: "DELETE" });
-      setComplaintTypes((prev) => prev.filter((t) => t.id !== typeId));
+      await deleteComplaintType(typeId).unwrap();
 
       dispatch(
         showSuccessToast(
@@ -567,6 +676,18 @@ const AdminConfig: React.FC = () => {
     }
   };
 
+  const toggleWardExpansion = (wardId: string) => {
+    setExpandedWards((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(wardId)) {
+        newSet.delete(wardId);
+      } else {
+        newSet.add(wardId);
+      }
+      return newSet;
+    });
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -635,213 +756,71 @@ const AdminConfig: React.FC = () => {
                   <MapPin className="h-5 w-5 mr-2" />
                   Ward Management
                 </CardTitle>
-                <Dialog
-                  open={isWardDialogOpen}
-                  onOpenChange={setIsWardDialogOpen}
+                <Button
+                  onClick={() => {
+                    setEditingWard({
+                      id: "",
+                      name: "",
+                      description: "",
+                      isActive: true,
+                      subZones: [],
+                    });
+                    setIsWardDialogOpen(true);
+                  }}
                 >
-                  <DialogTrigger asChild>
-                    <Button
-                      onClick={() => {
-                        setEditingWard({
-                          id: "",
-                          name: "",
-                          description: "",
-                          isActive: true,
-                          subZones: [],
-                        });
-                        setIsWardDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Ward
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingWard?.id ? "Edit Ward" : "Add New Ward"}
-                      </DialogTitle>
-                    </DialogHeader>
-                    {editingWard && (
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="wardName">Ward Name</Label>
-                          <Input
-                            id="wardName"
-                            value={editingWard.name}
-                            onChange={(e) =>
-                              setEditingWard({
-                                ...editingWard,
-                                name: e.target.value,
-                              })
-                            }
-                            placeholder="Enter ward name"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="wardDescription">Description</Label>
-                          <Textarea
-                            id="wardDescription"
-                            value={editingWard.description}
-                            onChange={(e) =>
-                              setEditingWard({
-                                ...editingWard,
-                                description: e.target.value,
-                              })
-                            }
-                            placeholder="Enter ward description"
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setEditingWard(null)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={() => handleSaveWard(editingWard)}
-                            disabled={isLoading || !editingWard.name}
-                          >
-                            {isLoading ? (
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Save className="h-4 w-4 mr-2" />
-                            )}
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Ward
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ward Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Sub-Zones</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {wards.map((ward) => (
-                    <TableRow key={ward.id}>
-                      <TableCell className="font-medium">{ward.name}</TableCell>
-                      <TableCell>{ward.description}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {ward.subZones?.length || 0} zones
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            ward.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }
-                        >
-                          {ward.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingWard(ward)}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Edit Ward</DialogTitle>
-                              </DialogHeader>
-                              {editingWard && editingWard.id === ward.id && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label htmlFor="editWardName">
-                                      Ward Name
-                                    </Label>
-                                    <Input
-                                      id="editWardName"
-                                      value={editingWard.name}
-                                      onChange={(e) =>
-                                        setEditingWard({
-                                          ...editingWard,
-                                          name: e.target.value,
-                                        })
-                                      }
-                                      placeholder="Enter ward name"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="editWardDescription">
-                                      Description
-                                    </Label>
-                                    <Textarea
-                                      id="editWardDescription"
-                                      value={editingWard.description}
-                                      onChange={(e) =>
-                                        setEditingWard({
-                                          ...editingWard,
-                                          description: e.target.value,
-                                        })
-                                      }
-                                      placeholder="Enter ward description"
-                                    />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                      id="editWardActive"
-                                      checked={editingWard.isActive}
-                                      onCheckedChange={(checked) =>
-                                        setEditingWard({
-                                          ...editingWard,
-                                          isActive: !!checked,
-                                        })
-                                      }
-                                    />
-                                    <Label htmlFor="editWardActive">
-                                      Active
-                                    </Label>
-                                  </div>
-                                  <div className="flex justify-end space-x-2">
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => {
-                                        setEditingWard(null);
-                                        setIsWardDialogOpen(false);
-                                      }}
-                                    >
-                                      Cancel
-                                    </Button>
-                                    <Button
-                                      onClick={() =>
-                                        handleSaveWard(editingWard)
-                                      }
-                                      disabled={isLoading || !editingWard.name}
-                                    >
-                                      {isLoading ? (
-                                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                      ) : (
-                                        <Save className="h-4 w-4 mr-2" />
-                                      )}
-                                      Save
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
+              <div className="space-y-4">
+                {wards.map((ward) => (
+                  <div key={ward.id} className="border rounded-lg">
+                    <div className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleWardExpansion(ward.id)}
+                          >
+                            {expandedWards.has(ward.id) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <div>
+                            <h3 className="font-medium">{ward.name}</h3>
+                            <p className="text-sm text-gray-600">
+                              {ward.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary">
+                            {ward.subZones?.length || 0} zones
+                          </Badge>
+                          <Badge
+                            className={
+                              ward.isActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }
+                          >
+                            {ward.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingWard(ward);
+                              setIsWardDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -851,11 +830,88 @@ const AdminConfig: React.FC = () => {
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+
+                      {/* Sub-zones */}
+                      {expandedWards.has(ward.id) && (
+                        <div className="mt-4 pl-8 border-l-2 border-gray-200">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-medium text-sm">Sub-Zones</h4>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingSubZone({
+                                  id: "",
+                                  name: "",
+                                  wardId: ward.id,
+                                  description: "",
+                                  isActive: true,
+                                });
+                                setIsSubZoneDialogOpen(true);
+                              }}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Sub-Zone
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            {ward.subZones?.map((subZone) => (
+                              <div
+                                key={subZone.id}
+                                className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                              >
+                                <div>
+                                  <span className="text-sm font-medium">
+                                    {subZone.name}
+                                  </span>
+                                  <p className="text-xs text-gray-600">
+                                    {subZone.description}
+                                  </p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Badge
+                                    variant={
+                                      subZone.isActive ? "default" : "secondary"
+                                    }
+                                    className="text-xs"
+                                  >
+                                    {subZone.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingSubZone(subZone);
+                                      setIsSubZoneDialogOpen(true);
+                                    }}
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      handleDeleteSubZone(ward.id, subZone.id)
+                                    }
+                                    disabled={isLoading}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )) || (
+                              <p className="text-sm text-gray-500">
+                                No sub-zones defined
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -869,130 +925,22 @@ const AdminConfig: React.FC = () => {
                   <FileText className="h-5 w-5 mr-2" />
                   Complaint Type Management
                 </CardTitle>
-                <Dialog
-                  open={isComplaintTypeDialogOpen}
-                  onOpenChange={setIsComplaintTypeDialogOpen}
+                <Button
+                  onClick={() => {
+                    setEditingComplaintType({
+                      id: "",
+                      name: "",
+                      description: "",
+                      priority: "MEDIUM",
+                      slaHours: 48,
+                      isActive: true,
+                    });
+                    setIsComplaintTypeDialogOpen(true);
+                  }}
                 >
-                  <DialogTrigger asChild>
-                    <Button
-                      onClick={() => {
-                        setEditingComplaintType({
-                          id: "",
-                          name: "",
-                          description: "",
-                          priority: "MEDIUM",
-                          slaHours: 48,
-                          isActive: true,
-                        });
-                        setIsComplaintTypeDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Type
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingComplaintType?.id
-                          ? "Edit Complaint Type"
-                          : "Add New Complaint Type"}
-                      </DialogTitle>
-                    </DialogHeader>
-                    {editingComplaintType && (
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="typeName">Type Name</Label>
-                          <Input
-                            id="typeName"
-                            value={editingComplaintType.name}
-                            onChange={(e) =>
-                              setEditingComplaintType({
-                                ...editingComplaintType,
-                                name: e.target.value,
-                              })
-                            }
-                            placeholder="Enter complaint type name"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="typeDescription">Description</Label>
-                          <Textarea
-                            id="typeDescription"
-                            value={editingComplaintType.description}
-                            onChange={(e) =>
-                              setEditingComplaintType({
-                                ...editingComplaintType,
-                                description: e.target.value,
-                              })
-                            }
-                            placeholder="Enter type description"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="priority">Priority</Label>
-                          <Select
-                            value={editingComplaintType.priority}
-                            onValueChange={(
-                              value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
-                            ) =>
-                              setEditingComplaintType({
-                                ...editingComplaintType,
-                                priority: value,
-                              })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="LOW">Low</SelectItem>
-                              <SelectItem value="MEDIUM">Medium</SelectItem>
-                              <SelectItem value="HIGH">High</SelectItem>
-                              <SelectItem value="CRITICAL">Critical</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label htmlFor="slaHours">SLA Hours</Label>
-                          <Input
-                            id="slaHours"
-                            type="number"
-                            value={editingComplaintType.slaHours}
-                            onChange={(e) =>
-                              setEditingComplaintType({
-                                ...editingComplaintType,
-                                slaHours: parseInt(e.target.value),
-                              })
-                            }
-                            placeholder="Enter SLA hours"
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setEditingComplaintType(null)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              handleSaveComplaintType(editingComplaintType)
-                            }
-                            disabled={isLoading || !editingComplaintType.name}
-                          >
-                            {isLoading ? (
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Save className="h-4 w-4 mr-2" />
-                            )}
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Type
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -1008,193 +956,80 @@ const AdminConfig: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {complaintTypes.map((type) => (
-                    <TableRow key={type.id}>
-                      <TableCell className="font-medium">{type.name}</TableCell>
-                      <TableCell>{type.description}</TableCell>
-                      <TableCell>
-                        <Badge className={getPriorityColor(type.priority)}>
-                          {type.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{type.slaHours}h</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            type.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }
-                        >
-                          {type.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingComplaintType(type)}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Edit Complaint Type</DialogTitle>
-                              </DialogHeader>
-                              {editingComplaintType &&
-                                editingComplaintType.id === type.id && (
-                                  <div className="space-y-4">
-                                    <div>
-                                      <Label htmlFor="editTypeName">
-                                        Type Name
-                                      </Label>
-                                      <Input
-                                        id="editTypeName"
-                                        value={editingComplaintType.name}
-                                        onChange={(e) =>
-                                          setEditingComplaintType({
-                                            ...editingComplaintType,
-                                            name: e.target.value,
-                                          })
-                                        }
-                                        placeholder="Enter complaint type name"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="editTypeDescription">
-                                        Description
-                                      </Label>
-                                      <Textarea
-                                        id="editTypeDescription"
-                                        value={editingComplaintType.description}
-                                        onChange={(e) =>
-                                          setEditingComplaintType({
-                                            ...editingComplaintType,
-                                            description: e.target.value,
-                                          })
-                                        }
-                                        placeholder="Enter type description"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="editPriority">
-                                        Priority
-                                      </Label>
-                                      <Select
-                                        value={editingComplaintType.priority}
-                                        onValueChange={(
-                                          value:
-                                            | "LOW"
-                                            | "MEDIUM"
-                                            | "HIGH"
-                                            | "CRITICAL",
-                                        ) =>
-                                          setEditingComplaintType({
-                                            ...editingComplaintType,
-                                            priority: value,
-                                          })
-                                        }
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="LOW">
-                                            Low
-                                          </SelectItem>
-                                          <SelectItem value="MEDIUM">
-                                            Medium
-                                          </SelectItem>
-                                          <SelectItem value="HIGH">
-                                            High
-                                          </SelectItem>
-                                          <SelectItem value="CRITICAL">
-                                            Critical
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="editSlaHours">
-                                        SLA Hours
-                                      </Label>
-                                      <Input
-                                        id="editSlaHours"
-                                        type="number"
-                                        value={editingComplaintType.slaHours}
-                                        onChange={(e) =>
-                                          setEditingComplaintType({
-                                            ...editingComplaintType,
-                                            slaHours: parseInt(e.target.value),
-                                          })
-                                        }
-                                        placeholder="Enter SLA hours"
-                                      />
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        id="editTypeActive"
-                                        checked={editingComplaintType.isActive}
-                                        onCheckedChange={(checked) =>
-                                          setEditingComplaintType({
-                                            ...editingComplaintType,
-                                            isActive: !!checked,
-                                          })
-                                        }
-                                      />
-                                      <Label htmlFor="editTypeActive">
-                                        Active
-                                      </Label>
-                                    </div>
-                                    <div className="flex justify-end space-x-2">
-                                      <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                          setEditingComplaintType(null);
-                                          setIsComplaintTypeDialogOpen(false);
-                                        }}
-                                      >
-                                        Cancel
-                                      </Button>
-                                      <Button
-                                        onClick={() =>
-                                          handleSaveComplaintType(
-                                            editingComplaintType,
-                                          )
-                                        }
-                                        disabled={
-                                          isLoading ||
-                                          !editingComplaintType.name
-                                        }
-                                      >
-                                        {isLoading ? (
-                                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                        ) : (
-                                          <Save className="h-4 w-4 mr-2" />
-                                        )}
-                                        Save
-                                      </Button>
-                                    </div>
-                                  </div>
-                                )}
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteComplaintType(type.id)}
-                            disabled={isLoading}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                  {complaintTypesLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4">
+                        <RefreshCw className="h-4 w-4 animate-spin mx-auto mb-2" />
+                        Loading complaint types...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : complaintTypesError ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-4 text-red-600"
+                      >
+                        Failed to load complaint types. Please try again.
+                      </TableCell>
+                    </TableRow>
+                  ) : complaintTypesResponse?.data?.length ? (
+                    complaintTypesResponse.data.map((type) => (
+                      <TableRow key={type.id}>
+                        <TableCell className="font-medium">
+                          {type.name}
+                        </TableCell>
+                        <TableCell>{type.description}</TableCell>
+                        <TableCell>
+                          <Badge className={getPriorityColor(type.priority)}>
+                            {type.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{type.slaHours}h</TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              type.isActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }
+                          >
+                            {type.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingComplaintType(type);
+                                setIsComplaintTypeDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteComplaintType(type.id)}
+                              disabled={isLoading}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-4 text-gray-500"
+                      >
+                        No complaint types found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -1210,224 +1045,306 @@ const AdminConfig: React.FC = () => {
                   <Settings className="h-5 w-5 mr-2" />
                   System Settings
                 </CardTitle>
-                <Dialog
-                  open={isSettingDialogOpen}
-                  onOpenChange={setIsSettingDialogOpen}
+                <Button
+                  onClick={() => {
+                    setEditingSetting({
+                      key: "",
+                      value: "",
+                      description: "",
+                      type: "string",
+                    });
+                    setIsSettingDialogOpen(true);
+                  }}
                 >
-                  <DialogTrigger asChild>
-                    <Button
-                      onClick={() => {
-                        setEditingSetting({
-                          key: "",
-                          value: "",
-                          description: "",
-                          type: "string",
-                        });
-                        setIsSettingDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Setting
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingSetting?.key &&
-                        systemSettings.find((s) => s.key === editingSetting.key)
-                          ? "Edit System Setting"
-                          : "Add New System Setting"}
-                      </DialogTitle>
-                    </DialogHeader>
-                    {editingSetting && (
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="settingKey">Setting Key</Label>
-                          <Input
-                            id="settingKey"
-                            value={editingSetting.key}
-                            onChange={(e) =>
-                              setEditingSetting({
-                                ...editingSetting,
-                                key: e.target.value
-                                  .toUpperCase()
-                                  .replace(/[^A-Z0-9_]/g, "_"),
-                              })
-                            }
-                            placeholder="SETTING_KEY"
-                            disabled={
-                              !!systemSettings.find(
-                                (s) => s.key === editingSetting.key,
-                              )
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="settingValue">Value</Label>
-                          <Input
-                            id="settingValue"
-                            value={editingSetting.value}
-                            onChange={(e) =>
-                              setEditingSetting({
-                                ...editingSetting,
-                                value: e.target.value,
-                              })
-                            }
-                            placeholder="Setting value"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="settingDescription">
-                            Description
-                          </Label>
-                          <Textarea
-                            id="settingDescription"
-                            value={editingSetting.description}
-                            onChange={(e) =>
-                              setEditingSetting({
-                                ...editingSetting,
-                                description: e.target.value,
-                              })
-                            }
-                            placeholder="Setting description"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="settingType">Type</Label>
-                          <Select
-                            value={editingSetting.type}
-                            onValueChange={(
-                              value: "string" | "number" | "boolean" | "json",
-                            ) =>
-                              setEditingSetting({
-                                ...editingSetting,
-                                type: value,
-                              })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="string">String</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="boolean">Boolean</SelectItem>
-                              <SelectItem value="json">JSON</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setEditingSetting(null);
-                              setIsSettingDialogOpen(false);
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              handleSaveSystemSetting(editingSetting)
-                            }
-                            disabled={
-                              isLoading ||
-                              !editingSetting.key ||
-                              !editingSetting.value
-                            }
-                          >
-                            {isLoading ? (
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Save className="h-4 w-4 mr-2" />
-                            )}
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Setting
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {systemSettings.map((setting) => (
-                  <div key={setting.key} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <h3 className="font-medium">{setting.key}</h3>
-                        <p className="text-sm text-gray-600">
-                          {setting.description}
-                        </p>
+              <div className="space-y-8">
+                {/* Application Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Globe className="h-5 w-5 mr-2" />
+                    Application Settings
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter((s) =>
+                        ["APP_NAME", "APP_LOGO_URL"].includes(s.key),
+                      )
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Input
+                              type="text"
+                              value={setting.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) =>
+                                  prev.map((s) =>
+                                    s.key === setting.key
+                                      ? { ...s, value: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              onBlur={(e) =>
+                                handleUpdateSystemSetting(
+                                  setting.key,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={`Enter ${setting.type} value`}
+                              className="max-w-md"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Complaint ID Configuration */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Complaint ID Configuration
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter((s) => s.key.startsWith("COMPLAINT_ID"))
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Input
+                              type={
+                                setting.type === "number" ? "number" : "text"
+                              }
+                              value={setting.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) =>
+                                  prev.map((s) =>
+                                    s.key === setting.key
+                                      ? { ...s, value: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              onBlur={(e) =>
+                                handleUpdateSystemSetting(
+                                  setting.key,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={`Enter ${setting.type} value`}
+                              className="max-w-md"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <AlertTriangle className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-blue-900">
+                            Complaint ID Preview
+                          </h4>
+                          <p className="text-sm text-blue-700 mt-1">
+                            With current settings, new complaint IDs will look
+                            like:
+                            <span className="font-mono bg-white px-2 py-1 rounded border ml-2">
+                              {systemSettings.find(
+                                (s) => s.key === "COMPLAINT_ID_PREFIX",
+                              )?.value || "KSC"}
+                              {(
+                                parseInt(
+                                  systemSettings.find(
+                                    (s) =>
+                                      s.key === "COMPLAINT_ID_START_NUMBER",
+                                  )?.value,
+                                ) || 1
+                              )
+                                .toString()
+                                .padStart(
+                                  parseInt(
+                                    systemSettings.find(
+                                      (s) => s.key === "COMPLAINT_ID_LENGTH",
+                                    )?.value,
+                                  ) || 4,
+                                  "0",
+                                )}
+                            </span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">{setting.type}</Badge>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingSetting(setting);
-                            setIsSettingDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteSystemSetting(setting.key)}
-                          disabled={isLoading}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="mt-3">
-                      {setting.type === "boolean" ? (
-                        <Select
-                          value={setting.value}
-                          onValueChange={(value) =>
-                            handleUpdateSystemSetting(setting.key, value)
-                          }
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="true">True</SelectItem>
-                            <SelectItem value="false">False</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : setting.type === "json" ? (
-                        <Textarea
-                          value={setting.value}
-                          onChange={(e) =>
-                            handleUpdateSystemSetting(
-                              setting.key,
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Enter JSON value"
-                          rows={3}
-                        />
-                      ) : (
-                        <Input
-                          type={setting.type === "number" ? "number" : "text"}
-                          value={setting.value}
-                          onChange={(e) =>
-                            handleUpdateSystemSetting(
-                              setting.key,
-                              e.target.value,
-                            )
-                          }
-                          placeholder={`Enter ${setting.type} value`}
-                          className="max-w-md"
-                        />
-                      )}
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Other Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Settings className="h-5 w-5 mr-2" />
+                    Other Settings
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter(
+                        (s) =>
+                          !["APP_NAME", "APP_LOGO_URL"].includes(s.key) &&
+                          !s.key.startsWith("COMPLAINT_ID"),
+                      )
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  handleDeleteSystemSetting(setting.key)
+                                }
+                                disabled={isLoading}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            {setting.type === "boolean" ? (
+                              <Select
+                                value={setting.value}
+                                onValueChange={(value) =>
+                                  handleUpdateSystemSetting(setting.key, value)
+                                }
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="true">True</SelectItem>
+                                  <SelectItem value="false">False</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : setting.type === "json" ? (
+                              <Textarea
+                                value={setting.value}
+                                onChange={(e) =>
+                                  setSystemSettings((prev) =>
+                                    prev.map((s) =>
+                                      s.key === setting.key
+                                        ? { ...s, value: e.target.value }
+                                        : s,
+                                    ),
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  handleUpdateSystemSetting(
+                                    setting.key,
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Enter JSON value"
+                                rows={3}
+                              />
+                            ) : (
+                              <Input
+                                type={
+                                  setting.type === "number" ? "number" : "text"
+                                }
+                                value={setting.value}
+                                onChange={(e) =>
+                                  setSystemSettings((prev) =>
+                                    prev.map((s) =>
+                                      s.key === setting.key
+                                        ? { ...s, value: e.target.value }
+                                        : s,
+                                    ),
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  handleUpdateSystemSetting(
+                                    setting.key,
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={`Enter ${setting.type} value`}
+                                className="max-w-md"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1499,8 +1416,8 @@ const AdminConfig: React.FC = () => {
                   Email Templates
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Test Email Service
+                  <Mail className="h-4 w-4 mr-2" />
+                  Test Email
                 </Button>
               </CardContent>
             </Card>
@@ -1509,27 +1426,421 @@ const AdminConfig: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Globe className="h-5 w-5 mr-2" />
-                  Localization
+                  System Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Globe className="h-4 w-4 mr-2" />
-                  Manage Languages
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Translation Keys
-                </Button>
+                <div className="text-sm space-y-1">
+                  <p>
+                    <span className="font-medium">Version:</span> 1.0.0
+                  </p>
+                  <p>
+                    <span className="font-medium">Environment:</span> Production
+                  </p>
+                  <p>
+                    <span className="font-medium">Uptime:</span> 7 days
+                  </p>
+                </div>
                 <Button variant="outline" className="w-full justify-start">
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Sync Translations
+                  Refresh Data
                 </Button>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Ward Dialog */}
+      <Dialog open={isWardDialogOpen} onOpenChange={setIsWardDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingWard?.id ? "Edit Ward" : "Add New Ward"}
+            </DialogTitle>
+          </DialogHeader>
+          {editingWard && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="wardName">Ward Name</Label>
+                <Input
+                  id="wardName"
+                  value={editingWard.name}
+                  onChange={(e) =>
+                    setEditingWard({
+                      ...editingWard,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="Enter ward name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="wardDescription">Description</Label>
+                <Textarea
+                  id="wardDescription"
+                  value={editingWard.description}
+                  onChange={(e) =>
+                    setEditingWard({
+                      ...editingWard,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Enter ward description"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="wardActive"
+                  checked={editingWard.isActive}
+                  onCheckedChange={(checked) =>
+                    setEditingWard({
+                      ...editingWard,
+                      isActive: !!checked,
+                    })
+                  }
+                />
+                <Label htmlFor="wardActive">Active</Label>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingWard(null);
+                    setIsWardDialogOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleSaveWard(editingWard)}
+                  disabled={isLoading || !editingWard.name}
+                >
+                  {isLoading ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Sub-Zone Dialog */}
+      <Dialog open={isSubZoneDialogOpen} onOpenChange={setIsSubZoneDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSubZone?.id ? "Edit Sub-Zone" : "Add New Sub-Zone"}
+            </DialogTitle>
+          </DialogHeader>
+          {editingSubZone && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="subZoneName">Sub-Zone Name</Label>
+                <Input
+                  id="subZoneName"
+                  value={editingSubZone.name}
+                  onChange={(e) =>
+                    setEditingSubZone({
+                      ...editingSubZone,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="Enter sub-zone name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="subZoneDescription">Description</Label>
+                <Textarea
+                  id="subZoneDescription"
+                  value={editingSubZone.description}
+                  onChange={(e) =>
+                    setEditingSubZone({
+                      ...editingSubZone,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Enter sub-zone description"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="subZoneActive"
+                  checked={editingSubZone.isActive}
+                  onCheckedChange={(checked) =>
+                    setEditingSubZone({
+                      ...editingSubZone,
+                      isActive: !!checked,
+                    })
+                  }
+                />
+                <Label htmlFor="subZoneActive">Active</Label>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingSubZone(null);
+                    setIsSubZoneDialogOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleSaveSubZone(editingSubZone)}
+                  disabled={isLoading || !editingSubZone.name}
+                >
+                  {isLoading ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Complaint Type Dialog */}
+      <Dialog
+        open={isComplaintTypeDialogOpen}
+        onOpenChange={setIsComplaintTypeDialogOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingComplaintType?.id
+                ? "Edit Complaint Type"
+                : "Add New Complaint Type"}
+            </DialogTitle>
+          </DialogHeader>
+          {editingComplaintType && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="typeName">Type Name</Label>
+                <Input
+                  id="typeName"
+                  value={editingComplaintType.name}
+                  onChange={(e) =>
+                    setEditingComplaintType({
+                      ...editingComplaintType,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="Enter complaint type name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="typeDescription">Description</Label>
+                <Textarea
+                  id="typeDescription"
+                  value={editingComplaintType.description}
+                  onChange={(e) =>
+                    setEditingComplaintType({
+                      ...editingComplaintType,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Enter type description"
+                />
+              </div>
+              <div>
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  value={editingComplaintType.priority}
+                  onValueChange={(
+                    value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+                  ) =>
+                    setEditingComplaintType({
+                      ...editingComplaintType,
+                      priority: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LOW">Low</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="HIGH">High</SelectItem>
+                    <SelectItem value="CRITICAL">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="slaHours">SLA Hours</Label>
+                <Input
+                  id="slaHours"
+                  type="number"
+                  value={editingComplaintType.slaHours}
+                  onChange={(e) =>
+                    setEditingComplaintType({
+                      ...editingComplaintType,
+                      slaHours: parseInt(e.target.value),
+                    })
+                  }
+                  placeholder="Enter SLA hours"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="typeActive"
+                  checked={editingComplaintType.isActive}
+                  onCheckedChange={(checked) =>
+                    setEditingComplaintType({
+                      ...editingComplaintType,
+                      isActive: !!checked,
+                    })
+                  }
+                />
+                <Label htmlFor="typeActive">Active</Label>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingComplaintType(null);
+                    setIsComplaintTypeDialogOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleSaveComplaintType(editingComplaintType)}
+                  disabled={isLoading || !editingComplaintType.name}
+                >
+                  {isLoading ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* System Setting Dialog */}
+      <Dialog open={isSettingDialogOpen} onOpenChange={setIsSettingDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSetting?.key &&
+              systemSettings.find((s) => s.key === editingSetting.key)
+                ? "Edit System Setting"
+                : "Add New System Setting"}
+            </DialogTitle>
+          </DialogHeader>
+          {editingSetting && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="settingKey">Setting Key</Label>
+                <Input
+                  id="settingKey"
+                  value={editingSetting.key}
+                  onChange={(e) =>
+                    setEditingSetting({
+                      ...editingSetting,
+                      key: e.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9_]/g, "_"),
+                    })
+                  }
+                  placeholder="SETTING_KEY"
+                  disabled={
+                    !!systemSettings.find((s) => s.key === editingSetting.key)
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="settingValue">Value</Label>
+                <Input
+                  id="settingValue"
+                  value={editingSetting.value}
+                  onChange={(e) =>
+                    setEditingSetting({
+                      ...editingSetting,
+                      value: e.target.value,
+                    })
+                  }
+                  placeholder="Setting value"
+                />
+              </div>
+              <div>
+                <Label htmlFor="settingDescription">Description</Label>
+                <Textarea
+                  id="settingDescription"
+                  value={editingSetting.description}
+                  onChange={(e) =>
+                    setEditingSetting({
+                      ...editingSetting,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Setting description"
+                />
+              </div>
+              <div>
+                <Label htmlFor="settingType">Type</Label>
+                <Select
+                  value={editingSetting.type}
+                  onValueChange={(
+                    value: "string" | "number" | "boolean" | "json",
+                  ) =>
+                    setEditingSetting({
+                      ...editingSetting,
+                      type: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="string">String</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="boolean">Boolean</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingSetting(null);
+                    setIsSettingDialogOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleSaveSystemSetting(editingSetting)}
+                  disabled={
+                    isLoading || !editingSetting.key || !editingSetting.value
+                  }
+                >
+                  {isLoading ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

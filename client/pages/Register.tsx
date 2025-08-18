@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import {
   selectAuth,
   resetRegistrationState,
@@ -36,6 +37,7 @@ const Register: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { handleApiError } = useApiErrorHandler();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
+  const { appName, appLogoUrl } = useSystemConfig();
 
   // API hooks
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
@@ -196,11 +198,13 @@ const Register: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Shield className="h-12 w-12 text-blue-600 mr-3" />
+            {appLogoUrl && appLogoUrl !== "/logo.png" ? (
+              <img src={appLogoUrl} alt={appName} className="h-12 w-12 mr-3" />
+            ) : (
+              <Shield className="h-12 w-12 text-blue-600 mr-3" />
+            )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Cochin Smart City
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">{appName}</h1>
               <p className="text-gray-600">Create Your Account</p>
             </div>
           </div>

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { setCredentials, clearCredentials } from "../store/slices/authSlice";
 import { initializeLanguage } from "../store/slices/languageSlice";
 import { initializeTheme, setOnlineStatus } from "../store/slices/uiSlice";
@@ -25,6 +27,10 @@ interface AppInitializerProps {
 const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
+  const { appName } = useSystemConfig();
+
+  // Set document title
+  useDocumentTitle();
 
   // Get token from localStorage and check Redux state
   const token = localStorage.getItem("token");
@@ -208,7 +214,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-gray-700 mb-2">
-            Cochin Smart City
+            {appName}
           </h2>
           <p className="text-gray-600">Initializing application...</p>
         </div>

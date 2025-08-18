@@ -63,7 +63,8 @@ const ComplaintsList: React.FC = () => {
   const queryParams = useMemo(() => {
     const params: any = { page: 1, limit: 100 };
     if (statusFilter !== "all") params.status = statusFilter.toUpperCase();
-    if (priorityFilter !== "all") params.priority = priorityFilter.toUpperCase();
+    if (priorityFilter !== "all")
+      params.priority = priorityFilter.toUpperCase();
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
     return params;
   }, [statusFilter, priorityFilter, debouncedSearchTerm]);
@@ -76,7 +77,9 @@ const ComplaintsList: React.FC = () => {
     refetch,
   } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
-  const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints)
+    ? complaintsResponse.data.complaints
+    : [];
 
   // Cache complaints data when loaded
   useEffect(() => {
@@ -84,7 +87,6 @@ const ComplaintsList: React.FC = () => {
       cacheComplaintsList(complaints);
     }
   }, [complaints, cacheComplaintsList]);
-
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -191,10 +193,7 @@ const ComplaintsList: React.FC = () => {
                 <SelectItem value="CRITICAL">Critical</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              onClick={clearFilters}
-            >
+            <Button variant="outline" onClick={clearFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
             </Button>
@@ -233,7 +232,9 @@ const ComplaintsList: React.FC = () => {
               <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500 mb-2">No complaints found</p>
               <p className="text-sm text-gray-400">
-                {searchTerm || statusFilter !== "all" || priorityFilter !== "all"
+                {searchTerm ||
+                statusFilter !== "all" ||
+                priorityFilter !== "all"
                   ? "Try adjusting your filters or search terms"
                   : "Submit your first complaint to get started"}
               </p>
@@ -255,7 +256,7 @@ const ComplaintsList: React.FC = () => {
                 {filteredComplaints.map((complaint) => (
                   <TableRow key={complaint.id}>
                     <TableCell className="font-medium">
-                      #{complaint.id.slice(-6)}
+                      #{complaint.complaintId || complaint.id.slice(-6)}
                     </TableCell>
                     <TableCell>
                       <div className="max-w-xs">

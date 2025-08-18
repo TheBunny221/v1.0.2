@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import {
   Card,
   CardContent,
@@ -10,6 +11,8 @@ import {
 import { Shield, AlertTriangle, Home, LogIn } from "lucide-react";
 
 const Unauthorized: React.FC = () => {
+  const { appName } = useSystemConfig();
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
@@ -43,7 +46,7 @@ const Unauthorized: React.FC = () => {
           <div className="mt-8 pt-4 border-t">
             <div className="flex items-center justify-center space-x-2 text-gray-500">
               <Shield className="h-4 w-4" />
-              <span className="text-sm">Cochin Smart City E-Governance</span>
+              <span className="text-sm">{appName} E-Governance</span>
             </div>
           </div>
         </CardContent>

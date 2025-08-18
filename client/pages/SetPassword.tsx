@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { clearError, selectAuth } from "../store/slices/authSlice";
 import { useSetPasswordMutation } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
@@ -22,6 +23,7 @@ const SetPassword: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
+  const { appName } = useSystemConfig();
 
   const { error, isAuthenticated } = useAppSelector(selectAuth);
   const [setPasswordMutation, { isLoading }] = useSetPasswordMutation();
@@ -126,7 +128,8 @@ const SetPassword: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error?.data?.message || "Failed to set password. Please try again.",
+        description:
+          error?.data?.message || "Failed to set password. Please try again.",
         variant: "destructive",
       });
     }
@@ -162,7 +165,7 @@ const SetPassword: React.FC = () => {
             Set Your Password
           </h1>
           <p className="text-gray-600">
-            Create a secure password for your Cochin Smart City account
+            Create a secure password for your {appName} account
           </p>
         </div>
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   useGetComplaintsQuery,
   useGetComplaintStatisticsQuery,
@@ -49,10 +51,22 @@ import {
   ArrowUpRight,
   RefreshCw,
 } from "lucide-react";
+import FeedbackDialog from "../components/FeedbackDialog";
 
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const { complaintTypeOptions } = useComplaintTypes();
+
+  // Set document title
+  useDocumentTitle("Dashboard");
+
+  // Debug: Log authentication state
+  console.log("Authentication state:", {
+    user: !!user,
+    isAuthenticated,
+    userId: user?.id,
+  });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -73,7 +87,24 @@ const CitizenDashboard: React.FC = () => {
     refetch: refetchStats,
   } = useGetComplaintStatisticsQuery({}, { skip: !isAuthenticated || !user });
 
-  const complaints = Array.isArray(complaintsResponse?.data?.complaints) ? complaintsResponse.data.complaints : [];
+  // Debug: Log raw API responses
+  console.log("Raw API responses:", {
+    complaintsResponse,
+    statsResponse,
+    complaintsResponseKeys: complaintsResponse
+      ? Object.keys(complaintsResponse)
+      : null,
+    statsResponseKeys: statsResponse ? Object.keys(statsResponse) : null,
+  });
+
+  // Extract complaints from the actual API response structure
+  // Backend returns: { success: true, data: { complaints: [...], pagination: {...} } }
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints)
+    ? complaintsResponse.data.complaints
+    : [];
+
+  console.log("Extracted complaints:", complaints);
+  console.log("Complaints count:", complaints.length);
   const pagination = complaintsResponse?.data?.pagination || {
     currentPage: 1,
     totalPages: 1,
@@ -141,27 +172,81 @@ const CitizenDashboard: React.FC = () => {
 
   // Fetch complaints when user is available or filters change
   useEffect(() => {
+    // Debug: Log the actual data we're receiving
+    console.log("Dashboard data debug:", {
+      statsResponse: statsResponse?.data,
+      complaintsCount: complaints.length,
+      complaintStatuses: complaints.map((c) => c.status),
+      complaintsData: complaints.slice(0, 2), // Log first 2 complaints for inspection
+    });
+
     // Calculate dashboard statistics from complaints or use stats API
-    if (statsResponse?.data) {
+    if (statsResponse?.data?.stats) {
       // Use API stats if available
-      const stats = statsResponse.data;
+      const stats = statsResponse.data.stats;
+      const total = stats.total || 0;
+      const pending =
+        stats.byStatus?.REGISTERED || stats.byStatus?.registered || 0;
+      const inProgress =
+        stats.byStatus?.IN_PROGRESS || stats.byStatus?.in_progress || 0;
+      const resolved =
+        stats.byStatus?.RESOLVED || stats.byStatus?.resolved || 0;
+      const resolutionRate =
+        total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+      console.log("Using API stats:", {
+        stats,
+        total,
+        pending,
+        inProgress,
+        resolved,
+        resolutionRate,
+      });
+
       setDashboardStats({
-        total: stats.total,
-        pending: stats.byStatus?.REGISTERED || 0,
-        inProgress: stats.byStatus?.IN_PROGRESS || 0,
-        resolved: stats.byStatus?.RESOLVED || 0,
-        avgResolutionTime: stats.avgResolutionTime || 0,
+        total,
+        pending,
+        inProgress,
+        resolved,
+        avgResolutionTime: stats.avgResolutionTimeHours || 0,
+        resolutionRate,
       });
     } else {
       // Calculate from complaints list as fallback
       const total = complaints.length;
+
+      console.log(
+        "Fallback calculation - analyzing complaints:",
+        complaints.map((c) => ({
+          id: c.id,
+          status: c.status,
+          type: typeof c.status,
+        })),
+      );
+
       const pending = complaints.filter(
-        (c) => c.status === "REGISTERED",
+        (c) => c.status === "registered" || c.status === "REGISTERED",
       ).length;
       const inProgress = complaints.filter(
-        (c) => c.status === "IN_PROGRESS",
+        (c) => c.status === "in_progress" || c.status === "IN_PROGRESS",
       ).length;
-      const resolved = complaints.filter((c) => c.status === "RESOLVED").length;
+      const resolved = complaints.filter(
+        (c) =>
+          c.status === "resolved" ||
+          c.status === "RESOLVED" ||
+          c.status === "closed" ||
+          c.status === "CLOSED",
+      ).length;
+      const resolutionRate =
+        total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+      console.log("Using fallback calculation:", {
+        total,
+        pending,
+        inProgress,
+        resolved,
+        resolutionRate,
+      });
 
       setDashboardStats({
         total,
@@ -169,12 +254,14 @@ const CitizenDashboard: React.FC = () => {
         inProgress,
         resolved,
         avgResolutionTime: 0, // Will be calculated by backend stats API
+        resolutionRate,
       });
     }
   }, [complaints, statsResponse]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
       case "REGISTERED":
         return "bg-yellow-100 text-yellow-800";
       case "ASSIGNED":
@@ -207,11 +294,12 @@ const CitizenDashboard: React.FC = () => {
 
   const getComplaintTypeLabel = (type: string) => {
     // Convert type to readable format
-    return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    return type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const isResolved = (status: string) => {
-    return status === "RESOLVED" || status === "CLOSED";
+    const normalizedStatus = status.toUpperCase();
+    return normalizedStatus === "RESOLVED" || normalizedStatus === "CLOSED";
   };
 
   const recentComplaints = complaints.slice(0, 5);
@@ -412,19 +500,11 @@ const CitizenDashboard: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="WATER_SUPPLY">Water Supply</SelectItem>
-                  <SelectItem value="ELECTRICITY">Electricity</SelectItem>
-                  <SelectItem value="ROAD_REPAIR">Road Repair</SelectItem>
-                  <SelectItem value="GARBAGE_COLLECTION">
-                    Garbage Collection
-                  </SelectItem>
-                  <SelectItem value="STREET_LIGHTING">
-                    Street Lighting
-                  </SelectItem>
-                  <SelectItem value="SEWERAGE">Sewerage</SelectItem>
-                  <SelectItem value="PUBLIC_HEALTH">Public Health</SelectItem>
-                  <SelectItem value="TRAFFIC">Traffic</SelectItem>
-                  <SelectItem value="OTHERS">Others</SelectItem>
+                  {complaintTypeOptions.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -495,7 +575,7 @@ const CitizenDashboard: React.FC = () => {
                             {complaint.title}
                           </h4>
                           <p className="text-xs text-gray-500 mt-1">
-                            ID: {complaint.id}
+                            ID: {complaint.complaintId || complaint.id}
                           </p>
                         </div>
                         <Badge className={getStatusColor(complaint.status)}>

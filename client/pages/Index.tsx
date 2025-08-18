@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   createComplaint,
   ComplaintType,
@@ -51,6 +53,8 @@ const Index: React.FC = () => {
     (state) => state.language,
   );
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { appName } = useSystemConfig();
+  const { complaintTypeOptions } = useComplaintTypes();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -79,56 +83,31 @@ const Index: React.FC = () => {
     }
   }, [isAuthenticated, user]);
 
-  const problemTypes = [
-    {
-      key: "WATER_SUPPLY",
-      label: translations?.complaints?.types?.Water_Supply || "Water Supply",
-      icon: <Droplets className="h-4 w-4" />,
-    },
-    {
-      key: "ELECTRICITY",
-      label: translations?.complaints?.types?.Electricity || "Electricity",
-      icon: <Zap className="h-4 w-4" />,
-    },
-    {
-      key: "ROAD_REPAIR",
-      label: translations?.complaints?.types?.Road_Repair || "Road Repair",
-      icon: <Wrench className="h-4 w-4" />,
-    },
-    {
-      key: "GARBAGE_COLLECTION",
-      label:
-        translations?.complaints?.types?.Garbage_Collection ||
-        "Garbage Collection",
-      icon: <FileText className="h-4 w-4" />,
-    },
-    {
-      key: "STREET_LIGHTING",
-      label:
-        translations?.complaints?.types?.Street_Lighting || "Street Lighting",
-      icon: <Zap className="h-4 w-4" />,
-    },
-    {
-      key: "SEWERAGE",
-      label: translations?.complaints?.types?.Sewerage || "Sewerage",
-      icon: <Droplets className="h-4 w-4" />,
-    },
-    {
-      key: "PUBLIC_HEALTH",
-      label: translations?.complaints?.types?.Public_Health || "Public Health",
-      icon: <CheckCircle className="h-4 w-4" />,
-    },
-    {
-      key: "TRAFFIC",
-      label: translations?.complaints?.types?.Traffic || "Traffic",
-      icon: <AlertCircle className="h-4 w-4" />,
-    },
-    {
-      key: "OTHERS",
-      label: translations?.complaints?.types?.Others || "Others",
-      icon: <FileText className="h-4 w-4" />,
-    },
-  ];
+  // Icon mapping for different complaint types
+  const getIconForComplaintType = (type: string) => {
+    const iconMap: { [key: string]: React.ReactNode } = {
+      WATER_SUPPLY: <Droplets className="h-4 w-4" />,
+      ELECTRICITY: <Zap className="h-4 w-4" />,
+      ROAD_REPAIR: <Wrench className="h-4 w-4" />,
+      WASTE_MANAGEMENT: <FileText className="h-4 w-4" />,
+      GARBAGE_COLLECTION: <FileText className="h-4 w-4" />,
+      STREET_LIGHTING: <Zap className="h-4 w-4" />,
+      DRAINAGE: <Droplets className="h-4 w-4" />,
+      SEWERAGE: <Droplets className="h-4 w-4" />,
+      PUBLIC_TOILET: <CheckCircle className="h-4 w-4" />,
+      TREE_CUTTING: <Wrench className="h-4 w-4" />,
+      PUBLIC_HEALTH: <CheckCircle className="h-4 w-4" />,
+      TRAFFIC: <AlertCircle className="h-4 w-4" />,
+      OTHERS: <FileText className="h-4 w-4" />,
+    };
+    return iconMap[type] || <FileText className="h-4 w-4" />;
+  };
+
+  const problemTypes = complaintTypeOptions.map((type) => ({
+    key: type.value,
+    label: type.label,
+    icon: getIconForComplaintType(type.value),
+  }));
 
   const wards = [
     "Ward 1 - Central Zone",
@@ -264,12 +243,12 @@ const Index: React.FC = () => {
             <div className="flex items-center justify-center mb-4">
               <Shield className="h-12 w-12 text-primary mr-3" />
               <h1 className="text-4xl font-bold text-gray-900">
-                {translations?.nav?.home || "Cochin Smart City Portal"}
+                {translations?.nav?.home || `${appName} Portal`}
               </h1>
             </div>
             <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
               {translations?.guest?.guestSubmissionDescription ||
-                "Welcome to the Cochin Smart City Complaint Management System. Submit civic issues, track progress, and help build a better city together."}
+                `Welcome to the ${appName} Complaint Management System. Submit civic issues, track progress, and help build a better city together.`}
             </p>
 
             <div className="flex justify-center space-x-4 flex-wrap gap-4 mb-8">
@@ -751,7 +730,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "वास्तविक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
+                        ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
                         : currentLanguage === "ml"
                           ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
                           : "Monitor complaint progress in real time with instant updates"}
@@ -769,7 +748,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे लॉग करें"
                         : currentLanguage === "ml"
-                          ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ രേഖപ്പെടുത്തുക"
+                          ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ്റിനുള്ളിൽ പ്രശ്നങ്ങൾ ��േഖപ്പെടുത്തുക"
                           : "Log issues in under a minute with type, photo, and location"}
                     </div>
                   </div>

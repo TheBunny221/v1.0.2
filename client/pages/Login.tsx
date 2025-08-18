@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import {
   loginWithPassword,
   sendPasswordSetupEmail,
@@ -38,6 +40,10 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const { appName, appLogoUrl } = useSystemConfig();
+
+  // Set document title
+  useDocumentTitle("Login");
 
   const { isLoading, error, isAuthenticated, user } =
     useAppSelector(selectAuth);
@@ -116,7 +122,11 @@ const Login: React.FC = () => {
 
     try {
       // Request OTP first
-      await requestOTPLogin({ email: formData.email }).unwrap();
+      console.log("Requesting OTP for email:", formData.email);
+      const response = await requestOTPLogin({
+        email: formData.email,
+      }).unwrap();
+      console.log("OTP response:", response);
 
       // Open the unified OTP dialog
       openOtpFlow({
@@ -186,9 +196,14 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Cochin Smart City
-          </h1>
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            {appLogoUrl && appLogoUrl !== "/logo.png" ? (
+              <img src={appLogoUrl} alt={appName} className="h-12 w-12" />
+            ) : (
+              <Home className="h-12 w-12 text-blue-600" />
+            )}
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">{appName}</h1>
           <p className="text-gray-600">E-Governance Portal</p>
         </div>
 

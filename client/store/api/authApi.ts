@@ -1,4 +1,4 @@
-import { baseApi, ApiResponse, transformResponse } from "./baseApi";
+import { baseApi, ApiResponse } from "./baseApi";
 import type { User } from "../slices/authSlice";
 
 // API types
@@ -61,7 +61,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
-      transformResponse: transformResponse<LoginResponse>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -75,7 +75,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+      // Remove transformResponse to avoid response body conflicts
     }),
 
     // Verify OTP login
@@ -88,7 +88,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<LoginResponse>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -104,7 +104,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -118,7 +118,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<LoginResponse>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -132,7 +132,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
     }),
 
     // Send password setup email
@@ -145,7 +145,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
     }),
 
     // Set password
@@ -158,7 +158,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: { password },
       }),
-      transformResponse: transformResponse<LoginResponse>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -171,15 +171,25 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/change-password",
         method: "PUT",
         body: data,
+        headers: {
+          "Content-Type": "application/json",
+        },
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
+      onQueryStarted: async (data, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Change password error details:", error);
+        }
+      },
     }),
 
     // Get current user
     getCurrentUser: builder.query<ApiResponse<{ user: User }>, void>({
       query: () => "/auth/me",
-      transformResponse: transformResponse<{ user: User }>,
+      // Let RTK Query handle response naturally
       providesTags: ["Auth"],
     }),
 
@@ -193,7 +203,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<{ user: User }>,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth", "User"],
       // Optimistic update
       onQueryStarted: async (patch, { dispatch, queryFulfilled, getState }) => {
@@ -219,7 +229,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
 
@@ -229,7 +239,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/refresh",
         method: "POST",
       }),
-      transformResponse: transformResponse,
+      // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
     }),
   }),

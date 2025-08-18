@@ -283,7 +283,13 @@ const TaskDetails: React.FC = () => {
             <CardContent className="space-y-3">
               <div>
                 <p className="text-sm font-medium">Assigned By</p>
-                <p className="text-gray-600">{task.submittedBy}</p>
+                <p className="text-gray-600">
+                  {typeof task.submittedBy === "object" && task.submittedBy
+                    ? task.submittedBy.fullName ||
+                      task.submittedBy.name ||
+                      "Unknown"
+                    : task.submittedBy}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium">Contact Phone</p>

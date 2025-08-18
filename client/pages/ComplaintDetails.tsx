@@ -70,7 +70,6 @@ const ComplaintDetails: React.FC = () => {
     }
   }, [complaint, id, cacheComplaintDetails]);
 
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "REGISTERED":
@@ -196,18 +195,22 @@ const ComplaintDetails: React.FC = () => {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              Complaint #{complaint?.id?.slice(-6) || 'Unknown'}
+              Complaint #
+              {complaint?.complaintId || complaint?.id?.slice(-6) || "Unknown"}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge className={getStatusColor(complaint?.status || '')}>
-              {complaint?.status?.replace("_", " ") || 'Unknown'}
+            <Badge className={getStatusColor(complaint?.status || "")}>
+              {complaint?.status?.replace("_", " ") || "Unknown"}
             </Badge>
-            <Badge className={getPriorityColor(complaint?.priority || '')}>
-              {complaint?.priority || 'Unknown'} Priority
+            <Badge className={getPriorityColor(complaint?.priority || "")}>
+              {complaint?.priority || "Unknown"} Priority
             </Badge>
             <span className="text-sm text-gray-500">
-              Created {complaint?.submittedOn ? new Date(complaint.submittedOn).toLocaleDateString() : 'Unknown'}
+              Created{" "}
+              {complaint?.submittedOn
+                ? new Date(complaint.submittedOn).toLocaleDateString()
+                : "Unknown"}
             </span>
           </div>
         </div>
@@ -229,12 +232,14 @@ const ComplaintDetails: React.FC = () => {
               <div>
                 <h3 className="font-medium mb-2">Type</h3>
                 <p className="text-gray-600">
-                  {complaint?.type?.replace("_", " ") || 'Unknown Type'}
+                  {complaint?.type?.replace("_", " ") || "Unknown Type"}
                 </p>
               </div>
               <div>
                 <h3 className="font-medium mb-2">Description</h3>
-                <p className="text-gray-600">{complaint?.description || 'No description available'}</p>
+                <p className="text-gray-600">
+                  {complaint?.description || "No description available"}
+                </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -436,7 +441,12 @@ const ComplaintDetails: React.FC = () => {
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm font-medium">Assigned To</p>
-                  <p className="text-gray-600">{complaint.assignedTo}</p>
+                  <p className="text-gray-600">
+                    {typeof complaint.assignedTo === "object" &&
+                    complaint.assignedTo
+                      ? complaint.assignedTo.fullName
+                      : complaint.assignedTo}
+                  </p>
                 </div>
                 {complaint.deadline && (
                   <div>
@@ -467,7 +477,7 @@ const ComplaintDetails: React.FC = () => {
                       className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
-                        {attachment.mimeType?.startsWith('image/') ? (
+                        {attachment.mimeType?.startsWith("image/") ? (
                           <Image className="h-5 w-5 text-blue-500" />
                         ) : (
                           <FileText className="h-5 w-5 text-gray-500" />
@@ -477,8 +487,10 @@ const ComplaintDetails: React.FC = () => {
                             {attachment.originalName}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {(attachment.size / 1024).toFixed(1)} KB •{' '}
-                            {new Date(attachment.uploadedAt).toLocaleDateString()}
+                            {(attachment.size / 1024).toFixed(1)} KB •{" "}
+                            {new Date(
+                              attachment.uploadedAt,
+                            ).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -486,15 +498,17 @@ const ComplaintDetails: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(attachment.url, '_blank')}
+                          onClick={() => window.open(attachment.url, "_blank")}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
-                        {attachment.mimeType?.startsWith('image/') && (
+                        {attachment.mimeType?.startsWith("image/") && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(attachment.url, '_blank')}
+                            onClick={() =>
+                              window.open(attachment.url, "_blank")
+                            }
                           >
                             View
                           </Button>
