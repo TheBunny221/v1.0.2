@@ -6,13 +6,11 @@ import { cn } from "../../lib/utils";
 interface UnifiedLayoutProps {
   children: React.ReactNode;
   className?: string;
-  sidebarCollapsed?: boolean;
 }
 
 export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   children,
   className,
-  sidebarCollapsed = false,
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -22,7 +20,7 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
       <div className="flex pt-16">
         {/* Sidebar Navigation */}
         <div className="sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
-          <SimplifiedSidebarNav defaultCollapsed={sidebarCollapsed} />
+          <SimplifiedSidebarNav />
         </div>
         
         {/* Main Content */}
