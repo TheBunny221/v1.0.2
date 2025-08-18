@@ -553,6 +553,23 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* General Remarks */}
+          {complaint.remarks && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  General Remarks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-700 whitespace-pre-wrap">{complaint.remarks}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
         </div>
 
         {/* Right Column - Contact & Meta Info */}
