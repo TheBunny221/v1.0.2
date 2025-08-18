@@ -161,7 +161,7 @@ const App: React.FC = () => {
                               "WARD_OFFICER",
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
-                                        ]}
+                            ]}
                                       >
                                         <CreateComplaint />
                                       </RoleBasedRoute>
@@ -196,7 +196,7 @@ const App: React.FC = () => {
                               "WARD_OFFICER",
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
-                                        ]}
+                            ]}
                                       >
                                         <ComplaintDetails />
                                       </RoleBasedRoute>
@@ -255,7 +255,7 @@ const App: React.FC = () => {
                             allowedRoles={[
                               "WARD_OFFICER",
                               "MAINTENANCE_TEAM",
-                                        ]}
+                            ]}
                                       >
                                         <Messages />
                                       </RoleBasedRoute>
@@ -270,7 +270,7 @@ const App: React.FC = () => {
                             allowedRoles={[
                               "WARD_OFFICER",
                               "ADMINISTRATOR",
-                                        ]}
+                            ]}
                                       >
                                         <AdminReports />
                                       </RoleBasedRoute>
@@ -325,7 +325,7 @@ const App: React.FC = () => {
                             allowedRoles={[
                               "ADMINISTRATOR",
                               "WARD_OFFICER",
-                                        ]}
+                            ]}
                                       >
                                         <ReportsAnalytics />
                                       </RoleBasedRoute>
@@ -342,7 +342,7 @@ const App: React.FC = () => {
                               "WARD_OFFICER",
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
-                                        ]}
+                            ]}
                                       >
                                         <Profile />
                                       </RoleBasedRoute>
@@ -357,7 +357,7 @@ const App: React.FC = () => {
                               "WARD_OFFICER",
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
-                                        ]}
+                            ]}
                                       >
                                         <Settings />
                                       </RoleBasedRoute>
