@@ -59,6 +59,7 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = {
     profilePicture: /jpeg|jpg|png|gif/,
     complaintAttachment: /jpeg|jpg|png|gif|pdf|doc|docx/,
+    logo: /jpeg|jpg|png|gif|webp|svg/,
   };
 
   const fileExtension = path
