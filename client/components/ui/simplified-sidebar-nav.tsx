@@ -128,7 +128,7 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
       label: translations?.nav?.reportsAnalytics || "Reports Analytics",
       path: "/admin/reports-analytics",
       icon: <PieChart className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR"],
+      roles: ["ADMINISTRATOR", "WARD_OFFICER"],
     },
     {
       label: translations?.nav?.settings || "Settings",
