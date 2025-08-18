@@ -197,12 +197,15 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="flex items-center justify-center space-x-3 mb-2">
-            {appLogoUrl && appLogoUrl !== "/logo.png" ? (
-              <img src={appLogoUrl} alt={appName} className="h-12 w-12" />
-            ) : (
-              <Home className="h-12 w-12 text-blue-600" />
-            )}
+          <div className="mb-2">
+            <Logo
+              logoUrl={appLogoUrl}
+              appName={appName}
+              size={appLogoSize}
+              context="auth"
+              fallbackIcon={Home}
+              showText={false}
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">{appName}</h1>
           <p className="text-gray-600">E-Governance Portal</p>
