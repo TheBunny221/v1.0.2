@@ -1626,7 +1626,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="typeName">Type Name</Label>
                 <Input
                   id="typeName"
-                  value={editingComplaintType.name}
+                  value={editingComplaintType.name || ""}
                   onChange={(e) =>
                     setEditingComplaintType({
                       ...editingComplaintType,
@@ -1640,7 +1640,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="typeDescription">Description</Label>
                 <Textarea
                   id="typeDescription"
-                  value={editingComplaintType.description}
+                  value={editingComplaintType.description || ""}
                   onChange={(e) =>
                     setEditingComplaintType({
                       ...editingComplaintType,
