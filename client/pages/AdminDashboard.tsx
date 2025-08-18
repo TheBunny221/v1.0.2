@@ -142,7 +142,8 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between">
@@ -674,7 +675,8 @@ const AdminDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
