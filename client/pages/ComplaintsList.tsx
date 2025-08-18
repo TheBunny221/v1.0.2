@@ -66,8 +66,14 @@ const ComplaintsList: React.FC = () => {
     if (priorityFilter !== "all")
       params.priority = priorityFilter.toUpperCase();
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
+
+    // For MAINTENANCE_TEAM users, show only their own complaints
+    if (user?.role === "MAINTENANCE_TEAM") {
+      params.submittedById = user.id;
+    }
+
     return params;
-  }, [statusFilter, priorityFilter, debouncedSearchTerm]);
+  }, [statusFilter, priorityFilter, debouncedSearchTerm, user?.role, user?.id]);
 
   // Use RTK Query for better authentication handling
   const {
@@ -136,15 +142,21 @@ const ComplaintsList: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Complaints</h1>
-          <p className="text-gray-600">Manage and track all complaints</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {user?.role === "MAINTENANCE_TEAM" ? "My Complaints" : "Complaints"}
+          </h1>
+          <p className="text-gray-600">
+            {user?.role === "MAINTENANCE_TEAM"
+              ? "View and manage complaints you have submitted"
+              : "Manage and track all complaints"}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()}>
             <FileText className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          {user?.role === "CITIZEN" && (
+          {(user?.role === "CITIZEN" || user?.role === "MAINTENANCE_TEAM") && (
             <Link to="/complaints/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />

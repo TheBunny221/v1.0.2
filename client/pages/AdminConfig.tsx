@@ -1465,7 +1465,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="wardName">Ward Name</Label>
                 <Input
                   id="wardName"
-                  value={editingWard.name}
+                  value={editingWard.name || ""}
                   onChange={(e) =>
                     setEditingWard({
                       ...editingWard,
@@ -1479,7 +1479,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="wardDescription">Description</Label>
                 <Textarea
                   id="wardDescription"
-                  value={editingWard.description}
+                  value={editingWard.description || ""}
                   onChange={(e) =>
                     setEditingWard({
                       ...editingWard,
@@ -1543,7 +1543,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="subZoneName">Sub-Zone Name</Label>
                 <Input
                   id="subZoneName"
-                  value={editingSubZone.name}
+                  value={editingSubZone.name || ""}
                   onChange={(e) =>
                     setEditingSubZone({
                       ...editingSubZone,
@@ -1557,7 +1557,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="subZoneDescription">Description</Label>
                 <Textarea
                   id="subZoneDescription"
-                  value={editingSubZone.description}
+                  value={editingSubZone.description || ""}
                   onChange={(e) =>
                     setEditingSubZone({
                       ...editingSubZone,
@@ -1626,7 +1626,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="typeName">Type Name</Label>
                 <Input
                   id="typeName"
-                  value={editingComplaintType.name}
+                  value={editingComplaintType.name || ""}
                   onChange={(e) =>
                     setEditingComplaintType({
                       ...editingComplaintType,
@@ -1640,7 +1640,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="typeDescription">Description</Label>
                 <Textarea
                   id="typeDescription"
-                  value={editingComplaintType.description}
+                  value={editingComplaintType.description || ""}
                   onChange={(e) =>
                     setEditingComplaintType({
                       ...editingComplaintType,
@@ -1653,7 +1653,7 @@ const AdminConfig: React.FC = () => {
               <div>
                 <Label htmlFor="priority">Priority</Label>
                 <Select
-                  value={editingComplaintType.priority}
+                  value={editingComplaintType.priority || "MEDIUM"}
                   onValueChange={(
                     value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
                   ) =>
@@ -1679,11 +1679,11 @@ const AdminConfig: React.FC = () => {
                 <Input
                   id="slaHours"
                   type="number"
-                  value={editingComplaintType.slaHours}
+                  value={editingComplaintType.slaHours || ""}
                   onChange={(e) =>
                     setEditingComplaintType({
                       ...editingComplaintType,
-                      slaHours: parseInt(e.target.value),
+                      slaHours: parseInt(e.target.value) || 0,
                     })
                   }
                   placeholder="Enter SLA hours"
@@ -1746,7 +1746,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="settingKey">Setting Key</Label>
                 <Input
                   id="settingKey"
-                  value={editingSetting.key}
+                  value={editingSetting.key || ""}
                   onChange={(e) =>
                     setEditingSetting({
                       ...editingSetting,
@@ -1765,7 +1765,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="settingValue">Value</Label>
                 <Input
                   id="settingValue"
-                  value={editingSetting.value}
+                  value={editingSetting.value || ""}
                   onChange={(e) =>
                     setEditingSetting({
                       ...editingSetting,
@@ -1779,7 +1779,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="settingDescription">Description</Label>
                 <Textarea
                   id="settingDescription"
-                  value={editingSetting.description}
+                  value={editingSetting.description || ""}
                   onChange={(e) =>
                     setEditingSetting({
                       ...editingSetting,
@@ -1792,7 +1792,7 @@ const AdminConfig: React.FC = () => {
               <div>
                 <Label htmlFor="settingType">Type</Label>
                 <Select
-                  value={editingSetting.type}
+                  value={editingSetting.type || "string"}
                   onValueChange={(
                     value: "string" | "number" | "boolean" | "json",
                   ) =>

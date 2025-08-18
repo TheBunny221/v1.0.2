@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import {
-  useGetComplaintQuery,
-  useUpdateComplaintStatusMutation,
-} from "../store/api/complaintsApi";
-import { useDataManager, useStatusTracking } from "../hooks/useDataManager";
+import { useGetComplaintQuery } from "../store/api/complaintsApi";
+import { useDataManager } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import {
   Card,
@@ -15,8 +12,6 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Textarea } from "../components/ui/textarea";
-import { Label } from "../components/ui/label";
 import {
   Tabs,
   TabsContent,
@@ -37,18 +32,17 @@ import {
   Image,
   Download,
 } from "lucide-react";
+import jsPDF from "jspdf";
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
-  const [statusComment, setStatusComment] = useState("");
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
-  const { updateStatus: updateComplaintStatus } = useStatusTracking();
 
   // Use RTK Query to fetch complaint details
   const {
@@ -56,10 +50,6 @@ const ComplaintDetails: React.FC = () => {
     isLoading,
     error,
   } = useGetComplaintQuery(id!, { skip: !id || !isAuthenticated });
-
-  // Use RTK Query mutation for status updates
-  const [updateStatus, { isLoading: isUpdatingStatus }] =
-    useUpdateComplaintStatusMutation();
 
   const complaint = complaintResponse?.data?.complaint;
 
@@ -102,23 +92,227 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string) => {
-    if (id) {
-      try {
-        // Update via API
-        await updateStatus({
-          id,
-          status: newStatus as any,
-          remarks: statusComment,
-        }).unwrap();
 
-        // Update centralized store
-        updateComplaintStatus(id, newStatus, statusComment);
+  const handleExportDetails = () => {
+    if (!complaint) {
+      console.error("No complaint data available for export");
+      return;
+    }
 
-        setStatusComment("");
-      } catch (error) {
-        console.error("Failed to update status:", error);
+    try {
+      // Get current translations for the user's language
+      const t = translations || {};
+
+      // Create PDF document
+      const doc = new jsPDF();
+      let yPosition = 20;
+      const lineHeight = 10;
+      const sectionSpacing = 5;
+
+      // Helper function to add text with word wrapping
+      const addText = (text: string, fontSize = 10, isBold = false) => {
+        if (isBold) {
+          doc.setFont('helvetica', 'bold');
+        } else {
+          doc.setFont('helvetica', 'normal');
+        }
+        doc.setFontSize(fontSize);
+
+        // Simple word wrapping for long text
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        const maxWidth = pageWidth - (2 * margin);
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        lines.forEach((line: string) => {
+          if (yPosition > 280) { // Check if we need a new page
+            doc.addPage();
+            yPosition = 20;
+          }
+          doc.text(line, margin, yPosition);
+          yPosition += lineHeight;
+        });
+
+        return yPosition;
+      };
+
+      // Header
+      addText(t.common?.export || "Export Details", 16, true);
+      yPosition += sectionSpacing;
+
+      // Complaint Information Section
+      yPosition += sectionSpacing;
+      addText(t.complaints?.complaintId || "Complaint ID", 12, true);
+      addText(complaint.complaintId || complaint.id);
+      yPosition += sectionSpacing;
+
+      if (complaint.type) {
+        addText(t.complaints?.complaintType || "Complaint Type", 12, true);
+        addText(complaint.type);
+        yPosition += sectionSpacing;
       }
+
+      if (complaint.title) {
+        addText(t.complaints?.title || "Title", 12, true);
+        addText(complaint.title);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.description) {
+        addText(t.complaints?.description || "Description", 12, true);
+        addText(complaint.description);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.status) {
+        addText(t.complaints?.status || "Status", 12, true);
+        // Translate status if available
+        const statusKey = complaint.status.toLowerCase() as keyof typeof t.complaints;
+        const translatedStatus = t.complaints?.[statusKey] || complaint.status;
+        addText(translatedStatus);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.priority) {
+        addText(t.complaints?.priority || "Priority", 12, true);
+        // Translate priority if available
+        const priorityKey = complaint.priority.toLowerCase() as keyof typeof t.complaints;
+        const translatedPriority = t.complaints?.[priorityKey] || complaint.priority;
+        addText(translatedPriority);
+        yPosition += sectionSpacing;
+      }
+
+      // Location Information
+      yPosition += sectionSpacing;
+      addText(t.complaints?.locationDetails || "Location Details", 14, true);
+      yPosition += sectionSpacing;
+
+      if (complaint.ward?.name) {
+        addText(t.complaints?.ward || "Ward", 12, true);
+        addText(complaint.ward.name);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.area) {
+        addText(t.complaints?.area || "Area", 12, true);
+        addText(complaint.area);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.location) {
+        addText(t.complaints?.location || "Location", 12, true);
+        addText(complaint.location);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.address) {
+        addText(t.complaints?.address || "Address", 12, true);
+        addText(complaint.address);
+        yPosition += sectionSpacing;
+      }
+
+      // Contact Information
+      yPosition += sectionSpacing;
+      addText(t.forms?.contactInformation || "Contact Information", 14, true);
+      yPosition += sectionSpacing;
+
+      if (complaint.submittedBy?.fullName) {
+        addText(t.complaints?.submittedBy || "Submitted By", 12, true);
+        addText(complaint.submittedBy.fullName);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.mobile) {
+        addText(t.complaints?.mobile || "Mobile", 12, true);
+        addText(complaint.mobile);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.email) {
+        addText(t.auth?.email || "Email", 12, true);
+        addText(complaint.email);
+        yPosition += sectionSpacing;
+      }
+
+      // Dates
+      yPosition += sectionSpacing;
+      addText(t.common?.dates || "Important Dates", 14, true);
+      yPosition += sectionSpacing;
+
+      if (complaint.submittedOn) {
+        addText(t.complaints?.submittedDate || "Submitted Date", 12, true);
+        addText(new Date(complaint.submittedOn).toLocaleDateString());
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.lastUpdated) {
+        addText(t.complaints?.lastUpdated || "Last Updated", 12, true);
+        addText(new Date(complaint.lastUpdated).toLocaleDateString());
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.resolvedDate) {
+        addText(t.complaints?.resolvedDate || "Resolved Date", 12, true);
+        addText(new Date(complaint.resolvedDate).toLocaleDateString());
+        yPosition += sectionSpacing;
+      }
+
+      // Assignment Information
+      if (complaint.assignedTo?.fullName) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.assignedTo || "Assigned To", 12, true);
+        addText(complaint.assignedTo.fullName);
+        yPosition += sectionSpacing;
+      }
+
+      // Remarks and Feedback
+      if (complaint.remarks) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.remarks || "Remarks", 12, true);
+        addText(complaint.remarks);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.feedback) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.feedback || "Feedback", 12, true);
+        addText(complaint.feedback);
+        yPosition += sectionSpacing;
+      }
+
+      if (complaint.rating) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.rating || "Rating", 12, true);
+        addText(`${complaint.rating}/5`);
+        yPosition += sectionSpacing;
+      }
+
+      // Attachments
+      if (complaint.attachments && complaint.attachments.length > 0) {
+        yPosition += sectionSpacing;
+        addText(t.complaints?.attachments || "Attachments", 14, true);
+        yPosition += sectionSpacing;
+
+        complaint.attachments.forEach((attachment, index) => {
+          addText(`${index + 1}. ${attachment.originalName || attachment.fileName}`);
+        });
+        yPosition += sectionSpacing;
+      }
+
+      // Footer with export information
+      yPosition += sectionSpacing * 2;
+      addText(`${t.common?.export || "Exported"}: ${new Date().toLocaleString()}`, 8);
+      if (user?.fullName) {
+        addText(`${t.common?.by || "By"}: ${user.fullName}`, 8);
+      }
+
+      // Save PDF
+      const fileName = `complaint-${complaint.complaintId || complaint.id}-${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+
+      console.log("Complaint details exported as PDF successfully");
+    } catch (error) {
+      console.error("Failed to export complaint details as PDF:", error);
     }
   };
 
@@ -340,66 +534,6 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Status Update Form (for authorized users) */}
-          {(user?.role === "WARD_OFFICER" ||
-            user?.role === "MAINTENANCE_TEAM" ||
-            user?.role === "ADMINISTRATOR") && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Update Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="statusComment">Add Comment</Label>
-                  <Textarea
-                    id="statusComment"
-                    value={statusComment}
-                    onChange={(e) => setStatusComment(e.target.value)}
-                    placeholder="Add a status update or comment..."
-                    rows={3}
-                  />
-                </div>
-                <div className="flex space-x-2">
-                  {complaint.status === "REGISTERED" &&
-                    user?.role === "WARD_OFFICER" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("ASSIGNED")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Assigning..." : "Assign"}
-                      </Button>
-                    )}
-                  {complaint.status === "ASSIGNED" &&
-                    user?.role === "MAINTENANCE_TEAM" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("IN_PROGRESS")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Starting..." : "Start Work"}
-                      </Button>
-                    )}
-                  {complaint.status === "IN_PROGRESS" &&
-                    user?.role === "MAINTENANCE_TEAM" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("RESOLVED")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Resolving..." : "Mark Resolved"}
-                      </Button>
-                    )}
-                  {complaint.status === "RESOLVED" &&
-                    user?.role === "WARD_OFFICER" && (
-                      <Button
-                        onClick={() => handleStatusUpdate("CLOSED")}
-                        disabled={isUpdatingStatus}
-                      >
-                        {isUpdatingStatus ? "Closing..." : "Close Complaint"}
-                      </Button>
-                    )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* Right Column - Contact & Meta Info */}
@@ -546,13 +680,13 @@ const ComplaintDetails: React.FC = () => {
                   </Button>
                 )}
 
-              <Button variant="outline" className="w-full justify-start">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={handleExportDetails}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export Details
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Send Message
               </Button>
             </CardContent>
           </Card>
