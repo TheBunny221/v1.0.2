@@ -20,7 +20,12 @@ const QuickComplaintPage: React.FC = () => {
   };
 
   const handleClose = () => {
-    navigate(-1); // Go back to previous page
+    // Go back to previous page, or home if no history
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
   };
 
   return (
