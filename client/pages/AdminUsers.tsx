@@ -47,8 +47,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import {
-  useGetAllUsersQuery,
-  useGetUserStatsQuery,
+  useLazyGetAllUsersQuery,
+  useLazyGetUserStatsQuery,
   useActivateUserMutation,
   useDeactivateUserMutation,
   useDeleteUserMutation,
