@@ -325,6 +325,16 @@ const ComplaintsList: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Refresh data after successful submission
+          refetch();
+        }}
+      />
     </div>
   );
 };
