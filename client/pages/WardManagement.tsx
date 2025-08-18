@@ -184,10 +184,10 @@ const WardManagement: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Teams</p>
-                <p className="text-2xl font-bold">{wardStats.teams}</p>
+                <p className="text-sm font-medium text-gray-600">In Progress</p>
+                <p className="text-2xl font-bold text-orange-600">{wardStats.inProgress}</p>
               </div>
-              <Users className="h-8 w-8 text-purple-600" />
+              <Clock className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>
