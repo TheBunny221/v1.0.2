@@ -121,13 +121,26 @@ const AdminUsers: React.FC = () => {
   useEffect(() => {
     const fetchWards = async () => {
       try {
-        const response = await fetch('/api/wards');
+        const token = localStorage.getItem("token");
+        const response = await fetch('/api/wards', {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
         if (data.success) {
           setWards(data.data);
         }
       } catch (error) {
         console.error('Failed to fetch wards:', error);
+        // Set empty array as fallback so the component doesn't break
+        setWards([]);
       }
     };
     fetchWards();
