@@ -6,8 +6,21 @@ import {
   ComplaintType,
   Priority,
 } from "../store/slices/complaintsSlice";
-import { useGetWardsQuery } from "../store/api/guestApi";
+import {
+  submitGuestComplaint,
+  clearGuestData,
+  FileAttachment,
+} from "../store/slices/guestSlice";
+import {
+  useGetWardsQuery,
+  useVerifyGuestOtpMutation,
+} from "../store/api/guestApi";
+import {
+  selectAuth,
+  setCredentials,
+} from "../store/slices/authSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
+import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -90,16 +103,28 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const [captcha, setCaptcha] = useState("");
   const [captchaValue] = useState("A3X7M"); // Mock captcha
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
+  const [submissionMode, setSubmissionMode] = useState<"citizen" | "guest">(
+    isAuthenticated ? "citizen" : "guest"
+  );
+  const [otpCode, setOtpCode] = useState("");
+  const [complaintId, setComplaintId] = useState<string | null>(null);
+  const [showOtpInput, setShowOtpInput] = useState(false);
 
-  // Pre-fill user data if authenticated
+  const { toast } = useToast();
+  const [verifyGuestOtp] = useVerifyGuestOtpMutation();
+
+  // Pre-fill user data if authenticated and set submission mode
   useEffect(() => {
     if (isAuthenticated && user) {
+      setSubmissionMode("citizen");
       setFormData((prev) => ({
         ...prev,
         mobile: user.phoneNumber || "",
         email: user.email || "",
         ward: user.wardId || "",
       }));
+    } else {
+      setSubmissionMode("guest");
     }
   }, [isAuthenticated, user]);
 
@@ -200,62 +225,162 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       }
 
       try {
-        const complaintDataForAPI = {
-          title: `${formData.problemType} complaint`,
-          description: formData.description,
-          type: formData.problemType as ComplaintType,
-          priority: "MEDIUM" as Priority,
-          wardId: formData.ward,
-          area: formData.area,
-          landmark: formData.location,
-          address: formData.address,
-          coordinates: formData.coordinates
-            ? JSON.stringify(formData.coordinates)
-            : undefined,
-          contactName: isAuthenticated && user ? user.fullName : "Guest",
-          contactEmail:
-            formData.email || (isAuthenticated && user ? user.email : ""),
-          contactPhone: formData.mobile,
-          isAnonymous: !isAuthenticated,
-        };
+        if (submissionMode === "citizen" && isAuthenticated) {
+          // Citizen flow: Submit directly to authenticated API
+          const complaintData = {
+            title: `${formData.problemType} complaint`,
+            description: formData.description,
+            type: formData.problemType as ComplaintType,
+            priority: "MEDIUM" as Priority,
+            wardId: formData.ward,
+            area: formData.area,
+            landmark: formData.location,
+            address: formData.address,
+            coordinates: formData.coordinates,
+            contactName: user?.fullName || "",
+            contactEmail: formData.email,
+            contactPhone: formData.mobile,
+            isAnonymous: false,
+          };
 
-        const result = await dispatch(
-          createComplaint(complaintDataForAPI)
-        ).unwrap();
+          const result = await dispatch(createComplaint(complaintData)).unwrap();
 
-        dispatch(
-          showSuccessToast(
-            translations?.forms?.complaintSubmitted || "Complaint Submitted",
-            `${translations?.forms?.complaintSubmitted || "Complaint registered successfully"} ID: ${result.id}`
-          )
-        );
+          toast({
+            title: "Complaint Submitted Successfully!",
+            description: `Your complaint has been registered with ID: ${result.id}. You can track its progress from your dashboard.`,
+          });
 
-        // Reset form and call success callback
-        resetForm();
-        onSuccess?.(result.id);
-      } catch (error) {
-        dispatch(
-          showErrorToast(
-            translations?.forms?.complaintSubmissionError || "Submission Failed",
-            error instanceof Error
-              ? error.message
-              : translations?.forms?.complaintSubmissionError ||
-                  "Failed to submit complaint"
-          )
-        );
+          // Reset form and call success callback
+          resetForm();
+          onSuccess?.(result.id);
+        } else {
+          // Guest flow: Submit complaint and send OTP
+          const guestFormData = {
+            fullName: "Guest User",
+            email: formData.email,
+            phoneNumber: formData.mobile,
+            type: formData.problemType,
+            priority: "MEDIUM",
+            wardId: formData.ward,
+            area: formData.area,
+            landmark: formData.location,
+            address: formData.address,
+            description: formData.description,
+            coordinates: formData.coordinates,
+          };
+
+          // Convert files to FileAttachment format
+          const fileAttachments: FileAttachment[] = files.map((file, index) => ({
+            id: `file-${index}-${Date.now()}`,
+            file,
+          }));
+
+          const result = await dispatch(
+            submitGuestComplaint({
+              complaintData: guestFormData,
+              files: fileAttachments
+            })
+          ).unwrap();
+
+          if (result.complaintId && result.trackingNumber) {
+            setComplaintId(result.complaintId);
+            setShowOtpInput(true);
+            toast({
+              title: "Verification Code Sent",
+              description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
+            });
+          }
+        }
+      } catch (error: any) {
+        console.error("Complaint submission error:", error);
+        toast({
+          title: "Submission Failed",
+          description:
+            error.message || "Failed to submit complaint. Please try again.",
+          variant: "destructive",
+        });
       }
     },
     [
       captcha,
       captchaValue,
       formData,
+      submissionMode,
       isAuthenticated,
       user,
+      files,
       dispatch,
       translations,
+      toast,
       onSuccess,
     ]
   );
+
+  // Handle OTP verification and final submission
+  const handleVerifyOtp = useCallback(async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter a valid 6-digit verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!complaintId) {
+      toast({
+        title: "Error",
+        description: "Complaint ID not found. Please try submitting again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Use RTK Query mutation for OTP verification
+      const result = await verifyGuestOtp({
+        email: formData.email,
+        otpCode,
+        complaintId,
+        createAccount: true,
+      }).unwrap();
+
+      // Store auth token and user data if provided
+      if (result.data?.token && result.data?.user) {
+        dispatch(
+          setCredentials({
+            token: result.data.token,
+            user: result.data.user,
+          })
+        );
+        localStorage.setItem("token", result.data.token);
+      }
+
+      toast({
+        title: "Success!",
+        description: result.data?.isNewUser
+          ? "Your complaint has been verified and your citizen account has been created successfully!"
+          : "Your complaint has been verified and you've been logged in successfully!",
+      });
+
+      // Reset form and call success callback
+      resetForm();
+      setShowOtpInput(false);
+      setComplaintId(null);
+      setOtpCode("");
+      onSuccess?.(complaintId);
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description:
+          error?.data?.message ||
+          error?.message ||
+          "Invalid verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [otpCode, complaintId, formData.email, verifyGuestOtp, dispatch, toast, onSuccess]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -271,6 +396,9 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     });
     setFiles([]);
     setCaptcha("");
+    setOtpCode("");
+    setComplaintId(null);
+    setShowOtpInput(false);
   }, [isAuthenticated, user]);
 
   return (
@@ -597,22 +725,79 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               />
             </div>
 
+            {/* OTP Input Section for Guest Users */}
+            {showOtpInput && submissionMode === "guest" && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">
+                    Email Verification
+                  </h3>
+                  <div className="max-w-md mx-auto space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otpCode" className="text-center block">
+                        Enter Verification Code
+                      </Label>
+                      <Input
+                        id="otpCode"
+                        name="otpCode"
+                        type="text"
+                        placeholder="Enter 6-digit code"
+                        maxLength={6}
+                        className="text-center text-xl font-mono tracking-widest"
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        autoComplete="one-time-code"
+                      />
+                    </div>
+                    <div className="text-center text-sm text-gray-500">
+                      Code sent to: {formData.email}
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        className="flex-1"
+                        disabled={isLoading || otpCode.length !== 6}
+                      >
+                        Verify & Submit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowOtpInput(false);
+                          setOtpCode("");
+                          setComplaintId(null);
+                        }}
+                      >
+                        Back
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* Action Buttons */}
-            <div className="flex space-x-4 pt-4">
-              <Button
-                type="submit"
-                className="flex-1 md:flex-none"
-                disabled={isLoading}
-              >
-                {isLoading
-                  ? translations?.common?.loading || "Submitting..."
-                  : translations?.forms?.submitComplaint ||
-                    "Submit Complaint"}
-              </Button>
-              <Button type="button" variant="outline" onClick={resetForm}>
-                {translations?.forms?.resetForm || "Reset Form"}
-              </Button>
-            </div>
+            {!showOtpInput && (
+              <div className="flex space-x-4 pt-4">
+                <Button
+                  type="submit"
+                  className="flex-1 md:flex-none"
+                  disabled={isLoading}
+                >
+                  {isLoading
+                    ? translations?.common?.loading || "Submitting..."
+                    : submissionMode === "citizen"
+                    ? translations?.forms?.submitComplaint || "Submit Complaint"
+                    : "Submit & Send Verification"}
+                </Button>
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  {translations?.forms?.resetForm || "Reset Form"}
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
