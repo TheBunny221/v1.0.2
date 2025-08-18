@@ -22,31 +22,30 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Ultra-minimal base query wrapper - avoid all response body access
+// Absolute minimal base query - no response body access at all
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
+  // First attempt
+  let result = await baseQuery(args, api, extraOptions);
 
-  // Only handle 401s for logout - absolutely no response body access
+  // Handle 401 errors for re-authentication, but avoid ANY response body access
   if (result.error?.status === 401) {
-    try {
-      const endpoint = typeof args === "string" ? args : args.url;
-      const isAuthEndpoint = typeof endpoint === "string" &&
-        (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
+    // Check if this is an auth endpoint to avoid logout loops
+    const endpoint = typeof args === "string" ? args : args.url;
+    const isAuthEndpoint = typeof endpoint === "string" &&
+      (endpoint.includes("auth/login") || endpoint.includes("auth/register"));
 
-      if (!isAuthEndpoint) {
-        localStorage.removeItem("token");
-        api.dispatch(logout());
-      }
-    } catch (err) {
-      // Ignore any errors in logout handling to prevent cascading issues
-      console.warn("Error during logout handling:", err);
+    if (!isAuthEndpoint) {
+      // Clear token and logout without accessing response body
+      localStorage.removeItem("token");
+      api.dispatch(logout());
     }
   }
 
+  // Return the original result without any modifications
   return result;
 };
 
