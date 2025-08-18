@@ -130,6 +130,12 @@ export interface ApiResponse<T = any> {
   };
 }
 
+// Safe transform function that doesn't access response data
+export const safeTransformResponse = <T>(response: any): T => {
+  // Just return the response as-is to avoid any body consumption issues
+  return response;
+};
+
 // Helper for transforming API responses - defensive implementation
 export const transformResponse = <T>(response: any): ApiResponse<T> => {
   try {
