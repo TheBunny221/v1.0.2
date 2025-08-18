@@ -1801,17 +1801,103 @@ const AdminConfig: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="settingValue">Value</Label>
-                <Input
-                  id="settingValue"
-                  value={editingSetting.value}
-                  onChange={(e) =>
-                    setEditingSetting({
-                      ...editingSetting,
-                      value: e.target.value,
-                    })
-                  }
-                  placeholder="Setting value"
-                />
+                {editingSetting.key === 'APP_LOGO_URL' ? (
+                  <div className="space-y-4">
+                    {/* Mode Selection */}
+                    <div className="flex gap-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          value="url"
+                          checked={logoUploadMode === 'url'}
+                          onChange={(e) => setLogoUploadMode(e.target.value as 'url' | 'file')}
+                          className="form-radio"
+                        />
+                        <span>URL</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          value="file"
+                          checked={logoUploadMode === 'file'}
+                          onChange={(e) => setLogoUploadMode(e.target.value as 'url' | 'file')}
+                          className="form-radio"
+                        />
+                        <span>Upload File</span>
+                      </label>
+                    </div>
+
+                    {logoUploadMode === 'url' ? (
+                      <Input
+                        id="settingValue"
+                        value={editingSetting.value}
+                        onChange={(e) =>
+                          setEditingSetting({
+                            ...editingSetting,
+                            value: e.target.value,
+                          })
+                        }
+                        placeholder="Enter logo URL (e.g., https://example.com/logo.png)"
+                      />
+                    ) : (
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setLogoFile(file);
+                              // Create preview
+                              const reader = new FileReader();
+                              reader.onload = (e) => {
+                                setLogoPreview(e.target?.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                        />
+                        {logoPreview && (
+                          <div className="mt-2">
+                            <img
+                              src={logoPreview}
+                              alt="Logo preview"
+                              className="h-16 w-16 object-contain border rounded"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Current logo preview */}
+                    {editingSetting.value && editingSetting.value !== '/logo.png' && (
+                      <div className="mt-2">
+                        <Label>Current Logo:</Label>
+                        <img
+                          src={editingSetting.value}
+                          alt="Current logo"
+                          className="h-16 w-16 object-contain border rounded mt-1"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Input
+                    id="settingValue"
+                    value={editingSetting.value}
+                    onChange={(e) =>
+                      setEditingSetting({
+                        ...editingSetting,
+                        value: e.target.value,
+                      })
+                    }
+                    placeholder="Setting value"
+                  />
+                )}
               </div>
               <div>
                 <Label htmlFor="settingDescription">Description</Label>
