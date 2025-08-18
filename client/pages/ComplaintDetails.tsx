@@ -488,48 +488,65 @@ const ComplaintDetails: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {/* Mock status updates */}
-                <div className="border-l-4 border-blue-500 pl-4 py-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">Complaint Registered</p>
-                      <p className="text-sm text-gray-600">
-                        Your complaint has been successfully registered.
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(complaint.submittedOn).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
+                {/* Real status logs with remarks and comments */}
+                {complaint.statusLogs && complaint.statusLogs.length > 0 ? (
+                  complaint.statusLogs.map((log, index) => {
+                    const getStatusColor = (status) => {
+                      switch (status) {
+                        case "REGISTERED": return "border-blue-500";
+                        case "ASSIGNED": return "border-yellow-500";
+                        case "IN_PROGRESS": return "border-orange-500";
+                        case "RESOLVED": return "border-green-500";
+                        case "CLOSED": return "border-gray-500";
+                        default: return "border-gray-400";
+                      }
+                    };
 
-                {complaint.assignedOn && (
-                  <div className="border-l-4 border-yellow-500 pl-4 py-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">Complaint Assigned</p>
-                        <p className="text-sm text-gray-600">
-                          Assigned to maintenance team for resolution.
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {new Date(complaint.assignedOn).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                    const getStatusLabel = (status) => {
+                      switch (status) {
+                        case "REGISTERED": return "Complaint Registered";
+                        case "ASSIGNED": return "Complaint Assigned";
+                        case "IN_PROGRESS": return "Work in Progress";
+                        case "RESOLVED": return "Complaint Resolved";
+                        case "CLOSED": return "Complaint Closed";
+                        default: return `Status: ${status}`;
+                      }
+                    };
 
-                {complaint.status === "IN_PROGRESS" && (
-                  <div className="border-l-4 border-orange-500 pl-4 py-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">Work in Progress</p>
-                        <p className="text-sm text-gray-600">
-                          Our team is working on resolving this issue.
-                        </p>
+                    return (
+                      <div key={log.id || index} className={`border-l-4 ${getStatusColor(log.toStatus)} pl-4 py-2`}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium">{getStatusLabel(log.toStatus)}</p>
+                              {log.user && (
+                                <Badge variant="outline" className="text-xs">
+                                  {log.user.fullName} ({log.user.role})
+                                </Badge>
+                              )}
+                            </div>
+                            {log.comment && (
+                              <p className="text-sm text-gray-600 mb-1">
+                                <strong>Remarks:</strong> {log.comment}
+                              </p>
+                            )}
+                            {log.fromStatus && (
+                              <p className="text-xs text-gray-500">
+                                Status changed from <span className="font-medium">{log.fromStatus}</span> to <span className="font-medium">{log.toStatus}</span>
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-500 ml-4">
+                            {new Date(log.timestamp).toLocaleString()}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-xs text-gray-500">2 hours ago</span>
-                    </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No status updates available</p>
                   </div>
                 )}
               </div>
