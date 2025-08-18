@@ -96,6 +96,14 @@ const AdminUsers: React.FC = () => {
     }
   }, [searchParams]);
 
+  // Check authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
   // API queries
   const {
     data: usersResponse,
@@ -107,13 +115,17 @@ const AdminUsers: React.FC = () => {
     limit,
     role: roleFilter !== "all" ? roleFilter : undefined,
     status: statusFilter,
+  }, {
+    skip: !isAuthenticated, // Skip the query if not authenticated
   });
 
   const {
     data: statsResponse,
     isLoading: isLoadingStats,
     error: statsError,
-  } = useGetUserStatsQuery();
+  } = useGetUserStatsQuery(undefined, {
+    skip: !isAuthenticated, // Skip the query if not authenticated
+  });
 
   // Fetch wards for form dropdowns
   const [wards, setWards] = useState<Array<{id: string; name: string}>>([]);
