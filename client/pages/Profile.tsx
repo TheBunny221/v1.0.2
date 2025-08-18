@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
