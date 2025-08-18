@@ -130,16 +130,18 @@ const App: React.FC = () => {
                       <Route
                         path="/dashboard"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <RoleBasedDashboard />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <RoleBasedDashboard />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
@@ -147,66 +149,76 @@ const App: React.FC = () => {
                       <Route
                         path="/complaints"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <ComplaintsList />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <ComplaintsList />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/complaints/create"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <CreateComplaint />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <CreateComplaint />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/complaints/citizen-form"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["CITIZEN"]}
-                          >
-                            <UnifiedComplaintForm />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["CITIZEN"]}
+                            >
+                              <UnifiedComplaintForm />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/complaints/new"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={["CITIZEN"]}
-                          >
-                            <UnifiedComplaintForm />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["CITIZEN"]}
+                            >
+                              <UnifiedComplaintForm />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
                       <Route
                         path="/complaints/:id"
                         element={
-                          <RoleBasedRoute
-                            allowedRoles={[
-                              "CITIZEN",
-                              "WARD_OFFICER",
-                              "MAINTENANCE_TEAM",
-                              "ADMINISTRATOR",
-                            ]}
-                          >
-                            <ComplaintDetails />
-                          </RoleBasedRoute>
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <ComplaintDetails />
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
                         }
                       />
 
