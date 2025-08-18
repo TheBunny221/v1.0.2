@@ -202,6 +202,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const [submissionMode, setSubmissionMode] = useState<"citizen" | "guest">(
     isAuthenticated ? "citizen" : "guest",
   );
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   // OTP state
   const [otpCode, setOtpCode] = useState("");
