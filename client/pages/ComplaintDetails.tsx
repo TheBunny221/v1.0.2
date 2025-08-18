@@ -483,7 +483,7 @@ const ComplaintDetails: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2" />
-                Status Updates & Comments
+                {user?.role === "CITIZEN" ? "Status Updates" : "Status Updates & Comments"}
               </CardTitle>
             </CardHeader>
             <CardContent>
