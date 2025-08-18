@@ -175,6 +175,13 @@ const uiSlice = createSlice({
         localStorage.setItem("theme", "system");
       }
     },
+    initializeSidebar: (state) => {
+      // Initialize sidebar state from localStorage
+      const savedSidebarCollapsed = localStorage.getItem("sidebarCollapsed");
+      if (savedSidebarCollapsed !== null) {
+        state.isSidebarCollapsed = savedSidebarCollapsed === "true";
+      }
+    },
 
     // Network status
     setOnlineStatus: (state, action: PayloadAction<boolean>) => {
