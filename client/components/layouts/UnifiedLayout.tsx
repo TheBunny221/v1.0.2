@@ -18,8 +18,8 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
       <Navigation />
-      
-      <div className="flex">
+
+      <div className="flex pt-16">
         {/* Sidebar Navigation */}
         <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
           <SimplifiedSidebarNav defaultCollapsed={sidebarCollapsed} />
