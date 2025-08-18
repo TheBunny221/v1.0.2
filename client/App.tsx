@@ -115,9 +115,15 @@ const App: React.FC = () => {
                       />
                       <Route path="/unauthorized" element={<Unauthorized />} />
 
-                      {/* Protected and Public Routes */}
-                      {/* Home route */}
-                      <Route path="/" element={<Index />} />
+                      {/* Protected routes with unified layout */}
+                      <Route
+                        path="/"
+                        element={
+                          <UnifiedLayout>
+                            <Index />
+                          </UnifiedLayout>
+                        }
+                      />
 
                       {/* Dashboard routes - Unified role-based routing */}
                       <Route
