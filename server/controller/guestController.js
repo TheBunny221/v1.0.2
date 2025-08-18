@@ -883,6 +883,7 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
       key: {
         startsWith: "COMPLAINT_TYPE_",
       },
+      isActive: true, // Only show active complaint types for guests
     },
     orderBy: {
       key: "asc",
