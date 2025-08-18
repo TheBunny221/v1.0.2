@@ -373,7 +373,7 @@ export function SelectField<T extends FieldValues>({
             </FormControl>
             <SelectContent>
               {options.length === 0 ? (
-                <SelectItem value="" disabled>
+                <SelectItem value="no-options" disabled>
                   {emptyText}
                 </SelectItem>
               ) : (
