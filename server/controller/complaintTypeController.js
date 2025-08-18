@@ -137,6 +137,7 @@ export const createComplaintType = asyncHandler(async (req, res) => {
 export const updateComplaintType = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, description, priority, slaHours, isActive } = req.body;
+  console.log(`Updating complaint type ${id} with body:`, req.body);
   const key = `COMPLAINT_TYPE_${id}`;
 
   const existingType = await prisma.systemConfig.findUnique({
