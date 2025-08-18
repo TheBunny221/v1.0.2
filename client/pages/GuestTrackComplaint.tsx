@@ -30,6 +30,7 @@ const GuestTrackComplaint: React.FC = () => {
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
