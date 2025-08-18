@@ -66,8 +66,14 @@ const ComplaintsList: React.FC = () => {
     if (priorityFilter !== "all")
       params.priority = priorityFilter.toUpperCase();
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
+
+    // For MAINTENANCE_TEAM users, show only their own complaints
+    if (user?.role === "MAINTENANCE_TEAM") {
+      params.submittedById = user.id;
+    }
+
     return params;
-  }, [statusFilter, priorityFilter, debouncedSearchTerm]);
+  }, [statusFilter, priorityFilter, debouncedSearchTerm, user?.role, user?.id]);
 
   // Use RTK Query for better authentication handling
   const {
