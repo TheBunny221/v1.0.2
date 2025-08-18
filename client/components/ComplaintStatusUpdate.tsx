@@ -201,11 +201,22 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Unassigned</SelectItem>
-                  {teamMembers.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.name}
+                  {teamLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading team members...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    teamMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        <div className="flex justify-between items-center w-full">
+                          <span>{member.displayName}</span>
+                          <span className="text-xs text-gray-500">
+                            ({member.activeAssignments} active)
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
