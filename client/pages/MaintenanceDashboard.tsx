@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   fetchComplaints,
   updateComplaintStatus,
@@ -133,7 +132,6 @@ const MaintenanceDashboard: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-lg p-6 text-white">
@@ -568,7 +566,6 @@ const MaintenanceDashboard: React.FC = () => {
         </TabsContent>
       </Tabs>
       </div>
-    </DashboardLayout>
   );
 };
 
