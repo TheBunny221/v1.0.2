@@ -145,6 +145,13 @@ const AdminConfig: React.FC = () => {
   const [logoUploadMode, setLogoUploadMode] = useState<'url' | 'file'>('url');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
+  // Reset logo upload state
+  const resetLogoUploadState = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setLogoUploadMode('url');
+  };
+
   // API calls
   const apiCall = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("token");
