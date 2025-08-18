@@ -49,7 +49,20 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       landmark,
       address,
       coordinates,
+      captchaId,
+      captchaText,
     } = req.body;
+
+    // Verify CAPTCHA for guest complaint submissions with attachments
+    try {
+      await verifyCaptchaForComplaint(captchaId, captchaText);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || "CAPTCHA verification failed",
+        data: null,
+      });
+    }
 
     const attachments = req.files || [];
 
