@@ -8,6 +8,7 @@ import {
   ComplaintType,
   Priority,
 } from "../store/slices/complaintsSlice";
+import { useGetWardsQuery } from "../store/api/guestApi";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -56,6 +57,8 @@ const Index: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName } = useSystemConfig();
   const { complaintTypeOptions } = useComplaintTypes();
+  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
+  const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Form state
   const [formData, setFormData] = useState({
@@ -112,13 +115,7 @@ const Index: React.FC = () => {
     icon: getIconForComplaintType(type.value),
   }));
 
-  const wards = [
-    "Ward 1 - Central Zone",
-    "Ward 2 - North Zone",
-    "Ward 3 - South Zone",
-    "Ward 4 - East Zone",
-    "Ward 5 - West Zone",
-  ];
+  // Wards are now loaded from API - see above
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -458,11 +455,21 @@ const Index: React.FC = () => {
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {wards.map((ward) => (
-                            <SelectItem key={ward} value={ward}>
-                              {ward}
+                          {wardsLoading ? (
+                            <SelectItem value="loading" disabled>
+                              Loading wards...
                             </SelectItem>
-                          ))}
+                          ) : wardsError ? (
+                            <SelectItem value="error" disabled>
+                              Error loading wards
+                            </SelectItem>
+                          ) : (
+                            wards.map((ward) => (
+                              <SelectItem key={ward.id} value={ward.id}>
+                                {ward.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -775,7 +782,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत ���ी प्रगति की निगरानी करें"
                         : currentLanguage === "ml"
-                          ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
+                          ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക��കുക"
                           : "Monitor complaint progress in real time with instant updates"}
                     </div>
                   </div>
