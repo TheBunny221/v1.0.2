@@ -62,22 +62,7 @@ const Index: React.FC = () => {
   const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Form state
-  const [formData, setFormData] = useState({
-    mobile: "",
-    email: "",
-    problemType: "",
-    ward: "",
-    area: "",
-    location: "",
-    address: "",
-    description: "",
-    coordinates: null as { latitude: number; longitude: number } | null,
-  });
-  const [files, setFiles] = useState<File[]>([]);
-  const [captcha, setCaptcha] = useState("");
-  const [captchaValue] = useState("A3X7M"); // Mock captcha
   const [isFormExpanded, setIsFormExpanded] = useState(false);
-  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   // Pre-fill user data if authenticated
   useEffect(() => {
