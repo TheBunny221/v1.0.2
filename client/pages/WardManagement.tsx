@@ -447,31 +447,6 @@ const WardManagement: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Settings className="h-5 w-5 mr-2" />
-            Ward Management Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="w-full">
-              Assign Tasks
-            </Button>
-            <Button variant="outline" className="w-full">
-              Generate Report
-            </Button>
-            <Button variant="outline" className="w-full">
-              Team Schedule
-            </Button>
-            <Button variant="outline" className="w-full">
-              Resource Planning
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
