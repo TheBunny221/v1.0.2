@@ -103,7 +103,7 @@ const initialState: UIState = {
   loadingText: undefined,
   isOnline: navigator.onLine,
   isSidebarOpen: true,
-  isSidebarCollapsed: false,
+  isSidebarCollapsed: localStorage.getItem("sidebarCollapsed") === "true" || false,
   theme:
     (localStorage.getItem("theme") as "light" | "dark" | "system") || "system",
   modals: [],
