@@ -576,15 +576,7 @@ const AdminConfig: React.FC = () => {
     } catch (error: any) {
       console.error('Error toggling complaint type status:', error);
 
-      // Handle RTK Query error properly
-      let errorMessage = "Failed to update complaint type status. Please try again.";
-      if (error?.data?.message) {
-        errorMessage = error.data.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.status) {
-        errorMessage = `Request failed with status ${error.status}`;
-      }
+      const errorMessage = getApiErrorMessage(error);
 
       dispatch(
         showErrorToast(
