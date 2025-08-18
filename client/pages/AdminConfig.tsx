@@ -1239,7 +1239,7 @@ const AdminConfig: React.FC = () => {
                     {systemSettings
                       .filter(
                         (s) =>
-                          !["APP_NAME", "APP_LOGO_URL"].includes(s.key) &&
+                          !["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(s.key) &&
                           !s.key.startsWith("COMPLAINT_ID"),
                       )
                       .map((setting) => (
