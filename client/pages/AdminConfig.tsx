@@ -1746,7 +1746,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="settingKey">Setting Key</Label>
                 <Input
                   id="settingKey"
-                  value={editingSetting.key}
+                  value={editingSetting.key || ""}
                   onChange={(e) =>
                     setEditingSetting({
                       ...editingSetting,
@@ -1765,7 +1765,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="settingValue">Value</Label>
                 <Input
                   id="settingValue"
-                  value={editingSetting.value}
+                  value={editingSetting.value || ""}
                   onChange={(e) =>
                     setEditingSetting({
                       ...editingSetting,
@@ -1779,7 +1779,7 @@ const AdminConfig: React.FC = () => {
                 <Label htmlFor="settingDescription">Description</Label>
                 <Textarea
                   id="settingDescription"
-                  value={editingSetting.description}
+                  value={editingSetting.description || ""}
                   onChange={(e) =>
                     setEditingSetting({
                       ...editingSetting,
