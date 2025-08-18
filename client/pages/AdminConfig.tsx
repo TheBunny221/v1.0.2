@@ -1792,7 +1792,7 @@ const AdminConfig: React.FC = () => {
               <div>
                 <Label htmlFor="settingType">Type</Label>
                 <Select
-                  value={editingSetting.type}
+                  value={editingSetting.type || "string"}
                   onValueChange={(
                     value: "string" | "number" | "boolean" | "json",
                   ) =>
