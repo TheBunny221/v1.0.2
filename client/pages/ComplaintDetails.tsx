@@ -41,6 +41,7 @@ const ComplaintDetails: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
