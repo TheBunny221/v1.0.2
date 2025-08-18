@@ -91,7 +91,7 @@ export const guestApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<GuestOtpVerifyResponse>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["Auth"],
     }),
 
