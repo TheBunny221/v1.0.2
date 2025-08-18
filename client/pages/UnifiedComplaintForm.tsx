@@ -503,47 +503,24 @@ const UnifiedComplaintForm: React.FC = () => {
       return;
     }
 
-    try {
-      // Verify OTP and auto-register user
-      const result = await dispatch(
-        verifyOTPAndRegister({
-          email: formData.email,
-          otpCode,
-          complaintId,
-        }),
-      ).unwrap();
-
-      // Store auth token and user data
-      if (result.token && result.user) {
-        dispatch(
-          setCredentials({
-            token: result.token,
-            user: result.user,
-          }),
-        );
-        localStorage.setItem("token", result.token);
-      }
-
-      toast({
-        title: "Success!",
-        description: result.isNewUser
-          ? "Your complaint has been verified and your citizen account has been created successfully!"
-          : "Your complaint has been verified and you've been logged in successfully!",
-      });
-
-      // Clear form data and navigate to dashboard
-      dispatch(clearGuestData());
-      navigate("/dashboard");
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      toast({
-        title: "Verification Failed",
-        description:
-          error.message || "Invalid verification code. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [otpCode, complaintId, formData.email, dispatch, toast, navigate]);
+    // Use OtpContext to handle verification - it will automatically handle
+    // the RTK Query mutation, token storage, and navigation
+    openOtpFlow({
+      context: "guestComplaint",
+      email: formData.email,
+      complaintId,
+      title: "Verify Your Complaint",
+      description: "Enter the verification code sent to your email",
+      onSuccess: (data) => {
+        // Clear form data and navigate to dashboard
+        dispatch(clearGuestData());
+        navigate("/dashboard");
+      },
+      onCancel: () => {
+        // Handle cancellation if needed
+      },
+    });
+  }, [otpCode, complaintId, formData.email, openOtpFlow, dispatch, navigate, toast]);
 
   // Legacy handleSubmit for backward compatibility (now delegates to appropriate handler)
   const handleSubmit = useCallback(() => {
