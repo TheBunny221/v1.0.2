@@ -335,17 +335,20 @@ const MaintenanceTasks: React.FC = () => {
         </Card>
       </div>
 
-      {/* Active Tasks */}
+      {/* Filtered Tasks */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Wrench className="h-5 w-5 mr-2" />
-            My Tasks
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
+              <Wrench className="h-5 w-5 mr-2" />
+              My Tasks {activeFilter !== "all" && `(${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)})`}
+            </CardTitle>
+            <Badge variant="secondary">{filteredTasks.length} tasks</Badge>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <div
                 key={task.id}
                 className="border rounded-lg p-4 hover:bg-gray-50"
