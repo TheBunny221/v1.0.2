@@ -116,13 +116,6 @@ const App: React.FC = () => {
                       <Route path="/unauthorized" element={<Unauthorized />} />
 
                       {/* Protected and Public Routes */}
-                      <Route
-                        path="/*"
-                        element={
-                          <div className="min-h-screen bg-gray-50">
-                            <Navigation />
-                            <main className="pt-16">
-                              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                                 <Routes>
                                   {/* Home route */}
                                   <Route path="/" element={<Index />} />
@@ -378,11 +371,6 @@ const App: React.FC = () => {
                                     element={<Navigate to="/" replace />}
                                   />
                                 </Routes>
-                              </div>
-                            </main>
-                          </div>
-                        }
-                      />
                     </Routes>
                   </Suspense>
                 </div>
