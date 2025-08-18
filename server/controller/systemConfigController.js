@@ -275,6 +275,11 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
       description: "URL for the application logo",
     },
     {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      description: "Size of the application logo (small, medium, large)",
+    },
+    {
       key: "COMPLAINT_ID_PREFIX",
       value: "KSC",
       description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
