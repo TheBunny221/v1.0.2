@@ -668,6 +668,17 @@ const ComplaintDetails: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              {/* Status update button for Ward Officers and Administrators */}
+              {(user?.role === "WARD_OFFICER" || user?.role === "ADMINISTRATOR") && (
+                <Button
+                  className="w-full justify-start"
+                  onClick={() => setShowStatusDialog(true)}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Update Status
+                </Button>
+              )}
+
               {/* Show feedback button for resolved/closed complaints if user is the complainant */}
               {(complaint.status === "RESOLVED" ||
                 complaint.status === "CLOSED") &&
