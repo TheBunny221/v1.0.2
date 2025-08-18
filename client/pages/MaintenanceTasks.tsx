@@ -409,7 +409,7 @@ const MaintenanceTasks: React.FC = () => {
                         Start Work
                       </Button>
                     )}
-                    {task.status === "IN_PROGRESS" && (
+                    {(task.status === "IN_PROGRESS" || task.status === "REOPENED") && (
                       <Button
                         size="sm"
                         onClick={() => handleMarkResolved(task)}
