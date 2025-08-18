@@ -27,6 +27,24 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
   timeout: 30000,
+  // Add response handler to prevent body reuse issues
+  responseHandler: async (response) => {
+    // Clone the response to prevent "body already read" issues
+    const clonedResponse = response.clone();
+
+    // Check if response is JSON
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        return await clonedResponse.json();
+      } catch (error) {
+        console.warn("Failed to parse JSON response:", error);
+        return await clonedResponse.text();
+      }
+    }
+
+    return await clonedResponse.text();
+  },
 });
 
 // Enhanced base query with authentication handling
