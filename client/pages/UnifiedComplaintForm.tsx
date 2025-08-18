@@ -48,7 +48,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Textarea } from "../components/ui/textarea";
-import LocationMapDialog from "../components/LocationMapDialog";
+import SimpleLocationMapDialog from "../components/SimpleLocationMapDialog";
 import {
   Select,
   SelectContent,
