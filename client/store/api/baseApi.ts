@@ -65,15 +65,12 @@ const baseQueryWithReauth: BaseQueryFn<
       if (!isAuthEndpoint) {
         console.log("Session expired, logging out user");
 
-        // Safely extract error data without consuming response
-        try {
-          const errorData = result.error.data;
-          if (errorData && typeof errorData === 'object' && 'code' in errorData) {
-            localStorage.setItem('auth_error', JSON.stringify(errorData));
-          }
-        } catch (error) {
-          console.warn("Could not extract error data:", error);
-        }
+        // Don't try to access error.data as it might cause response body conflicts
+        // Just set a generic auth error
+        localStorage.setItem('auth_error', JSON.stringify({
+          code: 'USER_NOT_FOUND',
+          action: 'LOGIN_REQUIRED'
+        }));
 
         // Clear auth state and localStorage
         localStorage.removeItem("token");
