@@ -649,13 +649,13 @@ const ComplaintDetails: React.FC = () => {
                   </Button>
                 )}
 
-              <Button variant="outline" className="w-full justify-start">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={handleExportDetails}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export Details
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Send Message
               </Button>
             </CardContent>
           </Card>
