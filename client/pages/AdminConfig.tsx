@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import {
   useGetComplaintTypesQuery,
   useCreateComplaintTypeMutation,
