@@ -166,10 +166,25 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         className,
       )}
     >
-      {/* Header with toggle button */}
+      {/* Header with logo and toggle button */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {!isCollapsed && (
-          <h2 className="text-lg font-semibold text-gray-900">Navigation</h2>
+          <Logo
+            logoUrl={appLogoUrl}
+            appName={appName}
+            size={appLogoSize}
+            context="nav"
+            showText={true}
+          />
+        )}
+        {isCollapsed && (
+          <Logo
+            logoUrl={appLogoUrl}
+            appName={appName}
+            size={appLogoSize}
+            context="nav"
+            showText={false}
+          />
         )}
         <Button
           variant="ghost"
