@@ -662,7 +662,7 @@ const CitizenDashboard: React.FC = () => {
                     {complaints.map((complaint) => (
                       <TableRow key={complaint.id}>
                         <TableCell className="font-mono text-xs">
-                          {complaint.id.slice(-8)}
+                          {complaint.complaintId.slice(-8)}
                         </TableCell>
                         <TableCell>
                           <div className="max-w-48">
