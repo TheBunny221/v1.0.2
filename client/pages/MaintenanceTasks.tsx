@@ -31,39 +31,89 @@ import {
 } from "lucide-react";
 
 const MaintenanceTasks: React.FC = () => {
-  const tasks = [
+  const { user } = useAppSelector((state) => state.auth);
+  const { translations } = useAppSelector((state) => state.language);
+
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [isMarkResolvedOpen, setIsMarkResolvedOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [resolveComment, setResolveComment] = useState("");
+  const [resolvePhoto, setResolvePhoto] = useState<File | null>(null);
+
+  // Sample task data - in real app this would come from API
+  const [tasks, setTasks] = useState([
     {
       id: "1",
       title: "Water Pipeline Repair",
       location: "MG Road, Near Metro Station",
+      address: "MG Road, Near Metro Station, Kochi, Kerala 682001",
       priority: "HIGH",
       status: "ASSIGNED",
       estimatedTime: "4 hours",
       dueDate: "2024-01-15",
-      description:
-        "Main water pipeline burst, affecting supply to 200+ households",
+      isOverdue: false,
+      description: "Main water pipeline burst, affecting supply to 200+ households",
+      assignedAt: "2024-01-14T10:00:00Z",
+      photo: "/api/attachments/complaint-1-photo.jpg",
     },
     {
       id: "2",
       title: "Street Light Installation",
       location: "Marine Drive, Walkway Section",
+      address: "Marine Drive, Walkway Section, Fort Kochi, Kerala 682001",
       priority: "MEDIUM",
       status: "IN_PROGRESS",
       estimatedTime: "2 hours",
       dueDate: "2024-01-16",
+      isOverdue: false,
       description: "Install 5 new LED street lights along the walkway",
+      assignedAt: "2024-01-13T09:00:00Z",
+      photo: "/api/attachments/complaint-2-photo.jpg",
     },
     {
       id: "3",
       title: "Road Pothole Filling",
       location: "Broadway Junction",
+      address: "Broadway Junction, Ernakulam, Kerala 682011",
       priority: "LOW",
-      status: "COMPLETED",
+      status: "RESOLVED",
       estimatedTime: "3 hours",
       dueDate: "2024-01-10",
+      isOverdue: false,
       description: "Fill multiple potholes affecting traffic flow",
+      assignedAt: "2024-01-08T08:00:00Z",
+      resolvedAt: "2024-01-10T15:30:00Z",
+      photo: "/api/attachments/complaint-3-photo.jpg",
     },
-  ];
+    {
+      id: "4",
+      title: "Garbage Collection Issue",
+      location: "Kadavanthra Bus Stop",
+      address: "Kadavanthra Bus Stop, Kochi, Kerala 682020",
+      priority: "HIGH",
+      status: "ASSIGNED",
+      estimatedTime: "1 hour",
+      dueDate: "2024-01-12",
+      isOverdue: true,
+      description: "Garbage collection missed for 3 days",
+      assignedAt: "2024-01-10T07:00:00Z",
+      photo: "/api/attachments/complaint-4-photo.jpg",
+    },
+    {
+      id: "5",
+      title: "Sewer Blockage Clearance",
+      location: "Panampilly Nagar",
+      address: "Panampilly Nagar, Kochi, Kerala 682036",
+      priority: "CRITICAL",
+      status: "REOPENED",
+      estimatedTime: "6 hours",
+      dueDate: "2024-01-17",
+      isOverdue: false,
+      description: "Sewer blockage causing overflow in residential area",
+      assignedAt: "2024-01-15T11:00:00Z",
+      photo: "/api/attachments/complaint-5-photo.jpg",
+    },
+  ]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
