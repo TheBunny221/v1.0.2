@@ -52,6 +52,11 @@ import {
   useActivateUserMutation,
   useDeactivateUserMutation,
   useDeleteUserMutation,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  type AdminUser,
+  type CreateUserRequest,
+  type UpdateUserRequest,
 } from "../store/api/adminApi";
 import { toast } from "../components/ui/use-toast";
 
