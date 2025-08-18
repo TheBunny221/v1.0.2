@@ -40,27 +40,62 @@ import {
 } from "lucide-react";
 
 const WardManagement: React.FC = () => {
+  const { user } = useAppSelector((state) => state.auth);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Fetch complaints for the ward officer
+  const {
+    data: complaintsResponse,
+    isLoading: complaintsLoading,
+    refetch: refetchComplaints
+  } = useGetComplaintsQuery({
+    page: 1,
+    limit: 100,
+    wardId: user?.wardId
+  });
+
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints)
+    ? complaintsResponse.data.complaints
+    : [];
+
+  // Calculate real stats from complaint data
   const wardStats = {
-    totalComplaints: 45,
-    resolved: 38,
-    pending: 7,
-    teams: 8,
-    resolutionRate: 84,
+    totalComplaints: complaints.length,
+    resolved: complaints.filter(c => c.status === 'RESOLVED' || c.status === 'CLOSED').length,
+    pending: complaints.filter(c => c.status === 'REGISTERED' || c.status === 'ASSIGNED' || c.status === 'IN_PROGRESS').length,
+    inProgress: complaints.filter(c => c.status === 'IN_PROGRESS').length,
+    resolutionRate: complaints.length > 0
+      ? Math.round((complaints.filter(c => c.status === 'RESOLVED' || c.status === 'CLOSED').length / complaints.length) * 100)
+      : 0,
   };
 
-  const subZones = [
-    { name: "MG Road", complaints: 12, resolved: 10, priority: "Medium" },
-    { name: "Broadway", complaints: 8, resolved: 7, priority: "Low" },
-    { name: "Marine Drive", complaints: 15, resolved: 12, priority: "High" },
-    { name: "Fort Kochi", complaints: 10, resolved: 9, priority: "Medium" },
-  ];
+  // Group complaints by sub-zone if available
+  const complaintsByArea = complaints.reduce((acc: any, complaint) => {
+    const area = complaint.area || 'Unknown Area';
+    if (!acc[area]) {
+      acc[area] = {
+        name: area,
+        complaints: 0,
+        resolved: 0,
+        pending: 0,
+      };
+    }
+    acc[area].complaints++;
+    if (complaint.status === 'RESOLVED' || complaint.status === 'CLOSED') {
+      acc[area].resolved++;
+    } else {
+      acc[area].pending++;
+    }
+    return acc;
+  }, {});
 
-  const teams = [
-    { name: "Electrical Team", members: 5, activeJobs: 3, efficiency: 92 },
-    { name: "Water Works", members: 4, activeJobs: 2, efficiency: 88 },
-    { name: "Road Maintenance", members: 6, activeJobs: 4, efficiency: 85 },
-    { name: "Sanitation", members: 3, activeJobs: 1, efficiency: 95 },
-  ];
+  const subZones = Object.values(complaintsByArea);
+
+  // Priority complaints that need attention
+  const priorityComplaints = complaints.filter(c =>
+    c.priority === 'HIGH' || c.priority === 'CRITICAL' ||
+    c.status === 'REGISTERED'
+  ).slice(0, 10);
 
   return (
     <div className="space-y-6">
