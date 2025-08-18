@@ -118,6 +118,7 @@ const AdminConfig: React.FC = () => {
     data: complaintTypesResponse,
     isLoading: complaintTypesLoading,
     error: complaintTypesError,
+    refetch: refetchComplaintTypes,
   } = useGetComplaintTypesQuery();
   const [createComplaintType] = useCreateComplaintTypeMutation();
   const [updateComplaintType] = useUpdateComplaintTypeMutation();
