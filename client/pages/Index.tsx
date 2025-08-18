@@ -67,6 +67,7 @@ const Index: React.FC = () => {
     location: "",
     address: "",
     description: "",
+    coordinates: null as { latitude: number; longitude: number } | null,
   });
   const [files, setFiles] = useState<File[]>([]);
   const [captcha, setCaptcha] = useState("");
