@@ -64,57 +64,6 @@ const Index: React.FC = () => {
   // Form state
   const [isFormExpanded, setIsFormExpanded] = useState(false);
 
-  // Pre-fill user data if authenticated
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      setFormData((prev) => ({
-        ...prev,
-        mobile: user.phoneNumber || "",
-        email: user.email || "",
-      }));
-    }
-  }, [isAuthenticated, user]);
-
-  // Icon mapping for different complaint types
-  const getIconForComplaintType = (type: string) => {
-    const iconMap: { [key: string]: React.ReactNode } = {
-      WATER_SUPPLY: <Droplets className="h-4 w-4" />,
-      ELECTRICITY: <Zap className="h-4 w-4" />,
-      ROAD_REPAIR: <Wrench className="h-4 w-4" />,
-      WASTE_MANAGEMENT: <FileText className="h-4 w-4" />,
-      GARBAGE_COLLECTION: <FileText className="h-4 w-4" />,
-      STREET_LIGHTING: <Zap className="h-4 w-4" />,
-      DRAINAGE: <Droplets className="h-4 w-4" />,
-      SEWERAGE: <Droplets className="h-4 w-4" />,
-      PUBLIC_TOILET: <CheckCircle className="h-4 w-4" />,
-      TREE_CUTTING: <Wrench className="h-4 w-4" />,
-      PUBLIC_HEALTH: <CheckCircle className="h-4 w-4" />,
-      TRAFFIC: <AlertCircle className="h-4 w-4" />,
-      OTHERS: <FileText className="h-4 w-4" />,
-    };
-    return iconMap[type] || <FileText className="h-4 w-4" />;
-  };
-
-  const problemTypes = complaintTypeOptions.map((type) => ({
-    key: type.value,
-    label: type.label,
-    icon: getIconForComplaintType(type.value),
-  }));
-
-  // Wards are now loaded from API - see above
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files || []);
-    setFiles((prev) => [...prev, ...selectedFiles]);
-  };
-
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handleLocationSelect = (location: {
     latitude: number;
@@ -456,7 +405,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "ईमेल अलर्���"
                         : currentLanguage === "ml"
-                          ? "ഇമെയി��� അലേർട്ടുകൾ"
+                          ? "ഇമെയി��� അലേർട്ടുക���"
                           : "Email Alerts"}
                     </div>
                     <div className="text-sm text-gray-600">
