@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
+import { useGetComplaintsQuery } from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -9,6 +12,21 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import ComplaintQuickActions from "../components/ComplaintQuickActions";
+import {
   MapPin,
   Users,
   BarChart3,
@@ -16,6 +34,9 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
+  FileText,
+  Clock,
+  Calendar,
 } from "lucide-react";
 
 const WardManagement: React.FC = () => {
