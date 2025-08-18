@@ -144,7 +144,7 @@ const ComplaintsList: React.FC = () => {
             <FileText className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          {user?.role === "CITIZEN" && (
+          {(user?.role === "CITIZEN" || user?.role === "MAINTENANCE_TEAM") && (
             <Link to="/complaints/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
