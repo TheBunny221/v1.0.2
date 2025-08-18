@@ -123,7 +123,7 @@ export const guestApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      transformResponse: transformResponse<TrackComplaintResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: (result, error, { complaintId }) => [
         { type: "Complaint", id: complaintId },
       ],
@@ -132,7 +132,7 @@ export const guestApi = baseApi.injectEndpoints({
     // Get public statistics
     getPublicStats: builder.query<ApiResponse<PublicStatsResponse>, void>({
       query: () => "/guest/stats",
-      transformResponse: transformResponse<PublicStatsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
