@@ -36,6 +36,7 @@ import {
   Database,
   UserCheck,
   AlertTriangle,
+  PieChart,
 } from "lucide-react";
 
 type UserRole =
