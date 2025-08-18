@@ -23,11 +23,13 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import {
-  updateProfile,
-} from "../store/slices/authSlice";
+import { updateProfile } from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
-import { useSendPasswordSetupEmailMutation, useSetPasswordMutation } from "../store/api/authApi";
+import {
+  useSendPasswordSetupEmailMutation,
+  useSetPasswordMutation,
+  useChangePasswordMutation,
+} from "../store/api/authApi";
 import {
   User,
   Mail,
@@ -39,6 +41,7 @@ import {
   EyeOff,
   Lock,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 
 const Profile: React.FC = () => {
@@ -49,6 +52,7 @@ const Profile: React.FC = () => {
   // API mutations
   const [sendPasswordSetupEmail] = useSendPasswordSetupEmailMutation();
   const [setPassword] = useSetPasswordMutation();
+  const [changePassword] = useChangePasswordMutation();
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
@@ -72,6 +76,7 @@ const Profile: React.FC = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
   const [emailStep, setEmailStep] = useState<"none" | "sent">("none");
   const [setupToken, setSetupToken] = useState("");
@@ -86,7 +91,9 @@ const Profile: React.FC = () => {
 
   const handleSendPasswordSetupEmail = async () => {
     try {
-      const response = await sendPasswordSetupEmail({ email: user?.email || "" }).unwrap();
+      const response = await sendPasswordSetupEmail({
+        email: user?.email || "",
+      }).unwrap();
       setEmailStep("sent");
       dispatch(
         addNotification({
@@ -98,7 +105,7 @@ const Profile: React.FC = () => {
 
       // In development, show the token for testing
       if (process.env.NODE_ENV === "development" && response.data?.resetUrl) {
-        const token = response.data.resetUrl.split('/').pop();
+        const token = response.data.resetUrl.split("/").pop();
         if (token) {
           setSetupToken(token);
           dispatch(
@@ -115,7 +122,8 @@ const Profile: React.FC = () => {
         addNotification({
           type: "error",
           title: "Error",
-          message: error?.data?.message || "Failed to send password setup email",
+          message:
+            error?.data?.message || "Failed to send password setup email",
         }),
       );
     }
@@ -128,7 +136,9 @@ const Profile: React.FC = () => {
         addNotification({
           type: "success",
           title: translations?.common?.success || "Success",
-          message: translations?.profile?.profileUpdated || "Profile updated successfully",
+          message:
+            translations?.profile?.profileUpdated ||
+            "Profile updated successfully",
         }),
       );
       setIsEditing(false);
@@ -144,12 +154,28 @@ const Profile: React.FC = () => {
   };
 
   const handleChangePassword = async () => {
+    // Validate password match
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       dispatch(
         addNotification({
           type: "error",
           title: translations?.common?.error || "Error",
-          message: translations?.profile?.passwordMismatch || "Passwords do not match",
+          message:
+            translations?.profile?.passwordMismatch || "Passwords do not match",
+        }),
+      );
+      return;
+    }
+
+    // Validate password strength
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(passwordData.newPassword)) {
+      dispatch(
+        addNotification({
+          type: "error",
+          title: "Invalid Password",
+          message:
+            "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one number.",
         }),
       );
       return;
@@ -179,6 +205,8 @@ const Profile: React.FC = () => {
       return;
     }
 
+    setIsChangingPassword(true);
+
     try {
       if (!user?.hasPassword) {
         // Password setup with token
@@ -187,7 +215,11 @@ const Profile: React.FC = () => {
           password: passwordData.newPassword,
         }).unwrap();
       } else {
-        // Regular password change - mock implementation
+        // Regular password change
+        await changePassword({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }).unwrap();
       }
 
       dispatch(
@@ -196,7 +228,8 @@ const Profile: React.FC = () => {
           title: translations?.common?.success || "Success",
           message: !user?.hasPassword
             ? "Password set up successfully"
-            : (translations?.profile?.passwordChanged || "Password changed successfully"),
+            : translations?.profile?.passwordChanged ||
+              "Password changed successfully",
         }),
       );
 
@@ -208,18 +241,56 @@ const Profile: React.FC = () => {
       });
       setEmailStep("none");
       setSetupToken("");
-
     } catch (error: any) {
+      console.error("Password change error:", error);
+
+      let errorMessage = "Failed to change password";
+
+      // Handle RTK Query error structure
+      if (error?.data) {
+        if (typeof error.data === "string") {
+          errorMessage = error.data;
+        } else if (error.data.message) {
+          errorMessage = error.data.message;
+        } else if (error.data.errors && Array.isArray(error.data.errors)) {
+          // Handle validation errors
+          errorMessage = error.data.errors
+            .map((err: any) => err.message || err)
+            .join(", ");
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.status) {
+        // Handle HTTP status errors
+        switch (error.status) {
+          case 400:
+            errorMessage = "Invalid password data provided";
+            break;
+          case 401:
+            errorMessage = "Authentication failed. Please login again.";
+            break;
+          case 403:
+            errorMessage = "You don't have permission to change password";
+            break;
+          case 500:
+            errorMessage = "Server error. Please try again later.";
+            break;
+          default:
+            errorMessage = `An error occurred (${error.status})`;
+        }
+      }
+
       dispatch(
         addNotification({
           type: "error",
-          title: "Error",
-          message: error?.data?.message || "Failed to set password",
+          title: "Password Change Failed",
+          message: errorMessage,
         }),
       );
+    } finally {
+      setIsChangingPassword(false);
     }
   };
-
 
   if (!user) {
     return (
@@ -270,7 +341,8 @@ const Profile: React.FC = () => {
                   Password Setup Required
                 </h3>
                 <p className="mt-1 text-sm text-orange-700">
-                  Your account was created without a password. Please set up a password to secure your account.
+                  Your account was created without a password. Please set up a
+                  password to secure your account.
                 </p>
                 <div className="mt-4">
                   <Button
@@ -301,7 +373,10 @@ const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <User className="h-5 w-5" />
-                <span>{translations?.profile?.personalInformation || "Personal Information"}</span>
+                <span>
+                  {translations?.profile?.personalInformation ||
+                    "Personal Information"}
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -450,8 +525,8 @@ const Profile: React.FC = () => {
                 <span>
                   {!user?.hasPassword
                     ? "Set Up Password"
-                    : (translations?.profile?.changePassword || "Change Password")
-                  }
+                    : translations?.profile?.changePassword ||
+                      "Change Password"}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -460,7 +535,9 @@ const Profile: React.FC = () => {
               {!user?.hasPassword && (
                 <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="space-y-2">
-                    <h4 className="font-medium text-blue-900">Password Setup Required</h4>
+                    <h4 className="font-medium text-blue-900">
+                      Password Setup Required
+                    </h4>
                     <p className="text-sm text-blue-700">
                       We'll send you a secure link to set up your password.
                     </p>
@@ -479,10 +556,14 @@ const Profile: React.FC = () => {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 text-green-700">
                         <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium">Setup link sent! Check your email.</span>
+                        <span className="text-sm font-medium">
+                          Setup link sent! Check your email.
+                        </span>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="setupToken">Setup Token (from email)</Label>
+                        <Label htmlFor="setupToken">
+                          Setup Token (from email)
+                        </Label>
                         <Input
                           id="setupToken"
                           value={setupToken}
@@ -491,7 +572,9 @@ const Profile: React.FC = () => {
                           className="w-full"
                         />
                         <p className="text-xs text-gray-500">
-                          You can either click the link in your email to go to the setup page, or copy the token from the link and paste it here.
+                          You can either click the link in your email to go to
+                          the setup page, or copy the token from the link and
+                          paste it here.
                         </p>
                         <Button
                           variant="outline"
@@ -509,7 +592,8 @@ const Profile: React.FC = () => {
               {user?.hasPassword && (
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">
-                    {translations?.profile?.currentPassword || "Current Password"}
+                    {translations?.profile?.currentPassword ||
+                      "Current Password"}
                   </Label>
                   <div className="relative">
                     <Input
@@ -612,16 +696,42 @@ const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <Button onClick={handleChangePassword} className="w-full">
-                {!user?.hasPassword
-                  ? "Set Up Password"
-                  : (translations?.profile?.changePassword || "Change Password")
+              {/* Password Requirements */}
+              <div className="text-sm text-gray-600 space-y-1">
+                <p className="font-medium">Password Requirements:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>At least 6 characters long</li>
+                  <li>Contains at least one uppercase letter (A-Z)</li>
+                  <li>Contains at least one lowercase letter (a-z)</li>
+                  <li>Contains at least one number (0-9)</li>
+                </ul>
+              </div>
+
+              <Button
+                onClick={handleChangePassword}
+                className="w-full"
+                disabled={
+                  isChangingPassword ||
+                  (!user?.hasPassword && !setupToken) ||
+                  (user?.hasPassword && !passwordData.currentPassword) ||
+                  !passwordData.newPassword ||
+                  !passwordData.confirmPassword
                 }
+              >
+                {isChangingPassword ? (
+                  <div className="flex items-center">
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    {!user?.hasPassword ? "Setting Up..." : "Changing..."}
+                  </div>
+                ) : !user?.hasPassword ? (
+                  "Set Up Password"
+                ) : (
+                  translations?.profile?.changePassword || "Change Password"
+                )}
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
-
       </Tabs>
     </div>
   );

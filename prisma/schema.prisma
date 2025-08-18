@@ -87,6 +87,7 @@ model SubZone {
 
 model Complaint {
   id              String            @id @default(cuid())
+  complaintId     String?           @unique  // Human-readable complaint ID like KSC0001
   title           String?
   description     String
   type            String            // WATER_SUPPLY, ELECTRICITY, ROAD_REPAIR, etc.

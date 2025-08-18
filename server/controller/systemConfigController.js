@@ -265,6 +265,31 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
   // Create default settings
   const defaultSettings = [
     {
+      key: "APP_NAME",
+      value: "Kochi Smart City",
+      description: "Application name displayed across the system",
+    },
+    {
+      key: "APP_LOGO_URL",
+      value: "/logo.png",
+      description: "URL for the application logo",
+    },
+    {
+      key: "COMPLAINT_ID_PREFIX",
+      value: "KSC",
+      description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+    },
+    {
+      key: "COMPLAINT_ID_START_NUMBER",
+      value: "1",
+      description: "Starting number for complaint ID sequence",
+    },
+    {
+      key: "COMPLAINT_ID_LENGTH",
+      value: "4",
+      description: "Length of the numeric part in complaint IDs",
+    },
+    {
       key: "OTP_EXPIRY_MINUTES",
       value: "5",
       description: "OTP expiration time in minutes",
@@ -316,6 +341,61 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "System settings reset to defaults successfully",
+  });
+});
+
+// @desc    Get public system settings (non-sensitive settings only)
+// @route   GET /api/system-config/public
+// @access  Public
+export const getPublicSystemSettings = asyncHandler(async (req, res) => {
+  // Only return non-sensitive settings
+  const publicKeys = [
+    "APP_NAME",
+    "APP_LOGO_URL",
+    "COMPLAINT_ID_PREFIX",
+    "MAX_FILE_SIZE_MB",
+    "CITIZEN_REGISTRATION_ENABLED",
+    "SYSTEM_MAINTENANCE",
+  ];
+
+  const settings = await prisma.systemConfig.findMany({
+    where: {
+      key: {
+        in: publicKeys,
+      },
+      isActive: true,
+    },
+    orderBy: {
+      key: "asc",
+    },
+  });
+
+  // Transform data to match frontend interface
+  const transformedSettings = settings.map((setting) => {
+    let type = "string";
+    let value = setting.value;
+
+    // Determine type based on value
+    if (value === "true" || value === "false") {
+      type = "boolean";
+    } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+      type = "number";
+    } else if (value.startsWith("{") || value.startsWith("[")) {
+      type = "json";
+    }
+
+    return {
+      key: setting.key,
+      value: setting.value,
+      description: setting.description,
+      type: type,
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Public system settings retrieved successfully",
+    data: transformedSettings,
   });
 });
 

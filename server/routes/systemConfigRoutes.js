@@ -7,12 +7,16 @@ import {
   deleteSystemSetting,
   resetSystemSettings,
   getSystemHealth,
+  getPublicSystemSettings,
 } from "../controller/systemConfigController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { body, param } from "express-validator";
 import { handleValidationErrors } from "../middleware/validation.js";
 
 const router = express.Router();
+
+// Public route (no authentication required)
+router.get("/public", getPublicSystemSettings);
 
 // Validation middleware for system settings
 const validateSystemSetting = [
@@ -21,9 +25,7 @@ const validateSystemSetting = [
     .withMessage("Key is required")
     .matches(/^[A-Z_][A-Z0-9_]*$/)
     .withMessage("Key must be uppercase letters and underscores only"),
-  body("value")
-    .notEmpty()
-    .withMessage("Value is required"),
+  body("value").notEmpty().withMessage("Value is required"),
   body("description")
     .optional()
     .isLength({ max: 500 })

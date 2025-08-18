@@ -7,61 +7,84 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Robust base query that handles all edge cases properly
+// Create the base query without response interference
+const baseQuery = fetchBaseQuery({
+  baseUrl: "/api/",
+  prepareHeaders: (headers, { getState }) => {
+    // Try to get token from Redux state first, then localStorage
+    const state = getState() as any;
+    const token = state?.auth?.token || localStorage.getItem("token");
+
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
+    }
+
+    // Ensure content-type is set for JSON requests
+    if (!headers.get("content-type")) {
+      headers.set("content-type", "application/json");
+    }
+
+    return headers;
+  },
+  timeout: 30000,
+});
+
+// Enhanced base query with authentication handling
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Use the built-in fetchBaseQuery for each request to avoid response body conflicts
-  const baseQuery = fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers) => {
-      const state = api.getState() as any;
-      const token = state.auth.token || localStorage.getItem("token");
+  const endpoint = typeof args === "string" ? args : args.url;
 
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
-      }
-
-      return headers;
-    },
-    timeout: 30000,
-  });
-
+  // Make the initial request without try-catch to avoid interfering with response stream
   let result = await baseQuery(args, api, extraOptions);
+
+  // Log for debugging
+  if (process.env.NODE_ENV === "development") {
+    console.log(`API Request to ${endpoint}:`, {
+      args,
+      result: result.error ? "ERROR" : "SUCCESS",
+      status: result.error?.status,
+      hasData: !!result.data,
+    });
+  }
 
   // Handle 401 unauthorized responses
   if (result.error && result.error.status === 401) {
     // Check if this is an auth-related endpoint to avoid logout loops
-    const endpoint = typeof args === "string" ? args : args.url;
     const isAuthEndpoint =
       typeof endpoint === "string" &&
       (endpoint.includes("auth/login") ||
         endpoint.includes("auth/register") ||
         endpoint.includes("auth/verify-otp") ||
-        endpoint.includes("auth/login-otp"));
+        endpoint.includes("auth/login-otp") ||
+        endpoint.includes("auth/set-password"));
 
     if (!isAuthEndpoint) {
-      // Clear auth state
+      console.log("Session expired, logging out user");
+
+      // Clear auth state and localStorage
+      localStorage.removeItem("token");
       api.dispatch(logout());
 
-      // Show toast notification
-      try {
-        toast({
-          title: "Session Expired",
-          description: "Please login again to continue.",
-          variant: "destructive",
-        });
-      } catch (toastError) {
-        console.warn("Toast notification failed:", toastError);
-      }
+      // Show toast notification in a non-blocking way
+      setTimeout(() => {
+        try {
+          toast({
+            title: "Session Expired",
+            description: "Please login again to continue.",
+            variant: "destructive",
+          });
+        } catch (toastError) {
+          console.warn("Toast notification failed:", toastError);
+        }
+      }, 0);
     }
   }
 
   return result;
 };
-
 
 // Create the base API slice
 export const baseApi = createApi({
@@ -116,6 +139,11 @@ export const transformResponse = <T>(response: any): ApiResponse<T> => {
         data: {} as T,
         message: "No response received",
       };
+    }
+
+    // Log response for debugging in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("Transforming response:", response);
     }
 
     // If response is already in our expected format, return it

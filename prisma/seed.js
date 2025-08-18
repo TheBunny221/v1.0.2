@@ -33,8 +33,29 @@ async function main() {
       data: [
         {
           key: "APP_NAME",
-          value: "Cochin Smart City",
-          description: "Application name displayed to users",
+          value: "Kochi Smart City",
+          description: "Application name displayed across the system",
+        },
+        {
+          key: "APP_LOGO_URL",
+          value: "/logo.png",
+          description: "URL for the application logo",
+        },
+        {
+          key: "COMPLAINT_ID_PREFIX",
+          value: "KSC",
+          description:
+            "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+        },
+        {
+          key: "COMPLAINT_ID_START_NUMBER",
+          value: "1",
+          description: "Starting number for complaint ID sequence",
+        },
+        {
+          key: "COMPLAINT_ID_LENGTH",
+          value: "4",
+          description: "Length of the numeric part in complaint IDs",
         },
         {
           key: "DEFAULT_LANGUAGE",
@@ -278,7 +299,89 @@ async function main() {
       citizens.push(citizen);
     }
 
-    // 6. Create Sample Complaints
+    // 6. Create Complaint Types
+    console.log("🏷️ Creating complaint types...");
+    const complaintTypesData = [
+      {
+        key: "COMPLAINT_TYPE_WATER_SUPPLY",
+        name: "Water Supply",
+        description:
+          "Issues related to water supply, quality, pressure, or leakage",
+        priority: "HIGH",
+        slaHours: 24,
+      },
+      {
+        key: "COMPLAINT_TYPE_ELECTRICITY",
+        name: "Electricity",
+        description:
+          "Power outages, faulty connections, or street lighting issues",
+        priority: "HIGH",
+        slaHours: 12,
+      },
+      {
+        key: "COMPLAINT_TYPE_ROAD_REPAIR",
+        name: "Road Repair",
+        description: "Damaged roads, potholes, or infrastructure maintenance",
+        priority: "MEDIUM",
+        slaHours: 72,
+      },
+      {
+        key: "COMPLAINT_TYPE_WASTE_MANAGEMENT",
+        name: "Waste Management",
+        description:
+          "Garbage collection, waste disposal, and sanitation issues",
+        priority: "MEDIUM",
+        slaHours: 48,
+      },
+      {
+        key: "COMPLAINT_TYPE_STREET_LIGHTING",
+        name: "Street Lighting",
+        description: "Non-functional street lights or poor lighting conditions",
+        priority: "LOW",
+        slaHours: 48,
+      },
+      {
+        key: "COMPLAINT_TYPE_DRAINAGE",
+        name: "Drainage",
+        description: "Blocked drains, flooding, or sewage issues",
+        priority: "HIGH",
+        slaHours: 24,
+      },
+      {
+        key: "COMPLAINT_TYPE_PUBLIC_TOILET",
+        name: "Public Toilet",
+        description: "Maintenance and cleanliness of public toilet facilities",
+        priority: "LOW",
+        slaHours: 48,
+      },
+      {
+        key: "COMPLAINT_TYPE_TREE_CUTTING",
+        name: "Tree Cutting",
+        description:
+          "Tree trimming, removal of dangerous branches, or fallen trees",
+        priority: "MEDIUM",
+        slaHours: 72,
+      },
+    ];
+
+    // Create complaint types in SystemConfig
+    for (const typeData of complaintTypesData) {
+      await prisma.systemConfig.create({
+        data: {
+          key: typeData.key,
+          value: JSON.stringify({
+            name: typeData.name,
+            description: typeData.description,
+            priority: typeData.priority,
+            slaHours: typeData.slaHours,
+          }),
+          description: `Complaint type configuration for ${typeData.name}`,
+          isActive: true,
+        },
+      });
+    }
+
+    // 7. Create Sample Complaints
     console.log("📝 Creating sample complaints...");
     const complaintTypes = [
       "WATER_SUPPLY",
@@ -308,8 +411,13 @@ async function main() {
         priorities[Math.floor(Math.random() * priorities.length)];
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
+      // Generate complaint ID
+      const complaintNumber = (i + 1).toString().padStart(4, "0");
+      const complaintId = `KSC${complaintNumber}`;
+
       const complaint = await prisma.complaint.create({
         data: {
+          complaintId: complaintId,
           title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
           description: `Sample complaint regarding ${complaintType.toLowerCase().replace("_", " ")} issue that needs immediate attention.`,
           type: complaintType,
@@ -358,7 +466,7 @@ async function main() {
       }
     }
 
-    // 7. Create Sample Service Requests
+    // 8. Create Sample Service Requests
     console.log("🔧 Creating sample service requests...");
     const serviceTypes = [
       "BIRTH_CERTIFICATE",
@@ -407,7 +515,7 @@ async function main() {
       });
     }
 
-    // 8. Create Sample Notifications
+    // 9. Create Sample Notifications
     console.log("🔔 Creating sample notifications...");
     for (const citizen of citizens.slice(0, 3)) {
       await prisma.notification.create({

@@ -105,19 +105,61 @@ export function createApp() {
     }),
   );
 
-  // Rate limiting
+  // Rate limiting - more lenient for development
   const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // limit each IP to 100 requests per windowMs
+    max:
+      parseInt(process.env.RATE_LIMIT_MAX) ||
+      (process.env.NODE_ENV === "development" ? 1000 : 100), // Higher limit for development
     message: {
       success: false,
       message: "Too many requests from this IP, please try again later.",
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Skip rate limiting for certain conditions in development
+    skip: (req) => {
+      return process.env.NODE_ENV === "development" && req.ip === "127.0.0.1";
+    },
   });
 
   app.use("/api/", limiter);
+
+  // Development routes for rate limiting management
+  if (process.env.NODE_ENV === "development") {
+    app.get("/api/rate-limit/status", (req, res) => {
+      res.json({
+        success: true,
+        ip: req.ip,
+        headers: {
+          "x-forwarded-for": req.headers["x-forwarded-for"],
+          "x-real-ip": req.headers["x-real-ip"],
+        },
+        rateLimit: {
+          windowMs:
+            parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+          max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
+        },
+      });
+    });
+
+    app.post("/api/rate-limit/reset", (req, res) => {
+      try {
+        // Clear the rate limit store (this will reset all rate limits)
+        limiter.resetKey(req.ip);
+        res.json({
+          success: true,
+          message: `Rate limit reset for IP: ${req.ip}`,
+        });
+      } catch (error) {
+        res.json({
+          success: true,
+          message:
+            "Rate limit store cleared (server restart also clears limits)",
+        });
+      }
+    });
+  }
 
   // CORS configuration
   app.use(
