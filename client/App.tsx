@@ -136,22 +136,22 @@ const App: React.FC = () => {
                         }
                       />
 
-                                  {/* Complaint routes */}
-                                  <Route
-                                    path="/complaints"
-                                    element={
-                                      <RoleBasedRoute
-                                        allowedRoles={[
-                                          "CITIZEN",
-                                          "WARD_OFFICER",
-                                          "MAINTENANCE_TEAM",
-                                          "ADMINISTRATOR",
-                                        ]}
-                                      >
-                                        <ComplaintsList />
-                                      </RoleBasedRoute>
-                                    }
-                                  />
+                      {/* Complaint routes */}
+                      <Route
+                        path="/complaints"
+                        element={
+                          <RoleBasedRoute
+                            allowedRoles={[
+                              "CITIZEN",
+                              "WARD_OFFICER",
+                              "MAINTENANCE_TEAM",
+                              "ADMINISTRATOR",
+                            ]}
+                          >
+                            <ComplaintsList />
+                          </RoleBasedRoute>
+                        }
+                      />
                                   <Route
                                     path="/complaints/create"
                                     element={
