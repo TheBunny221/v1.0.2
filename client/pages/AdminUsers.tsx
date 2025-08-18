@@ -664,6 +664,196 @@ const AdminUsers: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account in the system.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="Enter email address"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CITIZEN">Citizen</SelectItem>
+                  <SelectItem value="WARD_OFFICER">Ward Officer</SelectItem>
+                  <SelectItem value="MAINTENANCE_TEAM">Maintenance Team</SelectItem>
+                  <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="department">Department</Label>
+              <Input
+                id="department"
+                value={formData.department}
+                onChange={(e) =>
+                  setFormData({ ...formData, department: e.target.value })
+                }
+                placeholder="Enter department (optional)"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleCloseDialogs}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create User"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user information.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="editFullName">Full Name</Label>
+              <Input
+                id="editFullName"
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="editEmail">Email</Label>
+              <Input
+                id="editEmail"
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="Enter email address"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="editPhoneNumber">Phone Number</Label>
+              <Input
+                id="editPhoneNumber"
+                value={formData.phoneNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="editRole">Role</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CITIZEN">Citizen</SelectItem>
+                  <SelectItem value="WARD_OFFICER">Ward Officer</SelectItem>
+                  <SelectItem value="MAINTENANCE_TEAM">Maintenance Team</SelectItem>
+                  <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="editDepartment">Department</Label>
+              <Input
+                id="editDepartment"
+                value={formData.department}
+                onChange={(e) =>
+                  setFormData({ ...formData, department: e.target.value })
+                }
+                placeholder="Enter department (optional)"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleCloseDialogs}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update User"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
