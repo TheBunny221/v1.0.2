@@ -21,16 +21,9 @@ import {
 import QuickComplaintForm from "../components/QuickComplaintForm";
 
 const Index: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.complaints);
-  const { translations, currentLanguage } = useAppSelector(
-    (state) => state.language,
-  );
+  const { translations } = useAppSelector((state) => state.language);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName } = useSystemConfig();
-  const { complaintTypeOptions } = useComplaintTypes();
-  const { data: wardsResponse, isLoading: wardsLoading, error: wardsError } = useGetWardsQuery();
-  const wards = Array.isArray(wardsResponse?.data) ? wardsResponse.data : [];
 
   // Form state
   const [isFormExpanded, setIsFormExpanded] = useState(false);
