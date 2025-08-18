@@ -581,6 +581,41 @@ const AdminConfig: React.FC = () => {
     }
   };
 
+  // Handle Logo File Upload
+  const handleLogoFileUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('logo', file);
+
+      const token = localStorage.getItem("token");
+      const response = await fetch('/api/uploads/logo', {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Upload failed');
+      }
+
+      const data = await response.json();
+
+      // Update the APP_LOGO_URL setting with the new file URL
+      const logoSetting = systemSettings.find(s => s.key === 'APP_LOGO_URL');
+      if (logoSetting) {
+        const updatedSetting = { ...logoSetting, value: data.data.url };
+        await handleSaveSystemSetting(updatedSetting);
+      }
+
+      return data.data.url;
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
   const handleSaveSystemSetting = async (setting: SystemSetting) => {
     setIsLoading(true);
     try {
