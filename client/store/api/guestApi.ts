@@ -166,7 +166,7 @@ export const {
   useTrackComplaintQuery,
   useLazyTrackComplaintQuery,
   useGetPublicStatsQuery,
-  useGetComplaintTypesQuery,
+  useGetPublicComplaintTypesQuery,
   useGetWardsQuery,
 } = guestApi;
 
@@ -178,6 +178,6 @@ export const useGuestApi = {
   useTrackComplaintQuery,
   useLazyTrackComplaintQuery,
   useGetPublicStatsQuery,
-  useGetComplaintTypesQuery,
+  useGetPublicComplaintTypesQuery,
   useGetWardsQuery,
 };
