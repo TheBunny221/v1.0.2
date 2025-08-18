@@ -208,6 +208,7 @@ export function createApp() {
   app.use("/api/uploads", uploadRoutes);
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
+  app.use("/api/captcha", captchaRoutes);
 
   // Development test routes (only in development)
   if (process.env.NODE_ENV !== "production") {
