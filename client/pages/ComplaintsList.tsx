@@ -160,12 +160,10 @@ const ComplaintsList: React.FC = () => {
             Refresh
           </Button>
           {(user?.role === "CITIZEN" || user?.role === "MAINTENANCE_TEAM") && (
-            <Link to="/complaints/new">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Complaint
-              </Button>
-            </Link>
+            <Button onClick={() => setIsQuickFormOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Complaint
+            </Button>
           )}
         </div>
       </div>
