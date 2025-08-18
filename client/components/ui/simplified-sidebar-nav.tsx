@@ -33,7 +33,6 @@ interface SimplifiedSidebarNavProps {
 
 export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
   className,
-  defaultCollapsed = false,
 }) => {
   const dispatch = useAppDispatch();
   const location = useLocation();
