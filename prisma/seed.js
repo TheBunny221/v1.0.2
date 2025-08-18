@@ -309,6 +309,7 @@ async function main() {
           "Issues related to water supply, quality, pressure, or leakage",
         priority: "HIGH",
         slaHours: 24,
+        isActive: true,
       },
       {
         key: "COMPLAINT_TYPE_ELECTRICITY",
@@ -317,6 +318,7 @@ async function main() {
           "Power outages, faulty connections, or street lighting issues",
         priority: "HIGH",
         slaHours: 12,
+        isActive: true,
       },
       {
         key: "COMPLAINT_TYPE_ROAD_REPAIR",
@@ -324,6 +326,7 @@ async function main() {
         description: "Damaged roads, potholes, or infrastructure maintenance",
         priority: "MEDIUM",
         slaHours: 72,
+        isActive: true,
       },
       {
         key: "COMPLAINT_TYPE_WASTE_MANAGEMENT",
@@ -332,6 +335,7 @@ async function main() {
           "Garbage collection, waste disposal, and sanitation issues",
         priority: "MEDIUM",
         slaHours: 48,
+        isActive: true,
       },
       {
         key: "COMPLAINT_TYPE_STREET_LIGHTING",
@@ -339,6 +343,7 @@ async function main() {
         description: "Non-functional street lights or poor lighting conditions",
         priority: "LOW",
         slaHours: 48,
+        isActive: true,
       },
       {
         key: "COMPLAINT_TYPE_DRAINAGE",
@@ -346,6 +351,7 @@ async function main() {
         description: "Blocked drains, flooding, or sewage issues",
         priority: "HIGH",
         slaHours: 24,
+        isActive: true,
       },
       {
         key: "COMPLAINT_TYPE_PUBLIC_TOILET",
@@ -353,6 +359,7 @@ async function main() {
         description: "Maintenance and cleanliness of public toilet facilities",
         priority: "LOW",
         slaHours: 48,
+        isActive: false, // Set as inactive for testing
       },
       {
         key: "COMPLAINT_TYPE_TREE_CUTTING",
@@ -361,6 +368,25 @@ async function main() {
           "Tree trimming, removal of dangerous branches, or fallen trees",
         priority: "MEDIUM",
         slaHours: 72,
+        isActive: false, // Set as inactive for testing
+      },
+      {
+        key: "COMPLAINT_TYPE_NOISE_POLLUTION",
+        name: "Noise Pollution",
+        description:
+          "Excessive noise from construction, events, or other sources",
+        priority: "LOW",
+        slaHours: 24,
+        isActive: true,
+      },
+      {
+        key: "COMPLAINT_TYPE_STRAY_ANIMALS",
+        name: "Stray Animals",
+        description:
+          "Issues with stray dogs, cats, or other animals in public spaces",
+        priority: "MEDIUM",
+        slaHours: 48,
+        isActive: false, // Set as inactive for testing
       },
     ];
 
@@ -376,7 +402,7 @@ async function main() {
             slaHours: typeData.slaHours,
           }),
           description: `Complaint type configuration for ${typeData.name}`,
-          isActive: true,
+          isActive: typeData.isActive,
         },
       });
     }
