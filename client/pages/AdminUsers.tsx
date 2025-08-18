@@ -96,36 +96,48 @@ const AdminUsers: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Check authentication
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-  }, []);
-
-  // API queries
-  const {
+  // API queries using lazy hooks to prevent AbortErrors
+  const [getAllUsers, {
     data: usersResponse,
     isLoading: isLoadingUsers,
     error: usersError,
-    refetch: refetchUsers,
-  } = useGetAllUsersQuery({
-    page,
-    limit,
-    role: roleFilter !== "all" ? roleFilter : undefined,
-    status: statusFilter,
-  }, {
-    skip: !isAuthenticated, // Skip the query if not authenticated
-  });
+  }] = useLazyGetAllUsersQuery();
 
-  const {
+  const [getUserStats, {
     data: statsResponse,
     isLoading: isLoadingStats,
     error: statsError,
-  } = useGetUserStatsQuery(undefined, {
-    skip: !isAuthenticated, // Skip the query if not authenticated
-  });
+  }] = useLazyGetUserStatsQuery();
+
+  // Trigger queries when authentication and parameters are ready
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Trigger users query
+      getAllUsers({
+        page,
+        limit,
+        role: roleFilter !== "all" ? roleFilter : undefined,
+        status: statusFilter,
+      });
+
+      // Trigger stats query
+      getUserStats();
+    }
+  }, [page, limit, roleFilter, statusFilter, getAllUsers, getUserStats]);
+
+  // Manual refetch function
+  const refetchUsers = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      getAllUsers({
+        page,
+        limit,
+        role: roleFilter !== "all" ? roleFilter : undefined,
+        status: statusFilter,
+      });
+    }
+  };
 
   // Fetch wards for form dropdowns
   const [wards, setWards] = useState<Array<{id: string; name: string}>>([]);
