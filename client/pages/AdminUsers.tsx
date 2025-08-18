@@ -61,11 +61,40 @@ import {
 import { toast } from "../components/ui/use-toast";
 
 const AdminUsers: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
+
+  // Dialog states
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+
+  // Form states
+  const [formData, setFormData] = useState<CreateUserRequest>({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    role: "CITIZEN",
+    wardId: "",
+    department: "",
+  });
+
+  // Initialize filters from URL parameters
+  useEffect(() => {
+    const roleParam = searchParams.get("role");
+    const statusParam = searchParams.get("status");
+
+    if (roleParam) {
+      setRoleFilter(roleParam);
+    }
+    if (statusParam) {
+      setStatusFilter(statusParam);
+    }
+  }, [searchParams]);
 
   // API queries
   const {
