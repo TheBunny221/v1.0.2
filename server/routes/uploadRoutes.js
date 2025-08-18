@@ -258,6 +258,31 @@ router.get("/:filename", getAttachment);
 
 /**
  * @swagger
+ * /api/uploads/logo/{filename}:
+ *   get:
+ *     summary: Get uploaded logo file
+ *     tags: [Uploads]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Logo file content
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Logo file not found
+ */
+router.get("/logo/:filename", getAttachment);
+
+/**
+ * @swagger
  * /api/uploads/{id}:
  *   delete:
  *     summary: Delete uploaded file
