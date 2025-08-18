@@ -751,7 +751,7 @@ const AdminUsers: React.FC = () => {
             <div>
               <Label htmlFor="ward">Ward</Label>
               <Select
-                value={formData.wardId}
+                value={formData.wardId || "none"}
                 onValueChange={(value) =>
                   setFormData({ ...formData, wardId: value === "none" ? "" : value })
                 }
