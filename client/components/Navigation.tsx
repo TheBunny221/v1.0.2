@@ -22,6 +22,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  X,
   Bell,
   Globe,
   User,
