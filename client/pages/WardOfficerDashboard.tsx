@@ -6,7 +6,6 @@ import {
   assignComplaint,
   updateComplaintStatus,
 } from "../store/slices/complaintsSlice";
-import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
@@ -132,7 +131,6 @@ const WardOfficerDashboard: React.FC = () => {
   const recentComplaints = wardComplaints.slice(0, 5);
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
@@ -489,7 +487,6 @@ const WardOfficerDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
   );
 };
 
