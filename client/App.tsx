@@ -156,7 +156,7 @@ const App: React.FC = () => {
                         path="/complaints/create"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "CITIZEN",
                                           "WARD_OFFICER",
                                           "MAINTENANCE_TEAM",
@@ -171,7 +171,7 @@ const App: React.FC = () => {
                         path="/complaints/citizen-form"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["CITIZEN"]}
+                            allowedRoles={["CITIZEN"]}
                                       >
                                         <UnifiedComplaintForm />
                                       </RoleBasedRoute>
@@ -181,7 +181,7 @@ const App: React.FC = () => {
                         path="/complaints/new"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["CITIZEN"]}
+                            allowedRoles={["CITIZEN"]}
                                       >
                                         <UnifiedComplaintForm />
                                       </RoleBasedRoute>
@@ -191,7 +191,7 @@ const App: React.FC = () => {
                         path="/complaints/:id"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "CITIZEN",
                                           "WARD_OFFICER",
                                           "MAINTENANCE_TEAM",
@@ -208,7 +208,7 @@ const App: React.FC = () => {
                         path="/tasks"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["WARD_OFFICER"]}
+                            allowedRoles={["WARD_OFFICER"]}
                                       >
                                         <WardTasks />
                                       </RoleBasedRoute>
@@ -218,7 +218,7 @@ const App: React.FC = () => {
                         path="/ward"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["WARD_OFFICER"]}
+                            allowedRoles={["WARD_OFFICER"]}
                                       >
                                         <WardManagement />
                                       </RoleBasedRoute>
@@ -230,7 +230,7 @@ const App: React.FC = () => {
                         path="/maintenance"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["MAINTENANCE_TEAM"]}
+                            allowedRoles={["MAINTENANCE_TEAM"]}
                                       >
                                         <MaintenanceTasks />
                                       </RoleBasedRoute>
@@ -240,7 +240,7 @@ const App: React.FC = () => {
                         path="/tasks/:id"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["MAINTENANCE_TEAM"]}
+                            allowedRoles={["MAINTENANCE_TEAM"]}
                                       >
                                         <TaskDetails />
                                       </RoleBasedRoute>
@@ -252,7 +252,7 @@ const App: React.FC = () => {
                         path="/messages"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "WARD_OFFICER",
                                           "MAINTENANCE_TEAM",
                                         ]}
@@ -267,7 +267,7 @@ const App: React.FC = () => {
                         path="/reports"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "WARD_OFFICER",
                                           "ADMINISTRATOR",
                                         ]}
@@ -282,7 +282,7 @@ const App: React.FC = () => {
                         path="/admin/users"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["ADMINISTRATOR"]}
+                            allowedRoles={["ADMINISTRATOR"]}
                                       >
                                         <AdminUsers />
                                       </RoleBasedRoute>
@@ -292,7 +292,7 @@ const App: React.FC = () => {
                         path="/admin/config"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["ADMINISTRATOR"]}
+                            allowedRoles={["ADMINISTRATOR"]}
                                       >
                                         <AdminConfig />
                                       </RoleBasedRoute>
@@ -302,7 +302,7 @@ const App: React.FC = () => {
                         path="/admin/languages"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["ADMINISTRATOR"]}
+                            allowedRoles={["ADMINISTRATOR"]}
                                       >
                                         <AdminLanguages />
                                       </RoleBasedRoute>
@@ -312,7 +312,7 @@ const App: React.FC = () => {
                         path="/admin/analytics"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={["ADMINISTRATOR"]}
+                            allowedRoles={["ADMINISTRATOR"]}
                                       >
                                         <AdminAnalytics />
                                       </RoleBasedRoute>
@@ -322,7 +322,7 @@ const App: React.FC = () => {
                         path="/admin/reports-analytics"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "ADMINISTRATOR",
                                           "WARD_OFFICER",
                                         ]}
@@ -337,7 +337,7 @@ const App: React.FC = () => {
                         path="/profile"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "CITIZEN",
                                           "WARD_OFFICER",
                                           "MAINTENANCE_TEAM",
@@ -352,7 +352,7 @@ const App: React.FC = () => {
                         path="/settings"
                         element={
                           <RoleBasedRoute
-                                        allowedRoles={[
+                            allowedRoles={[
                                           "CITIZEN",
                                           "WARD_OFFICER",
                                           "MAINTENANCE_TEAM",
