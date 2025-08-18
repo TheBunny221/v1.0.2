@@ -753,14 +753,14 @@ const AdminUsers: React.FC = () => {
               <Select
                 value={formData.wardId}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, wardId: value })
+                  setFormData({ ...formData, wardId: value === "none" ? "" : value })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select ward (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No ward assigned</SelectItem>
+                  <SelectItem value="none">No ward assigned</SelectItem>
                   {wards.map((ward) => (
                     <SelectItem key={ward.id} value={ward.id}>
                       {ward.name}
