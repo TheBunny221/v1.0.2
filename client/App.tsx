@@ -162,7 +162,7 @@ const App: React.FC = () => {
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
                             ]}
-                                      >
+                          >
                                         <CreateComplaint />
                                       </RoleBasedRoute>
                                     }
@@ -172,7 +172,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["CITIZEN"]}
-                                      >
+                          >
                                         <UnifiedComplaintForm />
                                       </RoleBasedRoute>
                                     }
@@ -182,7 +182,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["CITIZEN"]}
-                                      >
+                          >
                                         <UnifiedComplaintForm />
                                       </RoleBasedRoute>
                                     }
@@ -197,7 +197,7 @@ const App: React.FC = () => {
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
                             ]}
-                                      >
+                          >
                                         <ComplaintDetails />
                                       </RoleBasedRoute>
                                     }
@@ -209,7 +209,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["WARD_OFFICER"]}
-                                      >
+                          >
                                         <WardTasks />
                                       </RoleBasedRoute>
                                     }
@@ -219,7 +219,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["WARD_OFFICER"]}
-                                      >
+                          >
                                         <WardManagement />
                                       </RoleBasedRoute>
                                     }
@@ -231,7 +231,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["MAINTENANCE_TEAM"]}
-                                      >
+                          >
                                         <MaintenanceTasks />
                                       </RoleBasedRoute>
                                     }
@@ -241,7 +241,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["MAINTENANCE_TEAM"]}
-                                      >
+                          >
                                         <TaskDetails />
                                       </RoleBasedRoute>
                                     }
@@ -256,7 +256,7 @@ const App: React.FC = () => {
                               "WARD_OFFICER",
                               "MAINTENANCE_TEAM",
                             ]}
-                                      >
+                          >
                                         <Messages />
                                       </RoleBasedRoute>
                                     }
@@ -271,7 +271,7 @@ const App: React.FC = () => {
                               "WARD_OFFICER",
                               "ADMINISTRATOR",
                             ]}
-                                      >
+                          >
                                         <AdminReports />
                                       </RoleBasedRoute>
                                     }
@@ -283,7 +283,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["ADMINISTRATOR"]}
-                                      >
+                          >
                                         <AdminUsers />
                                       </RoleBasedRoute>
                                     }
@@ -293,7 +293,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["ADMINISTRATOR"]}
-                                      >
+                          >
                                         <AdminConfig />
                                       </RoleBasedRoute>
                                     }
@@ -303,7 +303,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["ADMINISTRATOR"]}
-                                      >
+                          >
                                         <AdminLanguages />
                                       </RoleBasedRoute>
                                     }
@@ -313,7 +313,7 @@ const App: React.FC = () => {
                         element={
                           <RoleBasedRoute
                             allowedRoles={["ADMINISTRATOR"]}
-                                      >
+                          >
                                         <AdminAnalytics />
                                       </RoleBasedRoute>
                                     }
@@ -326,7 +326,7 @@ const App: React.FC = () => {
                               "ADMINISTRATOR",
                               "WARD_OFFICER",
                             ]}
-                                      >
+                          >
                                         <ReportsAnalytics />
                                       </RoleBasedRoute>
                                     }
@@ -343,7 +343,7 @@ const App: React.FC = () => {
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
                             ]}
-                                      >
+                          >
                                         <Profile />
                                       </RoleBasedRoute>
                                     }
@@ -358,7 +358,7 @@ const App: React.FC = () => {
                               "MAINTENANCE_TEAM",
                               "ADMINISTRATOR",
                             ]}
-                                      >
+                          >
                                         <Settings />
                                       </RoleBasedRoute>
                                     }
