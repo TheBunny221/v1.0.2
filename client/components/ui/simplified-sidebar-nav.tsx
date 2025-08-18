@@ -29,7 +29,6 @@ interface SidebarNavItem {
 
 interface SimplifiedSidebarNavProps {
   className?: string;
-  defaultCollapsed?: boolean;
 }
 
 export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
