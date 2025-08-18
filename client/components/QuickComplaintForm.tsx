@@ -333,7 +333,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     },
     [
       captcha,
-      captchaValue,
+      captchaId,
       formData,
       submissionMode,
       isAuthenticated,
