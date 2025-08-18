@@ -126,6 +126,77 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Upload app logo
+// @route   POST /api/uploads/logo
+// @access  Private (Admin only)
+export const uploadLogo = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: "No file uploaded",
+      data: null,
+    });
+  }
+
+  // Validate file size (max 5MB for logos)
+  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  if (req.file.size > maxSize) {
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+    return res.status(413).json({
+      success: false,
+      message: "File size too large. Maximum allowed size is 5MB.",
+      data: null,
+    });
+  }
+
+  // Validate mime type (images only for logos)
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/svg+xml",
+  ];
+
+  if (!allowedMimeTypes.includes(req.file.mimetype)) {
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+    return res.status(400).json({
+      success: false,
+      message: "Invalid file type. Please upload a valid image file (JPEG, PNG, GIF, WEBP, SVG).",
+      data: null,
+    });
+  }
+
+  // Update APP_LOGO_URL system setting
+  const logoUrl = `/api/uploads/logo/${req.file.filename}`;
+
+  await prisma.systemConfig.upsert({
+    where: { key: "APP_LOGO_URL" },
+    create: {
+      key: "APP_LOGO_URL",
+      value: logoUrl,
+      description: "URL for the application logo",
+    },
+    update: {
+      value: logoUrl,
+    },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logo uploaded successfully",
+    data: {
+      filename: req.file.filename,
+      url: logoUrl,
+      originalName: req.file.originalname,
+      size: req.file.size,
+    },
+  });
+});
+
 // @desc    Get uploaded file
 // @route   GET /api/uploads/:filename
 // @access  Public
