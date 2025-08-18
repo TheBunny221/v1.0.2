@@ -551,9 +551,12 @@ const Navigation: React.FC = () => {
       </div>
 
       {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 bg-white">
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white shadow-lg">
             {filteredNavItems.map((item) => (
               <Link
                 key={item.path}
@@ -693,9 +696,8 @@ const Navigation: React.FC = () => {
                 </div>
               </button>
             </div>
-          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
