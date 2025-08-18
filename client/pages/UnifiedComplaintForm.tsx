@@ -167,6 +167,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const [verifyGuestOtp] = useVerifyGuestOtpMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // Fetch wards from API
