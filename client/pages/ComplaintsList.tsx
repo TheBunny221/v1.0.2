@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
 import { useDataManager } from "../hooks/useDataManager";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
