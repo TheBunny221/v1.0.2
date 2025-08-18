@@ -177,11 +177,16 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
             )}
             title={isCollapsed ? item.label : undefined}
           >
-            <span className="flex-shrink-0">
-              {item.icon}
+            <span className="flex-shrink-0 transition-colors duration-200">
+              {React.cloneElement(item.icon as React.ReactElement, {
+                className: cn(
+                  "h-4 w-4",
+                  isActiveRoute(item.path) ? "text-white" : "text-gray-500 group-hover:text-gray-700"
+                )
+              })}
             </span>
             {!isCollapsed && (
-              <span className="ml-3 truncate">
+              <span className="ml-3 truncate font-medium">
                 {item.label}
               </span>
             )}
