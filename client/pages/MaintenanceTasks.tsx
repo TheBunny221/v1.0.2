@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
 import {
   Card,
   CardContent,
@@ -8,6 +9,10 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
 import {
   Wrench,
   Calendar,
@@ -18,6 +23,11 @@ import {
   CheckCircle,
   AlertTriangle,
   Play,
+  Plus,
+  RotateCcw,
+  ListTodo,
+  AlertCircle,
+  Upload,
 } from "lucide-react";
 
 const MaintenanceTasks: React.FC = () => {
