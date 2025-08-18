@@ -9,7 +9,12 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
@@ -52,7 +57,8 @@ const MaintenanceTasks: React.FC = () => {
       estimatedTime: "4 hours",
       dueDate: "2024-01-15",
       isOverdue: false,
-      description: "Main water pipeline burst, affecting supply to 200+ households",
+      description:
+        "Main water pipeline burst, affecting supply to 200+ households",
       assignedAt: "2024-01-14T10:00:00Z",
       photo: "/api/attachments/complaint-1-photo.jpg",
     },
@@ -118,15 +124,15 @@ const MaintenanceTasks: React.FC = () => {
   // Calculate task counts
   const taskCounts = {
     total: tasks.length,
-    pending: tasks.filter(t => t.status === "ASSIGNED").length,
-    overdue: tasks.filter(t => t.isOverdue).length,
-    resolved: tasks.filter(t => t.status === "RESOLVED").length,
-    reopened: tasks.filter(t => t.status === "REOPENED").length,
-    inProgress: tasks.filter(t => t.status === "IN_PROGRESS").length,
+    pending: tasks.filter((t) => t.status === "ASSIGNED").length,
+    overdue: tasks.filter((t) => t.isOverdue).length,
+    resolved: tasks.filter((t) => t.status === "RESOLVED").length,
+    reopened: tasks.filter((t) => t.status === "REOPENED").length,
+    inProgress: tasks.filter((t) => t.status === "IN_PROGRESS").length,
   };
 
   // Filter tasks based on active filter
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     switch (activeFilter) {
       case "pending":
         return task.status === "ASSIGNED";
@@ -145,12 +151,10 @@ const MaintenanceTasks: React.FC = () => {
 
   // Handle task status updates
   const handleStartWork = (taskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? { ...task, status: "IN_PROGRESS" }
-          : task
-      )
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, status: "IN_PROGRESS" } : task,
+      ),
     );
   };
 
@@ -161,18 +165,18 @@ const MaintenanceTasks: React.FC = () => {
 
   const submitMarkResolved = () => {
     if (selectedTask) {
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
           task.id === selectedTask.id
             ? {
                 ...task,
                 status: "RESOLVED",
                 resolvedAt: new Date().toISOString(),
                 resolveComment,
-                resolvePhoto: resolvePhoto?.name
+                resolvePhoto: resolvePhoto?.name,
               }
-            : task
-        )
+            : task,
+        ),
       );
       setIsMarkResolvedOpen(false);
       setResolveComment("");
@@ -184,12 +188,12 @@ const MaintenanceTasks: React.FC = () => {
   // Handle navigation
   const handleNavigate = (address: string) => {
     const encodedAddress = encodeURIComponent(address);
-    window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+    window.open(`https://maps.google.com/?q=${encodedAddress}`, "_blank");
   };
 
   // Handle photo view
   const handleViewPhoto = (photoUrl: string) => {
-    window.open(photoUrl, '_blank');
+    window.open(photoUrl, "_blank");
   };
 
   const getPriorityColor = (priority: string) => {
@@ -257,7 +261,9 @@ const MaintenanceTasks: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                <p className="text-2xl font-bold text-blue-600">{taskCounts.total}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {taskCounts.total}
+                </p>
               </div>
               <ListTodo className="h-8 w-8 text-blue-600" />
             </div>
@@ -271,8 +277,12 @@ const MaintenanceTasks: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Tasks</p>
-                <p className="text-2xl font-bold text-blue-600">{taskCounts.pending}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Pending Tasks
+                </p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {taskCounts.pending}
+                </p>
               </div>
               <Clock className="h-8 w-8 text-blue-600" />
             </div>
@@ -286,8 +296,12 @@ const MaintenanceTasks: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Overdue Tasks</p>
-                <p className="text-2xl font-bold text-red-600">{taskCounts.overdue}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Overdue Tasks
+                </p>
+                <p className="text-2xl font-bold text-red-600">
+                  {taskCounts.overdue}
+                </p>
               </div>
               <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
@@ -301,8 +315,12 @@ const MaintenanceTasks: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Resolved Tasks</p>
-                <p className="text-2xl font-bold text-green-600">{taskCounts.resolved}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Resolved Tasks
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {taskCounts.resolved}
+                </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
@@ -316,8 +334,12 @@ const MaintenanceTasks: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Reopened Tasks</p>
-                <p className="text-2xl font-bold text-purple-600">{taskCounts.reopened}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Reopened Tasks
+                </p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {taskCounts.reopened}
+                </p>
               </div>
               <RotateCcw className="h-8 w-8 text-purple-600" />
             </div>
@@ -331,7 +353,9 @@ const MaintenanceTasks: React.FC = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
               <Wrench className="h-5 w-5 mr-2" />
-              My Tasks {activeFilter !== "all" && `(${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)})`}
+              My Tasks{" "}
+              {activeFilter !== "all" &&
+                `(${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)})`}
             </CardTitle>
             <Badge variant="secondary">{filteredTasks.length} tasks</Badge>
           </div>
@@ -409,7 +433,8 @@ const MaintenanceTasks: React.FC = () => {
                         Start Work
                       </Button>
                     )}
-                    {(task.status === "IN_PROGRESS" || task.status === "REOPENED") && (
+                    {(task.status === "IN_PROGRESS" ||
+                      task.status === "REOPENED") && (
                       <Button
                         size="sm"
                         onClick={() => handleMarkResolved(task)}
@@ -430,7 +455,6 @@ const MaintenanceTasks: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
 
       {/* Mark as Resolved Dialog */}
       <Dialog open={isMarkResolvedOpen} onOpenChange={setIsMarkResolvedOpen}>
