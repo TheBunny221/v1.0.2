@@ -152,7 +152,7 @@ const App: React.FC = () => {
                           </RoleBasedRoute>
                         }
                       />
-                                  <Route
+                      <Route
                                     path="/complaints/create"
                                     element={
                                       <RoleBasedRoute
@@ -167,7 +167,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/complaints/citizen-form"
                                     element={
                                       <RoleBasedRoute
@@ -177,7 +177,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/complaints/new"
                                     element={
                                       <RoleBasedRoute
@@ -187,7 +187,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/complaints/:id"
                                     element={
                                       <RoleBasedRoute
@@ -204,7 +204,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Ward Officer routes */}
-                                  <Route
+                      <Route
                                     path="/tasks"
                                     element={
                                       <RoleBasedRoute
@@ -214,7 +214,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/ward"
                                     element={
                                       <RoleBasedRoute
@@ -226,7 +226,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Maintenance Team routes */}
-                                  <Route
+                      <Route
                                     path="/maintenance"
                                     element={
                                       <RoleBasedRoute
@@ -236,7 +236,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/tasks/:id"
                                     element={
                                       <RoleBasedRoute
@@ -248,7 +248,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Communication routes */}
-                                  <Route
+                      <Route
                                     path="/messages"
                                     element={
                                       <RoleBasedRoute
@@ -263,7 +263,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Reports routes */}
-                                  <Route
+                      <Route
                                     path="/reports"
                                     element={
                                       <RoleBasedRoute
@@ -278,7 +278,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Admin routes */}
-                                  <Route
+                      <Route
                                     path="/admin/users"
                                     element={
                                       <RoleBasedRoute
@@ -288,7 +288,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/admin/config"
                                     element={
                                       <RoleBasedRoute
@@ -298,7 +298,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/admin/languages"
                                     element={
                                       <RoleBasedRoute
@@ -308,7 +308,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/admin/analytics"
                                     element={
                                       <RoleBasedRoute
@@ -318,7 +318,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/admin/reports-analytics"
                                     element={
                                       <RoleBasedRoute
@@ -333,7 +333,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Profile and Settings */}
-                                  <Route
+                      <Route
                                     path="/profile"
                                     element={
                                       <RoleBasedRoute
@@ -348,7 +348,7 @@ const App: React.FC = () => {
                                       </RoleBasedRoute>
                                     }
                                   />
-                                  <Route
+                      <Route
                                     path="/settings"
                                     element={
                                       <RoleBasedRoute
@@ -365,7 +365,7 @@ const App: React.FC = () => {
                                   />
 
                                   {/* Catch all route */}
-                                  <Route
+                      <Route
                                     path="*"
                                     element={<Navigate to="/" replace />}
                                   />
