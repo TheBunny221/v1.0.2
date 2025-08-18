@@ -22,6 +22,10 @@ const baseQueryWithReauth: BaseQueryFn<
 
   // Handle different body types properly
   if (typeof args !== "string" && args.body !== undefined) {
+    console.log("Body type:", typeof args.body);
+    console.log("Body value:", args.body);
+    console.log("Body constructor:", args.body.constructor.name);
+
     if (args.body instanceof FormData) {
       // FormData should not be JSON stringified and should not have content-type set
       body = args.body;
@@ -29,19 +33,29 @@ const baseQueryWithReauth: BaseQueryFn<
     } else if (typeof args.body === "string") {
       // Already a string, use as-is
       body = args.body;
-    } else if (typeof args.body === "object") {
-      // Object needs to be JSON stringified
-      body = JSON.stringify(args.body);
+    } else if (args.body !== null && typeof args.body === "object") {
+      // Object needs to be JSON stringified - be very explicit
+      try {
+        body = JSON.stringify(args.body);
+        console.log("Serialized body:", body);
+      } catch (error) {
+        console.error("Failed to stringify body:", error);
+        body = "{}";
+      }
+    } else {
+      // Fallback for other types
+      body = String(args.body);
     }
   }
 
+  // Build options WITHOUT spreading args to avoid overriding our body
   const options: RequestInit = typeof args === "string"
     ? { method: "GET" }
     : {
         method: args.method || "GET",
         headers: args.headers || {},
         body,
-        ...args,
+        // Remove ...args spread to prevent overriding our carefully prepared body
       };
 
   // Add auth headers manually
