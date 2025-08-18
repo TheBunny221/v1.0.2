@@ -119,6 +119,8 @@ const AdminUsers: React.FC = () => {
   const [activateUser] = useActivateUserMutation();
   const [deactivateUser] = useDeactivateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
+  const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
 
   const users = usersResponse?.data?.users || [];
   const pagination = usersResponse?.data?.pagination;
