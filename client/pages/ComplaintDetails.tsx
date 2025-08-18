@@ -573,7 +573,7 @@ const ComplaintDetails: React.FC = () => {
                 ) : (
                   <div className="text-center py-4 text-gray-500">
                     <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No status updates available</p>
+                    <p>{user?.role === "CITIZEN" ? "No updates available for your complaint yet" : "No status updates available"}</p>
                   </div>
                 )}
               </div>
