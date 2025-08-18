@@ -96,11 +96,13 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
 
   const appName = getConfig("APP_NAME", "Kochi Smart City");
   const appLogoUrl = getConfig("APP_LOGO_URL", "/logo.png");
+  const appLogoSize = getConfig("APP_LOGO_SIZE", "medium");
 
   const value: SystemConfigContextType = {
     config,
     appName,
     appLogoUrl,
+    appLogoSize,
     isLoading,
     refreshConfig,
     getConfig,
