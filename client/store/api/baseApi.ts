@@ -6,28 +6,7 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { logout } from "../slices/authSlice";
 
-// Create the most basic possible base query
-const baseQuery = fetchBaseQuery({
-  baseUrl: "/api/",
-  prepareHeaders: (headers, { getState }) => {
-    try {
-      const state = getState() as any;
-      const token = state?.auth?.token || localStorage.getItem("token");
-
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-    } catch (error) {
-      // Silently handle any state access errors
-      const token = localStorage.getItem("token");
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-    }
-
-    return headers;
-  },
-});
+// Note: Using completely custom fetch implementation below to avoid RTK Query response body conflicts
 
 // Completely custom base query to avoid all RTK Query response body conflicts
 const baseQueryWithReauth: BaseQueryFn<
