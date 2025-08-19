@@ -402,6 +402,26 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
       value: "medium",
       description: "Size of the application logo (small, medium, large)",
     },
+    {
+      key: "CONTACT_HELPLINE",
+      value: "1800-XXX-XXXX",
+      description: "Helpline phone number for customer support",
+    },
+    {
+      key: "CONTACT_EMAIL",
+      value: "support@cochinsmartcity.in",
+      description: "Email address for customer support",
+    },
+    {
+      key: "CONTACT_OFFICE_HOURS",
+      value: "Monday - Friday: 9 AM - 6 PM",
+      description: "Office hours for customer support",
+    },
+    {
+      key: "CONTACT_OFFICE_ADDRESS",
+      value: "Cochin Corporation Office",
+      description: "Physical address of the office",
+    },
   ];
 
   for (const setting of essentialSettings) {
