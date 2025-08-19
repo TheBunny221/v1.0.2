@@ -279,15 +279,15 @@ const App: React.FC = () => {
                         }
                       />
 
-                      {/* Reports routes */}
+                      {/* Unified Reports route */}
                       <Route
                         path="/reports"
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute
-                              allowedRoles={["WARD_OFFICER", "ADMINISTRATOR"]}
+                              allowedRoles={["WARD_OFFICER", "ADMINISTRATOR", "MAINTENANCE_TEAM"]}
                             >
-                              <AdminReports />
+                              <UnifiedReports />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
