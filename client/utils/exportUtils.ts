@@ -437,18 +437,18 @@ export const exportToExcel = (
   // Detailed Complaints Sheet with proper complaint IDs
   const complaintsData = data.complaints.map(complaint => {
     const complaintId = formatComplaintId(complaint.id, options.systemConfig.complaintIdPrefix || "KSC");
-    
+
     return {
       "Complaint ID": complaintId,
       "Database ID": complaint.id,
-      "Type": complaint.type || "N/A",
+      "Type": (complaint.type || "N/A").replace(/_/g, ' '),
       "Description": complaint.description || "N/A",
-      "Status": complaint.status || "N/A",
-      "Priority": complaint.priority || "N/A",
+      "Status": (complaint.status || "N/A").replace(/_/g, ' ').toUpperCase(),
+      "Priority": (complaint.priority || "N/A").replace(/_/g, ' ').toUpperCase(),
       "Ward": complaint.ward?.name || "N/A",
       "Created Date": complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : "N/A",
       "Resolved Date": complaint.resolvedOn ? new Date(complaint.resolvedOn).toLocaleDateString() : "Not resolved",
-      "Resolution Days": complaint.resolvedOn && complaint.createdAt 
+      "Resolution Days": complaint.resolvedOn && complaint.createdAt
         ? Math.ceil((new Date(complaint.resolvedOn).getTime() - new Date(complaint.createdAt).getTime()) / (1000 * 60 * 60 * 24))
         : "N/A",
       "Assigned To": complaint.assignedTo?.fullName || "Unassigned",
@@ -457,7 +457,7 @@ export const exportToExcel = (
       "Contact Email": complaint.contactEmail || "N/A",
       "Location": complaint.location || "N/A",
       "Landmark": complaint.landmark || "N/A",
-      "SLA Status": complaint.deadline && complaint.resolvedOn 
+      "SLA Status": complaint.deadline && complaint.resolvedOn
         ? (new Date(complaint.resolvedOn) <= new Date(complaint.deadline) ? "Met" : "Breached")
         : complaint.deadline && !complaint.resolvedOn && new Date() > new Date(complaint.deadline)
         ? "Overdue"
@@ -524,7 +524,7 @@ export const exportToExcel = (
       ["Metric", "Value", "Target", "Status"],
       ["Resolution Rate", `${((data.summary.resolved / data.summary.total) * 100).toFixed(2)}%`, "85%", ((data.summary.resolved / data.summary.total) * 100) >= 85 ? "✓ Met" : "✗ Below Target"],
       ["Average Resolution Time", "3.2 days", "5 days", "✓ Met"],
-      ["Citizen Satisfaction", "4.2/5", "4.0/5", "✓ Met"],
+      ["Citizen Satisfaction", "4.2/5", "4.0/5", "�� Met"],
       ["First Time Resolution", "78%", "75%", "✓ Met"],
       ["SLA Compliance", "87%", "90%", "✗ Below Target"]
     ];
