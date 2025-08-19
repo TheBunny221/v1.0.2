@@ -57,17 +57,46 @@ const GuestTrackComplaint: React.FC = () => {
     setError("");
 
     try {
-      const result = await dispatch(
-        trackGuestComplaint({
-          complaintId: complaintId.trim(),
-        }),
-      ).unwrap();
-      setTrackingResult(result);
-    } catch (err) {
-      setError("Complaint not found. Please check your complaint ID.");
+      // Request OTP for the complaint
+      const result = await requestOtp({
+        complaintId: complaintId.trim(),
+      }).unwrap();
+
+      if (result.success) {
+        setMaskedEmail(result.data.email);
+        setShowOtpModal(true);
+      }
+    } catch (err: any) {
+      setError(err?.data?.message || "Complaint not found. Please check your complaint ID.");
       setTrackingResult(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOtpVerified = async (data: { complaintId: string; otpCode: string }) => {
+    try {
+      const result = await verifyOtp(data).unwrap();
+
+      if (result.success) {
+        setVerifiedComplaint(result.data.complaint);
+        setVerifiedUser(result.data.user);
+        setShowOtpModal(false);
+        setShowComplaintDetails(true);
+      }
+    } catch (err: any) {
+      // Error will be handled by the OTP modal
+      console.error("OTP verification failed:", err);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      await requestOtp({
+        complaintId: complaintId.trim(),
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to resend OTP:", err);
     }
   };
 
