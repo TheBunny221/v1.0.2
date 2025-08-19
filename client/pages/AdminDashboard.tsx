@@ -445,19 +445,19 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>SLA Compliance by Ward</CardTitle>
               </CardHeader>
               <CardContent>
-                {wardPerformance.length > 0 ? (
+                {wardPerformance && wardPerformance.length > 0 ? (
                   <div className="space-y-4">
                     {wardPerformance.map((ward, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">
-                            {ward.ward}
+                            {ward?.ward || 'Unknown Ward'}
                           </span>
                           <span className="text-sm text-gray-600">
-                            {ward.sla}%
+                            {ward?.sla || 0}%
                           </span>
                         </div>
-                        <Progress value={ward.sla} className="h-2" />
+                        <Progress value={ward?.sla || 0} className="h-2" />
                       </div>
                     ))}
                   </div>
