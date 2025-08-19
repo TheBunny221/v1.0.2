@@ -1,16 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type {
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError,
-} from "@reduxjs/toolkit/query";
-import { logout, setError } from "../slices/authSlice";
-import { toast } from "../../components/ui/use-toast";
 
-// Base query without response body interference
+// Minimal base query to avoid any response body consumption issues
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api/",
   prepareHeaders: (headers, { getState }) => {
+    // Get auth token
     const state = getState() as any;
     const token = state?.auth?.token || localStorage.getItem("token");
 
@@ -20,62 +14,15 @@ const baseQuery = fetchBaseQuery({
 
     return headers;
   },
-  timeout: 30000,
 });
 
-// Remove custom auth wrapper to eliminate response body consumption issues
-// Auth handling will be done at the component level if needed
-
-// Enhanced base query with authentication handling
-const baseQueryWithReauth: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  // Make the request
-  const result = await baseQuery(args, api, extraOptions);
-
-  // Only handle 401 errors for logout, avoid any response body access
-  if (result.error?.status === 401) {
-    const endpoint = typeof args === "string" ? args : args.url;
-    const isAuthEndpoint = typeof endpoint === "string" && (
-      endpoint.includes("auth/login") ||
-      endpoint.includes("auth/register") ||
-      endpoint.includes("auth/verify-otp") ||
-      endpoint.includes("auth/login-otp") ||
-      endpoint.includes("auth/set-password")
-    );
-
-    if (!isAuthEndpoint) {
-      // Session expired, logout user
-      localStorage.removeItem("token");
-      api.dispatch(logout());
-
-      // Show notification without blocking
-      setTimeout(() => {
-        try {
-          toast({
-            title: "Session Expired",
-            description: "Please login again to continue.",
-            variant: "destructive",
-          });
-        } catch (e) {
-          console.warn("Toast failed:", e);
-        }
-      }, 100);
-    }
-  }
-
-  return result;
-};
-
-// Create the base API slice
+// Create the base API slice with minimal configuration
 export const baseApi = createApi({
   reducerPath: "api",
-  baseQuery: baseQuery,
+  baseQuery,
   tagTypes: [
     "Auth",
-    "User",
+    "User", 
     "Complaint",
     "ComplaintType",
     "Ward",
@@ -89,12 +36,7 @@ export const baseApi = createApi({
   endpoints: () => ({}),
 });
 
-// Export hooks
-export const {
-  // Will be populated by individual API slices
-} = baseApi;
-
-// Types for enhanced error handling
+// Types for API responses
 export interface ApiError {
   status: number;
   message: string;
@@ -113,12 +55,6 @@ export interface ApiResponse<T = any> {
     hasMore?: boolean;
   };
 }
-
-// Helper for transforming API responses (deprecated - kept for backwards compatibility)
-// Prefer to let RTK Query handle responses naturally to avoid response body consumption issues
-export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  return response as ApiResponse<T>;
-};
 
 // Helper for handling optimistic updates
 export const optimisticUpdate = <T>(
