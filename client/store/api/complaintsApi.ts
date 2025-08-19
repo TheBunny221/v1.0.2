@@ -380,4 +380,5 @@ export const {
   useUploadComplaintAttachmentMutation,
   useGetComplaintTypesQuery,
   useGetComplaintStatisticsQuery,
+  useGetWardUsersQuery,
 } = complaintsApi;
