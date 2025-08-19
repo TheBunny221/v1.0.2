@@ -77,11 +77,11 @@ const Index: React.FC = () => {
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
               >
-                // <Link to="/complaint">
+                {/**<Link to="/complaint"> **/}
                   <FileText className="mr-2 h-5 w-5" />
                   {translations?.complaints?.registerComplaint ||
                     "Register Complaint"}
-                // </Link>
+                {/**</Link>**/}
               </Button>
 
               <Button
