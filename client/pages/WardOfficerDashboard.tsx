@@ -2,10 +2,9 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import {
-  useGetComplaintsQuery,
   useAssignComplaintMutation
 } from "../store/api/complaintsApi";
-import { useGetAllUsersQuery } from "../store/api/adminApi";
+// import { useGetAllUsersQuery } from "../store/api/adminApi";
 import {
   Card,
   CardContent,
