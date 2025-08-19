@@ -71,10 +71,18 @@ interface ComplaintAssignment {
 }
 
 const WardOfficerDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Use RTK Query for complaints
+  const {
+    data: complaintsResponse,
+    isLoading: complaintsLoading,
+    error: complaintsError,
+    refetch: refetchComplaints
+  } = useGetComplaintsQuery({});
+
+  const complaints = complaintsResponse?.data || [];
 
   // State for filtering and assignment
   const [activeFilter, setActiveFilter] = useState<string>("all");
