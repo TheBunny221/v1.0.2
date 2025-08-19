@@ -111,7 +111,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       label: translations.nav.reports,
       path: "/reports",
       icon: <TrendingUp className="h-4 w-4" />,
-      roles: ["WARD_OFFICER", "ADMINISTRATOR"],
+      roles: ["WARD_OFFICER", "ADMINISTRATOR", "MAINTENANCE_TEAM"],
     },
     {
       label: translations.nav.users,
