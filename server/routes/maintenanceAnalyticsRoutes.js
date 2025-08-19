@@ -17,7 +17,7 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
   
   // Build filter conditions for maintenance team member
   let whereConditions = {
-    assignedTo: req.user.id,
+    assignedToId: req.user.id,
   };
   
   // Apply query filters
