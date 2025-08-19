@@ -162,20 +162,26 @@ const baseQueryWithReauth: BaseQueryFn<
     // Enhanced error detection for network issues
     const errorMessage = String(error);
     let errorType = "FETCH_ERROR";
-    let userMessage = "Network connection failed. Please check your internet connection.";
+    let userMessage =
+      "Network connection failed. Please check your internet connection.";
 
     if (error instanceof DOMException && error.name === "AbortError") {
       errorType = "TIMEOUT_ERROR";
       userMessage = "Request timed out. Please try again.";
     } else if (errorMessage.includes("Failed to fetch")) {
       errorType = "NETWORK_ERROR";
-      userMessage = "Cannot connect to the server. Please check your internet connection and try again.";
-    } else if (errorMessage.includes("timeout") || errorMessage.includes("TIMEOUT")) {
+      userMessage =
+        "Cannot connect to the server. Please check your internet connection and try again.";
+    } else if (
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("TIMEOUT")
+    ) {
       errorType = "TIMEOUT_ERROR";
       userMessage = "Request timed out. Please try again.";
     } else if (errorMessage.includes("ERR_NETWORK")) {
       errorType = "CONNECTION_ERROR";
-      userMessage = "Network connection error. Please check your connection and try again.";
+      userMessage =
+        "Network connection error. Please check your connection and try again.";
     }
 
     console.error("Fetch error in baseApi:", {
@@ -323,7 +329,10 @@ export const getApiErrorMessage = (error: any): string => {
     }
 
     // Handle network errors
-    if (error?.message?.includes("Failed to fetch") || error?.status === "NETWORK_ERROR") {
+    if (
+      error?.message?.includes("Failed to fetch") ||
+      error?.status === "NETWORK_ERROR"
+    ) {
       return "Cannot connect to the server. Please check your internet connection and try again.";
     }
 

@@ -239,7 +239,6 @@ export function createApp() {
     res.send(specs);
   });
 
-
   // 404 handler for API routes
   app.use("/api/*", (req, res) => {
     res.status(404).json({
@@ -277,7 +276,7 @@ export function createApp() {
         message: "Cochin Smart City API - Build files not found",
         documentation: "/api-docs",
         health: "/api/health",
-        note: "Run 'npm run build' to generate static files"
+        note: "Run 'npm run build' to generate static files",
       });
     });
   }
