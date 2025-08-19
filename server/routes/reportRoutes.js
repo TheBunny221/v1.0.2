@@ -3,8 +3,10 @@ import { protect, authorize } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import Complaint from "../model/Complaint.js";
 import User from "../model/User.js";
+import { getPrisma } from "../db/connection.js";
 
 const router = express.Router();
+const prisma = getPrisma();
 
 // All routes require authentication
 router.use(protect);
