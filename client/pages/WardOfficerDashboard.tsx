@@ -216,11 +216,11 @@ const WardOfficerDashboard: React.FC = () => {
     }
 
     try {
-      await dispatch(assignComplaint({
-        complaintId: assignmentData.complaintId,
+      await assignComplaintMutation({
+        id: assignmentData.complaintId,
         assignedToId: assignmentData.assignedToId,
         comment: assignmentData.comment,
-      })).unwrap();
+      }).unwrap();
 
       toast({
         title: "Success",
@@ -231,10 +231,13 @@ const WardOfficerDashboard: React.FC = () => {
       setIsAssignDialogOpen(false);
       setAssignmentData({ complaintId: "", assignedToId: "", comment: "" });
       setSelectedComplaint(null);
+
+      // Refresh complaints data
+      dispatch(fetchComplaints());
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to assign complaint",
+        description: error?.data?.message || "Failed to assign complaint",
         variant: "destructive",
       });
     }
