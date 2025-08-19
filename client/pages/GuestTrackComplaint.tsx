@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { useAppDispatch } from "../store/hooks";
 import { trackGuestComplaint } from "../store/slices/guestSlice";
 import {
+  useRequestComplaintOtpMutation,
+  useVerifyComplaintOtpMutation
+} from "../store/api/guestApi";
+import {
   Card,
   CardContent,
   CardHeader,
@@ -12,6 +16,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
+import { Alert, AlertDescription } from "../components/ui/alert";
 import {
   Search,
   FileText,
@@ -21,8 +26,11 @@ import {
   CheckCircle,
   AlertCircle,
   Shield,
+  Lock,
 } from "lucide-react";
 import QuickComplaintModal from "../components/QuickComplaintModal";
+import OtpVerificationModal from "../components/OtpVerificationModal";
+import ComplaintDetailsModal from "../components/ComplaintDetailsModal";
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
