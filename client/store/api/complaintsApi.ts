@@ -70,7 +70,7 @@ export interface CreateComplaintRequest {
 export interface UpdateComplaintRequest {
   id: string;
   status?: Complaint["status"];
-  assignedTo?: string;
+  assignedToId?: string;
   remarks?: string;
   priority?: Complaint["priority"];
 }
