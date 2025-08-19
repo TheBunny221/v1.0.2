@@ -1437,7 +1437,8 @@ const AdminConfig: React.FC = () => {
                             "APP_LOGO_URL",
                             "APP_LOGO_SIZE",
                           ].includes(s.key) &&
-                          !s.key.startsWith("COMPLAINT_ID"),
+                          !s.key.startsWith("COMPLAINT_ID") &&
+                          !s.key.startsWith("CONTACT_"),
                       )
                       .map((setting) => (
                         <div
