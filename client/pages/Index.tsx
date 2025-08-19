@@ -73,7 +73,6 @@ const Index: React.FC = () => {
 
             <div className="flex justify-center space-x-4 flex-wrap gap-4 mb-8">
               <Button
-                asChild
                 onClick={() => setIsFormExpanded(!isFormExpanded)}
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
