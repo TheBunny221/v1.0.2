@@ -98,7 +98,7 @@ const ComplaintsList: React.FC = () => {
     }
 
     return params;
-  }, [statusFilter, priorityFilter, debouncedSearchTerm, user?.role, user?.id]);
+  }, [statusFilter, priorityFilter, debouncedSearchTerm, user?.role, user?.id, searchParams]);
 
   // Use RTK Query for better authentication handling
   const {
