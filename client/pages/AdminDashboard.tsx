@@ -327,7 +327,7 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaints by Type</CardTitle>
               </CardHeader>
               <CardContent>
-                {complaintsByType.length > 0 ? (
+                {complaintsByType && complaintsByType.length > 0 ? (
                   <>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
@@ -341,7 +341,7 @@ const AdminDashboard: React.FC = () => {
                           dataKey="value"
                         >
                           {complaintsByType.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                            <Cell key={`cell-${index}`} fill={entry?.color || '#6B7280'} />
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [value, "Count"]} />
@@ -355,10 +355,10 @@ const AdminDashboard: React.FC = () => {
                         >
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: item.color }}
+                            style={{ backgroundColor: item?.color || '#6B7280' }}
                           ></div>
                           <span className="text-sm">
-                            {item.name} ({item.value})
+                            {item?.name || 'Unknown'} ({item?.value || 0})
                           </span>
                         </div>
                       ))}
