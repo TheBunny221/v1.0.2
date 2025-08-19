@@ -5,7 +5,8 @@ import "./global.css";
 import { suppressResizeObserverErrors } from "./utils/resizeObserverSuppress";
 import { installResizeObserverPolyfill } from "./utils/resizeObserverPolyfill";
 
-// Initialize ResizeObserver error suppression
+// Initialize ResizeObserver polyfill and error suppression
+installResizeObserverPolyfill();
 suppressResizeObserverErrors();
 
 // Global error handlers for production-grade error handling
