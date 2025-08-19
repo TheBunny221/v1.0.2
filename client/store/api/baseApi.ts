@@ -164,7 +164,10 @@ const baseQueryWithReauth: BaseQueryFn<
     let errorType = "FETCH_ERROR";
     let userMessage = "Network connection failed. Please check your internet connection.";
 
-    if (errorMessage.includes("Failed to fetch")) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      errorType = "TIMEOUT_ERROR";
+      userMessage = "Request timed out. Please try again.";
+    } else if (errorMessage.includes("Failed to fetch")) {
       errorType = "NETWORK_ERROR";
       userMessage = "Cannot connect to the server. Please check your internet connection and try again.";
     } else if (errorMessage.includes("timeout") || errorMessage.includes("TIMEOUT")) {
