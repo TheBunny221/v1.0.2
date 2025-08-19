@@ -369,7 +369,7 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await apiCall(`/wards/${wardId}`, { method: "DELETE" });
+      await apiCall(`/users/wards/${wardId}`, { method: "DELETE" });
       setWards((prev) => prev.filter((w) => w.id !== wardId));
 
       dispatch(
