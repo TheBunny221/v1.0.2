@@ -68,10 +68,10 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
     }).length;
 
     // Calculate average completion time
-    const completedWithTime = assignedComplaints.filter(c => c.status === "resolved" && c.resolvedAt);
-    const avgCompletionTime = completedWithTime.length > 0 
+    const completedWithTime = assignedComplaints.filter(c => c.status === "resolved" && c.resolvedOn);
+    const avgCompletionTime = completedWithTime.length > 0
       ? completedWithTime.reduce((sum, c) => {
-          const days = Math.ceil((new Date(c.resolvedAt) - new Date(c.assignedAt || c.createdAt)) / (1000 * 60 * 60 * 24));
+          const days = Math.ceil((new Date(c.resolvedOn) - new Date(c.assignedOn || c.createdAt)) / (1000 * 60 * 60 * 24));
           return sum + days;
         }, 0) / completedWithTime.length
       : 0;
