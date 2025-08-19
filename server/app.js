@@ -249,12 +249,24 @@ export function createApp() {
     });
   });
 
-  // SPA fallback route - redirect all non-API routes to Vite dev server in development
+  // SPA fallback route - proxy all non-API routes to Vite dev server in development
   if (process.env.NODE_ENV === "development") {
-    app.get("*", (req, res) => {
-      const viteUrl = `http://localhost:3000${req.path}${req.search || ""}`;
-      res.redirect(302, viteUrl);
+    const viteProxy = createProxyMiddleware({
+      target: 'http://localhost:3000',
+      changeOrigin: true,
+      ws: true, // Enable WebSocket proxying for HMR
+      logLevel: 'silent', // Reduce proxy logs
+      onError: (err, req, res) => {
+        console.log('Proxy error:', err.message);
+        res.status(500).json({
+          success: false,
+          message: 'Frontend service unavailable',
+          error: 'Unable to connect to the development server'
+        });
+      }
     });
+
+    app.use("*", viteProxy);
   }
 
   // Error handling middleware (should be last)
