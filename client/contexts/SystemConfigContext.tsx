@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
 
 interface SystemConfig {
   [key: string]: string;
