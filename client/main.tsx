@@ -4,9 +4,8 @@ import App from "./App";
 import "./global.css";
 import { fixResizeObserverError } from "./utils/resizeObserverFix";
 
-// Initialize ResizeObserver polyfill and error suppression
-installResizeObserverPolyfill();
-suppressResizeObserverErrors();
+// Initialize comprehensive ResizeObserver error fix
+fixResizeObserverError();
 
 // Global error handlers for production-grade error handling
 window.addEventListener("error", (event) => {
