@@ -115,6 +115,10 @@ const AdminConfig: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
 
+  // Get URL parameters for tab navigation
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'wards';
+
   // API queries
   const {
     data: complaintTypesResponse,
