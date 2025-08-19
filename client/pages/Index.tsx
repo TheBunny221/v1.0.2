@@ -25,7 +25,7 @@ import QuickComplaintForm from "../components/QuickComplaintForm";
 const Index: React.FC = () => {
   const { translations, currentLanguage } = useAppSelector((state) => state.language);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const { appName } = useSystemConfig();
+  const { appName, getConfig } = useSystemConfig();
 
   // Form state
   const [isFormExpanded, setIsFormExpanded] = useState(false);
