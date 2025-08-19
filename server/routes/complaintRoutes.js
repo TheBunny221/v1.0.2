@@ -32,7 +32,14 @@ router.get("/stats", getComplaintStats);
 // Get single complaint
 router.get("/:id", getComplaint);
 
-// Update complaint status
+// Update complaint (general update including status, priority, assignment)
+router.put(
+  "/:id",
+  authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"),
+  updateComplaintStatus,
+);
+
+// Update complaint status (legacy endpoint)
 router.put(
   "/:id/status",
   authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"),
