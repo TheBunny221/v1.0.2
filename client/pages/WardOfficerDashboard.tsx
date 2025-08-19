@@ -74,18 +74,33 @@ const WardOfficerDashboard: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
-  // Use RTK Query for complaints
-  const {
-    data: complaintsResponse,
-    isLoading: complaintsLoading,
-    error: complaintsError,
-    refetch: refetchComplaints
-  } = useGetComplaintsQuery({});
+  // Temporarily use mock data to isolate API issues
+  // const {
+  //   data: complaintsResponse,
+  //   isLoading: complaintsLoading,
+  //   error: complaintsError,
+  //   refetch: refetchComplaints
+  // } = useGetComplaintsQuery({});
 
-  // Ensure complaints is always an array - API returns { success, data: Complaint[] }
-  const complaints = Array.isArray(complaintsResponse?.data)
-    ? complaintsResponse.data
-    : [];
+  // Mock complaints for now
+  const complaints = [
+    {
+      id: "1",
+      wardId: user?.wardId,
+      status: "REGISTERED",
+      assignedToId: null,
+      deadline: new Date(Date.now() + 86400000).toISOString(),
+      title: "Water Pipeline Issue",
+      description: "Main water pipeline burst",
+      area: "MG Road",
+      contactPhone: "+91 9876543210",
+      attachments: [],
+      submittedOn: new Date().toISOString(),
+    },
+  ];
+  const complaintsLoading = false;
+  const complaintsError = null;
+  const refetchComplaints = () => {};
 
   // State for filtering and assignment
   const [activeFilter, setActiveFilter] = useState<string>("all");
