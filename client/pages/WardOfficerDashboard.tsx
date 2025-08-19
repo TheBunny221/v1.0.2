@@ -218,8 +218,8 @@ const WardOfficerDashboard: React.FC = () => {
     try {
       await assignComplaintMutation({
         id: assignmentData.complaintId,
-        assignedToId: assignmentData.assignedToId,
-        comment: assignmentData.comment,
+        assignedTo: assignmentData.assignedToId,
+        remarks: assignmentData.comment,
       }).unwrap();
 
       toast({
