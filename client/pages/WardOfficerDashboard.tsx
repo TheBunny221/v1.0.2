@@ -592,14 +592,20 @@ const WardOfficerDashboard: React.FC = () => {
                     <SelectValue placeholder="Select team member" />
                   </SelectTrigger>
                   <SelectContent>
-                    {maintenanceTeam.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        <div>
-                          <div className="font-medium">{member.name}</div>
-                          <div className="text-sm text-gray-500">{member.department}</div>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {isLoadingTeam ? (
+                      <div className="p-2 text-center text-sm text-gray-500">Loading team members...</div>
+                    ) : maintenanceTeam.length === 0 ? (
+                      <div className="p-2 text-center text-sm text-gray-500">No maintenance team members available</div>
+                    ) : (
+                      maintenanceTeam.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          <div>
+                            <div className="font-medium">{member.fullName}</div>
+                            <div className="text-sm text-gray-500">{member.department || 'Maintenance'}</div>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
