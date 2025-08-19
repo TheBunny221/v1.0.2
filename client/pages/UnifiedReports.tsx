@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAppSelector } from "../store/hooks";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -66,7 +67,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
-import { exportToPDF, exportToExcel, exportToCSV } from "../utils/exportUtils";
+import { exportToPDF, exportToExcel, exportToCSV, validateExportPermissions } from "../utils/exportUtils";
 
 interface AnalyticsData {
   complaints: {
