@@ -162,11 +162,11 @@ const UnifiedReports: React.FC = () => {
     }
   }, [permissions.defaultWard]);
 
-  // Fetch analytics data
-  const fetchAnalyticsData = async () => {
+  // Memoized analytics fetching with debouncing
+  const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const queryParams = new URLSearchParams({
         from: filters.dateRange.from,
@@ -178,10 +178,8 @@ const UnifiedReports: React.FC = () => {
       });
 
       // Use different endpoints based on user role
-      let endpoint = "/api/reports/dashboard";
-      if (user?.role === "ADMINISTRATOR") {
-        endpoint = "/api/admin/analytics";
-      } else if (user?.role === "MAINTENANCE_TEAM") {
+      let endpoint = "/api/reports/analytics";
+      if (user?.role === "MAINTENANCE_TEAM") {
         endpoint = "/api/maintenance/analytics";
       }
 
@@ -203,12 +201,16 @@ const UnifiedReports: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Fetch data on component mount and filter changes
-  useEffect(() => {
-    fetchAnalyticsData();
   }, [filters, user?.role]);
+
+  // Debounced effect for filter changes to improve performance
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchAnalyticsData();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchAnalyticsData]);
 
   // Export functionality
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
