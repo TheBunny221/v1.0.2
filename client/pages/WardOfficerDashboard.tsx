@@ -16,11 +16,30 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
+import { Input } from "../components/ui/input";
+import { toast } from "../components/ui/use-toast";
 import {
   AlertTriangle,
   Clock,
@@ -34,7 +53,22 @@ import {
   FileText,
   Settings,
   MessageSquare,
+  Search,
+  Camera,
+  Eye,
+  UserPlus,
+  Filter,
+  Download,
+  Phone,
+  Mail,
+  X,
 } from "lucide-react";
+
+interface ComplaintAssignment {
+  complaintId: string;
+  assignedToId: string;
+  comment?: string;
+}
 
 const WardOfficerDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -42,10 +76,32 @@ const WardOfficerDashboard: React.FC = () => {
   const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
 
+  // State for filtering and assignment
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
+  const [assignmentData, setAssignmentData] = useState<ComplaintAssignment>({
+    complaintId: "",
+    assignedToId: "",
+    comment: "",
+  });
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string>("");
+
+  // Mock maintenance team members - in real app, this would come from API
+  const maintenanceTeam = [
+    { id: "1", name: "Ravi Kumar", department: "Plumbing", phone: "+91 9876543210" },
+    { id: "2", name: "Suresh Nair", department: "Electrical", phone: "+91 9876543211" },
+    { id: "3", name: "Priya Menon", department: "Road Maintenance", phone: "+91 9876543212" },
+    { id: "4", name: "Arun Raj", department: "Waste Management", phone: "+91 9876543213" },
+    { id: "5", name: "Lakshmi Devi", department: "General Maintenance", phone: "+91 9876543214" },
+  ];
+
   const [dashboardStats, setDashboardStats] = useState({
-    totalAssigned: 0,
-    pending: 0,
-    inProgress: 0,
+    totalComplaints: 0,
+    pendingAssignment: 0,
+    assigned: 0,
     overdue: 0,
     resolved: 0,
     slaCompliance: 85,
@@ -57,36 +113,128 @@ const WardOfficerDashboard: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Filter complaints for this ward officer
+    // Filter complaints for this ward officer's ward
     const wardComplaints = complaints.filter(
-      (c) => c.assignedToId === user?.id || c.wardId === user?.wardId,
+      (c) => c.wardId === user?.wardId,
     );
 
-    const totalAssigned = wardComplaints.length;
-    const pending = wardComplaints.filter(
-      (c) => c.status === "REGISTERED",
+    const totalComplaints = wardComplaints.length;
+    const pendingAssignment = wardComplaints.filter(
+      (c) => c.status === "REGISTERED" && !c.assignedToId,
     ).length;
-    const inProgress = wardComplaints.filter(
-      (c) => c.status === "IN_PROGRESS",
+    const assigned = wardComplaints.filter(
+      (c) => c.assignedToId && c.status !== "RESOLVED" && c.status !== "CLOSED",
     ).length;
     const resolved = wardComplaints.filter(
       (c) => c.status === "RESOLVED",
     ).length;
     const overdue = wardComplaints.filter((c) => {
       if (!c.deadline) return false;
-      return new Date(c.deadline) < new Date() && c.status !== "RESOLVED";
+      return new Date(c.deadline) < new Date() && c.status !== "RESOLVED" && c.status !== "CLOSED";
     }).length;
 
     setDashboardStats({
-      totalAssigned,
-      pending,
-      inProgress,
+      totalComplaints,
+      pendingAssignment,
+      assigned,
       overdue,
       resolved,
       slaCompliance: 85, // Mock calculation
       avgResolutionTime: 2.8, // Mock calculation
     });
   }, [complaints, user]);
+
+  // Filter complaints based on active filter and search term
+  const getFilteredComplaints = () => {
+    let filtered = complaints.filter((c) => c.wardId === user?.wardId);
+
+    // Apply status filter
+    switch (activeFilter) {
+      case "pendingAssignment":
+        filtered = filtered.filter((c) => c.status === "REGISTERED" && !c.assignedToId);
+        break;
+      case "assigned":
+        filtered = filtered.filter((c) => c.assignedToId && c.status !== "RESOLVED" && c.status !== "CLOSED");
+        break;
+      case "overdue":
+        filtered = filtered.filter((c) => {
+          if (!c.deadline) return false;
+          return new Date(c.deadline) < new Date() && c.status !== "RESOLVED" && c.status !== "CLOSED";
+        });
+        break;
+      case "resolved":
+        filtered = filtered.filter((c) => c.status === "RESOLVED");
+        break;
+      default:
+        // "all" - no additional filtering
+        break;
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter((c) =>
+        c.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (c.contactPhone && c.contactPhone.includes(searchTerm)) ||
+        (c.id && c.id.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    return filtered.sort((a, b) => new Date(b.submittedOn).getTime() - new Date(a.submittedOn).getTime());
+  };
+
+  const filteredComplaints = getFilteredComplaints();
+
+  const handleAssignComplaint = (complaint: any) => {
+    setSelectedComplaint(complaint);
+    setAssignmentData({
+      complaintId: complaint.id,
+      assignedToId: "",
+      comment: "",
+    });
+    setIsAssignDialogOpen(true);
+  };
+
+  const submitAssignment = async () => {
+    if (!assignmentData.assignedToId) {
+      toast({
+        title: "Error",
+        description: "Please select a team member to assign",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await dispatch(assignComplaint({
+        complaintId: assignmentData.complaintId,
+        assignedToId: assignmentData.assignedToId,
+        comment: assignmentData.comment,
+      })).unwrap();
+
+      toast({
+        title: "Success",
+        description: "Complaint has been assigned successfully",
+        variant: "default",
+      });
+
+      setIsAssignDialogOpen(false);
+      setAssignmentData({ complaintId: "", assignedToId: "", comment: "" });
+      setSelectedComplaint(null);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to assign complaint",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewPhoto = (photoUrl: string) => {
+    setSelectedPhoto(photoUrl);
+    setIsPhotoDialogOpen(true);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -114,21 +262,15 @@ const WardOfficerDashboard: React.FC = () => {
       case "HIGH":
         return "bg-orange-100 text-orange-800";
       case "CRITICAL":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500 text-white";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const wardComplaints = complaints.filter(
-    (c) => c.assignedToId === user?.id || c.wardId === user?.wardId,
-  );
-
-  const urgentComplaints = wardComplaints
-    .filter((c) => c.priority === "CRITICAL" || c.priority === "HIGH")
-    .slice(0, 5);
-
-  const recentComplaints = wardComplaints.slice(0, 5);
+  const getAssignedTeamMember = (assignedToId: string) => {
+    return maintenanceTeam.find(member => member.id === assignedToId);
+  };
 
   return (
     <div className="space-y-6">
@@ -141,41 +283,74 @@ const WardOfficerDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Statistics Cards with Filtering */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${
+            activeFilter === "all" ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveFilter("all")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Assigned
+              Total Complaints
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboardStats.totalAssigned}
+              {dashboardStats.totalComplaints}
             </div>
             <p className="text-xs text-muted-foreground">
-              Complaints in your ward
+              All complaints in ward
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${
+            activeFilter === "pendingAssignment" ? "ring-2 ring-yellow-500 bg-yellow-50" : "hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveFilter("pendingAssignment")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Action
+              Pending Assignment
             </CardTitle>
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {dashboardStats.pending}
+              {dashboardStats.pendingAssignment}
             </div>
             <p className="text-xs text-muted-foreground">Awaiting assignment</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${
+            activeFilter === "assigned" ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveFilter("assigned")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Assigned</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {dashboardStats.assigned}
+            </div>
+            <p className="text-xs text-muted-foreground">Currently assigned</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className={`cursor-pointer transition-colors ${
+            activeFilter === "overdue" ? "ring-2 ring-red-500 bg-red-50" : "hover:bg-gray-50"
+          }`}
+          onClick={() => setActiveFilter("overdue")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overdue</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -187,292 +362,300 @@ const WardOfficerDashboard: React.FC = () => {
             <p className="text-xs text-muted-foreground">Past deadline</p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              SLA Compliance
-            </CardTitle>
-            <BarChart3 className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {dashboardStats.slaCompliance}%
-            </div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="urgent">
-            Urgent ({urgentComplaints.length})
-          </TabsTrigger>
-          <TabsTrigger value="assignments">Assignments</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Complaints */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Recent Complaints
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {recentComplaints.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-500">No complaints in your ward</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recentComplaints.map((complaint) => (
-                      <div
-                        key={complaint.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-medium text-sm">
-                            {complaint.title ||
-                              `Complaint #${complaint.id.slice(-6)}`}
-                          </h3>
-                          <div className="flex space-x-2">
-                            <Badge className={getStatusColor(complaint.status)}>
-                              {complaint.status.replace("_", " ")}
-                            </Badge>
-                            <Badge
-                              className={getPriorityColor(complaint.priority)}
-                            >
-                              {complaint.priority}
-                            </Badge>
+      {/* Complaints Management Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-2">
+              <CardTitle>
+                Complaints 
+                {activeFilter !== "all" && (
+                  <span className="text-sm font-normal text-gray-500 ml-2">
+                    - {activeFilter.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                  </span>
+                )}
+              </CardTitle>
+              <Badge variant="secondary">{filteredComplaints.length} items</Badge>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search complaints..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8 w-64"
+                />
+              </div>
+              {activeFilter !== "all" && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setActiveFilter("all")}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear Filter
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredComplaints.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-500">
+                {searchTerm ? "No complaints match your search" : "No complaints found for this filter"}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Complaint ID</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Assigned To</TableHead>
+                    <TableHead>Submitted</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredComplaints.map((complaint) => {
+                    const assignedMember = complaint.assignedToId ? getAssignedTeamMember(complaint.assignedToId) : null;
+                    
+                    return (
+                      <TableRow key={complaint.id}>
+                        <TableCell className="font-medium">
+                          {complaint.complaintId || `#${complaint.id.slice(-6)}`}
+                        </TableCell>
+                        
+                        <TableCell className="max-w-xs">
+                          <div>
+                            {complaint.title && (
+                              <div className="font-medium text-sm mb-1">{complaint.title}</div>
+                            )}
+                            <div className="text-sm text-gray-600 line-clamp-2">
+                              {complaint.description}
+                            </div>
                           </div>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                          {complaint.description}
-                        </p>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center text-xs text-gray-500">
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="text-sm">
+                            <div className="flex items-center">
+                              <Phone className="h-3 w-3 mr-1" />
+                              {complaint.contactPhone}
+                            </div>
+                            {complaint.contactEmail && (
+                              <div className="flex items-center mt-1 text-gray-500">
+                                <Mail className="h-3 w-3 mr-1" />
+                                {complaint.contactEmail}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="flex items-center text-sm">
                             <MapPin className="h-3 w-3 mr-1" />
                             {complaint.area}
-                            <Calendar className="h-3 w-3 ml-3 mr-1" />
-                            {new Date(
-                              complaint.submittedOn,
-                            ).toLocaleDateString()}
+                            {complaint.landmark && (
+                              <div className="text-gray-500 ml-1">
+                                near {complaint.landmark}
+                              </div>
+                            )}
                           </div>
-                          <Link to={`/complaints/${complaint.id}`}>
-                            <Button variant="outline" size="sm">
-                              Manage
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to="/complaints?status=REGISTERED" className="block">
-                  <Button className="w-full justify-start">
-                    <Users className="h-4 w-4 mr-2" />
-                    Assign Complaints ({dashboardStats.pending})
-                  </Button>
-                </Link>
-                <Link to="/complaints?priority=CRITICAL,HIGH" className="block">
-                  <Button
-                    variant="destructive"
-                    className="w-full justify-start"
-                  >
-                    <AlertTriangle className="h-4 w-4 mr-2" />
-                    Handle Urgent ({urgentComplaints.length})
-                  </Button>
-                </Link>
-                <Link to="/reports" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Generate Reports
-                  </Button>
-                </Link>
-                <Link to="/messages" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Team Communication
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="urgent" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-red-600">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                Urgent Complaints Requiring Immediate Attention
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {urgentComplaints.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 mx-auto text-green-400 mb-4" />
-                  <p className="text-gray-500">
-                    No urgent complaints! Great job!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {urgentComplaints.map((complaint) => (
-                    <div
-                      key={complaint.id}
-                      className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-sm">
-                          {complaint.title ||
-                            `Complaint #${complaint.id.slice(-6)}`}
-                        </h3>
-                        <div className="flex space-x-2">
-                          <Badge className="bg-red-100 text-red-800">
+                        </TableCell>
+                        
+                        <TableCell>
+                          <Badge className={getPriorityColor(complaint.priority)}>
                             {complaint.priority}
                           </Badge>
+                        </TableCell>
+                        
+                        <TableCell>
                           <Badge className={getStatusColor(complaint.status)}>
                             {complaint.status.replace("_", " ")}
                           </Badge>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-700 mb-2">
-                        {complaint.description}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center text-xs text-gray-600">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {complaint.area}
-                          <Clock className="h-3 w-3 ml-3 mr-1" />
-                          {complaint.deadline &&
-                            new Date(complaint.deadline).toLocaleDateString()}
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="destructive">
-                            Assign Now
-                          </Button>
-                          <Link to={`/complaints/${complaint.id}`}>
-                            <Button size="sm" variant="outline">
-                              View Details
+                        </TableCell>
+                        
+                        <TableCell>
+                          {assignedMember ? (
+                            <div className="text-sm">
+                              <div className="font-medium">{assignedMember.name}</div>
+                              <div className="text-gray-500">{assignedMember.department}</div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">Unassigned</span>
+                          )}
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {new Date(complaint.submittedOn).toLocaleDateString()}
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            {/* Assign/Reassign Button */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAssignComplaint(complaint)}
+                            >
+                              <UserPlus className="h-3 w-3 mr-1" />
+                              {complaint.assignedToId ? "Reassign" : "Assign"}
                             </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                            
+                            {/* View Photo Button */}
+                            {complaint.attachments && complaint.attachments.length > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewPhoto(complaint.attachments[0].url)}
+                              >
+                                <Camera className="h-3 w-3 mr-1" />
+                                Photo
+                              </Button>
+                            )}
+                            
+                            {/* View Details Button */}
+                            <Link to={`/complaints/${complaint.id}`}>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-3 w-3 mr-1" />
+                                Details
+                              </Button>
+                            </Link>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        <TabsContent value="assignments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Complaint Assignment Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Unassigned Complaints</h3>
-                  <Badge variant="secondary">
-                    {dashboardStats.pending} pending
-                  </Badge>
-                </div>
-                {/* Assignment interface would go here */}
-                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">
-                    Assignment interface will be implemented here
-                  </p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Drag and drop complaints to maintenance team members
-                  </p>
+      {/* Assignment Dialog */}
+      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedComplaint?.assignedToId ? "Reassign" : "Assign"} Complaint
+            </DialogTitle>
+          </DialogHeader>
+          {selectedComplaint && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <h4 className="font-medium text-sm mb-1">
+                  {selectedComplaint.title || `Complaint #${selectedComplaint.id.slice(-6)}`}
+                </h4>
+                <p className="text-sm text-gray-600">{selectedComplaint.description}</p>
+                <div className="flex items-center mt-2 text-xs text-gray-500">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  {selectedComplaint.area}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="performance" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>SLA Performance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Resolution Rate</span>
-                    <span>{dashboardStats.slaCompliance}%</span>
-                  </div>
-                  <Progress
-                    value={dashboardStats.slaCompliance}
-                    className="h-2"
-                  />
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {dashboardStats.avgResolutionTime}
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Average Resolution Time (days)
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+              <div>
+                <Label htmlFor="assignedTo">Assign to Team Member</Label>
+                <Select 
+                  value={assignmentData.assignedToId} 
+                  onValueChange={(value) => setAssignmentData(prev => ({ ...prev, assignedToId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {maintenanceTeam.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        <div>
+                          <div className="font-medium">{member.name}</div>
+                          <div className="text-sm text-gray-500">{member.department}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Monthly Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Complaints Resolved</span>
-                    <div className="flex items-center">
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">+12%</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Response Time</span>
-                    <div className="flex items-center">
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">-8%</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Citizen Satisfaction</span>
-                    <div className="flex items-center">
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">4.2/5</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <div>
+                <Label htmlFor="comment">Assignment Notes (Optional)</Label>
+                <Textarea
+                  id="comment"
+                  value={assignmentData.comment}
+                  onChange={(e) => setAssignmentData(prev => ({ ...prev, comment: e.target.value }))}
+                  placeholder="Add any specific instructions or notes..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsAssignDialogOpen(false);
+                    setAssignmentData({ complaintId: "", assignedToId: "", comment: "" });
+                    setSelectedComplaint(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={submitAssignment}
+                  disabled={!assignmentData.assignedToId}
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  {selectedComplaint?.assignedToId ? "Reassign" : "Assign"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Photo View Dialog */}
+      <Dialog open={isPhotoDialogOpen} onOpenChange={setIsPhotoDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Complaint Photo</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center">
+            <img
+              src={selectedPhoto}
+              alt="Complaint attachment"
+              className="max-w-full max-h-96 object-contain rounded-lg"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/placeholder-image.png";
+              }}
+            />
           </div>
-        </TabsContent>
-      </Tabs>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsPhotoDialogOpen(false)}>
+              Close
+            </Button>
+            <Button asChild>
+              <a href={selectedPhoto} download target="_blank" rel="noopener noreferrer">
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </a>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
