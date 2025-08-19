@@ -7,7 +7,7 @@ import {
   getDashboardRouteForRole,
   setCredentials,
 } from "../store/slices/authSlice";
-import { createComplaint } from "../store/slices/complaintsSlice";
+import { useCreateComplaintMutation } from "../store/api/complaintsApi";
 import {
   selectGuestState,
   submitGuestComplaint,
