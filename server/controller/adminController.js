@@ -560,41 +560,53 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 
   const citizenSatisfaction = satisfactionResult._avg.rating || 0;
 
+  // Debug logging for analytics data
+  console.log("🔍 Dashboard Analytics Debug:");
+  console.log("Raw complaintTrends:", complaintTrends);
+  console.log("Raw complaintsByType:", complaintsByType);
+  console.log("Raw wardPerformance:", wardPerformance);
+  console.log("Total complaints:", totalComplaints);
+  console.log("Resolved complaints:", resolvedComplaints);
+
+  const responseData = {
+    complaintTrends: complaintTrends.length > 0 ? complaintTrends.map((trend) => ({
+      month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      }),
+      complaints: Number(trend.complaints),
+      resolved: Number(trend.resolved),
+    })) : generateEmptyTrends(),
+    complaintsByType: complaintsByType.length > 0 ? complaintsByType.map((item) => ({
+      name: item.type
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase()),
+      value: item._count,
+      color: getTypeColor(item.type),
+    })) : generateEmptyComplaintTypes(),
+    wardPerformance: wardPerformance.length > 0 ? wardPerformance.map((ward) => ({
+      ward: ward.ward || "Unknown Ward",
+      complaints: Number(ward.complaints) || 0,
+      resolved: Number(ward.resolved) || 0,
+      sla: Number(ward.sla) || 0,
+    })) : [],
+    metrics: {
+      avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
+      slaCompliance,
+      citizenSatisfaction: Math.round(citizenSatisfaction * 10) / 10,
+      resolutionRate:
+        totalComplaints > 0
+          ? Math.round((resolvedComplaints / totalComplaints) * 100)
+          : 0,
+    },
+  };
+
+  console.log("📊 Final response data:", JSON.stringify(responseData, null, 2));
+
   res.status(200).json({
     success: true,
     message: "Dashboard analytics retrieved successfully",
-    data: {
-      complaintTrends: complaintTrends.length > 0 ? complaintTrends.map((trend) => ({
-        month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
-          month: "short",
-          year: "numeric",
-        }),
-        complaints: Number(trend.complaints),
-        resolved: Number(trend.resolved),
-      })) : generateEmptyTrends(),
-      complaintsByType: complaintsByType.length > 0 ? complaintsByType.map((item) => ({
-        name: item.type
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase()),
-        value: item._count,
-        color: getTypeColor(item.type),
-      })) : generateEmptyComplaintTypes(),
-      wardPerformance: wardPerformance.length > 0 ? wardPerformance.map((ward) => ({
-        ward: ward.ward || "Unknown Ward",
-        complaints: Number(ward.complaints) || 0,
-        resolved: Number(ward.resolved) || 0,
-        sla: Number(ward.sla) || 0,
-      })) : [],
-      metrics: {
-        avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
-        slaCompliance,
-        citizenSatisfaction: Math.round(citizenSatisfaction * 10) / 10,
-        resolutionRate:
-          totalComplaints > 0
-            ? Math.round((resolvedComplaints / totalComplaints) * 100)
-            : 0,
-      },
-    },
+    data: responseData,
   });
 });
 
