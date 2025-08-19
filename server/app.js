@@ -254,7 +254,7 @@ export function createApp() {
   console.log("Serving static files from:", distPath);
 
   // Check if the build directory exists
-  if (require('fs').existsSync(distPath)) {
+  if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
 
     // SPA fallback - serve index.html for all non-API routes
