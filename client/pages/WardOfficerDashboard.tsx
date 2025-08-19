@@ -71,133 +71,13 @@ const WardOfficerDashboard: React.FC = () => {
   // Simple static data for now
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  const [dashboardStats, setDashboardStats] = useState({
-    totalComplaints: 0,
-    pendingAssignment: 0,
-    assigned: 0,
-    overdue: 0,
-    resolved: 0,
-    slaCompliance: 85,
-    avgResolutionTime: 2.8,
-  });
-
-
-  useEffect(() => {
-    // Only run if we have valid data
-    if (!Array.isArray(complaints) || !user?.wardId) {
-      return;
-    }
-
-    // Filter complaints for this ward officer's ward
-    const wardComplaints = complaints.filter(
-      (c) => c.wardId === user.wardId,
-    );
-
-    const totalComplaints = wardComplaints.length;
-    const pendingAssignment = wardComplaints.filter(
-      (c) => c.status === "REGISTERED" && !c.assignedToId,
-    ).length;
-    const assigned = wardComplaints.filter(
-      (c) => c.assignedToId && c.status !== "RESOLVED" && c.status !== "CLOSED",
-    ).length;
-    const resolved = wardComplaints.filter(
-      (c) => c.status === "RESOLVED",
-    ).length;
-    const overdue = wardComplaints.filter((c) => {
-      if (!c.deadline) return false;
-      return new Date(c.deadline) < new Date() && c.status !== "RESOLVED" && c.status !== "CLOSED";
-    }).length;
-
-    setDashboardStats({
-      totalComplaints,
-      pendingAssignment,
-      assigned,
-      overdue,
-      resolved,
-      slaCompliance: 85, // Mock calculation
-      avgResolutionTime: 2.8, // Mock calculation
-    });
-  }, [complaints.length, user?.wardId]); // Use .length to avoid object reference changes
-
-  // Filter complaints based on active filter and search term
-  const getFilteredComplaints = () => {
-    // Safety check - ensure complaints is an array
-    if (!Array.isArray(complaints)) {
-      return [];
-    }
-
-    let filtered = complaints.filter((c) => c.wardId === user?.wardId);
-
-    // Apply status filter
-    switch (activeFilter) {
-      case "pendingAssignment":
-        filtered = filtered.filter((c) => c.status === "REGISTERED" && !c.assignedToId);
-        break;
-      case "assigned":
-        filtered = filtered.filter((c) => c.assignedToId && c.status !== "RESOLVED" && c.status !== "CLOSED");
-        break;
-      case "overdue":
-        filtered = filtered.filter((c) => {
-          if (!c.deadline) return false;
-          return new Date(c.deadline) < new Date() && c.status !== "RESOLVED" && c.status !== "CLOSED";
-        });
-        break;
-      case "resolved":
-        filtered = filtered.filter((c) => c.status === "RESOLVED");
-        break;
-      default:
-        // "all" - no additional filtering
-        break;
-    }
-
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter((c) =>
-        c.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.contactPhone && c.contactPhone.includes(searchTerm)) ||
-        (c.id && c.id.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    return filtered.sort((a, b) => new Date(b.submittedOn).getTime() - new Date(a.submittedOn).getTime());
+  // Simple mock data
+  const dashboardStats = {
+    totalComplaints: 5,
+    pendingAssignment: 2,
+    assigned: 2,
+    overdue: 1,
   };
-
-  const filteredComplaints = useMemo(() => getFilteredComplaints(), [
-    complaints,
-    user?.wardId,
-    activeFilter,
-    searchTerm,
-  ]);
-
-  // Show loading state
-  if (complaintsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span>Loading complaints...</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (complaintsError) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">
-          <AlertTriangle className="h-12 w-12 mx-auto mb-2" />
-          <h2 className="text-xl font-semibold mb-2">Error Loading Dashboard</h2>
-          <p className="text-gray-600 mb-4">
-            Failed to load complaint data. Please try again.
-          </p>
-          <Button onClick={() => refetchComplaints()}>Retry</Button>
-        </div>
-      </div>
-    );
-  }
 
   const handleAssignComplaint = (complaint: any) => {
     setSelectedComplaint(complaint);
