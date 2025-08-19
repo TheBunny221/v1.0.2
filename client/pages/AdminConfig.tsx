@@ -455,7 +455,7 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await apiCall(`/wards/${wardId}/subzones/${subZoneId}`, {
+      await apiCall(`/users/wards/${wardId}/subzones/${subZoneId}`, {
         method: "DELETE",
       });
 
