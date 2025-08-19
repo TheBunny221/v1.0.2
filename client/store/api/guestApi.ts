@@ -214,6 +214,8 @@ export const guestApi = baseApi.injectEndpoints({
 
 // Export hooks
 export const {
+  useRequestComplaintOtpMutation,
+  useVerifyComplaintOtpMutation,
   useSubmitGuestComplaintMutation,
   useVerifyGuestOtpMutation,
   useResendGuestOtpMutation,
