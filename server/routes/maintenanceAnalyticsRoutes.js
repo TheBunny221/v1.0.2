@@ -111,8 +111,8 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
       const data = categoryMap.get(category);
       data.count++;
       
-      if (complaint.status === "resolved" && complaint.resolvedAt && complaint.assignedAt) {
-        const days = Math.ceil((new Date(complaint.resolvedAt) - new Date(complaint.assignedAt)) / (1000 * 60 * 60 * 24));
+      if (complaint.status === "resolved" && complaint.resolvedOn && complaint.assignedOn) {
+        const days = Math.ceil((new Date(complaint.resolvedOn) - new Date(complaint.assignedOn)) / (1000 * 60 * 60 * 24));
         data.totalTime += days;
         data.completedCount++;
       }
