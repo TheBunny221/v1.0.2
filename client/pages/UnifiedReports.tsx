@@ -217,10 +217,14 @@ const UnifiedReports: React.FC = () => {
       return;
     }
 
+    if (!analyticsData) {
+      alert("No data available for export");
+      return;
+    }
+
     setIsExporting(true);
     try {
       const queryParams = new URLSearchParams({
-        format,
         from: filters.dateRange.from,
         to: filters.dateRange.to,
         ...(filters.ward !== "all" && { ward: filters.ward }),
@@ -229,6 +233,7 @@ const UnifiedReports: React.FC = () => {
         ...(filters.priority !== "all" && { priority: filters.priority }),
       });
 
+      // Fetch detailed data for export
       const response = await fetch(`/api/reports/export?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -236,21 +241,45 @@ const UnifiedReports: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Export failed");
+        throw new Error("Failed to fetch export data");
       }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `reports-${format}-${Date.now()}.${format === "excel" ? "xlsx" : format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const exportData = await response.json();
+
+      if (!exportData.success) {
+        throw new Error(exportData.message || "Export failed");
+      }
+
+      const userRole = user?.role || "Unknown";
+      const orgName = "Cochin Smart City Corporation";
+
+      // Use appropriate export utility based on format
+      switch (format) {
+        case "pdf":
+          await exportToPDF(
+            exportData.data,
+            analyticsData.trends,
+            analyticsData.categories,
+            userRole,
+            orgName
+          );
+          break;
+        case "excel":
+          exportToExcel(
+            exportData.data,
+            analyticsData.trends,
+            analyticsData.categories,
+            userRole,
+            orgName
+          );
+          break;
+        case "csv":
+          exportToCSV(exportData.data);
+          break;
+      }
     } catch (err) {
       console.error("Export error:", err);
-      alert("Export failed. Please try again.");
+      alert(`Export failed: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setIsExporting(false);
     }
