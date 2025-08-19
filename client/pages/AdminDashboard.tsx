@@ -61,6 +61,22 @@ const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const { translations } = useAppSelector((state) => state.language);
 
+  // Suppress ResizeObserver errors (common with Recharts)
+  React.useEffect(() => {
+    const originalError = console.error;
+    console.error = (...args) => {
+      if (args[0]?.includes?.('ResizeObserver loop completed') ||
+          args[0]?.includes?.('ResizeObserver loop limit exceeded')) {
+        return;
+      }
+      originalError.apply(console, args);
+    };
+
+    return () => {
+      console.error = originalError;
+    };
+  }, []);
+
   // Fetch real-time data using API queries
   const {
     data: dashboardStats,
