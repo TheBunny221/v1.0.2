@@ -194,6 +194,11 @@ const Navigation: React.FC = () => {
       return item.path === "/maintenance" || item.path === "/complaints";
     }
 
+    // For WARD_OFFICER users, exclude Home page
+    if (user.role === "WARD_OFFICER") {
+      return item.roles.includes(user.role as UserRole) && item.path !== "/";
+    }
+
     // For other roles, use the original filtering logic
     return item.roles.includes(user.role as UserRole);
   });
