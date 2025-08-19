@@ -305,21 +305,27 @@ const ComplaintsList: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <ComplaintQuickActions
-                        complaint={{
-                          id: complaint.id,
-                          complaintId: complaint.complaintId,
-                          status: complaint.status,
-                          priority: complaint.priority,
-                          type: complaint.type,
-                          description: complaint.description,
-                          area: complaint.area,
-                          assignedTo: complaint.assignedTo,
-                        }}
-                        userRole={user?.role || ""}
-                        showDetails={false}
-                        onUpdate={() => refetch()}
-                      />
+                      <div className="flex items-center gap-2">
+                        <Link to={`/complaints/${complaint.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </Link>
+                        {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Update
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
