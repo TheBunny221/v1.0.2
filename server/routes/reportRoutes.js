@@ -275,8 +275,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     // Calculate SLA compliance
     const totalResolved = resolvedComplaints;
     const onTimeResolved = complaints.filter(c => {
-      if (c.status === "resolved" && c.slaDeadline && c.resolvedAt) {
-        return new Date(c.resolvedAt) <= new Date(c.slaDeadline);
+      if (c.status === "resolved" && c.deadline && c.resolvedOn) {
+        return new Date(c.resolvedOn) <= new Date(c.deadline);
       }
       return false;
     }).length;
