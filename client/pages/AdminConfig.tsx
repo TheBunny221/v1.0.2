@@ -73,6 +73,7 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
+  CheckCircle,
 } from "lucide-react";
 
 interface Ward {
