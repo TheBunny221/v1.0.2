@@ -113,7 +113,9 @@ const WardOfficerDashboard: React.FC = () => {
     limit: 100,
   });
 
-  const maintenanceTeam = maintenanceTeamResponse?.data?.users || [];
+  const maintenanceTeam = Array.isArray(maintenanceTeamResponse?.data?.users)
+    ? maintenanceTeamResponse.data.users
+    : [];
 
   // RTK Query mutation for assignment
   const [assignComplaintMutation, { isLoading: isAssigning }] = useAssignComplaintMutation();
