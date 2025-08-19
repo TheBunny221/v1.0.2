@@ -446,6 +446,10 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
     "MAX_FILE_SIZE_MB",
     "CITIZEN_REGISTRATION_ENABLED",
     "SYSTEM_MAINTENANCE",
+    "CONTACT_HELPLINE",
+    "CONTACT_EMAIL",
+    "CONTACT_OFFICE_HOURS",
+    "CONTACT_OFFICE_ADDRESS",
   ];
 
   const settings = await prisma.systemConfig.findMany({
