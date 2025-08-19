@@ -1812,14 +1812,17 @@ const AdminConfig: React.FC = () => {
                 <Input
                   id="slaHours"
                   type="number"
-                  value={editingComplaintType.slaHours || ""}
-                  onChange={(e) =>
+                  value={editingComplaintType.slaHours?.toString() || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 48 : parseInt(value, 10);
                     setEditingComplaintType({
                       ...editingComplaintType,
-                      slaHours: parseInt(e.target.value) || 0,
+                      slaHours: isNaN(numValue) ? 48 : numValue,
                     })
-                  }
+                  }}
                   placeholder="Enter SLA hours"
+                  min="1"
                 />
               </div>
               <div className="flex items-center space-x-2">
