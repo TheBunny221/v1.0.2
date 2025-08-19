@@ -38,10 +38,33 @@ import {
 } from "lucide-react";
 
 const WardOfficerDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Fetch complaints for the ward officer's ward
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+    refetch: refetchComplaints,
+  } = useGetComplaintsQuery({
+    ward: user?.wardId,
+    page: 1,
+    limit: 100,
+  });
+
+  const complaints = complaintsResponse?.data || [];
+
+  // Fetch complaint statistics
+  const {
+    data: statsResponse,
+    isLoading: statsLoading,
+  } = useGetComplaintStatisticsQuery({
+    ward: user?.wardId,
+  });
+
+  const [updateComplaint] = useUpdateComplaintMutation();
+  const [assignComplaintMutation] = useAssignComplaintMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalAssigned: 0,
