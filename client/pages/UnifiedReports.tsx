@@ -685,15 +685,15 @@ const UnifiedReports: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Escalation Rate</span>
-                      <Badge variant="outline">{analyticsData.performance.escalationRate}%</Badge>
+                      <Badge variant="outline">{analyticsData.performance.escalationRate.toFixed(2)}%</Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>First Call Resolution</span>
-                      <Badge variant="outline">{analyticsData.performance.firstCallResolution}%</Badge>
+                      <Badge variant="outline">{analyticsData.performance.firstCallResolution.toFixed(2)}%</Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Repeat Complaints</span>
-                      <Badge variant="outline">{analyticsData.performance.repeatComplaints}%</Badge>
+                      <Badge variant="outline">{analyticsData.performance.repeatComplaints.toFixed(2)}%</Badge>
                     </div>
                   </div>
                 </CardContent>
