@@ -90,7 +90,6 @@ export const guestApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<GuestOtpVerifyResponse>,
       invalidatesTags: ["Auth"],
     }),
 
@@ -104,7 +103,7 @@ export const guestApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse,
+
     }),
 
     // Track complaint (public endpoint)
@@ -122,7 +121,6 @@ export const guestApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      transformResponse: transformResponse<TrackComplaintResponse>,
       providesTags: (result, error, { complaintId }) => [
         { type: "Complaint", id: complaintId },
       ],
@@ -131,7 +129,6 @@ export const guestApi = baseApi.injectEndpoints({
     // Get public statistics
     getPublicStats: builder.query<ApiResponse<PublicStatsResponse>, void>({
       query: () => "/guest/stats",
-      transformResponse: transformResponse<PublicStatsResponse>,
       providesTags: ["Analytics"],
     }),
 
@@ -141,7 +138,7 @@ export const guestApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/guest/complaint-types",
-      transformResponse: transformResponse,
+
       providesTags: ["ComplaintType"],
     }),
 
@@ -151,7 +148,7 @@ export const guestApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/guest/wards",
-      transformResponse: transformResponse,
+
       providesTags: ["Ward"],
     }),
   }),
