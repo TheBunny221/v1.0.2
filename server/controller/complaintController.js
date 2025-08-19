@@ -631,6 +631,64 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     });
   }
 
+  // Validation: Check if status is being changed to ASSIGNED but no assignee is provided
+  if (status === "ASSIGNED" && !assignedToId && !complaint.assignedToId) {
+    let errorMessage = "Please select an assignee before setting status to ASSIGNED.";
+
+    // Customize error message based on user role
+    if (req.user.role === "ADMINISTRATOR") {
+      errorMessage = "Please select a Ward Officer before assigning the complaint.";
+    } else if (req.user.role === "WARD_OFFICER") {
+      errorMessage = "Please select a Maintenance Team member before assigning the complaint.";
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: errorMessage,
+      data: null,
+    });
+  }
+
+  // Validation: If assignedToId is provided, verify the user exists and has the correct role
+  if (assignedToId) {
+    const assignee = await prisma.user.findUnique({
+      where: { id: assignedToId },
+    });
+
+    if (!assignee) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected assignee not found",
+        data: null,
+      });
+    }
+
+    // Role-based validation for assignment
+    if (req.user.role === "ADMINISTRATOR" && assignee.role !== "WARD_OFFICER") {
+      return res.status(400).json({
+        success: false,
+        message: "Administrators can only assign complaints to Ward Officers",
+        data: null,
+      });
+    }
+
+    if (req.user.role === "WARD_OFFICER" && assignee.role !== "MAINTENANCE_TEAM") {
+      return res.status(400).json({
+        success: false,
+        message: "Ward Officers can only assign complaints to Maintenance Team members",
+        data: null,
+      });
+    }
+
+    if (!assignee.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign to inactive user",
+        data: null,
+      });
+    }
+  }
+
   const updateData = {
     status,
     slaStatus: calculateSLAStatus(
