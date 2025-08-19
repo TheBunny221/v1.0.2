@@ -100,20 +100,24 @@ const WardOfficerDashboard: React.FC = () => {
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string>("");
 
-  // Fetch maintenance team members from API
-  const {
-    data: maintenanceTeamResponse,
-    isLoading: isLoadingTeam,
-    error: teamError
-  } = useGetAllUsersQuery({
-    role: "MAINTENANCE_TEAM",
-    status: "active",
-    limit: 100,
-  });
+  // Temporarily use mock data to isolate API issues
+  // const {
+  //   data: maintenanceTeamResponse,
+  //   isLoading: isLoadingTeam,
+  //   error: teamError
+  // } = useGetAllUsersQuery({
+  //   role: "MAINTENANCE_TEAM",
+  //   status: "active",
+  //   limit: 100,
+  // });
 
-  const maintenanceTeam = Array.isArray(maintenanceTeamResponse?.data?.users)
-    ? maintenanceTeamResponse.data.users
-    : [];
+  // Mock maintenance team for now
+  const maintenanceTeam = [
+    { id: "1", fullName: "Ravi Kumar", department: "Plumbing" },
+    { id: "2", fullName: "Suresh Nair", department: "Electrical" },
+    { id: "3", fullName: "Priya Menon", department: "Road Maintenance" },
+  ];
+  const isLoadingTeam = false;
 
   // RTK Query mutation for assignment
   const [assignComplaintMutation, { isLoading: isAssigning }] = useAssignComplaintMutation();
