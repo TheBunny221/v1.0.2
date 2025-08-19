@@ -283,10 +283,10 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     const slaCompliance = totalResolved > 0 ? (onTimeResolved / totalResolved) * 100 : 0;
 
     // Calculate average resolution time
-    const resolvedWithTime = complaints.filter(c => c.status === "resolved" && c.resolvedAt);
+    const resolvedWithTime = complaints.filter(c => c.status === "resolved" && c.resolvedOn);
     const avgResolutionTime = resolvedWithTime.length > 0
       ? resolvedWithTime.reduce((sum, c) => {
-          const days = Math.ceil((new Date(c.resolvedAt) - new Date(c.createdAt)) / (1000 * 60 * 60 * 24));
+          const days = Math.ceil((new Date(c.resolvedOn) - new Date(c.createdAt)) / (1000 * 60 * 60 * 24));
           return sum + days;
         }, 0) / resolvedWithTime.length
       : 0;
