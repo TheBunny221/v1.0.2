@@ -6,6 +6,8 @@ import {
   useGetDashboardAnalyticsQuery,
   useGetRecentActivityQuery,
   useGetDashboardStatsQuery,
+  useGetUserActivityQuery,
+  useGetSystemHealthQuery,
 } from "../store/api/adminApi";
 import {
   Card,
@@ -78,6 +80,18 @@ const AdminDashboard: React.FC = () => {
     error: activityError,
   } = useGetRecentActivityQuery({ limit: 5 });
 
+  const {
+    data: userActivityData,
+    isLoading: userActivityLoading,
+    error: userActivityError,
+  } = useGetUserActivityQuery({ period: "24h" });
+
+  const {
+    data: systemHealthData,
+    isLoading: systemHealthLoading,
+    error: systemHealthError,
+  } = useGetSystemHealthQuery();
+
   const systemStats = dashboardStats?.data || {
     totalComplaints: 0,
     totalUsers: 0,
@@ -90,7 +104,7 @@ const AdminDashboard: React.FC = () => {
 
   const analytics = analyticsData?.data;
   const recentActivity = recentActivityData?.data || [];
-  const isLoading = statsLoading || analyticsLoading || activityLoading;
+  const isLoading = statsLoading || analyticsLoading || activityLoading || userActivityLoading || systemHealthLoading;
 
   // Use real data from APIs with fallbacks
   const complaintTrends = analytics?.complaintTrends || [];
@@ -113,7 +127,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   // Show error state
-  if (statsError || analyticsError || activityError) {
+  if (statsError || analyticsError || activityError || userActivityError || systemHealthError) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-red-600">
@@ -552,23 +566,53 @@ const AdminDashboard: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>User Activity</CardTitle>
+                <CardTitle>User Activity (Real-time)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Active Users (24h)</span>
-                    <Badge variant="secondary">32</Badge>
+                {userActivityLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-sm">Loading activity...</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">New Registrations (7d)</span>
-                    <Badge variant="secondary">5</Badge>
+                ) : userActivityError ? (
+                  <div className="text-center py-4 text-red-600">
+                    <p className="text-sm">Failed to load user activity</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Login Success Rate</span>
-                    <Badge variant="secondary">98.7%</Badge>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Active Users (24h)</span>
+                      <Badge variant="secondary">
+                        {userActivityData?.data?.metrics?.activeUsers || 0}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">New Registrations (24h)</span>
+                      <Badge variant="secondary">
+                        {userActivityData?.data?.metrics?.newRegistrations || 0}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Login Success Rate</span>
+                      <Badge variant="secondary">
+                        {userActivityData?.data?.metrics?.loginSuccessRate || 0}%
+                      </Badge>
+                    </div>
+                    {userActivityData?.data?.activities && userActivityData.data.activities.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {userActivityData.data.activities.slice(0, 3).map((activity) => (
+                            <div key={activity.id} className="text-xs p-2 bg-gray-50 rounded">
+                              <p className="font-medium">{activity.message}</p>
+                              <p className="text-gray-500">{activity.time}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -587,13 +631,13 @@ const AdminDashboard: React.FC = () => {
                     System Settings
                   </Button>
                 </Link>
-                <Link to="/admin/config/wards" className="block">
+                <Link to="/admin/config?tab=wards" className="block">
                   <Button variant="outline" className="w-full justify-start">
                     <MapPin className="h-4 w-4 mr-2" />
                     Ward Management
                   </Button>
                 </Link>
-                <Link to="/admin/config/types" className="block">
+                <Link to="/admin/config?tab=types" className="block">
                   <Button variant="outline" className="w-full justify-start">
                     <FileText className="h-4 w-4 mr-2" />
                     Complaint Types
@@ -604,35 +648,91 @@ const AdminDashboard: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>System Health</CardTitle>
+                <CardTitle>System Health (Real-time)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Database Status</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      Healthy
-                    </Badge>
+                {systemHealthLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-sm">Checking health...</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Email Service</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      Operational
-                    </Badge>
+                ) : systemHealthError ? (
+                  <div className="text-center py-4 text-red-600">
+                    <p className="text-sm">Failed to load system health</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">File Storage</span>
-                    <Badge className="bg-yellow-100 text-yellow-800">
-                      85% Used
-                    </Badge>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">System Uptime</span>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        {systemHealthData?.data?.uptime?.formatted || 'N/A'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Database Status</span>
+                      <Badge
+                        className={
+                          systemHealthData?.data?.services?.database?.status === 'healthy'
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {systemHealthData?.data?.services?.database?.status === 'healthy' ? 'Healthy' : 'Unhealthy'}
+                        {systemHealthData?.data?.services?.database?.responseTime &&
+                          ` (${systemHealthData.data.services.database.responseTime})`
+                        }
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Email Service</span>
+                      <Badge
+                        className={
+                          systemHealthData?.data?.services?.emailService?.status === 'operational'
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {systemHealthData?.data?.services?.emailService?.status || 'Unknown'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">File Storage</span>
+                      <Badge
+                        className={
+                          (systemHealthData?.data?.services?.fileStorage?.usedPercent || 0) > 90
+                            ? "bg-red-100 text-red-800"
+                            : (systemHealthData?.data?.services?.fileStorage?.usedPercent || 0) > 75
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"
+                        }
+                      >
+                        {systemHealthData?.data?.services?.fileStorage?.usedPercent || 0}% Used
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">API Response</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        {systemHealthData?.data?.services?.api?.averageResponseTime || 'N/A'}
+                      </Badge>
+                    </div>
+                    {systemHealthData?.data?.system?.memory && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Memory Usage</span>
+                        <Badge
+                          className={
+                            systemHealthData.data.system.memory.percentage > 80
+                              ? "bg-red-100 text-red-800"
+                              : systemHealthData.data.system.memory.percentage > 60
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                          }
+                        >
+                          {systemHealthData.data.system.memory.used} ({systemHealthData.data.system.memory.percentage}%)
+                        </Badge>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">API Response</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      Fast (120ms)
-                    </Badge>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
