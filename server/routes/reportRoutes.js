@@ -247,7 +247,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         ward: {
           select: { id: true, name: true },
         },
-        assignedUser: {
+        assignedTo: {
           select: { id: true, fullName: true },
         },
       },
