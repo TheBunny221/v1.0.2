@@ -100,6 +100,8 @@ export const baseApi = createApi({
     "Report",
     "Notification",
     "SystemConfig",
+    "MaintenanceTask",
+    "MaintenanceStats",
   ],
   endpoints: () => ({}),
 });
