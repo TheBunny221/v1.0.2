@@ -66,6 +66,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
+import { exportToPDF, exportToExcel, exportToCSV } from "../utils/exportUtils";
 
 interface AnalyticsData {
   complaints: {
