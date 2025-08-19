@@ -39,10 +39,7 @@ import {
 } from "lucide-react";
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
 import QuickComplaintModal from "../components/QuickComplaintModal";
-<<<<<<< HEAD
-=======
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -66,11 +63,8 @@ const ComplaintsList: React.FC = () => {
   });
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
-<<<<<<< HEAD
-=======
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 
   // Data management
   const { cacheComplaintsList } = useDataManager();
@@ -347,23 +341,6 @@ const ComplaintsList: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-<<<<<<< HEAD
-                      <ComplaintQuickActions
-                        complaint={{
-                          id: complaint.id,
-                          complaintId: complaint.complaintId,
-                          status: complaint.status,
-                          priority: complaint.priority,
-                          type: complaint.type,
-                          description: complaint.description,
-                          area: complaint.area,
-                          assignedTo: complaint.assignedTo,
-                        }}
-                        userRole={user?.role || ""}
-                        showDetails={false}
-                        onUpdate={() => refetch()}
-                      />
-=======
                       <div className="flex items-center gap-2">
                         <Link to={`/complaints/${complaint.id}`}>
                           <Button variant="outline" size="sm">
@@ -405,8 +382,6 @@ const ComplaintsList: React.FC = () => {
           refetch();
         }}
       />
-<<<<<<< HEAD
-=======
 
       {/* Update Complaint Modal */}
       <UpdateComplaintModal
@@ -422,7 +397,6 @@ const ComplaintsList: React.FC = () => {
           refetch();
         }}
       />
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
     </div>
   );
 };

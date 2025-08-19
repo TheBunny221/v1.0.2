@@ -2,12 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {
   createComplaint,
   ComplaintType,
   Priority,
 } from "../store/slices/complaintsSlice";
 =======
+=======
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 import { useCreateComplaintMutation } from "../store/api/complaintsApi";
 
 // Define types locally instead of importing from deprecated slice
@@ -23,6 +26,9 @@ type ComplaintType =
   | "OTHERS";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+<<<<<<< HEAD
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
+=======
 >>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 import {
   submitGuestComplaint,

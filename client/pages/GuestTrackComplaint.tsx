@@ -29,11 +29,8 @@ import {
   Lock,
 } from "lucide-react";
 import QuickComplaintModal from "../components/QuickComplaintModal";
-<<<<<<< HEAD
-=======
 import OtpVerificationModal from "../components/OtpVerificationModal";
 import ComplaintDetailsModal from "../components/ComplaintDetailsModal";
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -42,8 +39,6 @@ const GuestTrackComplaint: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
-<<<<<<< HEAD
-=======
 
   // OTP Verification States
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -57,7 +52,6 @@ const GuestTrackComplaint: React.FC = () => {
     useRequestComplaintOtpMutation();
   const [verifyOtp, { isLoading: isVerifyingOtp, error: verifyError }] =
     useVerifyComplaintOtpMutation();
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -526,8 +520,6 @@ const GuestTrackComplaint: React.FC = () => {
           setComplaintId(complaintId);
         }}
       />
-<<<<<<< HEAD
-=======
 
       {/* OTP Verification Modal */}
       <OtpVerificationModal
@@ -549,7 +541,6 @@ const GuestTrackComplaint: React.FC = () => {
         complaint={verifiedComplaint}
         user={verifiedUser}
       />
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
     </div>
   );
 };

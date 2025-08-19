@@ -1365,8 +1365,6 @@ const AdminConfig: React.FC = () => {
                   </div>
                 </div>
 
-<<<<<<< HEAD
-=======
                 {/* Complaint Management Settings */}
                 <div>
                   <h3 className="text-lg font-medium mb-4 flex items-center">
@@ -1465,7 +1463,6 @@ const AdminConfig: React.FC = () => {
                   </div>
                 </div>
 
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
                 {/* Contact Information Settings */}
                 <div>
                   <h3 className="text-lg font-medium mb-4 flex items-center">

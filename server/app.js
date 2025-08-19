@@ -213,10 +213,7 @@ export function createApp() {
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
   app.use("/api/captcha", captchaRoutes);
-<<<<<<< HEAD
-=======
   app.use("/api/guest-otp", guestOtpRoutes);
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 
   // Development test routes (only in development)
   if (process.env.NODE_ENV !== "production") {

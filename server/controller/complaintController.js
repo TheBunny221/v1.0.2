@@ -136,6 +136,36 @@ export const createComplaint = asyncHandler(async (req, res) => {
   // Generate unique complaint ID
   const complaintId = await generateComplaintId();
 
+  // Check auto-assignment setting
+  const autoAssignSetting = await prisma.systemConfig.findUnique({
+    where: { key: "AUTO_ASSIGN_COMPLAINTS" },
+  });
+
+  const isAutoAssignEnabled = autoAssignSetting?.value === "true";
+  let assignedToId = null;
+  let initialStatus = "REGISTERED";
+
+  // Auto-assign to ward officer if enabled
+  if (isAutoAssignEnabled && wardId) {
+    // Find an available ward officer for this ward
+    const wardOfficer = await prisma.user.findFirst({
+      where: {
+        role: "WARD_OFFICER",
+        wardId: wardId,
+        isActive: true,
+      },
+      orderBy: {
+        // Optionally order by workload or other criteria
+        createdAt: "asc", // For now, just assign to the oldest officer
+      },
+    });
+
+    if (wardOfficer) {
+      assignedToId = wardOfficer.id;
+      initialStatus = "ASSIGNED";
+    }
+  }
+
   const complaint = await prisma.complaint.create({
     data: {
       complaintId,
@@ -143,7 +173,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
       description,
       type,
       priority: priority || "MEDIUM",
-      status: "REGISTERED",
+      status: initialStatus,
       slaStatus: "ON_TIME",
       wardId,
       subZoneId,
@@ -156,6 +186,8 @@ export const createComplaint = asyncHandler(async (req, res) => {
       contactPhone: contactPhone || req.user.phoneNumber,
       isAnonymous: isAnonymous || false,
       submittedById: req.user.id,
+      assignedToId,
+      assignedOn: assignedToId ? new Date() : null,
       deadline,
     },
     include: {
@@ -169,10 +201,20 @@ export const createComplaint = asyncHandler(async (req, res) => {
           phoneNumber: true,
         },
       },
+      assignedTo: assignedToId
+        ? {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+            },
+          }
+        : false,
     },
   });
 
-  // Create status log
+  // Create status log for registration
   await prisma.statusLog.create({
     data: {
       complaintId: complaint.id,
@@ -182,25 +224,52 @@ export const createComplaint = asyncHandler(async (req, res) => {
     },
   });
 
-  // Send notification to ward officer if available
-  const wardOfficers = await prisma.user.findMany({
-    where: {
-      role: "WARD_OFFICER",
-      wardId: wardId,
-      isActive: true,
-    },
-  });
-
-  for (const officer of wardOfficers) {
-    await prisma.notification.create({
+  // Create additional status log for auto-assignment if applicable
+  if (assignedToId) {
+    await prisma.statusLog.create({
       data: {
-        userId: officer.id,
         complaintId: complaint.id,
-        type: "IN_APP",
-        title: "New Complaint Registered",
-        message: `A new ${type} complaint has been registered in your ward.`,
+        userId: assignedToId, // Use the assigned user as the one making the status change
+        fromStatus: "REGISTERED",
+        toStatus: "ASSIGNED",
+        comment: "Auto-assigned to ward officer",
       },
     });
+  }
+
+  // Send notifications
+  if (assignedToId) {
+    // Send notification to the assigned ward officer
+    await prisma.notification.create({
+      data: {
+        userId: assignedToId,
+        complaintId: complaint.id,
+        type: "IN_APP",
+        title: "New Complaint Assigned",
+        message: `A new ${type} complaint has been auto-assigned to you in ${complaint.ward?.name || "your ward"}.`,
+      },
+    });
+  } else {
+    // Send notification to all ward officers if not auto-assigned
+    const wardOfficers = await prisma.user.findMany({
+      where: {
+        role: "WARD_OFFICER",
+        wardId: wardId,
+        isActive: true,
+      },
+    });
+
+    for (const officer of wardOfficers) {
+      await prisma.notification.create({
+        data: {
+          userId: officer.id,
+          complaintId: complaint.id,
+          type: "IN_APP",
+          title: "New Complaint Registered",
+          message: `A new ${type} complaint has been registered in your ward.`,
+        },
+      });
+    }
   }
 
   res.status(201).json({
@@ -307,7 +376,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
 
   // --- generic filters ---
   if (status) filters.status = status;
-  if (priority) filters.priority = priority;
+  if (priority) {
+    // Handle both single values and arrays for priority
+    if (Array.isArray(priority)) {
+      filters.priority = { in: priority };
+    } else {
+      filters.priority = priority;
+    }
+  }
   if (type) filters.type = type;
 
   // --- admin-only overrides ---
@@ -528,7 +604,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, remarks, assignedToId } = req.body;
+  const { status, priority, remarks, assignedToId } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -564,6 +640,71 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     });
   }
 
+  // Validation: Check if status is being changed to ASSIGNED but no assignee is provided
+  if (status === "ASSIGNED" && !assignedToId && !complaint.assignedToId) {
+    let errorMessage =
+      "Please select an assignee before setting status to ASSIGNED.";
+
+    // Customize error message based on user role
+    if (req.user.role === "ADMINISTRATOR") {
+      errorMessage =
+        "Please select a Ward Officer before assigning the complaint.";
+    } else if (req.user.role === "WARD_OFFICER") {
+      errorMessage =
+        "Please select a Maintenance Team member before assigning the complaint.";
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: errorMessage,
+      data: null,
+    });
+  }
+
+  // Validation: If assignedToId is provided, verify the user exists and has the correct role
+  if (assignedToId) {
+    const assignee = await prisma.user.findUnique({
+      where: { id: assignedToId },
+    });
+
+    if (!assignee) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected assignee not found",
+        data: null,
+      });
+    }
+
+    // Role-based validation for assignment
+    if (req.user.role === "ADMINISTRATOR" && assignee.role !== "WARD_OFFICER") {
+      return res.status(400).json({
+        success: false,
+        message: "Administrators can only assign complaints to Ward Officers",
+        data: null,
+      });
+    }
+
+    if (
+      req.user.role === "WARD_OFFICER" &&
+      assignee.role !== "MAINTENANCE_TEAM"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Ward Officers can only assign complaints to Maintenance Team members",
+        data: null,
+      });
+    }
+
+    if (!assignee.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign to inactive user",
+        data: null,
+      });
+    }
+  }
+
   const updateData = {
     status,
     slaStatus: calculateSLAStatus(
@@ -572,6 +713,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       status,
     ),
   };
+
+  // Update priority if provided
+  if (priority && priority !== complaint.priority) {
+    updateData.priority = priority;
+  }
 
   // Set timestamps based on status
   if (status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
@@ -954,5 +1100,84 @@ export const assignComplaint = asyncHandler(async (req, res) => {
     success: true,
     message: "Complaint assigned successfully",
     data: { complaint: updatedComplaint },
+  });
+});
+
+// @desc    Get users for assignment (Ward Officer access)
+// @route   GET /api/complaints/ward-users
+// @access  Private (Ward Officer, Maintenance Team, Administrator)
+export const getWardUsers = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 100, role, status = "all" } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  // Build where clause based on user role
+  let whereClause = {
+    ...(status !== "all" && { isActive: status === "active" }),
+  };
+
+  // Role-based filtering
+  if (req.user.role === "WARD_OFFICER") {
+    // Ward Officers can only see users in their ward
+    whereClause.wardId = req.user.wardId;
+    // Ward Officers can see MAINTENANCE_TEAM and other WARD_OFFICER users for assignment
+    whereClause.role = {
+      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"],
+    };
+  } else if (req.user.role === "MAINTENANCE_TEAM") {
+    // Maintenance team can see other maintenance team members and ward officers in their ward
+    whereClause.wardId = req.user.wardId;
+    whereClause.role = {
+      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"],
+    };
+  } else if (req.user.role === "ADMINISTRATOR") {
+    // Administrators can see all users
+    if (role) {
+      whereClause.role = role;
+    }
+  }
+
+  // If specific role filter is requested, apply it
+  if (role && req.user.role === "ADMINISTRATOR") {
+    whereClause.role = role;
+  }
+
+  const users = await prisma.user.findMany({
+    where: whereClause,
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      wardId: true,
+      department: true,
+      isActive: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    skip,
+    take: parseInt(limit),
+    orderBy: {
+      fullName: "asc",
+    },
+  });
+
+  const total = await prisma.user.count({ where: whereClause });
+
+  res.status(200).json({
+    success: true,
+    message: "Ward users retrieved successfully",
+    data: {
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    },
   });
 });
