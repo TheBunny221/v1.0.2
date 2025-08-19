@@ -249,19 +249,37 @@ export function createApp() {
   });
 
   // Serve static files from the React build
-  const distPath = path.join(__dirname, "../dist/spa");
-  app.use(express.static(distPath));
+  const distPath = path.resolve(__dirname, "../dist/spa");
+  console.log("Serving static files from:", distPath);
 
-  // SPA fallback - serve index.html for all non-API routes
-  app.get("*", (req, res, next) => {
-    // Skip API routes
-    if (req.path.startsWith("/api")) {
-      return next();
-    }
+  // Check if the build directory exists
+  if (require('fs').existsSync(distPath)) {
+    app.use(express.static(distPath));
 
-    // Serve index.html for all other routes (SPA routing)
-    res.sendFile(path.join(distPath, "index.html"));
-  });
+    // SPA fallback - serve index.html for all non-API routes
+    app.get("*", (req, res, next) => {
+      // Skip API routes
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
+
+      // Serve index.html for all other routes (SPA routing)
+      console.log("Serving index.html for:", req.path);
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else {
+    console.warn("Build directory not found:", distPath);
+    // Fallback to API info
+    app.get("/", (req, res) => {
+      res.json({
+        success: true,
+        message: "Cochin Smart City API - Build files not found",
+        documentation: "/api-docs",
+        health: "/api/health",
+        note: "Run 'npm run build' to generate static files"
+      });
+    });
+  }
 
   // Error handling middleware (should be last)
   app.use(errorHandler);
