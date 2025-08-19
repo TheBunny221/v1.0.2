@@ -508,17 +508,17 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {metrics.resolutionRate}%
+                  {metrics?.resolutionRate || 0}%
                 </div>
                 <p className="text-sm text-gray-600">Complaints resolved</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Resolution rate</span>
                     <span>
-                      {metrics.resolutionRate >= 90 ? "Excellent" : "Good"}
+                      {(metrics?.resolutionRate || 0) >= 90 ? "Excellent" : "Good"}
                     </span>
                   </div>
-                  <Progress value={metrics.resolutionRate} className="h-2" />
+                  <Progress value={metrics?.resolutionRate || 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
