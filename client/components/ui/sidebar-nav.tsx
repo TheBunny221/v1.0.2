@@ -136,11 +136,21 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
   const filteredNavItems = navigationItems.filter((item) => {
     if (!user) return false;
 
-    // Hide Home tab for logged-in users (should only show for guests/non-authenticated)
-    if (item.path === "/" && user) {
-      return false;
+    // For MAINTENANCE_TEAM users, show only Maintenance and Complaints
+    if (user.role === "MAINTENANCE_TEAM") {
+      return item.path === "/maintenance" || item.path === "/complaints";
     }
 
+    // For WARD_OFFICER users, exclude Home, Messages/Communication, and Settings
+    if (user.role === "WARD_OFFICER") {
+      const excludedPaths = ["/", "/messages", "/settings"];
+      return (
+        item.roles.includes(user.role as string) &&
+        !excludedPaths.includes(item.path)
+      );
+    }
+
+    // For other roles, use the original filtering logic
     return item.roles.includes(user.role as string);
   });
 

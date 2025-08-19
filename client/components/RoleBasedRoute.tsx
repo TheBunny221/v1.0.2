@@ -51,6 +51,8 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
   const location = useLocation();
   const dispatch = useAppDispatch();
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC
+
   // Handle token expiration and logout
   useEffect(() => {
     const handleTokenExpiration = () => {
@@ -84,6 +86,29 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
     return () => clearInterval(interval);
   }, [token, isAuthenticated, dispatch, translations]);
 
+  // Handle unauthorized access notifications in useEffect to avoid setState during render
+  useEffect(() => {
+    if (user && !allowedRoles.includes(user.role as UserRole)) {
+      toast({
+        title: translations?.messages?.unauthorizedAccess || "Access Denied",
+        description: `You don't have permission to access this page. Required roles: ${allowedRoles.join(", ")}`,
+        variant: "destructive",
+      });
+    }
+  }, [user?.role, allowedRoles, translations]);
+
+  useEffect(() => {
+    if (user && checkPermissions && !checkPermissions(user)) {
+      toast({
+        title: translations?.messages?.unauthorizedAccess || "Access Denied",
+        description: "You don't have the required permissions for this action.",
+        variant: "destructive",
+      });
+    }
+  }, [user, checkPermissions, translations]);
+
+  // CONDITIONAL LOGIC AND EARLY RETURNS AFTER ALL HOOKS
+
   // Show loading during authentication check
   if (isLoading) {
     return loadingComponent || <AuthLoadingComponent />;
@@ -114,24 +139,11 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
       onUnauthorized();
     }
 
-    // Show toast notification
-    toast({
-      title: translations?.messages?.unauthorizedAccess || "Access Denied",
-      description: `You don't have permission to access this page. Required roles: ${allowedRoles.join(", ")}`,
-      variant: "destructive",
-    });
-
     return <Navigate to={unauthorizedPath} replace />;
   }
 
   // Handle custom permission checks
   if (user && checkPermissions && !checkPermissions(user)) {
-    toast({
-      title: translations?.messages?.unauthorizedAccess || "Access Denied",
-      description: "You don't have the required permissions for this action.",
-      variant: "destructive",
-    });
-
     return <Navigate to={unauthorizedPath} replace />;
   }
 

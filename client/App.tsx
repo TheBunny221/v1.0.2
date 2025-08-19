@@ -175,7 +175,7 @@ const App: React.FC = () => {
                                 "ADMINISTRATOR",
                               ]}
                             >
-                              <CreateComplaint />
+                              <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
@@ -184,8 +184,10 @@ const App: React.FC = () => {
                         path="/complaints/citizen-form"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                              <QuickComplaintPage />
+                            <RoleBasedRoute
+                              allowedRoles={["CITIZEN", "WARD_OFFICER"]}
+                            >
+                              <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
@@ -194,8 +196,14 @@ const App: React.FC = () => {
                         path="/complaints/new"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                              <QuickComplaintPage />
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                              ]}
+                            >
+                              <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }

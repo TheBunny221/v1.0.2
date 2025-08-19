@@ -252,10 +252,10 @@ const baseQueryWithReauth: BaseQueryFn<
 // Create the base API slice
 export const baseApi = createApi({
   reducerPath: "api",
-  baseQuery: baseQueryWithReauth,
+  baseQuery,
   tagTypes: [
     "Auth",
-    "User",
+    "User", 
     "Complaint",
     "ComplaintType",
     "Ward",
@@ -263,16 +263,13 @@ export const baseApi = createApi({
     "Report",
     "Notification",
     "SystemConfig",
+    "MaintenanceTask",
+    "MaintenanceStats",
   ],
   endpoints: () => ({}),
 });
 
-// Export hooks
-export const {
-  // Will be populated by individual API slices
-} = baseApi;
-
-// Types for enhanced error handling
+// Types for API responses
 export interface ApiError {
   status: number;
   message: string;
