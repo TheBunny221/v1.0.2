@@ -148,26 +148,28 @@ const ComplaintsList: React.FC = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-        {user?.role === "MAINTENANCE_TEAM"
-          ? "My Complaints"
-          : user?.role === "WARD_OFFICER"
-          ? "Ward Complaints"
-          : "Complaints"}
-      </h1>
-      <p className="text-gray-600">
-        {user?.role === "MAINTENANCE_TEAM"
-          ? "View and manage complaints you have submitted"
-          : user?.role === "WARD_OFFICER"
-          ? "Manage complaints in your ward and register new ones"
-          : "Manage and track all complaints"}
-      </p>
+            {user?.role === "MAINTENANCE_TEAM"
+              ? "My Complaints"
+              : user?.role === "WARD_OFFICER"
+                ? "Ward Complaints"
+                : "Complaints"}
+          </h1>
+          <p className="text-gray-600">
+            {user?.role === "MAINTENANCE_TEAM"
+              ? "View and manage complaints you have submitted"
+              : user?.role === "WARD_OFFICER"
+                ? "Manage complaints in your ward and register new ones"
+                : "Manage and track all complaints"}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()}>
             <FileText className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          {(user?.role === "CITIZEN" || user?.role === "MAINTENANCE_TEAM" || user?.role === "WARD_OFFICER") && (
+          {(user?.role === "CITIZEN" ||
+            user?.role === "MAINTENANCE_TEAM" ||
+            user?.role === "WARD_OFFICER") && (
             <Link to="/complaints/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />

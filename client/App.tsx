@@ -168,15 +168,15 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute
-                          allowedRoles={[
-                            "CITIZEN",
-                            "WARD_OFFICER",
-                            "MAINTENANCE_TEAM",
-                            "ADMINISTRATOR",
-                          ]}
-                        >
-                          <UnifiedComplaintForm />
-                        </RoleBasedRoute>
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <UnifiedComplaintForm />
+                            </RoleBasedRoute>
                           </UnifiedLayout>
                         }
                       />
@@ -184,7 +184,9 @@ const App: React.FC = () => {
                         path="/complaints/citizen-form"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute allowedRoles={["CITIZEN", "WARD_OFFICER"]}>
+                            <RoleBasedRoute
+                              allowedRoles={["CITIZEN", "WARD_OFFICER"]}
+                            >
                               <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>
@@ -194,7 +196,13 @@ const App: React.FC = () => {
                         path="/complaints/new"
                         element={
                           <UnifiedLayout>
-                            <RoleBasedRoute allowedRoles={["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM"]}>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                              ]}
+                            >
                               <UnifiedComplaintForm />
                             </RoleBasedRoute>
                           </UnifiedLayout>

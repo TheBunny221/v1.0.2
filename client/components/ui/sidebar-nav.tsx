@@ -150,7 +150,10 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     // For WARD_OFFICER users, exclude Home, Messages/Communication, and Settings
     if (user.role === "WARD_OFFICER") {
       const excludedPaths = ["/", "/messages", "/settings"];
-      return item.roles.includes(user.role as string) && !excludedPaths.includes(item.path);
+      return (
+        item.roles.includes(user.role as string) &&
+        !excludedPaths.includes(item.path)
+      );
     }
 
     // For other roles, use the original filtering logic
