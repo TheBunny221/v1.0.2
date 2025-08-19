@@ -44,10 +44,19 @@ import UpdateComplaintModal from "../components/UpdateComplaintModal";
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const [searchParams] = useSearchParams();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
+  // Initialize filters from URL parameters
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
+  const [priorityFilter, setPriorityFilter] = useState(() => {
+    const priority = searchParams.get("priority");
+    // Handle comma-separated values like "CRITICAL,HIGH"
+    if (priority && priority.includes(",")) {
+      return "high_critical"; // Use a combined filter for UI purposes
+    }
+    return priority || "all";
+  });
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
