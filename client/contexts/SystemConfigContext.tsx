@@ -100,8 +100,9 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         COMPLAINT_ID_LENGTH: "4",
       });
     } finally {
-      // Only set loading to false on the final attempt
-      if (retryCount >= maxRetries) {
+      // Set loading to false when we're done (either success or final failure)
+      if (retryCount === 0) {
+        // For the first attempt, only set to false if we're not retrying
         setIsLoading(false);
       }
     }
