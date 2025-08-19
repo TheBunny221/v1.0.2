@@ -46,6 +46,14 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     refetch,
   } = useGetPublicSystemConfigQuery();
 
+  // Debug logging
+  console.log("SystemConfigContext RTK Query status:", {
+    isLoading,
+    hasData: !!configResponse,
+    hasError: !!error,
+    errorDetails: error,
+  });
+
   // Process the RTK Query data when it changes
   useEffect(() => {
     if (configResponse?.success && Array.isArray(configResponse.data)) {
