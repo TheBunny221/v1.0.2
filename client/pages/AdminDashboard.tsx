@@ -107,9 +107,9 @@ const AdminDashboard: React.FC = () => {
   const isLoading = statsLoading || analyticsLoading || activityLoading || userActivityLoading || systemHealthLoading;
 
   // Use real data from APIs with fallbacks
-  const complaintTrends = analytics?.complaintTrends || [];
-  const complaintsByType = analytics?.complaintsByType || [];
-  const wardPerformance = analytics?.wardPerformance || [];
+  const complaintTrends = analytics?.data?.complaintTrends || [];
+  const complaintsByType = analytics?.data?.complaintsByType || [];
+  const wardPerformance = analytics?.data?.wardPerformance || [];
   const metrics = analytics?.data?.metrics || {
     avgResolutionTime: 0,
     slaCompliance: 0,
