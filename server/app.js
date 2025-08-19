@@ -248,29 +248,15 @@ export function createApp() {
     });
   });
 
-  // SPA fallback route - proxy all non-API routes to Vite dev server in development
-  if (process.env.NODE_ENV === "development") {
-    const viteProxy = createProxyMiddleware({
-      target: 'http://localhost:3000',
-      changeOrigin: true,
-      ws: true, // Enable WebSocket proxying for HMR
-      logLevel: 'silent', // Reduce proxy logs
-      pathFilter: (pathname, req) => {
-        // Only proxy non-API routes
-        return !pathname.startsWith('/api');
-      },
-      onError: (err, req, res) => {
-        console.log('Proxy error:', err.message);
-        res.status(500).json({
-          success: false,
-          message: 'Frontend service unavailable',
-          error: 'Unable to connect to the development server'
-        });
-      }
+  // Root endpoint
+  app.get("/", (req, res) => {
+    res.json({
+      success: true,
+      message: "Cochin Smart City API",
+      documentation: "/api-docs",
+      health: "/api/health",
     });
-
-    app.use(viteProxy);
-  }
+  });
 
   // Error handling middleware (should be last)
   app.use(errorHandler);
