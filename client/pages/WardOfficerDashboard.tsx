@@ -123,9 +123,6 @@ const WardOfficerDashboard: React.FC = () => {
     avgResolutionTime: 2.8,
   });
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
 
   useEffect(() => {
     // Filter complaints for this ward officer's ward
