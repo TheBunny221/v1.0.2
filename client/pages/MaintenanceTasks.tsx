@@ -276,7 +276,7 @@ const MaintenanceTasks: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("all")}
+          onClick={() => handleFilterChange("all")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
