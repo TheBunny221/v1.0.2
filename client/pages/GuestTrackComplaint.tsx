@@ -154,9 +154,20 @@ const GuestTrackComplaint: React.FC = () => {
         {/* Search Form */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-center">Complaint Tracking</CardTitle>
+            <CardTitle className="text-center flex items-center justify-center space-x-2">
+              <Lock className="h-5 w-5 text-blue-600" />
+              <span>Secure Complaint Tracking</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Security Info */}
+            <Alert className="mb-4">
+              <Lock className="h-4 w-4" />
+              <AlertDescription>
+                For your security, we'll send a verification code to your registered email before showing complaint details.
+              </AlertDescription>
+            </Alert>
+
             <form onSubmit={handleTrack} className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
@@ -177,15 +188,18 @@ const GuestTrackComplaint: React.FC = () => {
                 <div className="flex items-end">
                   <Button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || isRequestingOtp}
                     className="w-full sm:w-auto"
                   >
-                    {isLoading ? "Searching..." : "Track Complaint"}
+                    {isLoading || isRequestingOtp ? "Verifying..." : "Verify & Track"}
                   </Button>
                 </div>
               </div>
               {error && (
-                <div className="text-red-600 text-sm mt-2">{error}</div>
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
             </form>
           </CardContent>
