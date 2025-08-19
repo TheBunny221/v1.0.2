@@ -197,7 +197,7 @@ async function main() {
       data: {
         email: "admin@cochinsmartcity.gov.in",
         fullName: "System Administrator",
-        phoneNumber: "9876543210",
+        phoneNumber: "+91-9876543210",
         password: await hashPassword("admin123"),
         role: "ADMINISTRATOR",
         language: "en",
@@ -214,7 +214,7 @@ async function main() {
         data: {
           email: `officer${i + 1}@cochinsmartcity.gov.in`,
           fullName: `Ward Officer ${i + 1}`,
-          phoneNumber: `98765432${10 + i}`,
+          phoneNumber: `+91-98765432${10 + i}`,
           password: await hashPassword("officer123"),
           role: "WARD_OFFICER",
           wardId: ward.id,
@@ -239,7 +239,7 @@ async function main() {
         data: {
           email: `maintenance${i + 1}@cochinsmartcity.gov.in`,
           fullName: `${departments_list[i]} Technician`,
-          phoneNumber: `98765433${10 + i}`,
+          phoneNumber: `+91-98765433${10 + i}`,
           password: await hashPassword("maintenance123"),
           role: "MAINTENANCE_TEAM",
           department: departments_list[i],
@@ -256,28 +256,28 @@ async function main() {
     const citizenData = [
       {
         name: "Rajesh Kumar",
-        email: "citizen1@email.com",
-        phone: "9876540001",
+        email: "rajesh.kumar@email.com",
+        phone: "+91-9876540001",
       },
       {
         name: "Priya Nair",
-        email: "citizen2@email.com",
-        phone: "9876540002",
+        email: "priya.nair@email.com",
+        phone: "+91-9876540002",
       },
       {
         name: "Mohammed Ali",
-        email: "citizen3@email.com",
-        phone: "9876540003",
+        email: "mohammed.ali@email.com",
+        phone: "+91-9876540003",
       },
       {
         name: "Sunitha Menon",
-        email: "citizen4@email.com",
-        phone: "9876540004",
+        email: "sunitha.menon@email.com",
+        phone: "+91-9876540004",
       },
       {
         name: "Ravi Krishnan",
-        email: "citizen5@email.com",
-        phone: "9876540005",
+        email: "ravi.krishnan@email.com",
+        phone: "+91-9876540005",
       },
     ];
 
@@ -574,7 +574,7 @@ async function main() {
     console.log(
       "Maintenance: maintenance1@cochinsmartcity.gov.in / maintenance123",
     );
-    console.log("Citizen: citizen1@email.com / citizen123");
+    console.log("Citizen: rajesh.kumar@email.com / citizen123");
   } catch (error) {
     console.error("❌ Error during seeding:", error);
     throw error;
