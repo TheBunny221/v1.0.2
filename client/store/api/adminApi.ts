@@ -384,6 +384,21 @@ export const adminApi = baseApi.injectEndpoints({
         providesTags: ["Analytics"],
       },
     ),
+
+    // Get user activity
+    getUserActivity: builder.query<
+      ApiResponse<UserActivityResponse>,
+      { period?: string }
+    >({
+      query: ({ period = "24h" }) => `/admin/user-activity?period=${period}`,
+      providesTags: ["Analytics"],
+    }),
+
+    // Get system health
+    getSystemHealth: builder.query<ApiResponse<SystemHealthResponse>, void>({
+      query: () => "/admin/system-health",
+      providesTags: ["Analytics"],
+    }),
   }),
 });
 
