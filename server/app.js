@@ -8,6 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 // Import database connection
 import connectDB from "./db/connection.js";
