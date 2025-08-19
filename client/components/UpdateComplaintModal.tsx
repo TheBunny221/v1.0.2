@@ -191,7 +191,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     setFormData({
       status: "",
       priority: "",
-      assignedToId: "",
+      assignedToId: "none",
       remarks: "",
     });
     setSearchTerm("");
