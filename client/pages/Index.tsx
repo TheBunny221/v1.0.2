@@ -28,9 +28,17 @@ const Index: React.FC = () => {
   );
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName, getConfig } = useSystemConfig();
+  const navigate = useNavigate();
 
   // Form state
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   // Show loading if translations not ready
   if (!translations) {
