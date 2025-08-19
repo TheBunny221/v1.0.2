@@ -1,6 +1,8 @@
 // Debounced ResizeObserver utility to prevent loop errors
 // This wraps ResizeObserver with debouncing to reduce frequency of callbacks
 
+import React from 'react';
+
 export const createDebouncedResizeObserver = (
   callback: ResizeObserverCallback,
   delay: number = 16 // Default to ~60fps
