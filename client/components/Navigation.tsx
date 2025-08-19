@@ -146,7 +146,7 @@ const Navigation: React.FC = () => {
       label: translations.nav.reports,
       path: "/reports",
       icon: <TrendingUp className="h-4 w-4" />,
-      roles: ["WARD_OFFICER", "ADMINISTRATOR"],
+      roles: ["WARD_OFFICER", "ADMINISTRATOR", "MAINTENANCE_TEAM"],
     },
     {
       label: translations.nav.users,
@@ -161,22 +161,10 @@ const Navigation: React.FC = () => {
       roles: ["ADMINISTRATOR"],
     },
     {
-      label: translations?.dashboard?.analytics || "Analytics",
-      path: "/admin/analytics",
-      icon: <TrendingUp className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR"],
-    },
-    {
       label: translations?.nav?.languages || "Languages",
       path: "/admin/languages",
       icon: <Globe className="h-4 w-4" />,
       roles: ["ADMINISTRATOR"],
-    },
-    {
-      label: translations?.nav?.reportsAnalytics || "Reports Analytics",
-      path: "/admin/reports-analytics",
-      icon: <PieChart className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR", "WARD_OFFICER"],
     },
     {
       label: translations?.nav?.settings || "Settings",
