@@ -687,19 +687,21 @@ const UnifiedReports: React.FC = () => {
                 <CardTitle>Detailed Trends Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <ComposedChart data={analyticsData.trends}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="complaints" fill="#8884d8" />
-                    <Bar yAxisId="left" dataKey="resolved" fill="#82ca9d" />
-                    <Line yAxisId="right" type="monotone" dataKey="slaCompliance" stroke="#ff7300" />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                <div id="detailed-trends-chart">
+                  <ResponsiveContainer width="100%" height={400}>
+                    <ComposedChart data={analyticsData.trends}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="complaints" fill="#8884d8" />
+                      <Bar yAxisId="left" dataKey="resolved" fill="#82ca9d" />
+                      <Line yAxisId="right" type="monotone" dataKey="slaCompliance" stroke="#ff7300" />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
