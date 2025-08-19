@@ -250,6 +250,9 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         assignedTo: {
           select: { id: true, fullName: true },
         },
+        submittedBy: {
+          select: { id: true, fullName: true },
+        },
       },
       orderBy: {
         createdAt: 'desc',
