@@ -171,12 +171,23 @@ export const exportToPDF = async (
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
 
+  // Calculate actual metrics from complaint data to ensure accuracy
+  const actualTotal = data.complaints.length;
+  const actualResolved = data.complaints.filter(c => c.status === "resolved").length;
+  const actualPending = data.complaints.filter(c => ["registered", "assigned", "in_progress"].includes(c.status)).length;
+  const actualOverdue = data.complaints.filter(c => {
+    if (c.deadline && ["registered", "assigned", "in_progress"].includes(c.status)) {
+      return new Date(c.deadline) < new Date();
+    }
+    return false;
+  }).length;
+
   // Summary metrics in a grid
   const metrics = [
-    { label: "Total Complaints", value: data.summary.total.toLocaleString(), color: primaryColor },
-    { label: "Resolved", value: data.summary.resolved.toLocaleString(), color: [39, 174, 96] },
-    { label: "Pending", value: data.summary.pending.toLocaleString(), color: [243, 156, 18] },
-    { label: "Resolution Rate", value: `${((data.summary.resolved / data.summary.total) * 100).toFixed(1)}%`, color: accentColor }
+    { label: "Total Complaints", value: actualTotal.toLocaleString(), color: primaryColor },
+    { label: "Resolved", value: actualResolved.toLocaleString(), color: [39, 174, 96] },
+    { label: "Pending", value: actualPending.toLocaleString(), color: [243, 156, 18] },
+    { label: "Resolution Rate", value: actualTotal > 0 ? `${((actualResolved / actualTotal) * 100).toFixed(1)}%` : "0%", color: accentColor }
   ];
 
   const boxWidth = (contentWidth - 15) / 4; // 4 boxes with spacing
