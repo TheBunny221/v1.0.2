@@ -496,13 +496,13 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const wardPerformance = await prisma.$queryRaw`
     SELECT
       w.name as ward,
-      COUNT(c.id) as complaints,
-      COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) as resolved,
-      ROUND(
+      COALESCE(COUNT(c.id), 0) as complaints,
+      COALESCE(COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END), 0) as resolved,
+      COALESCE(ROUND(
         (COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) * 100.0) /
         NULLIF(COUNT(c.id), 0),
         2
-      ) as sla
+      ), 0) as sla
     FROM wards w
     LEFT JOIN complaints c ON w.id = c.wardId
     WHERE w.isActive = 1
