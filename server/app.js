@@ -248,6 +248,14 @@ export function createApp() {
     });
   });
 
+  // SPA fallback route - redirect all non-API routes to Vite dev server in development
+  if (process.env.NODE_ENV === "development") {
+    app.get("*", (req, res) => {
+      const viteUrl = `http://localhost:3000${req.path}${req.search || ""}`;
+      res.redirect(302, viteUrl);
+    });
+  }
+
   // Error handling middleware (should be last)
   app.use(errorHandler);
 
