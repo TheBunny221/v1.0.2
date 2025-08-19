@@ -253,21 +253,6 @@ export function createApp() {
     res.send(specs);
   });
 
-  // Root endpoint - handle development vs production
-  app.get("/", (req, res) => {
-    // In development mode, redirect to the Vite dev server
-    if (process.env.NODE_ENV === "development") {
-      res.redirect("http://localhost:3000");
-    } else {
-      // In production, serve static files or API info
-      res.json({
-        success: true,
-        message: "Cochin Smart City API",
-        documentation: "/api-docs",
-        health: "/api/health",
-      });
-    }
-  });
 
   // 404 handler for API routes
   app.use("/api/*", (req, res) => {
