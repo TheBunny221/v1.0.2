@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./global.css";
 import { suppressResizeObserverErrors } from "./utils/resizeObserverSuppress";
+import { installResizeObserverPolyfill } from "./utils/resizeObserverPolyfill";
 
 // Initialize ResizeObserver error suppression
 suppressResizeObserverErrors();
