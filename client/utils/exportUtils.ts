@@ -244,57 +244,108 @@ export const exportToPDF = async (
 
   // Table headers with background
   doc.setFillColor(245, 245, 245);
-  doc.rect(marginLeft, yPosition - 2, contentWidth, 10, 'F');
+  doc.rect(marginLeft, yPosition - 2, contentWidth, 12, 'F');
+  doc.setDrawColor(200, 200, 200);
+  doc.rect(marginLeft, yPosition - 2, contentWidth, 12, 'S');
+
   doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
 
-  const headers = ["Complaint ID", "Type", "Status", "Priority", "Created", "Ward", "Assigned To"];
-  const columnWidths = [25, 25, 20, 18, 22, 25, 35];
+  const headers = ["ID", "Type", "Status", "Priority", "Created", "Ward", "Assigned"];
+  const columnWidths = [20, 24, 20, 16, 20, 32, 38];
   let tableXPos = marginLeft;
 
   headers.forEach((header, index) => {
-    doc.text(header, tableXPos + 2, yPosition + 3);
+    // Draw column separators
+    if (index > 0) {
+      doc.setDrawColor(200, 200, 200);
+      doc.line(tableXPos, yPosition - 2, tableXPos, yPosition + 10);
+    }
+
+    doc.text(header, tableXPos + 2, yPosition + 5);
     tableXPos += columnWidths[index];
   });
 
-  yPosition += 12;
+  yPosition += 14;
   doc.setFont("helvetica", "normal");
 
-  // Table data with alternating row colors
+  // Table data with proper formatting and separators
   const maxRecords = Math.min(data.complaints.length, options.maxRecords || 100);
-  
+
   data.complaints.slice(0, maxRecords).forEach((complaint, index) => {
     if (yPosition > pageHeight - 30) {
       doc.addPage();
       yPosition = addHeader() + 10;
+
+      // Redraw headers on new page
+      doc.setFillColor(245, 245, 245);
+      doc.rect(marginLeft, yPosition - 2, contentWidth, 12, 'F');
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(marginLeft, yPosition - 2, contentWidth, 12, 'S');
+
+      doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold");
+
+      let headerXPos = marginLeft;
+      headers.forEach((header, headerIndex) => {
+        if (headerIndex > 0) {
+          doc.setDrawColor(200, 200, 200);
+          doc.line(headerXPos, yPosition - 2, headerXPos, yPosition + 10);
+        }
+        doc.text(header, headerXPos + 2, yPosition + 5);
+        headerXPos += columnWidths[headerIndex];
+      });
+
+      yPosition += 14;
+      doc.setFont("helvetica", "normal");
     }
 
     // Alternating row background
     if (index % 2 === 1) {
       doc.setFillColor(248, 249, 250);
-      doc.rect(marginLeft, yPosition - 2, contentWidth, 8, 'F');
+      doc.rect(marginLeft, yPosition - 1, contentWidth, 10, 'F');
     }
+
+    // Draw row border
+    doc.setDrawColor(220, 220, 220);
+    doc.rect(marginLeft, yPosition - 1, contentWidth, 10, 'S');
 
     tableXPos = marginLeft;
     const complaintId = formatComplaintId(complaint.id, options.systemConfig.complaintIdPrefix || "KSC");
-    
+
+    // Format text to prevent overflow
+    const formatText = (text: string, maxLength: number): string => {
+      if (!text) return "N/A";
+      text = text.toString().replace(/_/g, ' '); // Replace underscores with spaces
+      return text.length > maxLength ? text.substring(0, maxLength - 2) + ".." : text;
+    };
+
     const rowData = [
-      complaintId,
-      (complaint.type || "N/A").substring(0, 15),
-      (complaint.status || "N/A").substring(0, 12),
-      (complaint.priority || "N/A").substring(0, 10),
-      complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : "N/A",
-      (complaint.ward?.name || "N/A").substring(0, 15),
-      (complaint.assignedTo?.fullName || "Unassigned").substring(0, 20),
+      formatText(complaintId, 14),
+      formatText(complaint.type, 16),
+      formatText(complaint.status, 14),
+      formatText(complaint.priority, 12),
+      complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString("en-GB").replace(/\//g, '/') : "N/A",
+      formatText(complaint.ward?.name, 22),
+      formatText(complaint.assignedTo?.fullName || "Unassigned", 26),
     ];
 
-    rowData.forEach((data, colIndex) => {
-      doc.text(data.toString(), tableXPos + 2, yPosition + 3);
+    rowData.forEach((cellData, colIndex) => {
+      // Draw column separators
+      if (colIndex > 0) {
+        doc.setDrawColor(220, 220, 220);
+        doc.line(tableXPos, yPosition - 1, tableXPos, yPosition + 9);
+      }
+
+      doc.setFontSize(6);
+      doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+      doc.text(cellData, tableXPos + 1, yPosition + 5);
       tableXPos += columnWidths[colIndex];
     });
 
-    yPosition += 8;
+    yPosition += 10;
   });
 
   // Add footers to all pages
