@@ -110,7 +110,7 @@ const AdminDashboard: React.FC = () => {
   const complaintTrends = analytics?.complaintTrends || [];
   const complaintsByType = analytics?.complaintsByType || [];
   const wardPerformance = analytics?.wardPerformance || [];
-  const metrics = analytics?.metrics || {
+  const metrics = analytics?.data?.metrics || {
     avgResolutionTime: 0,
     slaCompliance: 0,
     citizenSatisfaction: 0,
