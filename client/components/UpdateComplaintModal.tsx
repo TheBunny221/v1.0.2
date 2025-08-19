@@ -83,7 +83,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     data: usersResponse,
     isLoading: isLoadingUsers,
     error: usersError,
-  } = useGetAllUsersQuery({
+  } = useGetWardUsersQuery({
     page: 1,
     limit: 100,
     ...getUsersFilter(),
