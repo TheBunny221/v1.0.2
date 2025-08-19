@@ -194,9 +194,10 @@ const Navigation: React.FC = () => {
       return item.path === "/maintenance" || item.path === "/complaints";
     }
 
-    // For WARD_OFFICER users, exclude Home page
+    // For WARD_OFFICER users, exclude Home, Messages/Communication, and Settings
     if (user.role === "WARD_OFFICER") {
-      return item.roles.includes(user.role as UserRole) && item.path !== "/";
+      const excludedPaths = ["/", "/messages", "/settings"];
+      return item.roles.includes(user.role as UserRole) && !excludedPaths.includes(item.path);
     }
 
     // For other roles, use the original filtering logic

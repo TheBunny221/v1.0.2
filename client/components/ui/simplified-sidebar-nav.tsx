@@ -146,6 +146,12 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
       return item.path === "/maintenance" || item.path === "/complaints";
     }
 
+    // For WARD_OFFICER users, exclude Home, Messages/Communication, and Settings
+    if (user.role === "WARD_OFFICER") {
+      const excludedPaths = ["/", "/messages", "/settings"];
+      return item.roles.includes(user.role as string) && !excludedPaths.includes(item.path);
+    }
+
     // For other roles, use the original filtering logic
     return item.roles.includes(user.role as string);
   });
