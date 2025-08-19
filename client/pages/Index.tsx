@@ -18,6 +18,7 @@ import {
   BarChart3,
   Shield,
   MapPin,
+  CheckCircle,
 } from "lucide-react";
 import QuickComplaintForm from "../components/QuickComplaintForm";
 
@@ -263,7 +264,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "बहुभाषी सहायता"
                         : currentLanguage === "ml"
-                          ? "ബഹുഭാഷാ പിന്തുണ"
+                          ? "ബഹുഭ��ഷാ പിന്തുണ"
                           : "Multilingual Support"}
                     </div>
                     <div className="text-sm text-gray-600">
