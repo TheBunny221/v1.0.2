@@ -20,6 +20,7 @@ import guestRoutes from "./routes/guestRoutes.js";
 import wardRoutes from "./routes/wardRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import maintenanceAnalyticsRoutes from "./routes/maintenanceAnalyticsRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
