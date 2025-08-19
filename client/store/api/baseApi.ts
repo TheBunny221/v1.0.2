@@ -5,6 +5,7 @@ import type {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
 import { logout } from "../slices/authSlice";
+import { createRobustFetch, logFetchDebugInfo } from "../utils/fetchDebug";
 
 // Preserve original fetch before any third-party libraries can override it
 if (typeof globalThis !== 'undefined' && globalThis.fetch && !(globalThis as any).__originalFetch) {
@@ -12,6 +13,11 @@ if (typeof globalThis !== 'undefined' && globalThis.fetch && !(globalThis as any
 }
 if (typeof window !== 'undefined' && window.fetch && !(globalThis as any).__originalFetch) {
   (globalThis as any).__originalFetch = window.fetch;
+}
+
+// Log fetch environment info for debugging
+if (process.env.NODE_ENV === 'development') {
+  logFetchDebugInfo();
 }
 
 // Note: Using completely custom fetch implementation below to avoid RTK Query response body conflicts
