@@ -248,14 +248,19 @@ export function createApp() {
     });
   });
 
-  // Root endpoint
-  app.get("/", (req, res) => {
-    res.json({
-      success: true,
-      message: "Cochin Smart City API",
-      documentation: "/api-docs",
-      health: "/api/health",
-    });
+  // Serve static files from the React build
+  const distPath = path.join(__dirname, "../dist/spa");
+  app.use(express.static(distPath));
+
+  // SPA fallback - serve index.html for all non-API routes
+  app.get("*", (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+
+    // Serve index.html for all other routes (SPA routing)
+    res.sendFile(path.join(distPath, "index.html"));
   });
 
   // Error handling middleware (should be last)
