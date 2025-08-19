@@ -247,20 +247,11 @@ const Navigation: React.FC = () => {
                 aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               >
                 <div className="relative w-5 h-5">
-                  <Menu
-                    className={`h-5 w-5 absolute transition-all duration-200 ${
-                      isMobileMenuOpen
-                        ? "rotate-180 opacity-0"
-                        : "rotate-0 opacity-100"
-                    }`}
-                  />
-                  <X
-                    className={`h-5 w-5 absolute transition-all duration-200 ${
-                      isMobileMenuOpen
-                        ? "rotate-0 opacity-100"
-                        : "-rotate-180 opacity-0"
-                    }`}
-                  />
+                  {isMobileMenuOpen ? (
+                    <X className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                  ) : (
+                    <Menu className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                  )}
                 </div>
               </Button>
             </div>
@@ -411,20 +402,11 @@ const Navigation: React.FC = () => {
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               <div className="relative w-5 h-5">
-                <Menu
-                  className={`h-5 w-5 absolute transition-all duration-200 ${
-                    isMobileMenuOpen
-                      ? "rotate-180 opacity-0"
-                      : "rotate-0 opacity-100"
-                  }`}
-                />
-                <X
-                  className={`h-5 w-5 absolute transition-all duration-200 ${
-                    isMobileMenuOpen
-                      ? "rotate-0 opacity-100"
-                      : "-rotate-180 opacity-0"
-                  }`}
-                />
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                ) : (
+                  <Menu className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                )}
               </div>
             </Button>
           </div>
@@ -492,7 +474,7 @@ const Navigation: React.FC = () => {
                   English
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
-                  हिंदी
+                  हि���दी
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
                   മലയാളം
