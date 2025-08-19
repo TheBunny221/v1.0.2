@@ -1,8 +1,8 @@
 import express from "express";
-import { 
-  requestComplaintOtp, 
+import {
+  requestComplaintOtp,
   verifyComplaintOtp,
-  getComplaintDetailsWithOtp
+  getComplaintDetailsWithOtp,
 } from "../controller/guestOtpController.js";
 
 const router = express.Router();

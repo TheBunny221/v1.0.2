@@ -12,7 +12,9 @@ window.addEventListener("error", (event) => {
   // Filter out known harmless errors
   if (
     event.error === null ||
-    event.message?.includes("ResizeObserver loop completed with undelivered notifications") ||
+    event.message?.includes(
+      "ResizeObserver loop completed with undelivered notifications",
+    ) ||
     event.message?.includes("ResizeObserver loop limit exceeded")
   ) {
     // These are harmless warnings that can be safely ignored

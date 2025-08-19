@@ -110,7 +110,8 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
             <span>Verify Your Identity</span>
           </DialogTitle>
           <DialogDescription>
-            We've sent a verification code to your email address to ensure the security of your complaint details.
+            We've sent a verification code to your email address to ensure the
+            security of your complaint details.
           </DialogDescription>
         </DialogHeader>
 
@@ -237,7 +238,8 @@ const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
                   Security Note
                 </p>
                 <p className="text-xs text-yellow-700">
-                  Never share this code with anyone. Our team will never ask for your verification code.
+                  Never share this code with anyone. Our team will never ask for
+                  your verification code.
                 </p>
               </div>
             </div>

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from "../store/hooks";
-import { useUpdateComplaintMutation, useGetWardUsersQuery } from "../store/api/complaintsApi";
+import {
+  useUpdateComplaintMutation,
+  useGetWardUsersQuery,
+} from "../store/api/complaintsApi";
 import {
   Dialog,
   DialogContent,
@@ -58,17 +61,17 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   onSuccess,
 }) => {
   const { user } = useAppSelector((state) => state.auth);
-  
+
   const [formData, setFormData] = useState({
     status: "",
     priority: "",
     assignedToId: "",
     remarks: "",
   });
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  
+
   // Get users based on current user role
   const getUsersFilter = () => {
     if (user?.role === "ADMINISTRATOR") {
@@ -89,14 +92,16 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     ...getUsersFilter(),
   });
 
-  const [updateComplaint, { isLoading: isUpdating }] = useUpdateComplaintMutation();
+  const [updateComplaint, { isLoading: isUpdating }] =
+    useUpdateComplaintMutation();
 
   const availableUsers = usersResponse?.data?.users || [];
 
   // Filter users based on search term
-  const filteredUsers = availableUsers.filter((user) =>
-    user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = availableUsers.filter(
+    (user) =>
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   useEffect(() => {
@@ -104,9 +109,10 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
       setFormData({
         status: complaint.status,
         priority: complaint.priority,
-        assignedToId: typeof complaint.assignedTo === 'object' && complaint.assignedTo?.id
-          ? complaint.assignedTo.id
-          : complaint.assignedTo || "none",
+        assignedToId:
+          typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
+            ? complaint.assignedTo.id
+            : complaint.assignedTo || "none",
         remarks: "",
       });
       setSearchTerm("");
@@ -118,20 +124,35 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     const errors: string[] = [];
 
     // Check if status is being changed to ASSIGNED but no user is selected
-    if (formData.status === "ASSIGNED" && (!formData.assignedToId || formData.assignedToId === "none")) {
+    if (
+      formData.status === "ASSIGNED" &&
+      (!formData.assignedToId || formData.assignedToId === "none")
+    ) {
       if (user?.role === "ADMINISTRATOR") {
-        errors.push("Please select a Ward Officer before assigning the complaint.");
+        errors.push(
+          "Please select a Ward Officer before assigning the complaint.",
+        );
       } else if (user?.role === "WARD_OFFICER") {
-        errors.push("Please select a Maintenance Team member before assigning the complaint.");
+        errors.push(
+          "Please select a Maintenance Team member before assigning the complaint.",
+        );
       }
     }
 
     // Check if status is being changed from REGISTERED to ASSIGNED
-    if (complaint?.status === "REGISTERED" && formData.status === "ASSIGNED" && (!formData.assignedToId || formData.assignedToId === "none")) {
+    if (
+      complaint?.status === "REGISTERED" &&
+      formData.status === "ASSIGNED" &&
+      (!formData.assignedToId || formData.assignedToId === "none")
+    ) {
       if (user?.role === "ADMINISTRATOR") {
-        errors.push("Please select a Ward Officer before assigning the complaint.");
+        errors.push(
+          "Please select a Ward Officer before assigning the complaint.",
+        );
       } else if (user?.role === "WARD_OFFICER") {
-        errors.push("Please select a Maintenance Team member before assigning the complaint.");
+        errors.push(
+          "Please select a Maintenance Team member before assigning the complaint.",
+        );
       }
     }
 
@@ -265,7 +286,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             Update Complaint
           </DialogTitle>
           <DialogDescription>
-            Update the status and assignment of complaint #{complaint.complaintId || complaint.id.slice(-6)}
+            Update the status and assignment of complaint #
+            {complaint.complaintId || complaint.id.slice(-6)}
           </DialogDescription>
         </DialogHeader>
 
@@ -275,7 +297,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             <h3 className="font-medium mb-2">Complaint Summary</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-600">Type:</span> {complaint.type.replace("_", " ")}
+                <span className="text-gray-600">Type:</span>{" "}
+                {complaint.type.replace("_", " ")}
               </div>
               <div>
                 <span className="text-gray-600">Area:</span> {complaint.area}
@@ -288,7 +311,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               </div>
               <div>
                 <span className="text-gray-600">Current Priority:</span>
-                <Badge className={`ml-2 ${getPriorityColor(complaint.priority)}`}>
+                <Badge
+                  className={`ml-2 ${getPriorityColor(complaint.priority)}`}
+                >
                   {complaint.priority}
                 </Badge>
               </div>
@@ -308,7 +333,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               </div>
               <ul className="list-disc list-inside space-y-1">
                 {validationErrors.map((error, index) => (
-                  <li key={index} className="text-sm text-red-700">{error}</li>
+                  <li key={index} className="text-sm text-red-700">
+                    {error}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -321,7 +348,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               <Select
                 value={formData.status}
                 onValueChange={(value) => {
-                  setFormData(prev => ({ ...prev, status: value }));
+                  setFormData((prev) => ({ ...prev, status: value }));
                   // Clear validation errors when user makes changes
                   setValidationErrors([]);
                 }}
@@ -368,7 +395,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, priority: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority" />
@@ -402,7 +431,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               <Select
                 value={formData.assignedToId}
                 onValueChange={(value) => {
-                  setFormData(prev => ({ ...prev, assignedToId: value }));
+                  setFormData((prev) => ({ ...prev, assignedToId: value }));
                   // Clear validation errors when user makes a selection
                   setValidationErrors([]);
                 }}
@@ -424,9 +453,13 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                           {getUserRoleIcon(user.role)}
                           <div className="ml-2">
                             <div className="font-medium">{user.fullName}</div>
-                            <div className="text-xs text-gray-500">{user.email}</div>
+                            <div className="text-xs text-gray-500">
+                              {user.email}
+                            </div>
                             {user.ward && (
-                              <div className="text-xs text-blue-600">{user.ward.name}</div>
+                              <div className="text-xs text-blue-600">
+                                {user.ward.name}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -463,7 +496,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               id="remarks"
               placeholder="Add any additional comments or remarks about this update..."
               value={formData.remarks}
-              onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, remarks: e.target.value }))
+              }
               rows={3}
             />
           </div>

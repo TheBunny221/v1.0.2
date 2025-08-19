@@ -201,14 +201,16 @@ export const createComplaint = asyncHandler(async (req, res) => {
           phoneNumber: true,
         },
       },
-      assignedTo: assignedToId ? {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          role: true,
-        },
-      } : false,
+      assignedTo: assignedToId
+        ? {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+            },
+          }
+        : false,
     },
   });
 
@@ -244,7 +246,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
         complaintId: complaint.id,
         type: "IN_APP",
         title: "New Complaint Assigned",
-        message: `A new ${type} complaint has been auto-assigned to you in ${complaint.ward?.name || 'your ward'}.`,
+        message: `A new ${type} complaint has been auto-assigned to you in ${complaint.ward?.name || "your ward"}.`,
       },
     });
   } else {
@@ -633,13 +635,16 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
 
   // Validation: Check if status is being changed to ASSIGNED but no assignee is provided
   if (status === "ASSIGNED" && !assignedToId && !complaint.assignedToId) {
-    let errorMessage = "Please select an assignee before setting status to ASSIGNED.";
+    let errorMessage =
+      "Please select an assignee before setting status to ASSIGNED.";
 
     // Customize error message based on user role
     if (req.user.role === "ADMINISTRATOR") {
-      errorMessage = "Please select a Ward Officer before assigning the complaint.";
+      errorMessage =
+        "Please select a Ward Officer before assigning the complaint.";
     } else if (req.user.role === "WARD_OFFICER") {
-      errorMessage = "Please select a Maintenance Team member before assigning the complaint.";
+      errorMessage =
+        "Please select a Maintenance Team member before assigning the complaint.";
     }
 
     return res.status(400).json({
@@ -672,10 +677,14 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       });
     }
 
-    if (req.user.role === "WARD_OFFICER" && assignee.role !== "MAINTENANCE_TEAM") {
+    if (
+      req.user.role === "WARD_OFFICER" &&
+      assignee.role !== "MAINTENANCE_TEAM"
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Ward Officers can only assign complaints to Maintenance Team members",
+        message:
+          "Ward Officers can only assign complaints to Maintenance Team members",
         data: null,
       });
     }
@@ -1105,13 +1114,13 @@ export const getWardUsers = asyncHandler(async (req, res) => {
     whereClause.wardId = req.user.wardId;
     // Ward Officers can see MAINTENANCE_TEAM and other WARD_OFFICER users for assignment
     whereClause.role = {
-      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"]
+      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"],
     };
   } else if (req.user.role === "MAINTENANCE_TEAM") {
     // Maintenance team can see other maintenance team members and ward officers in their ward
     whereClause.wardId = req.user.wardId;
     whereClause.role = {
-      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"]
+      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"],
     };
   } else if (req.user.role === "ADMINISTRATOR") {
     // Administrators can see all users

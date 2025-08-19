@@ -234,12 +234,17 @@ export const verifyComplaintOtp = async (req, res) => {
           submittedOn: complaint.createdAt,
           assignedOn: complaint.assignedAt,
           resolvedOn: complaint.resolvedAt,
-          assignedTo: complaint.assignedTo ? {
-            name: complaint.assignedTo.fullName,
-            role: complaint.assignedTo.role,
-          } : null,
+          assignedTo: complaint.assignedTo
+            ? {
+                name: complaint.assignedTo.fullName,
+                role: complaint.assignedTo.role,
+              }
+            : null,
           attachments: complaint.attachments,
-          estimatedResolution: getEstimatedResolution(complaint.priority, complaint.complaintType?.name),
+          estimatedResolution: getEstimatedResolution(
+            complaint.priority,
+            complaint.complaintType?.name,
+          ),
         },
         user: {
           name: complaint.user.fullName,
@@ -263,7 +268,7 @@ const sendComplaintDetailsEmail = async (complaint) => {
   try {
     const statusColor = {
       REGISTERED: "#f59e0b",
-      ASSIGNED: "#3b82f6", 
+      ASSIGNED: "#3b82f6",
       IN_PROGRESS: "#f97316",
       RESOLVED: "#10b981",
       CLOSED: "#6b7280",
@@ -291,12 +296,12 @@ const sendComplaintDetailsEmail = async (complaint) => {
           <div style="padding: 20px 30px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
               <div>
-                <span style="background-color: ${statusColor[complaint.status] || '#6b7280'}; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px;">
-                  ${complaint.status.replace('_', ' ')}
+                <span style="background-color: ${statusColor[complaint.status] || "#6b7280"}; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                  ${complaint.status.replace("_", " ")}
                 </span>
               </div>
               <div>
-                <span style="background-color: ${priorityColor[complaint.priority] || '#6b7280'}; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                <span style="background-color: ${priorityColor[complaint.priority] || "#6b7280"}; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px;">
                   ${complaint.priority} Priority
                 </span>
               </div>
@@ -315,7 +320,7 @@ const sendComplaintDetailsEmail = async (complaint) => {
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 12px 0; color: #374151; font-weight: 600; width: 140px; vertical-align: top;">Type:</td>
-                  <td style="padding: 12px 0; color: #1f2937;">${complaint.complaintType?.name || 'N/A'}</td>
+                  <td style="padding: 12px 0; color: #1f2937;">${complaint.complaintType?.name || "N/A"}</td>
                 </tr>
                 <tr style="background-color: #f9fafb;">
                   <td style="padding: 12px 0; color: #374151; font-weight: 600; vertical-align: top;">Description:</td>
@@ -325,18 +330,26 @@ const sendComplaintDetailsEmail = async (complaint) => {
                   <td style="padding: 12px 0; color: #374151; font-weight: 600; vertical-align: top;">Location:</td>
                   <td style="padding: 12px 0; color: #1f2937;">${complaint.area}</td>
                 </tr>
-                ${complaint.address ? `
+                ${
+                  complaint.address
+                    ? `
                 <tr style="background-color: #f9fafb;">
                   <td style="padding: 12px 0; color: #374151; font-weight: 600; vertical-align: top;">Address:</td>
                   <td style="padding: 12px 0; color: #1f2937;">${complaint.address}</td>
                 </tr>
-                ` : ''}
-                ${complaint.ward?.name ? `
+                `
+                    : ""
+                }
+                ${
+                  complaint.ward?.name
+                    ? `
                 <tr>
                   <td style="padding: 12px 0; color: #374151; font-weight: 600; vertical-align: top;">Ward:</td>
                   <td style="padding: 12px 0; color: #1f2937;">${complaint.ward.name}</td>
                 </tr>
-                ` : ''}
+                `
+                    : ""
+                }
               </table>
             </div>
 
@@ -354,22 +367,30 @@ const sendComplaintDetailsEmail = async (complaint) => {
                   <div style="color: #6b7280; font-size: 14px;">${new Date(complaint.createdAt).toLocaleString()}</div>
                 </div>
                 
-                ${complaint.assignedAt ? `
+                ${
+                  complaint.assignedAt
+                    ? `
                 <div style="position: relative; margin-bottom: 20px;">
                   <div style="position: absolute; left: -30px; width: 12px; height: 12px; background-color: #3b82f6; border-radius: 50%; top: 5px;"></div>
                   <div style="font-weight: 600; color: #1f2937;">Assigned to Team</div>
                   <div style="color: #6b7280; font-size: 14px;">${new Date(complaint.assignedAt).toLocaleString()}</div>
-                  ${complaint.assignedTo ? `<div style="color: #374151; font-size: 14px; margin-top: 5px;">Assigned to: ${complaint.assignedTo.fullName}</div>` : ''}
+                  ${complaint.assignedTo ? `<div style="color: #374151; font-size: 14px; margin-top: 5px;">Assigned to: ${complaint.assignedTo.fullName}</div>` : ""}
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
                 
-                ${complaint.resolvedAt ? `
+                ${
+                  complaint.resolvedAt
+                    ? `
                 <div style="position: relative; margin-bottom: 20px;">
                   <div style="position: absolute; left: -30px; width: 12px; height: 12px; background-color: #10b981; border-radius: 50%; top: 5px;"></div>
                   <div style="font-weight: 600; color: #1f2937;">Complaint Resolved</div>
                   <div style="color: #6b7280; font-size: 14px;">${new Date(complaint.resolvedAt).toLocaleString()}</div>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
             </div>
 
@@ -406,17 +427,17 @@ const getEstimatedResolution = (priority, type) => {
     HIGH: 3,
     URGENT: 1,
   };
-  
+
   const typeMultiplier = {
-    'Water Supply': 1.2,
-    'Road Maintenance': 1.5,
-    'Waste Management': 1.0,
-    'Street Lighting': 0.8,
-    'Drainage': 1.3,
+    "Water Supply": 1.2,
+    "Road Maintenance": 1.5,
+    "Waste Management": 1.0,
+    "Street Lighting": 0.8,
+    Drainage: 1.3,
   };
 
   const days = Math.ceil(baseTime[priority] * (typeMultiplier[type] || 1.0));
-  return `${days} ${days === 1 ? 'day' : 'days'}`;
+  return `${days} ${days === 1 ? "day" : "days"}`;
 };
 
 export const getComplaintDetailsWithOtp = async (req, res) => {
@@ -425,7 +446,7 @@ export const getComplaintDetailsWithOtp = async (req, res) => {
 
     // This would be used for fetching additional details after initial verification
     // Implementation depends on your session management strategy
-    
+
     res.json({
       success: true,
       message: "Additional details retrieved successfully",

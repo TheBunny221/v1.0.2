@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
@@ -102,22 +97,22 @@ Status: ${complaint.status}
 Priority: ${complaint.priority}
 Description: ${complaint.description}
 Location: ${complaint.area}
-Address: ${complaint.address || 'N/A'}
-Ward: ${complaint.ward || 'N/A'}
+Address: ${complaint.address || "N/A"}
+Ward: ${complaint.ward || "N/A"}
 Submitted On: ${new Date(complaint.submittedOn).toLocaleString()}
-${complaint.assignedOn ? `Assigned On: ${new Date(complaint.assignedOn).toLocaleString()}` : ''}
-${complaint.resolvedOn ? `Resolved On: ${new Date(complaint.resolvedOn).toLocaleString()}` : ''}
+${complaint.assignedOn ? `Assigned On: ${new Date(complaint.assignedOn).toLocaleString()}` : ""}
+${complaint.resolvedOn ? `Resolved On: ${new Date(complaint.resolvedOn).toLocaleString()}` : ""}
 
 Contact Information
 ==================
 Name: ${user.name}
 Email: ${user.email}
-Phone: ${user.phone || 'N/A'}
+Phone: ${user.phone || "N/A"}
     `;
 
-    const blob = new Blob([content], { type: 'text/plain' });
+    const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `complaint-${complaint.id}.txt`;
     document.body.appendChild(a);
@@ -169,16 +164,22 @@ Phone: ${user.phone || 'N/A'}
             <CardContent className="pt-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center space-x-4">
-                  <Badge className={`${getStatusColor(complaint.status)} border flex items-center space-x-1`}>
+                  <Badge
+                    className={`${getStatusColor(complaint.status)} border flex items-center space-x-1`}
+                  >
                     {getStatusIcon(complaint.status)}
-                    <span>{complaint.status.replace('_', ' ')}</span>
+                    <span>{complaint.status.replace("_", " ")}</span>
                   </Badge>
-                  <Badge className={`${getPriorityColor(complaint.priority)} border`}>
+                  <Badge
+                    className={`${getPriorityColor(complaint.priority)} border`}
+                  >
                     {complaint.priority} Priority
                   </Badge>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-500">Estimated Resolution</div>
+                  <div className="text-sm text-gray-500">
+                    Estimated Resolution
+                  </div>
                   <div className="font-medium text-blue-600">
                     {complaint.estimatedResolution}
                   </div>
@@ -197,12 +198,18 @@ Phone: ${user.phone || 'N/A'}
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Type</label>
+                    <label className="text-sm font-medium text-gray-500">
+                      Type
+                    </label>
                     <p className="text-gray-900">{complaint.type}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Description</label>
-                    <p className="text-gray-900 leading-relaxed">{complaint.description}</p>
+                    <label className="text-sm font-medium text-gray-500">
+                      Description
+                    </label>
+                    <p className="text-gray-900 leading-relaxed">
+                      {complaint.description}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500 flex items-center">
@@ -211,15 +218,21 @@ Phone: ${user.phone || 'N/A'}
                     </label>
                     <p className="text-gray-900">{complaint.area}</p>
                     {complaint.address && (
-                      <p className="text-sm text-gray-600 mt-1">{complaint.address}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {complaint.address}
+                      </p>
                     )}
                     {complaint.landmark && (
-                      <p className="text-sm text-gray-600">Landmark: {complaint.landmark}</p>
+                      <p className="text-sm text-gray-600">
+                        Landmark: {complaint.landmark}
+                      </p>
                     )}
                   </div>
                   {complaint.ward && (
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Ward</label>
+                      <label className="text-sm font-medium text-gray-500">
+                        Ward
+                      </label>
                       <p className="text-gray-900">{complaint.ward}</p>
                     </div>
                   )}
@@ -236,7 +249,9 @@ Phone: ${user.phone || 'N/A'}
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Name</label>
+                    <label className="text-sm font-medium text-gray-500">
+                      Name
+                    </label>
                     <p className="text-gray-900">{user.name}</p>
                   </div>
                   <div>
@@ -257,9 +272,15 @@ Phone: ${user.phone || 'N/A'}
                   )}
                   {complaint.assignedTo && (
                     <div className="pt-4 border-t">
-                      <label className="text-sm font-medium text-gray-500">Assigned To</label>
-                      <p className="text-gray-900">{complaint.assignedTo.name}</p>
-                      <p className="text-sm text-gray-600">{complaint.assignedTo.role}</p>
+                      <label className="text-sm font-medium text-gray-500">
+                        Assigned To
+                      </label>
+                      <p className="text-gray-900">
+                        {complaint.assignedTo.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {complaint.assignedTo.role}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -282,13 +303,16 @@ Phone: ${user.phone || 'N/A'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="font-medium text-green-600">Complaint Registered</p>
+                      <p className="font-medium text-green-600">
+                        Complaint Registered
+                      </p>
                       <p className="text-sm text-gray-500">
                         {new Date(complaint.submittedOn).toLocaleDateString()}
                       </p>
                     </div>
                     <p className="text-sm text-gray-600">
-                      Your complaint has been successfully registered in our system.
+                      Your complaint has been successfully registered in our
+                      system.
                     </p>
                   </div>
                 </div>
@@ -302,7 +326,9 @@ Phone: ${user.phone || 'N/A'}
                   >
                     <AlertCircle
                       className={`h-5 w-5 ${
-                        complaint.assignedOn ? "text-green-600" : "text-gray-400"
+                        complaint.assignedOn
+                          ? "text-green-600"
+                          : "text-gray-400"
                       }`}
                     />
                   </div>
@@ -310,7 +336,9 @@ Phone: ${user.phone || 'N/A'}
                     <div className="flex items-center justify-between">
                       <p
                         className={`font-medium ${
-                          complaint.assignedOn ? "text-green-600" : "text-gray-400"
+                          complaint.assignedOn
+                            ? "text-green-600"
+                            : "text-gray-400"
                         }`}
                       >
                         Complaint Assigned
@@ -333,14 +361,18 @@ Phone: ${user.phone || 'N/A'}
                 <div className="flex items-start space-x-4">
                   <div
                     className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(complaint.status)
+                      ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                        complaint.status,
+                      )
                         ? "bg-green-100"
                         : "bg-gray-100"
                     }`}
                   >
                     <Clock
                       className={`h-5 w-5 ${
-                        ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(complaint.status)
+                        ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                          complaint.status,
+                        )
                           ? "text-green-600"
                           : "text-gray-400"
                       }`}
@@ -350,7 +382,9 @@ Phone: ${user.phone || 'N/A'}
                     <div className="flex items-center justify-between">
                       <p
                         className={`font-medium ${
-                          ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(complaint.status)
+                          ["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                            complaint.status,
+                          )
                             ? "text-green-600"
                             : "text-gray-400"
                         }`}
@@ -359,7 +393,9 @@ Phone: ${user.phone || 'N/A'}
                       </p>
                     </div>
                     <p className="text-sm text-gray-600">
-                      {["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(complaint.status)
+                      {["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(
+                        complaint.status,
+                      )
                         ? "Our team is actively working on resolving your complaint."
                         : "Work will begin once the complaint is assigned."}
                     </p>
@@ -375,7 +411,9 @@ Phone: ${user.phone || 'N/A'}
                   >
                     <CheckCircle
                       className={`h-5 w-5 ${
-                        complaint.resolvedOn ? "text-green-600" : "text-gray-400"
+                        complaint.resolvedOn
+                          ? "text-green-600"
+                          : "text-gray-400"
                       }`}
                     />
                   </div>
@@ -383,7 +421,9 @@ Phone: ${user.phone || 'N/A'}
                     <div className="flex items-center justify-between">
                       <p
                         className={`font-medium ${
-                          complaint.resolvedOn ? "text-green-600" : "text-gray-400"
+                          complaint.resolvedOn
+                            ? "text-green-600"
+                            : "text-gray-400"
                         }`}
                       >
                         Complaint Resolved
@@ -411,25 +451,29 @@ Phone: ${user.phone || 'N/A'}
               <CardContent className="pt-6">
                 <h3 className="font-semibold text-lg mb-4">Attachments</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {complaint.attachments.map((attachment: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50"
-                    >
-                      <FileText className="h-8 w-8 text-blue-600" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {attachment.filename || `Attachment ${index + 1}`}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {attachment.size ? `${(attachment.size / 1024).toFixed(1)} KB` : ''}
-                        </p>
+                  {complaint.attachments.map(
+                    (attachment: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50"
+                      >
+                        <FileText className="h-8 w-8 text-blue-600" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {attachment.filename || `Attachment ${index + 1}`}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {attachment.size
+                              ? `${(attachment.size / 1024).toFixed(1)} KB`
+                              : ""}
+                          </p>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -439,12 +483,19 @@ Phone: ${user.phone || 'N/A'}
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="text-sm text-gray-500">
               Need help? Contact support at{" "}
-              <a href="mailto:support@cochinsmartcity.in" className="text-blue-600 hover:underline">
+              <a
+                href="mailto:support@cochinsmartcity.in"
+                className="text-blue-600 hover:underline"
+              >
                 support@cochinsmartcity.in
               </a>
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline" onClick={downloadComplaintDetails} className="sm:hidden">
+              <Button
+                variant="outline"
+                onClick={downloadComplaintDetails}
+                className="sm:hidden"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>

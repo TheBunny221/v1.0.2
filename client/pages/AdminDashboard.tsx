@@ -104,7 +104,12 @@ const AdminDashboard: React.FC = () => {
 
   const analytics = analyticsData?.data;
   const recentActivity = recentActivityData?.data || [];
-  const isLoading = statsLoading || analyticsLoading || activityLoading || userActivityLoading || systemHealthLoading;
+  const isLoading =
+    statsLoading ||
+    analyticsLoading ||
+    activityLoading ||
+    userActivityLoading ||
+    systemHealthLoading;
 
   // Use real data from APIs with fallbacks
   const complaintTrends = analytics?.data?.complaintTrends || [];
@@ -127,7 +132,13 @@ const AdminDashboard: React.FC = () => {
   }
 
   // Show error state
-  if (statsError || analyticsError || activityError || userActivityError || systemHealthError) {
+  if (
+    statsError ||
+    analyticsError ||
+    activityError ||
+    userActivityError ||
+    systemHealthError
+  ) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-red-600">
@@ -182,7 +193,9 @@ const AdminDashboard: React.FC = () => {
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{metrics?.slaCompliance || 0}%</div>
+            <div className="text-2xl font-bold">
+              {metrics?.slaCompliance || 0}%
+            </div>
             <div className="text-sm text-purple-200">SLA Compliance</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
@@ -325,7 +338,10 @@ const AdminDashboard: React.FC = () => {
                           dataKey="value"
                         >
                           {complaintsByType.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry?.color || '#6B7280'} />
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={entry?.color || "#6B7280"}
+                            />
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [value, "Count"]} />
@@ -339,10 +355,12 @@ const AdminDashboard: React.FC = () => {
                         >
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: item?.color || '#6B7280' }}
+                            style={{
+                              backgroundColor: item?.color || "#6B7280",
+                            }}
                           ></div>
                           <span className="text-sm">
-                            {item?.name || 'Unknown'} ({item?.value || 0})
+                            {item?.name || "Unknown"} ({item?.value || 0})
                           </span>
                         </div>
                       ))}
@@ -435,7 +453,7 @@ const AdminDashboard: React.FC = () => {
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">
-                            {ward?.ward || 'Unknown Ward'}
+                            {ward?.ward || "Unknown Ward"}
                           </span>
                           <span className="text-sm text-gray-600">
                             {ward?.sla || 0}%
@@ -477,7 +495,8 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   <Progress
                     value={Math.min(
-                      (1 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) * 100,
+                      (1 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) *
+                        100,
                       100,
                     )}
                     className="h-2"
@@ -499,10 +518,15 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex justify-between text-sm mb-1">
                     <span>Resolution rate</span>
                     <span>
-                      {(metrics?.resolutionRate || 0) >= 90 ? "Excellent" : "Good"}
+                      {(metrics?.resolutionRate || 0) >= 90
+                        ? "Excellent"
+                        : "Good"}
                     </span>
                   </div>
-                  <Progress value={metrics?.resolutionRate || 0} className="h-2" />
+                  <Progress
+                    value={metrics?.resolutionRate || 0}
+                    className="h-2"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -595,22 +619,35 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Login Success Rate</span>
                       <Badge variant="secondary">
-                        {userActivityData?.data?.metrics?.loginSuccessRate || 0}%
+                        {userActivityData?.data?.metrics?.loginSuccessRate || 0}
+                        %
                       </Badge>
                     </div>
-                    {userActivityData?.data?.activities && userActivityData.data.activities.length > 0 && (
-                      <div className="mt-4">
-                        <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                          {userActivityData.data.activities.slice(0, 3).map((activity) => (
-                            <div key={activity.id} className="text-xs p-2 bg-gray-50 rounded">
-                              <p className="font-medium">{activity.message}</p>
-                              <p className="text-gray-500">{activity.time}</p>
-                            </div>
-                          ))}
+                    {userActivityData?.data?.activities &&
+                      userActivityData.data.activities.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium mb-2">
+                            Recent Activity
+                          </h4>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {userActivityData.data.activities
+                              .slice(0, 3)
+                              .map((activity) => (
+                                <div
+                                  key={activity.id}
+                                  className="text-xs p-2 bg-gray-50 rounded"
+                                >
+                                  <p className="font-medium">
+                                    {activity.message}
+                                  </p>
+                                  <p className="text-gray-500">
+                                    {activity.time}
+                                  </p>
+                                </div>
+                              ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
               </CardContent>
@@ -665,54 +702,65 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm">System Uptime</span>
                       <Badge className="bg-blue-100 text-blue-800">
-                        {systemHealthData?.data?.uptime?.formatted || 'N/A'}
+                        {systemHealthData?.data?.uptime?.formatted || "N/A"}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Database Status</span>
                       <Badge
                         className={
-                          systemHealthData?.data?.services?.database?.status === 'healthy'
+                          systemHealthData?.data?.services?.database?.status ===
+                          "healthy"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }
                       >
-                        {systemHealthData?.data?.services?.database?.status === 'healthy' ? 'Healthy' : 'Unhealthy'}
-                        {systemHealthData?.data?.services?.database?.responseTime &&
-                          ` (${systemHealthData.data.services.database.responseTime})`
-                        }
+                        {systemHealthData?.data?.services?.database?.status ===
+                        "healthy"
+                          ? "Healthy"
+                          : "Unhealthy"}
+                        {systemHealthData?.data?.services?.database
+                          ?.responseTime &&
+                          ` (${systemHealthData.data.services.database.responseTime})`}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Email Service</span>
                       <Badge
                         className={
-                          systemHealthData?.data?.services?.emailService?.status === 'operational'
+                          systemHealthData?.data?.services?.emailService
+                            ?.status === "operational"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }
                       >
-                        {systemHealthData?.data?.services?.emailService?.status || 'Unknown'}
+                        {systemHealthData?.data?.services?.emailService
+                          ?.status || "Unknown"}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">File Storage</span>
                       <Badge
                         className={
-                          (systemHealthData?.data?.services?.fileStorage?.usedPercent || 0) > 90
+                          (systemHealthData?.data?.services?.fileStorage
+                            ?.usedPercent || 0) > 90
                             ? "bg-red-100 text-red-800"
-                            : (systemHealthData?.data?.services?.fileStorage?.usedPercent || 0) > 75
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
+                            : (systemHealthData?.data?.services?.fileStorage
+                                  ?.usedPercent || 0) > 75
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
                         }
                       >
-                        {systemHealthData?.data?.services?.fileStorage?.usedPercent || 0}% Used
+                        {systemHealthData?.data?.services?.fileStorage
+                          ?.usedPercent || 0}
+                        % Used
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">API Response</span>
                       <Badge className="bg-green-100 text-green-800">
-                        {systemHealthData?.data?.services?.api?.averageResponseTime || 'N/A'}
+                        {systemHealthData?.data?.services?.api
+                          ?.averageResponseTime || "N/A"}
                       </Badge>
                     </div>
                     {systemHealthData?.data?.system?.memory && (
@@ -722,12 +770,14 @@ const AdminDashboard: React.FC = () => {
                           className={
                             systemHealthData.data.system.memory.percentage > 80
                               ? "bg-red-100 text-red-800"
-                              : systemHealthData.data.system.memory.percentage > 60
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-green-100 text-green-800"
+                              : systemHealthData.data.system.memory.percentage >
+                                  60
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
                           }
                         >
-                          {systemHealthData.data.system.memory.used} ({systemHealthData.data.system.memory.percentage}%)
+                          {systemHealthData.data.system.memory.used} (
+                          {systemHealthData.data.system.memory.percentage}%)
                         </Badge>
                       </div>
                     )}

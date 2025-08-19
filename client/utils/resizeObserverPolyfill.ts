@@ -2,7 +2,7 @@
 // This creates a wrapper around ResizeObserver to handle loop detection gracefully
 
 export const installResizeObserverPolyfill = () => {
-  if (typeof window === 'undefined' || !window.ResizeObserver) {
+  if (typeof window === "undefined" || !window.ResizeObserver) {
     return;
   }
 
@@ -29,8 +29,10 @@ export const installResizeObserverPolyfill = () => {
             callback(entries, observer);
           } catch (error) {
             // Silently catch ResizeObserver loop errors
-            if (!(error.message && error.message.includes('ResizeObserver loop'))) {
-              console.error('ResizeObserver callback error:', error);
+            if (
+              !(error.message && error.message.includes("ResizeObserver loop"))
+            ) {
+              console.error("ResizeObserver callback error:", error);
             }
           } finally {
             this.pendingCallback = false;

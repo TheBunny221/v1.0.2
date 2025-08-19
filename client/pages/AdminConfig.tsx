@@ -119,7 +119,7 @@ const AdminConfig: React.FC = () => {
 
   // Get URL parameters for tab navigation
   const [searchParams] = useSearchParams();
-  const defaultTab = searchParams.get('tab') || 'wards';
+  const defaultTab = searchParams.get("tab") || "wards";
 
   // API queries
   const {
@@ -1381,9 +1381,13 @@ const AdminConfig: React.FC = () => {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex-1">
-                              <h4 className="font-medium">Auto-Assign Complaints</h4>
+                              <h4 className="font-medium">
+                                Auto-Assign Complaints
+                              </h4>
                               <p className="text-sm text-gray-600">
-                                When enabled, complaints will be automatically assigned to Ward Officers based on the ward location
+                                When enabled, complaints will be automatically
+                                assigned to Ward Officers based on the ward
+                                location
                               </p>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -1435,10 +1439,23 @@ const AdminConfig: React.FC = () => {
                             How Auto-Assignment Works
                           </h4>
                           <div className="text-sm text-green-700 mt-1 space-y-1">
-                            <p>• When a complaint is submitted by a citizen, it gets automatically assigned to a Ward Officer in that ward</p>
-                            <p>• When an admin creates a complaint, it also gets auto-assigned to the respective Ward Officer</p>
-                            <p>• If disabled, complaints remain in "Registered" status until manually assigned</p>
-                            <p>• Ward Officers can then assign complaints to Maintenance Team members</p>
+                            <p>
+                              • When a complaint is submitted by a citizen, it
+                              gets automatically assigned to a Ward Officer in
+                              that ward
+                            </p>
+                            <p>
+                              • When an admin creates a complaint, it also gets
+                              auto-assigned to the respective Ward Officer
+                            </p>
+                            <p>
+                              • If disabled, complaints remain in "Registered"
+                              status until manually assigned
+                            </p>
+                            <p>
+                              • Ward Officers can then assign complaints to
+                              Maintenance Team members
+                            </p>
                           </div>
                         </div>
                       </div>

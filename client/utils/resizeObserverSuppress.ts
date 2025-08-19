@@ -8,14 +8,16 @@ export const suppressResizeObserverErrors = () => {
 
   // Override console.error
   window.console.error = (...args) => {
-    const message = String(args[0] || '');
+    const message = String(args[0] || "");
 
     // Filter out ResizeObserver errors
     if (
-      message.includes('ResizeObserver loop completed with undelivered notifications') ||
-      message.includes('ResizeObserver loop limit exceeded') ||
-      message.includes('ResizeObserver loop') ||
-      message.includes('ResizeObserver') && message.includes('loop')
+      message.includes(
+        "ResizeObserver loop completed with undelivered notifications",
+      ) ||
+      message.includes("ResizeObserver loop limit exceeded") ||
+      message.includes("ResizeObserver loop") ||
+      (message.includes("ResizeObserver") && message.includes("loop"))
     ) {
       // Silently ignore these harmless errors
       return;
@@ -27,13 +29,15 @@ export const suppressResizeObserverErrors = () => {
 
   // Override console.warn as well (sometimes ResizeObserver issues show as warnings)
   window.console.warn = (...args) => {
-    const message = String(args[0] || '');
+    const message = String(args[0] || "");
 
     // Filter out ResizeObserver warnings
     if (
-      message.includes('ResizeObserver loop completed with undelivered notifications') ||
-      message.includes('ResizeObserver loop limit exceeded') ||
-      message.includes('ResizeObserver loop')
+      message.includes(
+        "ResizeObserver loop completed with undelivered notifications",
+      ) ||
+      message.includes("ResizeObserver loop limit exceeded") ||
+      message.includes("ResizeObserver loop")
     ) {
       // Silently ignore these harmless warnings
       return;
@@ -45,11 +49,11 @@ export const suppressResizeObserverErrors = () => {
 
   // Handle global error events
   const handleGlobalError = (event) => {
-    const message = event.message || event.error?.message || '';
+    const message = event.message || event.error?.message || "";
     if (
-      message.includes('ResizeObserver loop completed') ||
-      message.includes('ResizeObserver loop limit exceeded') ||
-      message.includes('ResizeObserver loop')
+      message.includes("ResizeObserver loop completed") ||
+      message.includes("ResizeObserver loop limit exceeded") ||
+      message.includes("ResizeObserver loop")
     ) {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -59,11 +63,11 @@ export const suppressResizeObserverErrors = () => {
 
   // Handle unhandled promise rejections that might contain ResizeObserver errors
   const handleUnhandledRejection = (event) => {
-    const message = String(event.reason?.message || event.reason || '');
+    const message = String(event.reason?.message || event.reason || "");
     if (
-      message.includes('ResizeObserver loop completed') ||
-      message.includes('ResizeObserver loop limit exceeded') ||
-      message.includes('ResizeObserver loop')
+      message.includes("ResizeObserver loop completed") ||
+      message.includes("ResizeObserver loop limit exceeded") ||
+      message.includes("ResizeObserver loop")
     ) {
       event.preventDefault();
       return false;
@@ -71,11 +75,11 @@ export const suppressResizeObserverErrors = () => {
   };
 
   // Add event listeners
-  window.addEventListener('error', handleGlobalError, true);
-  window.addEventListener('unhandledrejection', handleUnhandledRejection, true);
+  window.addEventListener("error", handleGlobalError, true);
+  window.addEventListener("unhandledrejection", handleUnhandledRejection, true);
 
   // Also try to monkey-patch ResizeObserver constructor if available
-  if (typeof ResizeObserver !== 'undefined') {
+  if (typeof ResizeObserver !== "undefined") {
     const OriginalResizeObserver = ResizeObserver;
 
     window.ResizeObserver = class extends OriginalResizeObserver {
@@ -85,7 +89,7 @@ export const suppressResizeObserverErrors = () => {
             callback(entries, observer);
           } catch (error) {
             // Suppress ResizeObserver callback errors
-            if (error.message?.includes('ResizeObserver loop')) {
+            if (error.message?.includes("ResizeObserver loop")) {
               return;
             }
             throw error;
@@ -101,7 +105,11 @@ export const suppressResizeObserverErrors = () => {
   return () => {
     window.console.error = originalError;
     window.console.warn = originalWarn;
-    window.removeEventListener('error', handleGlobalError, true);
-    window.removeEventListener('unhandledrejection', handleUnhandledRejection, true);
+    window.removeEventListener("error", handleGlobalError, true);
+    window.removeEventListener(
+      "unhandledrejection",
+      handleUnhandledRejection,
+      true,
+    );
   };
 };

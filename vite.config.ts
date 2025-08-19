@@ -33,21 +33,28 @@ export default defineConfig(({ mode }) => {
             Connection: "keep-alive",
           },
           onError: (err, req, res) => {
-            console.error('Proxy error:', err.message);
+            console.error("Proxy error:", err.message);
             if (res.writeHead) {
               res.writeHead(500, {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               });
-              res.end(JSON.stringify({
-                success: false,
-                message: 'Proxy connection failed',
-                error: err.message
-              }));
+              res.end(
+                JSON.stringify({
+                  success: false,
+                  message: "Proxy connection failed",
+                  error: err.message,
+                }),
+              );
             }
           },
           onProxyReq: (proxyReq, req, res) => {
-            console.log('Proxying request:', req.method, req.url, '-> http://localhost:4005' + req.url);
-          }
+            console.log(
+              "Proxying request:",
+              req.method,
+              req.url,
+              "-> http://localhost:4005" + req.url,
+            );
+          },
         },
       },
       hmr: isProduction

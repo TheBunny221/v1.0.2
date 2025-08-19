@@ -312,7 +312,8 @@ const ComplaintsList: React.FC = () => {
                             View
                           </Button>
                         </Link>
-                        {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                        {(user?.role === "ADMINISTRATOR" ||
+                          user?.role === "WARD_OFFICER") && (
                           <Button
                             variant="outline"
                             size="sm"

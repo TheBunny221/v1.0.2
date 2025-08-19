@@ -1,17 +1,20 @@
 // Debounced ResizeObserver utility to prevent loop errors
 // This wraps ResizeObserver with debouncing to reduce frequency of callbacks
 
-import React from 'react';
+import React from "react";
 
 export const createDebouncedResizeObserver = (
   callback: ResizeObserverCallback,
-  delay: number = 16 // Default to ~60fps
+  delay: number = 16, // Default to ~60fps
 ) => {
   let timeoutId: number | null = null;
   let latestEntries: ResizeObserverEntry[] = [];
   let observer: ResizeObserver | null = null;
 
-  const debouncedCallback = (entries: ResizeObserverEntry[], obs: ResizeObserver) => {
+  const debouncedCallback = (
+    entries: ResizeObserverEntry[],
+    obs: ResizeObserver,
+  ) => {
     latestEntries = entries;
 
     if (timeoutId !== null) {
@@ -23,8 +26,13 @@ export const createDebouncedResizeObserver = (
         callback(latestEntries, obs);
       } catch (error) {
         // Silently handle ResizeObserver loop errors
-        if (!(error instanceof Error && error.message.includes('ResizeObserver loop'))) {
-          console.error('Debounced ResizeObserver error:', error);
+        if (
+          !(
+            error instanceof Error &&
+            error.message.includes("ResizeObserver loop")
+          )
+        ) {
+          console.error("Debounced ResizeObserver error:", error);
         }
       } finally {
         timeoutId = null;
@@ -33,7 +41,7 @@ export const createDebouncedResizeObserver = (
   };
 
   // Create the observer
-  if (typeof ResizeObserver !== 'undefined') {
+  if (typeof ResizeObserver !== "undefined") {
     observer = new ResizeObserver(debouncedCallback);
   }
 
@@ -57,20 +65,22 @@ export const createDebouncedResizeObserver = (
         observer.disconnect();
         observer = null;
       }
-    }
+    },
   };
 };
 
 // Hook for React components
 export const useDebouncedResizeObserver = (
   callback: ResizeObserverCallback,
-  delay: number = 16
+  delay: number = 16,
 ) => {
-  const observerRef = React.useRef<ReturnType<typeof createDebouncedResizeObserver> | null>(null);
+  const observerRef = React.useRef<ReturnType<
+    typeof createDebouncedResizeObserver
+  > | null>(null);
 
   React.useEffect(() => {
     observerRef.current = createDebouncedResizeObserver(callback, delay);
-    
+
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();

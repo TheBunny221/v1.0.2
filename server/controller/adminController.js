@@ -818,22 +818,22 @@ function parseTimeAgo(timeStr) {
 // @route   GET /api/admin/user-activity
 // @access  Private (Admin only)
 export const getUserActivity = asyncHandler(async (req, res) => {
-  const { period = '24h' } = req.query;
+  const { period = "24h" } = req.query;
 
   let dateFilter;
   const now = new Date();
 
   switch (period) {
-    case '1h':
+    case "1h":
       dateFilter = new Date(now.getTime() - 60 * 60 * 1000);
       break;
-    case '24h':
+    case "24h":
       dateFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       break;
-    case '7d':
+    case "7d":
       dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       break;
-    case '30d':
+    case "30d":
       dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       break;
     default:
@@ -861,7 +861,7 @@ export const getUserActivity = asyncHandler(async (req, res) => {
       },
     },
     orderBy: {
-      updatedAt: 'desc',
+      updatedAt: "desc",
     },
     take: 50,
   });
@@ -887,7 +887,7 @@ export const getUserActivity = asyncHandler(async (req, res) => {
       },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
     take: 30,
   });
@@ -917,11 +917,11 @@ export const getUserActivity = asyncHandler(async (req, res) => {
   const activityFeed = [];
 
   // Add user activities
-  recentActivity.forEach(user => {
+  recentActivity.forEach((user) => {
     activityFeed.push({
       id: `user-activity-${user.id}`,
-      type: 'user_activity',
-      message: `${user.fullName} (${user.role.replace('_', ' ')}) was active`,
+      type: "user_activity",
+      message: `${user.fullName} (${user.role.replace("_", " ")}) was active`,
       time: formatTimeAgo(user.updatedAt),
       user: {
         name: user.fullName,
@@ -933,15 +933,15 @@ export const getUserActivity = asyncHandler(async (req, res) => {
   });
 
   // Add complaint activities
-  recentComplaints.forEach(complaint => {
+  recentComplaints.forEach((complaint) => {
     activityFeed.push({
       id: `complaint-activity-${complaint.id}`,
-      type: 'complaint_submission',
-      message: `New ${complaint.type.toLowerCase().replace('_', ' ')} complaint submitted`,
+      type: "complaint_submission",
+      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint submitted`,
       time: formatTimeAgo(complaint.createdAt),
       user: {
-        name: complaint.submittedBy?.fullName || 'Guest User',
-        email: complaint.submittedBy?.email || 'N/A',
+        name: complaint.submittedBy?.fullName || "Guest User",
+        email: complaint.submittedBy?.email || "N/A",
       },
       ward: complaint.ward?.name,
     });
@@ -956,7 +956,7 @@ export const getUserActivity = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'User activity retrieved successfully',
+    message: "User activity retrieved successfully",
     data: {
       period,
       metrics: {
@@ -990,20 +990,22 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
     const memoryTotalMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
 
     // Ensure we don't divide by zero
-    const memoryPercentage = memoryTotalMB > 0 ? Math.round((memoryUsedMB / memoryTotalMB) * 100) : 0;
+    const memoryPercentage =
+      memoryTotalMB > 0 ? Math.round((memoryUsedMB / memoryTotalMB) * 100) : 0;
 
     // Get system statistics
-    const [totalUsers, activeUsers, totalComplaints, openComplaints] = await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { isActive: true } }),
-      prisma.complaint.count(),
-      prisma.complaint.count({
-        where: { status: { in: ['REGISTERED', 'ASSIGNED', 'IN_PROGRESS'] } },
-      }),
-    ]);
+    const [totalUsers, activeUsers, totalComplaints, openComplaints] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.user.count({ where: { isActive: true } }),
+        prisma.complaint.count(),
+        prisma.complaint.count({
+          where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } },
+        }),
+      ]);
 
     // Check email service (simulated)
-    const emailServiceStatus = 'operational';
+    const emailServiceStatus = "operational";
 
     // Calculate file storage usage (simulated)
     const storageUsedPercent = Math.floor(Math.random() * 20) + 70; // 70-90%
@@ -1012,7 +1014,7 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
     const recentErrors = 0; // In a real app, you'd check error logs
 
     const healthData = {
-      status: 'healthy',
+      status: "healthy",
       uptime: {
         seconds: Math.floor(uptime),
         formatted: uptimeFormatted,
@@ -1020,7 +1022,7 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
       timestamp: new Date().toISOString(),
       services: {
         database: {
-          status: 'healthy',
+          status: "healthy",
           responseTime: `${dbResponseTime}ms`,
         },
         emailService: {
@@ -1028,12 +1030,12 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
           lastCheck: new Date().toISOString(),
         },
         fileStorage: {
-          status: storageUsedPercent > 90 ? 'warning' : 'healthy',
+          status: storageUsedPercent > 90 ? "warning" : "healthy",
           usedPercent: storageUsedPercent,
         },
         api: {
-          status: 'healthy',
-          averageResponseTime: '120ms',
+          status: "healthy",
+          averageResponseTime: "120ms",
         },
       },
       system: {
@@ -1044,7 +1046,7 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
         },
         errors: {
           last24h: recentErrors,
-          status: recentErrors === 0 ? 'good' : 'warning',
+          status: recentErrors === 0 ? "good" : "warning",
         },
       },
       statistics: {
@@ -1058,16 +1060,16 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'System health check completed',
+      message: "System health check completed",
       data: healthData,
     });
   } catch (error) {
-    console.error('Health check failed:', error);
+    console.error("Health check failed:", error);
     res.status(500).json({
       success: false,
-      message: 'System health check failed',
+      message: "System health check failed",
       data: {
-        status: 'unhealthy',
+        status: "unhealthy",
         error: error.message,
         timestamp: new Date().toISOString(),
       },
@@ -1086,7 +1088,7 @@ function formatUptime(seconds) {
   if (hours > 0) parts.push(`${hours}h`);
   if (minutes > 0) parts.push(`${minutes}m`);
 
-  return parts.join(' ') || '<1m';
+  return parts.join(" ") || "<1m";
 }
 
 // Helper function to send password setup email

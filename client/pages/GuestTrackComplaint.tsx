@@ -4,7 +4,7 @@ import { useAppDispatch } from "../store/hooks";
 import { trackGuestComplaint } from "../store/slices/guestSlice";
 import {
   useRequestComplaintOtpMutation,
-  useVerifyComplaintOtpMutation
+  useVerifyComplaintOtpMutation,
 } from "../store/api/guestApi";
 import {
   Card,
@@ -48,8 +48,10 @@ const GuestTrackComplaint: React.FC = () => {
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
 
   // API Hooks
-  const [requestOtp, { isLoading: isRequestingOtp }] = useRequestComplaintOtpMutation();
-  const [verifyOtp, { isLoading: isVerifyingOtp, error: verifyError }] = useVerifyComplaintOtpMutation();
+  const [requestOtp, { isLoading: isRequestingOtp }] =
+    useRequestComplaintOtpMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp, error: verifyError }] =
+    useVerifyComplaintOtpMutation();
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,14 +69,20 @@ const GuestTrackComplaint: React.FC = () => {
         setShowOtpModal(true);
       }
     } catch (err: any) {
-      setError(err?.data?.message || "Complaint not found. Please check your complaint ID.");
+      setError(
+        err?.data?.message ||
+          "Complaint not found. Please check your complaint ID.",
+      );
       setTrackingResult(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOtpVerified = async (data: { complaintId: string; otpCode: string }) => {
+  const handleOtpVerified = async (data: {
+    complaintId: string;
+    otpCode: string;
+  }) => {
     try {
       const result = await verifyOtp(data).unwrap();
 
@@ -164,7 +172,8 @@ const GuestTrackComplaint: React.FC = () => {
             <Alert className="mb-4">
               <Lock className="h-4 w-4" />
               <AlertDescription>
-                For your security, we'll send a verification code to your registered email before showing complaint details.
+                For your security, we'll send a verification code to your
+                registered email before showing complaint details.
               </AlertDescription>
             </Alert>
 
@@ -191,7 +200,9 @@ const GuestTrackComplaint: React.FC = () => {
                     disabled={isLoading || isRequestingOtp}
                     className="w-full sm:w-auto"
                   >
-                    {isLoading || isRequestingOtp ? "Verifying..." : "Verify & Track"}
+                    {isLoading || isRequestingOtp
+                      ? "Verifying..."
+                      : "Verify & Track"}
                   </Button>
                 </div>
               </div>

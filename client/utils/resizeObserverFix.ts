@@ -8,12 +8,14 @@ export const fixResizeObserverError = () => {
   window.onerror = (message, source, lineno, colno, error) => {
     // Suppress ResizeObserver loop errors
     if (
-      typeof message === 'string' &&
-      message.includes('ResizeObserver loop completed with undelivered notifications')
+      typeof message === "string" &&
+      message.includes(
+        "ResizeObserver loop completed with undelivered notifications",
+      )
     ) {
       return true; // Prevent default error handling
     }
-    
+
     // Call original handler for other errors
     if (originalErrorHandler) {
       return originalErrorHandler(message, source, lineno, colno, error);
@@ -23,24 +25,30 @@ export const fixResizeObserverError = () => {
 
   // Method 2: Patch addEventListener for error events
   const originalAddEventListener = EventTarget.prototype.addEventListener;
-  EventTarget.prototype.addEventListener = function(type, listener, options) {
-    if (type === 'error' && this === window) {
-      const wrappedListener = function(event: ErrorEvent) {
+  EventTarget.prototype.addEventListener = function (type, listener, options) {
+    if (type === "error" && this === window) {
+      const wrappedListener = function (event: ErrorEvent) {
         if (
-          event.message?.includes('ResizeObserver loop completed with undelivered notifications')
+          event.message?.includes(
+            "ResizeObserver loop completed with undelivered notifications",
+          )
         ) {
           event.preventDefault();
           event.stopImmediatePropagation();
           return;
         }
-        
-        if (typeof listener === 'function') {
+
+        if (typeof listener === "function") {
           listener.call(this, event);
-        } else if (listener && typeof listener === 'object' && 'handleEvent' in listener) {
+        } else if (
+          listener &&
+          typeof listener === "object" &&
+          "handleEvent" in listener
+        ) {
           listener.handleEvent(event);
         }
       };
-      
+
       originalAddEventListener.call(this, type, wrappedListener, options);
     } else {
       originalAddEventListener.call(this, type, listener, options);
@@ -48,24 +56,32 @@ export const fixResizeObserverError = () => {
   };
 
   // Method 3: Create a safe ResizeObserver wrapper
-  if (typeof ResizeObserver !== 'undefined') {
+  if (typeof ResizeObserver !== "undefined") {
     const OriginalResizeObserver = ResizeObserver;
-    
+
     const SafeResizeObserver = class extends OriginalResizeObserver {
       constructor(callback: ResizeObserverCallback) {
-        const safeCallback = (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
+        const safeCallback = (
+          entries: ResizeObserverEntry[],
+          observer: ResizeObserver,
+        ) => {
           requestAnimationFrame(() => {
             try {
               callback(entries, observer);
             } catch (error) {
               // Only log non-ResizeObserver loop errors
-              if (!(error instanceof Error && error.message.includes('ResizeObserver loop'))) {
-                console.error('ResizeObserver callback error:', error);
+              if (
+                !(
+                  error instanceof Error &&
+                  error.message.includes("ResizeObserver loop")
+                )
+              ) {
+                console.error("ResizeObserver callback error:", error);
               }
             }
           });
         };
-        
+
         super(safeCallback);
       }
     };
@@ -79,8 +95,10 @@ export const fixResizeObserverError = () => {
   console.error = (...args) => {
     const message = args[0];
     if (
-      typeof message === 'string' &&
-      message.includes('ResizeObserver loop completed with undelivered notifications')
+      typeof message === "string" &&
+      message.includes(
+        "ResizeObserver loop completed with undelivered notifications",
+      )
     ) {
       // Silently ignore ResizeObserver loop errors
       return;
@@ -88,5 +106,5 @@ export const fixResizeObserverError = () => {
     originalConsoleError.apply(console, args);
   };
 
-  console.info('🔧 ResizeObserver error suppression initialized');
+  console.info("🔧 ResizeObserver error suppression initialized");
 };
