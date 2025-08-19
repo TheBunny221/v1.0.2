@@ -212,7 +212,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     },
   });
 
-  // Create status log
+  // Create status log for registration
   await prisma.statusLog.create({
     data: {
       complaintId: complaint.id,
@@ -221,6 +221,19 @@ export const createComplaint = asyncHandler(async (req, res) => {
       comment: "Complaint registered",
     },
   });
+
+  // Create additional status log for auto-assignment if applicable
+  if (assignedToId) {
+    await prisma.statusLog.create({
+      data: {
+        complaintId: complaint.id,
+        userId: assignedToId, // Use the assigned user as the one making the status change
+        fromStatus: "REGISTERED",
+        toStatus: "ASSIGNED",
+        comment: "Auto-assigned to ward officer",
+      },
+    });
+  }
 
   // Send notification to ward officer if available
   const wardOfficers = await prisma.user.findMany({
