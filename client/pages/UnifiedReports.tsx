@@ -183,9 +183,12 @@ const UnifiedReports: React.FC = () => {
         endpoint = "/api/maintenance/analytics";
       }
 
-      const response = await fetch(`${endpoint}?${queryParams}`, {
+      // Use absolute URL to match the deployed environment
+      const baseUrl = window.location.origin;
+      const response = await fetch(`${baseUrl}${endpoint}?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          'Content-Type': 'application/json',
         },
       });
 
@@ -236,9 +239,12 @@ const UnifiedReports: React.FC = () => {
       });
 
       // Fetch detailed data for export
-      const response = await fetch(`/api/reports/export?${queryParams}`, {
+      // Use absolute URL to match the deployed environment
+      const baseUrl = window.location.origin;
+      const response = await fetch(`${baseUrl}/api/reports/export?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          'Content-Type': 'application/json',
         },
       });
 
