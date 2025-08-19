@@ -203,7 +203,7 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
             <div className="text-2xl font-bold">
-              {metrics.citizenSatisfaction}/5
+              {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
             </div>
             <div className="text-sm text-purple-200">Satisfaction</div>
           </div>
