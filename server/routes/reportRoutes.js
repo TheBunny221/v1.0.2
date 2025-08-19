@@ -314,8 +314,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       select: {
         createdAt: true,
         status: true,
-        resolvedAt: true,
-        slaDeadline: true,
+        resolvedOn: true,
+        deadline: true,
       },
     });
 
