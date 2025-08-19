@@ -421,8 +421,9 @@ export const exportToExcel = (
 
   // Add category data to summary
   categoriesData.forEach(category => {
-    const percentage = ((category.count / data.summary.total) * 100).toFixed(1);
-    summaryData.push([category.name, category.count, `${percentage}%`, `${category.avgTime.toFixed(1)} days`]);
+    const percentage = actualTotal > 0 ? ((category.count / actualTotal) * 100).toFixed(1) : "0.0";
+    const categoryName = category.name.replace(/_/g, ' '); // Replace underscores with spaces
+    summaryData.push([categoryName, category.count, `${percentage}%`, `${category.avgTime.toFixed(1)} days`]);
   });
 
   const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
