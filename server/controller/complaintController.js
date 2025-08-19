@@ -376,7 +376,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
 
   // --- generic filters ---
   if (status) filters.status = status;
-  if (priority) filters.priority = priority;
+  if (priority) {
+    // Handle both single values and arrays for priority
+    if (Array.isArray(priority)) {
+      filters.priority = { in: priority };
+    } else {
+      filters.priority = priority;
+    }
+  }
   if (type) filters.type = type;
 
   // --- admin-only overrides ---
