@@ -145,7 +145,7 @@ const GuestTrackComplaint: React.FC = () => {
                 Track Your Complaint
               </h1>
               <p className="text-gray-600">
-                Enter your complaint ID to check status
+                Secure complaint tracking with email verification
               </p>
             </div>
           </div>
