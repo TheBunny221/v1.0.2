@@ -597,7 +597,7 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={analyticsData.trends}>
+                    <AreaChart data={processedChartData?.trendsData || []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
