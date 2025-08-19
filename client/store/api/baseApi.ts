@@ -319,8 +319,20 @@ export const getApiErrorMessage = (error: any): string => {
     }
 
     // Handle network errors
-    if (error?.message?.includes("Failed to fetch")) {
-      return "Network connection failed. Please check your internet connection.";
+    if (error?.message?.includes("Failed to fetch") || error?.status === "NETWORK_ERROR") {
+      return "Cannot connect to the server. Please check your internet connection and try again.";
+    }
+
+    if (error?.status === "TIMEOUT_ERROR") {
+      return "Request timed out. Please try again.";
+    }
+
+    if (error?.status === "CONNECTION_ERROR") {
+      return "Network connection error. Please check your connection and try again.";
+    }
+
+    if (error?.status === "FETCH_ERROR") {
+      return "Network request failed. Please try again.";
     }
 
     // Handle other error types
