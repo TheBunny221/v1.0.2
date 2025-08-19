@@ -10,6 +10,7 @@ import {
   getWards,
   createWard,
   updateWard,
+  deleteWard,
 } from "../controller/userController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import {
