@@ -189,6 +189,11 @@ const Navigation: React.FC = () => {
   const filteredNavItems = navigationItems.filter((item) => {
     if (!user) return false;
 
+    // Hide Home tab for logged-in users (should only show for guests/non-authenticated)
+    if (item.path === "/" && user) {
+      return false;
+    }
+
     // For MAINTENANCE_TEAM users, show only Maintenance and Complaints
     if (user.role === "MAINTENANCE_TEAM") {
       return item.path === "/maintenance" || item.path === "/complaints";
