@@ -55,4 +55,9 @@ router.route("/wards").post(createWard);
 
 router.route("/wards/:id").put(updateWard).delete(deleteWard);
 
+// Sub-zone management (admin only)
+router.route("/wards/:wardId/subzones").post(createSubZone);
+
+router.route("/wards/:wardId/subzones/:id").put(updateSubZone).delete(deleteSubZone);
+
 export default router;
