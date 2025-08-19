@@ -230,13 +230,35 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Get complaint statistics
+    // Performance optimization: Use pagination for large datasets
+    const pageNumber = parseInt(page) || 1;
+    const pageSize = Math.min(parseInt(limit) || 1000, 10000); // Max 10k records
+    const skip = (pageNumber - 1) * pageSize;
+
+    // Get total count for pagination
+    const totalComplaints = await prisma.complaint.count({
+      where: whereConditions,
+    });
+
+    // Get complaint statistics with optimized query
     const complaints = await prisma.complaint.findMany({
       where: whereConditions,
       include: {
-        ward: true,
-        assignedUser: true,
+        ward: {
+          select: { id: true, name: true },
+        },
+        assignedUser: {
+          select: { id: true, fullName: true },
+        },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      // Only apply pagination for detailed data, not for analytics
+      ...(pageSize < totalComplaints && {
+        skip,
+        take: pageSize,
+      }),
     });
 
     // Calculate basic metrics
