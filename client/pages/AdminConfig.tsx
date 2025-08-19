@@ -848,7 +848,7 @@ const AdminConfig: React.FC = () => {
       </div>
 
       {/* Configuration Tabs */}
-      <Tabs defaultValue="wards" className="space-y-4">
+      <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="wards">Wards & Zones</TabsTrigger>
           <TabsTrigger value="types">Complaint Types</TabsTrigger>
