@@ -815,6 +815,26 @@ function parseTimeAgo(timeStr) {
   return 0;
 }
 
+// Helper function to generate empty trends for last 6 months
+function generateEmptyTrends() {
+  const trends = [];
+  const today = new Date();
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    trends.push({
+      month: date.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      }),
+      complaints: 0,
+      resolved: 0,
+    });
+  }
+
+  return trends;
+}
+
 // @desc    Get user activity data
 // @route   GET /api/admin/user-activity
 // @access  Private (Admin only)
