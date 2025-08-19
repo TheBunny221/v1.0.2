@@ -40,6 +40,17 @@ const GuestTrackComplaint: React.FC = () => {
   const [error, setError] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
+  // OTP Verification States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showComplaintDetails, setShowComplaintDetails] = useState(false);
+  const [maskedEmail, setMaskedEmail] = useState("");
+  const [verifiedComplaint, setVerifiedComplaint] = useState<any>(null);
+  const [verifiedUser, setVerifiedUser] = useState<any>(null);
+
+  // API Hooks
+  const [requestOtp, { isLoading: isRequestingOtp }] = useRequestComplaintOtpMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp, error: verifyError }] = useVerifyComplaintOtpMutation();
+
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
