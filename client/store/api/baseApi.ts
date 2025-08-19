@@ -7,11 +7,10 @@ import type {
 import { logout, setError } from "../slices/authSlice";
 import { toast } from "../../components/ui/use-toast";
 
-// Create the base query
+// Base query without response body interference
 const baseQuery = fetchBaseQuery({
   baseUrl: "/api/",
   prepareHeaders: (headers, { getState }) => {
-    // Get auth token
     const state = getState() as any;
     const token = state?.auth?.token || localStorage.getItem("token");
 
@@ -23,6 +22,19 @@ const baseQuery = fetchBaseQuery({
   },
   timeout: 30000,
 });
+
+// Simple wrapper for auth error handling without response body consumption
+const baseQueryWithAuth: typeof baseQuery = async (args, api, extraOptions) => {
+  const result = await baseQuery(args, api, extraOptions);
+
+  // Handle 401 without accessing response body
+  if (result.error?.status === 401) {
+    localStorage.removeItem("token");
+    api.dispatch(logout());
+  }
+
+  return result;
+};
 
 // Enhanced base query with authentication handling
 const baseQueryWithReauth: BaseQueryFn<
