@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import {
-  fetchComplaints,
-  assignComplaint,
-  updateComplaintStatus,
-} from "../store/slices/complaintsSlice";
-import { useAssignComplaintMutation } from "../store/api/complaintsApi";
+  useGetComplaintsQuery,
+  useAssignComplaintMutation
+} from "../store/api/complaintsApi";
 import { useGetAllUsersQuery } from "../store/api/adminApi";
 import {
   Card,
