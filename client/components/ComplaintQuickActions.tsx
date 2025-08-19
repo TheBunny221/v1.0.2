@@ -44,6 +44,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   userRole,
   showDetails = true,
   onUpdate,
+  onShowUpdateModal,
 }) => {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
