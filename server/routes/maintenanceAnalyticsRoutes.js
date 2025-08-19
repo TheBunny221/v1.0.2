@@ -199,7 +199,7 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
       },
       include: {
         ward: true,
-        citizen: true,
+        submittedBy: true,
       },
       orderBy: [
         { priority: 'desc' },
