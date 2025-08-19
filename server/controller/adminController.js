@@ -572,13 +572,13 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
         complaints: Number(trend.complaints),
         resolved: Number(trend.resolved),
       })) : generateEmptyTrends(),
-      complaintsByType: complaintsByType.map((item) => ({
+      complaintsByType: complaintsByType.length > 0 ? complaintsByType.map((item) => ({
         name: item.type
-          .replace("_", " ")
+          .replace(/_/g, " ")
           .replace(/\b\w/g, (l) => l.toUpperCase()),
         value: item._count,
         color: getTypeColor(item.type),
-      })),
+      })) : generateEmptyComplaintTypes(),
       wardPerformance: wardPerformance.map((ward) => ({
         ward: ward.ward,
         complaints: Number(ward.complaints),
