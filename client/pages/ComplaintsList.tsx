@@ -376,7 +376,6 @@ const ComplaintsList: React.FC = () => {
                           </Button>
                         )}
                       </div>
->>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
                     </TableCell>
                   </TableRow>
                 ))}

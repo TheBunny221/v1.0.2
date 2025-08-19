@@ -1,5 +1,4 @@
 import { baseApi, ApiResponse } from "./baseApi";
-import { baseApi, ApiResponse } from "./baseApi";
 
 // Admin API types
 export interface AdminUser {
