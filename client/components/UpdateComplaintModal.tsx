@@ -155,8 +155,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         priority: formData.priority,
       };
 
-      // Only include assignedToId if it's provided
-      if (formData.assignedToId) {
+      // Only include assignedToId if it's provided and not "none"
+      if (formData.assignedToId && formData.assignedToId !== "none") {
         updateData.assignedToId = formData.assignedToId;
       }
 
