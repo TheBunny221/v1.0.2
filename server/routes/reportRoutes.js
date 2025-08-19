@@ -266,8 +266,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     const resolvedComplaints = complaints.filter(c => c.status === "resolved").length;
     const pendingComplaints = complaints.filter(c => ["registered", "assigned", "in_progress"].includes(c.status)).length;
     const overdueComplaints = complaints.filter(c => {
-      if (c.slaDeadline && ["registered", "assigned", "in_progress"].includes(c.status)) {
-        return new Date(c.slaDeadline) < new Date();
+      if (c.deadline && ["registered", "assigned", "in_progress"].includes(c.status)) {
+        return new Date(c.deadline) < new Date();
       }
       return false;
     }).length;
