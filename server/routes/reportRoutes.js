@@ -532,8 +532,8 @@ const exportReports = asyncHandler(async (req, res) => {
         complaint.ward?.name || "N/A",
         complaint.createdAt.toISOString().split('T')[0],
         complaint.resolvedAt ? complaint.resolvedAt.toISOString().split('T')[0] : "N/A",
-        complaint.assignedUser?.fullName || "Unassigned",
-        complaint.citizen?.fullName || "Guest",
+        complaint.assignedTo?.fullName || "Unassigned",
+        complaint.submittedBy?.fullName || "Guest",
         complaint.contactPhone || "N/A",
       ]);
 
