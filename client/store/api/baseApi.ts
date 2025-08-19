@@ -5,9 +5,37 @@ import type {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
 import { logout } from "../slices/authSlice";
+<<<<<<< HEAD
 
 // Note: Using completely custom fetch implementation below to avoid RTK Query response body conflicts
 
+=======
+import { createRobustFetch, logFetchDebugInfo } from "../../utils/fetchDebug";
+
+// Preserve original fetch before any third-party libraries can override it
+if (
+  typeof globalThis !== "undefined" &&
+  globalThis.fetch &&
+  !(globalThis as any).__originalFetch
+) {
+  (globalThis as any).__originalFetch = globalThis.fetch;
+}
+if (
+  typeof window !== "undefined" &&
+  window.fetch &&
+  !(globalThis as any).__originalFetch
+) {
+  (globalThis as any).__originalFetch = window.fetch;
+}
+
+// Log fetch environment info for debugging
+if (process.env.NODE_ENV === "development") {
+  logFetchDebugInfo();
+}
+
+// Note: Using completely custom fetch implementation below to avoid RTK Query response body conflicts
+
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 // Completely custom base query to avoid all RTK Query response body conflicts
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
@@ -64,10 +92,18 @@ const baseQueryWithReauth: BaseQueryFn<
     }
   }
 
+<<<<<<< HEAD
   // Build request options carefully
   const baseOptions: RequestInit = {
     method: typeof args === "string" ? "GET" : args.method || "GET",
     headers: typeof args === "string" ? {} : args.headers || {},
+=======
+  // Build request options carefully with timeout
+  const baseOptions: RequestInit = {
+    method: typeof args === "string" ? "GET" : args.method || "GET",
+    headers: typeof args === "string" ? {} : args.headers || {},
+    signal: AbortSignal.timeout(15000), // 15 second timeout
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
   };
 
   // Only add body for methods that support it
@@ -116,8 +152,15 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   try {
+<<<<<<< HEAD
     // Use native fetch to avoid RTK Query's internal response handling
     const response = await fetch(
+=======
+    // Use robust fetch that handles third-party overrides
+    const robustFetch = createRobustFetch();
+
+    const response = await robustFetch(
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
       `/api${url.startsWith("/") ? "" : "/"}${url}`,
       options,
     );
@@ -158,10 +201,74 @@ const baseQueryWithReauth: BaseQueryFn<
       };
     }
   } catch (error) {
+<<<<<<< HEAD
     return {
       error: {
         status: "FETCH_ERROR",
         error: String(error),
+=======
+    // Enhanced error detection for network issues and third-party overrides
+    const errorMessage = String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    let errorType = "FETCH_ERROR";
+    let userMessage =
+      "Network connection failed. Please check your internet connection.";
+
+    // Check for specific third-party library interference
+    const isFullStoryError =
+      errorStack?.includes("fs.js") || errorStack?.includes("fullstory");
+    const isThirdPartyFetchOverride =
+      errorMessage.includes("window.fetch") || isFullStoryError;
+
+    if (error instanceof DOMException && error.name === "AbortError") {
+      errorType = "TIMEOUT_ERROR";
+      userMessage = "Request timed out. Please try again.";
+    } else if (errorMessage.includes("Failed to fetch")) {
+      errorType = "NETWORK_ERROR";
+      if (isThirdPartyFetchOverride) {
+        userMessage =
+          "Network request intercepted by tracking library. Retrying...";
+      } else {
+        userMessage =
+          "Cannot connect to the server. Please check your internet connection and try again.";
+      }
+    } else if (
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("TIMEOUT")
+    ) {
+      errorType = "TIMEOUT_ERROR";
+      userMessage = "Request timed out. Please try again.";
+    } else if (errorMessage.includes("ERR_NETWORK")) {
+      errorType = "CONNECTION_ERROR";
+      userMessage =
+        "Network connection error. Please check your connection and try again.";
+    } else if (isThirdPartyFetchOverride) {
+      errorType = "THIRD_PARTY_INTERFERENCE";
+      userMessage =
+        "Request intercepted by tracking service. Please try again.";
+    }
+
+    console.error("Fetch error in baseApi:", {
+      url: `/api${url.startsWith("/") ? "" : "/"}${url}`,
+      method: typeof args === "string" ? "GET" : args.method || "GET",
+      error: errorMessage,
+      errorType,
+      originalError: error,
+      errorStack,
+      isFullStoryError,
+      isThirdPartyFetchOverride,
+      options: options,
+    });
+
+    // The robust fetch function already handles retries and fallbacks
+    // No need for additional retry logic here
+
+    return {
+      error: {
+        status: errorType,
+        error: errorMessage,
+        data: { message: userMessage },
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
       } as FetchBaseQueryError,
     };
   }
@@ -295,8 +402,28 @@ export const getApiErrorMessage = (error: any): string => {
     }
 
     // Handle network errors
+<<<<<<< HEAD
     if (error?.message?.includes("Failed to fetch")) {
       return "Network connection failed. Please check your internet connection.";
+=======
+    if (
+      error?.message?.includes("Failed to fetch") ||
+      error?.status === "NETWORK_ERROR"
+    ) {
+      return "Cannot connect to the server. Please check your internet connection and try again.";
+    }
+
+    if (error?.status === "TIMEOUT_ERROR") {
+      return "Request timed out. Please try again.";
+    }
+
+    if (error?.status === "CONNECTION_ERROR") {
+      return "Network connection error. Please check your connection and try again.";
+    }
+
+    if (error?.status === "FETCH_ERROR") {
+      return "Network request failed. Please try again.";
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
     }
 
     // Handle other error types

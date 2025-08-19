@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { fetchComplaints } from "../store/slices/complaintsSlice";
+import { useAppSelector } from "../store/hooks";
+import {
+  useGetComplaintsQuery,
+  useGetComplaintStatisticsQuery,
+} from "../store/api/complaintsApi";
 import {
   useGetDashboardAnalyticsQuery,
   useGetRecentActivityQuery,
   useGetDashboardStatsQuery,
+  useGetUserActivityQuery,
+  useGetSystemHealthQuery,
 } from "../store/api/adminApi";
 import {
   Card,
@@ -56,7 +61,6 @@ import {
 } from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { translations } = useAppSelector((state) => state.language);
 
   // Fetch real-time data using API queries
@@ -78,6 +82,18 @@ const AdminDashboard: React.FC = () => {
     error: activityError,
   } = useGetRecentActivityQuery({ limit: 5 });
 
+  const {
+    data: userActivityData,
+    isLoading: userActivityLoading,
+    error: userActivityError,
+  } = useGetUserActivityQuery({ period: "24h" });
+
+  const {
+    data: systemHealthData,
+    isLoading: systemHealthLoading,
+    error: systemHealthError,
+  } = useGetSystemHealthQuery();
+
   const systemStats = dashboardStats?.data || {
     totalComplaints: 0,
     totalUsers: 0,
@@ -90,7 +106,12 @@ const AdminDashboard: React.FC = () => {
 
   const analytics = analyticsData?.data;
   const recentActivity = recentActivityData?.data || [];
-  const isLoading = statsLoading || analyticsLoading || activityLoading;
+  const isLoading =
+    statsLoading ||
+    analyticsLoading ||
+    activityLoading ||
+    userActivityLoading ||
+    systemHealthLoading;
 
   // Use real data from APIs with fallbacks
   const complaintTrends = analytics?.complaintTrends || [];
@@ -113,7 +134,13 @@ const AdminDashboard: React.FC = () => {
   }
 
   // Show error state
-  if (statsError || analyticsError || activityError) {
+  if (
+    statsError ||
+    analyticsError ||
+    activityError ||
+    userActivityError ||
+    systemHealthError
+  ) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-red-600">
@@ -168,12 +195,14 @@ const AdminDashboard: React.FC = () => {
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{metrics.slaCompliance}%</div>
+            <div className="text-2xl font-bold">
+              {metrics?.slaCompliance || 0}%
+            </div>
             <div className="text-sm text-purple-200">SLA Compliance</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
             <div className="text-2xl font-bold">
-              {metrics.citizenSatisfaction}/5
+              {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
             </div>
             <div className="text-sm text-purple-200">Satisfaction</div>
           </div>
@@ -235,7 +264,7 @@ const AdminDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {metrics.avgResolutionTime}d
+              {(metrics?.avgResolutionTime || 0).toFixed(1)}d
             </div>
             <p className="text-xs text-muted-foreground">Target: 3 days</p>
           </CardContent>
@@ -260,7 +289,7 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaint Trends (Last 6 Months)</CardTitle>
               </CardHeader>
               <CardContent>
-                {complaintTrends.length > 0 ? (
+                {complaintTrends && complaintTrends.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={complaintTrends}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -297,7 +326,7 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaints by Type</CardTitle>
               </CardHeader>
               <CardContent>
-                {complaintsByType.length > 0 ? (
+                {complaintsByType && complaintsByType.length > 0 ? (
                   <>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
@@ -311,7 +340,10 @@ const AdminDashboard: React.FC = () => {
                           dataKey="value"
                         >
                           {complaintsByType.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={entry?.color || "#6B7280"}
+                            />
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [value, "Count"]} />
@@ -325,10 +357,12 @@ const AdminDashboard: React.FC = () => {
                         >
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: item.color }}
+                            style={{
+                              backgroundColor: item?.color || "#6B7280",
+                            }}
                           ></div>
                           <span className="text-sm">
-                            {item.name} ({item.value})
+                            {item?.name || "Unknown"} ({item?.value || 0})
                           </span>
                         </div>
                       ))}
@@ -386,7 +420,7 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Ward Performance Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                {wardPerformance.length > 0 ? (
+                {wardPerformance && wardPerformance.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={wardPerformance}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -415,19 +449,19 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>SLA Compliance by Ward</CardTitle>
               </CardHeader>
               <CardContent>
-                {wardPerformance.length > 0 ? (
+                {wardPerformance && wardPerformance.length > 0 ? (
                   <div className="space-y-4">
                     {wardPerformance.map((ward, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">
-                            {ward.ward}
+                            {ward?.ward || "Unknown Ward"}
                           </span>
                           <span className="text-sm text-gray-600">
-                            {ward.sla}%
+                            {ward?.sla || 0}%
                           </span>
                         </div>
-                        <Progress value={ward.sla} className="h-2" />
+                        <Progress value={ward?.sla || 0} className="h-2" />
                       </div>
                     ))}
                   </div>
@@ -449,21 +483,22 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
-                  {(metrics.avgResolutionTime * 24).toFixed(1)}h
+                  {((metrics?.avgResolutionTime || 0) * 24).toFixed(1)}h
                 </div>
                 <p className="text-sm text-gray-600">Average response time</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 24h</span>
                     <span>
-                      {metrics.avgResolutionTime < 1
+                      {(metrics?.avgResolutionTime || 0) < 1
                         ? "On target"
                         : "Needs improvement"}
                     </span>
                   </div>
                   <Progress
                     value={Math.min(
-                      (1 / Math.max(metrics.avgResolutionTime, 0.1)) * 100,
+                      (1 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) *
+                        100,
                       100,
                     )}
                     className="h-2"
@@ -478,17 +513,22 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {metrics.resolutionRate}%
+                  {metrics?.resolutionRate || 0}%
                 </div>
                 <p className="text-sm text-gray-600">Complaints resolved</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Resolution rate</span>
                     <span>
-                      {metrics.resolutionRate >= 90 ? "Excellent" : "Good"}
+                      {(metrics?.resolutionRate || 0) >= 90
+                        ? "Excellent"
+                        : "Good"}
                     </span>
                   </div>
-                  <Progress value={metrics.resolutionRate} className="h-2" />
+                  <Progress
+                    value={metrics?.resolutionRate || 0}
+                    className="h-2"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -499,20 +539,20 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-yellow-600">
-                  {metrics.citizenSatisfaction}/5
+                  {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
                 </div>
                 <p className="text-sm text-gray-600">Citizen feedback</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 4.0</span>
                     <span>
-                      {metrics.citizenSatisfaction >= 4.0
+                      {(metrics?.citizenSatisfaction || 0) >= 4.0
                         ? "Above target"
                         : "Below target"}
                     </span>
                   </div>
                   <Progress
-                    value={(metrics.citizenSatisfaction / 5) * 100}
+                    value={((metrics?.citizenSatisfaction || 0) / 5) * 100}
                     className="h-2"
                   />
                 </div>
@@ -552,23 +592,66 @@ const AdminDashboard: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>User Activity</CardTitle>
+                <CardTitle>User Activity (Real-time)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Active Users (24h)</span>
-                    <Badge variant="secondary">32</Badge>
+                {userActivityLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-sm">Loading activity...</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">New Registrations (7d)</span>
-                    <Badge variant="secondary">5</Badge>
+                ) : userActivityError ? (
+                  <div className="text-center py-4 text-red-600">
+                    <p className="text-sm">Failed to load user activity</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Login Success Rate</span>
-                    <Badge variant="secondary">98.7%</Badge>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Active Users (24h)</span>
+                      <Badge variant="secondary">
+                        {userActivityData?.data?.metrics?.activeUsers || 0}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">New Registrations (24h)</span>
+                      <Badge variant="secondary">
+                        {userActivityData?.data?.metrics?.newRegistrations || 0}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Login Success Rate</span>
+                      <Badge variant="secondary">
+                        {userActivityData?.data?.metrics?.loginSuccessRate || 0}
+                        %
+                      </Badge>
+                    </div>
+                    {userActivityData?.data?.activities &&
+                      userActivityData.data.activities.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium mb-2">
+                            Recent Activity
+                          </h4>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {userActivityData.data.activities
+                              .slice(0, 3)
+                              .map((activity) => (
+                                <div
+                                  key={activity.id}
+                                  className="text-xs p-2 bg-gray-50 rounded"
+                                >
+                                  <p className="font-medium">
+                                    {activity.message}
+                                  </p>
+                                  <p className="text-gray-500">
+                                    {activity.time}
+                                  </p>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -587,13 +670,13 @@ const AdminDashboard: React.FC = () => {
                     System Settings
                   </Button>
                 </Link>
-                <Link to="/admin/config/wards" className="block">
+                <Link to="/admin/config?tab=wards" className="block">
                   <Button variant="outline" className="w-full justify-start">
                     <MapPin className="h-4 w-4 mr-2" />
                     Ward Management
                   </Button>
                 </Link>
-                <Link to="/admin/config/types" className="block">
+                <Link to="/admin/config?tab=types" className="block">
                   <Button variant="outline" className="w-full justify-start">
                     <FileText className="h-4 w-4 mr-2" />
                     Complaint Types
@@ -604,42 +687,111 @@ const AdminDashboard: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>System Health</CardTitle>
+                <CardTitle>System Health (Real-time)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Database Status</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      Healthy
-                    </Badge>
+                {systemHealthLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-sm">Checking health...</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Email Service</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      Operational
-                    </Badge>
+                ) : systemHealthError ? (
+                  <div className="text-center py-4 text-red-600">
+                    <p className="text-sm">Failed to load system health</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">File Storage</span>
-                    <Badge className="bg-yellow-100 text-yellow-800">
-                      85% Used
-                    </Badge>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">System Uptime</span>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        {systemHealthData?.data?.uptime?.formatted || "N/A"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Database Status</span>
+                      <Badge
+                        className={
+                          systemHealthData?.data?.services?.database?.status ===
+                          "healthy"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {systemHealthData?.data?.services?.database?.status ===
+                        "healthy"
+                          ? "Healthy"
+                          : "Unhealthy"}
+                        {systemHealthData?.data?.services?.database
+                          ?.responseTime &&
+                          ` (${systemHealthData.data.services.database.responseTime})`}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Email Service</span>
+                      <Badge
+                        className={
+                          systemHealthData?.data?.services?.emailService
+                            ?.status === "operational"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {systemHealthData?.data?.services?.emailService
+                          ?.status || "Unknown"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">File Storage</span>
+                      <Badge
+                        className={
+                          (systemHealthData?.data?.services?.fileStorage
+                            ?.usedPercent || 0) > 90
+                            ? "bg-red-100 text-red-800"
+                            : (systemHealthData?.data?.services?.fileStorage
+                                  ?.usedPercent || 0) > 75
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                        }
+                      >
+                        {systemHealthData?.data?.services?.fileStorage
+                          ?.usedPercent || 0}
+                        % Used
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">API Response</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        {systemHealthData?.data?.services?.api
+                          ?.averageResponseTime || "N/A"}
+                      </Badge>
+                    </div>
+                    {systemHealthData?.data?.system?.memory && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Memory Usage</span>
+                        <Badge
+                          className={
+                            systemHealthData.data.system.memory.percentage > 80
+                              ? "bg-red-100 text-red-800"
+                              : systemHealthData.data.system.memory.percentage >
+                                  60
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
+                          }
+                        >
+                          {systemHealthData.data.system.memory.used} (
+                          {systemHealthData.data.system.memory.percentage}%)
+                        </Badge>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">API Response</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      Fast (120ms)
-                    </Badge>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions */}
+      {/* Quick Actions 
       <Card>
         <CardHeader>
           <CardTitle>Quick Administrative Actions</CardTitle>
@@ -673,6 +825,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      */}
     </div>
   );
 };

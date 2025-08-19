@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import {
-  fetchComplaints,
-  assignComplaint,
-  updateComplaintStatus,
-} from "../store/slices/complaintsSlice";
+  useGetComplaintsQuery,
+  useUpdateComplaintMutation,
+  useAssignComplaintMutation,
+  useGetComplaintStatisticsQuery,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -37,10 +38,31 @@ import {
 } from "lucide-react";
 
 const WardOfficerDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Fetch complaints for the ward officer's ward
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+    refetch: refetchComplaints,
+  } = useGetComplaintsQuery({
+    ward: user?.wardId,
+    page: 1,
+    limit: 100,
+  });
+
+  const complaints = complaintsResponse?.data || [];
+
+  // Fetch complaint statistics
+  const { data: statsResponse, isLoading: statsLoading } =
+    useGetComplaintStatisticsQuery({
+      ward: user?.wardId,
+    });
+
+  const [updateComplaint] = useUpdateComplaintMutation();
+  const [assignComplaintMutation] = useAssignComplaintMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalAssigned: 0,
@@ -52,9 +74,7 @@ const WardOfficerDashboard: React.FC = () => {
     avgResolutionTime: 2.8,
   });
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
+  // Data fetching is handled by RTK Query hooks automatically
 
   useEffect(() => {
     // Filter complaints for this ward officer

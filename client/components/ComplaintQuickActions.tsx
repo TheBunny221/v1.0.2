@@ -36,6 +36,10 @@ interface ComplaintQuickActionsProps {
   userRole: string;
   showDetails?: boolean;
   onUpdate?: () => void;
+<<<<<<< HEAD
+=======
+  onShowUpdateModal?: (complaint: any) => void;
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 }
 
 const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
@@ -43,6 +47,10 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   userRole,
   showDetails = true,
   onUpdate,
+<<<<<<< HEAD
+=======
+  onShowUpdateModal,
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 }) => {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -163,15 +171,37 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+<<<<<<< HEAD
                 <DropdownMenuItem onClick={() => setStatusDialogOpen(true)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Update Status
+=======
+                {onShowUpdateModal && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => onShowUpdateModal(complaint)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Complaint
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
+                <DropdownMenuItem onClick={() => setStatusDialogOpen(true)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Quick Status Update
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
                 </DropdownMenuItem>
 
                 {canAssign && (
                   <DropdownMenuItem onClick={() => setAssignDialogOpen(true)}>
                     <UserPlus className="h-4 w-4 mr-2" />
+<<<<<<< HEAD
                     Reassign
+=======
+                    Quick Reassign
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
                   </DropdownMenuItem>
                 )}
 

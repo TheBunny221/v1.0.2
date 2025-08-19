@@ -5,6 +5,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ResizeObserver performance optimizations */
+* {
+  /* Improve rendering performance to reduce ResizeObserver issues */
+  box-sizing: border-box;
+}
+
+/* Optimize chart containers */
+.recharts-wrapper,
+.recharts-responsive-container {
+  /* Prevent layout thrashing that can trigger ResizeObserver loops */
+  contain: layout style paint;
+  will-change: auto;
+}
+
+/* Reduce layout recalculations */
+.recharts-surface {
+  /* Stable positioning */
+  position: relative;
+}
+
+/* Performance optimizations for UI components that might trigger ResizeObserver */
+[class*="ui-"],
+[class*="radix-"],
+[class*="recharts-"] {
+  /* Use GPU acceleration for smoother rendering */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
 @layer base {
   /**
    * Tailwind CSS theme

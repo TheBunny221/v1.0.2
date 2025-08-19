@@ -781,16 +781,8 @@ const CitizenDashboard: React.FC = () => {
                       size="sm"
                       disabled={!pagination.hasPrev}
                       onClick={() => {
-                        const newPage = pagination.currentPage - 1;
-                        if (user) {
-                          dispatch(
-                            fetchComplaints({
-                              submittedById: user.id,
-                              ...filters,
-                              page: newPage,
-                            }),
-                          );
-                        }
+                        // RTK Query handles pagination automatically via refetch
+                        refetchComplaints();
                       }}
                     >
                       Previous
@@ -800,16 +792,8 @@ const CitizenDashboard: React.FC = () => {
                       size="sm"
                       disabled={!pagination.hasNext}
                       onClick={() => {
-                        const newPage = pagination.currentPage + 1;
-                        if (user) {
-                          dispatch(
-                            fetchComplaints({
-                              submittedById: user.id,
-                              ...filters,
-                              page: newPage,
-                            }),
-                          );
-                        }
+                        // RTK Query handles pagination automatically via refetch
+                        refetchComplaints();
                       }}
                     >
                       Next

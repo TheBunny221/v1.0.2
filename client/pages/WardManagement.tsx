@@ -26,6 +26,10 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
+<<<<<<< HEAD
+=======
+import UpdateComplaintModal from "../components/UpdateComplaintModal";
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
 import {
   MapPin,
   Users,
@@ -43,6 +47,13 @@ const WardManagement: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("overview");
 
+<<<<<<< HEAD
+=======
+  // State for Update Complaint Modal
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
+
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
   // Fetch complaints for the ward officer
   const {
     data: complaintsResponse,
@@ -442,6 +453,13 @@ const WardManagement: React.FC = () => {
                             userRole={user?.role || ""}
                             showDetails={false}
                             onUpdate={() => refetchComplaints()}
+<<<<<<< HEAD
+=======
+                            onShowUpdateModal={(complaint) => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
                           />
                         </TableCell>
                       </TableRow>
@@ -521,6 +539,24 @@ const WardManagement: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+<<<<<<< HEAD
+=======
+
+      {/* Update Complaint Modal */}
+      <UpdateComplaintModal
+        complaint={selectedComplaint}
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+        }}
+        onSuccess={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+          refetchComplaints();
+        }}
+      />
+>>>>>>> 0478b5bca327a2ded82b614cde472d3579766792
     </div>
   );
 };

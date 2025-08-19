@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
 
 interface SystemConfig {
   [key: string]: string;
@@ -36,38 +37,26 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   children,
 }) => {
   const [config, setConfig] = useState<SystemConfig>({});
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchConfig = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/system-config/public");
+  // Use RTK Query hook for better error handling and caching
+  const {
+    data: configResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetPublicSystemConfigQuery();
 
-      if (response.ok) {
-        const data = await response.json();
-        const configMap: SystemConfig = {};
-
-        if (data.success && Array.isArray(data.data)) {
-          data.data.forEach((setting: any) => {
-            configMap[setting.key] = setting.value;
-          });
-        }
-
-        setConfig(configMap);
-      } else {
-        // Fallback to default values if API fails
-        console.warn("Failed to load system config, using defaults");
-        setConfig({
-          APP_NAME: "Kochi Smart City",
-          APP_LOGO_URL: "/logo.png",
-          APP_LOGO_SIZE: "medium",
-          COMPLAINT_ID_PREFIX: "KSC",
-          COMPLAINT_ID_START_NUMBER: "1",
-          COMPLAINT_ID_LENGTH: "4",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching system config:", error);
+  // Process the RTK Query data when it changes
+  useEffect(() => {
+    if (configResponse?.success && Array.isArray(configResponse.data)) {
+      const configMap: SystemConfig = {};
+      configResponse.data.forEach((setting: any) => {
+        configMap[setting.key] = setting.value;
+      });
+      setConfig(configMap);
+      console.log("System config loaded successfully via RTK Query");
+    } else if (error) {
+      console.error("Error fetching system config via RTK Query:", error);
       // Fallback to default values
       setConfig({
         APP_NAME: "Kochi Smart City",
@@ -77,22 +66,18 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         COMPLAINT_ID_START_NUMBER: "1",
         COMPLAINT_ID_LENGTH: "4",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [configResponse, error]);
 
   const refreshConfig = async () => {
-    await fetchConfig();
+    await refetch();
   };
 
   const getConfig = (key: string, defaultValue: string = "") => {
     return config[key] || defaultValue;
   };
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
+  // RTK Query handles data fetching automatically, no manual useEffect needed
 
   const appName = getConfig("APP_NAME", "Kochi Smart City");
   const appLogoUrl = getConfig("APP_LOGO_URL", "/logo.png");

@@ -7,7 +7,7 @@ import {
   getDashboardRouteForRole,
   setCredentials,
 } from "../store/slices/authSlice";
-import { createComplaint } from "../store/slices/complaintsSlice";
+import { useCreateComplaintMutation } from "../store/api/complaintsApi";
 import {
   selectGuestState,
   submitGuestComplaint,
@@ -168,6 +168,9 @@ const PRIORITIES = [
 
 const UnifiedComplaintForm: React.FC = () => {
   const navigate = useNavigate();
+
+  // RTK Query mutations
+  const [createComplaintMutation] = useCreateComplaintMutation();
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
@@ -461,7 +464,7 @@ const UnifiedComplaintForm: React.FC = () => {
           isAnonymous: false,
         };
 
-        const result = await dispatch(createComplaint(complaintData)).unwrap();
+        const result = await createComplaintMutation(complaintData).unwrap();
 
         toast({
           title: "Complaint Submitted Successfully!",

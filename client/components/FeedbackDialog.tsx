@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useAppDispatch } from "../store/hooks";
-import { submitFeedback } from "../store/slices/complaintsSlice";
+import { useAddComplaintFeedbackMutation } from "../store/api/complaintsApi";
 import {
   Dialog,
   DialogContent,
@@ -33,8 +32,8 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
   existingFeedback,
   children,
 }) => {
-  const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const [addFeedback] = useAddComplaintFeedbackMutation();
 
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(existingFeedback?.rating || 0);
@@ -57,13 +56,11 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
     setIsSubmitting(true);
 
     try {
-      await dispatch(
-        submitFeedback({
-          complaintId,
-          rating,
-          comment: comment.trim(),
-        }),
-      ).unwrap();
+      await addFeedback({
+        id: complaintId,
+        feedback: comment.trim(),
+        rating,
+      }).unwrap();
 
       toast({
         title: "Feedback Submitted",
