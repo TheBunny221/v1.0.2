@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useAppDispatch } from "../store/hooks";
-import { submitFeedback } from "../store/slices/complaintsSlice";
+import { useAddComplaintFeedbackMutation } from "../store/api/complaintsApi";
 import {
   Dialog,
   DialogContent,
