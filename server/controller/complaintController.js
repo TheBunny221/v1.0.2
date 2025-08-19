@@ -136,6 +136,36 @@ export const createComplaint = asyncHandler(async (req, res) => {
   // Generate unique complaint ID
   const complaintId = await generateComplaintId();
 
+  // Check auto-assignment setting
+  const autoAssignSetting = await prisma.systemConfig.findUnique({
+    where: { key: "AUTO_ASSIGN_COMPLAINTS" },
+  });
+
+  const isAutoAssignEnabled = autoAssignSetting?.value === "true";
+  let assignedToId = null;
+  let initialStatus = "REGISTERED";
+
+  // Auto-assign to ward officer if enabled
+  if (isAutoAssignEnabled && wardId) {
+    // Find an available ward officer for this ward
+    const wardOfficer = await prisma.user.findFirst({
+      where: {
+        role: "WARD_OFFICER",
+        wardId: wardId,
+        isActive: true,
+      },
+      orderBy: {
+        // Optionally order by workload or other criteria
+        createdAt: "asc", // For now, just assign to the oldest officer
+      },
+    });
+
+    if (wardOfficer) {
+      assignedToId = wardOfficer.id;
+      initialStatus = "ASSIGNED";
+    }
+  }
+
   const complaint = await prisma.complaint.create({
     data: {
       complaintId,
@@ -143,7 +173,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
       description,
       type,
       priority: priority || "MEDIUM",
-      status: "REGISTERED",
+      status: initialStatus,
       slaStatus: "ON_TIME",
       wardId,
       subZoneId,
@@ -156,6 +186,8 @@ export const createComplaint = asyncHandler(async (req, res) => {
       contactPhone: contactPhone || req.user.phoneNumber,
       isAnonymous: isAnonymous || false,
       submittedById: req.user.id,
+      assignedToId,
+      assignedOn: assignedToId ? new Date() : null,
       deadline,
     },
     include: {
@@ -169,6 +201,14 @@ export const createComplaint = asyncHandler(async (req, res) => {
           phoneNumber: true,
         },
       },
+      assignedTo: assignedToId ? {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+        },
+      } : false,
     },
   });
 
