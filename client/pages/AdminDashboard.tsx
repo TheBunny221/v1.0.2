@@ -529,20 +529,20 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-yellow-600">
-                  {metrics.citizenSatisfaction}/5
+                  {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
                 </div>
                 <p className="text-sm text-gray-600">Citizen feedback</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 4.0</span>
                     <span>
-                      {metrics.citizenSatisfaction >= 4.0
+                      {(metrics?.citizenSatisfaction || 0) >= 4.0
                         ? "Above target"
                         : "Below target"}
                     </span>
                   </div>
                   <Progress
-                    value={(metrics.citizenSatisfaction / 5) * 100}
+                    value={((metrics?.citizenSatisfaction || 0) / 5) * 100}
                     className="h-2"
                   />
                 </div>
