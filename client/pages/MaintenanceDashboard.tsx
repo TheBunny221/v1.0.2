@@ -67,9 +67,7 @@ const MaintenanceDashboard: React.FC = () => {
     efficiency: 92,
   });
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
+  // Data fetching is handled by RTK Query hooks automatically
 
   useEffect(() => {
     // Filter tasks assigned to this maintenance team member
