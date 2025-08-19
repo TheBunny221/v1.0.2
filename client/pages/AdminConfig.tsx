@@ -503,10 +503,12 @@ const AdminConfig: React.FC = () => {
       };
 
       console.log("Saving complaint type with data:", typeData);
+      console.log("Original type object:", type);
 
       let result;
       if (type.id && type.id !== "") {
         // Update existing type
+        console.log("Updating existing complaint type with ID:", type.id);
         result = await updateComplaintType({
           id: type.id,
           data: typeData,
@@ -514,6 +516,7 @@ const AdminConfig: React.FC = () => {
         console.log("Update result:", result);
       } else {
         // Create new type
+        console.log("Creating new complaint type");
         result = await createComplaintType(typeData).unwrap();
         console.log("Create result:", result);
       }
@@ -532,10 +535,17 @@ const AdminConfig: React.FC = () => {
       );
     } catch (error: any) {
       console.error("Error saving complaint type:", error);
+      console.error("Error details:", {
+        status: error?.status,
+        data: error?.data,
+        message: error?.message,
+        fullError: error
+      });
 
       const errorMessage = getApiErrorMessage(error);
+      console.log("Extracted error message:", errorMessage);
 
-      dispatch(showErrorToast("Save Failed", errorMessage));
+      dispatch(showErrorToast("Error saving complaint type", errorMessage));
     } finally {
       setIsLoading(false);
     }
