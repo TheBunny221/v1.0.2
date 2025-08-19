@@ -43,7 +43,10 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     const retryDelay = 1000; // 1 second
 
     try {
-      setIsLoading(true);
+      // Only set loading on the first attempt
+      if (retryCount === 0) {
+        setIsLoading(true);
+      }
 
       // Add timeout to prevent hanging requests
       const controller = new AbortController();
@@ -71,6 +74,8 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
 
         setConfig(configMap);
         console.log("System config loaded successfully");
+        setIsLoading(false);
+        return; // Success, exit early
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -79,8 +84,8 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
 
       // Retry logic for network errors
       if (retryCount < maxRetries &&
-          (error instanceof TypeError && error.message.includes("fetch")) ||
-          (error instanceof DOMException && error.name === "AbortError")) {
+          ((error instanceof TypeError && error.message.includes("fetch")) ||
+          (error instanceof DOMException && error.name === "AbortError"))) {
 
         console.log(`Retrying system config fetch in ${retryDelay}ms... (${retryCount + 1}/${maxRetries})`);
         setTimeout(() => {
@@ -99,12 +104,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         COMPLAINT_ID_START_NUMBER: "1",
         COMPLAINT_ID_LENGTH: "4",
       });
-    } finally {
-      // Set loading to false when we're done (either success or final failure)
-      if (retryCount === 0) {
-        // For the first attempt, only set to false if we're not retrying
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
   };
 
