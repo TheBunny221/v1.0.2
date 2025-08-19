@@ -500,8 +500,8 @@ const exportReports = asyncHandler(async (req, res) => {
       where: whereConditions,
       include: {
         ward: true,
-        assignedUser: true,
-        citizen: true,
+        assignedTo: true,
+        submittedBy: true,
       },
       orderBy: {
         createdAt: 'desc',
