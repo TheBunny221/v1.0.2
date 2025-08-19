@@ -324,27 +324,14 @@ const App: React.FC = () => {
                           </UnifiedLayout>
                         }
                       />
+                      {/* Redirect old analytics routes to unified reports */}
                       <Route
                         path="/admin/analytics"
-                        element={
-                          <UnifiedLayout>
-                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
-                              <AdminAnalytics />
-                            </RoleBasedRoute>
-                          </UnifiedLayout>
-                        }
+                        element={<Navigate to="/reports" replace />}
                       />
                       <Route
                         path="/admin/reports-analytics"
-                        element={
-                          <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["ADMINISTRATOR", "WARD_OFFICER"]}
-                            >
-                              <ReportsAnalytics />
-                            </RoleBasedRoute>
-                          </UnifiedLayout>
-                        }
+                        element={<Navigate to="/reports" replace />}
                       />
 
                       {/* Profile and Settings */}
