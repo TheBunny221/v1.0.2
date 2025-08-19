@@ -163,6 +163,11 @@ const WardOfficerDashboard: React.FC = () => {
 
   // Filter complaints based on active filter and search term
   const getFilteredComplaints = () => {
+    // Safety check - ensure complaints is an array
+    if (!Array.isArray(complaints)) {
+      return [];
+    }
+
     let filtered = complaints.filter((c) => c.wardId === user?.wardId);
 
     // Apply status filter
