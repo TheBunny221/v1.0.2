@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { fetchComplaints } from "../store/slices/complaintsSlice";
+import { useAppSelector } from "../store/hooks";
+import { useGetComplaintsQuery, useGetComplaintStatisticsQuery } from "../store/api/complaintsApi";
 import {
   useGetDashboardAnalyticsQuery,
   useGetRecentActivityQuery,
