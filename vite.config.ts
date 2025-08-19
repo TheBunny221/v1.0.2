@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API calls to the backend server
         "/api": {
-          target: "http://localhost:4005",
+          target: "http://127.0.0.1:4005",
           changeOrigin: true,
           secure: false,
           timeout: 10000,
