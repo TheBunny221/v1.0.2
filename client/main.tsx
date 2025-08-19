@@ -4,6 +4,9 @@ import App from "./App";
 import "./global.css";
 import { suppressResizeObserverErrors } from "./utils/resizeObserverSuppress";
 
+// Initialize ResizeObserver error suppression
+suppressResizeObserverErrors();
+
 // Global error handlers for production-grade error handling
 window.addEventListener("error", (event) => {
   // Filter out known harmless errors
