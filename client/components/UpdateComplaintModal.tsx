@@ -105,9 +105,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
       setFormData({
         status: complaint.status,
         priority: complaint.priority,
-        assignedToId: typeof complaint.assignedTo === 'object' && complaint.assignedTo?.id 
-          ? complaint.assignedTo.id 
-          : complaint.assignedTo || "",
+        assignedToId: typeof complaint.assignedTo === 'object' && complaint.assignedTo?.id
+          ? complaint.assignedTo.id
+          : complaint.assignedTo || "none",
         remarks: "",
       });
       setSearchTerm("");
