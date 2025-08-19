@@ -211,7 +211,12 @@ const WardOfficerDashboard: React.FC = () => {
     return filtered.sort((a, b) => new Date(b.submittedOn).getTime() - new Date(a.submittedOn).getTime());
   };
 
-  const filteredComplaints = getFilteredComplaints();
+  const filteredComplaints = useMemo(() => getFilteredComplaints(), [
+    complaints,
+    user?.wardId,
+    activeFilter,
+    searchTerm,
+  ]);
 
   // Show loading state
   if (complaintsLoading) {
