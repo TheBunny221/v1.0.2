@@ -169,7 +169,6 @@ export const adminApi = baseApi.injectEndpoints({
 
         return `/admin/users?${params.toString()}`;
       },
-      transformResponse: transformResponse<UsersResponse>,
       providesTags: ["User"],
     }),
 
