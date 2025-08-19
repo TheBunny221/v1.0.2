@@ -530,6 +530,21 @@ const WardManagement: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Update Complaint Modal */}
+      <UpdateComplaintModal
+        complaint={selectedComplaint}
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+        }}
+        onSuccess={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+          refetchComplaints();
+        }}
+      />
     </div>
   );
 };
