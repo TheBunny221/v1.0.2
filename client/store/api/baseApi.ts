@@ -238,10 +238,37 @@ export const rollbackUpdate = <T>(
 // Helper to extract error message from RTK Query error - defensive implementation
 export const getApiErrorMessage = (error: any): string => {
   try {
-    // Avoid accessing error.data directly to prevent "Response body is already used" errors
-    // Instead, rely on status codes for user-friendly messages
+    console.log("getApiErrorMessage received error:", error);
 
-    // Handle status-based errors first
+    // First, try to get the actual error message from the response data
+    if (error?.data?.message) {
+      return error.data.message;
+    }
+
+    // Try to get error message from different possible structures
+    if (error?.data?.error) {
+      return typeof error.data.error === 'string' ? error.data.error : 'An error occurred';
+    }
+
+    // Handle RTK Query error formats
+    if (error?.message) {
+      return error.message;
+    }
+
+    // Handle serialized error responses
+    if (typeof error?.data === 'string') {
+      try {
+        const parsedError = JSON.parse(error.data);
+        if (parsedError.message) {
+          return parsedError.message;
+        }
+      } catch {
+        // If parsing fails, return the string as is
+        return error.data;
+      }
+    }
+
+    // Handle status-based errors as fallback
     if (error?.status) {
       switch (error.status) {
         case 400:
@@ -270,7 +297,7 @@ export const getApiErrorMessage = (error: any): string => {
       return "Network connection failed. Please check your internet connection.";
     }
 
-    // Handle other error types without accessing data property
+    // Handle other error types
     if (error?.error) {
       return "Network error - please check your connection";
     }
