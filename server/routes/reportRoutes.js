@@ -418,7 +418,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     const analyticsData = {
       complaints: {
-        total: totalComplaints,
+        total: totalComplaints, // Using the count from database
         resolved: resolvedComplaints,
         pending: pendingComplaints,
         overdue: overdueComplaints,
