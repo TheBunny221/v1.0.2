@@ -68,68 +68,8 @@ const WardOfficerDashboard: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
-  // Temporarily use mock data to isolate API issues
-  // const {
-  //   data: complaintsResponse,
-  //   isLoading: complaintsLoading,
-  //   error: complaintsError,
-  //   refetch: refetchComplaints
-  // } = useGetComplaintsQuery({});
-
-  // Mock complaints for now
-  const complaints = [
-    {
-      id: "1",
-      wardId: user?.wardId,
-      status: "REGISTERED",
-      assignedToId: null,
-      deadline: new Date(Date.now() + 86400000).toISOString(),
-      title: "Water Pipeline Issue",
-      description: "Main water pipeline burst",
-      area: "MG Road",
-      contactPhone: "+91 9876543210",
-      attachments: [],
-      submittedOn: new Date().toISOString(),
-    },
-  ];
-  const complaintsLoading = false;
-  const complaintsError = null;
-  const refetchComplaints = () => {};
-
-  // State for filtering and assignment
+  // Simple static data for now
   const [activeFilter, setActiveFilter] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
-  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
-  const [assignmentData, setAssignmentData] = useState<ComplaintAssignment>({
-    complaintId: "",
-    assignedToId: "",
-    comment: "",
-  });
-  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<string>("");
-
-  // Temporarily use mock data to isolate API issues
-  // const {
-  //   data: maintenanceTeamResponse,
-  //   isLoading: isLoadingTeam,
-  //   error: teamError
-  // } = useGetAllUsersQuery({
-  //   role: "MAINTENANCE_TEAM",
-  //   status: "active",
-  //   limit: 100,
-  // });
-
-  // Mock maintenance team for now
-  const maintenanceTeam = [
-    { id: "1", fullName: "Ravi Kumar", department: "Plumbing" },
-    { id: "2", fullName: "Suresh Nair", department: "Electrical" },
-    { id: "3", fullName: "Priya Menon", department: "Road Maintenance" },
-  ];
-  const isLoadingTeam = false;
-
-  // RTK Query mutation for assignment
-  const [assignComplaintMutation, { isLoading: isAssigning }] = useAssignComplaintMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalComplaints: 0,
