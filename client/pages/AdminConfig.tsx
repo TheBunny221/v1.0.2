@@ -401,7 +401,7 @@ const AdminConfig: React.FC = () => {
       if (subZone.id && subZone.id !== "") {
         // Update existing sub-zone
         response = await apiCall(
-          `/wards/${subZone.wardId}/subzones/${subZone.id}`,
+          `/users/wards/${subZone.wardId}/subzones/${subZone.id}`,
           {
             method: "PUT",
             body: JSON.stringify(subZoneData),
@@ -409,7 +409,7 @@ const AdminConfig: React.FC = () => {
         );
       } else {
         // Create new sub-zone
-        response = await apiCall(`/wards/${subZone.wardId}/subzones`, {
+        response = await apiCall(`/users/wards/${subZone.wardId}/subzones`, {
           method: "POST",
           body: JSON.stringify(subZoneData),
         });
