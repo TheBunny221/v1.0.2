@@ -133,32 +133,9 @@ export interface ApiResponse<T = any> {
 
 // Helper for transforming API responses
 export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  // Handle null or undefined responses
-  if (response == null) {
-    return {
-      success: false,
-      data: {} as T,
-      message: "No response received",
-    };
-  }
-
-  // If response is already in our expected format, return it as-is
-  if (
-    typeof response === "object" &&
-    response !== null &&
-    "success" in response &&
-    "data" in response
-  ) {
-    return response as ApiResponse<T>;
-  }
-
-  // Transform raw response to our format
-  return {
-    success: response?.success ?? true,
-    data: response?.data ?? response,
-    message: response?.message,
-    meta: response?.meta,
-  };
+  // RTK Query already parses the JSON response, so we just need to pass it through
+  // without trying to read the response body again
+  return response as ApiResponse<T>;
 };
 
 // Helper for handling optimistic updates
