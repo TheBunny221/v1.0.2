@@ -36,6 +36,7 @@ interface ComplaintQuickActionsProps {
   userRole: string;
   showDetails?: boolean;
   onUpdate?: () => void;
+  onShowUpdateModal?: (complaint: any) => void;
 }
 
 const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
