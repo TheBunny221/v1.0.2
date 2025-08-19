@@ -110,6 +110,16 @@ const AdminDashboard: React.FC = () => {
     userActivityLoading ||
     systemHealthLoading;
 
+  // Debug logging for frontend analytics data
+  if (process.env.NODE_ENV === 'development' && analytics) {
+    console.log("🎯 Frontend Analytics Debug:");
+    console.log("Full analyticsData:", analyticsData);
+    console.log("Extracted analytics:", analytics);
+    console.log("Complaint trends:", analytics?.complaintTrends);
+    console.log("Complaints by type:", analytics?.complaintsByType);
+    console.log("Ward performance:", analytics?.wardPerformance);
+  }
+
   // Use real data from APIs with fallbacks
   const complaintTrends = analytics?.complaintTrends || [];
   const complaintsByType = analytics?.complaintsByType || [];
