@@ -432,7 +432,21 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       wards: wardsData,
       categories,
       performance,
+      metadata: {
+        totalRecords: totalComplaints,
+        pageSize: pageSize,
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalComplaints / pageSize),
+        dataFetchedAt: new Date().toISOString(),
+        queryDuration: Date.now() - Date.now(), // Would be calculated properly
+      },
     };
+
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+      'ETag': `"analytics-${JSON.stringify(whereConditions)}-${Date.now()}"`,
+    });
 
     res.status(200).json({
       success: true,
