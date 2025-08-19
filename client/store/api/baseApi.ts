@@ -35,40 +35,26 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const endpoint = typeof args === "string" ? args : args.url;
+  // Make the request
+  const result = await baseQuery(args, api, extraOptions);
 
-  // Make the initial request without any try-catch to avoid interfering with response processing
-  let result = await baseQuery(args, api, extraOptions);
-
-  // Log for debugging - only log metadata, never access response body
-  if (process.env.NODE_ENV === "development") {
-    console.log(`API Request to ${endpoint}:`, {
-      method: typeof args === "object" ? args.method : "GET",
-      status: result.error?.status || "SUCCESS",
-      hasError: !!result.error,
-      hasData: !!result.data,
-    });
-  }
-
-  // Handle 401 unauthorized responses
-  if (result.error && result.error.status === 401) {
-    // Check if this is an auth-related endpoint to avoid logout loops
-    const isAuthEndpoint =
-      typeof endpoint === "string" &&
-      (endpoint.includes("auth/login") ||
-        endpoint.includes("auth/register") ||
-        endpoint.includes("auth/verify-otp") ||
-        endpoint.includes("auth/login-otp") ||
-        endpoint.includes("auth/set-password"));
+  // Only handle 401 errors for logout, avoid any response body access
+  if (result.error?.status === 401) {
+    const endpoint = typeof args === "string" ? args : args.url;
+    const isAuthEndpoint = typeof endpoint === "string" && (
+      endpoint.includes("auth/login") ||
+      endpoint.includes("auth/register") ||
+      endpoint.includes("auth/verify-otp") ||
+      endpoint.includes("auth/login-otp") ||
+      endpoint.includes("auth/set-password")
+    );
 
     if (!isAuthEndpoint) {
-      console.log("Session expired, logging out user");
-
-      // Clear auth state and localStorage
+      // Session expired, logout user
       localStorage.removeItem("token");
       api.dispatch(logout());
 
-      // Show toast notification in a non-blocking way
+      // Show notification without blocking
       setTimeout(() => {
         try {
           toast({
@@ -76,10 +62,10 @@ const baseQueryWithReauth: BaseQueryFn<
             description: "Please login again to continue.",
             variant: "destructive",
           });
-        } catch (toastError) {
-          console.warn("Toast notification failed:", toastError);
+        } catch (e) {
+          console.warn("Toast failed:", e);
         }
-      }, 0);
+      }, 100);
     }
   }
 
