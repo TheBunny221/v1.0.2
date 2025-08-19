@@ -23,18 +23,8 @@ const baseQuery = fetchBaseQuery({
   timeout: 30000,
 });
 
-// Simple wrapper for auth error handling without response body consumption
-const baseQueryWithAuth: typeof baseQuery = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
-
-  // Handle 401 without accessing response body
-  if (result.error?.status === 401) {
-    localStorage.removeItem("token");
-    api.dispatch(logout());
-  }
-
-  return result;
-};
+// Remove custom auth wrapper to eliminate response body consumption issues
+// Auth handling will be done at the component level if needed
 
 // Enhanced base query with authentication handling
 const baseQueryWithReauth: BaseQueryFn<
