@@ -213,9 +213,9 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
     
     const todayCompleted = await prisma.complaint.count({
       where: {
-        assignedTo: userId,
+        assignedToId: userId,
         status: "resolved",
-        resolvedAt: {
+        resolvedOn: {
           gte: today,
         },
       },
