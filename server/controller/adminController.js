@@ -579,12 +579,12 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
         value: item._count,
         color: getTypeColor(item.type),
       })) : generateEmptyComplaintTypes(),
-      wardPerformance: wardPerformance.map((ward) => ({
-        ward: ward.ward,
-        complaints: Number(ward.complaints),
-        resolved: Number(ward.resolved),
+      wardPerformance: wardPerformance.length > 0 ? wardPerformance.map((ward) => ({
+        ward: ward.ward || "Unknown Ward",
+        complaints: Number(ward.complaints) || 0,
+        resolved: Number(ward.resolved) || 0,
         sla: Number(ward.sla) || 0,
-      })),
+      })) : [],
       metrics: {
         avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
         slaCompliance,
