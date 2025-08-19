@@ -143,6 +143,73 @@ export interface DashboardStatsResponse {
   maintenanceTeam: number;
 }
 
+export interface UserActivityResponse {
+  period: string;
+  metrics: {
+    activeUsers: number;
+    newRegistrations: number;
+    loginSuccessRate: number;
+  };
+  activities: Array<{
+    id: string;
+    type: string;
+    message: string;
+    time: string;
+    user?: {
+      name: string;
+      email: string;
+      role?: string;
+      ward?: string;
+    };
+    ward?: string;
+  }>;
+}
+
+export interface SystemHealthResponse {
+  status: string;
+  uptime: {
+    seconds: number;
+    formatted: string;
+  };
+  timestamp: string;
+  services: {
+    database: {
+      status: string;
+      responseTime: string;
+    };
+    emailService: {
+      status: string;
+      lastCheck: string;
+    };
+    fileStorage: {
+      status: string;
+      usedPercent: number;
+    };
+    api: {
+      status: string;
+      averageResponseTime: string;
+    };
+  };
+  system: {
+    memory: {
+      used: string;
+      total: string;
+      percentage: number;
+    };
+    errors: {
+      last24h: number;
+      status: string;
+    };
+  };
+  statistics: {
+    totalUsers: number;
+    activeUsers: number;
+    totalComplaints: number;
+    openComplaints: number;
+    systemLoad: number;
+  };
+}
+
 // Admin API slice
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
