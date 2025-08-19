@@ -1358,6 +1358,69 @@ const AdminConfig: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Contact Information Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Phone className="h-5 w-5 mr-2" />
+                    Contact Information
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter((s) => s.key.startsWith("CONTACT_"))
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Input
+                              type="text"
+                              value={setting.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) =>
+                                  prev.map((s) =>
+                                    s.key === setting.key
+                                      ? { ...s, value: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              onBlur={(e) =>
+                                handleUpdateSystemSetting(
+                                  setting.key,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={`Enter ${setting.type} value`}
+                              className="max-w-md"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
                 {/* Other Settings */}
                 <div>
                   <h3 className="text-lg font-medium mb-4 flex items-center">
