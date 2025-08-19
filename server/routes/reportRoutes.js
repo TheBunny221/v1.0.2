@@ -193,7 +193,7 @@ const getSLAReport = asyncHandler(async (req, res) => {
 // @route   GET /api/reports/analytics
 // @access  Private (Admin, Ward Officer, Maintenance)
 const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
-  const { from, to, ward, type, status, priority } = req.query;
+  const { from, to, ward, type, status, priority, page = 1, limit = 1000 } = req.query;
 
   // Build filter conditions based on user role
   let whereConditions = {};
