@@ -26,6 +26,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
+import UpdateComplaintModal from "../components/UpdateComplaintModal";
 import {
   MapPin,
   Users,
@@ -42,6 +43,10 @@ import {
 const WardManagement: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // State for Update Complaint Modal
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
 
   // Fetch complaints for the ward officer
   const {
@@ -442,6 +447,10 @@ const WardManagement: React.FC = () => {
                             userRole={user?.role || ""}
                             showDetails={false}
                             onUpdate={() => refetchComplaints()}
+                            onShowUpdateModal={(complaint) => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
                           />
                         </TableCell>
                       </TableRow>
@@ -521,6 +530,21 @@ const WardManagement: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Update Complaint Modal */}
+      <UpdateComplaintModal
+        complaint={selectedComplaint}
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+        }}
+        onSuccess={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+          refetchComplaints();
+        }}
+      />
     </div>
   );
 };

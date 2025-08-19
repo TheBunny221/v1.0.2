@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import {
-  fetchComplaints,
-  updateComplaintStatus,
-} from "../store/slices/complaintsSlice";
+  useGetComplaintsQuery,
+  useUpdateComplaintMutation,
+  useGetComplaintStatisticsQuery,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -37,10 +38,24 @@ import {
 } from "lucide-react";
 
 const MaintenanceDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Fetch complaints assigned to this maintenance team member
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+    refetch: refetchComplaints,
+  } = useGetComplaintsQuery({
+    assignedTo: user?.id,
+    page: 1,
+    limit: 100,
+  });
+
+  const complaints = complaintsResponse?.data || [];
+
+  const [updateComplaint] = useUpdateComplaintMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalTasks: 0,
@@ -52,9 +67,7 @@ const MaintenanceDashboard: React.FC = () => {
     efficiency: 92,
   });
 
-  useEffect(() => {
-    dispatch(fetchComplaints());
-  }, [dispatch]);
+  // Data fetching is handled by RTK Query hooks automatically
 
   useEffect(() => {
     // Filter tasks assigned to this maintenance team member

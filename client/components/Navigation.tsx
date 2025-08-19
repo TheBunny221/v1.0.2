@@ -247,20 +247,11 @@ const Navigation: React.FC = () => {
                 aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               >
                 <div className="relative w-5 h-5">
-                  <Menu
-                    className={`h-5 w-5 absolute transition-all duration-200 ${
-                      isMobileMenuOpen
-                        ? "rotate-180 opacity-0"
-                        : "rotate-0 opacity-100"
-                    }`}
-                  />
-                  <X
-                    className={`h-5 w-5 absolute transition-all duration-200 ${
-                      isMobileMenuOpen
-                        ? "rotate-0 opacity-100"
-                        : "-rotate-180 opacity-0"
-                    }`}
-                  />
+                  {isMobileMenuOpen ? (
+                    <X className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                  ) : (
+                    <Menu className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                  )}
                 </div>
               </Button>
             </div>
@@ -332,8 +323,10 @@ const Navigation: React.FC = () => {
                     variant="outline"
                     className="w-full justify-center mb-3"
                   >
-                    <Globe className="h-4 w-4 mr-2" />
-                    {currentLanguage.toUpperCase()}
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 mr-2" />
+                      <span>{currentLanguage.toUpperCase()}</span>
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -411,20 +404,11 @@ const Navigation: React.FC = () => {
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               <div className="relative w-5 h-5">
-                <Menu
-                  className={`h-5 w-5 absolute transition-all duration-200 ${
-                    isMobileMenuOpen
-                      ? "rotate-180 opacity-0"
-                      : "rotate-0 opacity-100"
-                  }`}
-                />
-                <X
-                  className={`h-5 w-5 absolute transition-all duration-200 ${
-                    isMobileMenuOpen
-                      ? "rotate-0 opacity-100"
-                      : "-rotate-180 opacity-0"
-                  }`}
-                />
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                ) : (
+                  <Menu className="h-5 w-5 absolute transition-all duration-200 rotate-0 opacity-100" />
+                )}
               </div>
             </Button>
           </div>

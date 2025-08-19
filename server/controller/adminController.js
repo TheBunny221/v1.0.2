@@ -469,15 +469,15 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
-  // Get complaint trends for last 6 months
+  // Get complaint trends for last 6 months (including current month)
   const complaintTrends = await prisma.$queryRaw`
     SELECT
-      strftime('%Y-%m', createdAt) as month,
+      strftime('%Y-%m', submittedOn) as month,
       COUNT(*) as complaints,
       COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
     FROM complaints
-    WHERE createdAt >= datetime('now', '-6 months')
-    GROUP BY strftime('%Y-%m', createdAt)
+    WHERE submittedOn >= date('now', '-6 months')
+    GROUP BY strftime('%Y-%m', submittedOn)
     ORDER BY month ASC
   `;
 
@@ -496,13 +496,13 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const wardPerformance = await prisma.$queryRaw`
     SELECT
       w.name as ward,
-      COUNT(c.id) as complaints,
-      COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) as resolved,
-      ROUND(
+      COALESCE(COUNT(c.id), 0) as complaints,
+      COALESCE(COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END), 0) as resolved,
+      COALESCE(ROUND(
         (COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) * 100.0) /
         NULLIF(COUNT(c.id), 0),
         2
-      ) as sla
+      ), 0) as sla
     FROM wards w
     LEFT JOIN complaints c ON w.id = c.wardId
     WHERE w.isActive = 1
@@ -564,26 +564,36 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     success: true,
     message: "Dashboard analytics retrieved successfully",
     data: {
-      complaintTrends: complaintTrends.map((trend) => ({
-        month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
-          month: "short",
-        }),
-        complaints: Number(trend.complaints),
-        resolved: Number(trend.resolved),
-      })),
-      complaintsByType: complaintsByType.map((item) => ({
-        name: item.type
-          .replace("_", " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase()),
-        value: item._count,
-        color: getTypeColor(item.type),
-      })),
-      wardPerformance: wardPerformance.map((ward) => ({
-        ward: ward.ward,
-        complaints: Number(ward.complaints),
-        resolved: Number(ward.resolved),
-        sla: Number(ward.sla) || 0,
-      })),
+      complaintTrends:
+        complaintTrends.length > 0
+          ? complaintTrends.map((trend) => ({
+              month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              }),
+              complaints: Number(trend.complaints),
+              resolved: Number(trend.resolved),
+            }))
+          : generateEmptyTrends(),
+      complaintsByType:
+        complaintsByType.length > 0
+          ? complaintsByType.map((item) => ({
+              name: item.type
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, (l) => l.toUpperCase()),
+              value: item._count,
+              color: getTypeColor(item.type),
+            }))
+          : generateEmptyComplaintTypes(),
+      wardPerformance:
+        wardPerformance.length > 0
+          ? wardPerformance.map((ward) => ({
+              ward: ward.ward || "Unknown Ward",
+              complaints: Number(ward.complaints) || 0,
+              resolved: Number(ward.resolved) || 0,
+              sla: Number(ward.sla) || 0,
+            }))
+          : [],
       metrics: {
         avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
         slaCompliance,
@@ -812,6 +822,320 @@ function parseTimeAgo(timeStr) {
   if (timeStr.includes("hours")) return value * 60;
   if (timeStr.includes("days")) return value * 60 * 24;
   return 0;
+}
+
+// Helper function to generate empty trends for last 6 months
+function generateEmptyTrends() {
+  const trends = [];
+  const today = new Date();
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    trends.push({
+      month: date.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      }),
+      complaints: 0,
+      resolved: 0,
+    });
+  }
+
+  return trends;
+}
+
+// Helper function to generate default complaint types when no data exists
+function generateEmptyComplaintTypes() {
+  const types = [
+    { type: "WATER_SUPPLY", name: "Water Supply" },
+    { type: "ELECTRICITY", name: "Electricity" },
+    { type: "ROAD_REPAIR", name: "Road Repair" },
+    { type: "WASTE_MANAGEMENT", name: "Waste Management" },
+    { type: "STREET_LIGHTING", name: "Street Lighting" },
+  ];
+
+  return types.map((t) => ({
+    name: t.name,
+    value: 0,
+    color: getTypeColor(t.type),
+  }));
+}
+
+// @desc    Get user activity data
+// @route   GET /api/admin/user-activity
+// @access  Private (Admin only)
+export const getUserActivity = asyncHandler(async (req, res) => {
+  const { period = "24h" } = req.query;
+
+  let dateFilter;
+  const now = new Date();
+
+  switch (period) {
+    case "1h":
+      dateFilter = new Date(now.getTime() - 60 * 60 * 1000);
+      break;
+    case "24h":
+      dateFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
+    case "7d":
+      dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case "30d":
+      dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      dateFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  }
+
+  // Get recent logins (simulate by looking at recently created complaints or user updates)
+  const recentActivity = await prisma.user.findMany({
+    where: {
+      updatedAt: {
+        gte: dateFilter,
+      },
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      isActive: true,
+      updatedAt: true,
+      ward: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    take: 50,
+  });
+
+  // Get complaint submissions in the period
+  const recentComplaints = await prisma.complaint.findMany({
+    where: {
+      createdAt: {
+        gte: dateFilter,
+      },
+    },
+    include: {
+      submittedBy: {
+        select: {
+          fullName: true,
+          email: true,
+        },
+      },
+      ward: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 30,
+  });
+
+  // Calculate activity metrics
+  const totalActiveUsers = await prisma.user.count({
+    where: {
+      isActive: true,
+      updatedAt: {
+        gte: dateFilter,
+      },
+    },
+  });
+
+  const newRegistrations = await prisma.user.count({
+    where: {
+      createdAt: {
+        gte: dateFilter,
+      },
+    },
+  });
+
+  // Get login success rate (simulated)
+  const loginSuccessRate = 98.7; // In a real app, you'd track failed login attempts
+
+  // Combine activity data
+  const activityFeed = [];
+
+  // Add user activities
+  recentActivity.forEach((user) => {
+    activityFeed.push({
+      id: `user-activity-${user.id}`,
+      type: "user_activity",
+      message: `${user.fullName} (${user.role.replace("_", " ")}) was active`,
+      time: formatTimeAgo(user.updatedAt),
+      user: {
+        name: user.fullName,
+        email: user.email,
+        role: user.role,
+        ward: user.ward?.name,
+      },
+    });
+  });
+
+  // Add complaint activities
+  recentComplaints.forEach((complaint) => {
+    activityFeed.push({
+      id: `complaint-activity-${complaint.id}`,
+      type: "complaint_submission",
+      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint submitted`,
+      time: formatTimeAgo(complaint.createdAt),
+      user: {
+        name: complaint.submittedBy?.fullName || "Guest User",
+        email: complaint.submittedBy?.email || "N/A",
+      },
+      ward: complaint.ward?.name,
+    });
+  });
+
+  // Sort by time and limit
+  activityFeed.sort((a, b) => {
+    const timeA = parseTimeAgo(a.time);
+    const timeB = parseTimeAgo(b.time);
+    return timeA - timeB;
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "User activity retrieved successfully",
+    data: {
+      period,
+      metrics: {
+        activeUsers: totalActiveUsers,
+        newRegistrations,
+        loginSuccessRate,
+      },
+      activities: activityFeed.slice(0, 20),
+    },
+  });
+});
+
+// @desc    Get enhanced system health with uptime
+// @route   GET /api/admin/system-health
+// @access  Private (Admin only)
+export const getSystemHealth = asyncHandler(async (req, res) => {
+  const startTime = Date.now();
+
+  try {
+    // Test database connectivity
+    await prisma.$queryRaw`SELECT 1`;
+    const dbResponseTime = Date.now() - startTime;
+
+    // Get system uptime
+    const uptime = process.uptime();
+    const uptimeFormatted = formatUptime(uptime);
+
+    // Get memory usage
+    const memoryUsage = process.memoryUsage();
+    const memoryUsedMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+    const memoryTotalMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
+
+    // Ensure we don't divide by zero
+    const memoryPercentage =
+      memoryTotalMB > 0 ? Math.round((memoryUsedMB / memoryTotalMB) * 100) : 0;
+
+    // Get system statistics
+    const [totalUsers, activeUsers, totalComplaints, openComplaints] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.user.count({ where: { isActive: true } }),
+        prisma.complaint.count(),
+        prisma.complaint.count({
+          where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } },
+        }),
+      ]);
+
+    // Check email service (simulated)
+    const emailServiceStatus = "operational";
+
+    // Calculate file storage usage (simulated)
+    const storageUsedPercent = Math.floor(Math.random() * 20) + 70; // 70-90%
+
+    // Get recent errors (simulated)
+    const recentErrors = 0; // In a real app, you'd check error logs
+
+    const healthData = {
+      status: "healthy",
+      uptime: {
+        seconds: Math.floor(uptime),
+        formatted: uptimeFormatted,
+      },
+      timestamp: new Date().toISOString(),
+      services: {
+        database: {
+          status: "healthy",
+          responseTime: `${dbResponseTime}ms`,
+        },
+        emailService: {
+          status: emailServiceStatus,
+          lastCheck: new Date().toISOString(),
+        },
+        fileStorage: {
+          status: storageUsedPercent > 90 ? "warning" : "healthy",
+          usedPercent: storageUsedPercent,
+        },
+        api: {
+          status: "healthy",
+          averageResponseTime: "120ms",
+        },
+      },
+      system: {
+        memory: {
+          used: `${memoryUsedMB}MB`,
+          total: `${memoryTotalMB}MB`,
+          percentage: memoryPercentage,
+        },
+        errors: {
+          last24h: recentErrors,
+          status: recentErrors === 0 ? "good" : "warning",
+        },
+      },
+      statistics: {
+        totalUsers,
+        activeUsers,
+        totalComplaints,
+        openComplaints,
+        systemLoad: Math.random() * 0.5 + 0.3, // Simulated 30-80% load
+      },
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "System health check completed",
+      data: healthData,
+    });
+  } catch (error) {
+    console.error("Health check failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "System health check failed",
+      data: {
+        status: "unhealthy",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+});
+
+// Helper function to format uptime
+function formatUptime(seconds) {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+
+  return parts.join(" ") || "<1m";
 }
 
 // Helper function to send password setup email

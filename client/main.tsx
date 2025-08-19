@@ -2,9 +2,42 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./global.css";
+import { fixResizeObserverError } from "./utils/resizeObserverFix";
+
+// Preserve original fetch BEFORE any third-party libraries can override it
+// This is critical for FullStory and other analytics libraries
+if (
+  typeof globalThis !== "undefined" &&
+  globalThis.fetch &&
+  !(globalThis as any).__originalFetch
+) {
+  (globalThis as any).__originalFetch = globalThis.fetch.bind(globalThis);
+}
+if (
+  typeof window !== "undefined" &&
+  window.fetch &&
+  !(globalThis as any).__originalFetch
+) {
+  (globalThis as any).__originalFetch = window.fetch.bind(window);
+}
+
+// Initialize comprehensive ResizeObserver error fix
+fixResizeObserverError();
 
 // Global error handlers for production-grade error handling
 window.addEventListener("error", (event) => {
+  // Filter out known harmless errors
+  if (
+    event.error === null ||
+    event.message?.includes(
+      "ResizeObserver loop completed with undelivered notifications",
+    ) ||
+    event.message?.includes("ResizeObserver loop limit exceeded")
+  ) {
+    // These are harmless warnings that can be safely ignored
+    return;
+  }
+
   console.error("Global error caught:", event.error);
   // Prevent the error from bubbling up and causing white screens
   event.preventDefault();

@@ -70,7 +70,7 @@ export interface CreateComplaintRequest {
 export interface UpdateComplaintRequest {
   id: string;
   status?: Complaint["status"];
-  assignedTo?: string;
+  assignedToId?: string;
   remarks?: string;
   priority?: Complaint["priority"];
 }
@@ -323,6 +323,48 @@ export const complaintsApi = baseApi.injectEndpoints({
       // Let RTK Query handle response naturally
       providesTags: ["Analytics"],
     }),
+
+    // Get ward users for assignment (role-based access)
+    getWardUsers: builder.query<
+      ApiResponse<{
+        users: Array<{
+          id: string;
+          fullName: string;
+          email: string;
+          role: string;
+          wardId?: string;
+          department?: string;
+          isActive: boolean;
+          ward?: {
+            id: string;
+            name: string;
+          };
+        }>;
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          pages: number;
+        };
+      }>,
+      {
+        page?: number;
+        limit?: number;
+        role?: string;
+        status?: string;
+      }
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== "") {
+            searchParams.append(key, value.toString());
+          }
+        });
+        return `/complaints/ward-users?${searchParams.toString()}`;
+      },
+      providesTags: ["User"],
+    }),
   }),
 });
 
@@ -338,4 +380,5 @@ export const {
   useUploadComplaintAttachmentMutation,
   useGetComplaintTypesQuery,
   useGetComplaintStatisticsQuery,
+  useGetWardUsersQuery,
 } = complaintsApi;

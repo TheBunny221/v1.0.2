@@ -8,6 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 // Import database connection
 import connectDB from "./db/connection.js";
@@ -26,6 +27,7 @@ import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
 import captchaRoutes from "./routes/captchaRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
+import guestOtpRoutes from "./routes/guestOtpRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -211,6 +213,7 @@ export function createApp() {
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
   app.use("/api/captcha", captchaRoutes);
+  app.use("/api/guest-otp", guestOtpRoutes);
 
   // Development test routes (only in development)
   if (process.env.NODE_ENV !== "production") {
@@ -238,16 +241,6 @@ export function createApp() {
     res.send(specs);
   });
 
-  // Root endpoint
-  app.get("/", (req, res) => {
-    res.json({
-      success: true,
-      message: "Cochin Smart City API",
-      documentation: "/api-docs",
-      health: "/api/health",
-    });
-  });
-
   // 404 handler for API routes
   app.use("/api/*", (req, res) => {
     res.status(404).json({
@@ -256,6 +249,39 @@ export function createApp() {
       data: null,
     });
   });
+
+  // Serve static files from the React build
+  const distPath = path.resolve(__dirname, "../dist/spa");
+  console.log("Serving static files from:", distPath);
+
+  // Check if the build directory exists
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+
+    // SPA fallback - serve index.html for all non-API routes
+    app.get("*", (req, res, next) => {
+      // Skip API routes
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
+
+      // Serve index.html for all other routes (SPA routing)
+      console.log("Serving index.html for:", req.path);
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else {
+    console.warn("Build directory not found:", distPath);
+    // Fallback to API info
+    app.get("/", (req, res) => {
+      res.json({
+        success: true,
+        message: "Cochin Smart City API - Build files not found",
+        documentation: "/api-docs",
+        health: "/api/health",
+        note: "Run 'npm run build' to generate static files",
+      });
+    });
+  }
 
   // Error handling middleware (should be last)
   app.use(errorHandler);

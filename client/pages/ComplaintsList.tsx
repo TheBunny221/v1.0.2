@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
 import { useDataManager } from "../hooks/useDataManager";
@@ -39,16 +39,32 @@ import {
 } from "lucide-react";
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
 import QuickComplaintModal from "../components/QuickComplaintModal";
+import UpdateComplaintModal from "../components/UpdateComplaintModal";
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const [searchParams] = useSearchParams();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
+  // Initialize filters from URL parameters
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get("status") || "all",
+  );
+  const [priorityFilter, setPriorityFilter] = useState(() => {
+    const priority = searchParams.get("priority");
+    // Handle comma-separated values like "CRITICAL,HIGH"
+    if (priority && priority.includes(",")) {
+      return "high_critical"; // Use a combined filter for UI purposes
+    }
+    return priority || "all";
+  });
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
 
   // Data management
   const { cacheComplaintsList } = useDataManager();
@@ -66,8 +82,23 @@ const ComplaintsList: React.FC = () => {
   const queryParams = useMemo(() => {
     const params: any = { page: 1, limit: 100 };
     if (statusFilter !== "all") params.status = statusFilter.toUpperCase();
-    if (priorityFilter !== "all")
-      params.priority = priorityFilter.toUpperCase();
+
+    // Handle priority filter including URL-based comma-separated values
+    if (priorityFilter !== "all") {
+      const urlPriority = searchParams.get("priority");
+      if (urlPriority && urlPriority.includes(",")) {
+        // For comma-separated values from URL, send as array
+        params.priority = urlPriority
+          .split(",")
+          .map((p) => p.trim().toUpperCase());
+      } else if (priorityFilter === "high_critical") {
+        // Handle the combined high & critical filter
+        params.priority = ["HIGH", "CRITICAL"];
+      } else {
+        params.priority = priorityFilter.toUpperCase();
+      }
+    }
+
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
     // For MAINTENANCE_TEAM users, show only their own complaints
@@ -76,7 +107,14 @@ const ComplaintsList: React.FC = () => {
     }
 
     return params;
-  }, [statusFilter, priorityFilter, debouncedSearchTerm, user?.role, user?.id]);
+  }, [
+    statusFilter,
+    priorityFilter,
+    debouncedSearchTerm,
+    user?.role,
+    user?.id,
+    searchParams,
+  ]);
 
   // Use RTK Query for better authentication handling
   const {
@@ -204,6 +242,7 @@ const ComplaintsList: React.FC = () => {
                 <SelectItem value="MEDIUM">Medium</SelectItem>
                 <SelectItem value="HIGH">High</SelectItem>
                 <SelectItem value="CRITICAL">Critical</SelectItem>
+                <SelectItem value="high_critical">High & Critical</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={clearFilters}>
@@ -302,21 +341,28 @@ const ComplaintsList: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <ComplaintQuickActions
-                        complaint={{
-                          id: complaint.id,
-                          complaintId: complaint.complaintId,
-                          status: complaint.status,
-                          priority: complaint.priority,
-                          type: complaint.type,
-                          description: complaint.description,
-                          area: complaint.area,
-                          assignedTo: complaint.assignedTo,
-                        }}
-                        userRole={user?.role || ""}
-                        showDetails={false}
-                        onUpdate={() => refetch()}
-                      />
+                      <div className="flex items-center gap-2">
+                        <Link to={`/complaints/${complaint.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </Link>
+                        {(user?.role === "ADMINISTRATOR" ||
+                          user?.role === "WARD_OFFICER") && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Update
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -332,6 +378,21 @@ const ComplaintsList: React.FC = () => {
         onClose={() => setIsQuickFormOpen(false)}
         onSuccess={(complaintId) => {
           // Refresh data after successful submission
+          refetch();
+        }}
+      />
+
+      {/* Update Complaint Modal */}
+      <UpdateComplaintModal
+        complaint={selectedComplaint}
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+        }}
+        onSuccess={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
           refetch();
         }}
       />

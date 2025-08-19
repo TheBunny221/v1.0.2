@@ -36,6 +36,7 @@ interface ComplaintQuickActionsProps {
   userRole: string;
   showDetails?: boolean;
   onUpdate?: () => void;
+  onShowUpdateModal?: (complaint: any) => void;
 }
 
 const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
@@ -43,6 +44,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   userRole,
   showDetails = true,
   onUpdate,
+  onShowUpdateModal,
 }) => {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -163,15 +165,27 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {onShowUpdateModal && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => onShowUpdateModal(complaint)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Complaint
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
                 <DropdownMenuItem onClick={() => setStatusDialogOpen(true)}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Update Status
+                  Quick Status Update
                 </DropdownMenuItem>
 
                 {canAssign && (
                   <DropdownMenuItem onClick={() => setAssignDialogOpen(true)}>
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Reassign
+                    Quick Reassign
                   </DropdownMenuItem>
                 )}
 

@@ -14,6 +14,8 @@ import {
   getDashboardAnalytics,
   getRecentActivity,
   getDashboardStats,
+  getUserActivity,
+  getSystemHealth,
 } from "../controller/adminController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { validateUser, validateUserUpdate } from "../middleware/validation.js";
@@ -361,5 +363,9 @@ router.put("/roles", manageRoles);
 router.get("/dashboard/analytics", getDashboardAnalytics);
 router.get("/dashboard/activity", getRecentActivity);
 router.get("/dashboard/stats", getDashboardStats);
+
+// User activity and system health routes
+router.get("/user-activity", getUserActivity);
+router.get("/system-health", getSystemHealth);
 
 export default router;
