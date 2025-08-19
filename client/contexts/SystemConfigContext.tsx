@@ -37,7 +37,14 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   children,
 }) => {
   const [config, setConfig] = useState<SystemConfig>({});
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Use RTK Query hook for better error handling and caching
+  const {
+    data: configResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetPublicSystemConfigQuery();
 
   const fetchConfig = async (retryCount = 0) => {
     const maxRetries = 3;
