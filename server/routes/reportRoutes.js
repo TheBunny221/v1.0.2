@@ -262,7 +262,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     });
 
     // Calculate basic metrics
-    const totalComplaints = complaints.length;
+    const complaintCount = complaints.length;
     const resolvedComplaints = complaints.filter(c => c.status === "resolved").length;
     const pendingComplaints = complaints.filter(c => ["registered", "assigned", "in_progress"].includes(c.status)).length;
     const overdueComplaints = complaints.filter(c => {
