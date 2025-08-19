@@ -290,7 +290,7 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Complaint Trends (Last 6 Months)</CardTitle>
               </CardHeader>
               <CardContent>
-                {complaintTrends.length > 0 ? (
+                {complaintTrends && complaintTrends.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={complaintTrends}>
                       <CartesianGrid strokeDasharray="3 3" />
