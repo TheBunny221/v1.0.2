@@ -38,10 +38,26 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   const [config, setConfig] = useState<SystemConfig>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchConfig = async () => {
+  const fetchConfig = async (retryCount = 0) => {
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second
+
     try {
       setIsLoading(true);
-      const response = await fetch("/api/system-config/public");
+
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const response = await fetch("/api/system-config/public", {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -54,21 +70,27 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         }
 
         setConfig(configMap);
+        console.log("System config loaded successfully");
       } else {
-        // Fallback to default values if API fails
-        console.warn("Failed to load system config, using defaults");
-        setConfig({
-          APP_NAME: "Kochi Smart City",
-          APP_LOGO_URL: "/logo.png",
-          APP_LOGO_SIZE: "medium",
-          COMPLAINT_ID_PREFIX: "KSC",
-          COMPLAINT_ID_START_NUMBER: "1",
-          COMPLAINT_ID_LENGTH: "4",
-        });
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
-      console.error("Error fetching system config:", error);
-      // Fallback to default values
+      console.error(`Error fetching system config (attempt ${retryCount + 1}):`, error);
+
+      // Retry logic for network errors
+      if (retryCount < maxRetries &&
+          (error instanceof TypeError && error.message.includes("fetch")) ||
+          (error instanceof DOMException && error.name === "AbortError")) {
+
+        console.log(`Retrying system config fetch in ${retryDelay}ms... (${retryCount + 1}/${maxRetries})`);
+        setTimeout(() => {
+          fetchConfig(retryCount + 1);
+        }, retryDelay);
+        return;
+      }
+
+      // Fallback to default values after all retries failed
+      console.warn("All retries failed, using default system config");
       setConfig({
         APP_NAME: "Kochi Smart City",
         APP_LOGO_URL: "/logo.png",
@@ -78,7 +100,10 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         COMPLAINT_ID_LENGTH: "4",
       });
     } finally {
-      setIsLoading(false);
+      // Only set loading to false on the final attempt
+      if (retryCount >= maxRetries) {
+        setIsLoading(false);
+      }
     }
   };
 
