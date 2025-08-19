@@ -419,6 +419,8 @@ export const {
   useGetDashboardAnalyticsQuery,
   useGetRecentActivityQuery,
   useGetDashboardStatsQuery,
+  useGetUserActivityQuery,
+  useGetSystemHealthQuery,
 } = adminApi;
 
 // Re-export for convenience
