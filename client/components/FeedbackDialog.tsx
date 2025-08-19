@@ -32,8 +32,8 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
   existingFeedback,
   children,
 }) => {
-  const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const [addFeedback] = useAddComplaintFeedbackMutation();
 
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(existingFeedback?.rating || 0);
