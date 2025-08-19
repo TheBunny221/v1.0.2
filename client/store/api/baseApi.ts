@@ -64,10 +64,11 @@ const baseQueryWithReauth: BaseQueryFn<
     }
   }
 
-  // Build request options carefully
+  // Build request options carefully with timeout
   const baseOptions: RequestInit = {
     method: typeof args === "string" ? "GET" : args.method || "GET",
     headers: typeof args === "string" ? {} : args.headers || {},
+    signal: AbortSignal.timeout(15000), // 15 second timeout
   };
 
   // Only add body for methods that support it
