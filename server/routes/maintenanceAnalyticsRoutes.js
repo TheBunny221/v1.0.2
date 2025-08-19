@@ -46,7 +46,7 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
       where: whereConditions,
       include: {
         ward: true,
-        citizen: true,
+        submittedBy: true,
       },
       orderBy: {
         createdAt: 'desc',
