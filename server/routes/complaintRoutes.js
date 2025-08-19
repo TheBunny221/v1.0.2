@@ -24,7 +24,7 @@ router.use(protect); // All routes below require authentication
 router.get("/", getComplaints);
 
 // Create new complaint
-router.post("/", authorize("CITIZEN", "ADMINISTRATOR"), createComplaint);
+router.post("/", authorize("CITIZEN", "ADMINISTRATOR", "MAINTENANCE_TEAM"), createComplaint);
 
 // Get complaint statistics for authenticated users
 router.get("/stats", getComplaintStats);

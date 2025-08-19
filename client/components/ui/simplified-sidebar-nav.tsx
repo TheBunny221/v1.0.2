@@ -138,9 +138,17 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
     },
   ];
 
-  const filteredNavItems = navigationItems.filter(
-    (item) => !user || item.roles.includes(user.role as string),
-  );
+  const filteredNavItems = navigationItems.filter((item) => {
+    if (!user) return false;
+
+    // For MAINTENANCE_TEAM users, show only Maintenance and Complaints
+    if (user.role === "MAINTENANCE_TEAM") {
+      return item.path === "/maintenance" || item.path === "/complaints";
+    }
+
+    // For other roles, use the original filtering logic
+    return item.roles.includes(user.role as string);
+  });
 
   const isActiveRoute = (path: string) => {
     if (path === "/") {
