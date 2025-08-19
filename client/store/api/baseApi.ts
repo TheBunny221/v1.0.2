@@ -1,89 +1,170 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import type {
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-import { logout, setError } from "../slices/authSlice";
-import { toast } from "../../components/ui/use-toast";
+import { logout } from "../slices/authSlice";
 
-// Create the base query without response interference
-const baseQuery = fetchBaseQuery({
-  baseUrl: "/api/",
-  prepareHeaders: (headers, { getState }) => {
-    // Try to get token from Redux state first, then localStorage
-    const state = getState() as any;
-    const token = state?.auth?.token || localStorage.getItem("token");
+// Note: Using completely custom fetch implementation below to avoid RTK Query response body conflicts
 
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-
-    // Ensure content-type is set for JSON requests
-    if (!headers.get("content-type")) {
-      headers.set("content-type", "application/json");
-    }
-
-    return headers;
-  },
-  timeout: 30000,
-});
-
-// Enhanced base query with authentication handling
+// Completely custom base query to avoid all RTK Query response body conflicts
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const endpoint = typeof args === "string" ? args : args.url;
+  // Build URL and options
+  const url = typeof args === "string" ? args : args.url;
 
-  // Make the initial request without any try-catch to avoid interfering with response processing
-  let result = await baseQuery(args, api, extraOptions);
+  let body: string | FormData | undefined = undefined;
+  let contentType = "application/json";
 
-  // Log for debugging - only log metadata, never access response body
-  if (process.env.NODE_ENV === "development") {
-    console.log(`API Request to ${endpoint}:`, {
-      method: typeof args === "object" ? args.method : "GET",
-      status: result.error?.status || "SUCCESS",
-      hasError: !!result.error,
-      hasData: !!result.data,
-    });
-  }
-
-  // Handle 401 unauthorized responses
-  if (result.error && result.error.status === 401) {
-    // Check if this is an auth-related endpoint to avoid logout loops
-    const isAuthEndpoint =
-      typeof endpoint === "string" &&
-      (endpoint.includes("auth/login") ||
-        endpoint.includes("auth/register") ||
-        endpoint.includes("auth/verify-otp") ||
-        endpoint.includes("auth/login-otp") ||
-        endpoint.includes("auth/set-password"));
-
-    if (!isAuthEndpoint) {
-      console.log("Session expired, logging out user");
-
-      // Clear auth state and localStorage
-      localStorage.removeItem("token");
-      api.dispatch(logout());
-
-      // Show toast notification in a non-blocking way
-      setTimeout(() => {
-        try {
-          toast({
-            title: "Session Expired",
-            description: "Please login again to continue.",
-            variant: "destructive",
-          });
-        } catch (toastError) {
-          console.warn("Toast notification failed:", toastError);
-        }
-      }, 0);
+  // Handle different body types with comprehensive logic
+  if (
+    typeof args !== "string" &&
+    args.body !== undefined &&
+    args.body !== null
+  ) {
+    // Check for FormData first (most specific)
+    if (args.body instanceof FormData) {
+      body = args.body;
+      contentType = ""; // Let browser set multipart/form-data boundary
+    }
+    // Check if it's already a JSON string
+    else if (typeof args.body === "string") {
+      // Check if it looks like JSON or if it's already serialized
+      if (
+        args.body.startsWith("{") ||
+        args.body.startsWith("[") ||
+        args.body === "null"
+      ) {
+        body = args.body; // Already JSON
+      } else {
+        // Non-JSON string, wrap it
+        body = JSON.stringify(args.body);
+      }
+    }
+    // Handle all object types (including arrays, dates, etc.)
+    else if (typeof args.body === "object") {
+      // Safety check for circular references and ensure it's serializable
+      try {
+        // Deep clone to avoid any reference issues and ensure clean serialization
+        const cleanBody = JSON.parse(JSON.stringify(args.body));
+        body = JSON.stringify(cleanBody);
+      } catch (error) {
+        // Fallback for objects that can't be serialized
+        console.warn("Failed to serialize request body:", error);
+        body = JSON.stringify({ error: "Failed to serialize request data" });
+      }
+    }
+    // Handle primitives (numbers, booleans)
+    else {
+      body = JSON.stringify(args.body);
     }
   }
 
-  return result;
+  // Build request options carefully
+  const baseOptions: RequestInit = {
+    method: typeof args === "string" ? "GET" : args.method || "GET",
+    headers: typeof args === "string" ? {} : args.headers || {},
+  };
+
+  // Only add body for methods that support it
+  const methodsWithBody = ["POST", "PUT", "PATCH", "DELETE"];
+  if (
+    body !== undefined &&
+    methodsWithBody.includes(baseOptions.method!.toUpperCase())
+  ) {
+    baseOptions.body = body;
+  }
+
+  const options: RequestInit = baseOptions;
+
+  // Add auth headers manually
+  try {
+    const state = api.getState() as any;
+    const token = state?.auth?.token || localStorage.getItem("token");
+    if (token) {
+      const headers: Record<string, string> = {
+        ...options.headers,
+        authorization: `Bearer ${token}`,
+      };
+
+      // Only add content-type for JSON requests (not FormData)
+      if (contentType) {
+        headers["content-type"] = contentType;
+      }
+
+      options.headers = headers;
+    }
+  } catch (error) {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const headers: Record<string, string> = {
+        ...options.headers,
+        authorization: `Bearer ${token}`,
+      };
+
+      // Only add content-type for JSON requests (not FormData)
+      if (contentType) {
+        headers["content-type"] = contentType;
+      }
+
+      options.headers = headers;
+    }
+  }
+
+  try {
+    // Use native fetch to avoid RTK Query's internal response handling
+    const response = await fetch(
+      `/api${url.startsWith("/") ? "" : "/"}${url}`,
+      options,
+    );
+
+    // Handle 401 errors before parsing response
+    if (response.status === 401) {
+      const isAuthEndpoint =
+        url.includes("auth/login") || url.includes("auth/register");
+      if (!isAuthEndpoint) {
+        localStorage.removeItem("token");
+        setTimeout(() => {
+          try {
+            api.dispatch(logout());
+          } catch (err) {
+            console.warn("Error dispatching logout:", err);
+          }
+        }, 0);
+      }
+    }
+
+    // Parse response only once
+    let data;
+    try {
+      const text = await response.text();
+      data = text ? JSON.parse(text) : null;
+    } catch (parseError) {
+      data = null;
+    }
+
+    if (response.ok) {
+      return { data };
+    } else {
+      return {
+        error: {
+          status: response.status,
+          data: data,
+        } as FetchBaseQueryError,
+      };
+    }
+  } catch (error) {
+    return {
+      error: {
+        status: "FETCH_ERROR",
+        error: String(error),
+      } as FetchBaseQueryError,
+    };
+  }
 };
 
 // Create the base API slice
@@ -129,35 +210,8 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// Helper for transforming API responses
-export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  // Handle null or undefined responses
-  if (response == null) {
-    return {
-      success: false,
-      data: {} as T,
-      message: "No response received",
-    };
-  }
-
-  // If response is already in our expected format, return it as-is
-  if (
-    typeof response === "object" &&
-    response !== null &&
-    "success" in response &&
-    "data" in response
-  ) {
-    return response as ApiResponse<T>;
-  }
-
-  // Transform raw response to our format
-  return {
-    success: response?.success ?? true,
-    data: response?.data ?? response,
-    message: response?.message,
-    meta: response?.meta,
-  };
-};
+// Note: transformResponse functions were removed to prevent "Response body is already used" errors
+// in RTK Query. The backend now returns ApiResponse<T> format directly.
 
 // Helper for handling optimistic updates
 export const optimisticUpdate = <T>(
@@ -181,41 +235,78 @@ export const rollbackUpdate = <T>(
   );
 };
 
-// Helper to extract error message from RTK Query error
+// Helper to extract error message from RTK Query error - defensive implementation
 export const getApiErrorMessage = (error: any): string => {
-  // Handle RTK Query FetchBaseQueryError structure
-  if (error?.data?.message) {
-    return error.data.message;
-  }
+  try {
+    console.log("getApiErrorMessage received error:", error);
 
-  // Handle status-based errors
-  if (error?.status) {
-    switch (error.status) {
-      case 400:
-        return "Bad request - please check your input";
-      case 401:
-        return "Unauthorized - please login again";
-      case 403:
-        return "Forbidden - you do not have permission";
-      case 404:
-        return "Resource not found";
-      case 409:
-        return "Conflict - resource already exists";
-      case 422:
-        return "Validation error - please check your input";
-      case 429:
-        return "Too many requests - please try again later";
-      case 500:
-        return "Internal server error - please try again later";
-      default:
-        return `An error occurred (${error.status})`;
+    // First, try to get the actual error message from the response data
+    if (error?.data?.message) {
+      return error.data.message;
     }
-  }
 
-  // Handle network errors
-  if (error?.message?.includes("Failed to fetch")) {
-    return "Network connection failed. Please check your internet connection.";
-  }
+    // Try to get error message from different possible structures
+    if (error?.data?.error) {
+      return typeof error.data.error === "string"
+        ? error.data.error
+        : "An error occurred";
+    }
 
-  return "An unexpected error occurred. Please try again.";
+    // Handle RTK Query error formats
+    if (error?.message) {
+      return error.message;
+    }
+
+    // Handle serialized error responses
+    if (typeof error?.data === "string") {
+      try {
+        const parsedError = JSON.parse(error.data);
+        if (parsedError.message) {
+          return parsedError.message;
+        }
+      } catch {
+        // If parsing fails, return the string as is
+        return error.data;
+      }
+    }
+
+    // Handle status-based errors as fallback
+    if (error?.status) {
+      switch (error.status) {
+        case 400:
+          return "Bad request - please check your input";
+        case 401:
+          return "Unauthorized - please login again";
+        case 403:
+          return "Forbidden - you do not have permission";
+        case 404:
+          return "Resource not found";
+        case 409:
+          return "Conflict - resource already exists";
+        case 422:
+          return "Validation error - please check your input";
+        case 429:
+          return "Too many requests - please try again later";
+        case 500:
+          return "Internal server error - please try again later";
+        default:
+          return `An error occurred (${error.status})`;
+      }
+    }
+
+    // Handle network errors
+    if (error?.message?.includes("Failed to fetch")) {
+      return "Network connection failed. Please check your internet connection.";
+    }
+
+    // Handle other error types
+    if (error?.error) {
+      return "Network error - please check your connection";
+    }
+
+    return "An unexpected error occurred. Please try again.";
+  } catch (err) {
+    console.warn("Error in getApiErrorMessage:", err);
+    return "An unexpected error occurred. Please try again.";
+  }
 };

@@ -43,6 +43,7 @@ import {
   Eye,
   Info,
   UserCheck,
+  Image,
 } from "lucide-react";
 
 interface CitizenComplaintData {
@@ -53,6 +54,7 @@ interface CitizenComplaintData {
   type: string;
   description: string;
   priority: string;
+  slaHours?: number; // Auto-assigned internally
 
   // Step 2: Location
   wardId: string;
@@ -68,63 +70,6 @@ interface CitizenComplaintData {
   // Step 3: Attachments
   attachments?: any[];
 }
-
-const COMPLAINT_TYPES = [
-  {
-    value: "WATER_SUPPLY",
-    label: "Water Supply",
-    description: "Issues with water supply, quality, or pressure",
-    urgency: "Medium",
-  },
-  {
-    value: "ELECTRICITY",
-    label: "Electricity",
-    description: "Power outages, faulty connections, or street lighting",
-    urgency: "High",
-  },
-  {
-    value: "ROAD_REPAIR",
-    label: "Road Repair",
-    description: "Potholes, broken roads, or pedestrian issues",
-    urgency: "Medium",
-  },
-  {
-    value: "GARBAGE_COLLECTION",
-    label: "Garbage Collection",
-    description: "Waste management and cleanliness issues",
-    urgency: "Medium",
-  },
-  {
-    value: "STREET_LIGHTING",
-    label: "Street Lighting",
-    description: "Non-functioning or damaged street lights",
-    urgency: "Medium",
-  },
-  {
-    value: "SEWERAGE",
-    label: "Sewerage",
-    description: "Drainage problems, blockages, or overflow",
-    urgency: "High",
-  },
-  {
-    value: "PUBLIC_HEALTH",
-    label: "Public Health",
-    description: "Health and sanitation concerns",
-    urgency: "High",
-  },
-  {
-    value: "TRAFFIC",
-    label: "Traffic",
-    description: "Traffic management and road safety issues",
-    urgency: "Medium",
-  },
-  {
-    value: "OTHERS",
-    label: "Others",
-    description: "Any other civic issues not listed above",
-    urgency: "Low",
-  },
-];
 
 const PRIORITIES = [
   {
@@ -209,6 +154,7 @@ const CitizenComplaintForm: React.FC = () => {
     type: "",
     description: "",
     priority: "MEDIUM",
+    slaHours: 48,
     wardId: user?.wardId || "",
     area: "",
     landmark: "",
@@ -289,7 +235,22 @@ const CitizenComplaintForm: React.FC = () => {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const updatedData = { ...prev, [name]: value };
+
+      // Auto-assign priority and SLA hours when complaint type changes
+      if (name === "type") {
+        const selectedType = complaintTypeOptions.find(
+          (type) => type.value === value,
+        );
+        if (selectedType) {
+          updatedData.priority = selectedType.priority || "MEDIUM";
+          updatedData.slaHours = selectedType.slaHours || 48;
+        }
+      }
+
+      return updatedData;
+    });
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -338,6 +299,7 @@ const CitizenComplaintForm: React.FC = () => {
         description: formData.description,
         type: formData.type,
         priority: formData.priority,
+        slaHours: formData.slaHours,
         wardId: formData.wardId,
         subZoneId: formData.subZoneId,
         area: formData.area,
@@ -464,7 +426,7 @@ const CitizenComplaintForm: React.FC = () => {
     }));
   };
 
-  const selectedComplaintType = COMPLAINT_TYPES.find(
+  const selectedComplaintType = complaintTypeOptions.find(
     (c) => c.value === formData.type,
   );
   const selectedWard = WARDS.find((w) => w.id === formData.wardId);
@@ -689,50 +651,62 @@ const CitizenComplaintForm: React.FC = () => {
                       <p className="text-sm text-blue-700 mb-2">
                         {selectedComplaintType.description}
                       </p>
-                      <div className="flex items-center gap-2">
-                        <Info className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm text-blue-600">
-                          Typical urgency level: {selectedComplaintType.urgency}
-                        </span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="flex items-center gap-2">
+                          <Info className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm text-blue-600">
+                            Priority: {selectedComplaintType.priority}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Info className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm text-blue-600">
+                            SLA: {selectedComplaintType.slaHours}h
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label>Priority</Label>
-                    <Select
-                      value={formData.priority}
-                      onValueChange={(value) =>
-                        handleSelectChange("priority", value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRIORITIES.map((priority) => (
-                          <SelectItem
-                            key={priority.value}
-                            value={priority.value}
-                          >
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`w-2 h-2 rounded-full ${priority.color}`}
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  {priority.label}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {priority.description}
-                                </span>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* Priority is now auto-assigned and hidden from user */}
+                  {selectedComplaintType && (
+                    <div className="bg-gray-50 p-4 rounded-lg border">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-gray-800 mb-1">
+                            Auto-assigned Details
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            Based on your complaint type, the following have
+                            been automatically set:
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              PRIORITIES.find(
+                                (p) => p.value === formData.priority,
+                              )?.color || "bg-gray-500"
+                            }`}
+                          />
+                          <span className="text-sm font-medium">
+                            Priority:{" "}
+                            {PRIORITIES.find(
+                              (p) => p.value === formData.priority,
+                            )?.label || formData.priority}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Info className="h-4 w-4 text-gray-600" />
+                          <span className="text-sm font-medium">
+                            SLA: {formData.slaHours} hours
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="description">Description *</Label>
@@ -1045,6 +1019,9 @@ const CitizenComplaintForm: React.FC = () => {
                             )?.label
                           }
                         </Badge>
+                      </p>
+                      <p>
+                        <strong>SLA Hours:</strong> {formData.slaHours} hours
                       </p>
                       <p>
                         <strong>Description:</strong> {formData.description}

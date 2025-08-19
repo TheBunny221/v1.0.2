@@ -33,6 +33,10 @@ const validateComplaintType = [
     .optional()
     .isInt({ min: 1, max: 168 })
     .withMessage("SLA hours must be between 1 and 168 (1 week)"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean value"),
   handleValidationErrors,
 ];
 
@@ -105,7 +109,12 @@ router.get("/", getComplaintTypes);
  *       200:
  *         description: Complaint type usage statistics
  */
-router.get("/stats", protect, authorize("ADMINISTRATOR", "WARD_OFFICER"), getComplaintTypeStats);
+router.get(
+  "/stats",
+  protect,
+  authorize("ADMINISTRATOR", "WARD_OFFICER"),
+  getComplaintTypeStats,
+);
 
 /**
  * @swagger
@@ -152,7 +161,12 @@ router.use(protect);
  *       403:
  *         description: Forbidden
  */
-router.post("/", authorize("ADMINISTRATOR"), validateComplaintType, createComplaintType);
+router.post(
+  "/",
+  authorize("ADMINISTRATOR"),
+  validateComplaintType,
+  createComplaintType,
+);
 
 /**
  * @swagger
@@ -180,7 +194,12 @@ router.post("/", authorize("ADMINISTRATOR"), validateComplaintType, createCompla
  *       404:
  *         description: Complaint type not found
  */
-router.put("/:id", authorize("ADMINISTRATOR"), validateComplaintType, updateComplaintType);
+router.put(
+  "/:id",
+  authorize("ADMINISTRATOR"),
+  validateComplaintType,
+  updateComplaintType,
+);
 
 /**
  * @swagger

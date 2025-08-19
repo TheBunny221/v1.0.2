@@ -48,6 +48,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Textarea } from "../components/ui/textarea";
+import SimpleLocationMapDialog from "../components/SimpleLocationMapDialog";
 import {
   Select,
   SelectContent,
@@ -201,6 +202,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const [submissionMode, setSubmissionMode] = useState<"citizen" | "guest">(
     isAuthenticated ? "citizen" : "guest",
   );
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   // OTP state
   const [otpCode, setOtpCode] = useState("");
@@ -265,6 +267,30 @@ const UnifiedComplaintForm: React.FC = () => {
       dispatch(updateGuestFormData({ [name]: value }));
     },
     [dispatch],
+  );
+
+  // Handle location selection from map
+  const handleLocationSelect = useCallback(
+    (location: {
+      latitude: number;
+      longitude: number;
+      address?: string;
+      area?: string;
+      landmark?: string;
+    }) => {
+      dispatch(
+        updateGuestFormData({
+          landmark: location.landmark || location.address || "",
+          area: location.area || formData.area,
+          address: location.address || formData.address,
+          coordinates: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        }),
+      );
+    },
+    [dispatch, formData.area, formData.address],
   );
 
   // Handle file upload
@@ -1063,13 +1089,25 @@ const UnifiedComplaintForm: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="landmark">Landmark (Optional)</Label>
-                      <Input
-                        id="landmark"
-                        name="landmark"
-                        placeholder="Nearby landmark"
-                        value={formData.landmark}
-                        onChange={handleInputChange}
-                      />
+                      <div className="flex space-x-2">
+                        <Input
+                          id="landmark"
+                          name="landmark"
+                          placeholder="Nearby landmark"
+                          value={formData.landmark}
+                          onChange={handleInputChange}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setIsMapDialogOpen(true)}
+                          title="Select location on map"
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -1581,6 +1619,24 @@ const UnifiedComplaintForm: React.FC = () => {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Location Map Dialog */}
+        <SimpleLocationMapDialog
+          isOpen={isMapDialogOpen}
+          onClose={() => setIsMapDialogOpen(false)}
+          onLocationSelect={handleLocationSelect}
+          initialLocation={
+            formData.coordinates
+              ? {
+                  latitude: formData.coordinates.latitude,
+                  longitude: formData.coordinates.longitude,
+                  address: formData.address,
+                  area: formData.area,
+                  landmark: formData.landmark,
+                }
+              : undefined
+          }
+        />
       </div>
     </div>
   );

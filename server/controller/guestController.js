@@ -1,6 +1,7 @@
 import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { sendEmail } from "../utils/emailService.js";
+import { verifyCaptchaForComplaint } from "./captchaController.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
@@ -48,7 +49,20 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       landmark,
       address,
       coordinates,
+      captchaId,
+      captchaText,
     } = req.body;
+
+    // Verify CAPTCHA for guest complaint submissions with attachments
+    try {
+      await verifyCaptchaForComplaint(captchaId, captchaText);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || "CAPTCHA verification failed",
+        data: null,
+      });
+    }
 
     const attachments = req.files || [];
 
@@ -293,7 +307,19 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     landmark,
     address,
     coordinates,
+    captchaId,
+    captchaText,
   } = req.body;
+
+  // Verify CAPTCHA for guest complaint submissions
+  try {
+    await verifyCaptchaForComplaint(captchaId, captchaText);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "CAPTCHA verification failed",
+    });
+  }
 
   // Parse coordinates if it's a string
   let parsedCoordinates = coordinates;
@@ -316,7 +342,7 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
   // Validate wardId exists
   const ward = await prisma.ward.findUnique({
     where: { id: wardId },
-    include: { subZones: true }
+    include: { subZones: true },
   });
 
   if (!ward) {
@@ -877,55 +903,32 @@ export const getPublicWards = asyncHandler(async (req, res) => {
 // @route   GET /api/guest/complaint-types
 // @access  Public
 export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
-  // Static complaint types for now - these could be stored in database if needed
-  const complaintTypes = [
-    {
-      id: "WATER_SUPPLY",
-      name: "Water Supply",
-      description:
-        "Water related issues including supply, quality, and leakage",
+  // Fetch complaint types from database using the same logic as the main complaint types controller
+  const complaintTypesData = await prisma.systemConfig.findMany({
+    where: {
+      key: {
+        startsWith: "COMPLAINT_TYPE_",
+      },
+      isActive: true, // Only show active complaint types for guests
     },
-    {
-      id: "ELECTRICITY",
-      name: "Electricity",
-      description: "Power outages, faulty connections, and electrical issues",
+    orderBy: {
+      key: "asc",
     },
-    {
-      id: "ROAD_REPAIR",
-      name: "Road Repair",
-      description: "Potholes, damaged roads, and road maintenance",
-    },
-    {
-      id: "GARBAGE_COLLECTION",
-      name: "Garbage Collection",
-      description: "Waste management and garbage collection issues",
-    },
-    {
-      id: "STREET_LIGHTING",
-      name: "Street Lighting",
-      description: "Street light repairs and new installations",
-    },
-    {
-      id: "SEWERAGE",
-      name: "Sewerage",
-      description: "Drainage, sewage blockages, and sanitation issues",
-    },
-    {
-      id: "PUBLIC_HEALTH",
-      name: "Public Health",
-      description: "Health and hygiene related public issues",
-    },
-    {
-      id: "TRAFFIC",
-      name: "Traffic",
-      description: "Traffic management, signals, and road safety",
-    },
-    {
-      id: "OTHERS",
-      name: "Others",
-      description: "Other civic issues not covered in above categories",
-    },
-  ];
+  });
+
+  // Transform data to match frontend interface
+  const complaintTypes = complaintTypesData.map((config) => {
+    const data = JSON.parse(config.value);
+    return {
+      id: config.key.replace("COMPLAINT_TYPE_", ""),
+      name: data.name,
+      description: data.description,
+      priority: data.priority,
+      slaHours: data.slaHours,
+      isActive: config.isActive,
+      updatedAt: config.updatedAt,
+    };
+  });
 
   res.status(200).json({
     success: true,

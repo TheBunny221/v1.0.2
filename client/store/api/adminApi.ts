@@ -1,4 +1,4 @@
-import { baseApi, ApiResponse, transformResponse } from "./baseApi";
+import { baseApi, ApiResponse } from "./baseApi";
 
 // Admin API types
 export interface AdminUser {
@@ -169,7 +169,7 @@ export const adminApi = baseApi.injectEndpoints({
 
         return `/admin/users?${params.toString()}`;
       },
-      transformResponse: transformResponse<UsersResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["User"],
     }),
 
@@ -180,7 +180,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -194,7 +194,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -204,7 +204,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}`,
         method: "DELETE",
       }),
-      transformResponse: transformResponse<null>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -214,7 +214,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}/activate`,
         method: "PUT",
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -224,7 +224,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}/deactivate`,
         method: "PUT",
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -238,21 +238,21 @@ export const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<{ affectedCount: number }>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
     // Get user statistics
     getUserStats: builder.query<ApiResponse<UserStatsResponse>, void>({
       query: () => "/admin/stats/users",
-      transformResponse: transformResponse<UserStatsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
     // Get system statistics
     getSystemStats: builder.query<ApiResponse<SystemStatsResponse>, void>({
       query: () => "/admin/stats/system",
-      transformResponse: transformResponse<SystemStatsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
@@ -274,7 +274,7 @@ export const adminApi = baseApi.injectEndpoints({
 
         return `/admin/analytics?${params.toString()}`;
       },
-      transformResponse: transformResponse<AnalyticsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
@@ -285,7 +285,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<AdminUser>,
+      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["User"],
     }),
 
@@ -295,7 +295,7 @@ export const adminApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/admin/dashboard/analytics",
-      transformResponse: transformResponse<DashboardAnalyticsResponse>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
@@ -305,7 +305,7 @@ export const adminApi = baseApi.injectEndpoints({
       { limit?: number }
     >({
       query: ({ limit = 5 }) => `/admin/dashboard/activity?limit=${limit}`,
-      transformResponse: transformResponse<RecentActivity[]>,
+      // Removed transformResponse to prevent response body conflicts
       providesTags: ["Analytics"],
     }),
 
@@ -313,7 +313,7 @@ export const adminApi = baseApi.injectEndpoints({
     getDashboardStats: builder.query<ApiResponse<DashboardStatsResponse>, void>(
       {
         query: () => "/admin/dashboard/stats",
-        transformResponse: transformResponse<DashboardStatsResponse>,
+        // Removed transformResponse to prevent response body conflicts
         providesTags: ["Analytics"],
       },
     ),

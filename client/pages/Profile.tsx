@@ -30,6 +30,7 @@ import {
   useSetPasswordMutation,
   useChangePasswordMutation,
 } from "../store/api/authApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import {
   User,
   Mail,
@@ -244,41 +245,9 @@ const Profile: React.FC = () => {
     } catch (error: any) {
       console.error("Password change error:", error);
 
-      let errorMessage = "Failed to change password";
-
-      // Handle RTK Query error structure
-      if (error?.data) {
-        if (typeof error.data === "string") {
-          errorMessage = error.data;
-        } else if (error.data.message) {
-          errorMessage = error.data.message;
-        } else if (error.data.errors && Array.isArray(error.data.errors)) {
-          // Handle validation errors
-          errorMessage = error.data.errors
-            .map((err: any) => err.message || err)
-            .join(", ");
-        }
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.status) {
-        // Handle HTTP status errors
-        switch (error.status) {
-          case 400:
-            errorMessage = "Invalid password data provided";
-            break;
-          case 401:
-            errorMessage = "Authentication failed. Please login again.";
-            break;
-          case 403:
-            errorMessage = "You don't have permission to change password";
-            break;
-          case 500:
-            errorMessage = "Server error. Please try again later.";
-            break;
-          default:
-            errorMessage = `An error occurred (${error.status})`;
-        }
-      }
+      // Use safe error message extraction to avoid response body issues
+      const errorMessage =
+        getApiErrorMessage(error) || "Failed to change password";
 
       dispatch(
         addNotification({

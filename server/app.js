@@ -20,9 +20,11 @@ import guestRoutes from "./routes/guestRoutes.js";
 import wardRoutes from "./routes/wardRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import maintenanceAnalyticsRoutes from "./routes/maintenanceAnalyticsRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
+import captchaRoutes from "./routes/captchaRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
 
 // Import middleware
@@ -204,9 +206,11 @@ export function createApp() {
   app.use("/api/wards", wardRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/reports", reportRoutes);
+  app.use("/api/maintenance", maintenanceAnalyticsRoutes);
   app.use("/api/uploads", uploadRoutes);
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
+  app.use("/api/captcha", captchaRoutes);
 
   // Development test routes (only in development)
   if (process.env.NODE_ENV !== "production") {

@@ -11,6 +11,7 @@ import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
+import AuthErrorHandler from "./components/AuthErrorHandler";
 import UnifiedLayout from "./components/layouts/UnifiedLayout";
 import OtpProvider from "./contexts/OtpContext";
 import { SystemConfigProvider } from "./contexts/SystemConfigContext";
@@ -39,6 +40,7 @@ const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
 const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
 const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
 const UnifiedComplaintForm = lazy(() => import("./pages/UnifiedComplaintForm"));
+const QuickComplaintPage = lazy(() => import("./pages/QuickComplaintPage"));
 const GuestTrackComplaint = lazy(() => import("./pages/GuestTrackComplaint"));
 const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
 const GuestDashboard = lazy(() => import("./pages/GuestDashboard"));
@@ -53,11 +55,9 @@ const TaskDetails = lazy(() => import("./pages/TaskDetails"));
 
 // Admin pages
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
-const AdminReports = lazy(() => import("./pages/AdminReports"));
+const UnifiedReports = lazy(() => import("./pages/UnifiedReports"));
 const AdminConfig = lazy(() => import("./pages/AdminConfig"));
-const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const AdminLanguages = lazy(() => import("./pages/AdminLanguages"));
-const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
 
 // Communication
 const Messages = lazy(() => import("./pages/Messages"));
@@ -99,7 +99,7 @@ const App: React.FC = () => {
                       />
                       <Route
                         path="/complaint"
-                        element={<UnifiedComplaintForm />}
+                        element={<QuickComplaintPage />}
                       />
                       <Route
                         path="/guest/track"
@@ -185,7 +185,7 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                              <UnifiedComplaintForm />
+                              <QuickComplaintPage />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
@@ -195,7 +195,7 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute allowedRoles={["CITIZEN"]}>
-                              <UnifiedComplaintForm />
+                              <QuickComplaintPage />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
@@ -279,15 +279,19 @@ const App: React.FC = () => {
                         }
                       />
 
-                      {/* Reports routes */}
+                      {/* Unified Reports route */}
                       <Route
                         path="/reports"
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute
-                              allowedRoles={["WARD_OFFICER", "ADMINISTRATOR"]}
+                              allowedRoles={[
+                                "WARD_OFFICER",
+                                "ADMINISTRATOR",
+                                "MAINTENANCE_TEAM",
+                              ]}
                             >
-                              <AdminReports />
+                              <UnifiedReports />
                             </RoleBasedRoute>
                           </UnifiedLayout>
                         }
@@ -324,27 +328,14 @@ const App: React.FC = () => {
                           </UnifiedLayout>
                         }
                       />
+                      {/* Redirect old analytics routes to unified reports */}
                       <Route
                         path="/admin/analytics"
-                        element={
-                          <UnifiedLayout>
-                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
-                              <AdminAnalytics />
-                            </RoleBasedRoute>
-                          </UnifiedLayout>
-                        }
+                        element={<Navigate to="/reports" replace />}
                       />
                       <Route
                         path="/admin/reports-analytics"
-                        element={
-                          <UnifiedLayout>
-                            <RoleBasedRoute
-                              allowedRoles={["ADMINISTRATOR", "WARD_OFFICER"]}
-                            >
-                              <ReportsAnalytics />
-                            </RoleBasedRoute>
-                          </UnifiedLayout>
-                        }
+                        element={<Navigate to="/reports" replace />}
                       />
 
                       {/* Profile and Settings */}
@@ -390,6 +381,7 @@ const App: React.FC = () => {
                 </div>
                 <Toaster />
                 <GlobalMessageHandler />
+                <AuthErrorHandler />
               </Router>
             </OtpProvider>
           </AppInitializer>
