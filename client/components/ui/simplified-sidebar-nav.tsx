@@ -113,22 +113,10 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
       roles: ["ADMINISTRATOR"],
     },
     {
-      label: translations?.dashboard?.analytics || "Analytics",
-      path: "/admin/analytics",
-      icon: <TrendingUp className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR"],
-    },
-    {
       label: translations?.nav?.languages || "Languages",
       path: "/admin/languages",
       icon: <Globe className="h-4 w-4" />,
       roles: ["ADMINISTRATOR"],
-    },
-    {
-      label: translations?.nav?.reportsAnalytics || "Reports Analytics",
-      path: "/admin/reports-analytics",
-      icon: <PieChart className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR", "WARD_OFFICER"],
     },
     {
       label: translations?.nav?.settings || "Settings",
