@@ -173,19 +173,26 @@ const baseQueryWithReauth: BaseQueryFn<
       };
     }
   } catch (error) {
-    // Enhanced error detection for network issues
+    // Enhanced error detection for network issues and third-party overrides
     const errorMessage = String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
     let errorType = "FETCH_ERROR";
-    let userMessage =
-      "Network connection failed. Please check your internet connection.";
+    let userMessage = "Network connection failed. Please check your internet connection.";
+
+    // Check for specific third-party library interference
+    const isFullStoryError = errorStack?.includes('fs.js') || errorStack?.includes('fullstory');
+    const isThirdPartyFetchOverride = errorMessage.includes('window.fetch') || isFullStoryError;
 
     if (error instanceof DOMException && error.name === "AbortError") {
       errorType = "TIMEOUT_ERROR";
       userMessage = "Request timed out. Please try again.";
     } else if (errorMessage.includes("Failed to fetch")) {
       errorType = "NETWORK_ERROR";
-      userMessage =
-        "Cannot connect to the server. Please check your internet connection and try again.";
+      if (isThirdPartyFetchOverride) {
+        userMessage = "Network request intercepted by tracking library. Retrying...";
+      } else {
+        userMessage = "Cannot connect to the server. Please check your internet connection and try again.";
+      }
     } else if (
       errorMessage.includes("timeout") ||
       errorMessage.includes("TIMEOUT")
@@ -194,8 +201,10 @@ const baseQueryWithReauth: BaseQueryFn<
       userMessage = "Request timed out. Please try again.";
     } else if (errorMessage.includes("ERR_NETWORK")) {
       errorType = "CONNECTION_ERROR";
-      userMessage =
-        "Network connection error. Please check your connection and try again.";
+      userMessage = "Network connection error. Please check your connection and try again.";
+    } else if (isThirdPartyFetchOverride) {
+      errorType = "THIRD_PARTY_INTERFERENCE";
+      userMessage = "Request intercepted by tracking service. Please try again.";
     }
 
     console.error("Fetch error in baseApi:", {
@@ -204,9 +213,82 @@ const baseQueryWithReauth: BaseQueryFn<
       error: errorMessage,
       errorType,
       originalError: error,
-      errorStack: error instanceof Error ? error.stack : undefined,
+      errorStack,
+      isFullStoryError,
+      isThirdPartyFetchOverride,
       options: options,
     });
+
+    // If it's a third-party interference, try to retry with a different approach
+    if (isThirdPartyFetchOverride && !(options as any).__retryAttempt) {
+      console.warn("Retrying request due to third-party fetch override...");
+
+      // Mark this as a retry attempt to prevent infinite loops
+      const retryOptions = { ...options, __retryAttempt: true };
+
+      try {
+        // Try with XMLHttpRequest as fallback
+        const xhr = new XMLHttpRequest();
+        const finalUrl = `/api${url.startsWith("/") ? "" : "/"}${url}`;
+        const method = typeof args === "string" ? "GET" : args.method || "GET";
+
+        return new Promise((resolve) => {
+          xhr.timeout = 15000;
+          xhr.onload = () => {
+            let data;
+            try {
+              data = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+            } catch {
+              data = null;
+            }
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve({ data });
+            } else {
+              resolve({
+                error: {
+                  status: xhr.status,
+                  data: data,
+                } as FetchBaseQueryError,
+              });
+            }
+          };
+
+          xhr.onerror = () => {
+            resolve({
+              error: {
+                status: "NETWORK_ERROR",
+                error: "XHR fallback failed",
+                data: { message: "Network request failed using fallback method." },
+              } as FetchBaseQueryError,
+            });
+          };
+
+          xhr.ontimeout = () => {
+            resolve({
+              error: {
+                status: "TIMEOUT_ERROR",
+                error: "XHR timeout",
+                data: { message: "Request timed out using fallback method." },
+              } as FetchBaseQueryError,
+            });
+          };
+
+          xhr.open(method, finalUrl);
+
+          // Set headers
+          if (retryOptions.headers) {
+            Object.entries(retryOptions.headers as Record<string, string>).forEach(([key, value]) => {
+              xhr.setRequestHeader(key, value);
+            });
+          }
+
+          xhr.send(retryOptions.body as any);
+        });
+      } catch (retryError) {
+        console.error("XHR fallback also failed:", retryError);
+      }
+    }
 
     return {
       error: {
