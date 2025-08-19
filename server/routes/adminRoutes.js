@@ -364,4 +364,8 @@ router.get("/dashboard/analytics", getDashboardAnalytics);
 router.get("/dashboard/activity", getRecentActivity);
 router.get("/dashboard/stats", getDashboardStats);
 
+// User activity and system health routes
+router.get("/user-activity", getUserActivity);
+router.get("/system-health", getSystemHealth);
+
 export default router;
