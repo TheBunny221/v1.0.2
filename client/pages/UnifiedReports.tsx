@@ -292,6 +292,9 @@ const UnifiedReports: React.FC = () => {
     fetchAnalyticsData();
   };
 
+  // Chart colors
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
+
   // Memoized chart data processing for better performance
   const processedChartData = useMemo(() => {
     if (!analyticsData) return null;
@@ -311,9 +314,6 @@ const UnifiedReports: React.FC = () => {
       })),
     };
   }, [analyticsData]);
-
-  // Chart colors
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
 
   if (isLoading) {
     return (
