@@ -130,9 +130,14 @@ const WardOfficerDashboard: React.FC = () => {
 
 
   useEffect(() => {
+    // Only run if we have valid data
+    if (!Array.isArray(complaints) || !user?.wardId) {
+      return;
+    }
+
     // Filter complaints for this ward officer's ward
     const wardComplaints = complaints.filter(
-      (c) => c.wardId === user?.wardId,
+      (c) => c.wardId === user.wardId,
     );
 
     const totalComplaints = wardComplaints.length;
@@ -159,7 +164,7 @@ const WardOfficerDashboard: React.FC = () => {
       slaCompliance: 85, // Mock calculation
       avgResolutionTime: 2.8, // Mock calculation
     });
-  }, [complaints, user]);
+  }, [complaints.length, user?.wardId]); // Use .length to avoid object reference changes
 
   // Filter complaints based on active filter and search term
   const getFilteredComplaints = () => {
