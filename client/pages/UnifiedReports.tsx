@@ -313,9 +313,19 @@ const UnifiedReports: React.FC = () => {
     }
   };
 
-  // Generate custom report
-  const handleGenerateReport = () => {
-    fetchAnalyticsData();
+  // Generate custom report with real-time data fetch
+  const handleGenerateReport = async () => {
+    setIsLoading(true);
+    try {
+      // Force refresh analytics data with current filters
+      await fetchAnalyticsData();
+
+      // Show success message
+      alert(`Report generated successfully with ${analyticsData?.complaints?.total || 0} records based on applied filters.`);
+    } catch (error) {
+      console.error("Report generation error:", error);
+      alert("Failed to generate report. Please try again.");
+    }
   };
 
   // Chart colors
