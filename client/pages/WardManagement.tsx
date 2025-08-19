@@ -26,6 +26,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
+import UpdateComplaintModal from "../components/UpdateComplaintModal";
 import {
   MapPin,
   Users,
