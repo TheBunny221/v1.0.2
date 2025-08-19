@@ -509,6 +509,27 @@ const GuestTrackComplaint: React.FC = () => {
           setComplaintId(complaintId);
         }}
       />
+
+      {/* OTP Verification Modal */}
+      <OtpVerificationModal
+        isOpen={showOtpModal}
+        onClose={() => setShowOtpModal(false)}
+        onVerified={handleOtpVerified}
+        complaintId={complaintId}
+        maskedEmail={maskedEmail}
+        isVerifying={isVerifyingOtp}
+        error={verifyError?.data?.message || null}
+        onResendOtp={handleResendOtp}
+        isResending={isRequestingOtp}
+      />
+
+      {/* Complaint Details Modal */}
+      <ComplaintDetailsModal
+        isOpen={showComplaintDetails}
+        onClose={() => setShowComplaintDetails(false)}
+        complaint={verifiedComplaint}
+        user={verifiedUser}
+      />
     </div>
   );
 };
