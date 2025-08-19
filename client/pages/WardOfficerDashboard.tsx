@@ -91,14 +91,21 @@ const WardOfficerDashboard: React.FC = () => {
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string>("");
 
-  // Mock maintenance team members - in real app, this would come from API
-  const maintenanceTeam = [
-    { id: "1", name: "Ravi Kumar", department: "Plumbing", phone: "+91 9876543210" },
-    { id: "2", name: "Suresh Nair", department: "Electrical", phone: "+91 9876543211" },
-    { id: "3", name: "Priya Menon", department: "Road Maintenance", phone: "+91 9876543212" },
-    { id: "4", name: "Arun Raj", department: "Waste Management", phone: "+91 9876543213" },
-    { id: "5", name: "Lakshmi Devi", department: "General Maintenance", phone: "+91 9876543214" },
-  ];
+  // Fetch maintenance team members from API
+  const {
+    data: maintenanceTeamResponse,
+    isLoading: isLoadingTeam,
+    error: teamError
+  } = useGetAllUsersQuery({
+    role: "MAINTENANCE_TEAM",
+    status: "active",
+    limit: 100,
+  });
+
+  const maintenanceTeam = maintenanceTeamResponse?.data?.users || [];
+
+  // RTK Query mutation for assignment
+  const [assignComplaintMutation, { isLoading: isAssigning }] = useAssignComplaintMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalComplaints: 0,
