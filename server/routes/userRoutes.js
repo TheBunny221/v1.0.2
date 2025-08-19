@@ -10,6 +10,10 @@ import {
   getWards,
   createWard,
   updateWard,
+  deleteWard,
+  createSubZone,
+  updateSubZone,
+  deleteSubZone,
 } from "../controller/userController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import {
@@ -49,6 +53,14 @@ router
 // Ward management (admin only)
 router.route("/wards").post(createWard);
 
-router.route("/wards/:id").put(updateWard);
+router.route("/wards/:id").put(updateWard).delete(deleteWard);
+
+// Sub-zone management (admin only)
+router.route("/wards/:wardId/subzones").post(createSubZone);
+
+router
+  .route("/wards/:wardId/subzones/:id")
+  .put(updateSubZone)
+  .delete(deleteSubZone);
 
 export default router;

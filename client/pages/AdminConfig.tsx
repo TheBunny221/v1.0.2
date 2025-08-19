@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import {
   useGetComplaintTypesQuery,
   useCreateComplaintTypeMutation,
@@ -59,6 +60,7 @@ import {
   Users,
   Clock,
   Mail,
+  Phone,
   Database,
   Plus,
   Edit,
@@ -118,6 +120,7 @@ const AdminConfig: React.FC = () => {
     data: complaintTypesResponse,
     isLoading: complaintTypesLoading,
     error: complaintTypesError,
+    refetch: refetchComplaintTypes,
   } = useGetComplaintTypesQuery();
   const [createComplaintType] = useCreateComplaintTypeMutation();
   const [updateComplaintType] = useUpdateComplaintTypeMutation();
@@ -265,7 +268,7 @@ const AdminConfig: React.FC = () => {
       // Load wards (public endpoint)
       let wardsResponse;
       try {
-        wardsResponse = await apiCall("/wards");
+        wardsResponse = await apiCall("/guest/wards");
         setWards(wardsResponse.data || []);
       } catch (error: any) {
         console.error("Failed to load wards:", error);
@@ -324,7 +327,7 @@ const AdminConfig: React.FC = () => {
       let response;
       if (ward.id && ward.id !== "") {
         // Update existing ward
-        response = await apiCall(`/wards/${ward.id}`, {
+        response = await apiCall(`/users/wards/${ward.id}`, {
           method: "PUT",
           body: JSON.stringify(wardData),
         });
@@ -335,7 +338,7 @@ const AdminConfig: React.FC = () => {
         );
       } else {
         // Create new ward
-        response = await apiCall("/wards", {
+        response = await apiCall("/users/wards", {
           method: "POST",
           body: JSON.stringify(wardData),
         });
@@ -367,7 +370,7 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await apiCall(`/wards/${wardId}`, { method: "DELETE" });
+      await apiCall(`/users/wards/${wardId}`, { method: "DELETE" });
       setWards((prev) => prev.filter((w) => w.id !== wardId));
 
       dispatch(
@@ -399,7 +402,7 @@ const AdminConfig: React.FC = () => {
       if (subZone.id && subZone.id !== "") {
         // Update existing sub-zone
         response = await apiCall(
-          `/wards/${subZone.wardId}/subzones/${subZone.id}`,
+          `/users/wards/${subZone.wardId}/subzones/${subZone.id}`,
           {
             method: "PUT",
             body: JSON.stringify(subZoneData),
@@ -407,7 +410,7 @@ const AdminConfig: React.FC = () => {
         );
       } else {
         // Create new sub-zone
-        response = await apiCall(`/wards/${subZone.wardId}/subzones`, {
+        response = await apiCall(`/users/wards/${subZone.wardId}/subzones`, {
           method: "POST",
           body: JSON.stringify(subZoneData),
         });
@@ -453,7 +456,7 @@ const AdminConfig: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await apiCall(`/wards/${wardId}/subzones/${subZoneId}`, {
+      await apiCall(`/users/wards/${wardId}/subzones/${subZoneId}`, {
         method: "DELETE",
       });
 
@@ -500,34 +503,90 @@ const AdminConfig: React.FC = () => {
         isActive: type.isActive,
       };
 
+      console.log("Saving complaint type with data:", typeData);
+      console.log("Original type object:", type);
+
+      let result;
       if (type.id && type.id !== "") {
         // Update existing type
-        await updateComplaintType({
+        console.log("Updating existing complaint type with ID:", type.id);
+        result = await updateComplaintType({
           id: type.id,
           data: typeData,
         }).unwrap();
+        console.log("Update result:", result);
       } else {
         // Create new type
-        await createComplaintType(typeData).unwrap();
+        console.log("Creating new complaint type");
+        result = await createComplaintType(typeData).unwrap();
+        console.log("Create result:", result);
       }
 
       setEditingComplaintType(null);
       setIsComplaintTypeDialogOpen(false);
+
+      // Force a refetch to ensure UI is updated
+      await refetchComplaintTypes();
+
       dispatch(
         showSuccessToast(
           "Complaint Type Saved",
-          `Complaint type "${type.name}" has been saved successfully.`,
+          `Complaint type "${type.name}" has been saved successfully. Active status: ${type.isActive ? "Active" : "Inactive"}`,
         ),
       );
     } catch (error: any) {
-      dispatch(
-        showErrorToast(
-          "Save Failed",
-          error.message || "Failed to save complaint type. Please try again.",
-        ),
-      );
+      console.error("Error saving complaint type:", error);
+      console.error("Error details:", {
+        status: error?.status,
+        data: error?.data,
+        message: error?.message,
+        fullError: error,
+      });
+
+      const errorMessage = getApiErrorMessage(error);
+      console.log("Extracted error message:", errorMessage);
+
+      dispatch(showErrorToast("Error saving complaint type", errorMessage));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Quick toggle for active status
+  const handleToggleComplaintTypeStatus = async (type: ComplaintType) => {
+    try {
+      const updatedData = {
+        name: type.name,
+        description: type.description,
+        priority: type.priority,
+        slaHours: type.slaHours,
+        isActive: !type.isActive, // Toggle the status
+      };
+
+      console.log(
+        `Toggling complaint type ${type.name} to ${!type.isActive ? "Active" : "Inactive"}`,
+      );
+
+      await updateComplaintType({
+        id: type.id,
+        data: updatedData,
+      }).unwrap();
+
+      // Force a refetch to ensure UI is updated
+      await refetchComplaintTypes();
+
+      dispatch(
+        showSuccessToast(
+          "Status Updated",
+          `${type.name} is now ${!type.isActive ? "Active" : "Inactive"}`,
+        ),
+      );
+    } catch (error: any) {
+      console.error("Error toggling complaint type status:", error);
+
+      const errorMessage = getApiErrorMessage(error);
+
+      dispatch(showErrorToast("Update Failed", errorMessage));
     }
   };
 
@@ -970,22 +1029,32 @@ const AdminConfig: React.FC = () => {
                   <FileText className="h-5 w-5 mr-2" />
                   Complaint Type Management
                 </CardTitle>
-                <Button
-                  onClick={() => {
-                    setEditingComplaintType({
-                      id: "",
-                      name: "",
-                      description: "",
-                      priority: "MEDIUM",
-                      slaHours: 48,
-                      isActive: true,
-                    });
-                    setIsComplaintTypeDialogOpen(true);
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Type
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => refetchComplaintTypes()}
+                    size="sm"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setEditingComplaintType({
+                        id: "",
+                        name: "",
+                        description: "",
+                        priority: "MEDIUM",
+                        slaHours: 48,
+                        isActive: true,
+                      });
+                      setIsComplaintTypeDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Type
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -1031,15 +1100,29 @@ const AdminConfig: React.FC = () => {
                         </TableCell>
                         <TableCell>{type.slaHours}h</TableCell>
                         <TableCell>
-                          <Badge
-                            className={
-                              type.isActive
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                            }
-                          >
-                            {type.isActive ? "Active" : "Inactive"}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              className={
+                                type.isActive
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {type.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                handleToggleComplaintTypeStatus(type)
+                              }
+                              disabled={isLoading}
+                              className="h-6 w-6 p-0"
+                              title={`Make ${type.isActive ? "Inactive" : "Active"}`}
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
@@ -1276,6 +1359,69 @@ const AdminConfig: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Contact Information Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Phone className="h-5 w-5 mr-2" />
+                    Contact Information
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter((s) => s.key.startsWith("CONTACT_"))
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{setting.key}</h4>
+                              <p className="text-sm text-gray-600">
+                                {setting.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Input
+                              type="text"
+                              value={setting.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) =>
+                                  prev.map((s) =>
+                                    s.key === setting.key
+                                      ? { ...s, value: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              onBlur={(e) =>
+                                handleUpdateSystemSetting(
+                                  setting.key,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={`Enter ${setting.type} value`}
+                              className="max-w-md"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
                 {/* Other Settings */}
                 <div>
                   <h3 className="text-lg font-medium mb-4 flex items-center">
@@ -1291,7 +1437,8 @@ const AdminConfig: React.FC = () => {
                             "APP_LOGO_URL",
                             "APP_LOGO_SIZE",
                           ].includes(s.key) &&
-                          !s.key.startsWith("COMPLAINT_ID"),
+                          !s.key.startsWith("COMPLAINT_ID") &&
+                          !s.key.startsWith("CONTACT_"),
                       )
                       .map((setting) => (
                         <div
@@ -1730,14 +1877,17 @@ const AdminConfig: React.FC = () => {
                 <Input
                   id="slaHours"
                   type="number"
-                  value={editingComplaintType.slaHours || ""}
-                  onChange={(e) =>
+                  value={editingComplaintType.slaHours?.toString() || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 48 : parseInt(value, 10);
                     setEditingComplaintType({
                       ...editingComplaintType,
-                      slaHours: parseInt(e.target.value) || 0,
-                    })
-                  }
+                      slaHours: isNaN(numValue) ? 48 : numValue,
+                    });
+                  }}
                   placeholder="Enter SLA hours"
+                  min="1"
                 />
               </div>
               <div className="flex items-center space-x-2">

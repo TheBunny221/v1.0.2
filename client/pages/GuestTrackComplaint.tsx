@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Shield,
 } from "lucide-react";
+import QuickComplaintModal from "../components/QuickComplaintModal";
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -29,6 +30,7 @@ const GuestTrackComplaint: React.FC = () => {
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -417,9 +419,12 @@ const GuestTrackComplaint: React.FC = () => {
                 <p className="text-sm text-gray-600 mb-3">
                   Have another issue? Submit a new complaint.
                 </p>
-                <Link to="/guest/complaint">
-                  <Button variant="outline">New Complaint</Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsQuickFormOpen(true)}
+                >
+                  New Complaint
+                </Button>
               </div>
               <div>
                 <h3 className="font-medium mb-2">Contact Support</h3>
@@ -432,6 +437,16 @@ const GuestTrackComplaint: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Could automatically set the tracking ID to show the new complaint
+          setComplaintId(complaintId);
+        }}
+      />
     </div>
   );
 };

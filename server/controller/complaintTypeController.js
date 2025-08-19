@@ -79,10 +79,53 @@ export const getComplaintTypeById = asyncHandler(async (req, res) => {
 // @route   POST /api/complaint-types
 // @access  Private (Admin only)
 export const createComplaintType = asyncHandler(async (req, res) => {
-  const { name, description, priority, slaHours } = req.body;
+  console.log("Creating complaint type with body:", req.body);
+  const { name, description, priority, slaHours, isActive } = req.body;
+
+  // Validate required fields
+  if (!name || typeof name !== "string" || name.trim().length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Name is required and must be a non-empty string",
+    });
+  }
+
+  if (
+    !description ||
+    typeof description !== "string" ||
+    description.trim().length === 0
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Description is required and must be a non-empty string",
+    });
+  }
+
+  // Validate priority
+  const validPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+  if (priority && !validPriorities.includes(priority)) {
+    return res.status(400).json({
+      success: false,
+      message: `Priority must be one of: ${validPriorities.join(", ")}`,
+    });
+  }
+
+  // Validate slaHours
+  if (
+    slaHours !== undefined &&
+    (typeof slaHours !== "number" || slaHours <= 0)
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "SLA hours must be a positive number",
+    });
+  }
 
   // Generate a unique ID
-  const id = name.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+  const id = name
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "_");
   const key = `COMPLAINT_TYPE_${id}`;
 
   // Check if complaint type already exists
@@ -109,7 +152,7 @@ export const createComplaintType = asyncHandler(async (req, res) => {
       key,
       value: JSON.stringify(typeData),
       description: `Complaint type configuration for ${name}`,
-      isActive: true,
+      isActive: isActive !== undefined ? isActive : true,
     },
   });
 
@@ -136,7 +179,49 @@ export const createComplaintType = asyncHandler(async (req, res) => {
 export const updateComplaintType = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, description, priority, slaHours, isActive } = req.body;
+  console.log(`Updating complaint type ${id} with body:`, req.body);
   const key = `COMPLAINT_TYPE_${id}`;
+
+  // Validate fields if provided
+  if (
+    name !== undefined &&
+    (typeof name !== "string" || name.trim().length === 0)
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Name must be a non-empty string",
+    });
+  }
+
+  if (
+    description !== undefined &&
+    (typeof description !== "string" || description.trim().length === 0)
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Description must be a non-empty string",
+    });
+  }
+
+  // Validate priority
+  const validPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+  if (priority && !validPriorities.includes(priority)) {
+    return res.status(400).json({
+      success: false,
+      message: `Priority must be one of: ${validPriorities.join(", ")}`,
+    });
+  }
+
+  // Validate slaHours
+  if (
+    slaHours !== undefined &&
+    (typeof slaHours !== "number" || slaHours <= 0)
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "SLA hours must be a positive number",
+    });
+  }
 
   const existingType = await prisma.systemConfig.findUnique({
     where: { key },

@@ -598,3 +598,222 @@ export const updateWard = asyncHandler(async (req, res) => {
     data: { ward },
   });
 });
+
+// @desc    Delete ward (Admin only)
+// @route   DELETE /api/users/wards/:id
+// @access  Private (Admin)
+export const deleteWard = asyncHandler(async (req, res) => {
+  const wardId = req.params.id;
+
+  // Check if ward exists
+  const ward = await prisma.ward.findUnique({
+    where: { id: wardId },
+  });
+
+  if (!ward) {
+    return res.status(404).json({
+      success: false,
+      message: "Ward not found",
+    });
+  }
+
+  // Check if ward has any users assigned to it
+  const usersInWard = await prisma.user.count({
+    where: { wardId: wardId },
+  });
+
+  if (usersInWard > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot delete ward. There are users assigned to this ward.",
+    });
+  }
+
+  // Check if ward has any complaints
+  const complaintsInWard = await prisma.complaint.count({
+    where: { wardId: wardId },
+  });
+
+  if (complaintsInWard > 0) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Cannot delete ward. There are complaints assigned to this ward.",
+    });
+  }
+
+  // Delete the ward
+  await prisma.ward.delete({
+    where: { id: wardId },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Ward deleted successfully",
+  });
+});
+
+// @desc    Create sub-zone (Admin only)
+// @route   POST /api/users/wards/:wardId/subzones
+// @access  Private (Admin)
+export const createSubZone = asyncHandler(async (req, res) => {
+  const { name, description, isActive = true } = req.body;
+  const wardId = req.params.wardId;
+
+  // Check if ward exists
+  const ward = await prisma.ward.findUnique({
+    where: { id: wardId },
+  });
+
+  if (!ward) {
+    return res.status(404).json({
+      success: false,
+      message: "Ward not found",
+    });
+  }
+
+  // Check if sub-zone name already exists in this ward
+  const existingSubZone = await prisma.subZone.findFirst({
+    where: {
+      name,
+      wardId,
+    },
+  });
+
+  if (existingSubZone) {
+    return res.status(400).json({
+      success: false,
+      message: "Sub-zone name already exists in this ward",
+    });
+  }
+
+  const subZone = await prisma.subZone.create({
+    data: {
+      name,
+      description,
+      wardId,
+      isActive,
+    },
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Sub-zone created successfully",
+    data: subZone,
+  });
+});
+
+// @desc    Update sub-zone (Admin only)
+// @route   PUT /api/users/wards/:wardId/subzones/:id
+// @access  Private (Admin)
+export const updateSubZone = asyncHandler(async (req, res) => {
+  const { name, description, isActive } = req.body;
+  const { wardId, id: subZoneId } = req.params;
+
+  // Check if ward exists
+  const ward = await prisma.ward.findUnique({
+    where: { id: wardId },
+  });
+
+  if (!ward) {
+    return res.status(404).json({
+      success: false,
+      message: "Ward not found",
+    });
+  }
+
+  // Check if sub-zone exists and belongs to the ward
+  const existingSubZone = await prisma.subZone.findUnique({
+    where: { id: subZoneId },
+  });
+
+  if (!existingSubZone) {
+    return res.status(404).json({
+      success: false,
+      message: "Sub-zone not found",
+    });
+  }
+
+  if (existingSubZone.wardId !== wardId) {
+    return res.status(400).json({
+      success: false,
+      message: "Sub-zone does not belong to this ward",
+    });
+  }
+
+  const subZone = await prisma.subZone.update({
+    where: { id: subZoneId },
+    data: {
+      name,
+      description,
+      isActive,
+    },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Sub-zone updated successfully",
+    data: subZone,
+  });
+});
+
+// @desc    Delete sub-zone (Admin only)
+// @route   DELETE /api/users/wards/:wardId/subzones/:id
+// @access  Private (Admin)
+export const deleteSubZone = asyncHandler(async (req, res) => {
+  const { wardId, id: subZoneId } = req.params;
+
+  // Check if ward exists
+  const ward = await prisma.ward.findUnique({
+    where: { id: wardId },
+  });
+
+  if (!ward) {
+    return res.status(404).json({
+      success: false,
+      message: "Ward not found",
+    });
+  }
+
+  // Check if sub-zone exists and belongs to the ward
+  const subZone = await prisma.subZone.findUnique({
+    where: { id: subZoneId },
+  });
+
+  if (!subZone) {
+    return res.status(404).json({
+      success: false,
+      message: "Sub-zone not found",
+    });
+  }
+
+  if (subZone.wardId !== wardId) {
+    return res.status(400).json({
+      success: false,
+      message: "Sub-zone does not belong to this ward",
+    });
+  }
+
+  // Check if sub-zone has any complaints
+  const complaintsInSubZone = await prisma.complaint.count({
+    where: { subZoneId: subZoneId },
+  });
+
+  if (complaintsInSubZone > 0) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Cannot delete sub-zone. There are complaints assigned to this sub-zone.",
+    });
+  }
+
+  // Delete the sub-zone
+  await prisma.subZone.delete({
+    where: { id: subZoneId },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Sub-zone deleted successfully",
+  });
+});

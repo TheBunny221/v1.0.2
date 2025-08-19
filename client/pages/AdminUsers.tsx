@@ -58,6 +58,7 @@ import {
   type CreateUserRequest,
   type UpdateUserRequest,
 } from "../store/api/adminApi";
+import { useGetWardsQuery } from "../store/api/guestApi";
 import { toast } from "../components/ui/use-toast";
 
 const AdminUsers: React.FC = () => {
@@ -156,63 +157,15 @@ const AdminUsers: React.FC = () => {
     }
   };
 
-  // Fetch wards for form dropdowns
-  const [wards, setWards] = useState<Array<{ id: string; name: string }>>([]);
+  // Fetch wards for form dropdowns using RTK Query
+  const {
+    data: wardsResponse,
+    isLoading: isLoadingWards,
+    error: wardsError,
+  } = useGetWardsQuery();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchWards = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token || !isMounted) {
-          if (isMounted) setWards([]);
-          return;
-        }
-
-        const response = await fetch("/api/wards", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!isMounted) return;
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            console.warn("Not authenticated for wards fetch");
-            if (isMounted) setWards([]);
-            return;
-          }
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        if (isMounted) {
-          if (data.success && Array.isArray(data.data)) {
-            setWards(data.data);
-          } else {
-            setWards([]);
-          }
-        }
-      } catch (error: any) {
-        // Only log errors if the component is still mounted
-        if (isMounted) {
-          console.error("Failed to fetch wards:", error);
-          setWards([]);
-        }
-      }
-    };
-
-    fetchWards();
-
-    // Cleanup function
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  // Extract wards data from the API response
+  const wards = wardsResponse?.data || [];
 
   // Mutations
   const [activateUser] = useActivateUserMutation();

@@ -45,6 +45,7 @@ import {
   TrendingUp,
   History,
 } from "lucide-react";
+import QuickComplaintModal from "../components/QuickComplaintModal";
 
 // Mock data - in real app this would come from API
 const mockProfile = {
@@ -151,6 +152,7 @@ const GuestDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -216,7 +218,7 @@ const GuestDashboard: React.FC = () => {
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <Button
-                onClick={() => navigate("/guest/complaint")}
+                onClick={() => setIsQuickFormOpen(true)}
                 className="bg-white text-blue-600 hover:bg-gray-50"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -462,7 +464,7 @@ const GuestDashboard: React.FC = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">My Complaints</CardTitle>
-                  <Button onClick={() => navigate("/guest/complaint")}>
+                  <Button onClick={() => setIsQuickFormOpen(true)}>
                     <PlusCircle className="h-4 w-4 mr-2" />
                     New Complaint
                   </Button>
@@ -826,6 +828,16 @@ const GuestDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Could add refresh logic here if needed
+          setActiveTab("complaints");
+        }}
+      />
     </div>
   );
 };

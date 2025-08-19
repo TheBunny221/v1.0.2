@@ -52,6 +52,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import FeedbackDialog from "../components/FeedbackDialog";
+import QuickComplaintModal from "../components/QuickComplaintModal";
 
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -138,6 +139,7 @@ const CitizenDashboard: React.FC = () => {
   const [sortOrder, setSortOrder] = useState(
     searchParams.get("order") || "desc",
   );
+  const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
 
   // Handler functions
   const handleRefresh = () => {
@@ -338,7 +340,7 @@ const CitizenDashboard: React.FC = () => {
           </div>
           <div className="hidden md:flex items-center space-x-4">
             <Button
-              onClick={() => navigate("/complaints/citizen-form")}
+              onClick={() => setIsQuickFormOpen(true)}
               className="bg-white text-blue-600 hover:bg-gray-50"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -449,10 +451,7 @@ const CitizenDashboard: React.FC = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button
-                onClick={() => navigate("/complaints/citizen-form")}
-                size="sm"
-              >
+              <Button onClick={() => setIsQuickFormOpen(true)} size="sm">
                 <PlusCircle className="h-4 w-4 mr-2" />
                 New Complaint
               </Button>
@@ -662,7 +661,7 @@ const CitizenDashboard: React.FC = () => {
                     {complaints.map((complaint) => (
                       <TableRow key={complaint.id}>
                         <TableCell className="font-mono text-xs">
-                          {complaint.id.slice(-8)}
+                          {complaint.complaintId.slice(-8)}
                         </TableCell>
                         <TableCell>
                           <div className="max-w-48">
@@ -832,7 +831,7 @@ const CitizenDashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
-              onClick={() => navigate("/complaints/citizen-form")}
+              onClick={() => setIsQuickFormOpen(true)}
               className="w-full justify-start"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -879,6 +878,16 @@ const CitizenDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Complaint Modal */}
+      <QuickComplaintModal
+        isOpen={isQuickFormOpen}
+        onClose={() => setIsQuickFormOpen(false)}
+        onSuccess={(complaintId) => {
+          // Refresh data after successful submission
+          handleRefresh();
+        }}
+      />
     </div>
   );
 };

@@ -1,0 +1,372 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
+
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+  area?: string;
+  landmark?: string;
+}
+
+interface SimpleLocationMapDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLocationSelect: (location: LocationData) => void;
+  initialLocation?: LocationData;
+}
+
+const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
+  isOpen,
+  onClose,
+  onLocationSelect,
+  initialLocation,
+}) => {
+  // Default to Kochi, India coordinates
+  const defaultPosition = { lat: 9.9312, lng: 76.2673 };
+  const [position, setPosition] = useState(
+    initialLocation
+      ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
+      : defaultPosition,
+  );
+  const [address, setAddress] = useState(initialLocation?.address || "");
+  const [area, setArea] = useState(initialLocation?.area || "");
+  const [landmark, setLandmark] = useState(initialLocation?.landmark || "");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mapError, setMapError] = useState<string | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<any>(null);
+
+  // Initialize map when dialog opens
+  useEffect(() => {
+    if (!isOpen || !mapRef.current) return;
+
+    const initializeMap = async () => {
+      try {
+        // Dynamically import leaflet only when needed
+        const L = await import("leaflet");
+
+        // Set up the default icon
+        const DefaultIcon = L.icon({
+          iconRetinaUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+        });
+
+        // Create map if it doesn't exist
+        if (!leafletMapRef.current && mapRef.current) {
+          leafletMapRef.current = L.map(mapRef.current, {
+            center: [position.lat, position.lng],
+            zoom: 13,
+            scrollWheelZoom: true,
+          });
+
+          // Add tile layer
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          }).addTo(leafletMapRef.current);
+
+          // Add marker
+          const marker = L.marker([position.lat, position.lng], {
+            icon: DefaultIcon,
+          }).addTo(leafletMapRef.current);
+
+          // Handle map clicks
+          leafletMapRef.current.on("click", (e: any) => {
+            const { lat, lng } = e.latlng;
+            setPosition({ lat, lng });
+            marker.setLatLng([lat, lng]);
+            reverseGeocode({ lat, lng });
+          });
+        }
+
+        setMapError(null);
+      } catch (error) {
+        console.error("Error initializing map:", error);
+        setMapError("Failed to load map. Please refresh and try again.");
+      }
+    };
+
+    const timer = setTimeout(initializeMap, 100);
+    return () => clearTimeout(timer);
+  }, [isOpen, position.lat, position.lng]);
+
+  // Cleanup map when dialog closes
+  useEffect(() => {
+    if (!isOpen && leafletMapRef.current) {
+      leafletMapRef.current.remove();
+      leafletMapRef.current = null;
+    }
+  }, [isOpen]);
+
+  // Get current location
+  const getCurrentLocation = useCallback(() => {
+    setIsLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const newPos = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+          setPosition(newPos);
+          reverseGeocode(newPos);
+
+          // Update map view
+          if (leafletMapRef.current) {
+            leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
+            // Update marker if it exists
+            const markers = Object.values(leafletMapRef.current._layers).filter(
+              (layer: any) => layer instanceof L.Marker,
+            );
+            if (markers.length > 0) {
+              (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
+            }
+          }
+
+          setIsLoadingLocation(false);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setIsLoadingLocation(false);
+          alert(
+            "Could not get your location. Please ensure location access is enabled.",
+          );
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
+      );
+    } else {
+      setIsLoadingLocation(false);
+      alert("Geolocation is not supported by this browser.");
+    }
+  }, []);
+
+  // Reverse geocoding to get address from coordinates
+  const reverseGeocode = async (coords: { lat: number; lng: number }) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&addressdetails=1`,
+      );
+      const data = await response.json();
+
+      if (data && data.display_name) {
+        setAddress(data.display_name);
+
+        // Extract area information
+        const addressComponents = data.address;
+        if (addressComponents) {
+          const detectedArea =
+            addressComponents.neighbourhood ||
+            addressComponents.suburb ||
+            addressComponents.city_district ||
+            addressComponents.state_district ||
+            addressComponents.city ||
+            "";
+          setArea(detectedArea);
+        }
+      }
+    } catch (error) {
+      console.error("Error in reverse geocoding:", error);
+    }
+  };
+
+  // Search for a location
+  const searchLocation = async () => {
+    if (!searchQuery.trim()) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", Kochi, Kerala, India")}&format=json&limit=1&addressdetails=1`,
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const result = data[0];
+        const newPos = {
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon),
+        };
+        setPosition(newPos);
+        setAddress(result.display_name);
+
+        // Extract area information
+        const addressComponents = result.address;
+        if (addressComponents) {
+          const detectedArea =
+            addressComponents.neighbourhood ||
+            addressComponents.suburb ||
+            addressComponents.city_district ||
+            addressComponents.state_district ||
+            addressComponents.city ||
+            "";
+          setArea(detectedArea);
+        }
+
+        // Update map view
+        if (leafletMapRef.current) {
+          leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
+          // Update marker if it exists
+          const markers = Object.values(leafletMapRef.current._layers).filter(
+            (layer: any) => layer instanceof L.Marker,
+          );
+          if (markers.length > 0) {
+            (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
+          }
+        }
+      } else {
+        alert("Location not found. Please try a different search term.");
+      }
+    } catch (error) {
+      console.error("Error searching location:", error);
+      alert("Error searching for location. Please try again.");
+    }
+  };
+
+  const handleConfirm = () => {
+    onLocationSelect({
+      latitude: position.lat,
+      longitude: position.lng,
+      address: address.trim(),
+      area: area.trim(),
+      landmark: landmark.trim(),
+    });
+    onClose();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      searchLocation();
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Select Location on Map
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Search and Current Location */}
+          <div className="flex gap-2">
+            <div className="flex-1 flex gap-2">
+              <Input
+                placeholder="Search for a location in Kochi..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+              />
+              <Button onClick={searchLocation} variant="outline" size="icon">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              onClick={getCurrentLocation}
+              variant="outline"
+              disabled={isLoadingLocation}
+              className="flex items-center gap-2"
+            >
+              <Navigation className="h-4 w-4" />
+              {isLoadingLocation ? "Getting..." : "Current Location"}
+            </Button>
+          </div>
+
+          {/* Map */}
+          <div className="h-96 w-full rounded-lg overflow-hidden border relative">
+            {mapError ? (
+              <div className="h-full flex items-center justify-center bg-gray-100">
+                <div className="text-center">
+                  <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                  <p className="text-red-600">{mapError}</p>
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                  >
+                    Refresh Page
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                ref={mapRef}
+                className="h-full w-full"
+                style={{ minHeight: "384px" }}
+              />
+            )}
+          </div>
+
+          {/* Location Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="detected-area">Detected Area</Label>
+              <Input
+                id="detected-area"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="Area/Locality"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="landmark">Landmark (Optional)</Label>
+              <Input
+                id="landmark"
+                value={landmark}
+                onChange={(e) => setLandmark(e.target.value)}
+                placeholder="Nearby landmark"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="detected-address">Detected Address</Label>
+              <Input
+                id="detected-address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Full address"
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Coordinates Display */}
+          <div className="text-sm text-muted-foreground">
+            Selected coordinates: {position.lat.toFixed(6)},{" "}
+            {position.lng.toFixed(6)}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm}>Confirm Location</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default SimpleLocationMapDialog;

@@ -96,10 +96,10 @@ export const useCustomRegister = () => {
       console.log("Error object:", error);
 
       // Check if this is already a structured error from our API response handling
-      if (error.status && error.data) {
+      if (error.status) {
         console.log(
-          "Re-throwing structured API error with server message:",
-          error.data,
+          "Re-throwing structured API error with status:",
+          error.status,
         );
         throw error;
       }

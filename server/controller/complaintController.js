@@ -1,6 +1,7 @@
 import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { sendEmail } from "../utils/emailService.js";
+import { verifyCaptchaForComplaint } from "./captchaController.js";
 
 const prisma = getPrisma();
 
@@ -93,6 +94,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     description,
     type,
     priority,
+    slaHours,
     wardId,
     subZoneId,
     area,
@@ -103,19 +105,33 @@ export const createComplaint = asyncHandler(async (req, res) => {
     contactEmail,
     contactPhone,
     isAnonymous,
+    captchaId,
+    captchaText,
   } = req.body;
 
-  // Set deadline based on priority (in hours)
-  const priorityHours = {
-    LOW: 72,
-    MEDIUM: 48,
-    HIGH: 24,
-    CRITICAL: 8,
-  };
+  // Verify CAPTCHA for all complaint submissions
+  try {
+    await verifyCaptchaForComplaint(captchaId, captchaText);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "CAPTCHA verification failed",
+    });
+  }
 
-  const deadline = new Date(
-    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
-  );
+  // Use provided slaHours or fallback to priority-based hours
+  let deadlineHours = slaHours;
+  if (!deadlineHours) {
+    const priorityHours = {
+      LOW: 72,
+      MEDIUM: 48,
+      HIGH: 24,
+      CRITICAL: 8,
+    };
+    deadlineHours = priorityHours[priority || "MEDIUM"];
+  }
+
+  const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
 
   // Generate unique complaint ID
   const complaintId = await generateComplaintId();
@@ -512,7 +528,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, comment, assignedToId } = req.body;
+  const { status, remarks, assignedToId } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -607,7 +623,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       userId: req.user.id,
       fromStatus: complaint.status,
       toStatus: status,
-      comment: comment || `Status updated to ${status}`,
+      comment: remarks || `Status updated to ${status}`,
     },
   });
 
@@ -872,7 +888,7 @@ export const getComplaintStats = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/assign
 // @access  Private (Ward Officer, Admin)
 export const assignComplaint = asyncHandler(async (req, res) => {
-  const { assignedToId } = req.body;
+  const { assignedTo: assignedToId, remarks } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -930,7 +946,7 @@ export const assignComplaint = asyncHandler(async (req, res) => {
       userId: req.user.id,
       fromStatus: complaint.status,
       toStatus: "ASSIGNED",
-      comment: `Assigned to ${assignee.fullName}`,
+      comment: remarks || `Assigned to ${assignee.fullName}`,
     },
   });
 
