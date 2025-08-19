@@ -189,6 +189,9 @@ const baseQueryWithReauth: BaseQueryFn<
       method: typeof args === "string" ? "GET" : args.method || "GET",
       error: errorMessage,
       errorType,
+      originalError: error,
+      errorStack: error instanceof Error ? error.stack : undefined,
+      options: options,
     });
 
     return {
