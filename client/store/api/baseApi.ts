@@ -131,10 +131,9 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// Helper for transforming API responses
+// Helper for transforming API responses (deprecated - kept for backwards compatibility)
+// Prefer to let RTK Query handle responses naturally to avoid response body consumption issues
 export const transformResponse = <T>(response: any): ApiResponse<T> => {
-  // RTK Query already parses the JSON response, so we just need to pass it through
-  // without trying to read the response body again
   return response as ApiResponse<T>;
 };
 
