@@ -233,9 +233,10 @@ export const exportToPDF = async (
         doc.addPage();
         yPosition = addHeader();
       }
-      
-      const percentage = ((category.count / data.summary.total) * 100).toFixed(1);
-      doc.text(`• ${category.name}: ${category.count} complaints (${percentage}%) - Avg: ${category.avgTime.toFixed(1)} days`, marginLeft + 5, yPosition);
+
+      const percentage = actualTotal > 0 ? ((category.count / actualTotal) * 100).toFixed(1) : "0.0";
+      const categoryName = category.name.replace(/_/g, ' '); // Replace underscores with spaces
+      doc.text(`• ${categoryName}: ${category.count} complaints (${percentage}%) - Avg: ${category.avgTime.toFixed(1)} days`, marginLeft + 5, yPosition);
       yPosition += 6;
     });
   }
