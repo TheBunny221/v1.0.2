@@ -18,6 +18,13 @@ import {
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
+import { toast } from "../components/ui/use-toast";
+import {
+  useGetMaintenanceTasksQuery,
+  useGetMaintenanceStatsQuery,
+  useUpdateTaskStatusMutation,
+  type MaintenanceTask,
+} from "../store/api/maintenanceApi";
 import {
   Wrench,
   Calendar,
@@ -33,6 +40,7 @@ import {
   ListTodo,
   AlertCircle,
   Upload,
+  Loader2,
 } from "lucide-react";
 
 const MaintenanceTasks: React.FC = () => {
@@ -41,147 +49,127 @@ const MaintenanceTasks: React.FC = () => {
 
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [isMarkResolvedOpen, setIsMarkResolvedOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [resolveComment, setResolveComment] = useState("");
   const [resolvePhoto, setResolvePhoto] = useState<File | null>(null);
 
-  // Sample task data - in real app this would come from API
-  const [tasks, setTasks] = useState([
+  // API hooks
+  const {
+    data: tasksResponse,
+    isLoading: tasksLoading,
+    error: tasksError,
+    refetch: refetchTasks,
+  } = useGetMaintenanceTasksQuery(
     {
-      id: "1",
-      title: "Water Pipeline Repair",
-      location: "MG Road, Near Metro Station",
-      address: "MG Road, Near Metro Station, Kochi, Kerala 682001",
-      priority: "HIGH",
-      status: "ASSIGNED",
-      estimatedTime: "4 hours",
-      dueDate: "2024-01-15",
-      isOverdue: false,
-      description:
-        "Main water pipeline burst, affecting supply to 200+ households",
-      assignedAt: "2024-01-14T10:00:00Z",
-      photo: "/api/attachments/complaint-1-photo.jpg",
+      status: activeFilter === "all" ? undefined : (activeFilter as any),
+      page: 1,
+      limit: 50,
     },
     {
-      id: "2",
-      title: "Street Light Installation",
-      location: "Marine Drive, Walkway Section",
-      address: "Marine Drive, Walkway Section, Fort Kochi, Kerala 682001",
-      priority: "MEDIUM",
-      status: "IN_PROGRESS",
-      estimatedTime: "2 hours",
-      dueDate: "2024-01-16",
-      isOverdue: false,
-      description: "Install 5 new LED street lights along the walkway",
-      assignedAt: "2024-01-13T09:00:00Z",
-      photo: "/api/attachments/complaint-2-photo.jpg",
-    },
-    {
-      id: "3",
-      title: "Road Pothole Filling",
-      location: "Broadway Junction",
-      address: "Broadway Junction, Ernakulam, Kerala 682011",
-      priority: "LOW",
-      status: "RESOLVED",
-      estimatedTime: "3 hours",
-      dueDate: "2024-01-10",
-      isOverdue: false,
-      description: "Fill multiple potholes affecting traffic flow",
-      assignedAt: "2024-01-08T08:00:00Z",
-      resolvedAt: "2024-01-10T15:30:00Z",
-      photo: "/api/attachments/complaint-3-photo.jpg",
-    },
-    {
-      id: "4",
-      title: "Garbage Collection Issue",
-      location: "Kadavanthra Bus Stop",
-      address: "Kadavanthra Bus Stop, Kochi, Kerala 682020",
-      priority: "HIGH",
-      status: "ASSIGNED",
-      estimatedTime: "1 hour",
-      dueDate: "2024-01-12",
-      isOverdue: true,
-      description: "Garbage collection missed for 3 days",
-      assignedAt: "2024-01-10T07:00:00Z",
-      photo: "/api/attachments/complaint-4-photo.jpg",
-    },
-    {
-      id: "5",
-      title: "Sewer Blockage Clearance",
-      location: "Panampilly Nagar",
-      address: "Panampilly Nagar, Kochi, Kerala 682036",
-      priority: "CRITICAL",
-      status: "REOPENED",
-      estimatedTime: "6 hours",
-      dueDate: "2024-01-17",
-      isOverdue: false,
-      description: "Sewer blockage causing overflow in residential area",
-      assignedAt: "2024-01-15T11:00:00Z",
-      photo: "/api/attachments/complaint-5-photo.jpg",
-    },
-  ]);
-
-  // Calculate task counts
-  const taskCounts = {
-    total: tasks.length,
-    pending: tasks.filter((t) => t.status === "ASSIGNED").length,
-    overdue: tasks.filter((t) => t.isOverdue).length,
-    resolved: tasks.filter((t) => t.status === "RESOLVED").length,
-    reopened: tasks.filter((t) => t.status === "REOPENED").length,
-    inProgress: tasks.filter((t) => t.status === "IN_PROGRESS").length,
-  };
-
-  // Filter tasks based on active filter
-  const filteredTasks = tasks.filter((task) => {
-    switch (activeFilter) {
-      case "pending":
-        return task.status === "ASSIGNED";
-      case "overdue":
-        return task.isOverdue;
-      case "resolved":
-        return task.status === "RESOLVED";
-      case "reopened":
-        return task.status === "REOPENED";
-      case "inProgress":
-        return task.status === "IN_PROGRESS";
-      default:
-        return true;
+      refetchOnMountOrArgChange: true,
     }
+  );
+
+  const {
+    data: statsResponse,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useGetMaintenanceStatsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
   });
 
-  // Handle task status updates
-  const handleStartWork = (taskId: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: "IN_PROGRESS" } : task,
-      ),
-    );
+  const [updateTaskStatus, { isLoading: isUpdating }] = useUpdateTaskStatusMutation();
+
+  // Get data from API responses
+  const tasks = tasksResponse?.data?.tasks || [];
+  const taskStats = statsResponse?.data || {
+    total: 0,
+    pending: 0,
+    inProgress: 0,
+    resolved: 0,
+    reopened: 0,
+    overdue: 0,
+    critical: 0,
   };
 
-  const handleMarkResolved = (task: any) => {
+  // Use API statistics
+  const taskCounts = {
+    total: taskStats.total,
+    pending: taskStats.pending,
+    overdue: taskStats.overdue,
+    resolved: taskStats.resolved,
+    reopened: taskStats.reopened,
+    inProgress: taskStats.inProgress,
+  };
+
+  // Tasks are already filtered by the API based on activeFilter
+  const filteredTasks = tasks;
+
+  // Handle task status updates
+  const handleStartWork = async (taskId: string) => {
+    try {
+      await updateTaskStatus({
+        id: taskId,
+        status: "IN_PROGRESS",
+        comment: "Started working on the task",
+      }).unwrap();
+
+      toast({
+        title: "Task Updated",
+        description: "Task status updated to In Progress",
+        variant: "default",
+      });
+
+      refetchTasks();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to update task status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMarkResolved = (task: MaintenanceTask) => {
     setSelectedTask(task);
     setIsMarkResolvedOpen(true);
   };
 
-  const submitMarkResolved = () => {
-    if (selectedTask) {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === selectedTask.id
-            ? {
-                ...task,
-                status: "RESOLVED",
-                resolvedAt: new Date().toISOString(),
-                resolveComment,
-                resolvePhoto: resolvePhoto?.name,
-              }
-            : task,
-        ),
-      );
+  const submitMarkResolved = async () => {
+    if (!selectedTask || !resolveComment.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide completion notes",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await updateTaskStatus({
+        id: selectedTask.id,
+        status: "RESOLVED",
+        comment: resolveComment,
+        resolvePhoto: resolvePhoto?.name,
+      }).unwrap();
+
+      toast({
+        title: "Task Completed",
+        description: "Task has been marked as resolved",
+        variant: "default",
+      });
+
       setIsMarkResolvedOpen(false);
       setResolveComment("");
       setResolvePhoto(null);
       setSelectedTask(null);
+      refetchTasks();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to mark task as resolved",
+        variant: "destructive",
+      });
     }
   };
 
@@ -198,6 +186,8 @@ const MaintenanceTasks: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
+      case "CRITICAL":
+        return "bg-red-500 text-white";
       case "HIGH":
         return "bg-red-100 text-red-800";
       case "MEDIUM":
@@ -239,6 +229,37 @@ const MaintenanceTasks: React.FC = () => {
     }
   };
 
+  // Handle filter changes
+  const handleFilterChange = (newFilter: string) => {
+    setActiveFilter(newFilter);
+  };
+
+  // Show loading state
+  if (tasksLoading || statsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading maintenance tasks...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (tasksError || statsError) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Error Loading Tasks</h2>
+        <p className="text-gray-600 mb-4">
+          {(tasksError as any)?.data?.message || "Failed to load maintenance tasks"}
+        </p>
+        <Button onClick={() => refetchTasks()}>Try Again</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -255,7 +276,7 @@ const MaintenanceTasks: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("all")}
+          onClick={() => handleFilterChange("all")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -272,7 +293,7 @@ const MaintenanceTasks: React.FC = () => {
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "pending" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("pending")}
+          onClick={() => handleFilterChange("pending")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -291,7 +312,7 @@ const MaintenanceTasks: React.FC = () => {
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "overdue" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("overdue")}
+          onClick={() => handleFilterChange("overdue")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -310,7 +331,7 @@ const MaintenanceTasks: React.FC = () => {
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("resolved")}
+          onClick={() => handleFilterChange("resolved")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -329,7 +350,7 @@ const MaintenanceTasks: React.FC = () => {
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "reopened" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("reopened")}
+          onClick={() => handleFilterChange("reopened")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -509,10 +530,14 @@ const MaintenanceTasks: React.FC = () => {
                 </Button>
                 <Button
                   onClick={submitMarkResolved}
-                  disabled={!resolveComment.trim()}
+                  disabled={!resolveComment.trim() || isUpdating}
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Mark Resolved
+                  {isUpdating ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                  )}
+                  {isUpdating ? "Updating..." : "Mark Resolved"}
                 </Button>
               </div>
             </div>
