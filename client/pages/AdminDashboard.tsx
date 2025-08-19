@@ -265,7 +265,7 @@ const AdminDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {metrics.avgResolutionTime}d
+              {(metrics?.avgResolutionTime || 0).toFixed(1)}d
             </div>
             <p className="text-xs text-muted-foreground">Target: 3 days</p>
           </CardContent>
