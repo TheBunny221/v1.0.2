@@ -60,6 +60,7 @@ import {
   Users,
   Clock,
   Mail,
+  Phone,
   Database,
   Plus,
   Edit,
