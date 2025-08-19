@@ -598,3 +598,56 @@ export const updateWard = asyncHandler(async (req, res) => {
     data: { ward },
   });
 });
+
+// @desc    Delete ward (Admin only)
+// @route   DELETE /api/users/wards/:id
+// @access  Private (Admin)
+export const deleteWard = asyncHandler(async (req, res) => {
+  const wardId = req.params.id;
+
+  // Check if ward exists
+  const ward = await prisma.ward.findUnique({
+    where: { id: wardId },
+  });
+
+  if (!ward) {
+    return res.status(404).json({
+      success: false,
+      message: "Ward not found",
+    });
+  }
+
+  // Check if ward has any users assigned to it
+  const usersInWard = await prisma.user.count({
+    where: { wardId: wardId },
+  });
+
+  if (usersInWard > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot delete ward. There are users assigned to this ward.",
+    });
+  }
+
+  // Check if ward has any complaints
+  const complaintsInWard = await prisma.complaint.count({
+    where: { wardId: wardId },
+  });
+
+  if (complaintsInWard > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot delete ward. There are complaints assigned to this ward.",
+    });
+  }
+
+  // Delete the ward
+  await prisma.ward.delete({
+    where: { id: wardId },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Ward deleted successfully",
+  });
+});
