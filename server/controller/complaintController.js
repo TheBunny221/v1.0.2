@@ -698,6 +698,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     ),
   };
 
+  // Update priority if provided
+  if (priority && priority !== complaint.priority) {
+    updateData.priority = priority;
+  }
+
   // Set timestamps based on status
   if (status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
     updateData.assignedOn = new Date();
