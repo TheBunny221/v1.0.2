@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
@@ -48,6 +48,7 @@ import {
 
 const Index: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { isLoading } = useAppSelector((state) => state.complaints);
   const { translations, currentLanguage } = useAppSelector(
     (state) => state.language,
@@ -55,6 +56,13 @@ const Index: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName } = useSystemConfig();
   const { complaintTypeOptions } = useComplaintTypes();
+
+  // Redirect Ward Officers to complaints page
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "WARD_OFFICER") {
+      navigate("/complaints", { replace: true });
+    }
+  }, [isAuthenticated, user?.role, navigate]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -730,7 +738,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "वास्���विक समय में तुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
+                        ? "वास्���विक समय में ��ुरंत अपडेट के साथ शिकायत की प्रगति की निगरानी करें"
                         : currentLanguage === "ml"
                           ? "തൽക്ഷണ അപ്‌ഡേറ്റുകൾക്കൊപ്പം പരാതി പുരോഗതി തത്സമയം നിരീക്ഷിക്കുക"
                           : "Monitor complaint progress in real time with instant updates"}
@@ -767,7 +775,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
                         : currentLanguage === "ml"
-                          ? "രജിസ്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
+                          ? "രജിസ്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭ��ക്കുക"
                           : "Get notified at each stage — from registration to resolution"}
                     </div>
                   </div>
