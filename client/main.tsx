@@ -4,6 +4,15 @@ import App from "./App";
 import "./global.css";
 import { fixResizeObserverError } from "./utils/resizeObserverFix";
 
+// Preserve original fetch BEFORE any third-party libraries can override it
+// This is critical for FullStory and other analytics libraries
+if (typeof globalThis !== 'undefined' && globalThis.fetch && !(globalThis as any).__originalFetch) {
+  (globalThis as any).__originalFetch = globalThis.fetch.bind(globalThis);
+}
+if (typeof window !== 'undefined' && window.fetch && !(globalThis as any).__originalFetch) {
+  (globalThis as any).__originalFetch = window.fetch.bind(window);
+}
+
 // Initialize comprehensive ResizeObserver error fix
 fixResizeObserverError();
 
