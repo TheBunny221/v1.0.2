@@ -416,7 +416,7 @@ const AdminDashboard: React.FC = () => {
                 <CardTitle>Ward Performance Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                {wardPerformance.length > 0 ? (
+                {wardPerformance && wardPerformance.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={wardPerformance}>
                       <CartesianGrid strokeDasharray="3 3" />
