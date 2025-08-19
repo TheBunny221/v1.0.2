@@ -78,8 +78,18 @@ const ComplaintsList: React.FC = () => {
   const queryParams = useMemo(() => {
     const params: any = { page: 1, limit: 100 };
     if (statusFilter !== "all") params.status = statusFilter.toUpperCase();
-    if (priorityFilter !== "all")
-      params.priority = priorityFilter.toUpperCase();
+
+    // Handle priority filter including URL-based comma-separated values
+    if (priorityFilter !== "all") {
+      const urlPriority = searchParams.get("priority");
+      if (urlPriority && urlPriority.includes(",")) {
+        // For comma-separated values from URL, send as array
+        params.priority = urlPriority.split(",").map(p => p.trim().toUpperCase());
+      } else {
+        params.priority = priorityFilter.toUpperCase();
+      }
+    }
+
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
     // For MAINTENANCE_TEAM users, show only their own complaints
