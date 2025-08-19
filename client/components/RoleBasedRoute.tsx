@@ -107,34 +107,26 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
     );
   }
 
-  // Handle unauthorized access with useEffect to avoid setState during render
-  const [shouldShowUnauthorizedToast, setShouldShowUnauthorizedToast] = React.useState(false);
-  const [shouldShowPermissionToast, setShouldShowPermissionToast] = React.useState(false);
-  const [shouldRedirectUnauthorized, setShouldRedirectUnauthorized] = React.useState(false);
-  const [shouldRedirectPermission, setShouldRedirectPermission] = React.useState(false);
-
-  // Show toast notifications in useEffect to avoid render-time updates
+  // Handle unauthorized access notifications in useEffect to avoid setState during render
   useEffect(() => {
-    if (shouldShowUnauthorizedToast) {
+    if (user && !allowedRoles.includes(user.role as UserRole)) {
       toast({
         title: translations?.messages?.unauthorizedAccess || "Access Denied",
         description: `You don't have permission to access this page. Required roles: ${allowedRoles.join(", ")}`,
         variant: "destructive",
       });
-      setShouldShowUnauthorizedToast(false);
     }
-  }, [shouldShowUnauthorizedToast, translations, allowedRoles]);
+  }, [user?.role, allowedRoles, translations]);
 
   useEffect(() => {
-    if (shouldShowPermissionToast) {
+    if (user && checkPermissions && !checkPermissions(user)) {
       toast({
         title: translations?.messages?.unauthorizedAccess || "Access Denied",
         description: "You don't have the required permissions for this action.",
         variant: "destructive",
       });
-      setShouldShowPermissionToast(false);
     }
-  }, [shouldShowPermissionToast, translations]);
+  }, [user, checkPermissions, translations]);
 
   // Handle role-based access control
   if (user && !allowedRoles.includes(user.role as UserRole)) {
@@ -143,28 +135,12 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
       onUnauthorized();
     }
 
-    // Trigger toast in next render cycle
-    if (!shouldShowUnauthorizedToast && !shouldRedirectUnauthorized) {
-      setShouldShowUnauthorizedToast(true);
-      setShouldRedirectUnauthorized(true);
-    }
-
-    if (shouldRedirectUnauthorized) {
-      return <Navigate to={unauthorizedPath} replace />;
-    }
+    return <Navigate to={unauthorizedPath} replace />;
   }
 
   // Handle custom permission checks
   if (user && checkPermissions && !checkPermissions(user)) {
-    // Trigger toast in next render cycle
-    if (!shouldShowPermissionToast && !shouldRedirectPermission) {
-      setShouldShowPermissionToast(true);
-      setShouldRedirectPermission(true);
-    }
-
-    if (shouldRedirectPermission) {
-      return <Navigate to={unauthorizedPath} replace />;
-    }
+    return <Navigate to={unauthorizedPath} replace />;
   }
 
   // All checks passed, render children
