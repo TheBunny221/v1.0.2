@@ -217,6 +217,21 @@ export function createApp() {
     app.use("/api/test", testRoutes);
   }
 
+  // Serve static files from Vite dev server via proxy in development
+  if (process.env.NODE_ENV === "development") {
+    // Proxy frontend requests to Vite dev server
+    app.get("*", (req, res, next) => {
+      // Skip API routes
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
+
+      // Redirect all non-API routes to Vite dev server
+      const viteUrl = `http://localhost:3000${req.path}${req.search || ""}`;
+      res.redirect(302, viteUrl);
+    });
+  }
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.status(200).json({
