@@ -675,7 +675,7 @@ const UnifiedReports: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span>User Satisfaction</span>
-                      <Badge variant="outline">{analyticsData.performance.userSatisfaction}/5</Badge>
+                      <Badge variant="outline">{analyticsData.performance.userSatisfaction.toFixed(2)}/5</Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Escalation Rate</span>
