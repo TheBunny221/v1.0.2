@@ -267,7 +267,7 @@ const AdminConfig: React.FC = () => {
       // Load wards (public endpoint)
       let wardsResponse;
       try {
-        wardsResponse = await apiCall("/wards");
+        wardsResponse = await apiCall("/guest/wards");
         setWards(wardsResponse.data || []);
       } catch (error: any) {
         console.error("Failed to load wards:", error);
