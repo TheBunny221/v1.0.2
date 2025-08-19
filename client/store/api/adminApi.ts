@@ -194,7 +194,7 @@ export interface SystemHealthResponse {
     memory: {
       used: string;
       total: string;
-      percentage: number;
+      percentage: string;
     };
     errors: {
       last24h: number;
