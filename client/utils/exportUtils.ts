@@ -381,6 +381,17 @@ export const exportToExcel = (
 ) => {
   const workbook = XLSX.utils.book_new();
 
+  // Calculate actual metrics from complaint data for consistency
+  const actualTotal = data.complaints.length;
+  const actualResolved = data.complaints.filter(c => c.status === "resolved").length;
+  const actualPending = data.complaints.filter(c => ["registered", "assigned", "in_progress"].includes(c.status)).length;
+  const actualOverdue = data.complaints.filter(c => {
+    if (c.deadline && ["registered", "assigned", "in_progress"].includes(c.status)) {
+      return new Date(c.deadline) < new Date();
+    }
+    return false;
+  }).length;
+
   // Summary Sheet with enhanced formatting
   const summaryData = [
     [options.systemConfig.appName],
@@ -393,17 +404,17 @@ export const exportToExcel = (
     [""],
     ["APPLIED FILTERS"],
     ["Date Range:", data.filters.from && data.filters.to ? `${data.filters.from} to ${data.filters.to}` : "All dates"],
-    ["Ward:", data.filters.ward || "All wards"],
-    ["Type:", data.filters.type || "All types"],
-    ["Status:", data.filters.status || "All statuses"],
-    ["Priority:", data.filters.priority || "All priorities"],
+    ["Ward:", (data.filters.ward || "All wards").replace(/_/g, ' ')],
+    ["Type:", (data.filters.type || "All types").replace(/_/g, ' ')],
+    ["Status:", (data.filters.status || "All statuses").replace(/_/g, ' ')],
+    ["Priority:", (data.filters.priority || "All priorities").replace(/_/g, ' ')],
     [""],
     ["EXECUTIVE SUMMARY"],
-    ["Total Complaints:", data.summary.total],
-    ["Resolved Complaints:", data.summary.resolved],
-    ["Pending Complaints:", data.summary.pending],
-    ["Overdue Complaints:", data.summary.overdue || 0],
-    ["Resolution Rate:", `${((data.summary.resolved / data.summary.total) * 100).toFixed(2)}%`],
+    ["Total Complaints:", actualTotal],
+    ["Resolved Complaints:", actualResolved],
+    ["Pending Complaints:", actualPending],
+    ["Overdue Complaints:", actualOverdue],
+    ["Resolution Rate:", actualTotal > 0 ? `${((actualResolved / actualTotal) * 100).toFixed(2)}%` : "0%"],
     [""],
     ["CATEGORY BREAKDOWN"]
   ];
