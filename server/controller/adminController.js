@@ -835,6 +835,23 @@ function generateEmptyTrends() {
   return trends;
 }
 
+// Helper function to generate default complaint types when no data exists
+function generateEmptyComplaintTypes() {
+  const types = [
+    { type: "WATER_SUPPLY", name: "Water Supply" },
+    { type: "ELECTRICITY", name: "Electricity" },
+    { type: "ROAD_REPAIR", name: "Road Repair" },
+    { type: "WASTE_MANAGEMENT", name: "Waste Management" },
+    { type: "STREET_LIGHTING", name: "Street Lighting" },
+  ];
+
+  return types.map(t => ({
+    name: t.name,
+    value: 0,
+    color: getTypeColor(t.type),
+  }));
+}
+
 // @desc    Get user activity data
 // @route   GET /api/admin/user-activity
 // @access  Private (Admin only)
