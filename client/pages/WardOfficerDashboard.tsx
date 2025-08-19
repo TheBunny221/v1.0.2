@@ -1,10 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import { useAppSelector } from "../store/hooks";
-import {
-  useAssignComplaintMutation
-} from "../store/api/complaintsApi";
-// import { useGetAllUsersQuery } from "../store/api/adminApi";
 import {
   Card,
   CardContent,
