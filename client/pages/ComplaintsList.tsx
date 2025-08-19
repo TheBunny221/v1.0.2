@@ -50,6 +50,8 @@ const ComplaintsList: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
 
   // Data management
   const { cacheComplaintsList } = useDataManager();
