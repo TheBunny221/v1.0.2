@@ -14,6 +14,7 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   className,
 }) => {
   const { isSidebarCollapsed } = useAppSelector((state) => state.ui);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -21,10 +22,12 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
       <Navigation />
 
       <div className="flex pt-16">
-        {/* Sidebar Navigation - Hidden on mobile, always visible on desktop */}
-        <div className="hidden md:block sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
-          <SimplifiedSidebarNav />
-        </div>
+        {/* Sidebar Navigation - Only visible when authenticated */}
+        {isAuthenticated && (
+          <div className="hidden md:block sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
+            <SimplifiedSidebarNav />
+          </div>
+        )}
 
         {/* Main Content - Responsive margins */}
         <main
