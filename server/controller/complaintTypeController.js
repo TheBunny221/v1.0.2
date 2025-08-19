@@ -172,6 +172,38 @@ export const updateComplaintType = asyncHandler(async (req, res) => {
   console.log(`Updating complaint type ${id} with body:`, req.body);
   const key = `COMPLAINT_TYPE_${id}`;
 
+  // Validate fields if provided
+  if (name !== undefined && (typeof name !== 'string' || name.trim().length === 0)) {
+    return res.status(400).json({
+      success: false,
+      message: "Name must be a non-empty string",
+    });
+  }
+
+  if (description !== undefined && (typeof description !== 'string' || description.trim().length === 0)) {
+    return res.status(400).json({
+      success: false,
+      message: "Description must be a non-empty string",
+    });
+  }
+
+  // Validate priority
+  const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  if (priority && !validPriorities.includes(priority)) {
+    return res.status(400).json({
+      success: false,
+      message: `Priority must be one of: ${validPriorities.join(', ')}`,
+    });
+  }
+
+  // Validate slaHours
+  if (slaHours !== undefined && (typeof slaHours !== 'number' || slaHours <= 0)) {
+    return res.status(400).json({
+      success: false,
+      message: "SLA hours must be a positive number",
+    });
+  }
+
   const existingType = await prisma.systemConfig.findUnique({
     where: { key },
   });
