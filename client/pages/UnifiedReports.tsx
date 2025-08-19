@@ -619,7 +619,7 @@ const UnifiedReports: React.FC = () => {
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
-                        data={analyticsData.categories}
+                        data={processedChartData?.categoriesWithColors || []}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -628,8 +628,8 @@ const UnifiedReports: React.FC = () => {
                         fill="#8884d8"
                         dataKey="count"
                       >
-                        {analyticsData.categories.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        {(processedChartData?.categoriesWithColors || []).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
                       <Tooltip />
