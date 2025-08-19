@@ -479,21 +479,21 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
-                  {(metrics.avgResolutionTime * 24).toFixed(1)}h
+                  {((metrics?.avgResolutionTime || 0) * 24).toFixed(1)}h
                 </div>
                 <p className="text-sm text-gray-600">Average response time</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Target: 24h</span>
                     <span>
-                      {metrics.avgResolutionTime < 1
+                      {(metrics?.avgResolutionTime || 0) < 1
                         ? "On target"
                         : "Needs improvement"}
                     </span>
                   </div>
                   <Progress
                     value={Math.min(
-                      (1 / Math.max(metrics.avgResolutionTime, 0.1)) * 100,
+                      (1 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) * 100,
                       100,
                     )}
                     className="h-2"
