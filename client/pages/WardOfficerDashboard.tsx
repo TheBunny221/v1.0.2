@@ -634,10 +634,10 @@ const WardOfficerDashboard: React.FC = () => {
                 </Button>
                 <Button
                   onClick={submitAssignment}
-                  disabled={!assignmentData.assignedToId}
+                  disabled={!assignmentData.assignedToId || isAssigning}
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
-                  {selectedComplaint?.assignedToId ? "Reassign" : "Assign"}
+                  {isAssigning ? "Assigning..." : (selectedComplaint?.assignedToId ? "Reassign" : "Assign")}
                 </Button>
               </div>
             </div>
