@@ -18,6 +18,13 @@ import {
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
+import { toast } from "../components/ui/use-toast";
+import {
+  useGetMaintenanceTasksQuery,
+  useGetMaintenanceStatsQuery,
+  useUpdateTaskStatusMutation,
+  type MaintenanceTask,
+} from "../store/api/maintenanceApi";
 import {
   Wrench,
   Calendar,
@@ -33,6 +40,7 @@ import {
   ListTodo,
   AlertCircle,
   Upload,
+  Loader2,
 } from "lucide-react";
 
 const MaintenanceTasks: React.FC = () => {
