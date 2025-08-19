@@ -639,7 +639,7 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions */}
+      {/* Quick Actions 
       <Card>
         <CardHeader>
           <CardTitle>Quick Administrative Actions</CardTitle>
@@ -673,6 +673,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      */}
     </div>
   );
 };
