@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from "../store/hooks";
-import { useUpdateComplaintMutation } from "../store/api/complaintsApi";
-import { useGetAllUsersQuery } from "../store/api/adminApi";
+import { useUpdateComplaintMutation, useGetWardUsersQuery } from "../store/api/complaintsApi";
 import {
   Dialog,
   DialogContent,
