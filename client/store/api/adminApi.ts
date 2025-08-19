@@ -440,4 +440,6 @@ export const useAdminApi = {
   useGetDashboardAnalyticsQuery,
   useGetRecentActivityQuery,
   useGetDashboardStatsQuery,
+  useGetUserActivityQuery,
+  useGetSystemHealthQuery,
 };
