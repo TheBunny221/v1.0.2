@@ -564,13 +564,14 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     success: true,
     message: "Dashboard analytics retrieved successfully",
     data: {
-      complaintTrends: complaintTrends.map((trend) => ({
+      complaintTrends: complaintTrends.length > 0 ? complaintTrends.map((trend) => ({
         month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
           month: "short",
+          year: "numeric",
         }),
         complaints: Number(trend.complaints),
         resolved: Number(trend.resolved),
-      })),
+      })) : generateEmptyTrends(),
       complaintsByType: complaintsByType.map((item) => ({
         name: item.type
           .replace("_", " ")
