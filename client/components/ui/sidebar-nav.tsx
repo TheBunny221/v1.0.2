@@ -126,12 +126,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       roles: ["ADMINISTRATOR"],
     },
     {
-      label: translations?.dashboard?.analytics || "Analytics",
-      path: "/admin/analytics",
-      icon: <TrendingUp className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR"],
-    },
-    {
       label: translations?.nav?.settings || "Settings",
       path: "/settings",
       icon: <Settings className="h-4 w-4" />,
