@@ -61,8 +61,8 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
     
     // Calculate overdue tasks
     const overdueTasks = assignedComplaints.filter(c => {
-      if (c.slaDeadline && ["assigned", "in_progress"].includes(c.status)) {
-        return new Date(c.slaDeadline) < new Date();
+      if (c.deadline && ["assigned", "in_progress"].includes(c.status)) {
+        return new Date(c.deadline) < new Date();
       }
       return false;
     }).length;
