@@ -464,7 +464,7 @@ const UnifiedComplaintForm: React.FC = () => {
           isAnonymous: false,
         };
 
-        const result = await dispatch(createComplaint(complaintData)).unwrap();
+        const result = await createComplaintMutation(complaintData).unwrap();
 
         toast({
           title: "Complaint Submitted Successfully!",
