@@ -566,7 +566,7 @@ const UnifiedReports: React.FC = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analyticsData.performance.userSatisfaction}/5</div>
+              <div className="text-2xl font-bold">{analyticsData.performance.userSatisfaction.toFixed(2)}/5</div>
               <div className="flex items-center text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +0.2 from last month
