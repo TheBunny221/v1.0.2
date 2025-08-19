@@ -740,15 +740,17 @@ const UnifiedReports: React.FC = () => {
                   <CardTitle>Resolution Time Distribution</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={analyticsData.categories}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="avgTime" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <div id="resolution-time-chart">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={analyticsData.categories}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="avgTime" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </div>
