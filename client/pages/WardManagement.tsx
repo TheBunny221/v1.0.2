@@ -44,6 +44,10 @@ const WardManagement: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // State for Update Complaint Modal
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
+
   // Fetch complaints for the ward officer
   const {
     data: complaintsResponse,
