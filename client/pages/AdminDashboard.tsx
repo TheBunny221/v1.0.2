@@ -111,10 +111,10 @@ const AdminDashboard: React.FC = () => {
     systemHealthLoading;
 
   // Use real data from APIs with fallbacks
-  const complaintTrends = analytics?.data?.complaintTrends || [];
-  const complaintsByType = analytics?.data?.complaintsByType || [];
-  const wardPerformance = analytics?.data?.wardPerformance || [];
-  const metrics = analytics?.data?.metrics || {
+  const complaintTrends = analytics?.complaintTrends || [];
+  const complaintsByType = analytics?.complaintsByType || [];
+  const wardPerformance = analytics?.wardPerformance || [];
+  const metrics = analytics?.metrics || {
     avgResolutionTime: 0,
     slaCompliance: 0,
     citizenSatisfaction: 0,
