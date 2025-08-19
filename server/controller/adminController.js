@@ -476,7 +476,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
       COUNT(*) as complaints,
       COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
     FROM complaints
-    WHERE createdAt >= datetime('now', '-6 months')
+    WHERE createdAt >= datetime('now', '-180 days')
     GROUP BY strftime('%Y-%m', createdAt)
     ORDER BY month ASC
   `;
