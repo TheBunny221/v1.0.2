@@ -236,7 +236,7 @@ const WardOfficerDashboard: React.FC = () => {
       setSelectedComplaint(null);
 
       // Refresh complaints data
-      dispatch(fetchComplaints());
+      refetchComplaints();
     } catch (error: any) {
       toast({
         title: "Error",
