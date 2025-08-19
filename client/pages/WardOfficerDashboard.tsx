@@ -503,8 +503,8 @@ const WardOfficerDashboard: React.FC = () => {
                         <TableCell>
                           {assignedMember ? (
                             <div className="text-sm">
-                              <div className="font-medium">{assignedMember.name}</div>
-                              <div className="text-gray-500">{assignedMember.department}</div>
+                              <div className="font-medium">{assignedMember.fullName}</div>
+                              <div className="text-gray-500">{assignedMember.department || 'Maintenance'}</div>
                             </div>
                           ) : (
                             <span className="text-gray-400 text-sm">Unassigned</span>
