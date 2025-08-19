@@ -292,6 +292,26 @@ const UnifiedReports: React.FC = () => {
     fetchAnalyticsData();
   };
 
+  // Memoized chart data processing for better performance
+  const processedChartData = useMemo(() => {
+    if (!analyticsData) return null;
+
+    return {
+      trendsData: analyticsData.trends.map(trend => ({
+        ...trend,
+        date: new Date(trend.date).toLocaleDateString(),
+      })),
+      categoriesWithColors: analyticsData.categories.map((category, index) => ({
+        ...category,
+        color: COLORS[index % COLORS.length],
+      })),
+      wardsData: analyticsData.wards.map(ward => ({
+        ...ward,
+        efficiency: ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
+      })),
+    };
+  }, [analyticsData]);
+
   // Chart colors
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
 
