@@ -27,6 +27,7 @@ import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
 import captchaRoutes from "./routes/captchaRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
+import guestOtpRoutes from "./routes/guestOtpRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
