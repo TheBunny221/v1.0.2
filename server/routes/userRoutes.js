@@ -11,6 +11,9 @@ import {
   createWard,
   updateWard,
   deleteWard,
+  createSubZone,
+  updateSubZone,
+  deleteSubZone,
 } from "../controller/userController.js";
 import { protect, authorize } from "../middleware/auth.js";
 import {
