@@ -179,7 +179,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      transformResponse: transformResponse<AdminUser>,
+
       invalidatesTags: ["User"],
     }),
 
@@ -193,7 +193,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<AdminUser>,
+
       invalidatesTags: ["User"],
     }),
 
@@ -203,7 +203,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}`,
         method: "DELETE",
       }),
-      transformResponse: transformResponse<null>,
+
       invalidatesTags: ["User"],
     }),
 
@@ -213,7 +213,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}/activate`,
         method: "PUT",
       }),
-      transformResponse: transformResponse<AdminUser>,
+
       invalidatesTags: ["User"],
     }),
 
@@ -223,7 +223,7 @@ export const adminApi = baseApi.injectEndpoints({
         url: `/admin/users/${id}/deactivate`,
         method: "PUT",
       }),
-      transformResponse: transformResponse<AdminUser>,
+
       invalidatesTags: ["User"],
     }),
 
@@ -237,21 +237,21 @@ export const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: transformResponse<{ affectedCount: number }>,
+
       invalidatesTags: ["User"],
     }),
 
     // Get user statistics
     getUserStats: builder.query<ApiResponse<UserStatsResponse>, void>({
       query: () => "/admin/stats/users",
-      transformResponse: transformResponse<UserStatsResponse>,
+
       providesTags: ["Analytics"],
     }),
 
     // Get system statistics
     getSystemStats: builder.query<ApiResponse<SystemStatsResponse>, void>({
       query: () => "/admin/stats/system",
-      transformResponse: transformResponse<SystemStatsResponse>,
+
       providesTags: ["Analytics"],
     }),
 
@@ -273,7 +273,7 @@ export const adminApi = baseApi.injectEndpoints({
 
         return `/admin/analytics?${params.toString()}`;
       },
-      transformResponse: transformResponse<AnalyticsResponse>,
+
       providesTags: ["Analytics"],
     }),
 
@@ -284,7 +284,7 @@ export const adminApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: transformResponse<AdminUser>,
+
       invalidatesTags: ["User"],
     }),
 
@@ -294,7 +294,7 @@ export const adminApi = baseApi.injectEndpoints({
       void
     >({
       query: () => "/admin/dashboard/analytics",
-      transformResponse: transformResponse<DashboardAnalyticsResponse>,
+
       providesTags: ["Analytics"],
     }),
 
@@ -304,7 +304,7 @@ export const adminApi = baseApi.injectEndpoints({
       { limit?: number }
     >({
       query: ({ limit = 5 }) => `/admin/dashboard/activity?limit=${limit}`,
-      transformResponse: transformResponse<RecentActivity[]>,
+
       providesTags: ["Analytics"],
     }),
 
@@ -312,7 +312,7 @@ export const adminApi = baseApi.injectEndpoints({
     getDashboardStats: builder.query<ApiResponse<DashboardStatsResponse>, void>(
       {
         query: () => "/admin/dashboard/stats",
-        transformResponse: transformResponse<DashboardStatsResponse>,
+
         providesTags: ["Analytics"],
       },
     ),
