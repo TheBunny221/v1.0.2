@@ -82,7 +82,12 @@ const WardOfficerDashboard: React.FC = () => {
     refetch: refetchComplaints
   } = useGetComplaintsQuery({});
 
-  const complaints = complaintsResponse?.data || [];
+  // Ensure complaints is always an array
+  const complaints = Array.isArray(complaintsResponse?.data)
+    ? complaintsResponse.data
+    : Array.isArray(complaintsResponse?.data?.complaints)
+    ? complaintsResponse.data.complaints
+    : [];
 
   // State for filtering and assignment
   const [activeFilter, setActiveFilter] = useState<string>("all");
