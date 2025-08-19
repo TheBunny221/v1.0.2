@@ -235,25 +235,39 @@ export const createComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Send notification to ward officer if available
-  const wardOfficers = await prisma.user.findMany({
-    where: {
-      role: "WARD_OFFICER",
-      wardId: wardId,
-      isActive: true,
-    },
-  });
-
-  for (const officer of wardOfficers) {
+  // Send notifications
+  if (assignedToId) {
+    // Send notification to the assigned ward officer
     await prisma.notification.create({
       data: {
-        userId: officer.id,
+        userId: assignedToId,
         complaintId: complaint.id,
         type: "IN_APP",
-        title: "New Complaint Registered",
-        message: `A new ${type} complaint has been registered in your ward.`,
+        title: "New Complaint Assigned",
+        message: `A new ${type} complaint has been auto-assigned to you in ${complaint.ward?.name || 'your ward'}.`,
       },
     });
+  } else {
+    // Send notification to all ward officers if not auto-assigned
+    const wardOfficers = await prisma.user.findMany({
+      where: {
+        role: "WARD_OFFICER",
+        wardId: wardId,
+        isActive: true,
+      },
+    });
+
+    for (const officer of wardOfficers) {
+      await prisma.notification.create({
+        data: {
+          userId: officer.id,
+          complaintId: complaint.id,
+          type: "IN_APP",
+          title: "New Complaint Registered",
+          message: `A new ${type} complaint has been registered in your ward.`,
+        },
+      });
+    }
   }
 
   res.status(201).json({
