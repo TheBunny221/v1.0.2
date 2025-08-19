@@ -10,6 +10,7 @@ import {
   addComplaintFeedback,
   reopenComplaint,
   getComplaintStats,
+  getWardUsers,
 } from "../controller/complaintController.js";
 
 const router = express.Router();
