@@ -38,10 +38,24 @@ import {
 } from "lucide-react";
 
 const MaintenanceDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { complaints, isLoading } = useAppSelector((state) => state.complaints);
   const { translations } = useAppSelector((state) => state.language);
+
+  // Fetch complaints assigned to this maintenance team member
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+    refetch: refetchComplaints,
+  } = useGetComplaintsQuery({
+    assignedTo: user?.id,
+    page: 1,
+    limit: 100,
+  });
+
+  const complaints = complaintsResponse?.data || [];
+
+  const [updateComplaint] = useUpdateComplaintMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalTasks: 0,
