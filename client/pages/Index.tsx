@@ -17,6 +17,7 @@ import {
   Clock,
   BarChart3,
   Shield,
+  MapPin,
 } from "lucide-react";
 import QuickComplaintForm from "../components/QuickComplaintForm";
 
