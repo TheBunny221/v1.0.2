@@ -323,8 +323,10 @@ const Navigation: React.FC = () => {
                     variant="outline"
                     className="w-full justify-center mb-3"
                   >
-                    <Globe className="h-4 w-4 mr-2" />
-                    {currentLanguage.toUpperCase()}
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 mr-2" />
+                      <span>{currentLanguage.toUpperCase()}</span>
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -474,7 +476,7 @@ const Navigation: React.FC = () => {
                   English
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleLanguageChange("hi")}>
-                  हि���दी
+                  हिंदी
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleLanguageChange("ml")}>
                   മലയാളം
