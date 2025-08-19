@@ -8,15 +8,23 @@ import { logout } from "../slices/authSlice";
 import { createRobustFetch, logFetchDebugInfo } from "../../utils/fetchDebug";
 
 // Preserve original fetch before any third-party libraries can override it
-if (typeof globalThis !== 'undefined' && globalThis.fetch && !(globalThis as any).__originalFetch) {
+if (
+  typeof globalThis !== "undefined" &&
+  globalThis.fetch &&
+  !(globalThis as any).__originalFetch
+) {
   (globalThis as any).__originalFetch = globalThis.fetch;
 }
-if (typeof window !== 'undefined' && window.fetch && !(globalThis as any).__originalFetch) {
+if (
+  typeof window !== "undefined" &&
+  window.fetch &&
+  !(globalThis as any).__originalFetch
+) {
   (globalThis as any).__originalFetch = window.fetch;
 }
 
 // Log fetch environment info for debugging
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   logFetchDebugInfo();
 }
 
@@ -179,11 +187,14 @@ const baseQueryWithReauth: BaseQueryFn<
     const errorMessage = String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
     let errorType = "FETCH_ERROR";
-    let userMessage = "Network connection failed. Please check your internet connection.";
+    let userMessage =
+      "Network connection failed. Please check your internet connection.";
 
     // Check for specific third-party library interference
-    const isFullStoryError = errorStack?.includes('fs.js') || errorStack?.includes('fullstory');
-    const isThirdPartyFetchOverride = errorMessage.includes('window.fetch') || isFullStoryError;
+    const isFullStoryError =
+      errorStack?.includes("fs.js") || errorStack?.includes("fullstory");
+    const isThirdPartyFetchOverride =
+      errorMessage.includes("window.fetch") || isFullStoryError;
 
     if (error instanceof DOMException && error.name === "AbortError") {
       errorType = "TIMEOUT_ERROR";
@@ -191,9 +202,11 @@ const baseQueryWithReauth: BaseQueryFn<
     } else if (errorMessage.includes("Failed to fetch")) {
       errorType = "NETWORK_ERROR";
       if (isThirdPartyFetchOverride) {
-        userMessage = "Network request intercepted by tracking library. Retrying...";
+        userMessage =
+          "Network request intercepted by tracking library. Retrying...";
       } else {
-        userMessage = "Cannot connect to the server. Please check your internet connection and try again.";
+        userMessage =
+          "Cannot connect to the server. Please check your internet connection and try again.";
       }
     } else if (
       errorMessage.includes("timeout") ||
@@ -203,10 +216,12 @@ const baseQueryWithReauth: BaseQueryFn<
       userMessage = "Request timed out. Please try again.";
     } else if (errorMessage.includes("ERR_NETWORK")) {
       errorType = "CONNECTION_ERROR";
-      userMessage = "Network connection error. Please check your connection and try again.";
+      userMessage =
+        "Network connection error. Please check your connection and try again.";
     } else if (isThirdPartyFetchOverride) {
       errorType = "THIRD_PARTY_INTERFERENCE";
-      userMessage = "Request intercepted by tracking service. Please try again.";
+      userMessage =
+        "Request intercepted by tracking service. Please try again.";
     }
 
     console.error("Fetch error in baseApi:", {

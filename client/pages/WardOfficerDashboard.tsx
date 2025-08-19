@@ -56,12 +56,10 @@ const WardOfficerDashboard: React.FC = () => {
   const complaints = complaintsResponse?.data || [];
 
   // Fetch complaint statistics
-  const {
-    data: statsResponse,
-    isLoading: statsLoading,
-  } = useGetComplaintStatisticsQuery({
-    ward: user?.wardId,
-  });
+  const { data: statsResponse, isLoading: statsLoading } =
+    useGetComplaintStatisticsQuery({
+      ward: user?.wardId,
+    });
 
   const [updateComplaint] = useUpdateComplaintMutation();
   const [assignComplaintMutation] = useAssignComplaintMutation();

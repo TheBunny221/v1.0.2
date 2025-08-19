@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import { useGetComplaintsQuery, useGetComplaintStatisticsQuery } from "../store/api/complaintsApi";
+import {
+  useGetComplaintsQuery,
+  useGetComplaintStatisticsQuery,
+} from "../store/api/complaintsApi";
 import {
   useGetDashboardAnalyticsQuery,
   useGetRecentActivityQuery,

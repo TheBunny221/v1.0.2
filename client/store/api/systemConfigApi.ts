@@ -18,10 +18,12 @@ export interface SystemConfigResponse {
 export const systemConfigApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get public system configuration
-    getPublicSystemConfig: builder.query<ApiResponse<SystemConfigItem[]>, void>({
-      query: () => "/system-config/public",
-      providesTags: ["SystemConfig"],
-    }),
+    getPublicSystemConfig: builder.query<ApiResponse<SystemConfigItem[]>, void>(
+      {
+        query: () => "/system-config/public",
+        providesTags: ["SystemConfig"],
+      },
+    ),
 
     // Get all system configuration (admin only)
     getAllSystemConfig: builder.query<ApiResponse<SystemConfigItem[]>, void>({

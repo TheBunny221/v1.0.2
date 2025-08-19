@@ -564,27 +564,36 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     success: true,
     message: "Dashboard analytics retrieved successfully",
     data: {
-      complaintTrends: complaintTrends.length > 0 ? complaintTrends.map((trend) => ({
-        month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
-          month: "short",
-          year: "numeric",
-        }),
-        complaints: Number(trend.complaints),
-        resolved: Number(trend.resolved),
-      })) : generateEmptyTrends(),
-      complaintsByType: complaintsByType.length > 0 ? complaintsByType.map((item) => ({
-        name: item.type
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase()),
-        value: item._count,
-        color: getTypeColor(item.type),
-      })) : generateEmptyComplaintTypes(),
-      wardPerformance: wardPerformance.length > 0 ? wardPerformance.map((ward) => ({
-        ward: ward.ward || "Unknown Ward",
-        complaints: Number(ward.complaints) || 0,
-        resolved: Number(ward.resolved) || 0,
-        sla: Number(ward.sla) || 0,
-      })) : [],
+      complaintTrends:
+        complaintTrends.length > 0
+          ? complaintTrends.map((trend) => ({
+              month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              }),
+              complaints: Number(trend.complaints),
+              resolved: Number(trend.resolved),
+            }))
+          : generateEmptyTrends(),
+      complaintsByType:
+        complaintsByType.length > 0
+          ? complaintsByType.map((item) => ({
+              name: item.type
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, (l) => l.toUpperCase()),
+              value: item._count,
+              color: getTypeColor(item.type),
+            }))
+          : generateEmptyComplaintTypes(),
+      wardPerformance:
+        wardPerformance.length > 0
+          ? wardPerformance.map((ward) => ({
+              ward: ward.ward || "Unknown Ward",
+              complaints: Number(ward.complaints) || 0,
+              resolved: Number(ward.resolved) || 0,
+              sla: Number(ward.sla) || 0,
+            }))
+          : [],
       metrics: {
         avgResolutionTime: Math.round(avgResolutionTime * 10) / 10,
         slaCompliance,
@@ -845,7 +854,7 @@ function generateEmptyComplaintTypes() {
     { type: "STREET_LIGHTING", name: "Street Lighting" },
   ];
 
-  return types.map(t => ({
+  return types.map((t) => ({
     name: t.name,
     value: 0,
     color: getTypeColor(t.type),

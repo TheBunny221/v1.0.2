@@ -47,8 +47,12 @@ const ComplaintsList: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   // Initialize filters from URL parameters
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get("status") || "all",
+  );
   const [priorityFilter, setPriorityFilter] = useState(() => {
     const priority = searchParams.get("priority");
     // Handle comma-separated values like "CRITICAL,HIGH"
@@ -84,7 +88,9 @@ const ComplaintsList: React.FC = () => {
       const urlPriority = searchParams.get("priority");
       if (urlPriority && urlPriority.includes(",")) {
         // For comma-separated values from URL, send as array
-        params.priority = urlPriority.split(",").map(p => p.trim().toUpperCase());
+        params.priority = urlPriority
+          .split(",")
+          .map((p) => p.trim().toUpperCase());
       } else if (priorityFilter === "high_critical") {
         // Handle the combined high & critical filter
         params.priority = ["HIGH", "CRITICAL"];
@@ -101,7 +107,14 @@ const ComplaintsList: React.FC = () => {
     }
 
     return params;
-  }, [statusFilter, priorityFilter, debouncedSearchTerm, user?.role, user?.id, searchParams]);
+  }, [
+    statusFilter,
+    priorityFilter,
+    debouncedSearchTerm,
+    user?.role,
+    user?.id,
+    searchParams,
+  ]);
 
   // Use RTK Query for better authentication handling
   const {
