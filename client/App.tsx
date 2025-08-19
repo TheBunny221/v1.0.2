@@ -55,11 +55,9 @@ const TaskDetails = lazy(() => import("./pages/TaskDetails"));
 
 // Admin pages
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
-const AdminReports = lazy(() => import("./pages/AdminReports"));
+const UnifiedReports = lazy(() => import("./pages/UnifiedReports"));
 const AdminConfig = lazy(() => import("./pages/AdminConfig"));
-const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const AdminLanguages = lazy(() => import("./pages/AdminLanguages"));
-const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
 
 // Communication
 const Messages = lazy(() => import("./pages/Messages"));
