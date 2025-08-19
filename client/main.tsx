@@ -5,6 +5,16 @@ import "./global.css";
 
 // Global error handlers for production-grade error handling
 window.addEventListener("error", (event) => {
+  // Filter out known harmless errors
+  if (
+    event.error === null ||
+    event.message?.includes("ResizeObserver loop completed with undelivered notifications") ||
+    event.message?.includes("ResizeObserver loop limit exceeded")
+  ) {
+    // These are harmless warnings that can be safely ignored
+    return;
+  }
+
   console.error("Global error caught:", event.error);
   // Prevent the error from bubbling up and causing white screens
   event.preventDefault();
