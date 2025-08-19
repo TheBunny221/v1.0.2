@@ -56,13 +56,11 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
     setIsSubmitting(true);
 
     try {
-      await dispatch(
-        submitFeedback({
-          complaintId,
-          rating,
-          comment: comment.trim(),
-        }),
-      ).unwrap();
+      await addFeedback({
+        id: complaintId,
+        feedback: comment.trim(),
+        rating,
+      }).unwrap();
 
       toast({
         title: "Feedback Submitted",
