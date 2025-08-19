@@ -476,20 +476,20 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   // Get complaint trends for last 6 months (including current month)
   const complaintTrends = await prisma.$queryRaw`
     SELECT
-      strftime('%Y-%m', createdAt) as month,
+      strftime('%Y-%m', submittedOn) as month,
       COUNT(*) as complaints,
       COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
     FROM complaints
-    WHERE createdAt >= date('now', '-6 months')
-    GROUP BY strftime('%Y-%m', createdAt)
+    WHERE submittedOn >= date('now', '-6 months')
+    GROUP BY strftime('%Y-%m', submittedOn)
     ORDER BY month ASC
   `;
 
   // Also get all complaint dates to see the distribution
   const allComplaintDates = await prisma.$queryRaw`
-    SELECT strftime('%Y-%m-%d', createdAt) as date, COUNT(*) as count
+    SELECT strftime('%Y-%m-%d', submittedOn) as date, COUNT(*) as count
     FROM complaints
-    GROUP BY strftime('%Y-%m-%d', createdAt)
+    GROUP BY strftime('%Y-%m-%d', submittedOn)
     ORDER BY date DESC
     LIMIT 10
   `;
