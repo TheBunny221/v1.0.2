@@ -25,7 +25,6 @@ import maintenanceAnalyticsRoutes from "./routes/maintenanceAnalyticsRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import complaintTypeRoutes from "./routes/complaintTypeRoutes.js";
 import systemConfigRoutes from "./routes/systemConfigRoutes.js";
-import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import captchaRoutes from "./routes/captchaRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
 import guestOtpRoutes from "./routes/guestOtpRoutes.js";
@@ -213,7 +212,6 @@ export function createApp() {
   app.use("/api/uploads", uploadRoutes);
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
-  app.use("/api/maintenance", maintenanceRoutes);
   app.use("/api/captcha", captchaRoutes);
   app.use("/api/guest-otp", guestOtpRoutes);
 

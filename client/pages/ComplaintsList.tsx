@@ -106,11 +106,6 @@ const ComplaintsList: React.FC = () => {
       params.submittedById = user.id;
     }
 
-    // For WARD_OFFICER users, show complaints in their ward
-    if (user?.role === "WARD_OFFICER" && user?.wardId) {
-      params.wardId = user.wardId;
-    }
-
     return params;
   }, [
     statusFilter,
@@ -189,18 +184,12 @@ const ComplaintsList: React.FC = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {user?.role === "MAINTENANCE_TEAM"
-              ? "My Complaints"
-              : user?.role === "WARD_OFFICER"
-                ? "Ward Complaints"
-                : "Complaints"}
+            {user?.role === "MAINTENANCE_TEAM" ? "My Complaints" : "Complaints"}
           </h1>
           <p className="text-gray-600">
             {user?.role === "MAINTENANCE_TEAM"
               ? "View and manage complaints you have submitted"
-              : user?.role === "WARD_OFFICER"
-                ? "Manage complaints in your ward and register new ones"
-                : "Manage and track all complaints"}
+              : "Manage and track all complaints"}
           </p>
         </div>
         <div className="flex gap-2">
@@ -208,12 +197,10 @@ const ComplaintsList: React.FC = () => {
             <FileText className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          {(user?.role === "CITIZEN" ||
-            user?.role === "MAINTENANCE_TEAM" ||
-            user?.role === "WARD_OFFICER") && (
+          {(user?.role === "CITIZEN" || user?.role === "MAINTENANCE_TEAM") && (
             <Button onClick={() => setIsQuickFormOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Register Complaint
+              New Complaint
             </Button>
           )}
         </div>

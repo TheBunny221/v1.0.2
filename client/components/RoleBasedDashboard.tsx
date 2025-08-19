@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { useAppSelector } from "../store/hooks";
 import AdminDashboard from "../pages/AdminDashboard";
 import CitizenDashboard from "../pages/CitizenDashboard";
@@ -11,16 +10,8 @@ import { Badge } from "./ui/badge";
 import { AlertTriangle } from "lucide-react";
 
 const RoleBasedDashboard: React.FC = () => {
-  const navigate = useNavigate();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
-
-  // Redirect Ward Officers to complaints page
-  useEffect(() => {
-    if (isAuthenticated && user?.role === "WARD_OFFICER") {
-      navigate("/complaints", { replace: true });
-    }
-  }, [isAuthenticated, user?.role, navigate]);
 
   if (!isAuthenticated || !user) {
     return <Unauthorized />;
@@ -33,8 +24,7 @@ const RoleBasedDashboard: React.FC = () => {
     case "CITIZEN":
       return <CitizenDashboard />;
     case "WARD_OFFICER":
-      // Ward Officers are redirected to complaints page
-      return null;
+      return <WardOfficerDashboard />;
     case "MAINTENANCE_TEAM":
       return <MaintenanceDashboard />;
     default:
