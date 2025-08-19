@@ -198,7 +198,7 @@ const AdminDashboard: React.FC = () => {
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
-            <div className="text-2xl font-bold">{metrics.slaCompliance}%</div>
+            <div className="text-2xl font-bold">{metrics?.slaCompliance || 0}%</div>
             <div className="text-sm text-purple-200">SLA Compliance</div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
