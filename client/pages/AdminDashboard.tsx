@@ -58,7 +58,6 @@ import {
 } from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
-  const dispatch = useAppDispatch();
   const { translations } = useAppSelector((state) => state.language);
 
   // Fetch real-time data using API queries
