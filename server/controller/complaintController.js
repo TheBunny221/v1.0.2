@@ -1086,3 +1086,82 @@ export const assignComplaint = asyncHandler(async (req, res) => {
     data: { complaint: updatedComplaint },
   });
 });
+
+// @desc    Get users for assignment (Ward Officer access)
+// @route   GET /api/complaints/ward-users
+// @access  Private (Ward Officer, Maintenance Team, Administrator)
+export const getWardUsers = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 100, role, status = "all" } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  // Build where clause based on user role
+  let whereClause = {
+    ...(status !== "all" && { isActive: status === "active" }),
+  };
+
+  // Role-based filtering
+  if (req.user.role === "WARD_OFFICER") {
+    // Ward Officers can only see users in their ward
+    whereClause.wardId = req.user.wardId;
+    // Ward Officers can see MAINTENANCE_TEAM and other WARD_OFFICER users for assignment
+    whereClause.role = {
+      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"]
+    };
+  } else if (req.user.role === "MAINTENANCE_TEAM") {
+    // Maintenance team can see other maintenance team members and ward officers in their ward
+    whereClause.wardId = req.user.wardId;
+    whereClause.role = {
+      in: ["MAINTENANCE_TEAM", "WARD_OFFICER"]
+    };
+  } else if (req.user.role === "ADMINISTRATOR") {
+    // Administrators can see all users
+    if (role) {
+      whereClause.role = role;
+    }
+  }
+
+  // If specific role filter is requested, apply it
+  if (role && req.user.role === "ADMINISTRATOR") {
+    whereClause.role = role;
+  }
+
+  const users = await prisma.user.findMany({
+    where: whereClause,
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      wardId: true,
+      department: true,
+      isActive: true,
+      ward: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    skip,
+    take: parseInt(limit),
+    orderBy: {
+      fullName: "asc",
+    },
+  });
+
+  const total = await prisma.user.count({ where: whereClause });
+
+  res.status(200).json({
+    success: true,
+    message: "Ward users retrieved successfully",
+    data: {
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    },
+  });
+});
