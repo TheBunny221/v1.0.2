@@ -30,6 +30,9 @@ router.post("/", authorize("CITIZEN", "ADMINISTRATOR"), createComplaint);
 // Get complaint statistics for authenticated users
 router.get("/stats", getComplaintStats);
 
+// Get users for assignment (Ward Officer access)
+router.get("/ward-users", authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"), getWardUsers);
+
 // Get single complaint
 router.get("/:id", getComplaint);
 
