@@ -256,6 +256,10 @@ export function createApp() {
       changeOrigin: true,
       ws: true, // Enable WebSocket proxying for HMR
       logLevel: 'silent', // Reduce proxy logs
+      pathFilter: (pathname, req) => {
+        // Only proxy non-API routes
+        return !pathname.startsWith('/api');
+      },
       onError: (err, req, res) => {
         console.log('Proxy error:', err.message);
         res.status(500).json({
@@ -266,7 +270,7 @@ export function createApp() {
       }
     });
 
-    app.use("*", viteProxy);
+    app.use(viteProxy);
   }
 
   // Error handling middleware (should be last)
