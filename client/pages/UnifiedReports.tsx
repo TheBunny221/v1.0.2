@@ -387,7 +387,7 @@ const UnifiedReports: React.FC = () => {
             {translations?.reports?.title || "Reports & Analytics"}
           </h1>
           <p className="text-muted-foreground">
-            {user?.role === "ADMINISTRATOR" 
+            {appName} - {user?.role === "ADMINISTRATOR"
               ? "Comprehensive system-wide insights and analytics"
               : user?.role === "WARD_OFFICER"
               ? `Analytics for ${user?.ward || "your ward"}`
