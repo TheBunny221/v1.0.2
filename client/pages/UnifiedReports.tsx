@@ -123,6 +123,7 @@ interface FilterOptions {
 const UnifiedReports: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const { appName, appLogoUrl, getConfig } = useSystemConfig();
 
   // State for filters
   const [filters, setFilters] = useState<FilterOptions>({
