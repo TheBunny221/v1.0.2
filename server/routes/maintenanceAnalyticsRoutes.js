@@ -134,10 +134,10 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
     };
 
     // SLA compliance calculation
-    const slaCompliance = completedTasks > 0 
+    const slaCompliance = completedTasks > 0
       ? (completedWithTime.filter(c => {
-          if (c.slaDeadline && c.resolvedAt) {
-            return new Date(c.resolvedAt) <= new Date(c.slaDeadline);
+          if (c.deadline && c.resolvedOn) {
+            return new Date(c.resolvedOn) <= new Date(c.deadline);
           }
           return false;
         }).length / completedTasks) * 100
