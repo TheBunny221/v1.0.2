@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./global.css";
+import { suppressResizeObserverErrors } from "./utils/resizeObserverSuppress";
 
 // Global error handlers for production-grade error handling
 window.addEventListener("error", (event) => {
