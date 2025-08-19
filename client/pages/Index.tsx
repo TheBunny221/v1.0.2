@@ -23,7 +23,7 @@ import {
 import QuickComplaintForm from "../components/QuickComplaintForm";
 
 const Index: React.FC = () => {
-  const { translations } = useAppSelector((state) => state.language);
+  const { translations, currentLanguage } = useAppSelector((state) => state.language);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName } = useSystemConfig();
 
