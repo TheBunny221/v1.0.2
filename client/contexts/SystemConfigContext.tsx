@@ -77,9 +77,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     return config[key] || defaultValue;
   };
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
+  // RTK Query handles data fetching automatically, no manual useEffect needed
 
   const appName = getConfig("APP_NAME", "Kochi Smart City");
   const appLogoUrl = getConfig("APP_LOGO_URL", "/logo.png");
