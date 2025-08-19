@@ -25,13 +25,29 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API calls to the backend server
         "/api": {
-          target: "http://127.0.0.1:4005",
+          target: "http://localhost:4005",
           changeOrigin: true,
           secure: false,
-          timeout: 10000,
+          timeout: 30000,
           headers: {
             Connection: "keep-alive",
           },
+          onError: (err, req, res) => {
+            console.error('Proxy error:', err.message);
+            if (res.writeHead) {
+              res.writeHead(500, {
+                'Content-Type': 'application/json',
+              });
+              res.end(JSON.stringify({
+                success: false,
+                message: 'Proxy connection failed',
+                error: err.message
+              }));
+            }
+          },
+          onProxyReq: (proxyReq, req, res) => {
+            console.log('Proxying request:', req.method, req.url, '-> http://localhost:4005' + req.url);
+          }
         },
       },
       hmr: isProduction
