@@ -78,6 +78,31 @@ export interface CaptchaVerifyRequest {
 // Guest API slice
 export const guestApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // OTP Verification for Complaint Tracking
+    requestComplaintOtp: builder.mutation<
+      ApiResponse<{ complaintId: string; email: string }>,
+      { complaintId: string }
+    >({
+      query: (data) => ({
+        url: "/guest-otp/request-complaint-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    verifyComplaintOtp: builder.mutation<
+      ApiResponse<{
+        complaint: any;
+        user: any;
+      }>,
+      { complaintId: string; otpCode: string }
+    >({
+      query: (data) => ({
+        url: "/guest-otp/verify-complaint-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
     // Submit guest complaint
     submitGuestComplaint: builder.mutation<
       ApiResponse<GuestComplaintResponse>,
