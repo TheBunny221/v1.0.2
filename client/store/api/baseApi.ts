@@ -117,8 +117,14 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   try {
+    // Store original fetch in case it's been overridden by third-party libraries
+    const originalFetch = (globalThis as any).__originalFetch || globalThis.fetch || window.fetch;
+
     // Use native fetch to avoid RTK Query's internal response handling
-    const response = await fetch(
+    // Handle FullStory or other fetch overrides by using original fetch when available
+    const fetchToUse = originalFetch || fetch;
+
+    const response = await fetchToUse(
       `/api${url.startsWith("/") ? "" : "/"}${url}`,
       options,
     );
