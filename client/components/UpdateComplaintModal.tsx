@@ -438,7 +438,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     </SelectItem>
                   ))}
                   {filteredUsers.length === 0 && searchTerm && (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-results" disabled>
                       No users found matching "{searchTerm}"
                     </SelectItem>
                   )}
