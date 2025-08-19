@@ -986,8 +986,11 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
 
     // Get memory usage
     const memoryUsage = process.memoryUsage();
-    const memoryUsedMB = Math.round(memoryUsage.used / 1024 / 1024);
-    const memoryTotalMB = Math.round(memoryUsage.rss / 1024 / 1024);
+    const memoryUsedMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+    const memoryTotalMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
+
+    // Ensure we don't divide by zero
+    const memoryPercentage = memoryTotalMB > 0 ? Math.round((memoryUsedMB / memoryTotalMB) * 100) : 0;
 
     // Get system statistics
     const [totalUsers, activeUsers, totalComplaints, openComplaints] = await Promise.all([
