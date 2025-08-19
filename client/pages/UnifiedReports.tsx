@@ -217,7 +217,7 @@ const UnifiedReports: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [fetchAnalyticsData]);
 
-  // Export functionality
+  // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
     if (!permissions.canExportData) {
       alert("You don't have permission to export data");
@@ -240,8 +240,18 @@ const UnifiedReports: React.FC = () => {
         ...(filters.priority !== "all" && { priority: filters.priority }),
       });
 
-      // Fetch detailed data for export
-      // Use absolute URL to match the deployed environment
+      // Validate export permissions based on role
+      const requestedData = {
+        includesOtherWards: filters.ward === "all" && user?.role !== "ADMINISTRATOR",
+        includesUnassignedComplaints: user?.role === "MAINTENANCE_TEAM" && filters.ward === "all"
+      };
+
+      if (!validateExportPermissions(user?.role || "", requestedData)) {
+        alert("You don't have permission to export data outside your assigned scope");
+        return;
+      }
+
+      // Fetch detailed data for export with real-time backend call
       const baseUrl = window.location.origin;
       const response = await fetch(`${baseUrl}/api/reports/export?${queryParams}`, {
         headers: {
@@ -260,8 +270,18 @@ const UnifiedReports: React.FC = () => {
         throw new Error(exportData.message || "Export failed");
       }
 
-      const userRole = user?.role || "Unknown";
-      const orgName = "Cochin Smart City Corporation";
+      // Prepare export options with system config
+      const exportOptions = {
+        systemConfig: {
+          appName,
+          appLogoUrl,
+          complaintIdPrefix: getConfig("COMPLAINT_ID_PREFIX", "KSC")
+        },
+        userRole: user?.role || "Unknown",
+        userWard: user?.ward || permissions.defaultWard,
+        includeCharts: true,
+        maxRecords: user?.role === "ADMINISTRATOR" ? 1000 : 500
+      };
 
       // Use appropriate export utility based on format
       switch (format) {
@@ -270,8 +290,7 @@ const UnifiedReports: React.FC = () => {
             exportData.data,
             analyticsData.trends,
             analyticsData.categories,
-            userRole,
-            orgName
+            exportOptions
           );
           break;
         case "excel":
@@ -279,12 +298,11 @@ const UnifiedReports: React.FC = () => {
             exportData.data,
             analyticsData.trends,
             analyticsData.categories,
-            userRole,
-            orgName
+            exportOptions
           );
           break;
         case "csv":
-          exportToCSV(exportData.data);
+          exportToCSV(exportData.data, exportOptions);
           break;
       }
     } catch (err) {
