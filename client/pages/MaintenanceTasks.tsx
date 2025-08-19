@@ -234,32 +234,6 @@ const MaintenanceTasks: React.FC = () => {
     setActiveFilter(newFilter);
   };
 
-  // Show loading state
-  if (tasksLoading || statsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading maintenance tasks...</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (tasksError || statsError) {
-    return (
-      <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Error Loading Tasks</h2>
-        <p className="text-gray-600 mb-4">
-          {(tasksError as any)?.data?.message || "Failed to load maintenance tasks"}
-        </p>
-        <Button onClick={() => refetchTasks()}>Try Again</Button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
