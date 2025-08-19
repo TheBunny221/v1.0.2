@@ -44,7 +44,17 @@ interface ExportOptions {
 
 // Utility function to format complaint ID from database ID
 const formatComplaintId = (dbId: string | number, prefix: string = "KSC"): string => {
-  const numericId = typeof dbId === 'string' ? parseInt(dbId) || 0 : dbId;
+  if (!dbId) return `${prefix}-000000`;
+
+  let numericId: number;
+  if (typeof dbId === 'string') {
+    // Extract numeric part if it's a string like "cm-123" or just "123"
+    const match = dbId.match(/\d+/);
+    numericId = match ? parseInt(match[0]) : 0;
+  } else {
+    numericId = dbId;
+  }
+
   return `${prefix}-${numericId.toString().padStart(6, '0')}`;
 };
 
