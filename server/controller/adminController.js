@@ -1040,7 +1040,7 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
         memory: {
           used: `${memoryUsedMB}MB`,
           total: `${memoryTotalMB}MB`,
-          percentage: Math.round((memoryUsedMB / memoryTotalMB) * 100),
+          percentage: memoryPercentage,
         },
         errors: {
           last24h: recentErrors,
