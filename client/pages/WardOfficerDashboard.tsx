@@ -213,6 +213,34 @@ const WardOfficerDashboard: React.FC = () => {
 
   const filteredComplaints = getFilteredComplaints();
 
+  // Show loading state
+  if (complaintsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <span>Loading complaints...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (complaintsError) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-500 mb-4">
+          <AlertTriangle className="h-12 w-12 mx-auto mb-2" />
+          <h2 className="text-xl font-semibold mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 mb-4">
+            Failed to load complaint data. Please try again.
+          </p>
+          <Button onClick={() => refetchComplaints()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+
   const handleAssignComplaint = (complaint: any) => {
     setSelectedComplaint(complaint);
     setAssignmentData({
