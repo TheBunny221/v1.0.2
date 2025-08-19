@@ -192,7 +192,7 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
     // Get current assignments
     const assignments = await prisma.complaint.findMany({
       where: {
-        assignedTo: userId,
+        assignedToId: userId,
         status: {
           in: ["assigned", "in_progress"],
         },
