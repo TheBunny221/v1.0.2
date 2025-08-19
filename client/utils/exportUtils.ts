@@ -524,7 +524,7 @@ export const exportToExcel = (
       ["Metric", "Value", "Target", "Status"],
       ["Resolution Rate", `${((data.summary.resolved / data.summary.total) * 100).toFixed(2)}%`, "85%", ((data.summary.resolved / data.summary.total) * 100) >= 85 ? "✓ Met" : "✗ Below Target"],
       ["Average Resolution Time", "3.2 days", "5 days", "✓ Met"],
-      ["Citizen Satisfaction", "4.2/5", "4.0/5", "�� Met"],
+      ["Citizen Satisfaction", "4.2/5", "4.0/5", "✓ Met"],
       ["First Time Resolution", "78%", "75%", "✓ Met"],
       ["SLA Compliance", "87%", "90%", "✗ Below Target"]
     ];
@@ -542,14 +542,14 @@ export const exportToExcel = (
 export const exportToCSV = (data: ExportData, options: ExportOptions) => {
   const complaintsData = data.complaints.map(complaint => {
     const complaintId = formatComplaintId(complaint.id, options.systemConfig.complaintIdPrefix || "KSC");
-    
+
     return {
       "Complaint ID": complaintId,
       "Database ID": complaint.id,
-      "Type": complaint.type || "N/A",
+      "Type": (complaint.type || "N/A").replace(/_/g, ' '),
       "Description": (complaint.description || "N/A").replace(/\r?\n|\r/g, " "), // Remove line breaks
-      "Status": complaint.status || "N/A",
-      "Priority": complaint.priority || "N/A",
+      "Status": (complaint.status || "N/A").replace(/_/g, ' ').toUpperCase(),
+      "Priority": (complaint.priority || "N/A").replace(/_/g, ' ').toUpperCase(),
       "Ward": complaint.ward?.name || "N/A",
       "Created Date": complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : "N/A",
       "Resolved Date": complaint.resolvedOn ? new Date(complaint.resolvedOn).toLocaleDateString() : "Not resolved",
