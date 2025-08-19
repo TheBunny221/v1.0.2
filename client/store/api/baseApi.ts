@@ -221,76 +221,8 @@ const baseQueryWithReauth: BaseQueryFn<
       options: options,
     });
 
-    // If it's a third-party interference, try to retry with a different approach
-    if (isThirdPartyFetchOverride && !(options as any).__retryAttempt) {
-      console.warn("Retrying request due to third-party fetch override...");
-
-      // Mark this as a retry attempt to prevent infinite loops
-      const retryOptions = { ...options, __retryAttempt: true };
-
-      try {
-        // Try with XMLHttpRequest as fallback
-        const xhr = new XMLHttpRequest();
-        const finalUrl = `/api${url.startsWith("/") ? "" : "/"}${url}`;
-        const method = typeof args === "string" ? "GET" : args.method || "GET";
-
-        return new Promise((resolve) => {
-          xhr.timeout = 15000;
-          xhr.onload = () => {
-            let data;
-            try {
-              data = xhr.responseText ? JSON.parse(xhr.responseText) : null;
-            } catch {
-              data = null;
-            }
-
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve({ data });
-            } else {
-              resolve({
-                error: {
-                  status: xhr.status,
-                  data: data,
-                } as FetchBaseQueryError,
-              });
-            }
-          };
-
-          xhr.onerror = () => {
-            resolve({
-              error: {
-                status: "NETWORK_ERROR",
-                error: "XHR fallback failed",
-                data: { message: "Network request failed using fallback method." },
-              } as FetchBaseQueryError,
-            });
-          };
-
-          xhr.ontimeout = () => {
-            resolve({
-              error: {
-                status: "TIMEOUT_ERROR",
-                error: "XHR timeout",
-                data: { message: "Request timed out using fallback method." },
-              } as FetchBaseQueryError,
-            });
-          };
-
-          xhr.open(method, finalUrl);
-
-          // Set headers
-          if (retryOptions.headers) {
-            Object.entries(retryOptions.headers as Record<string, string>).forEach(([key, value]) => {
-              xhr.setRequestHeader(key, value);
-            });
-          }
-
-          xhr.send(retryOptions.body as any);
-        });
-      } catch (retryError) {
-        console.error("XHR fallback also failed:", retryError);
-      }
-    }
+    // The robust fetch function already handles retries and fallbacks
+    // No need for additional retry logic here
 
     return {
       error: {
