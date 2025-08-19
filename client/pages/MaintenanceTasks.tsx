@@ -331,7 +331,7 @@ const MaintenanceTasks: React.FC = () => {
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("resolved")}
+          onClick={() => handleFilterChange("resolved")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
