@@ -165,15 +165,27 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {onShowUpdateModal && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => onShowUpdateModal(complaint)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Complaint
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
                 <DropdownMenuItem onClick={() => setStatusDialogOpen(true)}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Update Status
+                  Quick Status Update
                 </DropdownMenuItem>
 
                 {canAssign && (
                   <DropdownMenuItem onClick={() => setAssignDialogOpen(true)}>
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Reassign
+                    Quick Reassign
                   </DropdownMenuItem>
                 )}
 
