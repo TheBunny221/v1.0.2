@@ -85,6 +85,9 @@ const ComplaintsList: React.FC = () => {
       if (urlPriority && urlPriority.includes(",")) {
         // For comma-separated values from URL, send as array
         params.priority = urlPriority.split(",").map(p => p.trim().toUpperCase());
+      } else if (priorityFilter === "high_critical") {
+        // Handle the combined high & critical filter
+        params.priority = ["HIGH", "CRITICAL"];
       } else {
         params.priority = priorityFilter.toUpperCase();
       }
