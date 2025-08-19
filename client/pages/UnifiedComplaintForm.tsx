@@ -168,6 +168,9 @@ const PRIORITIES = [
 
 const UnifiedComplaintForm: React.FC = () => {
   const navigate = useNavigate();
+
+  // RTK Query mutations
+  const [createComplaintMutation] = useCreateComplaintMutation();
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
