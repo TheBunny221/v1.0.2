@@ -447,6 +447,10 @@ const WardManagement: React.FC = () => {
                             userRole={user?.role || ""}
                             showDetails={false}
                             onUpdate={() => refetchComplaints()}
+                            onShowUpdateModal={(complaint) => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
                           />
                         </TableCell>
                       </TableRow>
