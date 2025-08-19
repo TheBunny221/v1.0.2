@@ -119,7 +119,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     const errors: string[] = [];
 
     // Check if status is being changed to ASSIGNED but no user is selected
-    if (formData.status === "ASSIGNED" && !formData.assignedToId) {
+    if (formData.status === "ASSIGNED" && (!formData.assignedToId || formData.assignedToId === "none")) {
       if (user?.role === "ADMINISTRATOR") {
         errors.push("Please select a Ward Officer before assigning the complaint.");
       } else if (user?.role === "WARD_OFFICER") {
@@ -128,7 +128,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     }
 
     // Check if status is being changed from REGISTERED to ASSIGNED
-    if (complaint?.status === "REGISTERED" && formData.status === "ASSIGNED" && !formData.assignedToId) {
+    if (complaint?.status === "REGISTERED" && formData.status === "ASSIGNED" && (!formData.assignedToId || formData.assignedToId === "none")) {
       if (user?.role === "ADMINISTRATOR") {
         errors.push("Please select a Ward Officer before assigning the complaint.");
       } else if (user?.role === "WARD_OFFICER") {
