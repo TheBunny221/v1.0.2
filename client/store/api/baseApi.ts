@@ -158,10 +158,34 @@ const baseQueryWithReauth: BaseQueryFn<
       };
     }
   } catch (error) {
+    // Enhanced error detection for network issues
+    const errorMessage = String(error);
+    let errorType = "FETCH_ERROR";
+    let userMessage = "Network connection failed. Please check your internet connection.";
+
+    if (errorMessage.includes("Failed to fetch")) {
+      errorType = "NETWORK_ERROR";
+      userMessage = "Cannot connect to the server. Please check your internet connection and try again.";
+    } else if (errorMessage.includes("timeout") || errorMessage.includes("TIMEOUT")) {
+      errorType = "TIMEOUT_ERROR";
+      userMessage = "Request timed out. Please try again.";
+    } else if (errorMessage.includes("ERR_NETWORK")) {
+      errorType = "CONNECTION_ERROR";
+      userMessage = "Network connection error. Please check your connection and try again.";
+    }
+
+    console.error("Fetch error in baseApi:", {
+      url: `/api${url.startsWith("/") ? "" : "/"}${url}`,
+      method: typeof args === "string" ? "GET" : args.method || "GET",
+      error: errorMessage,
+      errorType,
+    });
+
     return {
       error: {
-        status: "FETCH_ERROR",
-        error: String(error),
+        status: errorType,
+        error: errorMessage,
+        data: { message: userMessage },
       } as FetchBaseQueryError,
     };
   }
