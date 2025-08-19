@@ -637,7 +637,8 @@ export const deleteWard = asyncHandler(async (req, res) => {
   if (complaintsInWard > 0) {
     return res.status(400).json({
       success: false,
-      message: "Cannot delete ward. There are complaints assigned to this ward.",
+      message:
+        "Cannot delete ward. There are complaints assigned to this ward.",
     });
   }
 
@@ -801,7 +802,8 @@ export const deleteSubZone = asyncHandler(async (req, res) => {
   if (complaintsInSubZone > 0) {
     return res.status(400).json({
       success: false,
-      message: "Cannot delete sub-zone. There are complaints assigned to this sub-zone.",
+      message:
+        "Cannot delete sub-zone. There are complaints assigned to this sub-zone.",
     });
   }
 

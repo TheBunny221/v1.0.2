@@ -14,12 +14,12 @@ router.use(protect);
 // @access  Private (Maintenance Team)
 const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
   const { from, to, type, status, priority } = req.query;
-  
+
   // Build filter conditions for maintenance team member
   let whereConditions = {
     assignedToId: req.user.id,
   };
-  
+
   // Apply query filters
   if (from && to) {
     whereConditions.createdAt = {
@@ -27,15 +27,15 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
       lte: new Date(to),
     };
   }
-  
+
   if (type && type !== "all") {
     whereConditions.type = type;
   }
-  
+
   if (status && status !== "all") {
     whereConditions.status = status;
   }
-  
+
   if (priority && priority !== "all") {
     whereConditions.priority = priority;
   }
@@ -49,18 +49,24 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
         submittedBy: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     // Calculate metrics specific to maintenance team
     const totalAssigned = assignedComplaints.length;
-    const completedTasks = assignedComplaints.filter(c => c.status === "resolved").length;
-    const inProgressTasks = assignedComplaints.filter(c => c.status === "in_progress").length;
-    const pendingTasks = assignedComplaints.filter(c => ["registered", "assigned"].includes(c.status)).length;
-    
+    const completedTasks = assignedComplaints.filter(
+      (c) => c.status === "resolved",
+    ).length;
+    const inProgressTasks = assignedComplaints.filter(
+      (c) => c.status === "in_progress",
+    ).length;
+    const pendingTasks = assignedComplaints.filter((c) =>
+      ["registered", "assigned"].includes(c.status),
+    ).length;
+
     // Calculate overdue tasks
-    const overdueTasks = assignedComplaints.filter(c => {
+    const overdueTasks = assignedComplaints.filter((c) => {
       if (c.deadline && ["assigned", "in_progress"].includes(c.status)) {
         return new Date(c.deadline) < new Date();
       }
@@ -68,29 +74,36 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
     }).length;
 
     // Calculate average completion time
-    const completedWithTime = assignedComplaints.filter(c => c.status === "resolved" && c.resolvedOn);
-    const avgCompletionTime = completedWithTime.length > 0
-      ? completedWithTime.reduce((sum, c) => {
-          const days = Math.ceil((new Date(c.resolvedOn) - new Date(c.assignedOn || c.createdAt)) / (1000 * 60 * 60 * 24));
-          return sum + days;
-        }, 0) / completedWithTime.length
-      : 0;
+    const completedWithTime = assignedComplaints.filter(
+      (c) => c.status === "resolved" && c.resolvedOn,
+    );
+    const avgCompletionTime =
+      completedWithTime.length > 0
+        ? completedWithTime.reduce((sum, c) => {
+            const days = Math.ceil(
+              (new Date(c.resolvedOn) - new Date(c.assignedOn || c.createdAt)) /
+                (1000 * 60 * 60 * 24),
+            );
+            return sum + days;
+          }, 0) / completedWithTime.length
+        : 0;
 
     // Get trends data for last 30 days
     const trendsData = [];
     for (let i = 29; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      
-      const dayComplaints = assignedComplaints.filter(c => 
-        c.createdAt.toISOString().split('T')[0] === dateStr
+      const dateStr = date.toISOString().split("T")[0];
+
+      const dayComplaints = assignedComplaints.filter(
+        (c) => c.createdAt.toISOString().split("T")[0] === dateStr,
       );
-      
-      const dayCompleted = dayComplaints.filter(c => 
-        c.status === "resolved" && 
-        c.resolvedAt && 
-        c.resolvedAt.toISOString().split('T')[0] === dateStr
+
+      const dayCompleted = dayComplaints.filter(
+        (c) =>
+          c.status === "resolved" &&
+          c.resolvedAt &&
+          c.resolvedAt.toISOString().split("T")[0] === dateStr,
       );
 
       trendsData.push({
@@ -103,27 +116,41 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
 
     // Get task categories
     const categoryMap = new Map();
-    assignedComplaints.forEach(complaint => {
+    assignedComplaints.forEach((complaint) => {
       const category = complaint.type || "Others";
       if (!categoryMap.has(category)) {
-        categoryMap.set(category, { count: 0, totalTime: 0, completedCount: 0 });
+        categoryMap.set(category, {
+          count: 0,
+          totalTime: 0,
+          completedCount: 0,
+        });
       }
       const data = categoryMap.get(category);
       data.count++;
-      
-      if (complaint.status === "resolved" && complaint.resolvedOn && complaint.assignedOn) {
-        const days = Math.ceil((new Date(complaint.resolvedOn) - new Date(complaint.assignedOn)) / (1000 * 60 * 60 * 24));
+
+      if (
+        complaint.status === "resolved" &&
+        complaint.resolvedOn &&
+        complaint.assignedOn
+      ) {
+        const days = Math.ceil(
+          (new Date(complaint.resolvedOn) - new Date(complaint.assignedOn)) /
+            (1000 * 60 * 60 * 24),
+        );
         data.totalTime += days;
         data.completedCount++;
       }
     });
 
-    const categories = Array.from(categoryMap.entries()).map(([name, data]) => ({
-      name,
-      count: data.count,
-      avgTime: data.completedCount > 0 ? data.totalTime / data.completedCount : 0,
-      color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
-    }));
+    const categories = Array.from(categoryMap.entries()).map(
+      ([name, data]) => ({
+        name,
+        count: data.count,
+        avgTime:
+          data.completedCount > 0 ? data.totalTime / data.completedCount : 0,
+        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
+      }),
+    );
 
     // Performance metrics for maintenance team
     const performance = {
@@ -134,14 +161,17 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
     };
 
     // SLA compliance calculation
-    const slaCompliance = completedTasks > 0
-      ? (completedWithTime.filter(c => {
-          if (c.deadline && c.resolvedOn) {
-            return new Date(c.resolvedOn) <= new Date(c.deadline);
-          }
-          return false;
-        }).length / completedTasks) * 100
-      : 0;
+    const slaCompliance =
+      completedTasks > 0
+        ? (completedWithTime.filter((c) => {
+            if (c.deadline && c.resolvedOn) {
+              return new Date(c.resolvedOn) <= new Date(c.deadline);
+            }
+            return false;
+          }).length /
+            completedTasks) *
+          100
+        : 0;
 
     const analyticsData = {
       complaints: {
@@ -188,7 +218,7 @@ const getMaintenanceAnalytics = asyncHandler(async (req, res) => {
 const getMaintenanceDashboard = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     // Get current assignments
     const assignments = await prisma.complaint.findMany({
       where: {
@@ -201,16 +231,13 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
         ward: true,
         submittedBy: true,
       },
-      orderBy: [
-        { priority: 'desc' },
-        { createdAt: 'asc' },
-      ],
+      orderBy: [{ priority: "desc" }, { createdAt: "asc" }],
     });
 
     // Get today's completed tasks
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const todayCompleted = await prisma.complaint.count({
       where: {
         assignedToId: userId,
@@ -222,7 +249,7 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
     });
 
     // Get overdue tasks
-    const overdueTasks = assignments.filter(task => {
+    const overdueTasks = assignments.filter((task) => {
       if (task.deadline) {
         return new Date(task.deadline) < new Date();
       }
@@ -230,8 +257,8 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
     });
 
     // Get urgent tasks (high/critical priority)
-    const urgentTasks = assignments.filter(task => 
-      ["HIGH", "CRITICAL"].includes(task.priority)
+    const urgentTasks = assignments.filter((task) =>
+      ["HIGH", "CRITICAL"].includes(task.priority),
     );
 
     res.status(200).json({

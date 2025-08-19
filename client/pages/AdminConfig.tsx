@@ -540,7 +540,7 @@ const AdminConfig: React.FC = () => {
         status: error?.status,
         data: error?.data,
         message: error?.message,
-        fullError: error
+        fullError: error,
       });
 
       const errorMessage = getApiErrorMessage(error);
@@ -1884,7 +1884,7 @@ const AdminConfig: React.FC = () => {
                     setEditingComplaintType({
                       ...editingComplaintType,
                       slaHours: isNaN(numValue) ? 48 : numValue,
-                    })
+                    });
                   }}
                   placeholder="Enter SLA hours"
                   min="1"

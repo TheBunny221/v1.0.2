@@ -285,7 +285,11 @@ const App: React.FC = () => {
                         element={
                           <UnifiedLayout>
                             <RoleBasedRoute
-                              allowedRoles={["WARD_OFFICER", "ADMINISTRATOR", "MAINTENANCE_TEAM"]}
+                              allowedRoles={[
+                                "WARD_OFFICER",
+                                "ADMINISTRATOR",
+                                "MAINTENANCE_TEAM",
+                              ]}
                             >
                               <UnifiedReports />
                             </RoleBasedRoute>

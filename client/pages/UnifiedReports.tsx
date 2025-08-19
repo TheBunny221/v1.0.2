@@ -67,7 +67,12 @@ import {
   Calendar,
 } from "lucide-react";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
-import { exportToPDF, exportToExcel, exportToCSV, validateExportPermissions } from "../utils/exportUtils";
+import {
+  exportToPDF,
+  exportToExcel,
+  exportToCSV,
+  validateExportPermissions,
+} from "../utils/exportUtils";
 
 interface AnalyticsData {
   complaints: {
@@ -138,7 +143,9 @@ const UnifiedReports: React.FC = () => {
   });
 
   // State for data
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +155,8 @@ const UnifiedReports: React.FC = () => {
     const role = user?.role;
     return {
       canViewAllWards: role === "ADMINISTRATOR",
-      canViewMaintenanceTasks: role === "MAINTENANCE_TEAM" || role === "ADMINISTRATOR",
+      canViewMaintenanceTasks:
+        role === "MAINTENANCE_TEAM" || role === "ADMINISTRATOR",
       canExportData: role === "ADMINISTRATOR" || role === "WARD_OFFICER",
       defaultWard: role === "WARD_OFFICER" ? user?.wardId : "all",
     };
@@ -157,7 +165,7 @@ const UnifiedReports: React.FC = () => {
   // Apply role-based filter restrictions
   useEffect(() => {
     if (permissions.defaultWard !== "all") {
-      setFilters(prev => ({
+      setFilters((prev) => ({
         ...prev,
         ward: permissions.defaultWard,
       }));
@@ -190,18 +198,22 @@ const UnifiedReports: React.FC = () => {
       const response = await fetch(`${baseUrl}${endpoint}?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch analytics data: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch analytics data: ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
       setAnalyticsData(data.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load analytics data");
+      setError(
+        err instanceof Error ? err.message : "Failed to load analytics data",
+      );
       console.error("Analytics fetch error:", err);
     } finally {
       setIsLoading(false);
@@ -242,23 +254,30 @@ const UnifiedReports: React.FC = () => {
 
       // Validate export permissions based on role
       const requestedData = {
-        includesOtherWards: filters.ward === "all" && user?.role !== "ADMINISTRATOR",
-        includesUnassignedComplaints: user?.role === "MAINTENANCE_TEAM" && filters.ward === "all"
+        includesOtherWards:
+          filters.ward === "all" && user?.role !== "ADMINISTRATOR",
+        includesUnassignedComplaints:
+          user?.role === "MAINTENANCE_TEAM" && filters.ward === "all",
       };
 
       if (!validateExportPermissions(user?.role || "", requestedData)) {
-        alert("You don't have permission to export data outside your assigned scope");
+        alert(
+          "You don't have permission to export data outside your assigned scope",
+        );
         return;
       }
 
       // Fetch detailed data for export with real-time backend call
       const baseUrl = window.location.origin;
-      const response = await fetch(`${baseUrl}/api/reports/export?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${baseUrl}/api/reports/export?${queryParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch export data");
@@ -275,12 +294,12 @@ const UnifiedReports: React.FC = () => {
         systemConfig: {
           appName,
           appLogoUrl,
-          complaintIdPrefix: getConfig("COMPLAINT_ID_PREFIX", "KSC")
+          complaintIdPrefix: getConfig("COMPLAINT_ID_PREFIX", "KSC"),
         },
         userRole: user?.role || "Unknown",
         userWard: user?.ward || permissions.defaultWard,
         includeCharts: true,
-        maxRecords: user?.role === "ADMINISTRATOR" ? 1000 : 500
+        maxRecords: user?.role === "ADMINISTRATOR" ? 1000 : 500,
       };
 
       // Use appropriate export utility based on format
@@ -290,7 +309,7 @@ const UnifiedReports: React.FC = () => {
             exportData.data,
             analyticsData.trends,
             analyticsData.categories,
-            exportOptions
+            exportOptions,
           );
           break;
         case "excel":
@@ -298,7 +317,7 @@ const UnifiedReports: React.FC = () => {
             exportData.data,
             analyticsData.trends,
             analyticsData.categories,
-            exportOptions
+            exportOptions,
           );
           break;
         case "csv":
@@ -307,7 +326,9 @@ const UnifiedReports: React.FC = () => {
       }
     } catch (err) {
       console.error("Export error:", err);
-      alert(`Export failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      alert(
+        `Export failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     } finally {
       setIsExporting(false);
     }
@@ -321,7 +342,9 @@ const UnifiedReports: React.FC = () => {
       await fetchAnalyticsData();
 
       // Show success message
-      alert(`Report generated successfully with ${analyticsData?.complaints?.total || 0} records based on applied filters.`);
+      alert(
+        `Report generated successfully with ${analyticsData?.complaints?.total || 0} records based on applied filters.`,
+      );
     } catch (error) {
       console.error("Report generation error:", error);
       alert("Failed to generate report. Please try again.");
@@ -329,14 +352,21 @@ const UnifiedReports: React.FC = () => {
   };
 
   // Chart colors
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884D8",
+    "#82CA9D",
+  ];
 
   // Memoized chart data processing for better performance
   const processedChartData = useMemo(() => {
     if (!analyticsData) return null;
 
     return {
-      trendsData: analyticsData.trends.map(trend => ({
+      trendsData: analyticsData.trends.map((trend) => ({
         ...trend,
         date: new Date(trend.date).toLocaleDateString(),
       })),
@@ -344,9 +374,10 @@ const UnifiedReports: React.FC = () => {
         ...category,
         color: COLORS[index % COLORS.length],
       })),
-      wardsData: analyticsData.wards.map(ward => ({
+      wardsData: analyticsData.wards.map((ward) => ({
         ...ward,
-        efficiency: ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
+        efficiency:
+          ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
       })),
     };
   }, [analyticsData]);
@@ -387,35 +418,35 @@ const UnifiedReports: React.FC = () => {
             {translations?.reports?.title || "Reports & Analytics"}
           </h1>
           <p className="text-muted-foreground">
-            {appName} - {user?.role === "ADMINISTRATOR"
+            {appName} -{" "}
+            {user?.role === "ADMINISTRATOR"
               ? "Comprehensive system-wide insights and analytics"
               : user?.role === "WARD_OFFICER"
-              ? `Analytics for ${user?.ward || "your ward"}`
-              : "Your assigned task analytics and performance metrics"
-            }
+                ? `Analytics for ${user?.ward || "your ward"}`
+                : "Your assigned task analytics and performance metrics"}
           </p>
         </div>
-        
+
         {permissions.canExportData && (
           <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => handleExport("csv")}
               disabled={isExporting}
             >
               <FileText className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => handleExport("excel")}
               disabled={isExporting}
             >
               <FileSpreadsheet className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => handleExport("pdf")}
               disabled={isExporting}
             >
@@ -444,9 +475,9 @@ const UnifiedReports: React.FC = () => {
                 type="date"
                 value={filters.dateRange.from}
                 onChange={(e) =>
-                  setFilters(prev => ({
+                  setFilters((prev) => ({
                     ...prev,
-                    dateRange: { ...prev.dateRange, from: e.target.value }
+                    dateRange: { ...prev.dateRange, from: e.target.value },
                   }))
                 }
               />
@@ -458,9 +489,9 @@ const UnifiedReports: React.FC = () => {
                 type="date"
                 value={filters.dateRange.to}
                 onChange={(e) =>
-                  setFilters(prev => ({
+                  setFilters((prev) => ({
                     ...prev,
-                    dateRange: { ...prev.dateRange, to: e.target.value }
+                    dateRange: { ...prev.dateRange, to: e.target.value },
                   }))
                 }
               />
@@ -470,10 +501,10 @@ const UnifiedReports: React.FC = () => {
             {permissions.canViewAllWards && (
               <div>
                 <Label htmlFor="ward-filter">Ward</Label>
-                <Select 
-                  value={filters.ward} 
-                  onValueChange={(value) => 
-                    setFilters(prev => ({ ...prev, ward: value }))
+                <Select
+                  value={filters.ward}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, ward: value }))
                   }
                 >
                   <SelectTrigger>
@@ -494,10 +525,10 @@ const UnifiedReports: React.FC = () => {
             {/* Complaint Type */}
             <div>
               <Label htmlFor="type-filter">Complaint Type</Label>
-              <Select 
-                value={filters.complaintType} 
-                onValueChange={(value) => 
-                  setFilters(prev => ({ ...prev, complaintType: value }))
+              <Select
+                value={filters.complaintType}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, complaintType: value }))
                 }
               >
                 <SelectTrigger>
@@ -517,10 +548,10 @@ const UnifiedReports: React.FC = () => {
             {/* Status */}
             <div>
               <Label htmlFor="status-filter">Status</Label>
-              <Select 
-                value={filters.status} 
-                onValueChange={(value) => 
-                  setFilters(prev => ({ ...prev, status: value }))
+              <Select
+                value={filters.status}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, status: value }))
                 }
               >
                 <SelectTrigger>
@@ -537,7 +568,7 @@ const UnifiedReports: React.FC = () => {
               </Select>
             </div>
           </div>
-          
+
           <div className="flex justify-end mt-4 space-x-2">
             <Button variant="outline" onClick={() => window.location.reload()}>
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -556,11 +587,15 @@ const UnifiedReports: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Complaints</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Complaints
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analyticsData.complaints.total}</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.complaints.total}
+              </div>
               <div className="flex items-center text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +12% from last month
@@ -574,21 +609,32 @@ const UnifiedReports: React.FC = () => {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analyticsData.complaints.resolved}</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.complaints.resolved}
+              </div>
               <div className="flex items-center text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                {((analyticsData.complaints.resolved / analyticsData.complaints.total) * 100).toFixed(1)}% resolution rate
+                {(
+                  (analyticsData.complaints.resolved /
+                    analyticsData.complaints.total) *
+                  100
+                ).toFixed(1)}
+                % resolution rate
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">SLA Compliance</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                SLA Compliance
+              </CardTitle>
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analyticsData.sla.compliance}%</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.sla.compliance}%
+              </div>
               <div className="flex items-center text-xs text-muted-foreground">
                 <Clock className="h-3 w-3 mr-1" />
                 Avg: {analyticsData.sla.avgResolutionTime} days
@@ -598,11 +644,15 @@ const UnifiedReports: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Satisfaction
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analyticsData.performance.userSatisfaction.toFixed(2)}/5</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.performance.userSatisfaction.toFixed(2)}/5
+              </div>
               <div className="flex items-center text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +0.2 from last month
@@ -619,7 +669,9 @@ const UnifiedReports: React.FC = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="trends">Trends</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
-            {permissions.canViewAllWards && <TabsTrigger value="wards">Ward Analysis</TabsTrigger>}
+            {permissions.canViewAllWards && (
+              <TabsTrigger value="wards">Ward Analysis</TabsTrigger>
+            )}
             <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
 
@@ -640,8 +692,20 @@ const UnifiedReports: React.FC = () => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Area type="monotone" dataKey="complaints" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                        <Area type="monotone" dataKey="resolved" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
+                        <Area
+                          type="monotone"
+                          dataKey="complaints"
+                          stackId="1"
+                          stroke="#8884d8"
+                          fill="#8884d8"
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="resolved"
+                          stackId="1"
+                          stroke="#82ca9d"
+                          fill="#82ca9d"
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -662,14 +726,18 @@ const UnifiedReports: React.FC = () => {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) =>
+                            `${name}: ${(percent * 100).toFixed(0)}%`
+                          }
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="count"
                         >
-                          {(processedChartData?.categoriesWithColors || []).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
+                          {(processedChartData?.categoriesWithColors || []).map(
+                            (entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ),
+                          )}
                         </Pie>
                         <Tooltip />
                       </PieChart>
@@ -698,7 +766,12 @@ const UnifiedReports: React.FC = () => {
                       <Legend />
                       <Bar yAxisId="left" dataKey="complaints" fill="#8884d8" />
                       <Bar yAxisId="left" dataKey="resolved" fill="#82ca9d" />
-                      <Line yAxisId="right" type="monotone" dataKey="slaCompliance" stroke="#ff7300" />
+                      <Line
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="slaCompliance"
+                        stroke="#ff7300"
+                      />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
@@ -717,19 +790,31 @@ const UnifiedReports: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span>User Satisfaction</span>
-                      <Badge variant="outline">{analyticsData.performance.userSatisfaction.toFixed(2)}/5</Badge>
+                      <Badge variant="outline">
+                        {analyticsData.performance.userSatisfaction.toFixed(2)}
+                        /5
+                      </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Escalation Rate</span>
-                      <Badge variant="outline">{analyticsData.performance.escalationRate.toFixed(2)}%</Badge>
+                      <Badge variant="outline">
+                        {analyticsData.performance.escalationRate.toFixed(2)}%
+                      </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>First Call Resolution</span>
-                      <Badge variant="outline">{analyticsData.performance.firstCallResolution.toFixed(2)}%</Badge>
+                      <Badge variant="outline">
+                        {analyticsData.performance.firstCallResolution.toFixed(
+                          2,
+                        )}
+                        %
+                      </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Repeat Complaints</span>
-                      <Badge variant="outline">{analyticsData.performance.repeatComplaints.toFixed(2)}%</Badge>
+                      <Badge variant="outline">
+                        {analyticsData.performance.repeatComplaints.toFixed(2)}%
+                      </Badge>
                     </div>
                   </div>
                 </CardContent>
@@ -791,11 +876,16 @@ const UnifiedReports: React.FC = () => {
               <CardContent>
                 <div className="space-y-4">
                   {analyticsData.categories.map((category, index) => (
-                    <div key={category.name} className="flex items-center justify-between p-3 border rounded">
+                    <div
+                      key={category.name}
+                      className="flex items-center justify-between p-3 border rounded"
+                    >
                       <div className="flex items-center space-x-3">
-                        <div 
-                          className="w-4 h-4 rounded" 
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        <div
+                          className="w-4 h-4 rounded"
+                          style={{
+                            backgroundColor: COLORS[index % COLORS.length],
+                          }}
                         />
                         <span className="font-medium">{category.name}</span>
                       </div>

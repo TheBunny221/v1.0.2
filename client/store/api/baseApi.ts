@@ -247,7 +247,9 @@ export const getApiErrorMessage = (error: any): string => {
 
     // Try to get error message from different possible structures
     if (error?.data?.error) {
-      return typeof error.data.error === 'string' ? error.data.error : 'An error occurred';
+      return typeof error.data.error === "string"
+        ? error.data.error
+        : "An error occurred";
     }
 
     // Handle RTK Query error formats
@@ -256,7 +258,7 @@ export const getApiErrorMessage = (error: any): string => {
     }
 
     // Handle serialized error responses
-    if (typeof error?.data === 'string') {
+    if (typeof error?.data === "string") {
       try {
         const parsedError = JSON.parse(error.data);
         if (parsedError.message) {

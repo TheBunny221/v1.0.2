@@ -23,7 +23,9 @@ import {
 import QuickComplaintForm from "../components/QuickComplaintForm";
 
 const Index: React.FC = () => {
-  const { translations, currentLanguage } = useAppSelector((state) => state.language);
+  const { translations, currentLanguage } = useAppSelector(
+    (state) => state.language,
+  );
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { appName, getConfig } = useSystemConfig();
 
@@ -178,7 +180,10 @@ const Index: React.FC = () => {
                       {translations?.common?.time || "Office Hours"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {getConfig("CONTACT_OFFICE_HOURS", "Monday - Friday: 9 AM - 6 PM")}
+                      {getConfig(
+                        "CONTACT_OFFICE_HOURS",
+                        "Monday - Friday: 9 AM - 6 PM",
+                      )}
                     </div>
                   </div>
                 </div>
@@ -189,7 +194,10 @@ const Index: React.FC = () => {
                       {translations?.complaints?.location || "Office Location"}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {getConfig("CONTACT_OFFICE_ADDRESS", "Cochin Corporation Office")}
+                      {getConfig(
+                        "CONTACT_OFFICE_ADDRESS",
+                        "Cochin Corporation Office",
+                      )}
                     </div>
                   </div>
                 </div>

@@ -193,7 +193,16 @@ const getSLAReport = asyncHandler(async (req, res) => {
 // @route   GET /api/reports/analytics
 // @access  Private (Admin, Ward Officer, Maintenance)
 const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
-  const { from, to, ward, type, status, priority, page = 1, limit = 1000 } = req.query;
+  const {
+    from,
+    to,
+    ward,
+    type,
+    status,
+    priority,
+    page = 1,
+    limit = 1000,
+  } = req.query;
 
   // Build filter conditions based on user role
   let whereConditions = {};
@@ -255,7 +264,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       // Only apply pagination for detailed data, not for analytics
       ...(pageSize < totalComplaints && {
@@ -266,10 +275,17 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     // Calculate basic metrics
     const complaintCount = complaints.length;
-    const resolvedComplaints = complaints.filter(c => c.status === "resolved").length;
-    const pendingComplaints = complaints.filter(c => ["registered", "assigned", "in_progress"].includes(c.status)).length;
-    const overdueComplaints = complaints.filter(c => {
-      if (c.deadline && ["registered", "assigned", "in_progress"].includes(c.status)) {
+    const resolvedComplaints = complaints.filter(
+      (c) => c.status === "resolved",
+    ).length;
+    const pendingComplaints = complaints.filter((c) =>
+      ["registered", "assigned", "in_progress"].includes(c.status),
+    ).length;
+    const overdueComplaints = complaints.filter((c) => {
+      if (
+        c.deadline &&
+        ["registered", "assigned", "in_progress"].includes(c.status)
+      ) {
         return new Date(c.deadline) < new Date();
       }
       return false;
@@ -277,22 +293,29 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     // Calculate SLA compliance
     const totalResolved = resolvedComplaints;
-    const onTimeResolved = complaints.filter(c => {
+    const onTimeResolved = complaints.filter((c) => {
       if (c.status === "resolved" && c.deadline && c.resolvedOn) {
         return new Date(c.resolvedOn) <= new Date(c.deadline);
       }
       return false;
     }).length;
-    const slaCompliance = totalResolved > 0 ? (onTimeResolved / totalResolved) * 100 : 0;
+    const slaCompliance =
+      totalResolved > 0 ? (onTimeResolved / totalResolved) * 100 : 0;
 
     // Calculate average resolution time
-    const resolvedWithTime = complaints.filter(c => c.status === "resolved" && c.resolvedOn);
-    const avgResolutionTime = resolvedWithTime.length > 0
-      ? resolvedWithTime.reduce((sum, c) => {
-          const days = Math.ceil((new Date(c.resolvedOn) - new Date(c.createdAt)) / (1000 * 60 * 60 * 24));
-          return sum + days;
-        }, 0) / resolvedWithTime.length
-      : 0;
+    const resolvedWithTime = complaints.filter(
+      (c) => c.status === "resolved" && c.resolvedOn,
+    );
+    const avgResolutionTime =
+      resolvedWithTime.length > 0
+        ? resolvedWithTime.reduce((sum, c) => {
+            const days = Math.ceil(
+              (new Date(c.resolvedOn) - new Date(c.createdAt)) /
+                (1000 * 60 * 60 * 24),
+            );
+            return sum + days;
+          }, 0) / resolvedWithTime.length
+        : 0;
 
     // Get trends data (last 30 days) with optimized aggregation
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -302,7 +325,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     for (let i = 29; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = date.toISOString().split("T")[0];
       trendsMap.set(dateStr, { complaints: 0, resolved: 0, slaCompliance: 0 });
     }
 
@@ -322,8 +345,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       },
     });
 
-    trendsComplaints.forEach(complaint => {
-      const dateStr = complaint.createdAt.toISOString().split('T')[0];
+    trendsComplaints.forEach((complaint) => {
+      const dateStr = complaint.createdAt.toISOString().split("T")[0];
       if (trendsMap.has(dateStr)) {
         const dayData = trendsMap.get(dateStr);
         dayData.complaints++;
@@ -331,7 +354,9 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
           dayData.resolved++;
           // Calculate SLA compliance
           if (complaint.resolvedOn && complaint.deadline) {
-            if (new Date(complaint.resolvedOn) <= new Date(complaint.deadline)) {
+            if (
+              new Date(complaint.resolvedOn) <= new Date(complaint.deadline)
+            ) {
               dayData.slaCompliance = (dayData.slaCompliance || 0) + 1;
             }
           }
@@ -341,9 +366,10 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     // Calculate final SLA compliance percentages
     const trends = Array.from(trendsMap.entries()).map(([date, data]) => {
-      const slaCompliance = data.resolved > 0
-        ? (data.slaCompliance / data.resolved) * 100
-        : 85 + Math.random() * 10; // Default if no data
+      const slaCompliance =
+        data.resolved > 0
+          ? (data.slaCompliance / data.resolved) * 100
+          : 85 + Math.random() * 10; // Default if no data
 
       return {
         date,
@@ -364,17 +390,26 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         },
       });
 
-      wardsData = wards.map(ward => {
+      wardsData = wards.map((ward) => {
         const wardComplaints = ward.complaints || [];
-        const wardResolved = wardComplaints.filter(c => c.status === "resolved").length;
-        const wardAvgTime = wardComplaints.length > 0
-          ? wardComplaints.reduce((sum, c) => {
-              if (c.status === "resolved" && c.resolvedAt) {
-                return sum + Math.ceil((new Date(c.resolvedAt) - new Date(c.createdAt)) / (1000 * 60 * 60 * 24));
-              }
-              return sum;
-            }, 0) / wardComplaints.length
-          : 0;
+        const wardResolved = wardComplaints.filter(
+          (c) => c.status === "resolved",
+        ).length;
+        const wardAvgTime =
+          wardComplaints.length > 0
+            ? wardComplaints.reduce((sum, c) => {
+                if (c.status === "resolved" && c.resolvedAt) {
+                  return (
+                    sum +
+                    Math.ceil(
+                      (new Date(c.resolvedAt) - new Date(c.createdAt)) /
+                        (1000 * 60 * 60 * 24),
+                    )
+                  );
+                }
+                return sum;
+              }, 0) / wardComplaints.length
+            : 0;
 
         return {
           id: ward.id,
@@ -382,14 +417,17 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
           complaints: wardComplaints.length,
           resolved: wardResolved,
           avgTime: wardAvgTime,
-          slaScore: wardComplaints.length > 0 ? (wardResolved / wardComplaints.length) * 100 : 0,
+          slaScore:
+            wardComplaints.length > 0
+              ? (wardResolved / wardComplaints.length) * 100
+              : 0,
         };
       });
     }
 
     // Get category breakdown
     const categoryMap = new Map();
-    complaints.forEach(complaint => {
+    complaints.forEach((complaint) => {
       const category = complaint.type || "Others";
       if (!categoryMap.has(category)) {
         categoryMap.set(category, { count: 0, totalTime: 0, resolvedCount: 0 });
@@ -398,18 +436,24 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       data.count++;
 
       if (complaint.status === "resolved" && complaint.resolvedAt) {
-        const days = Math.ceil((new Date(complaint.resolvedAt) - new Date(complaint.createdAt)) / (1000 * 60 * 60 * 24));
+        const days = Math.ceil(
+          (new Date(complaint.resolvedAt) - new Date(complaint.createdAt)) /
+            (1000 * 60 * 60 * 24),
+        );
         data.totalTime += days;
         data.resolvedCount++;
       }
     });
 
-    const categories = Array.from(categoryMap.entries()).map(([name, data]) => ({
-      name,
-      count: data.count,
-      avgTime: data.resolvedCount > 0 ? data.totalTime / data.resolvedCount : 0,
-      color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
-    }));
+    const categories = Array.from(categoryMap.entries()).map(
+      ([name, data]) => ({
+        name,
+        count: data.count,
+        avgTime:
+          data.resolvedCount > 0 ? data.totalTime / data.resolvedCount : 0,
+        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
+      }),
+    );
 
     // Performance metrics
     const performance = {
@@ -447,8 +491,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     // Set cache headers for better performance
     res.set({
-      'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
-      'ETag': `"analytics-${JSON.stringify(whereConditions)}-${Date.now()}"`,
+      "Cache-Control": "public, max-age=300", // Cache for 5 minutes
+      ETag: `"analytics-${JSON.stringify(whereConditions)}-${Date.now()}"`,
     });
 
     res.status(200).json({
@@ -507,7 +551,7 @@ const exportReports = asyncHandler(async (req, res) => {
         submittedBy: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -526,26 +570,31 @@ const exportReports = asyncHandler(async (req, res) => {
         "Contact",
       ];
 
-      const csvRows = complaints.map(complaint => [
+      const csvRows = complaints.map((complaint) => [
         complaint.id,
         complaint.type || "N/A",
         complaint.description?.substring(0, 100) || "N/A",
         complaint.status,
         complaint.priority || "N/A",
         complaint.ward?.name || "N/A",
-        complaint.createdAt.toISOString().split('T')[0],
-        complaint.resolvedOn ? complaint.resolvedOn.toISOString().split('T')[0] : "N/A",
+        complaint.createdAt.toISOString().split("T")[0],
+        complaint.resolvedOn
+          ? complaint.resolvedOn.toISOString().split("T")[0]
+          : "N/A",
         complaint.assignedTo?.fullName || "Unassigned",
         complaint.submittedBy?.fullName || "Guest",
         complaint.contactPhone || "N/A",
       ]);
 
       const csvContent = [csvHeaders, ...csvRows]
-        .map(row => row.map(field => `"${field}"`).join(","))
+        .map((row) => row.map((field) => `"${field}"`).join(","))
         .join("\n");
 
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", "attachment; filename=complaints-report.csv");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=complaints-report.csv",
+      );
       return res.send(csvContent);
     }
 
@@ -557,8 +606,10 @@ const exportReports = asyncHandler(async (req, res) => {
         complaints,
         summary: {
           total: complaints.length,
-          resolved: complaints.filter(c => c.status === "resolved").length,
-          pending: complaints.filter(c => ["registered", "assigned", "in_progress"].includes(c.status)).length,
+          resolved: complaints.filter((c) => c.status === "resolved").length,
+          pending: complaints.filter((c) =>
+            ["registered", "assigned", "in_progress"].includes(c.status),
+          ).length,
         },
         filters: { from, to, ward, type, status, priority },
         exportedAt: new Date().toISOString(),
@@ -583,13 +634,9 @@ router.get(
 router.get(
   "/trends",
   authorize("ADMINISTRATOR", "WARD_OFFICER"),
-  getComplaintTrends
+  getComplaintTrends,
 );
-router.get(
-  "/sla",
-  authorize("ADMINISTRATOR", "WARD_OFFICER"),
-  getSLAReport
-);
+router.get("/sla", authorize("ADMINISTRATOR", "WARD_OFFICER"), getSLAReport);
 router.get(
   "/analytics",
   authorize("ADMINISTRATOR", "WARD_OFFICER", "MAINTENANCE_TEAM"),
