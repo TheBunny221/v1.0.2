@@ -139,9 +139,16 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     },
   ];
 
-  const filteredNavItems = navigationItems.filter(
-    (item) => !user || item.roles.includes(user.role as string),
-  );
+  const filteredNavItems = navigationItems.filter((item) => {
+    if (!user) return false;
+
+    // Hide Home tab for logged-in users (should only show for guests/non-authenticated)
+    if (item.path === "/" && user) {
+      return false;
+    }
+
+    return item.roles.includes(user.role as string);
+  });
 
   const isActiveRoute = (path: string) => {
     if (path === "/") {
