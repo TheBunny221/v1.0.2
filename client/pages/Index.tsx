@@ -90,7 +90,7 @@ const Index: React.FC = () => {
                 className="bg-primary hover:bg-primary/90"
                 variant="outline"
               >
-                <FileText className="mr-2 h-5 w-5" />
+                <FileText className="mr-2 h-5 w-5" style={{color:"#ffffff"}} />
                 {translations?.complaints?.registerComplaint ||
                   "Register Complaint"}
               </Button>
