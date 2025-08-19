@@ -326,7 +326,7 @@ const AdminConfig: React.FC = () => {
       let response;
       if (ward.id && ward.id !== "") {
         // Update existing ward
-        response = await apiCall(`/wards/${ward.id}`, {
+        response = await apiCall(`/users/wards/${ward.id}`, {
           method: "PUT",
           body: JSON.stringify(wardData),
         });
@@ -337,7 +337,7 @@ const AdminConfig: React.FC = () => {
         );
       } else {
         // Create new ward
-        response = await apiCall("/wards", {
+        response = await apiCall("/users/wards", {
           method: "POST",
           body: JSON.stringify(wardData),
         });
