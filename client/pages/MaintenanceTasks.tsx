@@ -293,7 +293,7 @@ const MaintenanceTasks: React.FC = () => {
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "pending" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("pending")}
+          onClick={() => handleFilterChange("pending")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
