@@ -1364,6 +1364,87 @@ const AdminConfig: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Complaint Management Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Settings className="h-5 w-5 mr-2" />
+                    Complaint Management
+                  </h3>
+                  <div className="space-y-4">
+                    {systemSettings
+                      .filter((s) => s.key === "AUTO_ASSIGN_COMPLAINTS")
+                      .map((setting) => (
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium">Auto-Assign Complaints</h4>
+                              <p className="text-sm text-gray-600">
+                                When enabled, complaints will be automatically assigned to Ward Officers based on the ward location
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">{setting.type}</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setIsSettingDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Select
+                              value={setting.value}
+                              onValueChange={(value) => {
+                                setSystemSettings((prev) =>
+                                  prev.map((s) =>
+                                    s.key === setting.key
+                                      ? { ...s, value: value }
+                                      : s,
+                                  ),
+                                );
+                                handleUpdateSystemSetting(setting.key, value);
+                              }}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Enabled</SelectItem>
+                                <SelectItem value="false">Disabled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      ))}
+
+                    {/* Auto-assign info card */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-green-900">
+                            How Auto-Assignment Works
+                          </h4>
+                          <div className="text-sm text-green-700 mt-1 space-y-1">
+                            <p>• When a complaint is submitted by a citizen, it gets automatically assigned to a Ward Officer in that ward</p>
+                            <p>• When an admin creates a complaint, it also gets auto-assigned to the respective Ward Officer</p>
+                            <p>• If disabled, complaints remain in "Registered" status until manually assigned</p>
+                            <p>• Ward Officers can then assign complaints to Maintenance Team members</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Contact Information Settings */}
                 <div>
                   <h3 className="text-lg font-medium mb-4 flex items-center">
