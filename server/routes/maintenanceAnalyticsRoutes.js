@@ -223,8 +223,8 @@ const getMaintenanceDashboard = asyncHandler(async (req, res) => {
 
     // Get overdue tasks
     const overdueTasks = assignments.filter(task => {
-      if (task.slaDeadline) {
-        return new Date(task.slaDeadline) < new Date();
+      if (task.deadline) {
+        return new Date(task.deadline) < new Date();
       }
       return false;
     });
