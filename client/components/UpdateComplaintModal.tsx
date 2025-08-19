@@ -412,7 +412,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   <SelectValue placeholder={getDropdownLabel()} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">
+                  <SelectItem value="none">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
                       No Assignment
