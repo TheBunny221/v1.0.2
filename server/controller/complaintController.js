@@ -418,10 +418,17 @@ export const getComplaints = asyncHandler(async (req, res) => {
   // For now, using case-sensitive search for SQLite compatibility.
   if (search) {
     const searchTerm = search.trim();
+    const upperSearchTerm = searchTerm.toUpperCase();
+    const lowerSearchTerm = searchTerm.toLowerCase();
+
     filters.OR = [
       { title: { contains: searchTerm } },
+      { title: { contains: lowerSearchTerm } },
       { description: { contains: searchTerm } },
+      { description: { contains: lowerSearchTerm } },
       { area: { contains: searchTerm } },
+      { area: { contains: lowerSearchTerm } },
+      { complaintId: { contains: upperSearchTerm } },
       { complaintId: { contains: searchTerm } },
       // Support searching by partial ID (e.g., "KSC" or "0001")
       { id: { contains: searchTerm } },
@@ -429,7 +436,12 @@ export const getComplaints = asyncHandler(async (req, res) => {
 
     // If search looks like a complaint ID (starts with letters), prioritize exact matches
     if (/^[A-Za-z]/.test(searchTerm)) {
-      filters.OR.unshift({ complaintId: { equals: searchTerm.toUpperCase() } });
+      filters.OR.unshift({ complaintId: { equals: upperSearchTerm } });
+    }
+
+    // If search is purely numeric, it might be searching for the numeric part of complaint ID
+    if (/^\d+$/.test(searchTerm)) {
+      filters.OR.unshift({ complaintId: { contains: searchTerm.padStart(4, '0') } });
     }
   }
 
