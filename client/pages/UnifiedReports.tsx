@@ -972,7 +972,13 @@ const UnifiedReports: React.FC = () => {
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" />
                       <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
+                      <Tooltip
+                        labelFormatter={(label) => `Date: ${new Date(label).toLocaleDateString()}`}
+                        formatter={(value, name) => [
+                          name === 'slaCompliance' ? `${value}%` : value,
+                          name === 'slaCompliance' ? 'SLA Compliance' : name
+                        ]}
+                      />
                       <Legend />
                       <Bar yAxisId="left" dataKey="complaints" fill="#8884d8" />
                       <Bar yAxisId="left" dataKey="resolved" fill="#82ca9d" />
