@@ -25,6 +25,7 @@ async function main() {
       await prisma.ward.deleteMany({});
       await prisma.department.deleteMany({});
       await prisma.systemConfig.deleteMany({});
+      await prisma.report.deleteMany({});
     }
 
     // 1. Create System Configuration
@@ -44,8 +45,7 @@ async function main() {
         {
           key: "COMPLAINT_ID_PREFIX",
           value: "KSC",
-          description:
-            "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+          description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
         },
         {
           key: "COMPLAINT_ID_START_NUMBER",
@@ -80,15 +80,14 @@ async function main() {
         {
           key: "COMPLAINT_AUTO_ASSIGN",
           value: "true",
-          description:
-            "Whether complaints should be auto-assigned to ward officers",
+          description: "Whether complaints should be auto-assigned to ward officers",
         },
       ],
     });
 
     // 2. Create Departments
     console.log("🏢 Creating departments...");
-    const departments = await prisma.department.createMany({
+    await prisma.department.createMany({
       data: [
         {
           name: "Public Works",
@@ -96,13 +95,11 @@ async function main() {
         },
         {
           name: "Water Supply",
-          description:
-            "Water distribution, quality control, and pipeline maintenance",
+          description: "Water distribution, quality control, and pipeline maintenance",
         },
         {
           name: "Electricity",
-          description:
-            "Street lighting, power distribution, and electrical maintenance",
+          description: "Street lighting, power distribution, and electrical maintenance",
         },
         {
           name: "Waste Management",
@@ -115,40 +112,40 @@ async function main() {
       ],
     });
 
-    // 3. Create Wards
+    // 3. Create Wards (Real Kochi Ward Data)
     console.log("🏘️ Creating wards...");
     const wardsData = [
       {
         name: "Ward 1 - Fort Kochi",
-        description: "Historic Fort Kochi area including Chinese fishing nets",
+        description: "Historic Fort Kochi area including Chinese fishing nets and heritage sites",
       },
       {
         name: "Ward 2 - Mattancherry",
-        description: "Mattancherry Palace and spice markets area",
+        description: "Mattancherry Palace, spice markets, and Jewish quarter",
       },
       {
         name: "Ward 3 - Ernakulam South",
-        description: "Commercial district and shopping areas",
+        description: "Commercial district, shopping centers, and business hub",
       },
       {
         name: "Ward 4 - Kadavanthra",
-        description: "Residential area with IT companies",
+        description: "Residential area with IT companies and educational institutions",
       },
       {
         name: "Ward 5 - Panampilly Nagar",
-        description: "Upscale residential and commercial area",
+        description: "Upscale residential and commercial area near backwaters",
       },
       {
         name: "Ward 6 - Marine Drive",
-        description: "Waterfront promenade and business district",
+        description: "Waterfront promenade, business district, and shopping complex",
       },
       {
         name: "Ward 7 - Willingdon Island",
-        description: "Port area and industrial zone",
+        description: "Port area, industrial zone, and naval base",
       },
       {
         name: "Ward 8 - Thevara",
-        description: "Mixed residential and commercial area",
+        description: "Mixed residential and commercial area with ferry services",
       },
     ];
 
@@ -162,22 +159,26 @@ async function main() {
 
     // 4. Create Sub-zones for each ward
     console.log("📍 Creating sub-zones...");
-    for (const ward of createdWards) {
-      const subZoneNames = [
-        "North Zone",
-        "South Zone",
-        "East Zone",
-        "West Zone",
-        "Central Zone",
-      ];
+    const subZoneData = {
+      "Ward 1 - Fort Kochi": ["Princess Street Area", "Fort Kochi Beach", "Chinese Fishing Nets"],
+      "Ward 2 - Mattancherry": ["Palace Road", "Synagogue Lane", "Spice Market"],
+      "Ward 3 - Ernakulam South": ["MG Road", "Broadway", "Avenue Road"],
+      "Ward 4 - Kadavanthra": ["Kakkanad Junction", "HMT Colony", "CUSAT Campus"],
+      "Ward 5 - Panampilly Nagar": ["Gold Souk Area", "Hotel Strip", "Panampilly Avenue"],
+      "Ward 6 - Marine Drive": ["Marine Drive Walkway", "High Court Junction", "Menaka"],
+      "Ward 7 - Willingdon Island": ["Port Area", "Naval Base", "Island Express"],
+      "Ward 8 - Thevara": ["Ferry Road", "Bishop Garden", "Thevara Junction"],
+    };
 
-      for (let i = 0; i < 3; i++) {
-        // Create 3 sub-zones per ward
+    for (const ward of createdWards) {
+      const zoneNames = subZoneData[ward.name] || ["North Zone", "South Zone", "Central Zone"];
+      
+      for (const zoneName of zoneNames) {
         await prisma.subZone.create({
           data: {
-            name: `${ward.name} - ${subZoneNames[i]}`,
+            name: zoneName,
             wardId: ward.id,
-            description: `${subZoneNames[i]} area of ${ward.name}`,
+            description: `${zoneName} in ${ward.name}`,
           },
         });
       }
@@ -208,12 +209,17 @@ async function main() {
 
     // Ward Officers (one for each ward)
     const wardOfficers = [];
+    const officerNames = [
+      "Rajesh Kumar", "Priya Nair", "Mohammed Ali", "Sunitha Menon", 
+      "Ravi Krishnan", "Deepa Thomas", "Arun Vijayan", "Shweta Sharma"
+    ];
+
     for (let i = 0; i < createdWards.length; i++) {
       const ward = createdWards[i];
       const officer = await prisma.user.create({
         data: {
           email: `officer${i + 1}@cochinsmartcity.gov.in`,
-          fullName: `Ward Officer ${i + 1}`,
+          fullName: officerNames[i] || `Ward Officer ${i + 1}`,
           phoneNumber: `+91-98765432${10 + i}`,
           password: await hashPassword("officer123"),
           role: "WARD_OFFICER",
@@ -228,21 +234,23 @@ async function main() {
 
     // Maintenance Team Members
     const maintenanceTeam = [];
-    const departments_list = [
-      "Public Works",
-      "Water Supply",
-      "Electricity",
-      "Waste Management",
+    const maintenanceData = [
+      { name: "Suresh Kumar", dept: "Public Works", email: "suresh.kumar@cochinsmartcity.gov.in" },
+      { name: "Leela Devi", dept: "Water Supply", email: "leela.devi@cochinsmartcity.gov.in" },
+      { name: "Vinod Electrician", dept: "Electricity", email: "vinod.electric@cochinsmartcity.gov.in" },
+      { name: "Ramesh Cleaner", dept: "Waste Management", email: "ramesh.waste@cochinsmartcity.gov.in" },
     ];
-    for (let i = 0; i < departments_list.length; i++) {
+
+    for (let i = 0; i < maintenanceData.length; i++) {
+      const data = maintenanceData[i];
       const member = await prisma.user.create({
         data: {
-          email: `maintenance${i + 1}@cochinsmartcity.gov.in`,
-          fullName: `${departments_list[i]} Technician`,
+          email: data.email,
+          fullName: data.name,
           phoneNumber: `+91-98765433${10 + i}`,
           password: await hashPassword("maintenance123"),
           role: "MAINTENANCE_TEAM",
-          department: departments_list[i],
+          department: data.dept,
           language: "en",
           isActive: true,
           joinedOn: new Date(),
@@ -254,31 +262,14 @@ async function main() {
     // Citizens
     const citizens = [];
     const citizenData = [
-      {
-        name: "Rajesh Kumar",
-        email: "rajesh.kumar@email.com",
-        phone: "+91-9876540001",
-      },
-      {
-        name: "Priya Nair",
-        email: "priya.nair@email.com",
-        phone: "+91-9876540002",
-      },
-      {
-        name: "Mohammed Ali",
-        email: "mohammed.ali@email.com",
-        phone: "+91-9876540003",
-      },
-      {
-        name: "Sunitha Menon",
-        email: "sunitha.menon@email.com",
-        phone: "+91-9876540004",
-      },
-      {
-        name: "Ravi Krishnan",
-        email: "ravi.krishnan@email.com",
-        phone: "+91-9876540005",
-      },
+      { name: "Arjun Menon", email: "arjun.menon@email.com", phone: "+91-9876540001" },
+      { name: "Kavya Nair", email: "kavya.nair@email.com", phone: "+91-9876540002" },
+      { name: "Joseph Cherian", email: "joseph.cherian@email.com", phone: "+91-9876540003" },
+      { name: "Lakshmi Pillai", email: "lakshmi.pillai@email.com", phone: "+91-9876540004" },
+      { name: "Anand Kumar", email: "anand.kumar@email.com", phone: "+91-9876540005" },
+      { name: "Maya George", email: "maya.george@email.com", phone: "+91-9876540006" },
+      { name: "Vishnu Warrier", email: "vishnu.warrier@email.com", phone: "+91-9876540007" },
+      { name: "Nisha Kumari", email: "nisha.kumari@email.com", phone: "+91-9876540008" },
     ];
 
     for (const citizenInfo of citizenData) {
@@ -289,8 +280,7 @@ async function main() {
           phoneNumber: citizenInfo.phone,
           password: await hashPassword("citizen123"),
           role: "CITIZEN",
-          wardId:
-            createdWards[Math.floor(Math.random() * createdWards.length)].id,
+          wardId: createdWards[Math.floor(Math.random() * createdWards.length)].id,
           language: "en",
           isActive: true,
           joinedOn: new Date(),
@@ -305,8 +295,7 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WATER_SUPPLY",
         name: "Water Supply",
-        description:
-          "Issues related to water supply, quality, pressure, or leakage",
+        description: "Issues related to water supply, quality, pressure, or leakage",
         priority: "HIGH",
         slaHours: 24,
         isActive: true,
@@ -314,8 +303,7 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_ELECTRICITY",
         name: "Electricity",
-        description:
-          "Power outages, faulty connections, or street lighting issues",
+        description: "Power outages, faulty connections, or street lighting issues",
         priority: "HIGH",
         slaHours: 12,
         isActive: true,
@@ -331,8 +319,7 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WASTE_MANAGEMENT",
         name: "Waste Management",
-        description:
-          "Garbage collection, waste disposal, and sanitation issues",
+        description: "Garbage collection, waste disposal, and sanitation issues",
         priority: "MEDIUM",
         slaHours: 48,
         isActive: true,
@@ -353,41 +340,6 @@ async function main() {
         slaHours: 24,
         isActive: true,
       },
-      {
-        key: "COMPLAINT_TYPE_PUBLIC_TOILET",
-        name: "Public Toilet",
-        description: "Maintenance and cleanliness of public toilet facilities",
-        priority: "LOW",
-        slaHours: 48,
-        isActive: false, // Set as inactive for testing
-      },
-      {
-        key: "COMPLAINT_TYPE_TREE_CUTTING",
-        name: "Tree Cutting",
-        description:
-          "Tree trimming, removal of dangerous branches, or fallen trees",
-        priority: "MEDIUM",
-        slaHours: 72,
-        isActive: false, // Set as inactive for testing
-      },
-      {
-        key: "COMPLAINT_TYPE_NOISE_POLLUTION",
-        name: "Noise Pollution",
-        description:
-          "Excessive noise from construction, events, or other sources",
-        priority: "LOW",
-        slaHours: 24,
-        isActive: true,
-      },
-      {
-        key: "COMPLAINT_TYPE_STRAY_ANIMALS",
-        name: "Stray Animals",
-        description:
-          "Issues with stray dogs, cats, or other animals in public spaces",
-        priority: "MEDIUM",
-        slaHours: 48,
-        isActive: false, // Set as inactive for testing
-      },
     ];
 
     // Create complaint types in SystemConfig
@@ -407,65 +359,104 @@ async function main() {
       });
     }
 
-    // 7. Create Sample Complaints
+    // 7. Create Sample Complaints (Match current dashboard data: 94 total)
     console.log("📝 Creating sample complaints...");
     const complaintTypes = [
-      "WATER_SUPPLY",
-      "ELECTRICITY",
-      "ROAD_REPAIR",
-      "WASTE_MANAGEMENT",
-      "STREET_LIGHT",
-      "SEWAGE",
-      "GARBAGE",
-      "DRAINAGE",
-      "NOISE_POLLUTION",
-      "STRAY_ANIMALS",
+      "WATER_SUPPLY", "ELECTRICITY", "ROAD_REPAIR", 
+      "WASTE_MANAGEMENT", "STREET_LIGHTING", "DRAINAGE"
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"];
+    const statusWeights = [0.15, 0.25, 0.35, 0.25]; // 15% registered, 25% assigned, 35% in_progress, 25% resolved
 
-    // Create complaints spread across the last 6 months
+    // Generate complaints data to match dashboard (94 total, 68 active, 26 resolved)
     const complaintDates = [];
     const now = new Date();
+    
+    // Generate dates for last 6 months matching the dashboard data
+    const monthlyComplaintCounts = [
+      { month: 2, count: 14 }, // March 2025: 14 complaints, 5 resolved
+      { month: 1, count: 13 }, // April 2025: 13 complaints, 3 resolved  
+      { month: 0, count: 12 }, // May 2025: 12 complaints, 3 resolved
+      { month: -1, count: 9 }, // June 2025: 9 complaints, 3 resolved
+      { month: -2, count: 14 }, // July 2025: 14 complaints, 5 resolved
+      { month: -3, count: 20 }, // August 2025: 20 complaints, 3 resolved
+      { month: -4, count: 12 }, // September - older data
+    ];
 
-    // Generate specific month dates for better distribution
-    for (let monthOffset = 0; monthOffset < 6; monthOffset++) {
-      const monthDate = new Date(now.getFullYear(), now.getMonth() - monthOffset, 1);
+    let totalComplaints = 0;
+    let resolvedCount = 0;
+    const targetResolved = 26; // Based on dashboard showing ~26 resolved
+
+    for (const monthData of monthlyComplaintCounts) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - monthData.month, 1);
       const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
 
-      // Generate 8-15 complaints per month
-      const complaintsThisMonth = 8 + Math.floor(Math.random() * 8);
-
-      for (let dayOffset = 0; dayOffset < complaintsThisMonth; dayOffset++) {
+      for (let i = 0; i < monthData.count; i++) {
         const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
-        const complaintDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), randomDay);
-        complaintDates.push(complaintDate);
+        const randomHour = Math.floor(Math.random() * 24);
+        const randomMinute = Math.floor(Math.random() * 60);
+        
+        const complaintDate = new Date(
+          monthDate.getFullYear(), 
+          monthDate.getMonth(), 
+          randomDay, 
+          randomHour, 
+          randomMinute
+        );
+        
+        // Determine status - more recent complaints less likely to be resolved
+        let status;
+        const monthsFromNow = Math.abs(monthData.month);
+        if (monthsFromNow > 2 && resolvedCount < targetResolved && Math.random() < 0.4) {
+          status = "RESOLVED";
+          resolvedCount++;
+        } else if (Math.random() < 0.3) {
+          status = "IN_PROGRESS";
+        } else if (Math.random() < 0.5) {
+          status = "ASSIGNED";
+        } else {
+          status = "REGISTERED";
+        }
+
+        complaintDates.push({ date: complaintDate, status });
+        totalComplaints++;
       }
     }
 
-    // Ensure we have enough complaints for August (for testing)
-    const augustDate = new Date(2024, 7, 1); // August 2024
-    for (let i = 0; i < 12; i++) {
-      const randomDay = Math.floor(Math.random() * 31) + 1;
-      complaintDates.push(new Date(2024, 7, randomDay));
+    // Ensure we hit close to 94 total complaints
+    while (totalComplaints < 94) {
+      const recentDate = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+      complaintDates.push({ 
+        date: recentDate, 
+        status: Math.random() < 0.7 ? "REGISTERED" : "ASSIGNED" 
+      });
+      totalComplaints++;
     }
 
-    // Create complaints for each date
+    // Create complaints
+    let overdueCount = 0;
+    const targetOverdue = 54; // Based on dashboard
+
     for (let i = 0; i < complaintDates.length; i++) {
       const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
       const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
       const randomOfficer = wardOfficers.find((o) => o.wardId === randomWard.id);
       const complaintType = complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
       const priority = priorities[Math.floor(Math.random() * priorities.length)];
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const { date: complaintDate, status } = complaintDates[i];
 
       // Generate complaint ID
       const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
 
-      const complaintDate = complaintDates[i];
-      const resolvedDate = status === "RESOLVED" && Math.random() > 0.3
+      // Set deadline and determine if overdue
+      const deadline = new Date(complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const isOverdue = status !== "RESOLVED" && deadline < now && overdueCount < targetOverdue;
+      if (isOverdue) overdueCount++;
+
+      const resolvedDate = status === "RESOLVED" 
         ? new Date(complaintDate.getTime() + Math.random() * 10 * 24 * 60 * 60 * 1000)
         : null;
 
@@ -473,13 +464,14 @@ async function main() {
         data: {
           complaintId: complaintId,
           title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
-          description: `Sample complaint regarding ${complaintType.toLowerCase().replace("_", " ")} issue that needs immediate attention.`,
+          description: `Complaint regarding ${complaintType.toLowerCase().replace("_", " ")} issue that requires attention. Submitted by ${randomCitizen.fullName}.`,
           type: complaintType,
           status: status,
           priority: priority,
+          slaStatus: isOverdue ? "OVERDUE" : (status === "RESOLVED" ? "COMPLETED" : "ON_TIME"),
           wardId: randomWard.id,
-          area: `${randomWard.name} Area`,
-          landmark: "Near main junction",
+          area: randomWard.name.split(" - ")[1] || randomWard.name,
+          landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
           address: `Sample address in ${randomWard.name}`,
           contactName: randomCitizen.fullName,
           contactEmail: randomCitizen.email,
@@ -490,16 +482,16 @@ async function main() {
           submittedOn: complaintDate,
           assignedOn: status !== "REGISTERED" ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000) : null,
           resolvedOn: resolvedDate,
-          deadline: new Date(complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000),
-          rating: status === "RESOLVED" && Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : null,
+          deadline: deadline,
+          rating: status === "RESOLVED" && Math.random() > 0.4 ? Math.floor(Math.random() * 5) + 1 : null,
         },
       });
 
-      // Create status log for the complaint
+      // Create status logs
       await prisma.statusLog.create({
         data: {
           complaintId: complaint.id,
-          userId: randomOfficer?.id || adminUser.id,
+          userId: adminUser.id,
           fromStatus: null,
           toStatus: "REGISTERED",
           comment: "Complaint registered in the system",
@@ -524,28 +516,15 @@ async function main() {
     // 8. Create Sample Service Requests
     console.log("🔧 Creating sample service requests...");
     const serviceTypes = [
-      "BIRTH_CERTIFICATE",
-      "DEATH_CERTIFICATE",
-      "TRADE_LICENSE",
-      "BUILDING_PERMIT",
-      "WATER_CONNECTION",
-      "ELECTRICITY_CONNECTION",
+      "BIRTH_CERTIFICATE", "DEATH_CERTIFICATE", "TRADE_LICENSE",
+      "BUILDING_PERMIT", "WATER_CONNECTION", "ELECTRICITY_CONNECTION"
     ];
 
-    for (let i = 0; i < 10; i++) {
-      const randomWard =
-        createdWards[Math.floor(Math.random() * createdWards.length)];
-      const randomCitizen =
-        citizens[Math.floor(Math.random() * citizens.length)];
-      const serviceType =
-        serviceTypes[Math.floor(Math.random() * serviceTypes.length)];
-      const statuses = [
-        "SUBMITTED",
-        "VERIFIED",
-        "PROCESSING",
-        "APPROVED",
-        "COMPLETED",
-      ];
+    for (let i = 0; i < 15; i++) {
+      const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
+      const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
+      const serviceType = serviceTypes[Math.floor(Math.random() * serviceTypes.length)];
+      const statuses = ["SUBMITTED", "VERIFIED", "PROCESSING", "APPROVED", "COMPLETED"];
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
       await prisma.serviceRequest.create({
@@ -556,101 +535,30 @@ async function main() {
           status: status,
           priority: "NORMAL",
           wardId: randomWard.id,
-          area: `${randomWard.name} Area`,
+          area: randomWard.name.split(" - ")[1] || randomWard.name,
           address: `Sample address in ${randomWard.name}`,
           contactName: randomCitizen.fullName,
           contactEmail: randomCitizen.email,
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
-          submittedOn: new Date(
-            Date.now() - Math.random() * 20 * 24 * 60 * 60 * 1000,
-          ), // Random date within last 20 days
-          expectedCompletion: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+          submittedOn: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+          expectedCompletion: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         },
       });
     }
 
     // 9. Create Sample Notifications
     console.log("🔔 Creating sample notifications...");
-    for (const citizen of citizens.slice(0, 3)) {
+    for (const citizen of citizens.slice(0, 5)) {
       await prisma.notification.create({
         data: {
           userId: citizen.id,
           type: "IN_APP",
-          title: "Welcome to Cochin Smart City",
-          message:
-            "Thank you for registering with our digital platform. You can now submit complaints and track their progress.",
+          title: "Welcome to Kochi Smart City",
+          message: "Thank you for registering with our digital platform. You can now submit complaints and track their progress.",
           sentAt: new Date(),
         },
       });
-    }
-
-    // 10. Create some very recent complaints for testing activity feed
-    console.log("🔄 Creating recent activity for testing...");
-    const currentTime = new Date();
-
-    // Recent complaints (last few hours)
-    for (let i = 0; i < 5; i++) {
-      const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
-      const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
-      const randomOfficer = wardOfficers.find((o) => o.wardId === randomWard.id);
-      const complaintType = complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
-
-      // Create dates from 30 minutes to 6 hours ago
-      const minutesAgo = 30 + Math.floor(Math.random() * 330); // 30 min to 6 hours
-      const recentDate = new Date(currentTime.getTime() - minutesAgo * 60 * 1000);
-
-      const complaintNumber = (complaintDates.length + i + 1).toString().padStart(4, "0");
-      const complaintId = `KSC${complaintNumber}`;
-
-      const complaint = await prisma.complaint.create({
-        data: {
-          complaintId: complaintId,
-          title: `Recent ${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
-          description: `Fresh complaint about ${complaintType.toLowerCase().replace("_", " ")} requiring immediate attention.`,
-          type: complaintType,
-          status: i % 2 === 0 ? "REGISTERED" : "ASSIGNED",
-          priority: "MEDIUM",
-          wardId: randomWard.id,
-          area: `${randomWard.name} Area`,
-          landmark: "Near main junction",
-          address: `Sample address in ${randomWard.name}`,
-          contactName: randomCitizen.fullName,
-          contactEmail: randomCitizen.email,
-          contactPhone: randomCitizen.phoneNumber,
-          submittedById: randomCitizen.id,
-          assignedToId: i % 2 === 0 ? null : randomOfficer?.id,
-          createdAt: recentDate,
-          submittedOn: recentDate,
-          assignedOn: i % 2 === 0 ? null : new Date(recentDate.getTime() + 30 * 60 * 1000),
-          deadline: new Date(recentDate.getTime() + 7 * 24 * 60 * 60 * 1000),
-        },
-      });
-
-      // Create status logs for recent activity
-      await prisma.statusLog.create({
-        data: {
-          complaintId: complaint.id,
-          userId: randomOfficer?.id || adminUser.id,
-          fromStatus: null,
-          toStatus: "REGISTERED",
-          comment: "Complaint registered in the system",
-          timestamp: recentDate,
-        },
-      });
-
-      if (i % 2 !== 0 && randomOfficer) {
-        await prisma.statusLog.create({
-          data: {
-            complaintId: complaint.id,
-            userId: randomOfficer.id,
-            fromStatus: "REGISTERED",
-            toStatus: "ASSIGNED",
-            comment: "Complaint assigned to ward officer",
-            timestamp: new Date(recentDate.getTime() + 30 * 60 * 1000),
-          },
-        });
-      }
     }
 
     console.log("✅ Database seeding completed successfully!");
@@ -661,17 +569,17 @@ async function main() {
     console.log(`• ${wardOfficers.length} Ward Officers`);
     console.log(`• ${maintenanceTeam.length} Maintenance Team Members`);
     console.log(`• ${citizens.length} Citizens`);
-    console.log(`• ${complaintDates.length + 5} Sample Complaints (including recent ones)`);
-    console.log(`• 10 Sample Service Requests`);
-    console.log(`• Sample notifications and system config`);
+    console.log(`• ${totalComplaints} Total Complaints`);
+    console.log(`• ${resolvedCount} Resolved Complaints`);
+    console.log(`• ${overdueCount} Overdue Complaints`);
+    console.log(`• 15 Sample Service Requests`);
 
     console.log("\n🔑 Default Login Credentials:");
     console.log("Administrator: admin@cochinsmartcity.gov.in / admin123");
     console.log("Ward Officer: officer1@cochinsmartcity.gov.in / officer123");
-    console.log(
-      "Maintenance: maintenance1@cochinsmartcity.gov.in / maintenance123",
-    );
-    console.log("Citizen: rajesh.kumar@email.com / citizen123");
+    console.log("Maintenance: suresh.kumar@cochinsmartcity.gov.in / maintenance123");
+    console.log("Citizen: arjun.menon@email.com / citizen123");
+
   } catch (error) {
     console.error("❌ Error during seeding:", error);
     throw error;
