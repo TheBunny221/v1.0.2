@@ -467,7 +467,6 @@ export const manageRoles = asyncHandler(async (req, res) => {
 export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
   // Debug: Check total complaints first
   const totalComplaintsCount = await prisma.complaint.count();
@@ -483,8 +482,8 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 
   // Since SQLite date functions aren't working with our date format,
   // let's get all complaints and process them in JavaScript
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsCutoff = new Date();
+  sixMonthsCutoff.setMonth(sixMonthsCutoff.getMonth() - 6);
 
   const allComplaints = await prisma.complaint.findMany({
     where: {
