@@ -226,6 +226,7 @@ const UnifiedReports: React.FC = () => {
 
             console.log('Setting initial date range:', { earliestDate, latestDate });
 
+            // Set filters without triggering a new fetch loop
             setFilters(prev => ({
               ...prev,
               dateRange: {
@@ -233,8 +234,35 @@ const UnifiedReports: React.FC = () => {
                 to: latestDate,
               }
             }));
-            setFiltersInitialized(true);
+
+            // Also set the initial analytics data
+            const transformedData = {
+              complaints: {
+                total: data.data?.complaints?.total || 0,
+                resolved: data.data?.complaints?.resolved || 0,
+                pending: data.data?.complaints?.pending || 0,
+                overdue: data.data?.complaints?.overdue || 0,
+              },
+              sla: {
+                compliance: data.data?.sla?.compliance || 0,
+                avgResolutionTime: data.data?.sla?.avgResolutionTime || 0,
+                target: data.data?.sla?.target || 3,
+              },
+              trends: data.data?.trends || [],
+              wards: data.data?.wards || [],
+              categories: data.data?.categories || [],
+              performance: {
+                userSatisfaction: data.data?.performance?.userSatisfaction || 0,
+                escalationRate: data.data?.performance?.escalationRate || 0,
+                firstCallResolution: data.data?.performance?.firstCallResolution || 0,
+                repeatComplaints: data.data?.performance?.repeatComplaints || 0,
+              },
+            };
+
+            setAnalyticsData(transformedData);
+            setIsLoading(false);
           }
+          setFiltersInitialized(true);
         }
       } catch (error) {
         console.error('Initial data fetch error:', error);
