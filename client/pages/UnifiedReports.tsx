@@ -263,6 +263,12 @@ const UnifiedReports: React.FC = () => {
         ...(filters.priority !== "all" && { priority: filters.priority }),
       });
 
+      console.log('Fetching analytics with params:', {
+        filters,
+        queryString: queryParams.toString(),
+        url: `/api/reports/analytics?${queryParams}`
+      });
+
       // Use different endpoints based on user role
       let endpoint = "/api/reports/analytics";
       if (user?.role === "MAINTENANCE_TEAM") {
