@@ -76,7 +76,7 @@ export function getLogoClasses(
     large: {
       nav: {
         container: "flex items-center space-x-3",
-        image: "h-10 w-10",
+        image: "h-10 w-50",
         fallback: "h-10 w-10",
       },
       "nav-mobile": {
