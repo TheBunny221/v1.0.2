@@ -487,8 +487,6 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     }
   });
 
-  console.log('DEBUG: Found complaints for last 6 months:', allComplaints.length);
-
   // Process complaint trends in JavaScript
   const trendMap = new Map();
 
@@ -513,8 +511,6 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     complaints: data.complaints,
     resolved: data.resolved
   })).sort((a, b) => a.month.localeCompare(b.month));
-
-  console.log('DEBUG: Processed complaint trends:', complaintTrends);
 
   // Get complaints by type
   const complaintsByType = await prisma.complaint.groupBy({
