@@ -621,7 +621,6 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     processedTrends = generateEmptyTrends();
   }
 
-  console.log('DEBUG: Processed trends:', processedTrends);
 
   res.status(200).json({
     success: true,
