@@ -217,9 +217,24 @@ const AdminAnalytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={complaintTrends}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        value,
+                        name === 'complaints' ? 'Complaints' :
+                        name === 'resolved' ? 'Resolved' : name
+                      ]}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
                     <Area
                       type="monotone"
                       dataKey="complaints"
@@ -250,9 +265,24 @@ const AdminAnalytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={complaintTrends}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[3.5, 5]} />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis
+                      domain={[3.5, 5]}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        `${value}/5`,
+                        'Satisfaction Score'
+                      ]}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
                     <Line
                       type="monotone"
                       dataKey="satisfaction"
