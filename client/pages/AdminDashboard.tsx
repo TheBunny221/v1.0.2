@@ -135,16 +135,6 @@ const AdminDashboard: React.FC = () => {
       metrics: metrics,
       systemStats: systemStats
     });
-
-    // Additional debug for complaint trends specifically
-    console.log('Complaint Trends Debug:', {
-      rawAnalyticsData: analyticsData,
-      analyticsDataPath: analyticsData?.data,
-      complaintTrendsFromAnalytics: analyticsData?.data?.complaintTrends,
-      processedTrends: complaintTrends,
-      trendsLength: complaintTrends?.length,
-      firstTrend: complaintTrends?.[0]
-    });
   }
 
   // Show loading state
