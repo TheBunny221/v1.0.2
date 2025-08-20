@@ -414,32 +414,60 @@ async function main() {
       "ELECTRICITY",
       "ROAD_REPAIR",
       "WASTE_MANAGEMENT",
-      "STREET_LIGHTING",
+      "STREET_LIGHT",
+      "SEWAGE",
+      "GARBAGE",
       "DRAINAGE",
-      "PUBLIC_TOILET",
-      "TREE_CUTTING",
+      "NOISE_POLLUTION",
+      "STRAY_ANIMALS",
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"];
 
-    for (let i = 0; i < 15; i++) {
-      const randomWard =
-        createdWards[Math.floor(Math.random() * createdWards.length)];
-      const randomCitizen =
-        citizens[Math.floor(Math.random() * citizens.length)];
-      const randomOfficer = wardOfficers.find(
-        (o) => o.wardId === randomWard.id,
-      );
-      const complaintType =
-        complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
-      const priority =
-        priorities[Math.floor(Math.random() * priorities.length)];
+    // Create complaints spread across the last 6 months
+    const complaintDates = [];
+    const now = new Date();
+
+    // Generate specific month dates for better distribution
+    for (let monthOffset = 0; monthOffset < 6; monthOffset++) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - monthOffset, 1);
+      const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+
+      // Generate 8-15 complaints per month
+      const complaintsThisMonth = 8 + Math.floor(Math.random() * 8);
+
+      for (let dayOffset = 0; dayOffset < complaintsThisMonth; dayOffset++) {
+        const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
+        const complaintDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), randomDay);
+        complaintDates.push(complaintDate);
+      }
+    }
+
+    // Ensure we have enough complaints for August (for testing)
+    const augustDate = new Date(2024, 7, 1); // August 2024
+    for (let i = 0; i < 12; i++) {
+      const randomDay = Math.floor(Math.random() * 31) + 1;
+      complaintDates.push(new Date(2024, 7, randomDay));
+    }
+
+    // Create complaints for each date
+    for (let i = 0; i < complaintDates.length; i++) {
+      const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
+      const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
+      const randomOfficer = wardOfficers.find((o) => o.wardId === randomWard.id);
+      const complaintType = complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
+      const priority = priorities[Math.floor(Math.random() * priorities.length)];
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
       // Generate complaint ID
       const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
+
+      const complaintDate = complaintDates[i];
+      const resolvedDate = status === "RESOLVED" && Math.random() > 0.3
+        ? new Date(complaintDate.getTime() + Math.random() * 10 * 24 * 60 * 60 * 1000)
+        : null;
 
       const complaint = await prisma.complaint.create({
         data: {
@@ -458,11 +486,12 @@ async function main() {
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
-          submittedOn: new Date(
-            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
-          ), // Random date within last 30 days
-          assignedOn: status !== "REGISTERED" ? new Date() : null,
-          deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+          createdAt: complaintDate,
+          submittedOn: complaintDate,
+          assignedOn: status !== "REGISTERED" ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000) : null,
+          resolvedOn: resolvedDate,
+          deadline: new Date(complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000),
+          rating: status === "RESOLVED" && Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : null,
         },
       });
 
@@ -474,7 +503,7 @@ async function main() {
           fromStatus: null,
           toStatus: "REGISTERED",
           comment: "Complaint registered in the system",
-          timestamp: complaint.submittedOn,
+          timestamp: complaintDate,
         },
       });
 
@@ -486,7 +515,7 @@ async function main() {
             fromStatus: "REGISTERED",
             toStatus: status,
             comment: `Complaint ${status.toLowerCase()}`,
-            timestamp: new Date(),
+            timestamp: new Date(complaintDate.getTime() + 60 * 60 * 1000),
           },
         });
       }
