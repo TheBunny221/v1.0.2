@@ -585,6 +585,74 @@ async function main() {
       });
     }
 
+    // 10. Create some very recent complaints for testing activity feed
+    console.log("🔄 Creating recent activity for testing...");
+    const now = new Date();
+
+    // Recent complaints (last few hours)
+    for (let i = 0; i < 5; i++) {
+      const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
+      const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
+      const randomOfficer = wardOfficers.find((o) => o.wardId === randomWard.id);
+      const complaintType = complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
+
+      // Create dates from 30 minutes to 6 hours ago
+      const minutesAgo = 30 + Math.floor(Math.random() * 330); // 30 min to 6 hours
+      const recentDate = new Date(now.getTime() - minutesAgo * 60 * 1000);
+
+      const complaintNumber = (complaintDates.length + i + 1).toString().padStart(4, "0");
+      const complaintId = `KSC${complaintNumber}`;
+
+      const complaint = await prisma.complaint.create({
+        data: {
+          complaintId: complaintId,
+          title: `Recent ${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
+          description: `Fresh complaint about ${complaintType.toLowerCase().replace("_", " ")} requiring immediate attention.`,
+          type: complaintType,
+          status: i % 2 === 0 ? "REGISTERED" : "ASSIGNED",
+          priority: "MEDIUM",
+          wardId: randomWard.id,
+          area: `${randomWard.name} Area`,
+          landmark: "Near main junction",
+          address: `Sample address in ${randomWard.name}`,
+          contactName: randomCitizen.fullName,
+          contactEmail: randomCitizen.email,
+          contactPhone: randomCitizen.phoneNumber,
+          submittedById: randomCitizen.id,
+          assignedToId: i % 2 === 0 ? null : randomOfficer?.id,
+          createdAt: recentDate,
+          submittedOn: recentDate,
+          assignedOn: i % 2 === 0 ? null : new Date(recentDate.getTime() + 30 * 60 * 1000),
+          deadline: new Date(recentDate.getTime() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      // Create status logs for recent activity
+      await prisma.statusLog.create({
+        data: {
+          complaintId: complaint.id,
+          userId: randomOfficer?.id || adminUser.id,
+          fromStatus: null,
+          toStatus: "REGISTERED",
+          comment: "Complaint registered in the system",
+          timestamp: recentDate,
+        },
+      });
+
+      if (i % 2 !== 0 && randomOfficer) {
+        await prisma.statusLog.create({
+          data: {
+            complaintId: complaint.id,
+            userId: randomOfficer.id,
+            fromStatus: "REGISTERED",
+            toStatus: "ASSIGNED",
+            comment: "Complaint assigned to ward officer",
+            timestamp: new Date(recentDate.getTime() + 30 * 60 * 1000),
+          },
+        });
+      }
+    }
+
     console.log("✅ Database seeding completed successfully!");
     console.log("\n📊 Seeded Data Summary:");
     console.log(`• ${createdWards.length} Wards`);
@@ -593,7 +661,7 @@ async function main() {
     console.log(`• ${wardOfficers.length} Ward Officers`);
     console.log(`• ${maintenanceTeam.length} Maintenance Team Members`);
     console.log(`• ${citizens.length} Citizens`);
-    console.log(`• 15 Sample Complaints`);
+    console.log(`• ${complaintDates.length + 5} Sample Complaints (including recent ones)`);
     console.log(`• 10 Sample Service Requests`);
     console.log(`• Sample notifications and system config`);
 
