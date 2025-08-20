@@ -446,7 +446,128 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
+          {/* Analytics Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Complaints</p>
+                    <p className="text-2xl font-bold">{systemStats.totalComplaints}</p>
+                  </div>
+                  <FileText className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Resolution Rate</p>
+                    <p className="text-2xl font-bold">{metrics?.resolutionRate || 0}%</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Avg Resolution</p>
+                    <p className="text-2xl font-bold">{(metrics?.avgResolutionTime || 0).toFixed(1)}d</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Satisfaction</p>
+                    <p className="text-2xl font-bold">{(metrics?.citizenSatisfaction || 0).toFixed(1)}/5</p>
+                  </div>
+                  <Target className="h-8 w-8 text-purple-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Complaint Trends Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Complaint & Resolution Trends</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {complaintTrends && complaintTrends.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={complaintTrends}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="complaints"
+                        stroke="#3B82F6"
+                        strokeWidth={2}
+                        name="Complaints"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="resolved"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        name="Resolved"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No trend data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Complaint Types Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Complaint Distribution by Type</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {complaintsByType && complaintsByType.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={complaintsByType}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={100}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {complaintsByType.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry?.color || "#6B7280"}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No complaint type data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Ward Performance */}
             <Card>
               <CardHeader>
