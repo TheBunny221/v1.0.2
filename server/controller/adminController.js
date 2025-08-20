@@ -520,21 +520,22 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const resolvedWithDates = await prisma.complaint.findMany({
     where: {
       status: "RESOLVED",
+      resolvedOn: { not: null },
     },
     select: {
-      submittedOn: true,
+      createdAt: true,
       resolvedOn: true,
     },
   });
 
   const validResolutions = resolvedWithDates.filter(
-    (c) => c.resolvedOn && c.submittedOn,
+    (c) => c.resolvedOn && c.createdAt,
   );
   const avgResolutionTime =
     validResolutions.length > 0
       ? validResolutions.reduce((acc, complaint) => {
           const resolutionTime =
-            (new Date(complaint.resolvedOn) - new Date(complaint.submittedOn)) /
+            (new Date(complaint.resolvedOn) - new Date(complaint.createdAt)) /
             (1000 * 60 * 60 * 24);
           return acc + resolutionTime;
         }, 0) / validResolutions.length
