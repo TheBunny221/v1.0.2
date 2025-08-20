@@ -290,9 +290,8 @@ const AdminDashboard: React.FC = () => {
 
       {/* Main Dashboard Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
@@ -311,9 +310,24 @@ const AdminDashboard: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={complaintTrends}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
+                        <XAxis
+                          dataKey="month"
+                          tick={{ fontSize: 12 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis
+                          allowDecimals={false}
+                          tick={{ fontSize: 12 }}
+                        />
+                        <Tooltip
+                          formatter={(value, name) => [
+                            value,
+                            name === 'complaints' ? 'Complaints' : 'Resolved'
+                          ]}
+                          labelFormatter={(label) => `Month: ${label}`}
+                        />
                         <Line
                           type="monotone"
                           dataKey="complaints"
@@ -381,7 +395,7 @@ const AdminDashboard: React.FC = () => {
                           ))}
                         </Pie>
                         <Tooltip
-                          formatter={(value, name) => [value, "Complaints"]}
+                          formatter={(value, name) => [`${value} complaints`, "Count"]}
                           labelFormatter={(label) => `Type: ${label}`}
                         />
                       </PieChart>
