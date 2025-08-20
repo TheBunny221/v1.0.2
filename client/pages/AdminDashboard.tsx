@@ -910,41 +910,6 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions 
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Administrative Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Link to="/admin/users/new">
-              <Button variant="outline" className="w-full">
-                <Users className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
-            </Link>
-            <Link to="/reports">
-              <Button variant="outline" className="w-full">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Generate Report
-              </Button>
-            </Link>
-            <Link to="/admin/config">
-              <Button variant="outline" className="w-full">
-                <Settings className="h-4 w-4 mr-2" />
-                System Config
-              </Button>
-            </Link>
-            <Link to="/admin/analytics">
-              <Button variant="outline" className="w-full">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                View Analytics
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-      */}
     </div>
   );
 };
