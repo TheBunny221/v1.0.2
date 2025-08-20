@@ -854,11 +854,18 @@ function formatTimeAgo(date) {
 }
 
 function parseTimeAgo(timeStr) {
+  if (timeStr === "Just now") return 0;
+
   const value = parseInt(timeStr.split(" ")[0]);
-  if (timeStr.includes("mins")) return value;
-  if (timeStr.includes("hours")) return value * 60;
-  if (timeStr.includes("days")) return value * 60 * 24;
-  return 0;
+  if (isNaN(value)) {
+    // If it's a formatted date/time string, treat as very old for sorting
+    return 999999;
+  }
+
+  if (timeStr.includes("min")) return value;
+  if (timeStr.includes("hour")) return value * 60;
+  if (timeStr.includes("day")) return value * 60 * 24;
+  return 999999; // For date strings, sort to end
 }
 
 // Helper function to generate empty trends for last 6 months
