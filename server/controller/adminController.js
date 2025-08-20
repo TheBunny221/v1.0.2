@@ -827,17 +827,29 @@ function getStatusMessage(status, complaint, user) {
 
 function formatTimeAgo(date) {
   const now = new Date();
-  const diffMs = now - new Date(date);
+  const inputDate = new Date(date);
+  const diffMs = now - inputDate;
+
+  // Handle future dates or invalid dates
+  if (diffMs < 0 || isNaN(diffMs)) {
+    return inputDate.toLocaleDateString() + ' ' + inputDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  }
+
   const diffMins = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMins < 60) {
-    return `${diffMins} mins ago`;
+  if (diffMins < 1) {
+    return "Just now";
+  } else if (diffMins < 60) {
+    return `${diffMins} min${diffMins === 1 ? '' : 's'} ago`;
   } else if (diffHours < 24) {
-    return `${diffHours} hours ago`;
+    return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
   } else {
-    return `${diffDays} days ago`;
+    // For older dates, show actual date and time
+    return inputDate.toLocaleDateString() + ' ' + inputDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   }
 }
 
