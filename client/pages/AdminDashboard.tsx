@@ -351,9 +351,9 @@ const AdminDashboard: React.FC = () => {
                           data={complaintsByType}
                           cx="50%"
                           cy="50%"
-                          innerRadius={60}
-                          outerRadius={120}
-                          paddingAngle={5}
+                          innerRadius={50}
+                          outerRadius={100}
+                          paddingAngle={2}
                           dataKey="value"
                         >
                           {complaintsByType.map((entry, index) => (
@@ -363,31 +363,47 @@ const AdminDashboard: React.FC = () => {
                             />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [value, "Count"]} />
+                        <Tooltip
+                          formatter={(value, name) => [value, "Complaints"]}
+                          labelFormatter={(label) => `Type: ${label}`}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div className="grid grid-cols-2 gap-2 mt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-h-32 overflow-y-auto">
                       {complaintsByType.map((item, index) => (
                         <div
                           key={index}
-                          className="flex items-center space-x-2"
+                          className="flex items-center space-x-2 text-xs"
                         >
                           <div
-                            className="w-3 h-3 rounded-full"
+                            className="w-3 h-3 rounded-full flex-shrink-0"
                             style={{
                               backgroundColor: item?.color || "#6B7280",
                             }}
                           ></div>
-                          <span className="text-sm">
+                          <span className="truncate">
                             {item?.name || "Unknown"} ({item?.value || 0})
                           </span>
                         </div>
                       ))}
                     </div>
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="mt-2 text-xs text-gray-400">
+                        Types: {complaintsByType.length} | Total: {complaintsByType.reduce((sum, type) => sum + (type.value || 0), 0)}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center text-gray-500">
-                    No complaint type data available
+                    <div className="text-center">
+                      <div className="mb-2">No complaint type data available</div>
+                      {process.env.NODE_ENV === 'development' && analytics && (
+                        <div className="text-xs">
+                          Analytics loaded: {analytics ? 'Yes' : 'No'} |
+                          Types array length: {complaintsByType?.length || 0}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </CardContent>
