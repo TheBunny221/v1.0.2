@@ -934,7 +934,10 @@ const UnifiedReports: React.FC = () => {
                               ),
                             )}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip
+                            formatter={(value, name) => [`${value} complaints`, name]}
+                            labelFormatter={(label) => `Category: ${label}`}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
