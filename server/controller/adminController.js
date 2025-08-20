@@ -481,32 +481,51 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   });
   console.log('DEBUG: Sample complaints:', sampleComplaints);
 
-  // Get complaint trends for last 6 months (including current month)
-  // Use a different approach for SQLite date handling
-  const complaintTrends = await prisma.$queryRaw`
-    SELECT
-      substr(date(createdAt), 1, 7) as month,
-      COUNT(*) as complaints,
-      COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
-    FROM complaints
-    WHERE date(createdAt) >= date('now', '-12 months')
-    GROUP BY substr(date(createdAt), 1, 7)
-    ORDER BY month ASC
-  `;
+  // Since SQLite date functions aren't working with our date format,
+  // let's get all complaints and process them in JavaScript
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  console.log('DEBUG: Raw complaint trends query result:', complaintTrends);
+  const allComplaints = await prisma.complaint.findMany({
+    where: {
+      createdAt: {
+        gte: sixMonthsAgo
+      }
+    },
+    select: {
+      createdAt: true,
+      status: true
+    }
+  });
 
-  // Test different date functions to see what works
-  const dateTest = await prisma.$queryRaw`
-    SELECT
-      createdAt,
-      date(createdAt) as date_func,
-      substr(date(createdAt), 1, 7) as month_substr,
-      strftime('%Y-%m', createdAt) as strftime_func
-    FROM complaints
-    LIMIT 3
-  `;
-  console.log('DEBUG: Date function test:', dateTest);
+  console.log('DEBUG: Found complaints for last 6 months:', allComplaints.length);
+
+  // Process complaint trends in JavaScript
+  const trendMap = new Map();
+
+  allComplaints.forEach(complaint => {
+    const date = new Date(complaint.createdAt);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+    if (!trendMap.has(monthKey)) {
+      trendMap.set(monthKey, { complaints: 0, resolved: 0 });
+    }
+
+    const trend = trendMap.get(monthKey);
+    trend.complaints++;
+    if (complaint.status === 'RESOLVED') {
+      trend.resolved++;
+    }
+  });
+
+  // Convert map to array and sort
+  const complaintTrends = Array.from(trendMap.entries()).map(([monthKey, data]) => ({
+    month: monthKey,
+    complaints: data.complaints,
+    resolved: data.resolved
+  })).sort((a, b) => a.month.localeCompare(b.month));
+
+  console.log('DEBUG: Processed complaint trends:', complaintTrends);
 
   // Get complaints by type
   const complaintsByType = await prisma.complaint.groupBy({
