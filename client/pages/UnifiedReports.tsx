@@ -161,6 +161,7 @@ const UnifiedReports: React.FC = () => {
   const [reportProgress, setReportProgress] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportAbortController, setReportAbortController] = useState<AbortController | null>(null);
+  const [filtersInitialized, setFiltersInitialized] = useState(false);
 
   // Get role-based access permissions
   const permissions = useMemo(() => {
