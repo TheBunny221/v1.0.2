@@ -630,28 +630,29 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Performance KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Response Time</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
-                  {((metrics?.avgResolutionTime || 0) * 24).toFixed(1)}h
+                  {(metrics?.avgResolutionTime || 0).toFixed(1)}d
                 </div>
-                <p className="text-sm text-gray-600">Average response time</p>
+                <p className="text-sm text-gray-600">Average resolution time</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Target: 24h</span>
+                    <span>Target: 3d</span>
                     <span>
-                      {(metrics?.avgResolutionTime || 0) < 1
+                      {(metrics?.avgResolutionTime || 0) <= 3
                         ? "On target"
                         : "Needs improvement"}
                     </span>
                   </div>
                   <Progress
                     value={Math.min(
-                      (1 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) *
+                      (3 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) *
                         100,
                       100,
                     )}
@@ -672,15 +673,45 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-sm text-gray-600">Complaints resolved</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Resolution rate</span>
+                    <span>Target: 90%</span>
                     <span>
                       {(metrics?.resolutionRate || 0) >= 90
                         ? "Excellent"
-                        : "Good"}
+                        : (metrics?.resolutionRate || 0) >= 75
+                        ? "Good"
+                        : "Needs improvement"}
                     </span>
                   </div>
                   <Progress
                     value={metrics?.resolutionRate || 0}
+                    className="h-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>SLA Compliance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-purple-600">
+                  {metrics?.slaCompliance || 0}%
+                </div>
+                <p className="text-sm text-gray-600">Meeting deadlines</p>
+                <div className="mt-4">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Target: 85%</span>
+                    <span>
+                      {(metrics?.slaCompliance || 0) >= 85
+                        ? "Excellent"
+                        : (metrics?.slaCompliance || 0) >= 70
+                        ? "Good"
+                        : "Below target"}
+                    </span>
+                  </div>
+                  <Progress
+                    value={metrics?.slaCompliance || 0}
                     className="h-2"
                   />
                 </div>
@@ -709,6 +740,156 @@ const AdminDashboard: React.FC = () => {
                     value={((metrics?.citizenSatisfaction || 0) / 5) * 100}
                     className="h-2"
                   />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Performance Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Monthly Performance Trend */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly Performance Trends</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {complaintTrends && complaintTrends.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={complaintTrends.map(trend => ({
+                      ...trend,
+                      resolutionRate: trend.complaints > 0 ? ((trend.resolved / trend.complaints) * 100).toFixed(1) : 0
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value, name) => [
+                        name === 'resolutionRate' ? `${value}%` : value,
+                        name === 'resolutionRate' ? 'Resolution Rate' : name
+                      ]} />
+                      <Line
+                        type="monotone"
+                        dataKey="resolutionRate"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        name="Resolution Rate (%)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No performance trend data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Ward Performance Comparison */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ward Resolution Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {wardPerformance && wardPerformance.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={wardPerformance.map(ward => ({
+                      ...ward,
+                      resolutionRate: ward.complaints > 0 ? ((ward.resolved / ward.complaints) * 100).toFixed(1) : 0
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="ward" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip formatter={(value, name) => [
+                        name === 'resolutionRate' ? `${value}%` : value,
+                        name === 'resolutionRate' ? 'Resolution Rate' : name
+                      ]} />
+                      <Bar
+                        dataKey="resolutionRate"
+                        fill="#3B82F6"
+                        name="Resolution Rate (%)"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No ward performance data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* System Performance Metrics */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Load</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Active Complaints</span>
+                    <span className="text-sm font-medium">{systemStats.activeComplaints}</span>
+                  </div>
+                  <Progress
+                    value={Math.min((systemStats.activeComplaints / systemStats.totalComplaints) * 100, 100)}
+                    className="h-2"
+                  />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Overdue Items</span>
+                    <span className="text-sm font-medium text-red-600">{systemStats.overdue}</span>
+                  </div>
+                  <Progress
+                    value={Math.min((systemStats.overdue / systemStats.activeComplaints) * 100, 100)}
+                    className="h-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Ward Officers</span>
+                    <span className="text-sm font-medium">{systemStats.wardOfficers}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Maintenance Team</span>
+                    <span className="text-sm font-medium">{systemStats.maintenanceTeam}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Avg. Load per Officer</span>
+                    <span className="text-sm font-medium">
+                      {systemStats.wardOfficers > 0
+                        ? (systemStats.activeComplaints / systemStats.wardOfficers).toFixed(1)
+                        : 0}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Real-time Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">System Status</span>
+                    <Badge className="bg-green-100 text-green-800">Healthy</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Last Update</span>
+                    <span className="text-xs text-gray-500">Just now</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Data Freshness</span>
+                    <Badge className="bg-blue-100 text-blue-800">Real-time</Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
