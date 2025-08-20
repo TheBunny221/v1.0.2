@@ -392,12 +392,13 @@ const UnifiedReports: React.FC = () => {
     setReportAbortController(abortController);
 
     try {
-      // Start countdown timer
+      // Start countdown timer - more realistic progression
       let progress = 0;
       const timer = setInterval(() => {
-        progress += 1;
+        progress += Math.random() * 3 + 1; // Random increment between 1-4
+        if (progress > 95) progress = 95; // Cap at 95% until API responds
         setReportProgress(progress);
-      }, 100); // Update every 100ms
+      }, 200); // Update every 200ms
 
       // Prepare query parameters
       const queryParams = new URLSearchParams({
