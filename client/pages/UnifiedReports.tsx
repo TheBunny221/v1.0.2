@@ -991,7 +991,13 @@ const UnifiedReports: React.FC = () => {
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={processedChartData?.trendsData || []}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fontSize: 12 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
                       <YAxis yAxisId="left" />
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip
