@@ -578,6 +578,12 @@ const UnifiedReports: React.FC = () => {
                 ? `Analytics for ${user?.ward || "your ward"}`
                 : "Your assigned task analytics and performance metrics"}
           </p>
+          <div className="mt-2">
+            <Badge variant="secondary" className="text-sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              Data Period: {getTimePeriodLabel()}
+            </Badge>
+          </div>
         </div>
 
         {permissions.canExportData && (
