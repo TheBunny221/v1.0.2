@@ -185,6 +185,69 @@ const UnifiedReports: React.FC = () => {
     }
   }, [permissions.defaultWard]);
 
+  // Initial data fetch to get actual date range
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (filtersInitialized) return;
+
+      try {
+        // Fetch data without date filters to get full range
+        const queryParams = new URLSearchParams();
+
+        // Only apply role-based filters for initial fetch
+        if (user?.role === "WARD_OFFICER" && user?.wardId) {
+          queryParams.set("ward", user.wardId);
+        } else if (user?.role === "MAINTENANCE_TEAM") {
+          queryParams.set("assignedTo", user.id);
+        }
+
+        let endpoint = "/api/reports/analytics";
+        if (user?.role === "MAINTENANCE_TEAM") {
+          endpoint = "/api/maintenance/analytics";
+        }
+
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}${endpoint}?${queryParams}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Initial data fetch:', data);
+
+          // Initialize filters from this data
+          if (data.data?.trends && data.data.trends.length > 0) {
+            const dates = data.data.trends.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
+            const earliestDate = format(dates[0], "yyyy-MM-dd");
+            const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
+
+            console.log('Setting initial date range:', { earliestDate, latestDate });
+
+            setFilters(prev => ({
+              ...prev,
+              dateRange: {
+                from: earliestDate,
+                to: latestDate,
+              }
+            }));
+            setFiltersInitialized(true);
+          }
+        }
+      } catch (error) {
+        console.error('Initial data fetch error:', error);
+        // Fallback to current month if initial fetch fails
+        setFiltersInitialized(true);
+      }
+    };
+
+    if (user && !filtersInitialized) {
+      fetchInitialData();
+    }
+  }, [user, filtersInitialized]);
+
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true);
