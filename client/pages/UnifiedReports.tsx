@@ -1001,7 +1001,12 @@ const UnifiedReports: React.FC = () => {
                       <YAxis yAxisId="left" />
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip
-                        labelFormatter={(label) => `Date: ${new Date(label).toLocaleDateString()}`}
+                        labelFormatter={(label, payload) => {
+                          if (payload && payload[0]) {
+                            return `Date: ${payload[0].payload.fullDate || label}`;
+                          }
+                          return `Date: ${label}`;
+                        }}
                         formatter={(value, name) => [
                           name === 'slaCompliance' ? `${value}%` : value,
                           name === 'slaCompliance' ? 'SLA Compliance' : name
