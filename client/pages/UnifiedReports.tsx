@@ -869,7 +869,10 @@ const UnifiedReports: React.FC = () => {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="date" />
                           <YAxis />
-                          <Tooltip />
+                          <Tooltip
+                            labelFormatter={(label) => `Date: ${label}`}
+                            formatter={(value, name) => [value, name]}
+                          />
                           <Legend />
                           <Area
                             type="monotone"
