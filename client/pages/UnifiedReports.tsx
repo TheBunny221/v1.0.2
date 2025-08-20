@@ -828,16 +828,35 @@ const UnifiedReports: React.FC = () => {
           <div className="flex justify-end mt-4 space-x-2">
             <Button variant="outline" onClick={() => {
               console.log('Resetting filters...');
-              setFilters({
-                dateRange: {
-                  from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-                  to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-                },
-                ward: permissions.defaultWard,
-                complaintType: "all",
-                status: "all",
-                priority: "all",
-              });
+              // Reset to original data range if available
+              if (analyticsData?.trends && analyticsData.trends.length > 0) {
+                const dates = analyticsData.trends.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
+                const earliestDate = format(dates[0], "yyyy-MM-dd");
+                const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
+
+                setFilters({
+                  dateRange: {
+                    from: earliestDate,
+                    to: latestDate,
+                  },
+                  ward: permissions.defaultWard,
+                  complaintType: "all",
+                  status: "all",
+                  priority: "all",
+                });
+              } else {
+                // Fallback to current month if no data
+                setFilters({
+                  dateRange: {
+                    from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+                    to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+                  },
+                  ward: permissions.defaultWard,
+                  complaintType: "all",
+                  status: "all",
+                  priority: "all",
+                });
+              }
             }}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Reset Filters
