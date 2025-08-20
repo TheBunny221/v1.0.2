@@ -25,6 +25,14 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/ui/dialog";
+import { Progress } from "../components/ui/progress";
+import {
   BarChart,
   Bar,
   LineChart,
@@ -149,6 +157,12 @@ const UnifiedReports: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportProgress, setReportProgress] = useState(0);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportAbortController, setReportAbortController] =
+    useState<AbortController | null>(null);
+  const [filtersInitialized, setFiltersInitialized] = useState(false);
 
   // Get role-based access permissions
   const permissions = useMemo(() => {
@@ -172,6 +186,103 @@ const UnifiedReports: React.FC = () => {
     }
   }, [permissions.defaultWard]);
 
+  // Initial data fetch to get actual date range
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (filtersInitialized) return;
+
+      try {
+        // Fetch data without date filters to get full range
+        const queryParams = new URLSearchParams();
+
+        // Only apply role-based filters for initial fetch
+        if (user?.role === "WARD_OFFICER" && user?.wardId) {
+          queryParams.set("ward", user.wardId);
+        } else if (user?.role === "MAINTENANCE_TEAM") {
+          queryParams.set("assignedTo", user.id);
+        }
+
+        let endpoint = "/api/reports/analytics";
+        if (user?.role === "MAINTENANCE_TEAM") {
+          endpoint = "/api/maintenance/analytics";
+        }
+
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}${endpoint}?${queryParams}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Initial data fetch:", data);
+
+          // Initialize filters from this data
+          if (data.data?.trends && data.data.trends.length > 0) {
+            const dates = data.data.trends
+              .map((t) => new Date(t.date))
+              .sort((a, b) => a.getTime() - b.getTime());
+            const earliestDate = format(dates[0], "yyyy-MM-dd");
+            const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
+
+            console.log("Setting initial date range:", {
+              earliestDate,
+              latestDate,
+            });
+
+            // Set filters without triggering a new fetch loop
+            setFilters((prev) => ({
+              ...prev,
+              dateRange: {
+                from: earliestDate,
+                to: latestDate,
+              },
+            }));
+
+            // Also set the initial analytics data
+            const transformedData = {
+              complaints: {
+                total: data.data?.complaints?.total || 0,
+                resolved: data.data?.complaints?.resolved || 0,
+                pending: data.data?.complaints?.pending || 0,
+                overdue: data.data?.complaints?.overdue || 0,
+              },
+              sla: {
+                compliance: data.data?.sla?.compliance || 0,
+                avgResolutionTime: data.data?.sla?.avgResolutionTime || 0,
+                target: data.data?.sla?.target || 3,
+              },
+              trends: data.data?.trends || [],
+              wards: data.data?.wards || [],
+              categories: data.data?.categories || [],
+              performance: {
+                userSatisfaction: data.data?.performance?.userSatisfaction || 0,
+                escalationRate: data.data?.performance?.escalationRate || 0,
+                firstCallResolution:
+                  data.data?.performance?.firstCallResolution || 0,
+                repeatComplaints: data.data?.performance?.repeatComplaints || 0,
+              },
+            };
+
+            setAnalyticsData(transformedData);
+            setIsLoading(false);
+          }
+          setFiltersInitialized(true);
+        }
+      } catch (error) {
+        console.error("Initial data fetch error:", error);
+        // Fallback to current month if initial fetch fails
+        setFiltersInitialized(true);
+      }
+    };
+
+    if (user && !filtersInitialized) {
+      fetchInitialData();
+    }
+  }, [user, filtersInitialized]);
+
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true);
@@ -185,6 +296,12 @@ const UnifiedReports: React.FC = () => {
         ...(filters.complaintType !== "all" && { type: filters.complaintType }),
         ...(filters.status !== "all" && { status: filters.status }),
         ...(filters.priority !== "all" && { priority: filters.priority }),
+      });
+
+      console.log("Fetching analytics with params:", {
+        filters,
+        queryString: queryParams.toString(),
+        url: `/api/reports/analytics?${queryParams}`,
       });
 
       // Use different endpoints based on user role
@@ -209,7 +326,33 @@ const UnifiedReports: React.FC = () => {
       }
 
       const data = await response.json();
-      setAnalyticsData(data.data);
+      console.log("Received analytics data:", data);
+
+      // Transform the API response to match the expected format
+      const transformedData = {
+        complaints: {
+          total: data.data?.complaints?.total || 0,
+          resolved: data.data?.complaints?.resolved || 0,
+          pending: data.data?.complaints?.pending || 0,
+          overdue: data.data?.complaints?.overdue || 0,
+        },
+        sla: {
+          compliance: data.data?.sla?.compliance || 0,
+          avgResolutionTime: data.data?.sla?.avgResolutionTime || 0,
+          target: data.data?.sla?.target || 3,
+        },
+        trends: data.data?.trends || [],
+        wards: data.data?.wards || [],
+        categories: data.data?.categories || [],
+        performance: {
+          userSatisfaction: data.data?.performance?.userSatisfaction || 0,
+          escalationRate: data.data?.performance?.escalationRate || 0,
+          firstCallResolution: data.data?.performance?.firstCallResolution || 0,
+          repeatComplaints: data.data?.performance?.repeatComplaints || 0,
+        },
+      };
+
+      setAnalyticsData(transformedData);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load analytics data",
@@ -218,16 +361,27 @@ const UnifiedReports: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, user?.role]);
+  }, [filters, user?.role, filtersInitialized]);
 
   // Debounced effect for filter changes to improve performance
   useEffect(() => {
+    if (!filtersInitialized) return;
+
     const timeoutId = setTimeout(() => {
+      console.log("Filters changed, fetching new data:", filters);
       fetchAnalyticsData();
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [fetchAnalyticsData]);
+  }, [fetchAnalyticsData, filtersInitialized]);
+
+  // Force re-fetch when filters change (only after initialization)
+  useEffect(() => {
+    if (!filtersInitialized) return;
+
+    console.log("Filter state updated:", filters);
+    setAnalyticsData(null); // Clear existing data to show loading
+  }, [filters, filtersInitialized]);
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
@@ -334,22 +488,128 @@ const UnifiedReports: React.FC = () => {
     }
   };
 
-  // Generate custom report with real-time data fetch
+  // Generate custom report with countdown and cancellation
   const handleGenerateReport = async () => {
-    setIsLoading(true);
-    try {
-      // Force refresh analytics data with current filters
-      await fetchAnalyticsData();
+    if (isGeneratingReport) return;
 
-      // Show success message
-      alert(
-        `Report generated successfully with ${analyticsData?.complaints?.total || 0} records based on applied filters.`,
+    setIsGeneratingReport(true);
+    setShowReportModal(true);
+    setReportProgress(0);
+
+    // Create abort controller for cancellation
+    const abortController = new AbortController();
+    setReportAbortController(abortController);
+
+    try {
+      // Start countdown timer - more realistic progression
+      let progress = 0;
+      const timer = setInterval(() => {
+        progress += Math.random() * 3 + 1; // Random increment between 1-4
+        if (progress > 95) progress = 95; // Cap at 95% until API responds
+        setReportProgress(progress);
+      }, 200); // Update every 200ms
+
+      // Prepare query parameters
+      const queryParams = new URLSearchParams({
+        from: filters.dateRange.from,
+        to: filters.dateRange.to,
+        ...(filters.ward !== "all" && { ward: filters.ward }),
+        ...(filters.complaintType !== "all" && { type: filters.complaintType }),
+        ...(filters.status !== "all" && { status: filters.status }),
+        ...(filters.priority !== "all" && { priority: filters.priority }),
+        detailed: "true",
+      });
+
+      // Make API call with abort signal
+      const baseUrl = window.location.origin;
+      const response = await fetch(
+        `${baseUrl}/api/reports/analytics?${queryParams}`,
+        {
+          signal: abortController.signal,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        },
       );
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate report: ${response.statusText}`);
+      }
+
+      const reportData = await response.json();
+
+      // Clear timer
+      clearInterval(timer);
+      setReportProgress(100);
+
+      // Wait a bit to show completion
+      setTimeout(() => {
+        setShowReportModal(false);
+        setIsGeneratingReport(false);
+        setReportAbortController(null);
+
+        // Update analytics data with fresh report data
+        setAnalyticsData(reportData.data);
+
+        // Report completed successfully - no alert needed
+        console.log(
+          `Report generated successfully! Found ${reportData.data?.complaints?.total || 0} records based on applied filters.`,
+        );
+      }, 500);
     } catch (error) {
-      console.error("Report generation error:", error);
-      alert("Failed to generate report. Please try again.");
+      clearInterval(timer);
+
+      if (error.name === "AbortError") {
+        console.log("Report generation cancelled by user");
+      } else {
+        console.error("Report generation error:", error);
+        alert(`Failed to generate report: ${error.message}`);
+      }
+
+      setShowReportModal(false);
+      setIsGeneratingReport(false);
+      setReportAbortController(null);
+      setReportProgress(0);
     }
   };
+
+  // Cancel report generation
+  const handleCancelReport = () => {
+    if (reportAbortController) {
+      reportAbortController.abort();
+    }
+    setShowReportModal(false);
+    setIsGeneratingReport(false);
+    setReportAbortController(null);
+    setReportProgress(0);
+  };
+
+  // Calculate time period for chart titles
+  const getTimePeriodLabel = useCallback(() => {
+    const fromDate = new Date(filters.dateRange.from);
+    const toDate = new Date(filters.dateRange.to);
+    const diffTime = Math.abs(toDate - fromDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Format dates for display
+    const formatDate = (date) => format(date, "MMM dd, yyyy");
+    const fromFormatted = formatDate(fromDate);
+    const toFormatted = formatDate(toDate);
+
+    // Determine period type
+    if (diffDays <= 1) {
+      return `${fromFormatted}`;
+    } else if (diffDays <= 7) {
+      return `Past Week (${fromFormatted} - ${toFormatted})`;
+    } else if (diffDays <= 31) {
+      return `Past Month (${fromFormatted} - ${toFormatted})`;
+    } else if (diffDays <= 90) {
+      return `Past 3 Months (${fromFormatted} - ${toFormatted})`;
+    } else {
+      return `${fromFormatted} - ${toFormatted}`;
+    }
+  }, [filters.dateRange]);
 
   // Chart colors
   const COLORS = [
@@ -365,22 +625,29 @@ const UnifiedReports: React.FC = () => {
   const processedChartData = useMemo(() => {
     if (!analyticsData) return null;
 
+    console.log("Processing chart data:", analyticsData);
+
     return {
-      trendsData: analyticsData.trends.map((trend) => ({
-        ...trend,
-        date: new Date(trend.date).toLocaleDateString(),
-      })),
-      categoriesWithColors: analyticsData.categories.map((category, index) => ({
-        ...category,
-        color: COLORS[index % COLORS.length],
-      })),
-      wardsData: analyticsData.wards.map((ward) => ({
-        ...ward,
-        efficiency:
-          ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
-      })),
+      trendsData:
+        analyticsData.trends?.map((trend) => ({
+          ...trend,
+          date: format(new Date(trend.date), "MMM dd"),
+          fullDate: format(new Date(trend.date), "MMM dd, yyyy"),
+          rawDate: trend.date,
+        })) || [],
+      categoriesWithColors:
+        analyticsData.categories?.map((category, index) => ({
+          ...category,
+          color: COLORS[index % COLORS.length],
+        })) || [],
+      wardsData:
+        analyticsData.wards?.map((ward) => ({
+          ...ward,
+          efficiency:
+            ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
+        })) || [],
     };
-  }, [analyticsData]);
+  }, [analyticsData, filters]); // Added filters dependency to force re-processing
 
   if (isLoading) {
     return (
@@ -425,6 +692,12 @@ const UnifiedReports: React.FC = () => {
                 ? `Analytics for ${user?.ward || "your ward"}`
                 : "Your assigned task analytics and performance metrics"}
           </p>
+          <div className="mt-2">
+            <Badge variant="secondary" className="text-sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              Data Period: {getTimePeriodLabel()}
+            </Badge>
+          </div>
         </div>
 
         {permissions.canExportData && (
@@ -570,19 +843,68 @@ const UnifiedReports: React.FC = () => {
           </div>
 
           <div className="flex justify-end mt-4 space-x-2">
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log("Resetting filters...");
+                // Reset to original data range if available
+                if (analyticsData?.trends && analyticsData.trends.length > 0) {
+                  const dates = analyticsData.trends
+                    .map((t) => new Date(t.date))
+                    .sort((a, b) => a.getTime() - b.getTime());
+                  const earliestDate = format(dates[0], "yyyy-MM-dd");
+                  const latestDate = format(
+                    dates[dates.length - 1],
+                    "yyyy-MM-dd",
+                  );
+
+                  setFilters({
+                    dateRange: {
+                      from: earliestDate,
+                      to: latestDate,
+                    },
+                    ward: permissions.defaultWard,
+                    complaintType: "all",
+                    status: "all",
+                    priority: "all",
+                  });
+                } else {
+                  // Fallback to current month if no data
+                  setFilters({
+                    dateRange: {
+                      from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+                      to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+                    },
+                    ward: permissions.defaultWard,
+                    complaintType: "all",
+                    status: "all",
+                    priority: "all",
+                  });
+                }
+              }}
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Reset Filters
             </Button>
-            <Button onClick={handleGenerateReport}>
+            <Button
+              onClick={handleGenerateReport}
+              disabled={isGeneratingReport}
+            >
               <BarChart3 className="h-4 w-4 mr-2" />
-              Generate Report
+              {isGeneratingReport ? "Generating..." : "Generate Report"}
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Key Metrics */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Key Metrics</h2>
+        <Badge variant="outline" className="text-xs">
+          <Calendar className="h-3 w-3 mr-1" />
+          {getTimePeriodLabel()}
+        </Badge>
+      </div>
       {analyticsData && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
@@ -682,32 +1004,69 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Complaints Trend</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="trends-chart">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={processedChartData?.trendsData || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Area
-                          type="monotone"
-                          dataKey="complaints"
-                          stackId="1"
-                          stroke="#8884d8"
-                          fill="#8884d8"
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="resolved"
-                          stackId="1"
-                          stroke="#82ca9d"
-                          fill="#82ca9d"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                    {processedChartData?.trendsData?.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={processedChartData.trendsData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                          />
+                          <YAxis />
+                          <Tooltip
+                            labelFormatter={(label, payload) => {
+                              if (payload && payload[0]) {
+                                return `Date: ${payload[0].payload.fullDate || label}`;
+                              }
+                              return `Date: ${label}`;
+                            }}
+                            formatter={(value, name) => [
+                              value,
+                              name === "complaints"
+                                ? "Total Complaints"
+                                : "Resolved Complaints",
+                            ]}
+                          />
+                          <Legend />
+                          <Area
+                            type="monotone"
+                            dataKey="complaints"
+                            stackId="1"
+                            stroke="#8884d8"
+                            fill="#8884d8"
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="resolved"
+                            stackId="1"
+                            stroke="#82ca9d"
+                            fill="#82ca9d"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No trend data available for selected period</p>
+                          <p className="text-sm font-medium">
+                            {getTimePeriodLabel()}
+                          </p>
+                          <p className="text-xs">
+                            Try adjusting your date range or filters
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -716,32 +1075,59 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Complaint Categories</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="categories-chart">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={processedChartData?.categoriesWithColors || []}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
-                          }
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="count"
-                        >
-                          {(processedChartData?.categoriesWithColors || []).map(
-                            (entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ),
-                          )}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    {processedChartData?.categoriesWithColors?.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={processedChartData.categoriesWithColors}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) =>
+                              `${name}: ${(percent * 100).toFixed(0)}%`
+                            }
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                          >
+                            {processedChartData.categoriesWithColors.map(
+                              (entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
+                              ),
+                            )}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value, name) => [
+                              `${value} complaints`,
+                              name,
+                            ]}
+                            labelFormatter={(label) => `Category: ${label}`}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <PieChartIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No category data available for selected period</p>
+                          <p className="text-sm font-medium">
+                            {getTimePeriodLabel()}
+                          </p>
+                          <p className="text-xs">
+                            Try adjusting your filters or date range
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -753,16 +1139,36 @@ const UnifiedReports: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Detailed Trends Analysis</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {getTimePeriodLabel()}
+                </p>
               </CardHeader>
               <CardContent>
                 <div id="detailed-trends-chart">
                   <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={analyticsData.trends}>
+                    <ComposedChart data={processedChartData?.trendsData || []}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fontSize: 12 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
                       <YAxis yAxisId="left" />
                       <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
+                      <Tooltip
+                        labelFormatter={(label, payload) => {
+                          if (payload && payload[0]) {
+                            return `Date: ${payload[0].payload.fullDate || label}`;
+                          }
+                          return `Date: ${label}`;
+                        }}
+                        formatter={(value, name) => [
+                          name === "slaCompliance" ? `${value}%` : value,
+                          name === "slaCompliance" ? "SLA Compliance" : name,
+                        ]}
+                      />
                       <Legend />
                       <Bar yAxisId="left" dataKey="complaints" fill="#8884d8" />
                       <Bar yAxisId="left" dataKey="resolved" fill="#82ca9d" />
@@ -785,6 +1191,9 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Performance Metrics</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -823,13 +1232,24 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Resolution Time Distribution</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="resolution-time-chart">
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={analyticsData.categories}>
+                      <BarChart
+                        data={processedChartData?.categoriesWithColors || []}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fontSize: 11 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
                         <YAxis />
                         <Tooltip />
                         <Bar dataKey="avgTime" fill="#8884d8" />
@@ -847,13 +1267,22 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Ward Performance Comparison</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="ward-performance-chart">
                     <ResponsiveContainer width="100%" height={400}>
-                      <BarChart data={analyticsData.wards}>
+                      <BarChart data={processedChartData?.wardsData || []}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fontSize: 11 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
                         <YAxis />
                         <Tooltip />
                         <Legend />
@@ -872,35 +1301,126 @@ const UnifiedReports: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Category Analysis</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {getTimePeriodLabel()}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analyticsData.categories.map((category, index) => (
-                    <div
-                      key={category.name}
-                      className="flex items-center justify-between p-3 border rounded"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-4 h-4 rounded"
-                          style={{
-                            backgroundColor: COLORS[index % COLORS.length],
-                          }}
-                        />
-                        <span className="font-medium">{category.name}</span>
+                  {(processedChartData?.categoriesWithColors || []).map(
+                    (category, index) => (
+                      <div
+                        key={category.name}
+                        className="flex items-center justify-between p-3 border rounded"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className="w-4 h-4 rounded"
+                            style={{
+                              backgroundColor: COLORS[index % COLORS.length],
+                            }}
+                          />
+                          <span className="font-medium">{category.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <span>{category.count} complaints</span>
+                          <span>Avg: {category.avgTime} days</span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>{category.count} complaints</span>
-                        <span>Avg: {category.avgTime} days</span>
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       )}
+
+      {/* Report Generation Modal */}
+      <Dialog open={showReportModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2" />
+              Generating Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="text-lg font-medium mb-2">
+                Generating Report...
+              </div>
+              <div className="text-sm text-muted-foreground mb-4">
+                Processing {getTimePeriodLabel()} data
+              </div>
+
+              {/* Circular Progress with Timer */}
+              <div className="relative inline-flex items-center justify-center mb-4">
+                <div className="w-20 h-20 rounded-full border-4 border-gray-200">
+                  <div
+                    className="w-20 h-20 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"
+                    style={{
+                      animation: "spin 2s linear infinite",
+                    }}
+                  ></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold text-blue-600">
+                    {Math.floor(reportProgress)}%
+                  </span>
+                </div>
+              </div>
+
+              <Progress value={reportProgress} className="w-full mb-2" />
+              <div className="text-sm text-muted-foreground">
+                {reportProgress < 100
+                  ? `Estimated time remaining: ${Math.max(0, Math.ceil((100 - reportProgress) * 0.05))} seconds`
+                  : "Finalizing report..."}
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <Calendar className="h-4 w-4 text-blue-600 mr-2" />
+                <span className="font-medium text-blue-900">Report Scope</span>
+              </div>
+              <div className="space-y-2 text-sm text-blue-800">
+                <div className="flex justify-between">
+                  <span>Period:</span>
+                  <span className="font-medium">{getTimePeriodLabel()}</span>
+                </div>
+                {filters.ward !== "all" && (
+                  <div className="flex justify-between">
+                    <span>Ward:</span>
+                    <span className="font-medium">{filters.ward}</span>
+                  </div>
+                )}
+                {filters.complaintType !== "all" && (
+                  <div className="flex justify-between">
+                    <span>Type:</span>
+                    <span className="font-medium">{filters.complaintType}</span>
+                  </div>
+                )}
+                {filters.status !== "all" && (
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span className="font-medium">{filters.status}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCancelReport}
+              disabled={reportProgress >= 100}
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

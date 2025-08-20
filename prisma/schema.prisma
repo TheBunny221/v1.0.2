@@ -6,14 +6,59 @@ generator client {
 }
 
 datasource db {
-  // provider = "sqlite"
-  provider = "postgresql"
+  provider = env("DATABASE_PROVIDER")
   url      = env("DATABASE_URL")
-  // For production, uncomment the line below and comment sqlite above:
 }
 
-// Enums converted to String for SQLite compatibility
-// For PostgreSQL deployment, these should be converted back to proper enums
+// Enums (commented for SQLite, uncommented for PostgreSQL)
+// For PostgreSQL production deployment:
+/*
+enum UserRole {
+  CITIZEN
+  WARD_OFFICER
+  MAINTENANCE_TEAM
+  ADMINISTRATOR
+  GUEST
+}
+
+enum ComplaintStatus {
+  REGISTERED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REOPENED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SLAStatus {
+  ON_TIME
+  WARNING
+  OVERDUE
+  COMPLETED
+}
+
+enum ServiceRequestStatus {
+  SUBMITTED
+  VERIFIED
+  PROCESSING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  IN_APP
+}
+*/
 
 // Models
 model User {
@@ -22,7 +67,7 @@ model User {
   fullName    String
   phoneNumber String?
   password    String?
-  role        String   @default("CITIZEN") // CITIZEN, WARD_OFFICER, MAINTENANCE_TEAM, ADMINISTRATOR, GUEST
+  role        String   @default("CITIZEN") // UserRole for PostgreSQL
   wardId      String?
   department  String?
   language    String   @default("en")
@@ -47,6 +92,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([role, isActive])
+  @@index([wardId])
   @@map("users")
 }
 
@@ -82,6 +129,7 @@ model SubZone {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
+  @@index([wardId])
   @@map("sub_zones")
 }
 
@@ -90,10 +138,10 @@ model Complaint {
   complaintId     String?           @unique  // Human-readable complaint ID like KSC0001
   title           String?
   description     String
-  type            String            // WATER_SUPPLY, ELECTRICITY, ROAD_REPAIR, etc.
-  status          String            @default("REGISTERED") // REGISTERED, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED, REOPENED
-  priority        String            @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
-  slaStatus       String            @default("ON_TIME") // ON_TIME, WARNING, OVERDUE, COMPLETED
+  type            String            // ComplaintType enum for PostgreSQL
+  status          String            @default("REGISTERED") // ComplaintStatus for PostgreSQL
+  priority        String            @default("MEDIUM") // Priority for PostgreSQL
+  slaStatus       String            @default("ON_TIME") // SLAStatus for PostgreSQL
   
   // Location Information
   wardId          String
@@ -147,6 +195,8 @@ model Complaint {
   @@index([type, status])
   @@index([priority, status])
   @@index([submittedOn])
+  @@index([status, createdAt])
+  @@index([type, createdAt])
   @@map("complaints")
 }
 
@@ -164,6 +214,7 @@ model StatusLog {
   user        User            @relation(fields: [userId], references: [id])
 
   @@index([complaintId, timestamp])
+  @@index([userId])
   @@map("status_logs")
 }
 
@@ -180,6 +231,7 @@ model Attachment {
   // Relations
   complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   
+  @@index([complaintId])
   @@map("attachments")
 }
 
@@ -188,7 +240,7 @@ model Notification {
   userId      String
   complaintId String?
   serviceRequestId String?
-  type        String   // EMAIL, SMS, IN_APP
+  type        String   // NotificationType for PostgreSQL
   title       String
   message     String
   isRead      Boolean  @default(false)
@@ -221,6 +273,8 @@ model Message {
   sentBy      User      @relation("SentBy", fields: [sentById], references: [id])
   receivedBy  User?     @relation("ReceivedBy", fields: [receivedById], references: [id])
   
+  @@index([complaintId])
+  @@index([sentById])
   @@map("messages")
 }
 
@@ -241,6 +295,7 @@ model OTPSession {
 
   @@index([email, purpose, isVerified])
   @@index([expiresAt])
+  @@index([userId])
   @@map("otp_sessions")
 }
 
@@ -265,16 +320,17 @@ model SystemConfig {
   isActive    Boolean   @default(true)
   updatedAt   DateTime  @updatedAt
   
+  @@index([key, isActive])
   @@map("system_config")
 }
 
 model ServiceRequest {
   id              String    @id @default(cuid())
   title           String?
-  serviceType     String    // BIRTH_CERTIFICATE, DEATH_CERTIFICATE, TRADE_LICENSE, etc.
+  serviceType     String    // Service type identifier
   description     String
-  status          String    @default("SUBMITTED") // SUBMITTED, VERIFIED, PROCESSING, APPROVED, REJECTED, COMPLETED
-  priority        String    @default("NORMAL") // NORMAL, URGENT, EMERGENCY
+  status          String    @default("SUBMITTED") // ServiceRequestStatus for PostgreSQL
+  priority        String    @default("NORMAL") // Priority for PostgreSQL
 
   // Location Information
   wardId          String
@@ -336,6 +392,7 @@ model ServiceRequestStatusLog {
   user            User          @relation(fields: [userId], references: [id])
 
   @@index([serviceRequestId, timestamp])
+  @@index([userId])
   @@map("service_request_status_logs")
 }
 
@@ -348,5 +405,7 @@ model Report {
   generatedBy String
   generatedAt DateTime @default(now())
 
+  @@index([type, generatedAt])
+  @@index([generatedBy])
   @@map("reports")
 }
