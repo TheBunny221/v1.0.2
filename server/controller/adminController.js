@@ -488,7 +488,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const allComplaints = await prisma.complaint.findMany({
     where: {
       createdAt: {
-        gte: sixMonthsAgo
+        gte: sixMonthsCutoff
       }
     },
     select: {
