@@ -290,31 +290,48 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {complaintTrends && complaintTrends.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={complaintTrends}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="complaints"
-                        stroke="#3B82F6"
-                        strokeWidth={2}
-                        name="Complaints"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="resolved"
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        name="Resolved"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={complaintTrends}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="complaints"
+                          stroke="#3B82F6"
+                          strokeWidth={2}
+                          name="Complaints"
+                          connectNulls={false}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="resolved"
+                          stroke="#10B981"
+                          strokeWidth={2}
+                          name="Resolved"
+                          connectNulls={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="mt-2 text-xs text-gray-400">
+                        Data points: {complaintTrends.length} | Total complaints: {complaintTrends.reduce((sum, trend) => sum + (trend.complaints || 0), 0)}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center text-gray-500">
-                    No complaint trend data available
+                    <div className="text-center">
+                      <div className="mb-2">No complaint trend data available</div>
+                      {process.env.NODE_ENV === 'development' && analytics && (
+                        <div className="text-xs">
+                          Analytics loaded: {analytics ? 'Yes' : 'No'} |
+                          Trends array length: {complaintTrends?.length || 0}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </CardContent>
