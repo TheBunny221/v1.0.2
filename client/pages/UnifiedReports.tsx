@@ -951,8 +951,9 @@ const UnifiedReports: React.FC = () => {
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                         <div className="text-center">
                           <PieChartIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p>No category data available for selected filters</p>
-                          <p className="text-sm">Try adjusting your filters or date range</p>
+                          <p>No category data available for selected period</p>
+                          <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
+                          <p className="text-xs">Try adjusting your filters or date range</p>
                         </div>
                       </div>
                     )}
