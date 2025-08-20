@@ -1154,25 +1154,69 @@ const UnifiedReports: React.FC = () => {
               Generating Report
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="text-center">
-              <div className="text-sm text-muted-foreground mb-2">
-                Processing your report with applied filters...
+              <div className="text-lg font-medium mb-2">
+                Generating Report...
               </div>
-              <Progress value={reportProgress} className="w-full" />
-              <div className="text-xs text-muted-foreground mt-1">
-                {reportProgress < 100 ? `${reportProgress.toFixed(0)}% Complete` : 'Finalizing...'}
+              <div className="text-sm text-muted-foreground mb-4">
+                Processing {getTimePeriodLabel()} data
+              </div>
+
+              {/* Circular Progress with Timer */}
+              <div className="relative inline-flex items-center justify-center mb-4">
+                <div className="w-20 h-20 rounded-full border-4 border-gray-200">
+                  <div
+                    className="w-20 h-20 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"
+                    style={{
+                      animation: 'spin 2s linear infinite'
+                    }}
+                  ></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold text-blue-600">
+                    {Math.floor(reportProgress)}%
+                  </span>
+                </div>
+              </div>
+
+              <Progress value={reportProgress} className="w-full mb-2" />
+              <div className="text-sm text-muted-foreground">
+                {reportProgress < 100
+                  ? `Estimated time remaining: ${Math.max(0, Math.ceil((100 - reportProgress) * 0.05))} seconds`
+                  : 'Finalizing report...'
+                }
               </div>
             </div>
 
-            <div className="bg-gray-50 p-3 rounded-md text-sm">
-              <div className="font-medium mb-1">Applied Filters:</div>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <div>Date Range: {filters.dateRange.from} to {filters.dateRange.to}</div>
-                {filters.ward !== 'all' && <div>Ward: {filters.ward}</div>}
-                {filters.complaintType !== 'all' && <div>Type: {filters.complaintType}</div>}
-                {filters.status !== 'all' && <div>Status: {filters.status}</div>}
-                {filters.priority !== 'all' && <div>Priority: {filters.priority}</div>}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <Calendar className="h-4 w-4 text-blue-600 mr-2" />
+                <span className="font-medium text-blue-900">Report Scope</span>
+              </div>
+              <div className="space-y-2 text-sm text-blue-800">
+                <div className="flex justify-between">
+                  <span>Period:</span>
+                  <span className="font-medium">{getTimePeriodLabel()}</span>
+                </div>
+                {filters.ward !== 'all' && (
+                  <div className="flex justify-between">
+                    <span>Ward:</span>
+                    <span className="font-medium">{filters.ward}</span>
+                  </div>
+                )}
+                {filters.complaintType !== 'all' && (
+                  <div className="flex justify-between">
+                    <span>Type:</span>
+                    <span className="font-medium">{filters.complaintType}</span>
+                  </div>
+                )}
+                {filters.status !== 'all' && (
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span className="font-medium">{filters.status}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
