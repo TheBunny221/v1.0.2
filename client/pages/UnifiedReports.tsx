@@ -1079,7 +1079,13 @@ const UnifiedReports: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={analyticsData.categories}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fontSize: 11 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
                         <YAxis />
                         <Tooltip />
                         <Bar dataKey="avgTime" fill="#8884d8" />
