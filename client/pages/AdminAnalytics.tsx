@@ -224,14 +224,15 @@ const AdminAnalytics: React.FC = () => {
                       textAnchor="end"
                       height={60}
                     />
-                    <YAxis
-                      tick={{ fontSize: 12 }}
-                    />
+                    <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip
                       formatter={(value, name) => [
                         value,
-                        name === 'complaints' ? 'Complaints' :
-                        name === 'resolved' ? 'Resolved' : name
+                        name === "complaints"
+                          ? "Complaints"
+                          : name === "resolved"
+                            ? "Resolved"
+                            : name,
                       ]}
                       labelFormatter={(label) => `Month: ${label}`}
                     />
@@ -272,14 +273,11 @@ const AdminAnalytics: React.FC = () => {
                       textAnchor="end"
                       height={60}
                     />
-                    <YAxis
-                      domain={[3.5, 5]}
-                      tick={{ fontSize: 12 }}
-                    />
+                    <YAxis domain={[3.5, 5]} tick={{ fontSize: 12 }} />
                     <Tooltip
                       formatter={(value, name) => [
                         `${value}/5`,
-                        'Satisfaction Score'
+                        "Satisfaction Score",
                       ]}
                       labelFormatter={(label) => `Month: ${label}`}
                     />
@@ -341,14 +339,9 @@ const AdminAnalytics: React.FC = () => {
                       textAnchor="end"
                       height={60}
                     />
-                    <YAxis
-                      tick={{ fontSize: 12 }}
-                    />
+                    <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip
-                      formatter={(value, name) => [
-                        `${value}%`,
-                        'Efficiency'
-                      ]}
+                      formatter={(value, name) => [`${value}%`, "Efficiency"]}
                       labelFormatter={(label) => `Ward: ${label}`}
                     />
                     <Bar dataKey="efficiency" fill="#3B82F6" />
@@ -427,7 +420,10 @@ const AdminAnalytics: React.FC = () => {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value, name) => [`${value} complaints`, "Count"]}
+                      formatter={(value, name) => [
+                        `${value} complaints`,
+                        "Count",
+                      ]}
                       labelFormatter={(label) => `Type: ${label}`}
                     />
                   </PieChart>

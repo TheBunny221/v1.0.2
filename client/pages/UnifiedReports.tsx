@@ -160,7 +160,8 @@ const UnifiedReports: React.FC = () => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [reportProgress, setReportProgress] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportAbortController, setReportAbortController] = useState<AbortController | null>(null);
+  const [reportAbortController, setReportAbortController] =
+    useState<AbortController | null>(null);
   const [filtersInitialized, setFiltersInitialized] = useState(false);
 
   // Get role-based access permissions
@@ -216,23 +217,28 @@ const UnifiedReports: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Initial data fetch:', data);
+          console.log("Initial data fetch:", data);
 
           // Initialize filters from this data
           if (data.data?.trends && data.data.trends.length > 0) {
-            const dates = data.data.trends.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
+            const dates = data.data.trends
+              .map((t) => new Date(t.date))
+              .sort((a, b) => a.getTime() - b.getTime());
             const earliestDate = format(dates[0], "yyyy-MM-dd");
             const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
 
-            console.log('Setting initial date range:', { earliestDate, latestDate });
+            console.log("Setting initial date range:", {
+              earliestDate,
+              latestDate,
+            });
 
             // Set filters without triggering a new fetch loop
-            setFilters(prev => ({
+            setFilters((prev) => ({
               ...prev,
               dateRange: {
                 from: earliestDate,
                 to: latestDate,
-              }
+              },
             }));
 
             // Also set the initial analytics data
@@ -254,7 +260,8 @@ const UnifiedReports: React.FC = () => {
               performance: {
                 userSatisfaction: data.data?.performance?.userSatisfaction || 0,
                 escalationRate: data.data?.performance?.escalationRate || 0,
-                firstCallResolution: data.data?.performance?.firstCallResolution || 0,
+                firstCallResolution:
+                  data.data?.performance?.firstCallResolution || 0,
                 repeatComplaints: data.data?.performance?.repeatComplaints || 0,
               },
             };
@@ -265,7 +272,7 @@ const UnifiedReports: React.FC = () => {
           setFiltersInitialized(true);
         }
       } catch (error) {
-        console.error('Initial data fetch error:', error);
+        console.error("Initial data fetch error:", error);
         // Fallback to current month if initial fetch fails
         setFiltersInitialized(true);
       }
@@ -291,10 +298,10 @@ const UnifiedReports: React.FC = () => {
         ...(filters.priority !== "all" && { priority: filters.priority }),
       });
 
-      console.log('Fetching analytics with params:', {
+      console.log("Fetching analytics with params:", {
         filters,
         queryString: queryParams.toString(),
-        url: `/api/reports/analytics?${queryParams}`
+        url: `/api/reports/analytics?${queryParams}`,
       });
 
       // Use different endpoints based on user role
@@ -319,7 +326,7 @@ const UnifiedReports: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('Received analytics data:', data);
+      console.log("Received analytics data:", data);
 
       // Transform the API response to match the expected format
       const transformedData = {
@@ -361,7 +368,7 @@ const UnifiedReports: React.FC = () => {
     if (!filtersInitialized) return;
 
     const timeoutId = setTimeout(() => {
-      console.log('Filters changed, fetching new data:', filters);
+      console.log("Filters changed, fetching new data:", filters);
       fetchAnalyticsData();
     }, 500); // 500ms debounce
 
@@ -372,7 +379,7 @@ const UnifiedReports: React.FC = () => {
   useEffect(() => {
     if (!filtersInitialized) return;
 
-    console.log('Filter state updated:', filters);
+    console.log("Filter state updated:", filters);
     setAnalyticsData(null); // Clear existing data to show loading
   }, [filters, filtersInitialized]);
 
@@ -510,7 +517,7 @@ const UnifiedReports: React.FC = () => {
         ...(filters.complaintType !== "all" && { type: filters.complaintType }),
         ...(filters.status !== "all" && { status: filters.status }),
         ...(filters.priority !== "all" && { priority: filters.priority }),
-        detailed: 'true'
+        detailed: "true",
       });
 
       // Make API call with abort signal
@@ -523,7 +530,7 @@ const UnifiedReports: React.FC = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -547,15 +554,14 @@ const UnifiedReports: React.FC = () => {
 
         // Report completed successfully - no alert needed
         console.log(
-          `Report generated successfully! Found ${reportData.data?.complaints?.total || 0} records based on applied filters.`
+          `Report generated successfully! Found ${reportData.data?.complaints?.total || 0} records based on applied filters.`,
         );
       }, 500);
-
     } catch (error) {
       clearInterval(timer);
 
-      if (error.name === 'AbortError') {
-        console.log('Report generation cancelled by user');
+      if (error.name === "AbortError") {
+        console.log("Report generation cancelled by user");
       } else {
         console.error("Report generation error:", error);
         alert(`Failed to generate report: ${error.message}`);
@@ -619,24 +625,27 @@ const UnifiedReports: React.FC = () => {
   const processedChartData = useMemo(() => {
     if (!analyticsData) return null;
 
-    console.log('Processing chart data:', analyticsData);
+    console.log("Processing chart data:", analyticsData);
 
     return {
-      trendsData: analyticsData.trends?.map((trend) => ({
-        ...trend,
-        date: format(new Date(trend.date), 'MMM dd'),
-        fullDate: format(new Date(trend.date), 'MMM dd, yyyy'),
-        rawDate: trend.date,
-      })) || [],
-      categoriesWithColors: analyticsData.categories?.map((category, index) => ({
-        ...category,
-        color: COLORS[index % COLORS.length],
-      })) || [],
-      wardsData: analyticsData.wards?.map((ward) => ({
-        ...ward,
-        efficiency:
-          ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
-      })) || [],
+      trendsData:
+        analyticsData.trends?.map((trend) => ({
+          ...trend,
+          date: format(new Date(trend.date), "MMM dd"),
+          fullDate: format(new Date(trend.date), "MMM dd, yyyy"),
+          rawDate: trend.date,
+        })) || [],
+      categoriesWithColors:
+        analyticsData.categories?.map((category, index) => ({
+          ...category,
+          color: COLORS[index % COLORS.length],
+        })) || [],
+      wardsData:
+        analyticsData.wards?.map((ward) => ({
+          ...ward,
+          efficiency:
+            ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
+        })) || [],
     };
   }, [analyticsData, filters]); // Added filters dependency to force re-processing
 
@@ -834,38 +843,46 @@ const UnifiedReports: React.FC = () => {
           </div>
 
           <div className="flex justify-end mt-4 space-x-2">
-            <Button variant="outline" onClick={() => {
-              console.log('Resetting filters...');
-              // Reset to original data range if available
-              if (analyticsData?.trends && analyticsData.trends.length > 0) {
-                const dates = analyticsData.trends.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
-                const earliestDate = format(dates[0], "yyyy-MM-dd");
-                const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log("Resetting filters...");
+                // Reset to original data range if available
+                if (analyticsData?.trends && analyticsData.trends.length > 0) {
+                  const dates = analyticsData.trends
+                    .map((t) => new Date(t.date))
+                    .sort((a, b) => a.getTime() - b.getTime());
+                  const earliestDate = format(dates[0], "yyyy-MM-dd");
+                  const latestDate = format(
+                    dates[dates.length - 1],
+                    "yyyy-MM-dd",
+                  );
 
-                setFilters({
-                  dateRange: {
-                    from: earliestDate,
-                    to: latestDate,
-                  },
-                  ward: permissions.defaultWard,
-                  complaintType: "all",
-                  status: "all",
-                  priority: "all",
-                });
-              } else {
-                // Fallback to current month if no data
-                setFilters({
-                  dateRange: {
-                    from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-                    to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-                  },
-                  ward: permissions.defaultWard,
-                  complaintType: "all",
-                  status: "all",
-                  priority: "all",
-                });
-              }
-            }}>
+                  setFilters({
+                    dateRange: {
+                      from: earliestDate,
+                      to: latestDate,
+                    },
+                    ward: permissions.defaultWard,
+                    complaintType: "all",
+                    status: "all",
+                    priority: "all",
+                  });
+                } else {
+                  // Fallback to current month if no data
+                  setFilters({
+                    dateRange: {
+                      from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+                      to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+                    },
+                    ward: permissions.defaultWard,
+                    complaintType: "all",
+                    status: "all",
+                    priority: "all",
+                  });
+                }
+              }}
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Reset Filters
             </Button>
@@ -874,7 +891,7 @@ const UnifiedReports: React.FC = () => {
               disabled={isGeneratingReport}
             >
               <BarChart3 className="h-4 w-4 mr-2" />
-              {isGeneratingReport ? 'Generating...' : 'Generate Report'}
+              {isGeneratingReport ? "Generating..." : "Generate Report"}
             </Button>
           </div>
         </CardContent>
@@ -1012,7 +1029,12 @@ const UnifiedReports: React.FC = () => {
                               }
                               return `Date: ${label}`;
                             }}
-                            formatter={(value, name) => [value, name === 'complaints' ? 'Total Complaints' : 'Resolved Complaints']}
+                            formatter={(value, name) => [
+                              value,
+                              name === "complaints"
+                                ? "Total Complaints"
+                                : "Resolved Complaints",
+                            ]}
                           />
                           <Legend />
                           <Area
@@ -1036,8 +1058,12 @@ const UnifiedReports: React.FC = () => {
                         <div className="text-center">
                           <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
                           <p>No trend data available for selected period</p>
-                          <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
-                          <p className="text-xs">Try adjusting your date range or filters</p>
+                          <p className="text-sm font-medium">
+                            {getTimePeriodLabel()}
+                          </p>
+                          <p className="text-xs">
+                            Try adjusting your date range or filters
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1072,12 +1098,18 @@ const UnifiedReports: React.FC = () => {
                           >
                             {processedChartData.categoriesWithColors.map(
                               (entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
                               ),
                             )}
                           </Pie>
                           <Tooltip
-                            formatter={(value, name) => [`${value} complaints`, name]}
+                            formatter={(value, name) => [
+                              `${value} complaints`,
+                              name,
+                            ]}
                             labelFormatter={(label) => `Category: ${label}`}
                           />
                         </PieChart>
@@ -1087,8 +1119,12 @@ const UnifiedReports: React.FC = () => {
                         <div className="text-center">
                           <PieChartIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
                           <p>No category data available for selected period</p>
-                          <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
-                          <p className="text-xs">Try adjusting your filters or date range</p>
+                          <p className="text-sm font-medium">
+                            {getTimePeriodLabel()}
+                          </p>
+                          <p className="text-xs">
+                            Try adjusting your filters or date range
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1129,8 +1165,8 @@ const UnifiedReports: React.FC = () => {
                           return `Date: ${label}`;
                         }}
                         formatter={(value, name) => [
-                          name === 'slaCompliance' ? `${value}%` : value,
-                          name === 'slaCompliance' ? 'SLA Compliance' : name
+                          name === "slaCompliance" ? `${value}%` : value,
+                          name === "slaCompliance" ? "SLA Compliance" : name,
                         ]}
                       />
                       <Legend />
@@ -1203,7 +1239,9 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="resolution-time-chart">
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={processedChartData?.categoriesWithColors || []}>
+                      <BarChart
+                        data={processedChartData?.categoriesWithColors || []}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
                           dataKey="name"
@@ -1269,26 +1307,28 @@ const UnifiedReports: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {(processedChartData?.categoriesWithColors || []).map((category, index) => (
-                    <div
-                      key={category.name}
-                      className="flex items-center justify-between p-3 border rounded"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-4 h-4 rounded"
-                          style={{
-                            backgroundColor: COLORS[index % COLORS.length],
-                          }}
-                        />
-                        <span className="font-medium">{category.name}</span>
+                  {(processedChartData?.categoriesWithColors || []).map(
+                    (category, index) => (
+                      <div
+                        key={category.name}
+                        className="flex items-center justify-between p-3 border rounded"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className="w-4 h-4 rounded"
+                            style={{
+                              backgroundColor: COLORS[index % COLORS.length],
+                            }}
+                          />
+                          <span className="font-medium">{category.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <span>{category.count} complaints</span>
+                          <span>Avg: {category.avgTime} days</span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>{category.count} complaints</span>
-                        <span>Avg: {category.avgTime} days</span>
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1320,7 +1360,7 @@ const UnifiedReports: React.FC = () => {
                   <div
                     className="w-20 h-20 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"
                     style={{
-                      animation: 'spin 2s linear infinite'
+                      animation: "spin 2s linear infinite",
                     }}
                   ></div>
                 </div>
@@ -1335,8 +1375,7 @@ const UnifiedReports: React.FC = () => {
               <div className="text-sm text-muted-foreground">
                 {reportProgress < 100
                   ? `Estimated time remaining: ${Math.max(0, Math.ceil((100 - reportProgress) * 0.05))} seconds`
-                  : 'Finalizing report...'
-                }
+                  : "Finalizing report..."}
               </div>
             </div>
 
@@ -1350,19 +1389,19 @@ const UnifiedReports: React.FC = () => {
                   <span>Period:</span>
                   <span className="font-medium">{getTimePeriodLabel()}</span>
                 </div>
-                {filters.ward !== 'all' && (
+                {filters.ward !== "all" && (
                   <div className="flex justify-between">
                     <span>Ward:</span>
                     <span className="font-medium">{filters.ward}</span>
                   </div>
                 )}
-                {filters.complaintType !== 'all' && (
+                {filters.complaintType !== "all" && (
                   <div className="flex justify-between">
                     <span>Type:</span>
                     <span className="font-medium">{filters.complaintType}</span>
                   </div>
                 )}
-                {filters.status !== 'all' && (
+                {filters.status !== "all" && (
                   <div className="flex justify-between">
                     <span>Status:</span>
                     <span className="font-medium">{filters.status}</span>

@@ -45,7 +45,8 @@ async function main() {
         {
           key: "COMPLAINT_ID_PREFIX",
           value: "KSC",
-          description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+          description:
+            "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
         },
         {
           key: "COMPLAINT_ID_START_NUMBER",
@@ -80,7 +81,8 @@ async function main() {
         {
           key: "COMPLAINT_AUTO_ASSIGN",
           value: "true",
-          description: "Whether complaints should be auto-assigned to ward officers",
+          description:
+            "Whether complaints should be auto-assigned to ward officers",
         },
       ],
     });
@@ -95,11 +97,13 @@ async function main() {
         },
         {
           name: "Water Supply",
-          description: "Water distribution, quality control, and pipeline maintenance",
+          description:
+            "Water distribution, quality control, and pipeline maintenance",
         },
         {
           name: "Electricity",
-          description: "Street lighting, power distribution, and electrical maintenance",
+          description:
+            "Street lighting, power distribution, and electrical maintenance",
         },
         {
           name: "Waste Management",
@@ -117,7 +121,8 @@ async function main() {
     const wardsData = [
       {
         name: "Ward 1 - Fort Kochi",
-        description: "Historic Fort Kochi area including Chinese fishing nets and heritage sites",
+        description:
+          "Historic Fort Kochi area including Chinese fishing nets and heritage sites",
       },
       {
         name: "Ward 2 - Mattancherry",
@@ -129,7 +134,8 @@ async function main() {
       },
       {
         name: "Ward 4 - Kadavanthra",
-        description: "Residential area with IT companies and educational institutions",
+        description:
+          "Residential area with IT companies and educational institutions",
       },
       {
         name: "Ward 5 - Panampilly Nagar",
@@ -137,7 +143,8 @@ async function main() {
       },
       {
         name: "Ward 6 - Marine Drive",
-        description: "Waterfront promenade, business district, and shopping complex",
+        description:
+          "Waterfront promenade, business district, and shopping complex",
       },
       {
         name: "Ward 7 - Willingdon Island",
@@ -145,7 +152,8 @@ async function main() {
       },
       {
         name: "Ward 8 - Thevara",
-        description: "Mixed residential and commercial area with ferry services",
+        description:
+          "Mixed residential and commercial area with ferry services",
       },
     ];
 
@@ -160,19 +168,47 @@ async function main() {
     // 4. Create Sub-zones for each ward
     console.log("📍 Creating sub-zones...");
     const subZoneData = {
-      "Ward 1 - Fort Kochi": ["Princess Street Area", "Fort Kochi Beach", "Chinese Fishing Nets"],
-      "Ward 2 - Mattancherry": ["Palace Road", "Synagogue Lane", "Spice Market"],
+      "Ward 1 - Fort Kochi": [
+        "Princess Street Area",
+        "Fort Kochi Beach",
+        "Chinese Fishing Nets",
+      ],
+      "Ward 2 - Mattancherry": [
+        "Palace Road",
+        "Synagogue Lane",
+        "Spice Market",
+      ],
       "Ward 3 - Ernakulam South": ["MG Road", "Broadway", "Avenue Road"],
-      "Ward 4 - Kadavanthra": ["Kakkanad Junction", "HMT Colony", "CUSAT Campus"],
-      "Ward 5 - Panampilly Nagar": ["Gold Souk Area", "Hotel Strip", "Panampilly Avenue"],
-      "Ward 6 - Marine Drive": ["Marine Drive Walkway", "High Court Junction", "Menaka"],
-      "Ward 7 - Willingdon Island": ["Port Area", "Naval Base", "Island Express"],
+      "Ward 4 - Kadavanthra": [
+        "Kakkanad Junction",
+        "HMT Colony",
+        "CUSAT Campus",
+      ],
+      "Ward 5 - Panampilly Nagar": [
+        "Gold Souk Area",
+        "Hotel Strip",
+        "Panampilly Avenue",
+      ],
+      "Ward 6 - Marine Drive": [
+        "Marine Drive Walkway",
+        "High Court Junction",
+        "Menaka",
+      ],
+      "Ward 7 - Willingdon Island": [
+        "Port Area",
+        "Naval Base",
+        "Island Express",
+      ],
       "Ward 8 - Thevara": ["Ferry Road", "Bishop Garden", "Thevara Junction"],
     };
 
     for (const ward of createdWards) {
-      const zoneNames = subZoneData[ward.name] || ["North Zone", "South Zone", "Central Zone"];
-      
+      const zoneNames = subZoneData[ward.name] || [
+        "North Zone",
+        "South Zone",
+        "Central Zone",
+      ];
+
       for (const zoneName of zoneNames) {
         await prisma.subZone.create({
           data: {
@@ -210,8 +246,14 @@ async function main() {
     // Ward Officers (one for each ward)
     const wardOfficers = [];
     const officerNames = [
-      "Rajesh Kumar", "Priya Nair", "Mohammed Ali", "Sunitha Menon", 
-      "Ravi Krishnan", "Deepa Thomas", "Arun Vijayan", "Shweta Sharma"
+      "Rajesh Kumar",
+      "Priya Nair",
+      "Mohammed Ali",
+      "Sunitha Menon",
+      "Ravi Krishnan",
+      "Deepa Thomas",
+      "Arun Vijayan",
+      "Shweta Sharma",
     ];
 
     for (let i = 0; i < createdWards.length; i++) {
@@ -235,10 +277,26 @@ async function main() {
     // Maintenance Team Members
     const maintenanceTeam = [];
     const maintenanceData = [
-      { name: "Suresh Kumar", dept: "Public Works", email: "suresh.kumar@cochinsmartcity.gov.in" },
-      { name: "Leela Devi", dept: "Water Supply", email: "leela.devi@cochinsmartcity.gov.in" },
-      { name: "Vinod Electrician", dept: "Electricity", email: "vinod.electric@cochinsmartcity.gov.in" },
-      { name: "Ramesh Cleaner", dept: "Waste Management", email: "ramesh.waste@cochinsmartcity.gov.in" },
+      {
+        name: "Suresh Kumar",
+        dept: "Public Works",
+        email: "suresh.kumar@cochinsmartcity.gov.in",
+      },
+      {
+        name: "Leela Devi",
+        dept: "Water Supply",
+        email: "leela.devi@cochinsmartcity.gov.in",
+      },
+      {
+        name: "Vinod Electrician",
+        dept: "Electricity",
+        email: "vinod.electric@cochinsmartcity.gov.in",
+      },
+      {
+        name: "Ramesh Cleaner",
+        dept: "Waste Management",
+        email: "ramesh.waste@cochinsmartcity.gov.in",
+      },
     ];
 
     for (let i = 0; i < maintenanceData.length; i++) {
@@ -262,14 +320,46 @@ async function main() {
     // Citizens
     const citizens = [];
     const citizenData = [
-      { name: "Arjun Menon", email: "arjun.menon@email.com", phone: "+91-9876540001" },
-      { name: "Kavya Nair", email: "kavya.nair@email.com", phone: "+91-9876540002" },
-      { name: "Joseph Cherian", email: "joseph.cherian@email.com", phone: "+91-9876540003" },
-      { name: "Lakshmi Pillai", email: "lakshmi.pillai@email.com", phone: "+91-9876540004" },
-      { name: "Anand Kumar", email: "anand.kumar@email.com", phone: "+91-9876540005" },
-      { name: "Maya George", email: "maya.george@email.com", phone: "+91-9876540006" },
-      { name: "Vishnu Warrier", email: "vishnu.warrier@email.com", phone: "+91-9876540007" },
-      { name: "Nisha Kumari", email: "nisha.kumari@email.com", phone: "+91-9876540008" },
+      {
+        name: "Arjun Menon",
+        email: "arjun.menon@email.com",
+        phone: "+91-9876540001",
+      },
+      {
+        name: "Kavya Nair",
+        email: "kavya.nair@email.com",
+        phone: "+91-9876540002",
+      },
+      {
+        name: "Joseph Cherian",
+        email: "joseph.cherian@email.com",
+        phone: "+91-9876540003",
+      },
+      {
+        name: "Lakshmi Pillai",
+        email: "lakshmi.pillai@email.com",
+        phone: "+91-9876540004",
+      },
+      {
+        name: "Anand Kumar",
+        email: "anand.kumar@email.com",
+        phone: "+91-9876540005",
+      },
+      {
+        name: "Maya George",
+        email: "maya.george@email.com",
+        phone: "+91-9876540006",
+      },
+      {
+        name: "Vishnu Warrier",
+        email: "vishnu.warrier@email.com",
+        phone: "+91-9876540007",
+      },
+      {
+        name: "Nisha Kumari",
+        email: "nisha.kumari@email.com",
+        phone: "+91-9876540008",
+      },
     ];
 
     for (const citizenInfo of citizenData) {
@@ -280,7 +370,8 @@ async function main() {
           phoneNumber: citizenInfo.phone,
           password: await hashPassword("citizen123"),
           role: "CITIZEN",
-          wardId: createdWards[Math.floor(Math.random() * createdWards.length)].id,
+          wardId:
+            createdWards[Math.floor(Math.random() * createdWards.length)].id,
           language: "en",
           isActive: true,
           joinedOn: new Date(),
@@ -295,7 +386,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WATER_SUPPLY",
         name: "Water Supply",
-        description: "Issues related to water supply, quality, pressure, or leakage",
+        description:
+          "Issues related to water supply, quality, pressure, or leakage",
         priority: "HIGH",
         slaHours: 24,
         isActive: true,
@@ -303,7 +395,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_ELECTRICITY",
         name: "Electricity",
-        description: "Power outages, faulty connections, or street lighting issues",
+        description:
+          "Power outages, faulty connections, or street lighting issues",
         priority: "HIGH",
         slaHours: 12,
         isActive: true,
@@ -319,7 +412,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WASTE_MANAGEMENT",
         name: "Waste Management",
-        description: "Garbage collection, waste disposal, and sanitation issues",
+        description:
+          "Garbage collection, waste disposal, and sanitation issues",
         priority: "MEDIUM",
         slaHours: 48,
         isActive: true,
@@ -362,8 +456,12 @@ async function main() {
     // 7. Create Sample Complaints (Match current dashboard data: 94 total)
     console.log("📝 Creating sample complaints...");
     const complaintTypes = [
-      "WATER_SUPPLY", "ELECTRICITY", "ROAD_REPAIR", 
-      "WASTE_MANAGEMENT", "STREET_LIGHTING", "DRAINAGE"
+      "WATER_SUPPLY",
+      "ELECTRICITY",
+      "ROAD_REPAIR",
+      "WASTE_MANAGEMENT",
+      "STREET_LIGHTING",
+      "DRAINAGE",
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -373,11 +471,11 @@ async function main() {
     // Generate complaints data to match dashboard (94 total, 68 active, 26 resolved)
     const complaintDates = [];
     const now = new Date();
-    
+
     // Generate dates for last 6 months matching the dashboard data
     const monthlyComplaintCounts = [
       { month: 2, count: 14 }, // March 2025: 14 complaints, 5 resolved
-      { month: 1, count: 13 }, // April 2025: 13 complaints, 3 resolved  
+      { month: 1, count: 13 }, // April 2025: 13 complaints, 3 resolved
       { month: 0, count: 12 }, // May 2025: 12 complaints, 3 resolved
       { month: -1, count: 9 }, // June 2025: 9 complaints, 3 resolved
       { month: -2, count: 14 }, // July 2025: 14 complaints, 5 resolved
@@ -390,26 +488,38 @@ async function main() {
     const targetResolved = 26; // Based on dashboard showing ~26 resolved
 
     for (const monthData of monthlyComplaintCounts) {
-      const monthDate = new Date(now.getFullYear(), now.getMonth() - monthData.month, 1);
-      const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+      const monthDate = new Date(
+        now.getFullYear(),
+        now.getMonth() - monthData.month,
+        1,
+      );
+      const daysInMonth = new Date(
+        monthDate.getFullYear(),
+        monthDate.getMonth() + 1,
+        0,
+      ).getDate();
 
       for (let i = 0; i < monthData.count; i++) {
         const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
         const randomHour = Math.floor(Math.random() * 24);
         const randomMinute = Math.floor(Math.random() * 60);
-        
+
         const complaintDate = new Date(
-          monthDate.getFullYear(), 
-          monthDate.getMonth(), 
-          randomDay, 
-          randomHour, 
-          randomMinute
+          monthDate.getFullYear(),
+          monthDate.getMonth(),
+          randomDay,
+          randomHour,
+          randomMinute,
         );
-        
+
         // Determine status - more recent complaints less likely to be resolved
         let status;
         const monthsFromNow = Math.abs(monthData.month);
-        if (monthsFromNow > 2 && resolvedCount < targetResolved && Math.random() < 0.4) {
+        if (
+          monthsFromNow > 2 &&
+          resolvedCount < targetResolved &&
+          Math.random() < 0.4
+        ) {
           status = "RESOLVED";
           resolvedCount++;
         } else if (Math.random() < 0.3) {
@@ -427,10 +537,12 @@ async function main() {
 
     // Ensure we hit close to 94 total complaints
     while (totalComplaints < 94) {
-      const recentDate = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
-      complaintDates.push({ 
-        date: recentDate, 
-        status: Math.random() < 0.7 ? "REGISTERED" : "ASSIGNED" 
+      const recentDate = new Date(
+        now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+      );
+      complaintDates.push({
+        date: recentDate,
+        status: Math.random() < 0.7 ? "REGISTERED" : "ASSIGNED",
       });
       totalComplaints++;
     }
@@ -440,11 +552,17 @@ async function main() {
     const targetOverdue = 54; // Based on dashboard
 
     for (let i = 0; i < complaintDates.length; i++) {
-      const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
-      const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
-      const randomOfficer = wardOfficers.find((o) => o.wardId === randomWard.id);
-      const complaintType = complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
-      const priority = priorities[Math.floor(Math.random() * priorities.length)];
+      const randomWard =
+        createdWards[Math.floor(Math.random() * createdWards.length)];
+      const randomCitizen =
+        citizens[Math.floor(Math.random() * citizens.length)];
+      const randomOfficer = wardOfficers.find(
+        (o) => o.wardId === randomWard.id,
+      );
+      const complaintType =
+        complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
+      const priority =
+        priorities[Math.floor(Math.random() * priorities.length)];
       const { date: complaintDate, status } = complaintDates[i];
 
       // Generate complaint ID
@@ -452,13 +570,20 @@ async function main() {
       const complaintId = `KSC${complaintNumber}`;
 
       // Set deadline and determine if overdue
-      const deadline = new Date(complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-      const isOverdue = status !== "RESOLVED" && deadline < now && overdueCount < targetOverdue;
+      const deadline = new Date(
+        complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
+      );
+      const isOverdue =
+        status !== "RESOLVED" && deadline < now && overdueCount < targetOverdue;
       if (isOverdue) overdueCount++;
 
-      const resolvedDate = status === "RESOLVED" 
-        ? new Date(complaintDate.getTime() + Math.random() * 10 * 24 * 60 * 60 * 1000)
-        : null;
+      const resolvedDate =
+        status === "RESOLVED"
+          ? new Date(
+              complaintDate.getTime() +
+                Math.random() * 10 * 24 * 60 * 60 * 1000,
+            )
+          : null;
 
       const complaint = await prisma.complaint.create({
         data: {
@@ -468,7 +593,11 @@ async function main() {
           type: complaintType,
           status: status,
           priority: priority,
-          slaStatus: isOverdue ? "OVERDUE" : (status === "RESOLVED" ? "COMPLETED" : "ON_TIME"),
+          slaStatus: isOverdue
+            ? "OVERDUE"
+            : status === "RESOLVED"
+              ? "COMPLETED"
+              : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
           landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
@@ -480,10 +609,16 @@ async function main() {
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
           createdAt: complaintDate,
           submittedOn: complaintDate,
-          assignedOn: status !== "REGISTERED" ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000) : null,
+          assignedOn:
+            status !== "REGISTERED"
+              ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000)
+              : null,
           resolvedOn: resolvedDate,
           deadline: deadline,
-          rating: status === "RESOLVED" && Math.random() > 0.4 ? Math.floor(Math.random() * 5) + 1 : null,
+          rating:
+            status === "RESOLVED" && Math.random() > 0.4
+              ? Math.floor(Math.random() * 5) + 1
+              : null,
         },
       });
 
@@ -516,15 +651,28 @@ async function main() {
     // 8. Create Sample Service Requests
     console.log("🔧 Creating sample service requests...");
     const serviceTypes = [
-      "BIRTH_CERTIFICATE", "DEATH_CERTIFICATE", "TRADE_LICENSE",
-      "BUILDING_PERMIT", "WATER_CONNECTION", "ELECTRICITY_CONNECTION"
+      "BIRTH_CERTIFICATE",
+      "DEATH_CERTIFICATE",
+      "TRADE_LICENSE",
+      "BUILDING_PERMIT",
+      "WATER_CONNECTION",
+      "ELECTRICITY_CONNECTION",
     ];
 
     for (let i = 0; i < 15; i++) {
-      const randomWard = createdWards[Math.floor(Math.random() * createdWards.length)];
-      const randomCitizen = citizens[Math.floor(Math.random() * citizens.length)];
-      const serviceType = serviceTypes[Math.floor(Math.random() * serviceTypes.length)];
-      const statuses = ["SUBMITTED", "VERIFIED", "PROCESSING", "APPROVED", "COMPLETED"];
+      const randomWard =
+        createdWards[Math.floor(Math.random() * createdWards.length)];
+      const randomCitizen =
+        citizens[Math.floor(Math.random() * citizens.length)];
+      const serviceType =
+        serviceTypes[Math.floor(Math.random() * serviceTypes.length)];
+      const statuses = [
+        "SUBMITTED",
+        "VERIFIED",
+        "PROCESSING",
+        "APPROVED",
+        "COMPLETED",
+      ];
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
       await prisma.serviceRequest.create({
@@ -541,7 +689,9 @@ async function main() {
           contactEmail: randomCitizen.email,
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
-          submittedOn: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+          submittedOn: new Date(
+            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+          ),
           expectedCompletion: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         },
       });
@@ -555,7 +705,8 @@ async function main() {
           userId: citizen.id,
           type: "IN_APP",
           title: "Welcome to Kochi Smart City",
-          message: "Thank you for registering with our digital platform. You can now submit complaints and track their progress.",
+          message:
+            "Thank you for registering with our digital platform. You can now submit complaints and track their progress.",
           sentAt: new Date(),
         },
       });
@@ -577,9 +728,10 @@ async function main() {
     console.log("\n🔑 Default Login Credentials:");
     console.log("Administrator: admin@cochinsmartcity.gov.in / admin123");
     console.log("Ward Officer: officer1@cochinsmartcity.gov.in / officer123");
-    console.log("Maintenance: suresh.kumar@cochinsmartcity.gov.in / maintenance123");
+    console.log(
+      "Maintenance: suresh.kumar@cochinsmartcity.gov.in / maintenance123",
+    );
     console.log("Citizen: arjun.menon@email.com / citizen123");
-
   } catch (error) {
     console.error("❌ Error during seeding:", error);
     throw error;

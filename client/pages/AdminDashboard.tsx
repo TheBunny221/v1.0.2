@@ -125,14 +125,14 @@ const AdminDashboard: React.FC = () => {
   };
 
   // Development debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Dashboard Data Debug:', {
+  if (process.env.NODE_ENV === "development") {
+    console.log("Dashboard Data Debug:", {
       analytics: analytics,
       complaintTrends: complaintTrends,
       complaintsByType: complaintsByType,
       wardPerformance: wardPerformance,
       metrics: metrics,
-      systemStats: systemStats
+      systemStats: systemStats,
     });
   }
 
@@ -157,9 +157,10 @@ const AdminDashboard: React.FC = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-red-600">
           Error loading dashboard data. Please try refreshing the page.
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <div className="text-sm mt-2">
-              Errors: {JSON.stringify({statsError, analyticsError, activityError})}
+              Errors:{" "}
+              {JSON.stringify({ statsError, analyticsError, activityError })}
             </div>
           )}
         </div>
@@ -317,14 +318,11 @@ const AdminDashboard: React.FC = () => {
                           textAnchor="end"
                           height={60}
                         />
-                        <YAxis
-                          allowDecimals={false}
-                          tick={{ fontSize: 12 }}
-                        />
+                        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                         <Tooltip
                           formatter={(value, name) => [
                             value,
-                            name === 'complaints' ? 'Complaints' : 'Resolved'
+                            name === "complaints" ? "Complaints" : "Resolved",
                           ]}
                           labelFormatter={(label) => `Month: ${label}`}
                         />
@@ -346,20 +344,27 @@ const AdminDashboard: React.FC = () => {
                         />
                       </LineChart>
                     </ResponsiveContainer>
-                    {process.env.NODE_ENV === 'development' && (
+                    {process.env.NODE_ENV === "development" && (
                       <div className="mt-2 text-xs text-gray-400">
-                        Data points: {complaintTrends.length} | Total complaints: {complaintTrends.reduce((sum, trend) => sum + (trend.complaints || 0), 0)}
+                        Data points: {complaintTrends.length} | Total
+                        complaints:{" "}
+                        {complaintTrends.reduce(
+                          (sum, trend) => sum + (trend.complaints || 0),
+                          0,
+                        )}
                       </div>
                     )}
                   </>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center text-gray-500">
                     <div className="text-center">
-                      <div className="mb-2">No complaint trend data available</div>
-                      {process.env.NODE_ENV === 'development' && analytics && (
+                      <div className="mb-2">
+                        No complaint trend data available
+                      </div>
+                      {process.env.NODE_ENV === "development" && analytics && (
                         <div className="text-xs">
-                          Analytics loaded: {analytics ? 'Yes' : 'No'} |
-                          Trends array length: {complaintTrends?.length || 0}
+                          Analytics loaded: {analytics ? "Yes" : "No"} | Trends
+                          array length: {complaintTrends?.length || 0}
                         </div>
                       )}
                     </div>
@@ -395,7 +400,10 @@ const AdminDashboard: React.FC = () => {
                           ))}
                         </Pie>
                         <Tooltip
-                          formatter={(value, name) => [`${value} complaints`, "Count"]}
+                          formatter={(value, name) => [
+                            `${value} complaints`,
+                            "Count",
+                          ]}
                           labelFormatter={(label) => `Type: ${label}`}
                         />
                       </PieChart>
@@ -418,20 +426,26 @@ const AdminDashboard: React.FC = () => {
                         </div>
                       ))}
                     </div>
-                    {process.env.NODE_ENV === 'development' && (
+                    {process.env.NODE_ENV === "development" && (
                       <div className="mt-2 text-xs text-gray-400">
-                        Types: {complaintsByType.length} | Total: {complaintsByType.reduce((sum, type) => sum + (type.value || 0), 0)}
+                        Types: {complaintsByType.length} | Total:{" "}
+                        {complaintsByType.reduce(
+                          (sum, type) => sum + (type.value || 0),
+                          0,
+                        )}
                       </div>
                     )}
                   </>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center text-gray-500">
                     <div className="text-center">
-                      <div className="mb-2">No complaint type data available</div>
-                      {process.env.NODE_ENV === 'development' && analytics && (
+                      <div className="mb-2">
+                        No complaint type data available
+                      </div>
+                      {process.env.NODE_ENV === "development" && analytics && (
                         <div className="text-xs">
-                          Analytics loaded: {analytics ? 'Yes' : 'No'} |
-                          Types array length: {complaintsByType?.length || 0}
+                          Analytics loaded: {analytics ? "Yes" : "No"} | Types
+                          array length: {complaintsByType?.length || 0}
                         </div>
                       )}
                     </div>
@@ -475,7 +489,6 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
 
         <TabsContent value="performance" className="space-y-6">
           {/* Performance KPIs */}
@@ -526,8 +539,8 @@ const AdminDashboard: React.FC = () => {
                       {(metrics?.resolutionRate || 0) >= 90
                         ? "Excellent"
                         : (metrics?.resolutionRate || 0) >= 75
-                        ? "Good"
-                        : "Needs improvement"}
+                          ? "Good"
+                          : "Needs improvement"}
                     </span>
                   </div>
                   <Progress
@@ -554,8 +567,8 @@ const AdminDashboard: React.FC = () => {
                       {(metrics?.slaCompliance || 0) >= 85
                         ? "Excellent"
                         : (metrics?.slaCompliance || 0) >= 70
-                        ? "Good"
-                        : "Below target"}
+                          ? "Good"
+                          : "Below target"}
                     </span>
                   </div>
                   <Progress
@@ -609,7 +622,10 @@ const AdminDashboard: React.FC = () => {
                         {metrics?.resolutionRate || 0}%
                       </span>
                     </div>
-                    <Progress value={metrics?.resolutionRate || 0} className="h-3" />
+                    <Progress
+                      value={metrics?.resolutionRate || 0}
+                      className="h-3"
+                    />
 
                     <div className="flex justify-between items-center">
                       <span className="text-sm">SLA Compliance</span>
@@ -617,7 +633,10 @@ const AdminDashboard: React.FC = () => {
                         {metrics?.slaCompliance || 0}%
                       </span>
                     </div>
-                    <Progress value={metrics?.slaCompliance || 0} className="h-3" />
+                    <Progress
+                      value={metrics?.slaCompliance || 0}
+                      className="h-3"
+                    />
                   </div>
 
                   <div className="space-y-4">
@@ -625,7 +644,9 @@ const AdminDashboard: React.FC = () => {
                       <div className="text-3xl font-bold text-orange-600">
                         {(metrics?.avgResolutionTime || 0).toFixed(1)}d
                       </div>
-                      <p className="text-sm text-gray-600">Average Resolution Time</p>
+                      <p className="text-sm text-gray-600">
+                        Average Resolution Time
+                      </p>
                       <div className="text-xs text-gray-500 mt-1">
                         Target: 3 days
                       </div>
@@ -635,7 +656,9 @@ const AdminDashboard: React.FC = () => {
                       <div className="text-2xl font-bold text-purple-600">
                         {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
                       </div>
-                      <p className="text-sm text-gray-600">Satisfaction Score</p>
+                      <p className="text-sm text-gray-600">
+                        Satisfaction Score
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -677,7 +700,6 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
@@ -909,7 +931,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-
     </div>
   );
 };

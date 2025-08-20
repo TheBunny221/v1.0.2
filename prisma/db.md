@@ -3,6 +3,7 @@
 This document provides comprehensive instructions for setting up and migrating the Kochi Smart City database from SQLite (development) to PostgreSQL (production).
 
 ## Table of Contents
+
 1. [Environment Configuration](#environment-configuration)
 2. [Development Setup (SQLite)](#development-setup-sqlite)
 3. [Production Setup (PostgreSQL)](#production-setup-postgresql)
@@ -14,6 +15,7 @@ This document provides comprehensive instructions for setting up and migrating t
 ## Environment Configuration
 
 ### Development Environment Variables (.env)
+
 ```bash
 # Database Configuration
 DATABASE_PROVIDER="sqlite"
@@ -45,6 +47,7 @@ RATE_LIMIT_MAX=1000
 ```
 
 ### Production Environment Variables (.env.production)
+
 ```bash
 # Database Configuration
 DATABASE_PROVIDER="postgresql"
@@ -78,21 +81,25 @@ RATE_LIMIT_MAX=1000
 ## Development Setup (SQLite)
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Generate Prisma Client
+
 ```bash
 npx prisma generate
 ```
 
 ### 3. Create Database and Run Migrations
+
 ```bash
 npx prisma db push
 ```
 
 ### 4. Seed Development Data
+
 ```bash
 npm run seed
 # or
@@ -100,6 +107,7 @@ node prisma/seed.js
 ```
 
 ### 5. View Database (Optional)
+
 ```bash
 npx prisma studio
 ```
@@ -107,13 +115,16 @@ npx prisma studio
 ## Production Setup (PostgreSQL)
 
 ### 1. Install PostgreSQL
+
 #### Ubuntu/Debian:
+
 ```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 ```
 
 #### CentOS/RHEL:
+
 ```bash
 sudo yum install postgresql-server postgresql-contrib
 sudo postgresql-setup initdb
@@ -122,12 +133,14 @@ sudo systemctl enable postgresql
 ```
 
 #### macOS (via Homebrew):
+
 ```bash
 brew install postgresql
 brew services start postgresql
 ```
 
 ### 2. Create Database and User
+
 ```bash
 # Connect to PostgreSQL
 sudo -u postgres psql
@@ -146,6 +159,7 @@ GRANT ALL PRIVILEGES ON DATABASE kochi_smart_city TO kochi_admin;
 ```
 
 ### 3. Configure Environment
+
 ```bash
 # Copy production environment file
 cp .env.production .env
@@ -155,6 +169,7 @@ DATABASE_URL="postgresql://kochi_admin:secure_password_here@localhost:5432/kochi
 ```
 
 ### 4. Update Prisma Schema for PostgreSQL
+
 ```bash
 # Update schema.prisma
 # Change DATABASE_PROVIDER from "sqlite" to "postgresql"
@@ -162,16 +177,19 @@ DATABASE_URL="postgresql://kochi_admin:secure_password_here@localhost:5432/kochi
 ```
 
 ### 5. Generate Prisma Client
+
 ```bash
 npx prisma generate
 ```
 
 ### 6. Run Database Migrations
+
 ```bash
 npx prisma db push
 ```
 
 ### 7. Seed Production Data
+
 ```bash
 NODE_ENV=production npm run seed
 ```
@@ -181,6 +199,7 @@ NODE_ENV=production npm run seed
 ### Migrating from SQLite to PostgreSQL
 
 #### 1. Export Data from SQLite
+
 ```bash
 # Install sqlite3 and pg_dump tools
 npm install -g sqlite3
@@ -190,34 +209,38 @@ sqlite3 prisma/dev.db .dump > sqlite_dump.sql
 ```
 
 #### 2. Clean and Convert SQL
+
 Create a conversion script `convert_sqlite_to_postgresql.js`:
 
 ```javascript
-const fs = require('fs');
+const fs = require("fs");
 
 // Read SQLite dump
-const sqliteData = fs.readFileSync('sqlite_dump.sql', 'utf8');
+const sqliteData = fs.readFileSync("sqlite_dump.sql", "utf8");
 
 // Convert SQLite specific syntax to PostgreSQL
 let postgresqlData = sqliteData
   // Remove SQLite specific pragmas
-  .replace(/PRAGMA[^;]+;/g, '')
+  .replace(/PRAGMA[^;]+;/g, "")
   // Convert AUTOINCREMENT to SERIAL
-  .replace(/AUTOINCREMENT/g, 'SERIAL')
+  .replace(/AUTOINCREMENT/g, "SERIAL")
   // Convert DateTime formats
-  .replace(/datetime\('now'\)/g, 'NOW()')
+  .replace(/datetime\('now'\)/g, "NOW()")
   // Convert boolean values
   .replace(/([^'])'([01])'([^'])/g, "$1$2$3")
   // Remove SQLite specific quotes
   .replace(/`([^`]+)`/g, '"$1"')
   // Convert CUID functions if needed
-  .replace(/cuid\(\)/g, 'gen_random_uuid()');
+  .replace(/cuid\(\)/g, "gen_random_uuid()");
 
-fs.writeFileSync('postgresql_dump.sql', postgresqlData);
-console.log('Conversion completed! Review postgresql_dump.sql before importing.');
+fs.writeFileSync("postgresql_dump.sql", postgresqlData);
+console.log(
+  "Conversion completed! Review postgresql_dump.sql before importing.",
+);
 ```
 
 #### 3. Import to PostgreSQL
+
 ```bash
 # Run conversion
 node convert_sqlite_to_postgresql.js
@@ -227,6 +250,7 @@ psql -U kochi_admin -d kochi_smart_city -f postgresql_dump.sql
 ```
 
 #### 4. Verify Migration
+
 ```bash
 # Connect to PostgreSQL and verify
 psql -U kochi_admin -d kochi_smart_city
@@ -246,7 +270,9 @@ SELECT COUNT(*) FROM wards;
 ## Seeding Data
 
 ### Default Seed Data
+
 The seed script creates:
+
 - **8 Wards**: Real Kochi ward areas
 - **24 Sub-zones**: 3 per ward with realistic names
 - **1 Administrator**: admin@cochinsmartcity.gov.in
@@ -258,6 +284,7 @@ The seed script creates:
 - **System Configuration**: App settings and complaint types
 
 ### Custom Seed Data
+
 To modify seed data, edit `prisma/seed.js`:
 
 ```javascript
@@ -279,6 +306,7 @@ const monthlyComplaintCounts = [
 ```
 
 ### Running Seeds
+
 ```bash
 # Development
 npm run seed
@@ -293,6 +321,7 @@ DATABASE_URL="your_database_url" node prisma/seed.js
 ## Common Commands
 
 ### Database Operations
+
 ```bash
 # Generate Prisma client
 npx prisma generate
@@ -314,6 +343,7 @@ npx prisma studio
 ```
 
 ### Schema Operations
+
 ```bash
 # Validate schema
 npx prisma validate
@@ -326,6 +356,7 @@ npx prisma db pull
 ```
 
 ### Data Operations
+
 ```bash
 # Seed database
 npm run seed
@@ -345,6 +376,7 @@ psql -U kochi_admin -d kochi_smart_city < backup.sql
 ### Common Issues
 
 #### 1. Connection Issues
+
 ```bash
 # Check if PostgreSQL is running
 sudo systemctl status postgresql
@@ -354,6 +386,7 @@ psql -U kochi_admin -d kochi_smart_city -c "SELECT 1;"
 ```
 
 #### 2. Permission Issues
+
 ```bash
 # Grant all privileges
 sudo -u postgres psql
@@ -363,6 +396,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO kochi_admin;
 ```
 
 #### 3. Migration Failures
+
 ```bash
 # Check migration status
 npx prisma migrate status
@@ -373,6 +407,7 @@ npx prisma db push
 ```
 
 #### 4. Seed Failures
+
 ```bash
 # Clear existing data and reseed
 npx prisma migrate reset --force
@@ -382,13 +417,16 @@ npm run seed
 ### Performance Optimization
 
 #### 1. Database Indexes
+
 The schema includes optimized indexes for:
+
 - User roles and ward assignments
 - Complaint status and timestamps
 - Search operations
 - Reporting queries
 
 #### 2. Connection Pooling
+
 For production, configure connection pooling:
 
 ```javascript
@@ -399,11 +437,12 @@ const prisma = new PrismaClient({
       url: process.env.DATABASE_URL,
     },
   },
-  log: process.env.NODE_ENV === 'development' ? ['query'] : [],
-})
+  log: process.env.NODE_ENV === "development" ? ["query"] : [],
+});
 ```
 
 #### 3. Query Optimization
+
 - Use `select` to limit returned fields
 - Use `include` judiciously for relations
 - Implement pagination for large datasets
@@ -412,18 +451,21 @@ const prisma = new PrismaClient({
 ### Security Considerations
 
 #### 1. Database Access
+
 - Use strong passwords
 - Limit database user privileges
 - Enable SSL connections in production
 - Regular security updates
 
 #### 2. Environment Variables
+
 - Never commit production credentials
 - Use secret management systems
 - Rotate passwords regularly
 - Monitor access logs
 
 #### 3. Data Protection
+
 - Regular backups
 - Encrypt sensitive data
 - Implement data retention policies
@@ -446,6 +488,7 @@ const prisma = new PrismaClient({
 ## Support
 
 For issues and questions:
+
 1. Check this documentation
 2. Review Prisma documentation: https://www.prisma.io/docs
 3. Check application logs

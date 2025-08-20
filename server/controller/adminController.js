@@ -478,21 +478,21 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const allComplaints = await prisma.complaint.findMany({
     where: {
       createdAt: {
-        gte: sixMonthsCutoff
-      }
+        gte: sixMonthsCutoff,
+      },
     },
     select: {
       createdAt: true,
-      status: true
-    }
+      status: true,
+    },
   });
 
   // Process complaint trends in JavaScript
   const trendMap = new Map();
 
-  allComplaints.forEach(complaint => {
+  allComplaints.forEach((complaint) => {
     const date = new Date(complaint.createdAt);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
     if (!trendMap.has(monthKey)) {
       trendMap.set(monthKey, { complaints: 0, resolved: 0 });
@@ -500,17 +500,19 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 
     const trend = trendMap.get(monthKey);
     trend.complaints++;
-    if (complaint.status === 'RESOLVED') {
+    if (complaint.status === "RESOLVED") {
       trend.resolved++;
     }
   });
 
   // Convert map to array and sort
-  const complaintTrends = Array.from(trendMap.entries()).map(([monthKey, data]) => ({
-    month: monthKey,
-    complaints: data.complaints,
-    resolved: data.resolved
-  })).sort((a, b) => a.month.localeCompare(b.month));
+  const complaintTrends = Array.from(trendMap.entries())
+    .map(([monthKey, data]) => ({
+      month: monthKey,
+      complaints: data.complaints,
+      resolved: data.resolved,
+    }))
+    .sort((a, b) => a.month.localeCompare(b.month));
 
   // Get complaints by type
   const complaintsByType = await prisma.complaint.groupBy({
@@ -598,7 +600,9 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     processedTrends = complaintTrends.map((trend) => {
       try {
         // Ensure the month string is valid
-        const monthDate = trend.month ? new Date(trend.month + "-01") : new Date();
+        const monthDate = trend.month
+          ? new Date(trend.month + "-01")
+          : new Date();
         return {
           month: monthDate.toLocaleDateString("en-US", {
             month: "short",
@@ -608,7 +612,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
           resolved: Number(trend.resolved) || 0,
         };
       } catch (error) {
-        console.error('Error processing trend:', trend, error);
+        console.error("Error processing trend:", trend, error);
         return {
           month: "Unknown",
           complaints: Number(trend.complaints) || 0,
@@ -620,7 +624,6 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     // If no data, generate some sample data for the last 6 months
     processedTrends = generateEmptyTrends();
   }
-
 
   res.status(200).json({
     success: true,
@@ -829,25 +832,25 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
 // Helper functions
 function getTypeColor(type) {
   const colors = {
-    WATER_SUPPLY: "#3B82F6",         // Blue
-    ELECTRICITY: "#EF4444",         // Red
-    ROAD_REPAIR: "#10B981",         // Green
-    GARBAGE: "#F59E0B",             // Amber
-    SEWAGE: "#8B5CF6",              // Purple
-    STREET_LIGHT: "#F97316",        // Orange
-    WASTE_MANAGEMENT: "#EC4899",    // Pink
-    PUBLIC_TRANSPORT: "#06B6D4",   // Cyan
-    TRAFFIC_SIGNAL: "#84CC16",      // Lime
-    PARKS_GARDENS: "#22C55E",       // Green
-    DRAINAGE: "#6366F1",            // Indigo
-    BUILDING_PERMIT: "#F43F5E",     // Rose
-    NOISE_POLLUTION: "#A855F7",     // Violet
-    AIR_POLLUTION: "#14B8A6",       // Teal
-    WATER_POLLUTION: "#0EA5E9",     // Sky
+    WATER_SUPPLY: "#3B82F6", // Blue
+    ELECTRICITY: "#EF4444", // Red
+    ROAD_REPAIR: "#10B981", // Green
+    GARBAGE: "#F59E0B", // Amber
+    SEWAGE: "#8B5CF6", // Purple
+    STREET_LIGHT: "#F97316", // Orange
+    WASTE_MANAGEMENT: "#EC4899", // Pink
+    PUBLIC_TRANSPORT: "#06B6D4", // Cyan
+    TRAFFIC_SIGNAL: "#84CC16", // Lime
+    PARKS_GARDENS: "#22C55E", // Green
+    DRAINAGE: "#6366F1", // Indigo
+    BUILDING_PERMIT: "#F43F5E", // Rose
+    NOISE_POLLUTION: "#A855F7", // Violet
+    AIR_POLLUTION: "#14B8A6", // Teal
+    WATER_POLLUTION: "#0EA5E9", // Sky
     ILLEGAL_CONSTRUCTION: "#DC2626", // Red-600
-    STRAY_ANIMALS: "#CA8A04",       // Yellow-600
-    ENCROACHMENT: "#7C3AED",        // Purple-600
-    OTHER: "#64748B",               // Slate-500
+    STRAY_ANIMALS: "#CA8A04", // Yellow-600
+    ENCROACHMENT: "#7C3AED", // Purple-600
+    OTHER: "#64748B", // Slate-500
   };
   return colors[type] || getRandomColor();
 }
@@ -855,10 +858,22 @@ function getTypeColor(type) {
 // Generate consistent colors for new types
 function getRandomColor() {
   const additionalColors = [
-    "#F87171", "#FB923C", "#FBBF24", "#A3E635",
-    "#34D399", "#22D3EE", "#60A5FA", "#A78BFA",
-    "#F472B6", "#FB7185", "#FDBA74", "#BEF264",
-    "#6EE7B7", "#67E8F9", "#93C5FD", "#C4B5FD"
+    "#F87171",
+    "#FB923C",
+    "#FBBF24",
+    "#A3E635",
+    "#34D399",
+    "#22D3EE",
+    "#60A5FA",
+    "#A78BFA",
+    "#F472B6",
+    "#FB7185",
+    "#FDBA74",
+    "#BEF264",
+    "#6EE7B7",
+    "#67E8F9",
+    "#93C5FD",
+    "#C4B5FD",
   ];
   return additionalColors[Math.floor(Math.random() * additionalColors.length)];
 }
@@ -899,7 +914,11 @@ function formatTimeAgo(date) {
 
   // Handle future dates or invalid dates
   if (diffMs < 0 || isNaN(diffMs)) {
-    return inputDate.toLocaleDateString() + ' ' + inputDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return (
+      inputDate.toLocaleDateString() +
+      " " +
+      inputDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   }
 
   const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -909,14 +928,18 @@ function formatTimeAgo(date) {
   if (diffMins < 1) {
     return "Just now";
   } else if (diffMins < 60) {
-    return `${diffMins} min${diffMins === 1 ? '' : 's'} ago`;
+    return `${diffMins} min${diffMins === 1 ? "" : "s"} ago`;
   } else if (diffHours < 24) {
-    return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
   } else if (diffDays < 7) {
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
   } else {
     // For older dates, show actual date and time
-    return inputDate.toLocaleDateString() + ' ' + inputDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return (
+      inputDate.toLocaleDateString() +
+      " " +
+      inputDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   }
 }
 

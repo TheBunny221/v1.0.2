@@ -272,23 +272,35 @@ const AdminReports: React.FC = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-lg">Current Period Summary</h4>
+                  <h4 className="font-semibold text-lg">
+                    Current Period Summary
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>Report Period:</span>
-                      <span className="font-medium">{selectedPeriod === 'month' ? 'This Month' : selectedPeriod}</span>
+                      <span className="font-medium">
+                        {selectedPeriod === "month"
+                          ? "This Month"
+                          : selectedPeriod}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Ward Filter:</span>
-                      <span className="font-medium">{selectedWard === 'all' ? 'All Wards' : selectedWard}</span>
+                      <span className="font-medium">
+                        {selectedWard === "all" ? "All Wards" : selectedWard}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Type Filter:</span>
-                      <span className="font-medium">{selectedType === 'all' ? 'All Types' : selectedType}</span>
+                      <span className="font-medium">
+                        {selectedType === "all" ? "All Types" : selectedType}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Generated:</span>
-                      <span className="font-medium">{new Date().toLocaleDateString()}</span>
+                      <span className="font-medium">
+                        {new Date().toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -297,16 +309,28 @@ const AdminReports: React.FC = () => {
                   <h4 className="font-semibold text-lg">Key Insights</h4>
                   <div className="space-y-3 text-sm">
                     <div className="p-3 bg-green-50 rounded-lg">
-                      <div className="font-medium text-green-800">Top Performing Ward</div>
-                      <div className="text-green-600">Ward 2 - 89.6% SLA compliance</div>
+                      <div className="font-medium text-green-800">
+                        Top Performing Ward
+                      </div>
+                      <div className="text-green-600">
+                        Ward 2 - 89.6% SLA compliance
+                      </div>
                     </div>
                     <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="font-medium text-blue-800">Most Common Issue</div>
-                      <div className="text-blue-600">Water Supply (23% of complaints)</div>
+                      <div className="font-medium text-blue-800">
+                        Most Common Issue
+                      </div>
+                      <div className="text-blue-600">
+                        Water Supply (23% of complaints)
+                      </div>
                     </div>
                     <div className="p-3 bg-orange-50 rounded-lg">
-                      <div className="font-medium text-orange-800">Avg Resolution Time</div>
-                      <div className="text-orange-600">{reportMetrics.avgResolutionTime} days</div>
+                      <div className="font-medium text-orange-800">
+                        Avg Resolution Time
+                      </div>
+                      <div className="text-orange-600">
+                        {reportMetrics.avgResolutionTime} days
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -318,7 +342,12 @@ const AdminReports: React.FC = () => {
                     For detailed analytics and trends, visit the Analytics page
                   </p>
                   <div className="flex justify-center space-x-4">
-                    <Button variant="outline" onClick={() => window.location.href = '/admin/analytics'}>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        (window.location.href = "/admin/analytics")
+                      }
+                    >
                       <BarChart3 className="h-4 w-4 mr-2" />
                       View Analytics
                     </Button>
@@ -344,7 +373,9 @@ const AdminReports: React.FC = () => {
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     PDF Report
-                    <span className="ml-auto text-xs text-gray-500">Formatted</span>
+                    <span className="ml-auto text-xs text-gray-500">
+                      Formatted
+                    </span>
                   </Button>
 
                   <Button
@@ -354,17 +385,21 @@ const AdminReports: React.FC = () => {
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Excel Spreadsheet
-                    <span className="ml-auto text-xs text-gray-500">Raw data</span>
+                    <span className="ml-auto text-xs text-gray-500">
+                      Raw data
+                    </span>
                   </Button>
 
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => console.log('CSV export')}
+                    onClick={() => console.log("CSV export")}
                   >
                     <BarChart3 className="h-4 w-4 mr-2" />
                     CSV Export
-                    <span className="ml-auto text-xs text-gray-500">Data only</span>
+                    <span className="ml-auto text-xs text-gray-500">
+                      Data only
+                    </span>
                   </Button>
                 </div>
               </CardContent>

@@ -441,7 +441,9 @@ export const getComplaints = asyncHandler(async (req, res) => {
 
     // If search is purely numeric, it might be searching for the numeric part of complaint ID
     if (/^\d+$/.test(searchTerm)) {
-      filters.OR.unshift({ complaintId: { contains: searchTerm.padStart(4, '0') } });
+      filters.OR.unshift({
+        complaintId: { contains: searchTerm.padStart(4, "0") },
+      });
     }
   }
 
