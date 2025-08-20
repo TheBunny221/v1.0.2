@@ -472,12 +472,12 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   // Get complaint trends for last 6 months (including current month)
   const complaintTrends = await prisma.$queryRaw`
     SELECT
-      strftime('%Y-%m', submittedOn) as month,
+      strftime('%Y-%m', createdAt) as month,
       COUNT(*) as complaints,
       COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) as resolved
     FROM complaints
-    WHERE submittedOn >= date('now', '-6 months')
-    GROUP BY strftime('%Y-%m', submittedOn)
+    WHERE createdAt >= date('now', '-6 months')
+    GROUP BY strftime('%Y-%m', createdAt)
     ORDER BY month ASC
   `;
 
@@ -761,14 +761,38 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
 // Helper functions
 function getTypeColor(type) {
   const colors = {
-    WATER_SUPPLY: "#3B82F6",
-    ELECTRICITY: "#EF4444",
-    ROAD_REPAIR: "#10B981",
-    GARBAGE: "#F59E0B",
-    SEWAGE: "#8B5CF6",
-    STREET_LIGHT: "#F97316",
+    WATER_SUPPLY: "#3B82F6",         // Blue
+    ELECTRICITY: "#EF4444",         // Red
+    ROAD_REPAIR: "#10B981",         // Green
+    GARBAGE: "#F59E0B",             // Amber
+    SEWAGE: "#8B5CF6",              // Purple
+    STREET_LIGHT: "#F97316",        // Orange
+    WASTE_MANAGEMENT: "#EC4899",    // Pink
+    PUBLIC_TRANSPORT: "#06B6D4",   // Cyan
+    TRAFFIC_SIGNAL: "#84CC16",      // Lime
+    PARKS_GARDENS: "#22C55E",       // Green
+    DRAINAGE: "#6366F1",            // Indigo
+    BUILDING_PERMIT: "#F43F5E",     // Rose
+    NOISE_POLLUTION: "#A855F7",     // Violet
+    AIR_POLLUTION: "#14B8A6",       // Teal
+    WATER_POLLUTION: "#0EA5E9",     // Sky
+    ILLEGAL_CONSTRUCTION: "#DC2626", // Red-600
+    STRAY_ANIMALS: "#CA8A04",       // Yellow-600
+    ENCROACHMENT: "#7C3AED",        // Purple-600
+    OTHER: "#64748B",               // Slate-500
   };
-  return colors[type] || "#6B7280";
+  return colors[type] || getRandomColor();
+}
+
+// Generate consistent colors for new types
+function getRandomColor() {
+  const additionalColors = [
+    "#F87171", "#FB923C", "#FBBF24", "#A3E635",
+    "#34D399", "#22D3EE", "#60A5FA", "#A78BFA",
+    "#F472B6", "#FB7185", "#FDBA74", "#BEF264",
+    "#6EE7B7", "#67E8F9", "#93C5FD", "#C4B5FD"
+  ];
+  return additionalColors[Math.floor(Math.random() * additionalColors.length)];
 }
 
 function getActivityType(status) {
@@ -851,7 +875,9 @@ function generateEmptyComplaintTypes() {
     { type: "ELECTRICITY", name: "Electricity" },
     { type: "ROAD_REPAIR", name: "Road Repair" },
     { type: "WASTE_MANAGEMENT", name: "Waste Management" },
-    { type: "STREET_LIGHTING", name: "Street Lighting" },
+    { type: "STREET_LIGHT", name: "Street Light" },
+    { type: "SEWAGE", name: "Sewage" },
+    { type: "GARBAGE", name: "Garbage Collection" },
   ];
 
   return types.map((t) => ({
