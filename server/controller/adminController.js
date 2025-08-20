@@ -614,9 +614,17 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 export const getRecentActivity = asyncHandler(async (req, res) => {
   const { limit = 5 } = req.query;
 
+  // Get recent activity from last 7 days
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
   // Get recent complaints
   const recentComplaints = await prisma.complaint.findMany({
     take: parseInt(limit),
+    where: {
+      createdAt: {
+        gte: sevenDaysAgo,
+      },
+    },
     orderBy: { createdAt: "desc" },
     include: {
       ward: { select: { name: true } },
@@ -627,6 +635,11 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
   // Get recent status updates
   const recentStatusUpdates = await prisma.statusLog.findMany({
     take: parseInt(limit),
+    where: {
+      timestamp: {
+        gte: sevenDaysAgo,
+      },
+    },
     orderBy: { timestamp: "desc" },
     include: {
       complaint: {
