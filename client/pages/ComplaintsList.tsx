@@ -210,14 +210,36 @@ const ComplaintsList: React.FC = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search complaints..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="space-y-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by ID, description, or location..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                  title="Search by complaint ID (e.g., KSC0001), description, or location"
+                />
+                {searchTerm && (
+                  <div className="absolute right-3 top-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSearchTerm("")}
+                      className="h-4 w-4 p-0 hover:bg-gray-200"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {searchTerm && (
+                <p className="text-xs text-gray-500">
+                  {searchTerm.match(/^[A-Za-z]/)
+                    ? `Searching for complaint ID: ${searchTerm}`
+                    : `Searching in descriptions and locations`}
+                </p>
+              )}
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>

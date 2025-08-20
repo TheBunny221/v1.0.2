@@ -217,9 +217,25 @@ const AdminAnalytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={complaintTrends}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        value,
+                        name === "complaints"
+                          ? "Complaints"
+                          : name === "resolved"
+                            ? "Resolved"
+                            : name,
+                      ]}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
                     <Area
                       type="monotone"
                       dataKey="complaints"
@@ -250,9 +266,21 @@ const AdminAnalytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={complaintTrends}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[3.5, 5]} />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis domain={[3.5, 5]} tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        `${value}/5`,
+                        "Satisfaction Score",
+                      ]}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
                     <Line
                       type="monotone"
                       dataKey="satisfaction"
@@ -304,9 +332,18 @@ const AdminAnalytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={wardPerformance}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="ward" />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="ward"
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      formatter={(value, name) => [`${value}%`, "Efficiency"]}
+                      labelFormatter={(label) => `Ward: ${label}`}
+                    />
                     <Bar dataKey="efficiency" fill="#3B82F6" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -382,7 +419,13 @@ const AdminAnalytics: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        `${value} complaints`,
+                        "Count",
+                      ]}
+                      labelFormatter={(label) => `Type: ${label}`}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="grid grid-cols-2 gap-2 mt-4">

@@ -257,152 +257,182 @@ const AdminReports: React.FC = () => {
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="ward-performance">Ward Performance</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-          <TabsTrigger value="sla">SLA Analysis</TabsTrigger>
+          <TabsTrigger value="overview">Report Overview</TabsTrigger>
+          <TabsTrigger value="export">Export Options</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Complaint Types Breakdown */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Complaints by Type</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {typeBreakdown.map((item, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{item.type}</span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-muted-foreground">
-                            {item.count}
-                          </span>
-                          <span className="text-sm font-medium">
-                            {item.percentage}%
-                          </span>
-                        </div>
-                      </div>
-                      <Progress value={item.percentage} className="h-2" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Monthly Trends */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Monthly Trends</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {complaintTrends.map((month, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="font-medium">{month.month}</span>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <div className="text-sm">Total: {month.total}</div>
-                          <div className="text-xs text-green-600">
-                            Resolved: {month.resolved}
-                          </div>
-                        </div>
-                        <div className="w-20">
-                          <Progress
-                            value={(month.resolved / month.total) * 100}
-                            className="h-2"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="ward-performance" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <MapPin className="h-5 w-5" />
-                <span>Ward-wise Performance</span>
+                <FileText className="h-5 w-5" />
+                <span>Report Summary</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {wardPerformance.map((ward, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{ward.ward}</span>
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span>Total: {ward.complaints}</span>
-                        <span className="text-green-600">
-                          Resolved: {ward.resolved}
-                        </span>
-                        <span className="text-blue-600">
-                          SLA: {ward.slaCompliance}%
-                        </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg">
+                    Current Period Summary
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Report Period:</span>
+                      <span className="font-medium">
+                        {selectedPeriod === "month"
+                          ? "This Month"
+                          : selectedPeriod}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Ward Filter:</span>
+                      <span className="font-medium">
+                        {selectedWard === "all" ? "All Wards" : selectedWard}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Type Filter:</span>
+                      <span className="font-medium">
+                        {selectedType === "all" ? "All Types" : selectedType}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Generated:</span>
+                      <span className="font-medium">
+                        {new Date().toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg">Key Insights</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <div className="font-medium text-green-800">
+                        Top Performing Ward
+                      </div>
+                      <div className="text-green-600">
+                        Ward 2 - 89.6% SLA compliance
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">
-                          Resolution Rate
-                        </div>
-                        <Progress
-                          value={(ward.resolved / ward.complaints) * 100}
-                          className="h-2"
-                        />
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="font-medium text-blue-800">
+                        Most Common Issue
                       </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">
-                          SLA Compliance
-                        </div>
-                        <Progress value={ward.slaCompliance} className="h-2" />
+                      <div className="text-blue-600">
+                        Water Supply (23% of complaints)
+                      </div>
+                    </div>
+                    <div className="p-3 bg-orange-50 rounded-lg">
+                      <div className="font-medium text-orange-800">
+                        Avg Resolution Time
+                      </div>
+                      <div className="text-orange-600">
+                        {reportMetrics.avgResolutionTime} days
                       </div>
                     </div>
                   </div>
-                ))}
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-4">
+                    For detailed analytics and trends, visit the Analytics page
+                  </p>
+                  <div className="flex justify-center space-x-4">
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        (window.location.href = "/admin/analytics")
+                      }
+                    >
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      View Analytics
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="trends">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <BarChart3 className="h-12 w-12 mx-auto text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Trend Analysis</h3>
-              <p className="text-muted-foreground">
-                Detailed trend charts and analytics would be displayed here
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <TabsContent value="export" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Export Formats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => exportReport("pdf")}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    PDF Report
+                    <span className="ml-auto text-xs text-gray-500">
+                      Formatted
+                    </span>
+                  </Button>
 
-        <TabsContent value="sla">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Clock className="h-12 w-12 mx-auto text-orange-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">SLA Analysis</h3>
-              <p className="text-muted-foreground">
-                Service Level Agreement compliance analysis and breach patterns
-              </p>
-            </CardContent>
-          </Card>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => exportReport("excel")}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Excel Spreadsheet
+                    <span className="ml-auto text-xs text-gray-500">
+                      Raw data
+                    </span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => console.log("CSV export")}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    CSV Export
+                    <span className="ml-auto text-xs text-gray-500">
+                      Data only
+                    </span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Report Schedule</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-gray-600 mb-4">
+                  Set up automatic report generation and delivery
+                </div>
+
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Daily Reports
+                  </Button>
+
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Weekly Summary
+                  </Button>
+
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Monthly Analysis
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
