@@ -665,9 +665,12 @@ const UnifiedReports: React.FC = () => {
               <RefreshCw className="h-4 w-4 mr-2" />
               Reset Filters
             </Button>
-            <Button onClick={handleGenerateReport}>
+            <Button
+              onClick={handleGenerateReport}
+              disabled={isGeneratingReport}
+            >
               <BarChart3 className="h-4 w-4 mr-2" />
-              Generate Report
+              {isGeneratingReport ? 'Generating...' : 'Generate Report'}
             </Button>
           </div>
         </CardContent>
