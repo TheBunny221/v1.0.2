@@ -468,17 +468,7 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  // Debug: Check total complaints first
-  const totalComplaintsCount = await prisma.complaint.count();
-  console.log('DEBUG: Total complaints in database:', totalComplaintsCount);
-
-  // Debug: Get sample complaints to check date format
-  const sampleComplaints = await prisma.complaint.findMany({
-    take: 3,
-    orderBy: { createdAt: 'desc' },
-    select: { id: true, createdAt: true, status: true }
-  });
-  console.log('DEBUG: Sample complaints:', sampleComplaints);
+  // Get complaint trends for the last 6 months
 
   // Since SQLite date functions aren't working with our date format,
   // let's get all complaints and process them in JavaScript
