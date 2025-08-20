@@ -149,6 +149,10 @@ const UnifiedReports: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportProgress, setReportProgress] = useState(0);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportAbortController, setReportAbortController] = useState<AbortController | null>(null);
 
   // Get role-based access permissions
   const permissions = useMemo(() => {
@@ -223,11 +227,18 @@ const UnifiedReports: React.FC = () => {
   // Debounced effect for filter changes to improve performance
   useEffect(() => {
     const timeoutId = setTimeout(() => {
+      console.log('Filters changed, fetching new data:', filters);
       fetchAnalyticsData();
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
   }, [fetchAnalyticsData]);
+
+  // Force re-fetch when filters change
+  useEffect(() => {
+    console.log('Filter state updated:', filters);
+    setAnalyticsData(null); // Clear existing data to show loading
+  }, [filters]);
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
@@ -334,21 +345,101 @@ const UnifiedReports: React.FC = () => {
     }
   };
 
-  // Generate custom report with real-time data fetch
+  // Generate custom report with countdown and cancellation
   const handleGenerateReport = async () => {
-    setIsLoading(true);
-    try {
-      // Force refresh analytics data with current filters
-      await fetchAnalyticsData();
+    if (isGeneratingReport) return;
 
-      // Show success message
-      alert(
-        `Report generated successfully with ${analyticsData?.complaints?.total || 0} records based on applied filters.`,
+    setIsGeneratingReport(true);
+    setShowReportModal(true);
+    setReportProgress(0);
+
+    // Create abort controller for cancellation
+    const abortController = new AbortController();
+    setReportAbortController(abortController);
+
+    try {
+      // Start countdown timer
+      let progress = 0;
+      const timer = setInterval(() => {
+        progress += 1;
+        setReportProgress(progress);
+      }, 100); // Update every 100ms
+
+      // Prepare query parameters
+      const queryParams = new URLSearchParams({
+        from: filters.dateRange.from,
+        to: filters.dateRange.to,
+        ...(filters.ward !== "all" && { ward: filters.ward }),
+        ...(filters.complaintType !== "all" && { type: filters.complaintType }),
+        ...(filters.status !== "all" && { status: filters.status }),
+        ...(filters.priority !== "all" && { priority: filters.priority }),
+        detailed: 'true'
+      });
+
+      // Make API call with abort signal
+      const baseUrl = window.location.origin;
+      const response = await fetch(
+        `${baseUrl}/api/reports/analytics?${queryParams}`,
+        {
+          signal: abortController.signal,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate report: ${response.statusText}`);
+      }
+
+      const reportData = await response.json();
+
+      // Clear timer
+      clearInterval(timer);
+      setReportProgress(100);
+
+      // Wait a bit to show completion
+      setTimeout(() => {
+        setShowReportModal(false);
+        setIsGeneratingReport(false);
+        setReportAbortController(null);
+
+        // Update analytics data with fresh report data
+        setAnalyticsData(reportData.data);
+
+        // Show success message
+        alert(
+          `Report generated successfully! Found ${reportData.data?.complaints?.total || 0} records based on applied filters.`
+        );
+      }, 500);
+
     } catch (error) {
-      console.error("Report generation error:", error);
-      alert("Failed to generate report. Please try again.");
+      clearInterval(timer);
+
+      if (error.name === 'AbortError') {
+        console.log('Report generation cancelled by user');
+      } else {
+        console.error("Report generation error:", error);
+        alert(`Failed to generate report: ${error.message}`);
+      }
+
+      setShowReportModal(false);
+      setIsGeneratingReport(false);
+      setReportAbortController(null);
+      setReportProgress(0);
     }
+  };
+
+  // Cancel report generation
+  const handleCancelReport = () => {
+    if (reportAbortController) {
+      reportAbortController.abort();
+    }
+    setShowReportModal(false);
+    setIsGeneratingReport(false);
+    setReportAbortController(null);
+    setReportProgress(0);
   };
 
   // Chart colors
