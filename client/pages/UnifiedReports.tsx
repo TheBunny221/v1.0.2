@@ -344,19 +344,23 @@ const UnifiedReports: React.FC = () => {
 
   // Debounced effect for filter changes to improve performance
   useEffect(() => {
+    if (!filtersInitialized) return;
+
     const timeoutId = setTimeout(() => {
       console.log('Filters changed, fetching new data:', filters);
       fetchAnalyticsData();
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [fetchAnalyticsData]);
+  }, [fetchAnalyticsData, filtersInitialized]);
 
-  // Force re-fetch when filters change
+  // Force re-fetch when filters change (only after initialization)
   useEffect(() => {
+    if (!filtersInitialized) return;
+
     console.log('Filter state updated:', filters);
     setAnalyticsData(null); // Clear existing data to show loading
-  }, [filters]);
+  }, [filters, filtersInitialized]);
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
