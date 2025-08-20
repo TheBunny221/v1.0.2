@@ -257,10 +257,8 @@ const AdminReports: React.FC = () => {
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="ward-performance">Ward Performance</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-          <TabsTrigger value="sla">SLA Analysis</TabsTrigger>
+          <TabsTrigger value="overview">Report Overview</TabsTrigger>
+          <TabsTrigger value="export">Export Options</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -333,76 +331,75 @@ const AdminReports: React.FC = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="ward-performance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <MapPin className="h-5 w-5" />
-                <span>Ward-wise Performance</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {wardPerformance.map((ward, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{ward.ward}</span>
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span>Total: {ward.complaints}</span>
-                        <span className="text-green-600">
-                          Resolved: {ward.resolved}
-                        </span>
-                        <span className="text-blue-600">
-                          SLA: {ward.slaCompliance}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">
-                          Resolution Rate
-                        </div>
-                        <Progress
-                          value={(ward.resolved / ward.complaints) * 100}
-                          className="h-2"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">
-                          SLA Compliance
-                        </div>
-                        <Progress value={ward.slaCompliance} className="h-2" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <TabsContent value="export" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Export Formats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => exportReport("pdf")}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    PDF Report
+                    <span className="ml-auto text-xs text-gray-500">Formatted</span>
+                  </Button>
 
-        <TabsContent value="trends">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <BarChart3 className="h-12 w-12 mx-auto text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Trend Analysis</h3>
-              <p className="text-muted-foreground">
-                Detailed trend charts and analytics would be displayed here
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => exportReport("excel")}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Excel Spreadsheet
+                    <span className="ml-auto text-xs text-gray-500">Raw data</span>
+                  </Button>
 
-        <TabsContent value="sla">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Clock className="h-12 w-12 mx-auto text-orange-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">SLA Analysis</h3>
-              <p className="text-muted-foreground">
-                Service Level Agreement compliance analysis and breach patterns
-              </p>
-            </CardContent>
-          </Card>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => console.log('CSV export')}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    CSV Export
+                    <span className="ml-auto text-xs text-gray-500">Data only</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Report Schedule</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-gray-600 mb-4">
+                  Set up automatic report generation and delivery
+                </div>
+
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Daily Reports
+                  </Button>
+
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Weekly Summary
+                  </Button>
+
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Monthly Analysis
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
