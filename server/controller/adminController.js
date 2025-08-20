@@ -589,21 +589,42 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 
   const citizenSatisfaction = satisfactionResult._avg.rating || 0;
 
+  // Process complaint trends with better error handling
+  let processedTrends = [];
+  if (complaintTrends && complaintTrends.length > 0) {
+    processedTrends = complaintTrends.map((trend) => {
+      try {
+        // Ensure the month string is valid
+        const monthDate = trend.month ? new Date(trend.month + "-01") : new Date();
+        return {
+          month: monthDate.toLocaleDateString("en-US", {
+            month: "short",
+            year: "numeric",
+          }),
+          complaints: Number(trend.complaints) || 0,
+          resolved: Number(trend.resolved) || 0,
+        };
+      } catch (error) {
+        console.error('Error processing trend:', trend, error);
+        return {
+          month: "Unknown",
+          complaints: Number(trend.complaints) || 0,
+          resolved: Number(trend.resolved) || 0,
+        };
+      }
+    });
+  } else {
+    // If no data, generate some sample data for the last 6 months
+    processedTrends = generateEmptyTrends();
+  }
+
+  console.log('DEBUG: Processed trends:', processedTrends);
+
   res.status(200).json({
     success: true,
     message: "Dashboard analytics retrieved successfully",
     data: {
-      complaintTrends:
-        complaintTrends.length > 0
-          ? complaintTrends.map((trend) => ({
-              month: new Date(trend.month + "-01").toLocaleDateString("en-US", {
-                month: "short",
-                year: "numeric",
-              }),
-              complaints: Number(trend.complaints),
-              resolved: Number(trend.resolved),
-            }))
-          : generateEmptyTrends(),
+      complaintTrends: processedTrends,
       complaintsByType:
         complaintsByType.length > 0
           ? complaintsByType.map((item) => ({
