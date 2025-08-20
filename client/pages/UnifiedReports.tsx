@@ -982,7 +982,7 @@ const UnifiedReports: React.FC = () => {
               <CardContent>
                 <div id="detailed-trends-chart">
                   <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={analyticsData.trends}>
+                    <ComposedChart data={processedChartData?.trendsData || []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" />
