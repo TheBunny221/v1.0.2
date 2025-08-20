@@ -25,6 +25,14 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/ui/dialog";
+import { Progress } from "../components/ui/progress";
+import {
   BarChart,
   Bar,
   LineChart,
