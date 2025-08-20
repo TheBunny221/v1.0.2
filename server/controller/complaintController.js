@@ -417,11 +417,20 @@ export const getComplaints = asyncHandler(async (req, res) => {
   // we would need to use raw SQL or convert to lowercase on both sides.
   // For now, using case-sensitive search for SQLite compatibility.
   if (search) {
+    const searchTerm = search.trim();
     filters.OR = [
-      { title: { contains: search } },
-      { description: { contains: search } },
-      { area: { contains: search } },
+      { title: { contains: searchTerm } },
+      { description: { contains: searchTerm } },
+      { area: { contains: searchTerm } },
+      { complaintId: { contains: searchTerm } },
+      // Support searching by partial ID (e.g., "KSC" or "0001")
+      { id: { contains: searchTerm } },
     ];
+
+    // If search looks like a complaint ID (starts with letters), prioritize exact matches
+    if (/^[A-Za-z]/.test(searchTerm)) {
+      filters.OR.unshift({ complaintId: { equals: searchTerm.toUpperCase() } });
+    }
   }
 
   dbg("final prisma.where filters", filters);
