@@ -464,22 +464,24 @@ const UnifiedReports: React.FC = () => {
   const processedChartData = useMemo(() => {
     if (!analyticsData) return null;
 
+    console.log('Processing chart data:', analyticsData);
+
     return {
-      trendsData: analyticsData.trends.map((trend) => ({
+      trendsData: analyticsData.trends?.map((trend) => ({
         ...trend,
         date: new Date(trend.date).toLocaleDateString(),
-      })),
-      categoriesWithColors: analyticsData.categories.map((category, index) => ({
+      })) || [],
+      categoriesWithColors: analyticsData.categories?.map((category, index) => ({
         ...category,
         color: COLORS[index % COLORS.length],
-      })),
-      wardsData: analyticsData.wards.map((ward) => ({
+      })) || [],
+      wardsData: analyticsData.wards?.map((ward) => ({
         ...ward,
         efficiency:
           ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
-      })),
+      })) || [],
     };
-  }, [analyticsData]);
+  }, [analyticsData, filters]); // Added filters dependency to force re-processing
 
   if (isLoading) {
     return (
