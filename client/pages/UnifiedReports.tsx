@@ -1078,6 +1078,9 @@ const UnifiedReports: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Category Analysis</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {getTimePeriodLabel()}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
