@@ -878,8 +878,13 @@ const UnifiedReports: React.FC = () => {
                           <XAxis dataKey="date" />
                           <YAxis />
                           <Tooltip
-                            labelFormatter={(label) => `Date: ${label}`}
-                            formatter={(value, name) => [value, name]}
+                            labelFormatter={(label, payload) => {
+                              if (payload && payload[0]) {
+                                return `Date: ${payload[0].payload.fullDate || label}`;
+                              }
+                              return `Date: ${label}`;
+                            }}
+                            formatter={(value, name) => [value, name === 'complaints' ? 'Total Complaints' : 'Resolved Complaints']}
                           />
                           <Legend />
                           <Area
