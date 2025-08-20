@@ -850,6 +850,9 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Complaints Trend</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="trends-chart">
@@ -894,6 +897,9 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Complaint Categories</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="categories-chart">
@@ -941,6 +947,9 @@ const UnifiedReports: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Detailed Trends Analysis</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {getTimePeriodLabel()}
+                </p>
               </CardHeader>
               <CardContent>
                 <div id="detailed-trends-chart">
@@ -973,6 +982,9 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Performance Metrics</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -1011,6 +1023,9 @@ const UnifiedReports: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Resolution Time Distribution</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTimePeriodLabel()}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div id="resolution-time-chart">
