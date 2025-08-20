@@ -469,6 +469,18 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
+  // Debug: Check total complaints first
+  const totalComplaintsCount = await prisma.complaint.count();
+  console.log('DEBUG: Total complaints in database:', totalComplaintsCount);
+
+  // Debug: Get sample complaints to check date format
+  const sampleComplaints = await prisma.complaint.findMany({
+    take: 3,
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, createdAt: true, status: true }
+  });
+  console.log('DEBUG: Sample complaints:', sampleComplaints);
+
   // Get complaint trends for last 6 months (including current month)
   const complaintTrends = await prisma.$queryRaw`
     SELECT
@@ -480,6 +492,8 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     GROUP BY strftime('%Y-%m', createdAt)
     ORDER BY month ASC
   `;
+
+  console.log('DEBUG: Raw complaint trends query result:', complaintTrends);
 
   // Get complaints by type
   const complaintsByType = await prisma.complaint.groupBy({
