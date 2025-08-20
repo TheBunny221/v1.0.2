@@ -442,8 +442,8 @@ const UnifiedReports: React.FC = () => {
         // Update analytics data with fresh report data
         setAnalyticsData(reportData.data);
 
-        // Show success message
-        alert(
+        // Report completed successfully - no alert needed
+        console.log(
           `Report generated successfully! Found ${reportData.data?.complaints?.total || 0} records based on applied filters.`
         );
       }, 500);
@@ -521,7 +521,9 @@ const UnifiedReports: React.FC = () => {
     return {
       trendsData: analyticsData.trends?.map((trend) => ({
         ...trend,
-        date: new Date(trend.date).toLocaleDateString(),
+        date: format(new Date(trend.date), 'MMM dd'),
+        fullDate: format(new Date(trend.date), 'MMM dd, yyyy'),
+        rawDate: trend.date,
       })) || [],
       categoriesWithColors: analyticsData.categories?.map((category, index) => ({
         ...category,
