@@ -262,73 +262,71 @@ const AdminReports: React.FC = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Complaint Types Breakdown */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Complaints by Type</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5" />
+                <span>Report Summary</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  {typeBreakdown.map((item, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{item.type}</span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-muted-foreground">
-                            {item.count}
-                          </span>
-                          <span className="text-sm font-medium">
-                            {item.percentage}%
-                          </span>
-                        </div>
-                      </div>
-                      <Progress value={item.percentage} className="h-2" />
+                  <h4 className="font-semibold text-lg">Current Period Summary</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Report Period:</span>
+                      <span className="font-medium">{selectedPeriod === 'month' ? 'This Month' : selectedPeriod}</span>
                     </div>
-                  ))}
+                    <div className="flex justify-between">
+                      <span>Ward Filter:</span>
+                      <span className="font-medium">{selectedWard === 'all' ? 'All Wards' : selectedWard}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Type Filter:</span>
+                      <span className="font-medium">{selectedType === 'all' ? 'All Types' : selectedType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Generated:</span>
+                      <span className="font-medium">{new Date().toLocaleDateString()}</span>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Monthly Trends */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Monthly Trends</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
                 <div className="space-y-4">
-                  {complaintTrends.map((month, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="font-medium">{month.month}</span>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <div className="text-sm">Total: {month.total}</div>
-                          <div className="text-xs text-green-600">
-                            Resolved: {month.resolved}
-                          </div>
-                        </div>
-                        <div className="w-20">
-                          <Progress
-                            value={(month.resolved / month.total) * 100}
-                            className="h-2"
-                          />
-                        </div>
-                      </div>
+                  <h4 className="font-semibold text-lg">Key Insights</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <div className="font-medium text-green-800">Top Performing Ward</div>
+                      <div className="text-green-600">Ward 2 - 89.6% SLA compliance</div>
                     </div>
-                  ))}
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="font-medium text-blue-800">Most Common Issue</div>
+                      <div className="text-blue-600">Water Supply (23% of complaints)</div>
+                    </div>
+                    <div className="p-3 bg-orange-50 rounded-lg">
+                      <div className="font-medium text-orange-800">Avg Resolution Time</div>
+                      <div className="text-orange-600">{reportMetrics.avgResolutionTime} days</div>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-4">
+                    For detailed analytics and trends, visit the Analytics page
+                  </p>
+                  <div className="flex justify-center space-x-4">
+                    <Button variant="outline" onClick={() => window.location.href = '/admin/analytics'}>
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      View Analytics
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="export" className="space-y-4">
