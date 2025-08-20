@@ -595,73 +595,85 @@ const AdminDashboard: React.FC = () => {
 
           {/* Performance Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Monthly Performance Trend */}
+            {/* Performance Summary */}
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Performance Trends</CardTitle>
+                <CardTitle>Performance Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                {complaintTrends && complaintTrends.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={complaintTrends.map(trend => ({
-                      ...trend,
-                      resolutionRate: trend.complaints > 0 ? ((trend.resolved / trend.complaints) * 100).toFixed(1) : 0
-                    }))}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value, name) => [
-                        name === 'resolutionRate' ? `${value}%` : value,
-                        name === 'resolutionRate' ? 'Resolution Rate' : name
-                      ]} />
-                      <Line
-                        type="monotone"
-                        dataKey="resolutionRate"
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        name="Resolution Rate (%)"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-gray-500">
-                    No performance trend data available
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Overall Resolution Rate</span>
+                      <span className="text-lg font-bold text-green-600">
+                        {metrics?.resolutionRate || 0}%
+                      </span>
+                    </div>
+                    <Progress value={metrics?.resolutionRate || 0} className="h-3" />
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">SLA Compliance</span>
+                      <span className="text-lg font-bold text-blue-600">
+                        {metrics?.slaCompliance || 0}%
+                      </span>
+                    </div>
+                    <Progress value={metrics?.slaCompliance || 0} className="h-3" />
                   </div>
-                )}
+
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-orange-600">
+                        {(metrics?.avgResolutionTime || 0).toFixed(1)}d
+                      </div>
+                      <p className="text-sm text-gray-600">Average Resolution Time</p>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Target: 3 days
+                      </div>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
+                      </div>
+                      <p className="text-sm text-gray-600">Satisfaction Score</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Ward Performance Comparison */}
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Ward Resolution Performance</CardTitle>
+                <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                {wardPerformance && wardPerformance.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={wardPerformance.map(ward => ({
-                      ...ward,
-                      resolutionRate: ward.complaints > 0 ? ((ward.resolved / ward.complaints) * 100).toFixed(1) : 0
-                    }))}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="ward" angle={-45} textAnchor="end" height={80} />
-                      <YAxis />
-                      <Tooltip formatter={(value, name) => [
-                        name === 'resolutionRate' ? `${value}%` : value,
-                        name === 'resolutionRate' ? 'Resolution Rate' : name
-                      ]} />
-                      <Bar
-                        dataKey="resolutionRate"
-                        fill="#3B82F6"
-                        name="Resolution Rate (%)"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-gray-500">
-                    No ward performance data available
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-3">
+                  <Link to="/reports">
+                    <Button variant="outline" className="w-full">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Detailed Reports
+                    </Button>
+                  </Link>
+                  <Link to="/admin/analytics">
+                    <Button variant="outline" className="w-full">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Analytics
+                    </Button>
+                  </Link>
+                  <Link to="/admin/users/new">
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Add User
+                    </Button>
+                  </Link>
+                  <Link to="/admin/config">
+                    <Button variant="outline" className="w-full">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>
