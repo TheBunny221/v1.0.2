@@ -751,6 +751,13 @@ const UnifiedReports: React.FC = () => {
       </Card>
 
       {/* Key Metrics */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Key Metrics</h2>
+        <Badge variant="outline" className="text-xs">
+          <Calendar className="h-3 w-3 mr-1" />
+          {getTimePeriodLabel()}
+        </Badge>
+      </div>
       {analyticsData && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
