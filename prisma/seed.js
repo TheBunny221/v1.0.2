@@ -598,7 +598,7 @@ async function main() {
 
       // Create dates from 30 minutes to 6 hours ago
       const minutesAgo = 30 + Math.floor(Math.random() * 330); // 30 min to 6 hours
-      const recentDate = new Date(now.getTime() - minutesAgo * 60 * 1000);
+      const recentDate = new Date(currentTime.getTime() - minutesAgo * 60 * 1000);
 
       const complaintNumber = (complaintDates.length + i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
