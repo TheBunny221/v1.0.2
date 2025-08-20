@@ -871,29 +871,39 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="categories-chart">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={processedChartData?.categoriesWithColors || []}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
-                          }
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="count"
-                        >
-                          {(processedChartData?.categoriesWithColors || []).map(
-                            (entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ),
-                          )}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    {processedChartData?.categoriesWithColors?.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={processedChartData.categoriesWithColors}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) =>
+                              `${name}: ${(percent * 100).toFixed(0)}%`
+                            }
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                          >
+                            {processedChartData.categoriesWithColors.map(
+                              (entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ),
+                            )}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <PieChartIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No category data available for selected filters</p>
+                          <p className="text-sm">Try adjusting your filters or date range</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
