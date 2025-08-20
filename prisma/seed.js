@@ -587,7 +587,7 @@ async function main() {
 
     // 10. Create some very recent complaints for testing activity feed
     console.log("🔄 Creating recent activity for testing...");
-    const now = new Date();
+    const currentTime = new Date();
 
     // Recent complaints (last few hours)
     for (let i = 0; i < 5; i++) {
