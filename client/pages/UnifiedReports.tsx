@@ -346,26 +346,6 @@ const UnifiedReports: React.FC = () => {
       };
 
       setAnalyticsData(transformedData);
-
-      // Initialize filters from actual data on first load
-      if (!filtersInitialized && transformedData.trends.length > 0) {
-        const dates = transformedData.trends.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
-        if (dates.length > 0) {
-          const earliestDate = format(dates[0], "yyyy-MM-dd");
-          const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
-
-          console.log('Initializing filters from data:', { earliestDate, latestDate });
-
-          setFilters(prev => ({
-            ...prev,
-            dateRange: {
-              from: earliestDate,
-              to: latestDate,
-            }
-          }));
-          setFiltersInitialized(true);
-        }
-      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load analytics data",
