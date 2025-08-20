@@ -124,6 +124,18 @@ const AdminDashboard: React.FC = () => {
     resolutionRate: 0,
   };
 
+  // Development debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Dashboard Data Debug:', {
+      analytics: analytics,
+      complaintTrends: complaintTrends,
+      complaintsByType: complaintsByType,
+      wardPerformance: wardPerformance,
+      metrics: metrics,
+      systemStats: systemStats
+    });
+  }
+
   // Show loading state
   if (isLoading) {
     return (
@@ -145,6 +157,11 @@ const AdminDashboard: React.FC = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-red-600">
           Error loading dashboard data. Please try refreshing the page.
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-sm mt-2">
+              Errors: {JSON.stringify({statsError, analyticsError, activityError})}
+            </div>
+          )}
         </div>
       </div>
     );
