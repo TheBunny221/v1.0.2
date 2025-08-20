@@ -1003,6 +1003,49 @@ const UnifiedReports: React.FC = () => {
           </TabsContent>
         </Tabs>
       )}
+
+      {/* Report Generation Modal */}
+      <Dialog open={showReportModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2" />
+              Generating Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-sm text-muted-foreground mb-2">
+                Processing your report with applied filters...
+              </div>
+              <Progress value={reportProgress} className="w-full" />
+              <div className="text-xs text-muted-foreground mt-1">
+                {reportProgress < 100 ? `${reportProgress.toFixed(0)}% Complete` : 'Finalizing...'}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-md text-sm">
+              <div className="font-medium mb-1">Applied Filters:</div>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div>Date Range: {filters.dateRange.from} to {filters.dateRange.to}</div>
+                {filters.ward !== 'all' && <div>Ward: {filters.ward}</div>}
+                {filters.complaintType !== 'all' && <div>Type: {filters.complaintType}</div>}
+                {filters.status !== 'all' && <div>Status: {filters.status}</div>}
+                {filters.priority !== 'all' && <div>Priority: {filters.priority}</div>}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCancelReport}
+              disabled={reportProgress >= 100}
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
