@@ -697,7 +697,19 @@ const UnifiedReports: React.FC = () => {
           </div>
 
           <div className="flex justify-end mt-4 space-x-2">
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button variant="outline" onClick={() => {
+              console.log('Resetting filters...');
+              setFilters({
+                dateRange: {
+                  from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+                  to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+                },
+                ward: permissions.defaultWard,
+                complaintType: "all",
+                status: "all",
+                priority: "all",
+              });
+            }}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Reset Filters
             </Button>
