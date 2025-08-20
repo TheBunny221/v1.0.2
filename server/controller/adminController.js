@@ -656,10 +656,13 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
   // Get recent user registrations
   const recentUsers = await prisma.user.findMany({
     take: parseInt(limit),
-    orderBy: { createdAt: "desc" },
     where: {
-      role: { in: ["WARD_OFFICER", "MAINTENANCE_TEAM"] },
+      role: { in: ["WARD_OFFICER", "MAINTENANCE_TEAM", "CITIZEN"] },
+      createdAt: {
+        gte: sevenDaysAgo,
+      },
     },
+    orderBy: { createdAt: "desc" },
     select: {
       id: true,
       fullName: true,
