@@ -1170,7 +1170,7 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="resolution-time-chart">
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={analyticsData.categories}>
+                      <BarChart data={processedChartData?.categoriesWithColors || []}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
                           dataKey="name"
@@ -1203,7 +1203,7 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="ward-performance-chart">
                     <ResponsiveContainer width="100%" height={400}>
-                      <BarChart data={analyticsData.wards}>
+                      <BarChart data={processedChartData?.wardsData || []}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
                           dataKey="name"
@@ -1236,7 +1236,7 @@ const UnifiedReports: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analyticsData.categories.map((category, index) => (
+                  {(processedChartData?.categoriesWithColors || []).map((category, index) => (
                     <div
                       key={category.name}
                       className="flex items-center justify-between p-3 border rounded"
