@@ -213,11 +213,24 @@ const ComplaintsList: React.FC = () => {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search complaints..."
+                placeholder="Search by ID, description, or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
+                title="Search by complaint ID (e.g., KSC0001), description, or location"
               />
+              {searchTerm && (
+                <div className="absolute right-3 top-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSearchTerm("")}
+                    className="h-4 w-4 p-0 hover:bg-gray-200"
+                  >
+                    ×
+                  </Button>
+                </div>
+              )}
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
