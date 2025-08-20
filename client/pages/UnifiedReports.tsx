@@ -221,7 +221,33 @@ const UnifiedReports: React.FC = () => {
       }
 
       const data = await response.json();
-      setAnalyticsData(data.data);
+      console.log('Received analytics data:', data);
+
+      // Transform the API response to match the expected format
+      const transformedData = {
+        complaints: {
+          total: data.data?.complaints?.total || 0,
+          resolved: data.data?.complaints?.resolved || 0,
+          pending: data.data?.complaints?.pending || 0,
+          overdue: data.data?.complaints?.overdue || 0,
+        },
+        sla: {
+          compliance: data.data?.sla?.compliance || 0,
+          avgResolutionTime: data.data?.sla?.avgResolutionTime || 0,
+          target: data.data?.sla?.target || 3,
+        },
+        trends: data.data?.trends || [],
+        wards: data.data?.wards || [],
+        categories: data.data?.categories || [],
+        performance: {
+          userSatisfaction: data.data?.performance?.userSatisfaction || 0,
+          escalationRate: data.data?.performance?.escalationRate || 0,
+          firstCallResolution: data.data?.performance?.firstCallResolution || 0,
+          repeatComplaints: data.data?.performance?.repeatComplaints || 0,
+        },
+      };
+
+      setAnalyticsData(transformedData);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load analytics data",
