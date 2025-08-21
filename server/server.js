@@ -90,9 +90,16 @@ async function startServer() {
       if (process.env.NODE_ENV === "development") {
         console.log("\n🔧 Development Mode Features:");
         console.log(`📋 Test Routes: http://${HOST}:${PORT}/api/test`);
+
+        if (!databaseConnected) {
+          console.log("\n⚠️ Database Connection Issues:");
+          console.log("   • Some API endpoints will return errors");
+          console.log("   • Connect to a database for full functionality");
+          console.log("   • Consider using Neon for easy PostgreSQL setup");
+        }
       }
 
-      console.log("\n✅ Server is ready to accept connections");
+      console.log(`\n✅ Server is ready to accept connections ${!databaseConnected ? "(limited functionality)" : ""}`);
     });
 
     // 5. Server configuration
