@@ -6,18 +6,23 @@ import path from "path";
 // Initialize Prisma client with production-grade configuration
 const createPrismaClient = () => {
   const config = {
-    log: ["info", "warn", "error"],
+    log: process.env.NODE_ENV === "production" ? ["error"] : ["info", "warn", "error"],
     errorFormat: "pretty",
   };
 
-  // Production optimizations
+  // Production optimizations for PostgreSQL
   if (process.env.NODE_ENV === "production") {
-    config.log = ["error"];
     config.datasources = {
       db: {
         url: process.env.DATABASE_URL,
       },
     };
+
+    // Connection pool settings for PostgreSQL in production
+    if (process.env.DATABASE_URL?.includes("postgresql")) {
+      config.datasourceUrl = process.env.DATABASE_URL;
+      // Additional PostgreSQL-specific optimizations can be added here
+    }
   }
 
   return new PrismaClient(config);
