@@ -46,21 +46,35 @@ async function startServer() {
     app = createApp();
 
     // 3. Enhanced health check endpoint with database status
-    const { getDatabaseStatus } = await import("./scripts/initDatabase.js");
-
     app.get("/api/health/detailed", async (req, res) => {
-      const dbStatus = await getDatabaseStatus();
-      res.status(dbStatus.healthy ? 200 : 503).json({
-        success: dbStatus.healthy,
-        message: dbStatus.healthy
-          ? "All systems operational"
+      let dbStatus = { healthy: false, message: "Database not connected" };
+
+      if (databaseConnected) {
+        try {
+          const { getDatabaseStatus } = await import("./scripts/initDatabase.js");
+          dbStatus = await getDatabaseStatus();
+        } catch (error) {
+          dbStatus = { healthy: false, message: "Database status check failed", error: error.message };
+        }
+      }
+
+      const overallHealthy = process.env.NODE_ENV === "development" || databaseConnected;
+
+      res.status(overallHealthy ? 200 : 503).json({
+        success: overallHealthy,
+        message: overallHealthy
+          ? (databaseConnected ? "All systems operational" : "Server running in development mode")
           : "System issues detected",
-        data: dbStatus,
+        data: {
+          database: dbStatus,
+          server: { healthy: true, message: "Server is running" },
+          environment: process.env.NODE_ENV || "development"
+        },
       });
     });
 
     // 4. Start server
-    console.log("\n�� Step 3: Starting HTTP Server");
+    console.log("\n🔧 Step 3: Starting HTTP Server");
     const server = app.listen(PORT, HOST, () => {
       console.log("\n🎉 Server Successfully Started!");
       console.log("=".repeat(50));
