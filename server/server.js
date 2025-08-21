@@ -14,19 +14,36 @@ async function startServer() {
   console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔧 Node.js version: ${process.version}`);
 
+  let databaseConnected = false;
+  let app;
+
   try {
     // 1. Initialize and validate database
     console.log("\n🔧 Step 1: Database Initialization");
-    await connectDB();
 
-    const dbInitSuccess = await initializeDatabase();
-    if (!dbInitSuccess && process.env.NODE_ENV === "production") {
-      throw new Error("Database initialization failed in production");
+    try {
+      await connectDB();
+      const dbInitSuccess = await initializeDatabase();
+      if (!dbInitSuccess && process.env.NODE_ENV === "production") {
+        throw new Error("Database initialization failed in production");
+      }
+      databaseConnected = true;
+      console.log("✅ Database connected successfully");
+    } catch (dbError) {
+      console.error("❌ Database connection failed:", dbError.message);
+
+      if (process.env.NODE_ENV === "production") {
+        throw dbError; // Fail in production
+      } else {
+        console.warn("⚠️ Starting server in development mode without database");
+        console.warn("   API endpoints requiring database will return errors");
+        databaseConnected = false;
+      }
     }
 
     // 2. Create Express app
     console.log("\n🔧 Step 2: Express Application Setup");
-    const app = createApp();
+    app = createApp();
 
     // 3. Enhanced health check endpoint with database status
     const { getDatabaseStatus } = await import("./scripts/initDatabase.js");
@@ -43,7 +60,7 @@ async function startServer() {
     });
 
     // 4. Start server
-    console.log("\n🔧 Step 3: Starting HTTP Server");
+    console.log("\n�� Step 3: Starting HTTP Server");
     const server = app.listen(PORT, HOST, () => {
       console.log("\n🎉 Server Successfully Started!");
       console.log("=".repeat(50));
