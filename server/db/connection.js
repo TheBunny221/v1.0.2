@@ -130,26 +130,53 @@ const connectDB = async () => {
   } catch (error) {
     console.error("❌ Error connecting to database:", error);
 
-    // Provide helpful error messages based on error type
-    if (error.message.includes("readonly")) {
-      console.error("🔧 SOLUTION: Database file permission issue detected");
-      console.error("   • Ensure the database file has write permissions");
-      console.error(
-        "   • Check that the application has proper file system access",
-      );
-      console.error(
-        "   • Consider using PostgreSQL for production environments",
-      );
-    } else if (error.message.includes("does not exist")) {
-      console.error("🔧 SOLUTION: Database file not found");
-      console.error("   • Run 'npx prisma db push' to create the database");
-      console.error("   • Ensure DATABASE_URL points to the correct location");
-    } else if (error.message.includes("EACCES")) {
-      console.error("🔧 SOLUTION: Permission denied error");
-      console.error("   • Check file/directory permissions");
-      console.error(
-        "   • Ensure the application user has access to the database directory",
-      );
+    // Provide helpful error messages based on error type and database
+    const isPostgreSQL = process.env.DATABASE_URL?.includes("postgresql");
+
+    if (isPostgreSQL) {
+      // PostgreSQL specific error handling
+      if (error.message.includes("password authentication failed")) {
+        console.error("🔧 SOLUTION: PostgreSQL authentication failed");
+        console.error("   • Check username and password in DATABASE_URL");
+        console.error("   • Verify user has proper database permissions");
+        console.error("   • Ensure PostgreSQL server allows connections from this host");
+      } else if (error.message.includes("database") && error.message.includes("does not exist")) {
+        console.error("🔧 SOLUTION: PostgreSQL database does not exist");
+        console.error("   • Create the database: CREATE DATABASE your_db_name;");
+        console.error("   • Run migrations: npx prisma migrate deploy");
+        console.error("   • Check DATABASE_URL database name");
+      } else if (error.message.includes("connection refused") || error.message.includes("Can't reach database server")) {
+        console.error("🔧 SOLUTION: Cannot connect to PostgreSQL server");
+        console.error("   • Ensure PostgreSQL server is running");
+        console.error("   • Check host and port in DATABASE_URL");
+        console.error("   • Verify firewall settings allow connections");
+        console.error("   • For cloud databases, check connection limits and IP whitelist");
+      } else if (error.message.includes("SSL") || error.message.includes("sslmode")) {
+        console.error("🔧 SOLUTION: SSL connection issue");
+        console.error("   • Add ?sslmode=require to DATABASE_URL for secure connections");
+        console.error("   • Or use ?sslmode=disable for local development (not recommended for production)");
+      } else if (error.message.includes("too many connections")) {
+        console.error("🔧 SOLUTION: PostgreSQL connection limit reached");
+        console.error("   • Reduce connection pool size");
+        console.error("   • Check for connection leaks in application");
+        console.error("   • Increase max_connections in PostgreSQL config");
+      }
+    } else {
+      // SQLite specific error handling (legacy)
+      if (error.message.includes("readonly")) {
+        console.error("🔧 SOLUTION: Database file permission issue detected");
+        console.error("   • Ensure the database file has write permissions");
+        console.error("   • Check that the application has proper file system access");
+        console.error("   • Consider using PostgreSQL for production environments");
+      } else if (error.message.includes("does not exist")) {
+        console.error("🔧 SOLUTION: Database file not found");
+        console.error("   • Run 'npx prisma db push' to create the database");
+        console.error("   • Ensure DATABASE_URL points to the correct location");
+      } else if (error.message.includes("EACCES")) {
+        console.error("🔧 SOLUTION: Permission denied error");
+        console.error("   • Check file/directory permissions");
+        console.error("   • Ensure the application user has access to the database directory");
+      }
     }
 
     console.error("📖 Database configuration:");
