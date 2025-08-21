@@ -112,18 +112,18 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
       icon: <Database className="h-4 w-4" />,
       roles: ["ADMINISTRATOR"],
     },
-    {
-      label: translations?.nav?.languages || "Languages",
-      path: "/admin/languages",
-      icon: <Globe className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR"],
-    },
-    {
-      label: translations?.nav?.settings || "Settings",
-      path: "/settings",
-      icon: <Settings className="h-4 w-4" />,
-      roles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"],
-    },
+    // {
+    //   label: translations?.nav?.languages || "Languages",
+    //   path: "/admin/languages",
+    //   icon: <Globe className="h-4 w-4" />,
+    //   roles: ["ADMINISTRATOR"],
+    // },
+    // {
+    //   label: translations?.nav?.settings || "Settings",
+    //   path: "/settings",
+    //   icon: <Settings className="h-4 w-4" />,
+    //   roles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"],
+    // },
   ];
 
   const filteredNavItems = navigationItems.filter((item) => {

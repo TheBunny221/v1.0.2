@@ -27,47 +27,7 @@ let prisma = createPrismaClient();
 
 const ensureDatabaseAccess = async () => {
   try {
-    // For SQLite, ensure the database file and directory are accessible
-    if (process.env.DATABASE_URL?.startsWith("file:")) {
-      const dbPath = process.env.DATABASE_URL.replace("file:", "");
-      const dbDir = path.dirname(dbPath);
-
-      // Ensure database directory exists
-      if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true, mode: 0o755 });
-      }
-
-      // Check if database file exists and is writable
-      if (fs.existsSync(dbPath)) {
-        try {
-          fs.accessSync(dbPath, fs.constants.R_OK | fs.constants.W_OK);
-        } catch (error) {
-          console.error("❌ Database file is not writable:", dbPath);
-          console.error(
-            "This is typically a permission issue in production environments",
-          );
-
-          // Attempt to create a new database file with proper permissions
-          try {
-            const backupPath = `${dbPath}.backup.${Date.now()}`;
-            console.log(`📋 Creating backup at: ${backupPath}`);
-            fs.copyFileSync(dbPath, backupPath);
-
-            // Remove the problematic file and let Prisma recreate it
-            fs.unlinkSync(dbPath);
-            console.log(
-              "🔧 Removed readonly database file, Prisma will recreate it",
-            );
-          } catch (backupError) {
-            console.error(
-              "❌ Could not create backup or remove readonly file:",
-              backupError,
-            );
-            throw new Error(`Database file permission error: ${error.message}`);
-          }
-        }
-      }
-    }
+    
   } catch (error) {
     console.error("❌ Database access check failed:", error);
     throw error;

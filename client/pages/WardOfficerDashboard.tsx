@@ -48,7 +48,7 @@ const WardOfficerDashboard: React.FC = () => {
     error,
     refetch: refetchComplaints,
   } = useGetComplaintsQuery({
-    ward: user?.wardId,
+    ward: user?.ward.id,
     page: 1,
     limit: 100,
   });
@@ -78,23 +78,23 @@ const WardOfficerDashboard: React.FC = () => {
 
   useEffect(() => {
     // Filter complaints for this ward officer
-    const wardComplaints = complaints.filter(
-      (c) => c.assignedToId === user?.id || c.wardId === user?.wardId,
-    );
+    const wardComplaints = Array.isArray(complaints) 
+    ? complaints.filter((c) => c.assignedTo === user?.id || c.ward === user?.wardId)
+    : [];
 
     const totalAssigned = wardComplaints.length;
     const pending = wardComplaints.filter(
-      (c) => c.status === "REGISTERED",
+      (c) => c.status === "registered",
     ).length;
     const inProgress = wardComplaints.filter(
-      (c) => c.status === "IN_PROGRESS",
+      (c) => c.status === "in_progress",
     ).length;
     const resolved = wardComplaints.filter(
-      (c) => c.status === "RESOLVED",
+      (c) => c.status === "resolved",
     ).length;
     const overdue = wardComplaints.filter((c) => {
-      if (!c.deadline) return false;
-      return new Date(c.deadline) < new Date() && c.status !== "RESOLVED";
+      if (!c.slaDeadline) return false;
+      return new Date(c.slaDeadline) < new Date() && c.status !== "resolved";
     }).length;
 
     setDashboardStats({
@@ -140,12 +140,12 @@ const WardOfficerDashboard: React.FC = () => {
     }
   };
 
-  const wardComplaints = complaints.filter(
-    (c) => c.assignedToId === user?.id || c.wardId === user?.wardId,
-  );
+  const wardComplaints = Array.isArray(complaints) 
+    ? complaints.filter((c) => c.assignedTo === user?.id || c.ward === user?.wardId)
+    : [];
 
   const urgentComplaints = wardComplaints
-    .filter((c) => c.priority === "CRITICAL" || c.priority === "HIGH")
+    .filter((c) => c.priority === "critical" || c.priority === "high")
     .slice(0, 5);
 
   const recentComplaints = wardComplaints.slice(0, 5);

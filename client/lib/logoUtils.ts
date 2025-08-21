@@ -22,85 +22,86 @@ export function getLogoClasses(
     small: {
       nav: {
         container: "flex items-center space-x-1",
-        image: "h-6 w-6",
-        fallback: "h-6 w-6",
+        image: "h-2 w-10",   // ratio kept
+        fallback: "h-2 w-2",
       },
       "nav-mobile": {
         container: "flex items-center space-x-1",
-        image: "h-5 w-5",
-        fallback: "h-5 w-5",
+        image: "h-1.5 w-7.5",
+        fallback: "h-1.5 w-1.5",
       },
       auth: {
         container: "flex items-center justify-center space-x-2",
-        image: "h-8 w-8",
-        fallback: "h-8 w-8",
+        image: "h-3 w-15",
+        fallback: "h-3 w-3",
       },
       footer: {
         container: "flex items-center space-x-1",
-        image: "h-5 w-5",
-        fallback: "h-5 w-5",
+        image: "h-1.5 w-7.5",
+        fallback: "h-1.5 w-1.5",
       },
       mobile: {
         container: "flex items-center space-x-1",
-        image: "h-5 w-5",
-        fallback: "h-5 w-5",
+        image: "h-1.5 w-7.5",
+        fallback: "h-1.5 w-1.5",
       },
     },
     medium: {
       nav: {
         container: "flex items-center space-x-2",
-        image: "h-8 w-8",
-        fallback: "h-8 w-8",
+        image: "h-4 w-20",   // 1:5 ratio
+        fallback: "h-4 w-4",
       },
       "nav-mobile": {
         container: "flex items-center space-x-1",
-        image: "h-6 w-6",
-        fallback: "h-6 w-6",
+        image: "h-3 w-15",
+        fallback: "h-3 w-3",
       },
       auth: {
         container: "flex items-center justify-center space-x-3",
-        image: "h-12 w-12",
-        fallback: "h-12 w-12",
+        image: "h-6 w-30",
+        fallback: "h-6 w-6",
       },
       footer: {
         container: "flex items-center space-x-2",
-        image: "h-6 w-6",
-        fallback: "h-6 w-6",
+        image: "h-3 w-15",
+        fallback: "h-3 w-3",
       },
       mobile: {
         container: "flex items-center space-x-1",
-        image: "h-6 w-6",
-        fallback: "h-6 w-6",
+        image: "h-3 w-15",
+        fallback: "h-3 w-3",
       },
     },
     large: {
       nav: {
         container: "flex items-center space-x-3",
-        image: "h-10 w-50",
+        image: "h-10 w-50",   // your base ratio (h10:w50)
         fallback: "h-10 w-10",
       },
       "nav-mobile": {
         container: "flex items-center space-x-2",
-        image: "h-7 w-7",
+        image: "h-7 w-35",
         fallback: "h-7 w-7",
       },
       auth: {
         container: "flex items-center justify-center space-x-4",
-        image: "h-16 w-16",
+        image: "h-16 w-80",
         fallback: "h-16 w-16",
       },
       footer: {
         container: "flex items-center space-x-2",
-        image: "h-8 w-8",
+        image: "h-8 w-40",
         fallback: "h-8 w-8",
       },
       mobile: {
         container: "flex items-center space-x-2",
-        image: "h-7 w-7",
+        image: "h-7 w-35",
         fallback: "h-7 w-7",
       },
     },
   };
+
 
   const normalizedSize = size.toLowerCase() as keyof typeof sizeMap;
   const normalizedContext = context === "mobile" ? "nav-mobile" : context;

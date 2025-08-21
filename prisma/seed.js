@@ -7,85 +7,91 @@ async function main() {
   console.log("🌱 Starting database seeding...");
 
   try {
-    // Clear existing data in development
-    if (process.env.NODE_ENV !== "production") {
-      console.log("🧹 Clearing existing data...");
+    // Clear ALL existing data regardless of environment
+    console.log("🧹 Clearing ALL existing data...");
 
-      // Delete in order to respect foreign key constraints
-      await prisma.oTPSession.deleteMany({});
-      await prisma.serviceRequestStatusLog.deleteMany({});
-      await prisma.statusLog.deleteMany({});
-      await prisma.notification.deleteMany({});
-      await prisma.message.deleteMany({});
-      await prisma.attachment.deleteMany({});
-      await prisma.serviceRequest.deleteMany({});
-      await prisma.complaint.deleteMany({});
-      await prisma.user.deleteMany({});
-      await prisma.subZone.deleteMany({});
-      await prisma.ward.deleteMany({});
-      await prisma.department.deleteMany({});
-      await prisma.systemConfig.deleteMany({});
-      await prisma.report.deleteMany({});
-    }
+    // Delete in order to respect foreign key constraints
+    await prisma.oTPSession.deleteMany({});
+    await prisma.serviceRequestStatusLog.deleteMany({});
+    await prisma.statusLog.deleteMany({});
+    await prisma.notification.deleteMany({});
+    await prisma.message.deleteMany({});
+    await prisma.attachment.deleteMany({});
+    await prisma.serviceRequest.deleteMany({});
+    await prisma.complaint.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.subZone.deleteMany({});
+    await prisma.ward.deleteMany({});
+    await prisma.department.deleteMany({});
+    await prisma.systemConfig.deleteMany({});
+    await prisma.report.deleteMany({});
 
-    // 1. Create System Configuration
-    console.log("⚙️ Creating system configuration...");
-    await prisma.systemConfig.createMany({
-      data: [
-        {
-          key: "APP_NAME",
-          value: "Kochi Smart City",
-          description: "Application name displayed across the system",
-        },
-        {
-          key: "APP_LOGO_URL",
-          value: "/logo.png",
-          description: "URL for the application logo",
-        },
-        {
-          key: "COMPLAINT_ID_PREFIX",
-          value: "KSC",
-          description:
-            "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
-        },
-        {
-          key: "COMPLAINT_ID_START_NUMBER",
-          value: "1",
-          description: "Starting number for complaint ID sequence",
-        },
-        {
-          key: "COMPLAINT_ID_LENGTH",
-          value: "4",
-          description: "Length of the numeric part in complaint IDs",
-        },
-        {
-          key: "DEFAULT_LANGUAGE",
-          value: "en",
-          description: "Default language for the application",
-        },
-        {
-          key: "EMAIL_ENABLED",
-          value: "true",
-          description: "Whether email notifications are enabled",
-        },
-        {
-          key: "SMS_ENABLED",
-          value: "false",
-          description: "Whether SMS notifications are enabled",
-        },
-        {
-          key: "MAX_FILE_SIZE",
-          value: "10485760",
-          description: "Maximum file upload size in bytes (10MB)",
-        },
-        {
-          key: "COMPLAINT_AUTO_ASSIGN",
-          value: "true",
-          description:
-            "Whether complaints should be auto-assigned to ward officers",
-        },
-      ],
-    });
+    // 1. Create or Update System Configuration
+    console.log("⚙️ Creating/updating system configuration...");
+    const configs = [
+      {
+        key: "APP_NAME",
+        value: "Kochi Smart City",
+        description: "Application name displayed across the system",
+      },
+      {
+        key: "APP_LOGO_URL",
+        value: "/logo.png",
+        description: "URL for the application logo",
+      },
+      {
+        key: "COMPLAINT_ID_PREFIX",
+        value: "KSC",
+        description:
+          "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+      },
+      {
+        key: "COMPLAINT_ID_START_NUMBER",
+        value: "1",
+        description: "Starting number for complaint ID sequence",
+      },
+      {
+        key: "COMPLAINT_ID_LENGTH",
+        value: "4",
+        description: "Length of the numeric part in complaint IDs",
+      },
+      {
+        key: "DEFAULT_LANGUAGE",
+        value: "en",
+        description: "Default language for the application",
+      },
+      {
+        key: "EMAIL_ENABLED",
+        value: "true",
+        description: "Whether email notifications are enabled",
+      },
+      {
+        key: "SMS_ENABLED",
+        value: "false",
+        description: "Whether SMS notifications are enabled",
+      },
+      {
+        key: "MAX_FILE_SIZE",
+        value: "10485760",
+        description: "Maximum file upload size in bytes (10MB)",
+      },
+      {
+        key: "COMPLAINT_AUTO_ASSIGN",
+        value: "true",
+        description:
+          "Whether complaints should be auto-assigned to ward officers",
+      },
+    ];
+
+    await Promise.all(
+      configs.map(async (config) =>
+        prisma.systemConfig.upsert({
+          where: { key: config.key },
+          update: { value: config.value },
+          create: config,
+        })
+      )
+    );
 
     // 2. Create Departments
     console.log("🏢 Creating departments...");
@@ -585,8 +591,10 @@ async function main() {
             )
           : null;
 
-      const complaint = await prisma.complaint.create({
-        data: {
+      const complaint = await prisma.complaint.upsert({
+        where: { complaintId: complaintId },
+        update: {},
+        create: {
           complaintId: complaintId,
           title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
           description: `Complaint regarding ${complaintType.toLowerCase().replace("_", " ")} issue that requires attention. Submitted by ${randomCitizen.fullName}.`,

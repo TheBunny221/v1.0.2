@@ -160,18 +160,18 @@ const Navigation: React.FC = () => {
       icon: <Database className="h-4 w-4" />,
       roles: ["ADMINISTRATOR"],
     },
-    {
-      label: translations?.nav?.languages || "Languages",
-      path: "/admin/languages",
-      icon: <Globe className="h-4 w-4" />,
-      roles: ["ADMINISTRATOR"],
-    },
-    {
-      label: translations?.nav?.settings || "Settings",
-      path: "/settings",
-      icon: <Settings className="h-4 w-4" />,
-      roles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"],
-    },
+    // {
+    //   label: translations?.nav?.languages || "Languages",
+    //   path: "/admin/languages",
+    //   icon: <Globe className="h-4 w-4" />,
+    //   roles: ["ADMINISTRATOR"],
+    // },
+    // {
+    //   label: translations?.nav?.settings || "Settings",
+    //   path: "/settings",
+    //   icon: <Settings className="h-4 w-4" />,
+    //   roles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"],
+    // },
   ];
 
   const filteredNavItems = navigationItems.filter((item) => {
@@ -417,7 +417,7 @@ const Navigation: React.FC = () => {
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              {/* <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="relative">
                   <Bell className="h-5 w-5" />
                   {getUnreadNotificationCount() > 0 && (
@@ -429,7 +429,7 @@ const Navigation: React.FC = () => {
                     </Badge>
                   )}
                 </Button>
-              </DropdownMenuTrigger>
+              </DropdownMenuTrigger> */}
               <DropdownMenuContent align="end" className="w-80">
                 <div className="p-2">
                   <h3 className="font-semibold text-sm mb-2">
@@ -515,12 +515,12 @@ const Navigation: React.FC = () => {
                     {translations?.nav?.profile || "Profile"}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                   <Link to="/settings" className="flex items-center">
                     <Settings className="h-4 w-4 mr-2" />
                     {translations.nav.settings}
                   </Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}

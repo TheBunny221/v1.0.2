@@ -57,6 +57,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
+import { createComplaint } from "@/store/slices/complaintsSlice";
 
 interface QuickComplaintFormProps {
   onSuccess?: (complaintId: string) => void;

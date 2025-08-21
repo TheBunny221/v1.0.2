@@ -850,11 +850,11 @@ const AdminConfig: React.FC = () => {
 
       {/* Configuration Tabs */}
       <Tabs defaultValue={defaultTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="wards">Wards & Zones</TabsTrigger>
           <TabsTrigger value="types">Complaint Types</TabsTrigger>
           <TabsTrigger value="settings">System Settings</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+          {/* <TabsTrigger value="advanced">Advanced</TabsTrigger> */}
         </TabsList>
 
         {/* Ward Management */}

@@ -6,13 +6,13 @@ generator client {
 }
 
 datasource db {
-  provider = env("DATABASE_PROVIDER")
+  //provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Enums (commented for SQLite, uncommented for PostgreSQL)
+//Enums (commented for SQLite, uncommented for PostgreSQL)
 // For PostgreSQL production deployment:
-/*
 enum UserRole {
   CITIZEN
   WARD_OFFICER
@@ -21,22 +21,20 @@ enum UserRole {
   GUEST
 }
 
-enum ComplaintStatus {
-  REGISTERED
-  ASSIGNED
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-  REOPENED
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
+ enum ComplaintStatus {
+   REGISTERED
+   ASSIGNED
+   IN_PROGRESS
+   RESOLVED
+   CLOSED
+   REOPENED
+ }
+ enum Priority {
+   LOW
+   MEDIUM
+   HIGH
+   CRITICAL
+ }
 enum SLAStatus {
   ON_TIME
   WARNING
@@ -44,21 +42,20 @@ enum SLAStatus {
   COMPLETED
 }
 
-enum ServiceRequestStatus {
-  SUBMITTED
-  VERIFIED
-  PROCESSING
-  APPROVED
-  REJECTED
-  COMPLETED
-}
+ enum ServiceRequestStatus {
+   SUBMITTED
+   VERIFIED
+   PROCESSING
+   APPROVED
+   REJECTED
+   COMPLETED
+ }
 
 enum NotificationType {
   EMAIL
   SMS
   IN_APP
 }
-*/
 
 // Models
 model User {

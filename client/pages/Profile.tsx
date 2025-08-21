@@ -413,14 +413,14 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>Role</Label>
                   <Input
                     value={user.role.replace("-", " ").toUpperCase()}
                     disabled
                     className="bg-muted"
                   />
-                </div>
+                </div> */}
 
                 {user.ward && (
                   <div className="space-y-2">
