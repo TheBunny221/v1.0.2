@@ -391,106 +391,234 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get public system settings (non-sensitive settings only)
-// @route   GET /api/system-config/public
-// @access  Public
-export const getPublicSystemSettings = asyncHandler(async (req, res) => {
-  // First, ensure essential settings exist
-  const essentialSettings = [
+// Helper function to get default system settings
+const getDefaultPublicSettings = () => {
+  return [
+    {
+      key: "APP_NAME",
+      value: "Kochi Smart City",
+      description: "Application name displayed across the system",
+      type: "string",
+    },
+    {
+      key: "APP_LOGO_URL",
+      value: "/logo.png",
+      description: "URL for the application logo",
+      type: "string",
+    },
     {
       key: "APP_LOGO_SIZE",
       value: "medium",
       description: "Size of the application logo (small, medium, large)",
+      type: "string",
+    },
+    {
+      key: "COMPLAINT_ID_PREFIX",
+      value: "KSC",
+      description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+      type: "string",
+    },
+    {
+      key: "MAX_FILE_SIZE_MB",
+      value: "10",
+      description: "Maximum file upload size in MB",
+      type: "number",
+    },
+    {
+      key: "CITIZEN_REGISTRATION_ENABLED",
+      value: "true",
+      description: "Allow citizen self-registration",
+      type: "boolean",
+    },
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      description: "System maintenance mode",
+      type: "boolean",
     },
     {
       key: "CONTACT_HELPLINE",
       value: "1800-XXX-XXXX",
       description: "Helpline phone number for customer support",
+      type: "string",
     },
     {
       key: "CONTACT_EMAIL",
       value: "support@cochinsmartcity.in",
       description: "Email address for customer support",
+      type: "string",
     },
     {
       key: "CONTACT_OFFICE_HOURS",
       value: "Monday - Friday: 9 AM - 6 PM",
       description: "Office hours for customer support",
+      type: "string",
     },
     {
       key: "CONTACT_OFFICE_ADDRESS",
       value: "Cochin Corporation Office",
       description: "Physical address of the office",
+      type: "string",
     },
   ];
+};
 
-  for (const setting of essentialSettings) {
-    const exists = await prisma.systemConfig.findUnique({
-      where: { key: setting.key },
+// Helper function to check database connectivity
+const checkDatabaseConnectivity = async () => {
+  try {
+    await prisma.$queryRaw`SELECT 1 as test;`;
+    return true;
+  } catch (error) {
+    console.log("Database connectivity check failed:", error.message);
+    return false;
+  }
+};
+
+// @desc    Get public system settings (non-sensitive settings only)
+// @route   GET /api/system-config/public
+// @access  Public
+export const getPublicSystemSettings = asyncHandler(async (req, res) => {
+  // Check if database is available
+  const databaseAvailable = await checkDatabaseConnectivity();
+
+  if (!databaseAvailable) {
+    // Return default settings when database is unavailable
+    console.log("⚠️ Database unavailable, returning default system settings");
+    const defaultSettings = getDefaultPublicSettings();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Public system settings retrieved (default values - database unavailable)",
+      data: defaultSettings,
+      meta: {
+        source: "defaults",
+        databaseAvailable: false,
+      },
     });
-
-    if (!exists) {
-      await prisma.systemConfig.create({
-        data: setting,
-      });
-      console.log(`✅ Added missing system setting: ${setting.key}`);
-    }
   }
 
-  // Only return non-sensitive settings
-  const publicKeys = [
-    "APP_NAME",
-    "APP_LOGO_URL",
-    "APP_LOGO_SIZE",
-    "COMPLAINT_ID_PREFIX",
-    "MAX_FILE_SIZE_MB",
-    "CITIZEN_REGISTRATION_ENABLED",
-    "SYSTEM_MAINTENANCE",
-    "CONTACT_HELPLINE",
-    "CONTACT_EMAIL",
-    "CONTACT_OFFICE_HOURS",
-    "CONTACT_OFFICE_ADDRESS",
-  ];
-
-  const settings = await prisma.systemConfig.findMany({
-    where: {
-      key: {
-        in: publicKeys,
+  try {
+    // First, ensure essential settings exist
+    const essentialSettings = [
+      {
+        key: "APP_LOGO_SIZE",
+        value: "medium",
+        description: "Size of the application logo (small, medium, large)",
       },
-      isActive: true,
-    },
-    orderBy: {
-      key: "asc",
-    },
-  });
+      {
+        key: "CONTACT_HELPLINE",
+        value: "1800-XXX-XXXX",
+        description: "Helpline phone number for customer support",
+      },
+      {
+        key: "CONTACT_EMAIL",
+        value: "support@cochinsmartcity.in",
+        description: "Email address for customer support",
+      },
+      {
+        key: "CONTACT_OFFICE_HOURS",
+        value: "Monday - Friday: 9 AM - 6 PM",
+        description: "Office hours for customer support",
+      },
+      {
+        key: "CONTACT_OFFICE_ADDRESS",
+        value: "Cochin Corporation Office",
+        description: "Physical address of the office",
+      },
+    ];
 
-  // Transform data to match frontend interface
-  const transformedSettings = settings.map((setting) => {
-    let type = "string";
-    let value = setting.value;
+    for (const setting of essentialSettings) {
+      const exists = await prisma.systemConfig.findUnique({
+        where: { key: setting.key },
+      });
 
-    // Determine type based on value
-    if (value === "true" || value === "false") {
-      type = "boolean";
-    } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
-      type = "number";
-    } else if (value.startsWith("{") || value.startsWith("[")) {
-      type = "json";
+      if (!exists) {
+        await prisma.systemConfig.create({
+          data: setting,
+        });
+        console.log(`✅ Added missing system setting: ${setting.key}`);
+      }
     }
 
-    return {
-      key: setting.key,
-      value: setting.value,
-      description: setting.description,
-      type: type,
-    };
-  });
+    // Only return non-sensitive settings
+    const publicKeys = [
+      "APP_NAME",
+      "APP_LOGO_URL",
+      "APP_LOGO_SIZE",
+      "COMPLAINT_ID_PREFIX",
+      "MAX_FILE_SIZE_MB",
+      "CITIZEN_REGISTRATION_ENABLED",
+      "SYSTEM_MAINTENANCE",
+      "CONTACT_HELPLINE",
+      "CONTACT_EMAIL",
+      "CONTACT_OFFICE_HOURS",
+      "CONTACT_OFFICE_ADDRESS",
+    ];
 
-  res.status(200).json({
-    success: true,
-    message: "Public system settings retrieved successfully",
-    data: transformedSettings,
-  });
+    const settings = await prisma.systemConfig.findMany({
+      where: {
+        key: {
+          in: publicKeys,
+        },
+        isActive: true,
+      },
+      orderBy: {
+        key: "asc",
+      },
+    });
+
+    // Transform data to match frontend interface
+    const transformedSettings = settings.map((setting) => {
+      let type = "string";
+      let value = setting.value;
+
+      // Determine type based on value
+      if (value === "true" || value === "false") {
+        type = "boolean";
+      } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+        type = "number";
+      } else if (value.startsWith("{") || value.startsWith("[")) {
+        type = "json";
+      }
+
+      return {
+        key: setting.key,
+        value: setting.value,
+        description: setting.description,
+        type: type,
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Public system settings retrieved successfully",
+      data: transformedSettings,
+      meta: {
+        source: "database",
+        databaseAvailable: true,
+      },
+    });
+  } catch (error) {
+    // Fallback to default settings if database operation fails
+    console.error(
+      "Database operation failed, falling back to defaults:",
+      error.message,
+    );
+    const defaultSettings = getDefaultPublicSettings();
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Public system settings retrieved (default values - database error)",
+      data: defaultSettings,
+      meta: {
+        source: "defaults_fallback",
+        databaseAvailable: false,
+        error: error.message,
+      },
+    });
+  }
 });
 
 // @desc    Get system health check

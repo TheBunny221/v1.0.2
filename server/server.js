@@ -14,31 +14,71 @@ async function startServer() {
   console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔧 Node.js version: ${process.version}`);
 
+  let databaseConnected = false;
+  let app;
+
   try {
     // 1. Initialize and validate database
     console.log("\n🔧 Step 1: Database Initialization");
-    await connectDB();
 
-    const dbInitSuccess = await initializeDatabase();
-    if (!dbInitSuccess && process.env.NODE_ENV === "production") {
-      throw new Error("Database initialization failed in production");
+    try {
+      await connectDB();
+      const dbInitSuccess = await initializeDatabase();
+      if (!dbInitSuccess && process.env.NODE_ENV === "production") {
+        throw new Error("Database initialization failed in production");
+      }
+      databaseConnected = true;
+      console.log("✅ Database connected successfully");
+    } catch (dbError) {
+      console.error("❌ Database connection failed:", dbError.message);
+
+      if (process.env.NODE_ENV === "production") {
+        throw dbError; // Fail in production
+      } else {
+        console.warn("⚠️ Starting server in development mode without database");
+        console.warn("   API endpoints requiring database will return errors");
+        databaseConnected = false;
+      }
     }
 
     // 2. Create Express app
     console.log("\n🔧 Step 2: Express Application Setup");
-    const app = createApp();
+    app = createApp();
 
     // 3. Enhanced health check endpoint with database status
-    const { getDatabaseStatus } = await import("./scripts/initDatabase.js");
-
     app.get("/api/health/detailed", async (req, res) => {
-      const dbStatus = await getDatabaseStatus();
-      res.status(dbStatus.healthy ? 200 : 503).json({
-        success: dbStatus.healthy,
-        message: dbStatus.healthy
-          ? "All systems operational"
+      let dbStatus = { healthy: false, message: "Database not connected" };
+
+      if (databaseConnected) {
+        try {
+          const { getDatabaseStatus } = await import(
+            "./scripts/initDatabase.js"
+          );
+          dbStatus = await getDatabaseStatus();
+        } catch (error) {
+          dbStatus = {
+            healthy: false,
+            message: "Database status check failed",
+            error: error.message,
+          };
+        }
+      }
+
+      const overallHealthy =
+        process.env.NODE_ENV === "development" || databaseConnected;
+
+      res.status(overallHealthy ? 200 : 503).json({
+        success: overallHealthy,
+        message: overallHealthy
+          ? databaseConnected
+            ? "All systems operational"
+            : "Server running in development mode"
           : "System issues detected",
-        data: dbStatus,
+        data: {
+          database: dbStatus,
+          server: { healthy: true, message: "Server is running" },
+          environment: process.env.NODE_ENV || "development",
+        },
       });
     });
 
@@ -53,14 +93,26 @@ async function startServer() {
       console.log(
         `📊 Detailed Health: http://${HOST}:${PORT}/api/health/detailed`,
       );
+      console.log(
+        `📊 Database Status: ${databaseConnected ? "✅ Connected" : "❌ Not Connected"}`,
+      );
       console.log("=".repeat(50));
 
       if (process.env.NODE_ENV === "development") {
         console.log("\n🔧 Development Mode Features:");
         console.log(`📋 Test Routes: http://${HOST}:${PORT}/api/test`);
+
+        if (!databaseConnected) {
+          console.log("\n⚠️ Database Connection Issues:");
+          console.log("   • Some API endpoints will return errors");
+          console.log("   • Connect to a database for full functionality");
+          console.log("   • Consider using Neon for easy PostgreSQL setup");
+        }
       }
 
-      console.log("\n✅ Server is ready to accept connections");
+      console.log(
+        `\n✅ Server is ready to accept connections ${!databaseConnected ? "(limited functionality)" : ""}`,
+      );
     });
 
     // 5. Server configuration
