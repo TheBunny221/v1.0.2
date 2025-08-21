@@ -51,24 +51,33 @@ async function startServer() {
 
       if (databaseConnected) {
         try {
-          const { getDatabaseStatus } = await import("./scripts/initDatabase.js");
+          const { getDatabaseStatus } = await import(
+            "./scripts/initDatabase.js"
+          );
           dbStatus = await getDatabaseStatus();
         } catch (error) {
-          dbStatus = { healthy: false, message: "Database status check failed", error: error.message };
+          dbStatus = {
+            healthy: false,
+            message: "Database status check failed",
+            error: error.message,
+          };
         }
       }
 
-      const overallHealthy = process.env.NODE_ENV === "development" || databaseConnected;
+      const overallHealthy =
+        process.env.NODE_ENV === "development" || databaseConnected;
 
       res.status(overallHealthy ? 200 : 503).json({
         success: overallHealthy,
         message: overallHealthy
-          ? (databaseConnected ? "All systems operational" : "Server running in development mode")
+          ? databaseConnected
+            ? "All systems operational"
+            : "Server running in development mode"
           : "System issues detected",
         data: {
           database: dbStatus,
           server: { healthy: true, message: "Server is running" },
-          environment: process.env.NODE_ENV || "development"
+          environment: process.env.NODE_ENV || "development",
         },
       });
     });
@@ -84,7 +93,9 @@ async function startServer() {
       console.log(
         `📊 Detailed Health: http://${HOST}:${PORT}/api/health/detailed`,
       );
-      console.log(`📊 Database Status: ${databaseConnected ? "✅ Connected" : "❌ Not Connected"}`);
+      console.log(
+        `📊 Database Status: ${databaseConnected ? "✅ Connected" : "❌ Not Connected"}`,
+      );
       console.log("=".repeat(50));
 
       if (process.env.NODE_ENV === "development") {
@@ -99,7 +110,9 @@ async function startServer() {
         }
       }
 
-      console.log(`\n✅ Server is ready to accept connections ${!databaseConnected ? "(limited functionality)" : ""}`);
+      console.log(
+        `\n✅ Server is ready to accept connections ${!databaseConnected ? "(limited functionality)" : ""}`,
+      );
     });
 
     // 5. Server configuration

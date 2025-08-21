@@ -25,6 +25,7 @@ This guide provides comprehensive instructions for setting up and managing the P
 ### PostgreSQL Installation
 
 #### Ubuntu/Debian
+
 ```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
@@ -33,12 +34,14 @@ sudo systemctl enable postgresql
 ```
 
 #### macOS (Homebrew)
+
 ```bash
 brew install postgresql
 brew services start postgresql
 ```
 
 #### Windows
+
 Download and install from [PostgreSQL official website](https://www.postgresql.org/download/windows/)
 
 ## Development Setup
@@ -130,6 +133,7 @@ npm run db:studio
 #### Option A: Managed PostgreSQL Services
 
 **Recommended Services:**
+
 - **Neon** (Serverless PostgreSQL) - [Connect to Neon](#open-mcp-popover)
 - **Amazon RDS**
 - **Google Cloud SQL**
@@ -334,7 +338,7 @@ const prisma = new PrismaClient();
 async function main() {
   // Your custom seeding logic
   console.log("🌱 Custom seeding...");
-  
+
   // Example: Import ward data from CSV
   // const wardsData = await importFromCSV('wards.csv');
   // await prisma.ward.createMany({ data: wardsData });
@@ -382,6 +386,7 @@ psql -U kochi_prod -h localhost kochi_smart_city_prod < backup_20241218_120000.s
 5. **Regular restore testing**
 
 Example cron job for daily backups:
+
 ```bash
 # Add to crontab: crontab -e
 0 2 * * * /usr/bin/pg_dump -U kochi_prod kochi_smart_city_prod | gzip > /backups/daily/kochi_$(date +\%Y\%m\%d).sql.gz
@@ -436,6 +441,7 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
 
 **Solution:**
+
 - Check if PostgreSQL is running: `sudo systemctl status postgresql`
 - Start PostgreSQL: `sudo systemctl start postgresql`
 - Verify port: `sudo netstat -tunlp | grep 5432`
@@ -447,6 +453,7 @@ Error: password authentication failed for user "kochi_user"
 ```
 
 **Solution:**
+
 - Check username and password in DATABASE_URL
 - Reset user password:
   ```sql
@@ -461,6 +468,7 @@ Error: database "kochi_smart_city" does not exist
 ```
 
 **Solution:**
+
 ```bash
 sudo -u postgres createdb kochi_smart_city
 ```
@@ -472,6 +480,7 @@ Error: permission denied for relation users
 ```
 
 **Solution:**
+
 ```sql
 sudo -u postgres psql kochi_smart_city
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO kochi_user;
@@ -485,6 +494,7 @@ Error: SSL connection required
 ```
 
 **Solution:**
+
 - Add SSL to DATABASE_URL: `?sslmode=require`
 - For development: `?sslmode=disable` (not recommended for production)
 
@@ -493,12 +503,14 @@ Error: SSL connection required
 #### Slow Queries
 
 1. **Enable query logging:**
+
    ```sql
    ALTER SYSTEM SET log_min_duration_statement = 1000; -- Log queries > 1 second
    SELECT pg_reload_conf();
    ```
 
 2. **Analyze slow queries:**
+
    ```sql
    EXPLAIN ANALYZE SELECT * FROM complaints WHERE status = 'REGISTERED';
    ```
@@ -511,6 +523,7 @@ Error: SSL connection required
 #### High Memory Usage
 
 1. **Adjust PostgreSQL configuration:**
+
    ```bash
    # Edit postgresql.conf
    shared_buffers = 256MB

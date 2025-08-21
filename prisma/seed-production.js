@@ -39,7 +39,8 @@ async function main() {
       {
         key: "COMPLAINT_ID_PREFIX",
         value: "KSC",
-        description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+        description:
+          "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
       },
       {
         key: "COMPLAINT_ID_START_NUMBER",
@@ -74,7 +75,8 @@ async function main() {
       {
         key: "COMPLAINT_AUTO_ASSIGN",
         value: "true",
-        description: "Whether complaints should be auto-assigned to ward officers",
+        description:
+          "Whether complaints should be auto-assigned to ward officers",
       },
       {
         key: "OTP_EXPIRY_MINUTES",
@@ -108,7 +110,8 @@ async function main() {
       },
       {
         key: "CONTACT_OFFICE_HOURS",
-        value: "Monday - Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
+        value:
+          "Monday - Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
         description: "Official office hours",
       },
       {
@@ -124,8 +127,8 @@ async function main() {
           where: { key: config.key },
           update: { value: config.value, description: config.description },
           create: config,
-        })
-      )
+        }),
+      ),
     );
 
     // 2. Create Production Departments
@@ -133,15 +136,18 @@ async function main() {
     const departments = [
       {
         name: "Public Works Department",
-        description: "Roads, bridges, buildings, and public infrastructure maintenance",
+        description:
+          "Roads, bridges, buildings, and public infrastructure maintenance",
       },
       {
         name: "Water and Sewerage Department",
-        description: "Water supply, distribution, quality control, and sewerage management",
+        description:
+          "Water supply, distribution, quality control, and sewerage management",
       },
       {
         name: "Electrical Department",
-        description: "Street lighting, electrical maintenance, and power distribution",
+        description:
+          "Street lighting, electrical maintenance, and power distribution",
       },
       {
         name: "Health and Sanitation Department",
@@ -149,7 +155,8 @@ async function main() {
       },
       {
         name: "IT and e-Governance Department",
-        description: "Digital infrastructure, e-governance, and IT support services",
+        description:
+          "Digital infrastructure, e-governance, and IT support services",
       },
       {
         name: "Revenue Department",
@@ -157,7 +164,8 @@ async function main() {
       },
       {
         name: "Town Planning Department",
-        description: "Urban planning, building permits, and development control",
+        description:
+          "Urban planning, building permits, and development control",
       },
     ];
 
@@ -169,26 +177,83 @@ async function main() {
     // 3. Create Real Kochi Wards (74 wards as per actual Kochi Corporation)
     console.log("🏘️ Creating Kochi Corporation wards...");
     const kochiWards = [
-      { name: "Ward 1 - Fort Kochi", description: "Historic Fort Kochi area with heritage sites" },
-      { name: "Ward 2 - Mattancherry", description: "Mattancherry Palace area and spice markets" },
-      { name: "Ward 3 - Ernakulam South", description: "Commercial and business district" },
-      { name: "Ward 4 - Kadavanthra", description: "IT corridor and residential area" },
-      { name: "Ward 5 - Panampilly Nagar", description: "Premium residential and commercial zone" },
-      { name: "Ward 6 - Marine Drive", description: "Waterfront business and tourism district" },
-      { name: "Ward 7 - Willingdon Island", description: "Port and industrial area" },
-      { name: "Ward 8 - Thevara", description: "Mixed residential and commercial area" },
-      { name: "Ward 9 - Perumanoor", description: "Residential locality with ferry connectivity" },
-      { name: "Ward 10 - Kumbakonam", description: "Traditional residential area" },
-      { name: "Ward 11 - Mundamveli", description: "Island ward with fishing community" },
+      {
+        name: "Ward 1 - Fort Kochi",
+        description: "Historic Fort Kochi area with heritage sites",
+      },
+      {
+        name: "Ward 2 - Mattancherry",
+        description: "Mattancherry Palace area and spice markets",
+      },
+      {
+        name: "Ward 3 - Ernakulam South",
+        description: "Commercial and business district",
+      },
+      {
+        name: "Ward 4 - Kadavanthra",
+        description: "IT corridor and residential area",
+      },
+      {
+        name: "Ward 5 - Panampilly Nagar",
+        description: "Premium residential and commercial zone",
+      },
+      {
+        name: "Ward 6 - Marine Drive",
+        description: "Waterfront business and tourism district",
+      },
+      {
+        name: "Ward 7 - Willingdon Island",
+        description: "Port and industrial area",
+      },
+      {
+        name: "Ward 8 - Thevara",
+        description: "Mixed residential and commercial area",
+      },
+      {
+        name: "Ward 9 - Perumanoor",
+        description: "Residential locality with ferry connectivity",
+      },
+      {
+        name: "Ward 10 - Kumbakonam",
+        description: "Traditional residential area",
+      },
+      {
+        name: "Ward 11 - Mundamveli",
+        description: "Island ward with fishing community",
+      },
       { name: "Ward 12 - Chullickal", description: "Coastal residential area" },
-      { name: "Ward 13 - Kacheripady", description: "Central residential and commercial area" },
-      { name: "Ward 14 - Palluruthy", description: "Island locality with traditional houses" },
-      { name: "Ward 15 - Vyttila", description: "Major transport hub and commercial center" },
-      { name: "Ward 16 - Edappally", description: "Major commercial and residential hub" },
-      { name: "Ward 17 - Cheranalloor", description: "Residential area near NH bypass" },
-      { name: "Ward 18 - Kalamassery", description: "Industrial and residential area" },
-      { name: "Ward 19 - Mulavukad", description: "Island ward with fishing activities" },
-      { name: "Ward 20 - Cherai", description: "Beach area and tourist destination" },
+      {
+        name: "Ward 13 - Kacheripady",
+        description: "Central residential and commercial area",
+      },
+      {
+        name: "Ward 14 - Palluruthy",
+        description: "Island locality with traditional houses",
+      },
+      {
+        name: "Ward 15 - Vyttila",
+        description: "Major transport hub and commercial center",
+      },
+      {
+        name: "Ward 16 - Edappally",
+        description: "Major commercial and residential hub",
+      },
+      {
+        name: "Ward 17 - Cheranalloor",
+        description: "Residential area near NH bypass",
+      },
+      {
+        name: "Ward 18 - Kalamassery",
+        description: "Industrial and residential area",
+      },
+      {
+        name: "Ward 19 - Mulavukad",
+        description: "Island ward with fishing activities",
+      },
+      {
+        name: "Ward 20 - Cherai",
+        description: "Beach area and tourist destination",
+      },
       // Add more wards as needed - this is a sample for production
     ];
 
@@ -209,42 +274,45 @@ async function main() {
         "Princess Street",
         "Parade Ground",
         "Santa Cruz Cathedral",
-        "Chinese Fishing Nets Area"
+        "Chinese Fishing Nets Area",
       ],
       "Ward 3 - Ernakulam South": [
         "MG Road",
         "Broadway",
         "Boat Jetty",
-        "High Court Junction"
+        "High Court Junction",
       ],
       "Ward 6 - Marine Drive": [
         "Marine Drive Walkway",
         "Taj Gateway Area",
         "Rajendra Maidan",
-        "Children's Park"
+        "Children's Park",
       ],
       "Ward 15 - Vyttila": [
         "Vyttila Hub",
         "Mobility Hub",
         "Junction Area",
-        "Collectorate"
+        "Collectorate",
       ],
       "Ward 16 - Edappally": [
         "Edappally Church",
         "Shopping Complex",
         "NH Bypass",
-        "Changampuzha Park"
+        "Changampuzha Park",
       ],
     };
 
     for (const ward of createdWards) {
-      const subZones = majorWardSubZones[ward.name] || [`${ward.name.split(' - ')[1] || ward.name} North`, `${ward.name.split(' - ')[1] || ward.name} South`];
-      
+      const subZones = majorWardSubZones[ward.name] || [
+        `${ward.name.split(" - ")[1] || ward.name} North`,
+        `${ward.name.split(" - ")[1] || ward.name} South`,
+      ];
+
       for (const zoneName of subZones) {
         await prisma.subZone.upsert({
-          where: { 
+          where: {
             // Using a unique combination since Prisma requires a unique field for upsert
-            name: `${zoneName}-${ward.id}`
+            name: `${zoneName}-${ward.id}`,
           },
           update: {},
           create: {
@@ -258,7 +326,7 @@ async function main() {
 
     // 5. Create Initial Admin User
     console.log("👤 Creating system administrator...");
-    const adminPassword = process.env.ADMIN_PASSWORD || 'KochiAdmin@2024!';
+    const adminPassword = process.env.ADMIN_PASSWORD || "KochiAdmin@2024!";
     const hashedAdminPassword = await bcrypt.hash(adminPassword, 12);
 
     const adminUser = await prisma.user.upsert({
@@ -282,7 +350,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_WATER_SUPPLY",
         name: "Water Supply Issues",
-        description: "Water supply problems, quality issues, pressure problems, leakage",
+        description:
+          "Water supply problems, quality issues, pressure problems, leakage",
         priority: "HIGH",
         slaHours: 24,
         departmentId: "Water and Sewerage Department",
@@ -298,7 +367,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_ROAD_INFRASTRUCTURE",
         name: "Road and Infrastructure",
-        description: "Road damage, potholes, bridge issues, public infrastructure",
+        description:
+          "Road damage, potholes, bridge issues, public infrastructure",
         priority: "MEDIUM",
         slaHours: 72,
         departmentId: "Public Works Department",
@@ -314,7 +384,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_STREET_LIGHTING",
         name: "Street Lighting",
-        description: "Street light maintenance, new connections, lighting issues",
+        description:
+          "Street light maintenance, new connections, lighting issues",
         priority: "LOW",
         slaHours: 48,
         departmentId: "Electrical Department",
@@ -330,7 +401,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_BUILDING_PERMIT",
         name: "Building and Planning",
-        description: "Building permits, planning violations, unauthorized constructions",
+        description:
+          "Building permits, planning violations, unauthorized constructions",
         priority: "MEDIUM",
         slaHours: 168, // 7 days
         departmentId: "Town Planning Department",
@@ -338,7 +410,8 @@ async function main() {
       {
         key: "COMPLAINT_TYPE_TAX_REVENUE",
         name: "Tax and Revenue",
-        description: "Property tax issues, trade license problems, revenue matters",
+        description:
+          "Property tax issues, trade license problems, revenue matters",
         priority: "MEDIUM",
         slaHours: 72,
         departmentId: "Revenue Department",
@@ -348,14 +421,14 @@ async function main() {
     for (const typeData of productionComplaintTypes) {
       await prisma.systemConfig.upsert({
         where: { key: typeData.key },
-        update: { 
+        update: {
           value: JSON.stringify({
             name: typeData.name,
             description: typeData.description,
             priority: typeData.priority,
             slaHours: typeData.slaHours,
             departmentId: typeData.departmentId,
-          })
+          }),
         },
         create: {
           key: typeData.key,
@@ -377,7 +450,9 @@ async function main() {
     console.log(`• ${createdWards.length} Wards created`);
     console.log(`• ${departments.length} Departments created`);
     console.log(`• 1 System Administrator created`);
-    console.log(`• ${productionComplaintTypes.length} Complaint Types configured`);
+    console.log(
+      `• ${productionComplaintTypes.length} Complaint Types configured`,
+    );
     console.log(`• ${productionConfigs.length} System Configurations set`);
 
     console.log("\n🔑 IMPORTANT - Admin Credentials:");
@@ -388,7 +463,6 @@ async function main() {
     console.log("2. Set up proper environment variables for production");
     console.log("3. Configure proper backup and monitoring");
     console.log("4. Review and update system configurations as needed");
-
   } catch (error) {
     console.error("❌ Production seeding failed:", error);
     throw error;

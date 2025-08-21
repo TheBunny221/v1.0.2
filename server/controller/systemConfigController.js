@@ -488,7 +488,8 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Public system settings retrieved (default values - database unavailable)",
+      message:
+        "Public system settings retrieved (default values - database unavailable)",
       data: defaultSettings,
       meta: {
         source: "defaults",
@@ -600,12 +601,16 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     // Fallback to default settings if database operation fails
-    console.error("Database operation failed, falling back to defaults:", error.message);
+    console.error(
+      "Database operation failed, falling back to defaults:",
+      error.message,
+    );
     const defaultSettings = getDefaultPublicSettings();
 
     res.status(200).json({
       success: true,
-      message: "Public system settings retrieved (default values - database error)",
+      message:
+        "Public system settings retrieved (default values - database error)",
       data: defaultSettings,
       meta: {
         source: "defaults_fallback",

@@ -28,7 +28,7 @@ export async function checkDatabaseConnection() {
  */
 export async function applyMigrations() {
   console.log("🔄 Applying database migrations...");
-  
+
   try {
     // Check if migrations table exists
     const result = await prisma.$queryRaw`
@@ -38,19 +38,21 @@ export async function applyMigrations() {
         AND table_name = '_prisma_migrations'
       );
     `;
-    
+
     if (!result[0].exists) {
-      console.log("📋 No migration history found. This appears to be a fresh database.");
+      console.log(
+        "📋 No migration history found. This appears to be a fresh database.",
+      );
       console.log("💡 Migrations will be applied from the beginning.");
     }
 
     // Apply migrations using Prisma CLI equivalent
     console.log("⚡ Applying pending migrations...");
-    
+
     // Note: In production, you should use `npx prisma migrate deploy`
     // This is a simplified version for demonstration
     await prisma.$executeRaw`SELECT 1`; // Placeholder for actual migration logic
-    
+
     console.log("✅ Database migrations applied successfully");
     return true;
   } catch (error) {
@@ -64,63 +66,63 @@ export async function applyMigrations() {
  */
 export async function backupDatabase(backupDir = "./backups") {
   console.log("💾 Starting database backup...");
-  
+
   try {
     // Create backup directory if it doesn't exist
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
     }
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupPath = path.join(backupDir, `backup-${timestamp}`);
     fs.mkdirSync(backupPath, { recursive: true });
 
     // Backup main tables
     const tables = [
-      'users',
-      'wards', 
-      'subZones',
-      'departments',
-      'systemConfig',
-      'complaints',
-      'serviceRequests',
-      'statusLogs',
-      'notifications'
+      "users",
+      "wards",
+      "subZones",
+      "departments",
+      "systemConfig",
+      "complaints",
+      "serviceRequests",
+      "statusLogs",
+      "notifications",
     ];
 
     const backupData = {};
 
     for (const table of tables) {
       console.log(`📋 Backing up ${table}...`);
-      
+
       try {
         let data;
         switch (table) {
-          case 'users':
+          case "users":
             data = await prisma.user.findMany();
             break;
-          case 'wards':
+          case "wards":
             data = await prisma.ward.findMany();
             break;
-          case 'subZones':
+          case "subZones":
             data = await prisma.subZone.findMany();
             break;
-          case 'departments':
+          case "departments":
             data = await prisma.department.findMany();
             break;
-          case 'systemConfig':
+          case "systemConfig":
             data = await prisma.systemConfig.findMany();
             break;
-          case 'complaints':
+          case "complaints":
             data = await prisma.complaint.findMany();
             break;
-          case 'serviceRequests':
+          case "serviceRequests":
             data = await prisma.serviceRequest.findMany();
             break;
-          case 'statusLogs':
+          case "statusLogs":
             data = await prisma.statusLog.findMany();
             break;
-          case 'notifications':
+          case "notifications":
             data = await prisma.notification.findMany();
             break;
           default:
@@ -128,13 +130,13 @@ export async function backupDatabase(backupDir = "./backups") {
         }
 
         backupData[table] = data;
-        
+
         // Save individual table backup
         fs.writeFileSync(
           path.join(backupPath, `${table}.json`),
-          JSON.stringify(data, null, 2)
+          JSON.stringify(data, null, 2),
         );
-        
+
         console.log(`✅ ${table}: ${data.length} records backed up`);
       } catch (error) {
         console.warn(`⚠️ Failed to backup ${table}:`, error.message);
@@ -143,8 +145,8 @@ export async function backupDatabase(backupDir = "./backups") {
 
     // Save complete backup
     fs.writeFileSync(
-      path.join(backupPath, 'complete-backup.json'),
-      JSON.stringify(backupData, null, 2)
+      path.join(backupPath, "complete-backup.json"),
+      JSON.stringify(backupData, null, 2),
     );
 
     // Create backup metadata
@@ -152,19 +154,22 @@ export async function backupDatabase(backupDir = "./backups") {
       timestamp: new Date().toISOString(),
       version: "1.0.0",
       tables: Object.keys(backupData),
-      totalRecords: Object.values(backupData).reduce((sum, data) => sum + data.length, 0),
-      description: "Kochi Smart City database backup"
+      totalRecords: Object.values(backupData).reduce(
+        (sum, data) => sum + data.length,
+        0,
+      ),
+      description: "Kochi Smart City database backup",
     };
 
     fs.writeFileSync(
-      path.join(backupPath, 'metadata.json'),
-      JSON.stringify(metadata, null, 2)
+      path.join(backupPath, "metadata.json"),
+      JSON.stringify(metadata, null, 2),
     );
 
     console.log("✅ Database backup completed successfully");
     console.log(`📁 Backup location: ${backupPath}`);
     console.log(`📊 Total records backed up: ${metadata.totalRecords}`);
-    
+
     return backupPath;
   } catch (error) {
     console.error("❌ Backup failed:", error.message);
@@ -177,19 +182,19 @@ export async function backupDatabase(backupDir = "./backups") {
  */
 export async function restoreDatabase(backupPath) {
   console.log(`🔄 Restoring database from: ${backupPath}`);
-  
+
   try {
-    const metadataPath = path.join(backupPath, 'metadata.json');
+    const metadataPath = path.join(backupPath, "metadata.json");
     if (!fs.existsSync(metadataPath)) {
       throw new Error("Invalid backup directory - metadata.json not found");
     }
 
-    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
     console.log(`📋 Restoring backup from: ${metadata.timestamp}`);
     console.log(`📊 Total records to restore: ${metadata.totalRecords}`);
 
     // Ask for confirmation in production
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       console.log("⚠️ WARNING: This will overwrite existing production data!");
       console.log("💡 Make sure to backup current data before proceeding");
       // In a real implementation, you'd want to add a confirmation prompt here
@@ -198,45 +203,45 @@ export async function restoreDatabase(backupPath) {
     // Clear existing data (in reverse order to handle foreign keys)
     console.log("🧹 Clearing existing data...");
     const clearOrder = [
-      'notifications',
-      'statusLogs',
-      'serviceRequests', 
-      'complaints',
-      'systemConfig',
-      'departments',
-      'subZones',
-      'wards',
-      'users'
+      "notifications",
+      "statusLogs",
+      "serviceRequests",
+      "complaints",
+      "systemConfig",
+      "departments",
+      "subZones",
+      "wards",
+      "users",
     ];
 
     for (const table of clearOrder) {
       try {
         switch (table) {
-          case 'users':
+          case "users":
             await prisma.user.deleteMany();
             break;
-          case 'wards':
+          case "wards":
             await prisma.ward.deleteMany();
             break;
-          case 'subZones':
+          case "subZones":
             await prisma.subZone.deleteMany();
             break;
-          case 'departments':
+          case "departments":
             await prisma.department.deleteMany();
             break;
-          case 'systemConfig':
+          case "systemConfig":
             await prisma.systemConfig.deleteMany();
             break;
-          case 'complaints':
+          case "complaints":
             await prisma.complaint.deleteMany();
             break;
-          case 'serviceRequests':
+          case "serviceRequests":
             await prisma.serviceRequest.deleteMany();
             break;
-          case 'statusLogs':
+          case "statusLogs":
             await prisma.statusLog.deleteMany();
             break;
-          case 'notifications':
+          case "notifications":
             await prisma.notification.deleteMany();
             break;
         }
@@ -248,15 +253,15 @@ export async function restoreDatabase(backupPath) {
 
     // Restore data (in correct order)
     const restoreOrder = [
-      'wards',
-      'subZones', 
-      'departments',
-      'users',
-      'systemConfig',
-      'complaints',
-      'serviceRequests',
-      'statusLogs',
-      'notifications'
+      "wards",
+      "subZones",
+      "departments",
+      "users",
+      "systemConfig",
+      "complaints",
+      "serviceRequests",
+      "statusLogs",
+      "notifications",
     ];
 
     for (const table of restoreOrder) {
@@ -267,7 +272,7 @@ export async function restoreDatabase(backupPath) {
       }
 
       try {
-        const data = JSON.parse(fs.readFileSync(tablePath, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(tablePath, "utf8"));
         console.log(`🔄 Restoring ${table}: ${data.length} records...`);
 
         if (data.length === 0) {
@@ -277,32 +282,41 @@ export async function restoreDatabase(backupPath) {
 
         // Restore data using createMany
         switch (table) {
-          case 'users':
+          case "users":
             await prisma.user.createMany({ data, skipDuplicates: true });
             break;
-          case 'wards':
+          case "wards":
             await prisma.ward.createMany({ data, skipDuplicates: true });
             break;
-          case 'subZones':
+          case "subZones":
             await prisma.subZone.createMany({ data, skipDuplicates: true });
             break;
-          case 'departments':
+          case "departments":
             await prisma.department.createMany({ data, skipDuplicates: true });
             break;
-          case 'systemConfig':
-            await prisma.systemConfig.createMany({ data, skipDuplicates: true });
+          case "systemConfig":
+            await prisma.systemConfig.createMany({
+              data,
+              skipDuplicates: true,
+            });
             break;
-          case 'complaints':
+          case "complaints":
             await prisma.complaint.createMany({ data, skipDuplicates: true });
             break;
-          case 'serviceRequests':
-            await prisma.serviceRequest.createMany({ data, skipDuplicates: true });
+          case "serviceRequests":
+            await prisma.serviceRequest.createMany({
+              data,
+              skipDuplicates: true,
+            });
             break;
-          case 'statusLogs':
+          case "statusLogs":
             await prisma.statusLog.createMany({ data, skipDuplicates: true });
             break;
-          case 'notifications':
-            await prisma.notification.createMany({ data, skipDuplicates: true });
+          case "notifications":
+            await prisma.notification.createMany({
+              data,
+              skipDuplicates: true,
+            });
             break;
         }
 
@@ -325,7 +339,7 @@ export async function restoreDatabase(backupPath) {
  */
 export async function getDatabaseStats() {
   console.log("📊 Gathering database statistics...");
-  
+
   try {
     const stats = {
       users: await prisma.user.count(),
@@ -339,12 +353,12 @@ export async function getDatabaseStats() {
     };
 
     const complaintStats = await prisma.complaint.groupBy({
-      by: ['status'],
+      by: ["status"],
       _count: true,
     });
 
     const userStats = await prisma.user.groupBy({
-      by: ['role'],
+      by: ["role"],
       _count: true,
     });
 
@@ -355,12 +369,12 @@ export async function getDatabaseStats() {
     });
 
     console.log("\n📋 Complaint Status Breakdown:");
-    complaintStats.forEach(stat => {
+    complaintStats.forEach((stat) => {
       console.log(`${stat.status.padEnd(15)}: ${stat._count.toLocaleString()}`);
     });
 
     console.log("\n👥 User Role Breakdown:");
-    userStats.forEach(stat => {
+    userStats.forEach((stat) => {
       console.log(`${stat.role.padEnd(15)}: ${stat._count.toLocaleString()}`);
     });
 
@@ -376,7 +390,7 @@ export async function getDatabaseStats() {
  */
 export async function cleanupOldData(daysOld = 365) {
   console.log(`🧹 Cleaning up data older than ${daysOld} days...`);
-  
+
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
@@ -385,9 +399,9 @@ export async function cleanupOldData(daysOld = 365) {
     const oldOtpSessions = await prisma.oTPSession.deleteMany({
       where: {
         createdAt: {
-          lt: cutoffDate
-        }
-      }
+          lt: cutoffDate,
+        },
+      },
     });
 
     // Clean up old notifications (read ones)
@@ -395,9 +409,9 @@ export async function cleanupOldData(daysOld = 365) {
       where: {
         isRead: true,
         sentAt: {
-          lt: cutoffDate
-        }
-      }
+          lt: cutoffDate,
+        },
+      },
     });
 
     console.log(`✅ Cleanup completed:`);
@@ -406,7 +420,7 @@ export async function cleanupOldData(daysOld = 365) {
 
     return {
       otpSessionsRemoved: oldOtpSessions.count,
-      notificationsRemoved: oldNotifications.count
+      notificationsRemoved: oldNotifications.count,
     };
   } catch (error) {
     console.error("❌ Cleanup failed:", error.message);
@@ -417,22 +431,22 @@ export async function cleanupOldData(daysOld = 365) {
 // CLI interface for standalone usage
 if (import.meta.url === `file://${process.argv[1]}`) {
   const command = process.argv[2];
-  
+
   switch (command) {
-    case 'check':
+    case "check":
       checkDatabaseConnection()
         .then(() => process.exit(0))
         .catch(() => process.exit(1));
       break;
-      
-    case 'backup':
-      const backupDir = process.argv[3] || './backups';
+
+    case "backup":
+      const backupDir = process.argv[3] || "./backups";
       backupDatabase(backupDir)
         .then(() => process.exit(0))
         .catch(() => process.exit(1));
       break;
-      
-    case 'restore':
+
+    case "restore":
       const restorePath = process.argv[3];
       if (!restorePath) {
         console.error("❌ Please provide backup path");
@@ -442,20 +456,20 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         .then(() => process.exit(0))
         .catch(() => process.exit(1));
       break;
-      
-    case 'stats':
+
+    case "stats":
       getDatabaseStats()
         .then(() => process.exit(0))
         .catch(() => process.exit(1));
       break;
-      
-    case 'cleanup':
+
+    case "cleanup":
       const days = parseInt(process.argv[3]) || 365;
       cleanupOldData(days)
         .then(() => process.exit(0))
         .catch(() => process.exit(1));
       break;
-      
+
     default:
       console.log("Usage: node migration-utils.js <command>");
       console.log("Commands:");

@@ -58,7 +58,10 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
       console.log("System config loaded successfully via RTK Query");
     } else if (error) {
       const errorMessage = getApiErrorMessage(error);
-      console.error("Error fetching system config via RTK Query:", errorMessage);
+      console.error(
+        "Error fetching system config via RTK Query:",
+        errorMessage,
+      );
       console.error("Full error details:", {
         status: error?.status,
         data: error?.data,

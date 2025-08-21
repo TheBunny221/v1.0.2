@@ -5,18 +5,21 @@ This directory contains all database-related files for the Kochi Smart City Comp
 ## Files Overview
 
 ### Core Files
+
 - **`schema.prisma`** - Database schema definition with PostgreSQL configuration
 - **`seed.js`** - Development seed file with sample data (94 complaints, 8 wards, demo users)
 - **`seed-production.js`** - Production seed file with minimal essential data
 - **`migration-utils.js`** - Database utilities for backup, restore, and maintenance
 
 ### Migration Files
+
 - **`migrations/`** - Contains database migration history
 - **`migrations/20241218000001_initial_migration/`** - Initial PostgreSQL schema migration
 
 ## Quick Start
 
 ### 1. Development Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -39,6 +42,7 @@ npm run db:setup:validate
 ```
 
 ### 2. Production Setup
+
 ```bash
 # Generate Prisma client
 npm run db:generate
@@ -56,6 +60,7 @@ npm run db:setup:validate
 ## Available Scripts
 
 ### Basic Operations
+
 ```bash
 npm run db:generate        # Generate Prisma client
 npm run db:migrate:deploy   # Apply migrations to database
@@ -65,6 +70,7 @@ npm run db:validate        # Validate schema
 ```
 
 ### Data Management
+
 ```bash
 npm run seed:dev           # Seed development data
 npm run seed:prod          # Seed production data
@@ -74,6 +80,7 @@ npm run db:reset           # Reset database (WARNING: Destructive)
 ```
 
 ### Maintenance
+
 ```bash
 npm run db:backup          # Create database backup
 npm run db:restore         # Restore from backup
@@ -83,6 +90,7 @@ npm run db:check           # Check database connection
 ```
 
 ### Validation
+
 ```bash
 npm run db:setup:validate  # Comprehensive validation
 node scripts/setup-database.js check  # Detailed validation report
@@ -91,6 +99,7 @@ node scripts/setup-database.js check  # Detailed validation report
 ## Database Schema
 
 ### Core Tables
+
 - **`users`** - User accounts (citizens, officers, admins)
 - **`wards`** - Administrative wards of Kochi
 - **`sub_zones`** - Sub-divisions within wards
@@ -101,6 +110,7 @@ node scripts/setup-database.js check  # Detailed validation report
 - **`system_config`** - Application configuration
 
 ### Enums (PostgreSQL)
+
 - **`UserRole`** - CITIZEN, WARD_OFFICER, MAINTENANCE_TEAM, ADMINISTRATOR, GUEST
 - **`ComplaintStatus`** - REGISTERED, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED, REOPENED
 - **`Priority`** - LOW, MEDIUM, HIGH, CRITICAL
@@ -109,6 +119,7 @@ node scripts/setup-database.js check  # Detailed validation report
 ## Data Seeding
 
 ### Development Data (`seed.js`)
+
 - 8 Kochi wards with realistic names
 - 24 sub-zones across wards
 - 1 administrator
@@ -120,6 +131,7 @@ node scripts/setup-database.js check  # Detailed validation report
 - System configuration
 
 ### Production Data (`seed-production.js`)
+
 - 20 major Kochi wards
 - Essential departments
 - 1 system administrator
@@ -130,11 +142,13 @@ node scripts/setup-database.js check  # Detailed validation report
 ## Database URL Configuration
 
 ### Development
+
 ```bash
 DATABASE_URL="postgresql://username:password@localhost:5432/kochi_smart_city_dev"
 ```
 
 ### Production
+
 ```bash
 # Local PostgreSQL
 DATABASE_URL="postgresql://username:password@localhost:5432/kochi_smart_city_prod"
@@ -149,6 +163,7 @@ DATABASE_URL="postgresql://username:password@host:5432/database?connection_limit
 ## Migration Management
 
 ### Creating Migrations
+
 ```bash
 # Create new migration
 npm run db:migrate:create
@@ -161,6 +176,7 @@ npm run db:migrate:status
 ```
 
 ### Production Migrations
+
 ```bash
 # Deploy migrations to production
 npm run db:migrate:deploy
@@ -172,6 +188,7 @@ npm run db:migrate:deploy
 ## Backup and Restore
 
 ### Creating Backups
+
 ```bash
 # Automatic backup with timestamp
 npm run db:backup
@@ -184,6 +201,7 @@ pg_dump -U username database_name > backup.sql
 ```
 
 ### Restoring Backups
+
 ```bash
 # Restore from utility backup
 npm run db:restore /path/to/backup/dir
@@ -195,6 +213,7 @@ psql -U username database_name < backup.sql
 ## Monitoring and Maintenance
 
 ### Health Checks
+
 ```bash
 # Quick connection check
 npm run db:check
@@ -207,7 +226,9 @@ npm run db:setup:validate
 ```
 
 ### Performance Monitoring
+
 Monitor these metrics:
+
 - Connection count
 - Query performance
 - Database size
@@ -215,6 +236,7 @@ Monitor these metrics:
 - Lock contention
 
 ### Cleanup Tasks
+
 ```bash
 # Clean old data (default: 365 days)
 npm run db:cleanup
@@ -226,6 +248,7 @@ node prisma/migration-utils.js cleanup 90
 ## Security Best Practices
 
 ### Database Security
+
 - Use strong passwords (minimum 12 characters)
 - Enable SSL for all connections
 - Restrict database access by IP
@@ -233,6 +256,7 @@ node prisma/migration-utils.js cleanup 90
 - Monitor access logs
 
 ### Application Security
+
 - Never log database credentials
 - Use environment variables for secrets
 - Implement connection pooling
@@ -243,27 +267,35 @@ node prisma/migration-utils.js cleanup 90
 ### Common Issues
 
 #### Connection Refused
+
 ```bash
 Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
+
 **Solution:** Ensure PostgreSQL is running and accepting connections.
 
 #### Authentication Failed
+
 ```bash
 Error: password authentication failed
 ```
+
 **Solution:** Check username/password in DATABASE_URL.
 
 #### Database Does Not Exist
+
 ```bash
 Error: database does not exist
 ```
+
 **Solution:** Create database using `createdb` or SQL.
 
 #### Migration Issues
+
 ```bash
 Error: Migration failed
 ```
+
 **Solution:** Check migration logs and resolve conflicts.
 
 ### Getting Help
@@ -277,6 +309,7 @@ Error: Migration failed
 ## Environment Variables
 
 Required variables:
+
 ```bash
 DATABASE_URL=postgresql://...
 JWT_SECRET=your-secure-secret
@@ -284,6 +317,7 @@ NODE_ENV=production|development
 ```
 
 Optional variables:
+
 ```bash
 ADMIN_PASSWORD=secure-admin-password
 EMAIL_HOST=smtp.example.com
@@ -292,6 +326,7 @@ EMAIL_PASS=smtp-password
 ```
 
 ## File Structure
+
 ```
 prisma/
 ├── README.md              # This file
