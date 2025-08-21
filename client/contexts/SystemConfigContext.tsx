@@ -57,7 +57,9 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
       setConfig(configMap);
       console.log("System config loaded successfully via RTK Query");
     } else if (error) {
-      console.error("Error fetching system config via RTK Query:", error);
+      const errorMessage = getApiErrorMessage(error);
+      console.error("Error fetching system config via RTK Query:", errorMessage);
+      console.error("Full error object:", error);
       // Fallback to default values
       setConfig({
         APP_NAME: "Kochi Smart City",
