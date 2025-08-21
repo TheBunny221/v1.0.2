@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 
 interface SystemConfig {
   [key: string]: string;
