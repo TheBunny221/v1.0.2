@@ -104,38 +104,42 @@ const baseQueryWithReauth: BaseQueryFn<
 
   const options: RequestInit = baseOptions;
 
-  // Add auth headers manually
+  // Set headers: always set content-type for JSON; add authorization if token exists
   try {
     const state = api.getState() as any;
     const token = state?.auth?.token || localStorage.getItem("token");
-    if (token) {
-      const headers: Record<string, string> = {
-        ...options.headers,
-        authorization: `Bearer ${token}`,
-      };
 
-      // Only add content-type for JSON requests (not FormData)
-      if (contentType) {
-        headers["content-type"] = contentType;
-      }
+    const headers: Record<string, string> = {
+      ...(options.headers as Record<string, string>),
+    };
 
-      options.headers = headers;
+    // Only add content-type for JSON requests (not FormData)
+    if (contentType && !("content-type" in headers)) {
+      headers["content-type"] = contentType;
     }
+
+    if (token) {
+      headers["authorization"] = `Bearer ${token}`;
+    }
+
+    options.headers = headers;
   } catch (error) {
     const token = localStorage.getItem("token");
-    if (token) {
-      const headers: Record<string, string> = {
-        ...options.headers,
-        authorization: `Bearer ${token}`,
-      };
 
-      // Only add content-type for JSON requests (not FormData)
-      if (contentType) {
-        headers["content-type"] = contentType;
-      }
+    const headers: Record<string, string> = {
+      ...(options.headers as Record<string, string>),
+    };
 
-      options.headers = headers;
+    // Only add content-type for JSON requests (not FormData)
+    if (contentType && !("content-type" in headers)) {
+      headers["content-type"] = contentType;
     }
+
+    if (token) {
+      headers["authorization"] = `Bearer ${token}`;
+    }
+
+    options.headers = headers;
   }
 
   try {

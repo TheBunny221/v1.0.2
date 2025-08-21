@@ -408,14 +408,14 @@ export const getAnalytics = asyncHandler(async (req, res) => {
     _count: true,
   });
 
-  // Get monthly trends
+  // Get monthly trends (PostgreSQL)
   const monthlyTrends = await prisma.$queryRaw`
     SELECT
-      strftime('%Y-%m', createdAt) as month,
-      COUNT(*) as count,
+      TO_CHAR(date_trunc('month', "createdAt"), 'YYYY-MM') AS month,
+      COUNT(*) AS count,
       status
-    FROM complaints
-    WHERE createdAt >= datetime('now', '-12 months')
+    FROM "complaints"
+    WHERE "createdAt" >= NOW() - INTERVAL '12 months'
     GROUP BY month, status
     ORDER BY month DESC
   `;
@@ -528,17 +528,17 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   // Get ward performance
   const wardPerformance = await prisma.$queryRaw`
     SELECT
-      w.name as ward,
-      COALESCE(COUNT(c.id), 0) as complaints,
-      COALESCE(COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END), 0) as resolved,
+      w.name AS ward,
+      COALESCE(COUNT(c.id), 0) AS complaints,
+      COALESCE(COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END), 0) AS resolved,
       COALESCE(ROUND(
         (COUNT(CASE WHEN c.status = 'RESOLVED' THEN 1 END) * 100.0) /
         NULLIF(COUNT(c.id), 0),
         2
-      ), 0) as sla
-    FROM wards w
-    LEFT JOIN complaints c ON w.id = c.wardId
-    WHERE w.isActive = 1
+      ), 0) AS sla
+    FROM "wards" w
+    LEFT JOIN "complaints" c ON w.id = c."wardId"
+    WHERE w."isActive" = TRUE
     GROUP BY w.id, w.name
     ORDER BY w.name
   `;
@@ -682,7 +682,7 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
     orderBy: { createdAt: "desc" },
     include: {
       ward: { select: { name: true } },
-      submittedBy: { select: { fullName: true } },
+      submittedBy: { select: { fullName: true, email: true } },
     },
   });
 
@@ -703,7 +703,7 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
           ward: { select: { name: true } },
         },
       },
-      user: { select: { fullName: true, role: true } },
+      user: { select: { fullName: true, role: true, email: true } },
     },
   });
 
@@ -720,8 +720,27 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
     select: {
       id: true,
       fullName: true,
+      email: true,
       role: true,
       createdAt: true,
+    },
+  });
+
+  // Get recent logins/activity (approximate using updatedAt)
+  const recentLogins = await prisma.user.findMany({
+    take: parseInt(limit),
+    where: {
+      updatedAt: {
+        gte: sevenDaysAgo,
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      updatedAt: true,
     },
   });
 
@@ -735,6 +754,13 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
       type: "complaint",
       message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
       time: formatTimeAgo(complaint.createdAt),
+      user: complaint.submittedBy
+        ? {
+            name: complaint.submittedBy.fullName,
+            email: complaint.submittedBy.email,
+          }
+        : undefined,
+      ward: complaint.ward?.name,
     });
   });
 
@@ -745,6 +771,29 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
       type: getActivityType(log.toStatus),
       message: getStatusMessage(log.toStatus, log.complaint, log.user),
       time: formatTimeAgo(log.timestamp),
+      user: log.user
+        ? {
+            name: log.user.fullName,
+            email: log.user.email,
+            role: log.user.role,
+          }
+        : undefined,
+      ward: log.complaint?.ward?.name,
+    });
+  });
+
+  // Add user login activities
+  recentLogins.forEach((user) => {
+    activities.push({
+      id: `login-${user.id}-${new Date(user.updatedAt).getTime()}`,
+      type: "login",
+      message: `${user.fullName} logged in`,
+      time: formatTimeAgo(user.updatedAt),
+      user: {
+        name: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
     });
   });
 
@@ -752,9 +801,14 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
   recentUsers.forEach((user) => {
     activities.push({
       id: `user-${user.id}`,
-      type: "user",
+      type: "user_created",
       message: `New ${user.role.toLowerCase().replace("_", " ")} registered`,
       time: formatTimeAgo(user.createdAt),
+      user: {
+        name: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
     });
   });
 

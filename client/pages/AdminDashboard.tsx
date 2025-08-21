@@ -176,6 +176,10 @@ const AdminDashboard: React.FC = () => {
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case "assignment":
         return <UserCheck className="h-4 w-4 text-orange-600" />;
+      case "login":
+        return <UserCheck className="h-4 w-4 text-blue-600" />;
+      case "user_created":
+        return <Users className="h-4 w-4 text-purple-600" />;
       case "user":
         return <Users className="h-4 w-4 text-purple-600" />;
       case "alert":
@@ -473,9 +477,25 @@ const AdminDashboard: React.FC = () => {
                     >
                       {getActivityIcon(activity.type)}
                       <div className="flex-1">
-                        <p className="text-sm font-medium">
-                          {activity.message}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">
+                            {activity.message}
+                          </p>
+                          <span className="text-[10px] uppercase tracking-wide text-gray-400">
+                            {activity.type}
+                          </span>
+                        </div>
+                        {activity.user && (
+                          <p className="text-xs text-gray-600">
+                            {activity.user.name}
+                            {activity.user.email ? (
+                              <>
+                                {" "}
+                                · <span className="text-gray-500">{activity.user.email}</span>
+                              </>
+                            ) : null}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500">{activity.time}</p>
                       </div>
                     </div>

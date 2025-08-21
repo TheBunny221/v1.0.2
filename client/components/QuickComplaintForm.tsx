@@ -69,6 +69,7 @@ interface FormData {
   email: string;
   problemType: string;
   ward: string;
+  subZoneId?: string;
   area: string;
   location: string;
   address: string;
@@ -98,6 +99,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     email: "",
     problemType: "",
     ward: "",
+    subZoneId: "",
     area: "",
     location: "",
     address: "",
@@ -131,6 +133,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         mobile: user.phoneNumber || "",
         email: user.email || "",
         ward: user.wardId || "",
+        subZoneId: "",
       }));
     } else {
       setSubmissionMode("guest");
@@ -181,6 +184,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     label: type.label,
     icon: getIconForComplaintType(type.value),
   }));
+
+  // Derive sub-zones for the selected ward (from public wards response which includes subZones)
+  const selectedWard = wards.find((w: any) => w.id === formData.ward);
+  const subZonesForWard = selectedWard?.subZones || [];
 
   const handleInputChange = useCallback((field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -261,6 +268,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             type: formData.problemType as ComplaintType,
             priority: "MEDIUM" as Priority,
             wardId: formData.ward,
+            subZoneId: formData.subZoneId || undefined,
             area: formData.area,
             landmark: formData.location,
             address: formData.address,
@@ -294,6 +302,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             type: formData.problemType,
             priority: "MEDIUM",
             wardId: formData.ward,
+            subZoneId: formData.subZoneId || undefined,
             area: formData.area,
             landmark: formData.location,
             address: formData.address,
@@ -432,6 +441,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       email: isAuthenticated && user ? user.email || "" : "",
       problemType: "",
       ward: isAuthenticated && user ? user.wardId || "" : "",
+      subZoneId: "",
       area: "",
       location: "",
       address: "",
@@ -462,7 +472,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               </span>
               {!isAuthenticated && (
                 <Badge variant="secondary" className="ml-2">
-                  {translations?.auth?.guestMode || "Guest Mode"}
+                  {(translations as any)?.auth?.guestMode || "Guest Mode"}
                 </Badge>
               )}
             </CardTitle>
@@ -610,6 +620,36 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                   />
                 </div>
 
+                {/* Sub-Zone Selection - shows when ward selected and sub-zones available */}
+                {formData.ward && subZonesForWard.length > 0 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="subZone">
+                      {(translations as any)?.complaints?.subZone || "Sub-Zone"}
+                    </Label>
+                    <Select
+                      value={formData.subZoneId || ""}
+                      onValueChange={(value) =>
+                        handleInputChange("subZoneId", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            translations?.common?.selectAll || "Select sub-zone"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subZonesForWard.map((sz: any) => (
+                          <SelectItem key={sz.id} value={sz.id}>
+                            {sz.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="location">
                     {translations?.complaints?.location || "Location/Landmark"}
@@ -638,7 +678,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="address">
-                    {translations?.complaints?.address || "Full Address"}
+                    {(translations as any)?.complaints?.address || "Full Address"}
                   </Label>
                   <Textarea
                     id="address"
@@ -646,7 +686,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                     onChange={(e) =>
                       handleInputChange("address", e.target.value)
                     }
-                    placeholder={`${translations?.complaints?.address || "Complete address details"}...`}
+                    placeholder={`${(translations as any)?.complaints?.address || "Complete address details"}...`}
                     rows={3}
                   />
                 </div>
@@ -663,7 +703,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               </h3>
               <div className="space-y-2">
                 <Label htmlFor="description">
-                  {translations?.complaints?.description || "Description"} *
+                  {(translations as any)?.complaints?.description || (translations as any)?.forms?.description || "Description"} *
                 </Label>
                 <Textarea
                   id="description"

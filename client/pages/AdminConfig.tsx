@@ -271,11 +271,12 @@ const AdminConfig: React.FC = () => {
     setDataLoading(true);
 
     try {
-      // Load wards (public endpoint)
+      // Load wards (admin endpoint with flags to include isActive and subZones)
       let wardsResponse;
       try {
-        wardsResponse = await apiCall("/guest/wards");
-        setWards(wardsResponse.data || []);
+        wardsResponse = await apiCall("/users/wards?all=true&include=subzones");
+        const wardsData = wardsResponse?.data?.wards || [];
+        setWards(wardsData);
       } catch (error: any) {
         console.error("Failed to load wards:", error);
         setWards([]);

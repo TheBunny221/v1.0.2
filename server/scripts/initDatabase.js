@@ -98,10 +98,19 @@ export const initializeDatabase = async () => {
 
     console.log("✅ Environment configuration validated");
 
-    // 5. Database migration check (if needed)
+    // 5. Database schema check (dialect-aware)
     try {
-      // This will fail gracefully if migrations are not needed
-      await prisma.$queryRaw`PRAGMA table_info(users);`;
+      const isPostgres = process.env.DATABASE_URL?.includes("postgresql");
+      if (isPostgres) {
+        // Check that the users table exists in PostgreSQL and cast regclass to text
+        const result = await prisma.$queryRaw`SELECT to_regclass('public.users')::text AS exists;`;
+        if (!result || !result[0] || result[0].exists === null) {
+          throw new Error("users table not found");
+        }
+      } else {
+        // Legacy SQLite check
+        await prisma.$queryRaw`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`;
+      }
       console.log("✅ Database schema appears to be up to date");
     } catch (error) {
       console.warn(

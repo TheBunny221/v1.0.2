@@ -183,7 +183,20 @@ export const guestApi = baseApi.injectEndpoints({
 
     // Get wards (public endpoint)
     getWards: builder.query<
-      ApiResponse<Array<{ id: string; name: string; description?: string }>>,
+      ApiResponse<
+        Array<{
+          id: string;
+          name: string;
+          description?: string;
+          isActive?: boolean;
+          subZones?: Array<{
+            id: string;
+            name: string;
+            description?: string;
+            isActive?: boolean;
+          }>;
+        }>
+      >,
       void
     >({
       query: () => "/guest/wards",

@@ -88,6 +88,8 @@ export default defineConfig(({ mode }) => {
     define: {
       // Fix React runtime issues
       global: "globalThis",
+      // Ensure consistent NODE_ENV usage in client code
+      "process.env.NODE_ENV": JSON.stringify(isProduction ? "production" : "development"),
     },
     optimizeDeps: {
       include: ["react", "react-dom"],

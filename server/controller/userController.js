@@ -526,13 +526,32 @@ export const verifyAccount = asyncHandler(async (req, res) => {
 // @route   GET /api/users/wards
 // @access  Private
 export const getWards = asyncHandler(async (req, res) => {
+  const { include, all } = req.query;
+
+  const includeSubZones = include === "subzones";
+  const fetchAll = all === "true";
+
   const wards = await prisma.ward.findMany({
-    where: { isActive: true },
+    where: fetchAll ? {} : { isActive: true },
     orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
       description: true,
+      isActive: true,
+      ...(includeSubZones
+        ? {
+            subZones: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                isActive: true,
+              },
+              orderBy: { name: "asc" },
+            },
+          }
+        : {}),
     },
   });
 

@@ -131,6 +131,13 @@ export interface RecentActivity {
   type: string;
   message: string;
   time: string;
+  user?: {
+    name: string;
+    email: string;
+    role?: string;
+    ward?: string;
+  };
+  ward?: string;
 }
 
 export interface DashboardStatsResponse {
@@ -194,7 +201,7 @@ export interface SystemHealthResponse {
     memory: {
       used: string;
       total: string;
-      percentage: string;
+      percentage: number;
     };
     errors: {
       last24h: number;
