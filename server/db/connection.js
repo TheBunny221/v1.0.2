@@ -83,9 +83,27 @@ const connectDB = async () => {
 
     const dbType = process.env.DATABASE_URL?.includes("postgresql")
       ? "PostgreSQL"
+      : process.env.DATABASE_URL?.includes("mysql")
+      ? "MySQL"
       : "SQLite";
 
     console.log(`✅ ${dbType} Connected successfully`);
+
+    // PostgreSQL specific connection validation
+    if (dbType === "PostgreSQL") {
+      try {
+        const result = await prisma.$queryRaw`SELECT version() as version`;
+        console.log(`🐘 PostgreSQL Version: ${result[0]?.version?.substring(0, 50)}...`);
+
+        // Check for required extensions (if any)
+        const extensions = await prisma.$queryRaw`SELECT extname FROM pg_extension`;
+        if (extensions.length > 0) {
+          console.log(`🔧 Active Extensions: ${extensions.map(e => e.extname).join(', ')}`);
+        }
+      } catch (error) {
+        console.warn("⚠️ Could not fetch PostgreSQL version:", error.message);
+      }
+    }
 
     // Safe database URL logging (mask credentials)
     const maskedUrl =
