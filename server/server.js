@@ -84,6 +84,7 @@ async function startServer() {
       console.log(
         `📊 Detailed Health: http://${HOST}:${PORT}/api/health/detailed`,
       );
+      console.log(`📊 Database Status: ${databaseConnected ? "✅ Connected" : "❌ Not Connected"}`);
       console.log("=".repeat(50));
 
       if (process.env.NODE_ENV === "development") {
