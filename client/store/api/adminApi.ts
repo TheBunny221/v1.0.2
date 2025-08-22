@@ -1,5 +1,50 @@
 import { baseApi, ApiResponse } from "./baseApi";
 
+// Ward and boundary related interfaces
+export interface Ward {
+  id: string;
+  name: string;
+  description?: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+  subZones?: SubZone[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubZone {
+  id: string;
+  name: string;
+  wardId: string;
+  description?: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LocationDetection {
+  exact: {
+    ward: Ward | null;
+    subZone: SubZone | null;
+  };
+  nearest: {
+    ward: Ward | null;
+    subZone: SubZone | null;
+    distance: number;
+  };
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
 // Admin API types
 export interface AdminUser {
   id: string;
@@ -405,6 +450,48 @@ export const adminApi = baseApi.injectEndpoints({
     getSystemHealth: builder.query<ApiResponse<SystemHealthResponse>, void>({
       query: () => "/admin/system-health",
       providesTags: ["Analytics"],
+    }),
+
+    // Ward Boundary Management
+    getWardsWithBoundaries: builder.query<ApiResponse<Ward[]>, void>({
+      query: () => "/wards/boundaries",
+      providesTags: ["Ward"],
+    }),
+
+    updateWardBoundaries: builder.mutation<
+      ApiResponse<Ward>,
+      {
+        wardId: string;
+        boundaries?: string;
+        centerLat?: number;
+        centerLng?: number;
+        boundingBox?: string;
+        subZones?: Array<{
+          id: string;
+          boundaries?: string;
+          centerLat?: number;
+          centerLng?: number;
+          boundingBox?: string;
+        }>;
+      }
+    >({
+      query: ({ wardId, ...body }) => ({
+        url: `/wards/${wardId}/boundaries`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Ward"],
+    }),
+
+    detectLocationArea: builder.mutation<
+      ApiResponse<LocationDetection>,
+      { latitude: number; longitude: number }
+    >({
+      query: (body) => ({
+        url: "/wards/detect-area",
+        method: "POST",
+        body,
+      }),
     }),
   }),
 });
