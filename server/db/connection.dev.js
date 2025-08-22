@@ -1,5 +1,4 @@
-import pkg from "@prisma/client-dev";
-const { PrismaClient } = pkg;
+import { PrismaClient } from "../../../node_modules/.prisma/client-dev/index.js";
 import fs from "fs";
 import path from "path";
 
