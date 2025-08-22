@@ -6,60 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = env("DATABASE_PROVIDER") == "postgresql" ? "postgresql" : "sqlite"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// Conditional enums (only for PostgreSQL)
-// These are commented out for SQLite compatibility
-// Uncomment for PostgreSQL production deployment
-/*
-enum UserRole {
-  CITIZEN
-  WARD_OFFICER
-  MAINTENANCE_TEAM
-  ADMINISTRATOR
-  GUEST
-}
-
-enum ComplaintStatus {
-  REGISTERED
-  ASSIGNED
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-  REOPENED
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum SLAStatus {
-  ON_TIME
-  WARNING
-  OVERDUE
-  COMPLETED
-}
-
-enum ServiceRequestStatus {
-  SUBMITTED
-  VERIFIED
-  PROCESSING
-  APPROVED
-  REJECTED
-  COMPLETED
-}
-
-enum NotificationType {
-  EMAIL
-  SMS
-  IN_APP
-}
-*/
+// For SQLite, we use strings instead of enums
+// Enum values are enforced at the application level
 
 // Models
 model User {
