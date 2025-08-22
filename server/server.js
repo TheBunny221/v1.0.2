@@ -101,7 +101,7 @@ async function startServer() {
         `📊 Detailed Health: http://${HOST}:${PORT}/api/health/detailed`,
       );
       console.log(
-        `📊 Database Status: ${databaseConnected ? "✅ Connected" : "❌ Not Connected"}`,
+        `�� Database Status: ${databaseConnected ? "✅ Connected" : "❌ Not Connected"}`,
       );
       console.log("=".repeat(50));
 
@@ -211,7 +211,7 @@ process.on("warning", (warning) => {
 });
 
 // Memory usage monitoring (development only)
-if (process.env.NODE_ENV === "development") {
+if (env.isDevelopment) {
   setInterval(() => {
     const usage = process.memoryUsage();
     const usedMB = Math.round(usage.heapUsed / 1024 / 1024);
