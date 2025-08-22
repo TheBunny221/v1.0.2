@@ -1,16 +1,7 @@
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg;
 import fs from "fs";
 import path from "path";
-
-// Dynamically import the development Prisma client
-let PrismaClient;
-try {
-  const clientPath = path.resolve(process.cwd(), 'node_modules/.prisma/client-dev');
-  const module = await import(clientPath);
-  PrismaClient = module.PrismaClient;
-} catch (error) {
-  console.error('❌ Development Prisma client not found. Run: npm run db:generate:dev');
-  throw new Error('Development database client not available');
-}
 
 // Initialize Prisma client for development (SQLite)
 const createPrismaClient = () => {
