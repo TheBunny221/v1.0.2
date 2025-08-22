@@ -545,6 +545,7 @@ export const getWards = asyncHandler(async (req, res) => {
               select: {
                 id: true,
                 name: true,
+                wardId: true,
                 description: true,
                 isActive: true,
               },

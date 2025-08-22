@@ -230,7 +230,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-
+     
+      if (isLoading) return; // 👈 
       if (!captcha || !captchaId) {
         dispatch(
           showErrorToast(
@@ -287,7 +288,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
           toast({
             title: "Complaint Submitted Successfully!",
-            description: `Your complaint has been registered with ID: ${result.id}. You can track its progress from your dashboard.`,
+            description: `Your complaint has been registered with ID: ${result.complaintID}. You can track its progress from your dashboard.`,
           });
 
           // Reset form and call success callback
@@ -347,6 +348,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       }
     },
     [
+      isLoading,
       captcha,
       captchaId,
       formData,

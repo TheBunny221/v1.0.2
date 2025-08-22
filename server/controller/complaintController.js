@@ -24,66 +24,261 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
 };
 
 // Helper function to generate complaint ID with configurable prefix and sequential numbering
-const generateComplaintId = async () => {
-  try {
-    // Get complaint ID configuration from system settings
-    const config = await prisma.systemConfig.findMany({
-      where: {
-        key: {
-          in: [
-            "COMPLAINT_ID_PREFIX",
-            "COMPLAINT_ID_START_NUMBER",
-            "COMPLAINT_ID_LENGTH",
-          ],
-        },
-      },
-    });
 
-    const settings = config.reduce((acc, setting) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {});
+// const generateComplaintId = async () => {
+//   try {
+//     // Get complaint ID configuration from system settings
+//     const config = await prisma.systemConfig.findMany({
+//       where: {
+//         key: {
+//           in: [
+//             "COMPLAINT_ID_PREFIX",
+//             "COMPLAINT_ID_START_NUMBER",
+//             "COMPLAINT_ID_LENGTH",
+//           ],
+//         },
+//       },
+//     });
 
-    const prefix = settings.COMPLAINT_ID_PREFIX || "KSC";
-    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
-    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
+//     const settings = config.reduce((acc, setting) => {
+//       acc[setting.key] = setting.value;
+//       return acc;
+//     }, {});
 
-    // Get the last complaint ID to determine next number
-    const lastComplaint = await prisma.complaint.findFirst({
-      where: {
-        complaintId: {
-          startsWith: prefix,
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        complaintId: true,
-      },
-    });
+//     const prefix = settings.COMPLAINT_ID_PREFIX || "KSC";
+//     const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
+//     const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
 
-    let nextNumber = startNumber;
-    if (lastComplaint && lastComplaint.complaintId) {
-      // Extract number from last complaint ID
-      const lastNumber = parseInt(
-        lastComplaint.complaintId.replace(prefix, ""),
-      );
-      if (!isNaN(lastNumber)) {
-        nextNumber = lastNumber + 1;
-      }
-    }
+//     // Get the last complaint ID to determine next number
+//     const lastComplaint = await prisma.complaint.findFirst({
+//       where: {
+//         complaintId: {
+//           startsWith: prefix,
+//         },
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//       select: {
+//         complaintId: true,
+//       },
+//     });
 
-    // Format the number with leading zeros
-    const formattedNumber = nextNumber.toString().padStart(idLength, "0");
-    return `${prefix}${formattedNumber}`;
-  } catch (error) {
-    console.error("Error generating complaint ID:", error);
-    // Fallback to default format
-    const timestamp = Date.now().toString().slice(-6);
-    return `KSC${timestamp}`;
-  }
-};
+//     let nextNumber = startNumber;
+//     if (lastComplaint && lastComplaint.complaintId) {
+//       // Extract number from last complaint ID
+//       const lastNumber = parseInt(
+//         lastComplaint.complaintId.replace(prefix, ""),
+//       );
+//       if (!isNaN(lastNumber)) {
+//         nextNumber = lastNumber + 1;
+//       }
+//     }
+
+//     // Format the number with leading zeros
+//     const formattedNumber = nextNumber.toString().padStart(idLength, "0");
+//     return `${prefix}${formattedNumber}`;
+//   } catch (error) {
+//     console.error("Error generating complaint ID:", error);
+//     // Fallback to default format
+//     const timestamp = Date.now().toString().slice(-6);
+//     return `KSC${timestamp}`;
+//   }
+// };
+
+// @desc    Create a new complaint
+// @route   POST /api/complaints
+// @access  Private (Citizen, Admin)
+// export const createComplaint = asyncHandler(async (req, res) => {
+//   const {
+//     title,
+//     description,
+//     type,
+//     priority,
+//     slaHours,
+//     wardId,
+//     subZoneId,
+//     area,
+//     landmark,
+//     address,
+//     coordinates,
+//     contactName,
+//     contactEmail,
+//     contactPhone,
+//     isAnonymous,
+//     captchaId,
+//     captchaText,
+//   } = req.body;
+
+//   // Verify CAPTCHA for all complaint submissions
+//   try {
+//     await verifyCaptchaForComplaint(captchaId, captchaText);
+//   } catch (error) {
+//     return res.status(400).json({
+//       success: false,
+//       message: error.message || "CAPTCHA verification failed",
+//     });
+//   }
+
+//   // Use provided slaHours or fallback to priority-based hours
+//   let deadlineHours = slaHours;
+//   if (!deadlineHours) {
+//     const priorityHours = {
+//       LOW: 72,
+//       MEDIUM: 48,
+//       HIGH: 24,
+//       CRITICAL: 8,
+//     };
+//     deadlineHours = priorityHours[priority || "MEDIUM"];
+//   }
+
+//   const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
+
+//   // Generate unique complaint ID
+//   const complaintId = await generateComplaintId();
+
+//   // Check auto-assignment setting
+//   const autoAssignSetting = await prisma.systemConfig.findUnique({
+//     where: { key: "AUTO_ASSIGN_COMPLAINTS" },
+//   });
+
+//   const isAutoAssignEnabled = autoAssignSetting?.value === "true";
+//   let assignedToId = null;
+//   let initialStatus = "REGISTERED";
+
+//   // Auto-assign to ward officer if enabled
+//   if (isAutoAssignEnabled && wardId) {
+//     // Find an available ward officer for this ward
+//     const wardOfficer = await prisma.user.findFirst({
+//       where: {
+//         role: "WARD_OFFICER",
+//         wardId: wardId,
+//         isActive: true,
+//       },
+//       orderBy: {
+//         // Optionally order by workload or other criteria
+//         createdAt: "asc", // For now, just assign to the oldest officer
+//       },
+//     });
+
+//     if (wardOfficer) {
+//       assignedToId = wardOfficer.id;
+//       initialStatus = "ASSIGNED";
+//     }
+//   }
+
+//   const complaint = await prisma.complaint.create({
+//     data: {
+//       complaintId,
+//       title: title || `${type} complaint`,
+//       description,
+//       type,
+//       priority: priority || "MEDIUM",
+//       status: initialStatus,
+//       slaStatus: "ON_TIME",
+//       wardId,
+//       subZoneId,
+//       area,
+//       landmark,
+//       address,
+//       coordinates: coordinates ? JSON.stringify(coordinates) : null,
+//       contactName: contactName || req.user.fullName,
+//       contactEmail: contactEmail || req.user.email,
+//       contactPhone: contactPhone || req.user.phoneNumber,
+//       isAnonymous: isAnonymous || false,
+//       submittedById: req.user.id,
+//       assignedToId,
+//       assignedOn: assignedToId ? new Date() : null,
+//       deadline,
+//     },
+//     include: {
+//       ward: true,
+//       subZone: true,
+//       submittedBy: {
+//         select: {
+//           id: true,
+//           fullName: true,
+//           email: true,
+//           phoneNumber: true,
+//         },
+//       },
+//       assignedTo: assignedToId
+//         ? {
+//             select: {
+//               id: true,
+//               fullName: true,
+//               email: true,
+//               role: true,
+//             },
+//           }
+//         : false,
+//     },
+//   });
+
+//   // Create status log for registration
+//   await prisma.statusLog.create({
+//     data: {
+//       complaintId: complaint.id,
+//       userId: req.user.id,
+//       toStatus: "REGISTERED",
+//       comment: "Complaint registered",
+//     },
+//   });
+
+//   // Create additional status log for auto-assignment if applicable
+//   if (assignedToId) {
+//     await prisma.statusLog.create({
+//       data: {
+//         complaintId: complaint.id,
+//         userId: assignedToId, // Use the assigned user as the one making the status change
+//         fromStatus: "REGISTERED",
+//         toStatus: "ASSIGNED",
+//         comment: "Auto-assigned to ward officer",
+//       },
+//     });
+//   }
+
+//   // Send notifications
+//   if (assignedToId) {
+//     // Send notification to the assigned ward officer
+//     await prisma.notification.create({
+//       data: {
+//         userId: assignedToId,
+//         complaintId: complaint.id,
+//         type: "IN_APP",
+//         title: "New Complaint Assigned",
+//         message: `A new ${type} complaint has been auto-assigned to you in ${complaint.ward?.name || "your ward"}.`,
+//       },
+//     });
+//   } else {
+//     // Send notification to all ward officers if not auto-assigned
+//     const wardOfficers = await prisma.user.findMany({
+//       where: {
+//         role: "WARD_OFFICER",
+//         wardId: wardId,
+//         isActive: true,
+//       },
+//     });
+
+//     for (const officer of wardOfficers) {
+//       await prisma.notification.create({
+//         data: {
+//           userId: officer.id,
+//           complaintId: complaint.id,
+//           type: "IN_APP",
+//           title: "New Complaint Registered",
+//           message: `A new ${type} complaint has been registered in your ward.`,
+//         },
+//       });
+//     }
+//   }
+
+//   res.status(201).json({
+//     success: true,
+//     message: "Complaint registered successfully",
+//     data: { complaint },
+//   });
+// });
 
 // @desc    Create a new complaint
 // @route   POST /api/complaints
@@ -133,9 +328,6 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
 
-  // Generate unique complaint ID
-  const complaintId = await generateComplaintId();
-
   // Check auto-assignment setting
   const autoAssignSetting = await prisma.systemConfig.findUnique({
     where: { key: "AUTO_ASSIGN_COMPLAINTS" },
@@ -147,7 +339,6 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // Auto-assign to ward officer if enabled
   if (isAutoAssignEnabled && wardId) {
-    // Find an available ward officer for this ward
     const wardOfficer = await prisma.user.findFirst({
       where: {
         role: "WARD_OFFICER",
@@ -155,8 +346,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
         isActive: true,
       },
       orderBy: {
-        // Optionally order by workload or other criteria
-        createdAt: "asc", // For now, just assign to the oldest officer
+        createdAt: "asc",
       },
     });
 
@@ -166,52 +356,28 @@ export const createComplaint = asyncHandler(async (req, res) => {
     }
   }
 
-  const complaint = await prisma.complaint.create({
-    data: {
-      complaintId,
-      title: title || `${type} complaint`,
-      description,
-      type,
-      priority: priority || "MEDIUM",
-      status: initialStatus,
-      slaStatus: "ON_TIME",
-      wardId,
-      subZoneId,
-      area,
-      landmark,
-      address,
-      coordinates: coordinates ? JSON.stringify(coordinates) : null,
-      contactName: contactName || req.user.fullName,
-      contactEmail: contactEmail || req.user.email,
-      contactPhone: contactPhone || req.user.phoneNumber,
-      isAnonymous: isAnonymous || false,
-      submittedById: req.user.id,
-      assignedToId,
-      assignedOn: assignedToId ? new Date() : null,
-      deadline,
-    },
-    include: {
-      ward: true,
-      subZone: true,
-      submittedBy: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          phoneNumber: true,
-        },
-      },
-      assignedTo: assignedToId
-        ? {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              role: true,
-            },
-          }
-        : false,
-    },
+  // ✅ Create complaint with retry wrapper to avoid duplicate complaintId issue
+  const complaint = await createComplaintWithUniqueId({
+    title: title || `${type} complaint`,
+    description,
+    type,
+    priority: priority || "MEDIUM",
+    status: initialStatus,
+    slaStatus: "ON_TIME",
+    wardId,
+    subZoneId,
+    area,
+    landmark,
+    address,
+    coordinates: coordinates ? JSON.stringify(coordinates) : null,
+    contactName: contactName || req.user.fullName,
+    contactEmail: contactEmail || req.user.email,
+    contactPhone: contactPhone || req.user.phoneNumber,
+    isAnonymous: isAnonymous || false,
+    submittedById: req.user.id,
+    assignedToId,
+    assignedOn: assignedToId ? new Date() : null,
+    deadline,
   });
 
   // Create status log for registration
@@ -224,12 +390,12 @@ export const createComplaint = asyncHandler(async (req, res) => {
     },
   });
 
-  // Create additional status log for auto-assignment if applicable
+  // Additional status log for auto-assignment
   if (assignedToId) {
     await prisma.statusLog.create({
       data: {
         complaintId: complaint.id,
-        userId: assignedToId, // Use the assigned user as the one making the status change
+        userId: assignedToId,
         fromStatus: "REGISTERED",
         toStatus: "ASSIGNED",
         comment: "Auto-assigned to ward officer",
@@ -239,7 +405,6 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // Send notifications
   if (assignedToId) {
-    // Send notification to the assigned ward officer
     await prisma.notification.create({
       data: {
         userId: assignedToId,
@@ -250,7 +415,6 @@ export const createComplaint = asyncHandler(async (req, res) => {
       },
     });
   } else {
-    // Send notification to all ward officers if not auto-assigned
     const wardOfficers = await prisma.user.findMany({
       where: {
         role: "WARD_OFFICER",
@@ -278,6 +442,105 @@ export const createComplaint = asyncHandler(async (req, res) => {
     data: { complaint },
   });
 });
+
+
+// ✅ Transaction-safe complaint ID generator
+const generateComplaintId = async () => {
+  return await prisma.$transaction(async (tx) => {
+    // Get configuration settings
+    const config = await tx.systemConfig.findMany({
+      where: {
+        key: {
+          in: [
+            "COMPLAINT_ID_PREFIX",
+            "COMPLAINT_ID_START_NUMBER",
+            "COMPLAINT_ID_LENGTH",
+          ],
+        },
+      },
+    });
+
+    const settings = config.reduce((acc, setting) => {
+      acc[setting.key] = setting.value;
+      return acc;
+    }, {});
+
+    const prefix = settings.COMPLAINT_ID_PREFIX || "KSC";
+    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
+    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
+
+    // Find the highest existing complaint ID with this prefix
+    const lastComplaint = await tx.complaint.findFirst({
+      where: { complaintId: { startsWith: prefix } },
+      orderBy: { createdAt: "desc" },
+      select: { complaintId: true },
+    });
+
+    // Determine the next number in sequence
+    let nextNumber = startNumber;
+    if (lastComplaint?.complaintId) {
+      const lastNumber = parseInt(lastComplaint.complaintId.replace(prefix, ""));
+      if (!isNaN(lastNumber)) {
+        nextNumber = lastNumber + 1;
+      }
+    }
+
+    const formattedNumber = nextNumber.toString().padStart(idLength, "0");
+    return `${prefix}${formattedNumber}`;
+  });
+};
+
+
+// ✅ Retry wrapper to avoid unique constraint failure
+const createComplaintWithUniqueId = async (data) => {
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      // Generate a new complaintId for each attempt
+      const complaintId = await generateComplaintId();
+      console.log(`Attempting to create complaint with ID: ${complaintId}`);
+      
+      return await prisma.complaint.create({
+        data: { ...data, complaintId },
+        include: {
+          ward: true,
+          subZone: true,
+          submittedBy: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phoneNumber: true,
+            },
+          },
+          assignedTo: data.assignedToId
+            ? {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  role: true,
+                },
+              }
+            : false,
+        },
+      });
+    } catch (err) {
+      if (err.code === "P2002" && err.meta?.target?.includes("complaintId")) {
+        retries--;
+        console.log(`Complaint ID collision detected. Retries left: ${retries}`);
+        // Continue to next iteration which will generate a new ID
+        if (retries === 0) throw err;
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error("Failed to create complaint with unique ID after multiple attempts");
+};
+
+
+
 
 // @desc    Get all complaints with filters
 // @route   GET /api/complaints
