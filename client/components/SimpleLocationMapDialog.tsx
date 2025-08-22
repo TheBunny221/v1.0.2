@@ -10,6 +10,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
+import { useDetectLocationAreaMutation } from "../store/api/adminApi";
+import { detectLocationArea } from "../utils/geoUtils";
 
 interface LocationData {
   latitude: number;
@@ -45,8 +47,14 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapError, setMapError] = useState<string | null>(null);
+  const [detectedWard, setDetectedWard] = useState<string>("");
+  const [detectedSubZone, setDetectedSubZone] = useState<string>("");
+  const [isDetectingArea, setIsDetectingArea] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
+
+  // API hook for area detection
+  const [detectAreaMutation] = useDetectLocationAreaMutation();
 
   // Initialize map when dialog opens
   useEffect(() => {
@@ -95,6 +103,9 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             const { lat, lng } = e.latlng;
             setPosition({ lat, lng });
             marker.setLatLng([lat, lng]);
+
+            // Run both area detection and reverse geocoding
+            detectAdministrativeArea({ lat, lng });
             reverseGeocode({ lat, lng });
           });
         }
@@ -129,6 +140,9 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             lng: pos.coords.longitude,
           };
           setPosition(newPos);
+
+          // Run both area detection and reverse geocoding
+          detectAdministrativeArea(newPos);
           reverseGeocode(newPos);
 
           // Update map view
@@ -160,6 +174,47 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     }
   }, []);
 
+  // Detect administrative area based on coordinates
+  const detectAdministrativeArea = async (coords: { lat: number; lng: number }) => {
+    try {
+      setIsDetectingArea(true);
+
+      // Try API-based detection first
+      try {
+        const result = await detectAreaMutation({
+          latitude: coords.lat,
+          longitude: coords.lng,
+        }).unwrap();
+
+        if (result.success && result.data) {
+          const { exact, nearest } = result.data;
+
+          // Use exact match if available, otherwise use nearest
+          const ward = exact.ward || nearest.ward;
+          const subZone = exact.subZone || nearest.subZone;
+
+          if (ward) {
+            setDetectedWard(ward.name);
+            setArea(ward.name);
+          }
+
+          if (subZone) {
+            setDetectedSubZone(subZone.name);
+            // Prefer sub-zone as area if available
+            setArea(subZone.name);
+          }
+        }
+      } catch (apiError) {
+        console.log("API area detection failed, falling back to geocoding");
+      }
+
+    } catch (error) {
+      console.error("Error in area detection:", error);
+    } finally {
+      setIsDetectingArea(false);
+    }
+  };
+
   // Reverse geocoding to get address from coordinates
   const reverseGeocode = async (coords: { lat: number; lng: number }) => {
     try {
@@ -171,17 +226,19 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       if (data && data.display_name) {
         setAddress(data.display_name);
 
-        // Extract area information
-        const addressComponents = data.address;
-        if (addressComponents) {
-          const detectedArea =
-            addressComponents.neighbourhood ||
-            addressComponents.suburb ||
-            addressComponents.city_district ||
-            addressComponents.state_district ||
-            addressComponents.city ||
-            "";
-          setArea(detectedArea);
+        // Only use geocoding area if we don't have detected area
+        if (!detectedWard && !detectedSubZone) {
+          const addressComponents = data.address;
+          if (addressComponents) {
+            const detectedArea =
+              addressComponents.neighbourhood ||
+              addressComponents.suburb ||
+              addressComponents.city_district ||
+              addressComponents.state_district ||
+              addressComponents.city ||
+              "";
+            setArea(detectedArea);
+          }
         }
       }
     } catch (error) {
@@ -208,9 +265,12 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         setPosition(newPos);
         setAddress(result.display_name);
 
-        // Extract area information
+        // Run area detection first
+        detectAdministrativeArea(newPos);
+
+        // Extract area information as fallback
         const addressComponents = result.address;
-        if (addressComponents) {
+        if (addressComponents && !detectedWard && !detectedSubZone) {
           const detectedArea =
             addressComponents.neighbourhood ||
             addressComponents.suburb ||
@@ -352,6 +412,28 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                 />
               </div>
             </div>
+
+            {/* Area Detection Display */}
+            {(detectedWard || detectedSubZone || isDetectingArea) && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    {isDetectingArea ? "Detecting Area..." : "Detected Administrative Area"}
+                  </span>
+                </div>
+                {detectedWard && (
+                  <div className="text-sm text-blue-700">
+                    <strong>Ward:</strong> {detectedWard}
+                  </div>
+                )}
+                {detectedSubZone && (
+                  <div className="text-sm text-blue-700">
+                    <strong>Sub-Zone:</strong> {detectedSubZone}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Coordinates Display */}
             <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
