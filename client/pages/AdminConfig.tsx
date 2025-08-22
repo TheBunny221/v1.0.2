@@ -925,6 +925,14 @@ const AdminConfig: React.FC = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleOpenBoundaryManager(ward)}
+                            title="Set Geographic Boundaries"
+                          >
+                            <Map className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => {
                               setEditingWard(ward);
                               setIsWardDialogOpen(true);
@@ -1831,6 +1839,20 @@ const AdminConfig: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Ward Boundary Manager */}
+      {selectedWardForBoundary && (
+        <WardBoundaryManager
+          isOpen={isBoundaryManagerOpen}
+          onClose={() => {
+            setIsBoundaryManagerOpen(false);
+            setSelectedWardForBoundary(null);
+          }}
+          ward={selectedWardForBoundary}
+          subZones={selectedWardForBoundary.subZones || []}
+          onSave={handleSaveBoundaries}
+        />
+      )}
 
       {/* Sub-Zone Dialog */}
       <Dialog open={isSubZoneDialogOpen} onOpenChange={setIsSubZoneDialogOpen}>
