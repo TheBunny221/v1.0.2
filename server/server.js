@@ -1,18 +1,18 @@
-import dotenv from "dotenv";
+import { loadEnvironmentConfig, getDatabaseConnection, env } from "./config/environment.js";
 import createApp from "./app.js";
-import connectDB from "./db/connection.js";
 import { initializeDatabase } from "./scripts/initDatabase.js";
 
-// Load environment variables
-dotenv.config();
+// Load environment-specific configuration
+loadEnvironmentConfig();
 
 const PORT = process.env.PORT || 4005;
 const HOST = process.env.HOST || "0.0.0.0";
 
 async function startServer() {
   console.log("🚀 Starting Cochin Smart City API Server...");
-  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`📝 Environment: ${env.NODE_ENV}`);
   console.log(`🔧 Node.js version: ${process.version}`);
+  console.log(`💾 Database: ${env.isDevelopment ? 'SQLite (Development)' : 'PostgreSQL (Production)'}`);
 
   let databaseConnected = false;
   let app;
@@ -22,21 +22,28 @@ async function startServer() {
     console.log("\n🔧 Step 1: Database Initialization");
 
     try {
+      const connectDB = await getDatabaseConnection();
       await connectDB();
-      const dbInitSuccess = await initializeDatabase();
-      if (!dbInitSuccess && process.env.NODE_ENV === "production") {
-        throw new Error("Database initialization failed in production");
+
+      // Initialize database (only for production or when needed)
+      if (env.isProduction || process.env.INIT_DB === 'true') {
+        const dbInitSuccess = await initializeDatabase();
+        if (!dbInitSuccess && env.isProduction) {
+          throw new Error("Database initialization failed in production");
+        }
       }
+
       databaseConnected = true;
-      console.log("✅ Database connected successfully");
+      console.log(`✅ Database connected successfully (${env.isDevelopment ? 'SQLite' : 'PostgreSQL'})`);
     } catch (dbError) {
       console.error("❌ Database connection failed:", dbError.message);
 
-      if (process.env.NODE_ENV === "production") {
+      if (env.isProduction) {
         throw dbError; // Fail in production
       } else {
         console.warn("⚠️ Starting server in development mode without database");
         console.warn("   API endpoints requiring database will return errors");
+        console.warn("   Run 'npm run dev:setup' to set up the development database");
         databaseConnected = false;
       }
     }
@@ -77,7 +84,7 @@ async function startServer() {
         data: {
           database: dbStatus,
           server: { healthy: true, message: "Server is running" },
-          environment: process.env.NODE_ENV || "development",
+          environment: env.NODE_ENV,
         },
       });
     });
@@ -98,15 +105,16 @@ async function startServer() {
       );
       console.log("=".repeat(50));
 
-      if (process.env.NODE_ENV === "development") {
+      if (env.isDevelopment) {
         console.log("\n🔧 Development Mode Features:");
         console.log(`📋 Test Routes: http://${HOST}:${PORT}/api/test`);
+        console.log(`🎯 Database Browser: npm run db:studio:dev`);
 
         if (!databaseConnected) {
           console.log("\n⚠️ Database Connection Issues:");
           console.log("   • Some API endpoints will return errors");
-          console.log("   • Connect to a database for full functionality");
-          console.log("   • Consider using Neon for easy PostgreSQL setup");
+          console.log("   • Run 'npm run dev:setup' to set up SQLite database");
+          console.log("   • Or run 'npm run db:setup:dev' to reset the database");
         }
       }
 
