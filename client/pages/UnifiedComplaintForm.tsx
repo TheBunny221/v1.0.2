@@ -468,7 +468,7 @@ const UnifiedComplaintForm: React.FC = () => {
 
         toast({
           title: "Complaint Submitted Successfully!",
-          description: `Your complaint has been registered with ID: ${result.id}. You can track its progress from your dashboard.`,
+          description: `Your complaint has been registered with ID: ${result.complaintId}. You can track its progress from your dashboard.`,
         });
 
         // Clear form and navigate to dashboard

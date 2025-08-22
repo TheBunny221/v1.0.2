@@ -260,15 +260,15 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="sm:max-w-[90vw] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] p-0 flex flex-col h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="inline-flex items-center gap-2 text-lg font-medium px-4 pt-4">
             <MapPin className="h-5 w-5" />
             Select Location on Map
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="p-4 space-y-4 flex-grow overflow-y-auto">
           {/* Search and Current Location */}
           <div className="flex gap-2">
             <div className="flex-1 flex gap-2">
@@ -311,11 +311,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                 </div>
               </div>
             ) : (
-              <div
-                ref={mapRef}
-                className="h-full w-full"
-                style={{ minHeight: "384px" }}
-              />
+              <div ref={mapRef} className="w-full h-[300px] md:h-[400px] lg:h-[500px] rounded-md border"></div>
             )}
           </div>
 
@@ -358,7 +354,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="p-4 bg-gray-50 border-t flex flex-col sm:flex-row sm:justify-end gap-2 flex-shrink-0">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
