@@ -10,11 +10,13 @@ This project now supports both SQLite (development) and PostgreSQL (production) 
 ## Environment Configuration
 
 ### Development (SQLite)
+
 ```bash
 DATABASE_URL="file:./dev.db"
 ```
 
 ### Production (PostgreSQL)
+
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 ```
@@ -22,6 +24,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 ## Available Commands
 
 ### Development Environment (SQLite)
+
 ```bash
 # Generate Prisma client
 npm run db:generate:dev
@@ -48,6 +51,7 @@ npm run db:studio:dev
 ```
 
 ### Production Environment (PostgreSQL)
+
 ```bash
 # Generate Prisma client
 npm run db:generate:prod
@@ -71,6 +75,7 @@ npm run db:studio:prod
 ```
 
 ### Utility Commands
+
 ```bash
 # Validate schema files
 npm run db:validate:dev
@@ -93,12 +98,14 @@ npm run db:migrate:status:prod
 ## Key Differences
 
 ### SQLite (Development)
+
 - Uses string fields instead of enums for better compatibility
 - No indexes on foreign keys (handled by Prisma)
 - Simpler setup for local development
 - Contains sample data for testing
 
 ### PostgreSQL (Production)
+
 - Uses proper enums for better type safety
 - Includes database indexes for performance
 - Production-ready constraints and relationships
@@ -107,11 +114,13 @@ npm run db:migrate:status:prod
 ## Migration Workflow
 
 ### Development
+
 1. Make schema changes in `schema.dev.prisma`
 2. Run `npm run db:migrate` to create and apply migration
 3. Test changes locally
 
 ### Production
+
 1. Update `schema.prod.prisma` with the same changes
 2. Test migration in staging environment
 3. Deploy to production using `npm run prod:db`
@@ -140,15 +149,18 @@ DATABASE_URL="file:./dev.db"
 ## Troubleshooting
 
 ### SQLite Issues
+
 - Delete `dev.db` file to start fresh
 - Run `npm run db:setup:fresh:dev`
 
 ### PostgreSQL Issues
+
 - Check connection string format
 - Ensure database exists before running migrations
 - Verify user permissions
 
 ### Schema Sync Issues
+
 - Use `npm run db:validate:dev` and `npm run db:validate:prod`
 - Compare schema files manually
 - Run `npm run db:format:dev` and `npm run db:format:prod`
