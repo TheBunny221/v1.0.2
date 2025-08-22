@@ -269,7 +269,7 @@ async function main() {
 
     // 4. Create Sub-zones for major wards
     console.log("📍 Creating sub-zones for major wards...");
-    const majorWardSubZones = {
+    const majorWardSubZones: Record<string, string[]> = {
       "Ward 1 - Fort Kochi": [
         "Princess Street",
         "Parade Ground",

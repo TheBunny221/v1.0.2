@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting database seeding...");
+  console.log("🌱 Starting DEVELOPMENT database seeding...");
 
   try {
     // Clear ALL existing data regardless of environment
@@ -31,7 +31,7 @@ async function main() {
     const configs = [
       {
         key: "APP_NAME",
-        value: "Kochi Smart City",
+        value: "Kochi Smart City [DEV]",
         description: "Application name displayed across the system",
       },
       {
@@ -89,8 +89,8 @@ async function main() {
           where: { key: config.key },
           update: { value: config.value },
           create: config,
-        })
-      )
+        }),
+      ),
     );
 
     // 2. Create Departments
@@ -173,7 +173,7 @@ async function main() {
 
     // 4. Create Sub-zones for each ward
     console.log("📍 Creating sub-zones...");
-    const subZoneData = {
+    const subZoneData: Record<string, string[]> = {
       "Ward 1 - Fort Kochi": [
         "Princess Street Area",
         "Fort Kochi Beach",
@@ -230,7 +230,7 @@ async function main() {
     console.log("👥 Creating users...");
 
     // Hash password function
-    const hashPassword = async (password) => {
+    const hashPassword = async (password: string) => {
       const salt = await bcrypt.genSalt(10);
       return await bcrypt.hash(password, salt);
     };
@@ -238,8 +238,8 @@ async function main() {
     // Admin user
     const adminUser = await prisma.user.create({
       data: {
-        email: "admin@cochinsmartcity.gov.in",
-        fullName: "System Administrator",
+        email: "admin@cochinsmartcity.dev",
+        fullName: "Development Administrator",
         phoneNumber: "+91-9876543210",
         password: await hashPassword("admin123"),
         role: "ADMINISTRATOR",
@@ -266,7 +266,7 @@ async function main() {
       const ward = createdWards[i];
       const officer = await prisma.user.create({
         data: {
-          email: `officer${i + 1}@cochinsmartcity.gov.in`,
+          email: `officer${i + 1}@cochinsmartcity.dev`,
           fullName: officerNames[i] || `Ward Officer ${i + 1}`,
           phoneNumber: `+91-98765432${10 + i}`,
           password: await hashPassword("officer123"),
@@ -286,22 +286,22 @@ async function main() {
       {
         name: "Suresh Kumar",
         dept: "Public Works",
-        email: "suresh.kumar@cochinsmartcity.gov.in",
+        email: "suresh.kumar@cochinsmartcity.dev",
       },
       {
         name: "Leela Devi",
         dept: "Water Supply",
-        email: "leela.devi@cochinsmartcity.gov.in",
+        email: "leela.devi@cochinsmartcity.dev",
       },
       {
         name: "Vinod Electrician",
         dept: "Electricity",
-        email: "vinod.electric@cochinsmartcity.gov.in",
+        email: "vinod.electric@cochinsmartcity.dev",
       },
       {
         name: "Ramesh Cleaner",
         dept: "Waste Management",
-        email: "ramesh.waste@cochinsmartcity.gov.in",
+        email: "ramesh.waste@cochinsmartcity.dev",
       },
     ];
 
@@ -328,42 +328,42 @@ async function main() {
     const citizenData = [
       {
         name: "Arjun Menon",
-        email: "arjun.menon@email.com",
+        email: "arjun.menon@email.dev",
         phone: "+91-9876540001",
       },
       {
         name: "Kavya Nair",
-        email: "kavya.nair@email.com",
+        email: "kavya.nair@email.dev",
         phone: "+91-9876540002",
       },
       {
         name: "Joseph Cherian",
-        email: "joseph.cherian@email.com",
+        email: "joseph.cherian@email.dev",
         phone: "+91-9876540003",
       },
       {
         name: "Lakshmi Pillai",
-        email: "lakshmi.pillai@email.com",
+        email: "lakshmi.pillai@email.dev",
         phone: "+91-9876540004",
       },
       {
         name: "Anand Kumar",
-        email: "anand.kumar@email.com",
+        email: "anand.kumar@email.dev",
         phone: "+91-9876540005",
       },
       {
         name: "Maya George",
-        email: "maya.george@email.com",
+        email: "maya.george@email.dev",
         phone: "+91-9876540006",
       },
       {
         name: "Vishnu Warrier",
-        email: "vishnu.warrier@email.com",
+        email: "vishnu.warrier@email.dev",
         phone: "+91-9876540007",
       },
       {
         name: "Nisha Kumari",
-        email: "nisha.kumari@email.com",
+        email: "nisha.kumari@email.dev",
         phone: "+91-9876540008",
       },
     ];
@@ -459,7 +459,7 @@ async function main() {
       });
     }
 
-    // 7. Create Sample Complaints (Match current dashboard data: 94 total)
+    // 7. Create Sample Complaints
     console.log("📝 Creating sample complaints...");
     const complaintTypes = [
       "WATER_SUPPLY",
@@ -472,92 +472,9 @@ async function main() {
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"];
-    const statusWeights = [0.15, 0.25, 0.35, 0.25]; // 15% registered, 25% assigned, 35% in_progress, 25% resolved
 
-    // Generate complaints data to match dashboard (94 total, 68 active, 26 resolved)
-    const complaintDates = [];
-    const now = new Date();
-
-    // Generate dates for last 6 months matching the dashboard data
-    const monthlyComplaintCounts = [
-      { month: 2, count: 14 }, // March 2025: 14 complaints, 5 resolved
-      { month: 1, count: 13 }, // April 2025: 13 complaints, 3 resolved
-      { month: 0, count: 12 }, // May 2025: 12 complaints, 3 resolved
-      { month: -1, count: 9 }, // June 2025: 9 complaints, 3 resolved
-      { month: -2, count: 14 }, // July 2025: 14 complaints, 5 resolved
-      { month: -3, count: 20 }, // August 2025: 20 complaints, 3 resolved
-      { month: -4, count: 12 }, // September - older data
-    ];
-
-    let totalComplaints = 0;
-    let resolvedCount = 0;
-    const targetResolved = 26; // Based on dashboard showing ~26 resolved
-
-    for (const monthData of monthlyComplaintCounts) {
-      const monthDate = new Date(
-        now.getFullYear(),
-        now.getMonth() - monthData.month,
-        1,
-      );
-      const daysInMonth = new Date(
-        monthDate.getFullYear(),
-        monthDate.getMonth() + 1,
-        0,
-      ).getDate();
-
-      for (let i = 0; i < monthData.count; i++) {
-        const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
-        const randomHour = Math.floor(Math.random() * 24);
-        const randomMinute = Math.floor(Math.random() * 60);
-
-        const complaintDate = new Date(
-          monthDate.getFullYear(),
-          monthDate.getMonth(),
-          randomDay,
-          randomHour,
-          randomMinute,
-        );
-
-        // Determine status - more recent complaints less likely to be resolved
-        let status;
-        const monthsFromNow = Math.abs(monthData.month);
-        if (
-          monthsFromNow > 2 &&
-          resolvedCount < targetResolved &&
-          Math.random() < 0.4
-        ) {
-          status = "RESOLVED";
-          resolvedCount++;
-        } else if (Math.random() < 0.3) {
-          status = "IN_PROGRESS";
-        } else if (Math.random() < 0.5) {
-          status = "ASSIGNED";
-        } else {
-          status = "REGISTERED";
-        }
-
-        complaintDates.push({ date: complaintDate, status });
-        totalComplaints++;
-      }
-    }
-
-    // Ensure we hit close to 94 total complaints
-    while (totalComplaints < 94) {
-      const recentDate = new Date(
-        now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000,
-      );
-      complaintDates.push({
-        date: recentDate,
-        status: Math.random() < 0.7 ? "REGISTERED" : "ASSIGNED",
-      });
-      totalComplaints++;
-    }
-
-    // Create complaints
-    let overdueCount = 0;
-    const targetOverdue = 54; // Based on dashboard
-
-    for (let i = 0; i < complaintDates.length; i++) {
+    // Generate 20 sample complaints for development
+    for (let i = 0; i < 20; i++) {
       const randomWard =
         createdWards[Math.floor(Math.random() * createdWards.length)];
       const randomCitizen =
@@ -569,46 +486,40 @@ async function main() {
         complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
       const priority =
         priorities[Math.floor(Math.random() * priorities.length)];
-      const { date: complaintDate, status } = complaintDates[i];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
 
       // Generate complaint ID
       const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
 
-      // Set deadline and determine if overdue
+      // Generate random date within last 30 days
+      const complaintDate = new Date(
+        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+      );
       const deadline = new Date(
         complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
-      const isOverdue =
-        status !== "RESOLVED" && deadline < now && overdueCount < targetOverdue;
-      if (isOverdue) overdueCount++;
 
-      const resolvedDate =
-        status === "RESOLVED"
-          ? new Date(
-              complaintDate.getTime() +
-                Math.random() * 10 * 24 * 60 * 60 * 1000,
-            )
-          : null;
-
-      const complaint = await prisma.complaint.upsert({
-        where: { complaintId: complaintId },
-        update: {},
-        create: {
+      const complaint = await prisma.complaint.create({
+        data: {
           complaintId: complaintId,
-          title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
-          description: `Complaint regarding ${complaintType.toLowerCase().replace("_", " ")} issue that requires attention. Submitted by ${randomCitizen.fullName}.`,
+          title: `${complaintType.replace("_", " ")} Issue in ${
+            randomWard.name
+          }`,
+          description: `Development complaint regarding ${complaintType
+            .toLowerCase()
+            .replace("_", " ")} issue that requires attention. Submitted by ${
+            randomCitizen.fullName
+          }.`,
           type: complaintType,
           status: status,
           priority: priority,
-          slaStatus: isOverdue
-            ? "OVERDUE"
-            : status === "RESOLVED"
-              ? "COMPLETED"
-              : "ON_TIME",
+          slaStatus: status === "RESOLVED" ? "COMPLETED" : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
-          landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
+          landmark: `Near ${
+            randomWard.name.split(" - ")[1] || "main"
+          } junction`,
           address: `Sample address in ${randomWard.name}`,
           contactName: randomCitizen.fullName,
           contactEmail: randomCitizen.email,
@@ -621,7 +532,10 @@ async function main() {
             status !== "REGISTERED"
               ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000)
               : null,
-          resolvedOn: resolvedDate,
+          resolvedOn:
+            status === "RESOLVED"
+              ? new Date(complaintDate.getTime() + 5 * 24 * 60 * 60 * 1000)
+              : null,
           deadline: deadline,
           rating:
             status === "RESOLVED" && Math.random() > 0.4
@@ -630,7 +544,7 @@ async function main() {
         },
       });
 
-      // Create status logs
+      // Create status log
       await prisma.statusLog.create({
         data: {
           complaintId: complaint.id,
@@ -667,7 +581,7 @@ async function main() {
       "ELECTRICITY_CONNECTION",
     ];
 
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 10; i++) {
       const randomWard =
         createdWards[Math.floor(Math.random() * createdWards.length)];
       const randomCitizen =
@@ -687,7 +601,9 @@ async function main() {
         data: {
           title: `${serviceType.replace("_", " ")} Application`,
           serviceType: serviceType,
-          description: `Application for ${serviceType.toLowerCase().replace("_", " ")}`,
+          description: `Development application for ${serviceType
+            .toLowerCase()
+            .replace("_", " ")}`,
           status: status,
           priority: "NORMAL",
           wardId: randomWard.id,
@@ -707,20 +623,20 @@ async function main() {
 
     // 9. Create Sample Notifications
     console.log("🔔 Creating sample notifications...");
-    for (const citizen of citizens.slice(0, 5)) {
+    for (const citizen of citizens.slice(0, 3)) {
       await prisma.notification.create({
         data: {
           userId: citizen.id,
           type: "IN_APP",
-          title: "Welcome to Kochi Smart City",
+          title: "Welcome to Kochi Smart City [DEV]",
           message:
-            "Thank you for registering with our digital platform. You can now submit complaints and track their progress.",
+            "Thank you for registering with our development platform. You can now submit complaints and track their progress.",
           sentAt: new Date(),
         },
       });
     }
 
-    console.log("✅ Database seeding completed successfully!");
+    console.log("✅ Development database seeding completed successfully!");
     console.log("\n📊 Seeded Data Summary:");
     console.log(`• ${createdWards.length} Wards`);
     console.log(`• ${createdWards.length * 3} Sub-zones`);
@@ -728,27 +644,25 @@ async function main() {
     console.log(`• ${wardOfficers.length} Ward Officers`);
     console.log(`• ${maintenanceTeam.length} Maintenance Team Members`);
     console.log(`• ${citizens.length} Citizens`);
-    console.log(`• ${totalComplaints} Total Complaints`);
-    console.log(`• ${resolvedCount} Resolved Complaints`);
-    console.log(`• ${overdueCount} Overdue Complaints`);
-    console.log(`• 15 Sample Service Requests`);
+    console.log(`• 20 Sample Complaints`);
+    console.log(`• 10 Sample Service Requests`);
 
-    console.log("\n🔑 Default Login Credentials:");
-    console.log("Administrator: admin@cochinsmartcity.gov.in / admin123");
-    console.log("Ward Officer: officer1@cochinsmartcity.gov.in / officer123");
+    console.log("\n🔑 Development Login Credentials:");
+    console.log("Administrator: admin@cochinsmartcity.dev / admin123");
+    console.log("Ward Officer: officer1@cochinsmartcity.dev / officer123");
     console.log(
-      "Maintenance: suresh.kumar@cochinsmartcity.gov.in / maintenance123",
+      "Maintenance: suresh.kumar@cochinsmartcity.dev / maintenance123",
     );
-    console.log("Citizen: arjun.menon@email.com / citizen123");
+    console.log("Citizen: arjun.menon@email.dev / citizen123");
   } catch (error) {
-    console.error("❌ Error during seeding:", error);
+    console.error("❌ Error during development seeding:", error);
     throw error;
   }
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seeding failed:", e);
+    console.error("❌ Development seeding failed:", e);
     process.exit(1);
   })
   .finally(async () => {

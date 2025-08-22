@@ -1,342 +1,166 @@
-# Kochi Smart City - Database Management
+# Prisma Dual Database Setup
 
-This directory contains all database-related files for the Kochi Smart City Complaint Management System.
+This project now supports both SQLite (development) and PostgreSQL (production) databases with dedicated schema files and seeding scripts.
 
-## Files Overview
+## Schema Files
 
-### Core Files
+- **`schema.dev.prisma`**: SQLite configuration for development environment
+- **`schema.prod.prisma`**: PostgreSQL configuration for production environment
 
-- **`schema.prisma`** - Database schema definition with PostgreSQL configuration
-- **`seed.js`** - Development seed file with sample data (94 complaints, 8 wards, demo users)
-- **`seed-production.js`** - Production seed file with minimal essential data
-- **`migration-utils.js`** - Database utilities for backup, restore, and maintenance
+## Environment Configuration
 
-### Migration Files
-
-- **`migrations/`** - Contains database migration history
-- **`migrations/20241218000001_initial_migration/`** - Initial PostgreSQL schema migration
-
-## Quick Start
-
-### 1. Development Setup
+### Development (SQLite)
 
 ```bash
-# Install dependencies
-npm install
+DATABASE_URL="file:./dev.db"
+```
 
-# Set up development environment
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials
+### Production (PostgreSQL)
 
+```bash
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+```
+
+## Available Commands
+
+### Development Environment (SQLite)
+
+```bash
 # Generate Prisma client
-npm run db:generate
+npm run db:generate:dev
 
-# Apply migrations
-npm run db:migrate:deploy
+# Run migrations
+npm run dev:db
+# or
+npm run db:migrate
 
-# Seed with development data
+# Reset and migrate database
+npm run db:migrate:reset:dev
+
+# Seed database
 npm run seed:dev
 
-# Verify setup
-npm run db:setup:validate
+# Complete setup (generate + migrate + seed)
+npm run db:setup:dev
+
+# Fresh setup (reset + migrate + seed)
+npm run db:setup:fresh:dev
+
+# Open Prisma Studio
+npm run db:studio:dev
 ```
 
-### 2. Production Setup
+### Production Environment (PostgreSQL)
 
 ```bash
 # Generate Prisma client
-npm run db:generate
+npm run db:generate:prod
 
-# Apply migrations
-npm run db:migrate:deploy
+# Deploy migrations
+npm run prod:db
+# or
+npm run db:migrate:deploy:prod
 
-# Seed with production data
-npm run seed:prod
+# Seed database
+npm run seed:production
 
-# Validate deployment
-npm run db:setup:validate
+# Complete setup (generate + deploy + seed)
+npm run db:setup:prod
+
+# Migrate and seed in one command
+npm run migrate-and-seed
+
+# Open Prisma Studio
+npm run db:studio:prod
 ```
 
-## Available Scripts
-
-### Basic Operations
+### Utility Commands
 
 ```bash
-npm run db:generate        # Generate Prisma client
-npm run db:migrate:deploy   # Apply migrations to database
-npm run db:push            # Push schema changes (development)
-npm run db:studio          # Open Prisma Studio
-npm run db:validate        # Validate schema
+# Validate schema files
+npm run db:validate:dev
+npm run db:validate:prod
+
+# Format schema files
+npm run db:format:dev
+npm run db:format:prod
+
+# Check migration status
+npm run db:migrate:status:dev
+npm run db:migrate:status:prod
 ```
 
-### Data Management
+## Seed Files
 
-```bash
-npm run seed:dev           # Seed development data
-npm run seed:prod          # Seed production data
-npm run db:setup           # Full setup (generate + migrate + seed)
-npm run db:setup:prod      # Production setup
-npm run db:reset           # Reset database (WARNING: Destructive)
-```
+- **`seed.dev.ts`**: Development seeding with sample data and `.dev` email domains
+- **`seed.prod.ts`**: Production seeding with minimal essential data and safety checks
 
-### Maintenance
+## Key Differences
 
-```bash
-npm run db:backup          # Create database backup
-npm run db:restore         # Restore from backup
-npm run db:stats           # Show database statistics
-npm run db:cleanup         # Clean old data
-npm run db:check           # Check database connection
-```
+### SQLite (Development)
 
-### Validation
+- Uses string fields instead of enums for better compatibility
+- No indexes on foreign keys (handled by Prisma)
+- Simpler setup for local development
+- Contains sample data for testing
 
-```bash
-npm run db:setup:validate  # Comprehensive validation
-node scripts/setup-database.js check  # Detailed validation report
-```
+### PostgreSQL (Production)
 
-## Database Schema
+- Uses proper enums for better type safety
+- Includes database indexes for performance
+- Production-ready constraints and relationships
+- Minimal seeding with safety checks
 
-### Core Tables
-
-- **`users`** - User accounts (citizens, officers, admins)
-- **`wards`** - Administrative wards of Kochi
-- **`sub_zones`** - Sub-divisions within wards
-- **`complaints`** - Citizen complaints and their status
-- **`service_requests`** - Service requests (certificates, permits)
-- **`status_logs`** - Audit trail for complaint status changes
-- **`notifications`** - User notifications
-- **`system_config`** - Application configuration
-
-### Enums (PostgreSQL)
-
-- **`UserRole`** - CITIZEN, WARD_OFFICER, MAINTENANCE_TEAM, ADMINISTRATOR, GUEST
-- **`ComplaintStatus`** - REGISTERED, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED, REOPENED
-- **`Priority`** - LOW, MEDIUM, HIGH, CRITICAL
-- **`SLAStatus`** - ON_TIME, WARNING, OVERDUE, COMPLETED
-
-## Data Seeding
-
-### Development Data (`seed.js`)
-
-- 8 Kochi wards with realistic names
-- 24 sub-zones across wards
-- 1 administrator
-- 8 ward officers (one per ward)
-- 4 maintenance team members
-- 8 citizens
-- 94 complaints (matching dashboard data)
-- 15 service requests
-- System configuration
-
-### Production Data (`seed-production.js`)
-
-- 20 major Kochi wards
-- Essential departments
-- 1 system administrator
-- Minimal complaint types
-- Production system configuration
-- No sample complaints or citizens
-
-## Database URL Configuration
+## Migration Workflow
 
 ### Development
 
-```bash
-DATABASE_URL="postgresql://username:password@localhost:5432/kochi_smart_city_dev"
-```
+1. Make schema changes in `schema.dev.prisma`
+2. Run `npm run db:migrate` to create and apply migration
+3. Test changes locally
 
 ### Production
 
-```bash
-# Local PostgreSQL
-DATABASE_URL="postgresql://username:password@localhost:5432/kochi_smart_city_prod"
-
-# Cloud PostgreSQL (with SSL)
-DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=require"
-
-# With connection pooling
-DATABASE_URL="postgresql://username:password@host:5432/database?connection_limit=10&pool_timeout=20"
-```
-
-## Migration Management
-
-### Creating Migrations
-
-```bash
-# Create new migration
-npm run db:migrate:create
-
-# Apply migration in development
-npm run db:migrate
-
-# Check migration status
-npm run db:migrate:status
-```
-
-### Production Migrations
-
-```bash
-# Deploy migrations to production
-npm run db:migrate:deploy
-
-# NEVER use db:migrate in production
-# ALWAYS use db:migrate:deploy
-```
-
-## Backup and Restore
-
-### Creating Backups
-
-```bash
-# Automatic backup with timestamp
-npm run db:backup
-
-# Backup to specific directory
-npm run db:backup /path/to/backup/dir
-
-# Manual PostgreSQL backup
-pg_dump -U username database_name > backup.sql
-```
-
-### Restoring Backups
-
-```bash
-# Restore from utility backup
-npm run db:restore /path/to/backup/dir
-
-# Manual PostgreSQL restore
-psql -U username database_name < backup.sql
-```
-
-## Monitoring and Maintenance
-
-### Health Checks
-
-```bash
-# Quick connection check
-npm run db:check
-
-# Detailed statistics
-npm run db:stats
-
-# Full validation
-npm run db:setup:validate
-```
-
-### Performance Monitoring
-
-Monitor these metrics:
-
-- Connection count
-- Query performance
-- Database size
-- Index usage
-- Lock contention
-
-### Cleanup Tasks
-
-```bash
-# Clean old data (default: 365 days)
-npm run db:cleanup
-
-# Clean specific timeframe
-node prisma/migration-utils.js cleanup 90
-```
-
-## Security Best Practices
-
-### Database Security
-
-- Use strong passwords (minimum 12 characters)
-- Enable SSL for all connections
-- Restrict database access by IP
-- Regular security updates
-- Monitor access logs
-
-### Application Security
-
-- Never log database credentials
-- Use environment variables for secrets
-- Implement connection pooling
-- Regular backup verification
-
-## Troubleshooting
-
-### Common Issues
-
-#### Connection Refused
-
-```bash
-Error: connect ECONNREFUSED 127.0.0.1:5432
-```
-
-**Solution:** Ensure PostgreSQL is running and accepting connections.
-
-#### Authentication Failed
-
-```bash
-Error: password authentication failed
-```
-
-**Solution:** Check username/password in DATABASE_URL.
-
-#### Database Does Not Exist
-
-```bash
-Error: database does not exist
-```
-
-**Solution:** Create database using `createdb` or SQL.
-
-#### Migration Issues
-
-```bash
-Error: Migration failed
-```
-
-**Solution:** Check migration logs and resolve conflicts.
-
-### Getting Help
-
-1. Check application logs
-2. Review PostgreSQL logs
-3. Run database validation: `npm run db:setup:validate`
-4. Consult `DB_SETUP.md` for detailed instructions
-5. Contact development team
+1. Update `schema.prod.prisma` with the same changes
+2. Test migration in staging environment
+3. Deploy to production using `npm run prod:db`
 
 ## Environment Variables
 
-Required variables:
+Create a `.env` file based on `.env.example`:
 
 ```bash
-DATABASE_URL=postgresql://...
-JWT_SECRET=your-secure-secret
-NODE_ENV=production|development
+# Development
+DATABASE_URL="file:./dev.db"
+
+# Production
+# DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+# ADMIN_PASSWORD="YourSecureAdminPassword"
 ```
 
-Optional variables:
+## Best Practices
 
-```bash
-ADMIN_PASSWORD=secure-admin-password
-EMAIL_HOST=smtp.example.com
-EMAIL_USER=noreply@domain.com
-EMAIL_PASS=smtp-password
-```
+1. **Always test migrations in development first**
+2. **Backup production database before major migrations**
+3. **Use environment-specific seed files appropriately**
+4. **Keep schema files in sync between dev and prod**
+5. **Use the safety checks in production seeding**
 
-## File Structure
+## Troubleshooting
 
-```
-prisma/
-├── README.md              # This file
-├── schema.prisma          # Database schema
-├── seed.js               # Development seed data
-├── seed-production.js    # Production seed data
-├── migration-utils.js    # Backup/restore utilities
-└── migrations/           # Migration history
-    └── 20241218000001_initial_migration/
-        └── migration.sql
-```
+### SQLite Issues
 
-For detailed setup instructions, see: `../DB_SETUP.md`
+- Delete `dev.db` file to start fresh
+- Run `npm run db:setup:fresh:dev`
+
+### PostgreSQL Issues
+
+- Check connection string format
+- Ensure database exists before running migrations
+- Verify user permissions
+
+### Schema Sync Issues
+
+- Use `npm run db:validate:dev` and `npm run db:validate:prod`
+- Compare schema files manually
+- Run `npm run db:format:dev` and `npm run db:format:prod`

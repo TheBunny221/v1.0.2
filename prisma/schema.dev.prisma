@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+// Development Prisma schema file for SQLite
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -6,65 +6,18 @@ generator client {
 }
 
 datasource db {
-  //provider = "sqlite"
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-//Enums (commented for SQLite, uncommented for PostgreSQL)
-// For PostgreSQL production deployment:
-enum UserRole {
-  CITIZEN
-  WARD_OFFICER
-  MAINTENANCE_TEAM
-  ADMINISTRATOR
-  GUEST
-}
-
- enum ComplaintStatus {
-   REGISTERED
-   ASSIGNED
-   IN_PROGRESS
-   RESOLVED
-   CLOSED
-   REOPENED
- }
- enum Priority {
-   LOW
-   MEDIUM
-   HIGH
-   CRITICAL
- }
-enum SLAStatus {
-  ON_TIME
-  WARNING
-  OVERDUE
-  COMPLETED
-}
-
- enum ServiceRequestStatus {
-   SUBMITTED
-   VERIFIED
-   PROCESSING
-   APPROVED
-   REJECTED
-   COMPLETED
- }
-
-enum NotificationType {
-  EMAIL
-  SMS
-  IN_APP
-}
-
-// Models
+// Models (enums are replaced with strings for SQLite compatibility)
 model User {
   id          String   @id @default(cuid())
   email       String   @unique
   fullName    String
   phoneNumber String?
   password    String?
-  role        String   @default("CITIZEN") // UserRole for PostgreSQL
+  role        String   @default("CITIZEN") // String instead of UserRole enum
   wardId      String?
   department  String?
   language    String   @default("en")
@@ -89,8 +42,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([role, isActive])
-  @@index([wardId])
   @@map("users")
 }
 
@@ -126,7 +77,6 @@ model SubZone {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  @@index([wardId])
   @@map("sub_zones")
 }
 
@@ -135,10 +85,10 @@ model Complaint {
   complaintId     String?           @unique  // Human-readable complaint ID like KSC0001
   title           String?
   description     String
-  type            String            // ComplaintType enum for PostgreSQL
-  status          String            @default("REGISTERED") // ComplaintStatus for PostgreSQL
-  priority        String            @default("MEDIUM") // Priority for PostgreSQL
-  slaStatus       String            @default("ON_TIME") // SLAStatus for PostgreSQL
+  type            String            // String instead of enum
+  status          String            @default("REGISTERED") // String instead of enum
+  priority        String            @default("MEDIUM") // String instead of enum
+  slaStatus       String            @default("ON_TIME") // String instead of enum
   
   // Location Information
   wardId          String
@@ -185,15 +135,6 @@ model Complaint {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Indexes for performance
-  @@index([submittedById, createdAt])
-  @@index([wardId, status])
-  @@index([assignedToId, status])
-  @@index([type, status])
-  @@index([priority, status])
-  @@index([submittedOn])
-  @@index([status, createdAt])
-  @@index([type, createdAt])
   @@map("complaints")
 }
 
@@ -210,8 +151,6 @@ model StatusLog {
   complaint   Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   user        User            @relation(fields: [userId], references: [id])
 
-  @@index([complaintId, timestamp])
-  @@index([userId])
   @@map("status_logs")
 }
 
@@ -228,7 +167,6 @@ model Attachment {
   // Relations
   complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   
-  @@index([complaintId])
   @@map("attachments")
 }
 
@@ -237,7 +175,7 @@ model Notification {
   userId      String
   complaintId String?
   serviceRequestId String?
-  type        String   // NotificationType for PostgreSQL
+  type        String   // String instead of enum
   title       String
   message     String
   isRead      Boolean  @default(false)
@@ -249,9 +187,6 @@ model Notification {
   complaint   Complaint?       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   serviceRequest ServiceRequest? @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
 
-  @@index([userId, isRead])
-  @@index([complaintId])
-  @@index([serviceRequestId])
   @@map("notifications")
 }
 
@@ -270,8 +205,6 @@ model Message {
   sentBy      User      @relation("SentBy", fields: [sentById], references: [id])
   receivedBy  User?     @relation("ReceivedBy", fields: [receivedById], references: [id])
   
-  @@index([complaintId])
-  @@index([sentById])
   @@map("messages")
 }
 
@@ -290,9 +223,6 @@ model OTPSession {
   // Relations
   user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([email, purpose, isVerified])
-  @@index([expiresAt])
-  @@index([userId])
   @@map("otp_sessions")
 }
 
@@ -317,7 +247,6 @@ model SystemConfig {
   isActive    Boolean   @default(true)
   updatedAt   DateTime  @updatedAt
   
-  @@index([key, isActive])
   @@map("system_config")
 }
 
@@ -326,8 +255,8 @@ model ServiceRequest {
   title           String?
   serviceType     String    // Service type identifier
   description     String
-  status          String    @default("SUBMITTED") // ServiceRequestStatus for PostgreSQL
-  priority        String    @default("NORMAL") // Priority for PostgreSQL
+  status          String    @default("SUBMITTED") // String instead of enum
+  priority        String    @default("NORMAL") // String instead of enum
 
   // Location Information
   wardId          String
@@ -366,12 +295,6 @@ model ServiceRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Indexes for performance
-  @@index([submittedById, createdAt])
-  @@index([wardId, status])
-  @@index([assignedToId, status])
-  @@index([serviceType, status])
-  @@index([submittedOn])
   @@map("service_requests")
 }
 
@@ -388,8 +311,6 @@ model ServiceRequestStatusLog {
   serviceRequest  ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
   user            User          @relation(fields: [userId], references: [id])
 
-  @@index([serviceRequestId, timestamp])
-  @@index([userId])
   @@map("service_request_status_logs")
 }
 
@@ -402,7 +323,5 @@ model Report {
   generatedBy String
   generatedAt DateTime @default(now())
 
-  @@index([type, generatedAt])
-  @@index([generatedBy])
   @@map("reports")
 }
