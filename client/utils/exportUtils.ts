@@ -1,6 +1,4 @@
-import jsPDF from "jspdf";
-import * as XLSX from "xlsx";
-import html2canvas from "html2canvas";
+// Dependencies will be loaded dynamically to prevent module loading issues
 
 interface ExportData {
   complaints: any[];
