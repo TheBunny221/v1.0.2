@@ -258,8 +258,10 @@ const UnifiedReports: React.FC = () => {
             const dates = data.data.trends
               .map((t) => new Date(t.date))
               .sort((a, b) => a.getTime() - b.getTime());
-            const earliestDate = format(dates[0], "yyyy-MM-dd");
-            const latestDate = format(dates[dates.length - 1], "yyyy-MM-dd");
+
+            // Use fallback date formatting since date-fns might not be loaded yet
+            const earliestDate = dates[0].toISOString().split('T')[0];
+            const latestDate = dates[dates.length - 1].toISOString().split('T')[0];
 
             console.log("Setting initial date range:", {
               earliestDate,
