@@ -1,63 +1,130 @@
 import { baseApi, ApiResponse } from "./baseApi";
 
-// Types for ward operations
-export interface TeamMember {
+interface Ward {
   id: string;
-  fullName: string;
-  email: string;
-  phoneNumber?: string;
-  department?: string;
-  activeAssignments: number;
-  displayName: string;
+  name: string;
+  description?: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+  subZones?: SubZone[];
 }
 
-export interface WardStats {
-  ward: {
+interface SubZone {
+  id: string;
+  name: string;
+  wardId: string;
+  description?: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+}
+
+interface LocationDetection {
+  exact: {
+    ward: Ward | null;
+    subZone: SubZone | null;
+  };
+  nearest: {
+    ward: Ward | null;
+    subZone: SubZone | null;
+    distance: number;
+  };
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+interface UpdateBoundariesRequest {
+  wardId: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+  subZones?: Array<{
     id: string;
-    name: string;
-    description?: string;
-    subZones: Array<{
-      id: string;
-      name: string;
-    }>;
-  };
-  summary: {
-    totalComplaints: number;
-    resolvedComplaints: number;
-    pendingComplaints: number;
-    resolutionRate: number;
-  };
-  complaintsByStatus: Record<string, number>;
-  complaintsByArea: Array<{
-    area: string;
-    count: number;
+    boundaries?: string;
+    centerLat?: number;
+    centerLng?: number;
+    boundingBox?: string;
   }>;
 }
 
-// Ward API slice
+interface DetectAreaRequest {
+  latitude: number;
+  longitude: number;
+}
+
+interface TeamMember {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  department?: string;
+  isActive: boolean;
+}
+
+interface WardTeamMembersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    teamMembers: TeamMember[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+}
+
 export const wardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Get ward team members
-    getWardTeamMembers: builder.query<
-      ApiResponse<{ teamMembers: TeamMember[]; total: number }>,
-      string
-    >({
-      query: (wardId) => `/wards/${wardId}/team`,
-      providesTags: (result, error, wardId) => [
-        { type: "Ward", id: `${wardId}-team` },
-      ],
+    getWardsWithBoundaries: builder.query<ApiResponse<Ward[]>, void>({
+      query: () => "/wards/boundaries",
+      providesTags: ["Ward"],
     }),
 
-    // Get ward statistics
-    getWardStats: builder.query<ApiResponse<WardStats>, string>({
-      query: (wardId) => `/wards/${wardId}/stats`,
-      providesTags: (result, error, wardId) => [
-        { type: "Ward", id: `${wardId}-stats` },
-        { type: "Analytics", id: wardId },
-      ],
+    updateWardBoundaries: builder.mutation<
+      ApiResponse<Ward>,
+      UpdateBoundariesRequest
+    >({
+      query: ({ wardId, ...body }) => ({
+        url: `/wards/${wardId}/boundaries`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Ward"],
+    }),
+
+    detectLocationArea: builder.mutation<
+      ApiResponse<LocationDetection>,
+      DetectAreaRequest
+    >({
+      query: (body) => ({
+        url: "/wards/detect-area",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    getWardTeamMembers: builder.query<
+      ApiResponse<{ users: TeamMember[]; pagination: any }>,
+      string
+    >({
+      query: (wardId) =>
+        `/complaints/ward-users?role=MAINTENANCE_TEAM&limit=100`,
+      providesTags: ["Ward"],
     }),
   }),
 });
 
-// Export hooks
-export const { useGetWardTeamMembersQuery, useGetWardStatsQuery } = wardApi;
+export const {
+  useGetWardsWithBoundariesQuery,
+  useUpdateWardBoundariesMutation,
+  useDetectLocationAreaMutation,
+  useGetWardTeamMembersQuery,
+} = wardApi;

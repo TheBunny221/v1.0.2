@@ -10,6 +10,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
+import { useDetectLocationAreaMutation } from "../store/api/wardApi";
+import { detectLocationArea } from "../utils/geoUtils";
 
 interface LocationData {
   latitude: number;
@@ -45,8 +47,14 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapError, setMapError] = useState<string | null>(null);
+  const [detectedWard, setDetectedWard] = useState<string>("");
+  const [detectedSubZone, setDetectedSubZone] = useState<string>("");
+  const [isDetectingArea, setIsDetectingArea] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
+
+  // API hook for area detection
+  const [detectAreaMutation] = useDetectLocationAreaMutation();
 
   // Initialize map when dialog opens
   useEffect(() => {
@@ -73,7 +81,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
 
         // Create map if it doesn't exist
         if (!leafletMapRef.current && mapRef.current) {
-          leafletMapRef.current = L.map(mapRef.current, {
+          leafletMapRef.current = new L.Map(mapRef.current, {
             center: [position.lat, position.lng],
             zoom: 13,
             scrollWheelZoom: true,
@@ -95,6 +103,9 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             const { lat, lng } = e.latlng;
             setPosition({ lat, lng });
             marker.setLatLng([lat, lng]);
+
+            // Run both area detection and reverse geocoding
+            detectAdministrativeArea({ lat, lng });
             reverseGeocode({ lat, lng });
           });
         }
@@ -129,6 +140,9 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             lng: pos.coords.longitude,
           };
           setPosition(newPos);
+
+          // Run both area detection and reverse geocoding
+          detectAdministrativeArea(newPos);
           reverseGeocode(newPos);
 
           // Update map view
@@ -160,6 +174,49 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     }
   }, []);
 
+  // Detect administrative area based on coordinates
+  const detectAdministrativeArea = async (coords: {
+    lat: number;
+    lng: number;
+  }) => {
+    try {
+      setIsDetectingArea(true);
+
+      // Try API-based detection first
+      try {
+        const result = await detectAreaMutation({
+          latitude: coords.lat,
+          longitude: coords.lng,
+        }).unwrap();
+
+        if (result.success && result.data) {
+          const { exact, nearest } = result.data;
+
+          // Use exact match if available, otherwise use nearest
+          const ward = exact.ward || nearest.ward;
+          const subZone = exact.subZone || nearest.subZone;
+
+          if (ward) {
+            setDetectedWard(ward.name);
+            setArea(ward.name);
+          }
+
+          if (subZone) {
+            setDetectedSubZone(subZone.name);
+            // Prefer sub-zone as area if available
+            setArea(subZone.name);
+          }
+        }
+      } catch (apiError) {
+        console.log("API area detection failed, falling back to geocoding");
+      }
+    } catch (error) {
+      console.error("Error in area detection:", error);
+    } finally {
+      setIsDetectingArea(false);
+    }
+  };
+
   // Reverse geocoding to get address from coordinates
   const reverseGeocode = async (coords: { lat: number; lng: number }) => {
     try {
@@ -171,17 +228,19 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       if (data && data.display_name) {
         setAddress(data.display_name);
 
-        // Extract area information
-        const addressComponents = data.address;
-        if (addressComponents) {
-          const detectedArea =
-            addressComponents.neighbourhood ||
-            addressComponents.suburb ||
-            addressComponents.city_district ||
-            addressComponents.state_district ||
-            addressComponents.city ||
-            "";
-          setArea(detectedArea);
+        // Only use geocoding area if we don't have detected area
+        if (!detectedWard && !detectedSubZone) {
+          const addressComponents = data.address;
+          if (addressComponents) {
+            const detectedArea =
+              addressComponents.neighbourhood ||
+              addressComponents.suburb ||
+              addressComponents.city_district ||
+              addressComponents.state_district ||
+              addressComponents.city ||
+              "";
+            setArea(detectedArea);
+          }
         }
       }
     } catch (error) {
@@ -208,9 +267,12 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         setPosition(newPos);
         setAddress(result.display_name);
 
-        // Extract area information
+        // Run area detection first
+        detectAdministrativeArea(newPos);
+
+        // Extract area information as fallback
         const addressComponents = result.address;
-        if (addressComponents) {
+        if (addressComponents && !detectedWard && !detectedSubZone) {
           const detectedArea =
             addressComponents.neighbourhood ||
             addressComponents.suburb ||
@@ -260,105 +322,149 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[90vw] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] p-0 flex flex-col h-[90vh]">
-        <DialogHeader>
-          <DialogTitle className="inline-flex items-center gap-2 text-lg font-medium px-4 pt-4">
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b shrink-0">
+          <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
             Select Location on Map
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 space-y-4 flex-grow overflow-y-auto">
-          {/* Search and Current Location */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex gap-2">
-              <Input
-                placeholder="Search for a location in Kochi..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
-              <Button onClick={searchLocation} variant="outline" size="icon">
-                <Search className="h-4 w-4" />
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
+            {/* Search and Current Location */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex-1 flex gap-2">
+                <Input
+                  placeholder="Search for a location in Kochi..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={searchLocation}
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button
+                onClick={getCurrentLocation}
+                variant="outline"
+                disabled={isLoadingLocation}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <Navigation className="h-4 w-4" />
+                {isLoadingLocation ? "Getting..." : "Current Location"}
               </Button>
             </div>
-            <Button
-              onClick={getCurrentLocation}
-              variant="outline"
-              disabled={isLoadingLocation}
-              className="flex items-center gap-2"
-            >
-              <Navigation className="h-4 w-4" />
-              {isLoadingLocation ? "Getting..." : "Current Location"}
-            </Button>
-          </div>
 
-          {/* Map */}
-          <div className="h-96 w-full rounded-lg overflow-hidden border relative">
-            {mapError ? (
-              <div className="h-full flex items-center justify-center bg-gray-100">
-                <div className="text-center">
-                  <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                  <p className="text-red-600">{mapError}</p>
-                  <Button
-                    onClick={() => window.location.reload()}
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                  >
-                    Refresh Page
-                  </Button>
+            {/* Map */}
+            <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border relative">
+              {mapError ? (
+                <div className="h-full flex items-center justify-center bg-gray-100">
+                  <div className="text-center p-4">
+                    <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                    <p className="text-red-600 text-sm">{mapError}</p>
+                    <Button
+                      onClick={() => window.location.reload()}
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                    >
+                      Refresh Page
+                    </Button>
+                  </div>
                 </div>
+              ) : (
+                <div
+                  ref={mapRef}
+                  className="h-full w-full"
+                  style={{ minHeight: "256px" }}
+                />
+              )}
+            </div>
+
+            {/* Location Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="detected-area">Detected Area</Label>
+                <Input
+                  id="detected-area"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  placeholder="Area/Locality"
+                />
               </div>
-            ) : (
-              <div ref={mapRef} className="w-full h-[300px] md:h-[400px] lg:h-[500px] rounded-md border"></div>
+              <div className="space-y-2">
+                <Label htmlFor="landmark">Landmark (Optional)</Label>
+                <Input
+                  id="landmark"
+                  value={landmark}
+                  onChange={(e) => setLandmark(e.target.value)}
+                  placeholder="Nearby landmark"
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="detected-address">Detected Address</Label>
+                <Input
+                  id="detected-address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Full address"
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Area Detection Display */}
+            {(detectedWard || detectedSubZone || isDetectingArea) && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    {isDetectingArea
+                      ? "Detecting Area..."
+                      : "Detected Administrative Area"}
+                  </span>
+                </div>
+                {detectedWard && (
+                  <div className="text-sm text-blue-700">
+                    <strong>Ward:</strong> {detectedWard}
+                  </div>
+                )}
+                {detectedSubZone && (
+                  <div className="text-sm text-blue-700">
+                    <strong>Sub-Zone:</strong> {detectedSubZone}
+                  </div>
+                )}
+              </div>
             )}
-          </div>
 
-          {/* Location Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="detected-area">Detected Area</Label>
-              <Input
-                id="detected-area"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                placeholder="Area/Locality"
-              />
+            {/* Coordinates Display */}
+            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+              <strong>Selected coordinates:</strong> {position.lat.toFixed(6)},{" "}
+              {position.lng.toFixed(6)}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="landmark">Landmark (Optional)</Label>
-              <Input
-                id="landmark"
-                value={landmark}
-                onChange={(e) => setLandmark(e.target.value)}
-                placeholder="Nearby landmark"
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="detected-address">Detected Address</Label>
-              <Input
-                id="detected-address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Full address"
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          {/* Coordinates Display */}
-          <div className="text-sm text-muted-foreground">
-            Selected coordinates: {position.lat.toFixed(6)},{" "}
-            {position.lng.toFixed(6)}
           </div>
         </div>
 
-        <DialogFooter className="p-4 bg-gray-50 border-t flex flex-col sm:flex-row sm:justify-end gap-2 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>Confirm Location</Button>
+        <DialogFooter className="px-6 py-4 border-t shrink-0 bg-background">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirm} className="w-full sm:w-auto">
+              Confirm Location
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

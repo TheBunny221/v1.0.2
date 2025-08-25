@@ -27,7 +27,7 @@ import {
   Image,
   Download,
 } from "lucide-react";
-import jsPDF from "jspdf";
+// Dynamic import for jsPDF to avoid build issues
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -88,13 +88,16 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-  const handleExportDetails = () => {
+  const handleExportDetails = async () => {
     if (!complaint) {
       console.error("No complaint data available for export");
       return;
     }
 
     try {
+      // Dynamically import jsPDF to avoid build issues
+      const { default: jsPDF } = await import("jspdf");
+
       // Get current translations for the user's language
       const t = translations || {};
 
@@ -317,6 +320,10 @@ const ComplaintDetails: React.FC = () => {
       console.log("Complaint details exported as PDF successfully");
     } catch (error) {
       console.error("Failed to export complaint details as PDF:", error);
+      // Show user-friendly error message
+      alert(
+        "Failed to export complaint details. Please try again or contact support if the issue persists.",
+      );
     }
   };
 
@@ -443,14 +450,41 @@ const ComplaintDetails: React.FC = () => {
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
-                    Location
+                    Location Information
                   </h3>
-                  <p className="text-gray-600">{complaint.area}</p>
-                  {complaint.landmark && (
-                    <p className="text-sm text-gray-500">
-                      Near: {complaint.landmark}
+                  <div className="space-y-1 text-sm">
+                    <p className="text-gray-600">
+                      <strong>Area:</strong> {complaint.area}
                     </p>
-                  )}
+                    {complaint.ward && (
+                      <p className="text-gray-600">
+                        <strong>Ward:</strong> {complaint.ward.name}
+                      </p>
+                    )}
+                    {complaint.subZone && (
+                      <p className="text-gray-600">
+                        <strong>Sub-Zone:</strong> {complaint.subZone.name}
+                      </p>
+                    )}
+                    {complaint.landmark && (
+                      <p className="text-gray-600">
+                        <strong>Landmark:</strong> {complaint.landmark}
+                      </p>
+                    )}
+                    {complaint.address && (
+                      <p className="text-gray-600">
+                        <strong>Address:</strong> {complaint.address}
+                      </p>
+                    )}
+                    {/* Show coordinates for admin/ward managers */}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") &&
+                      complaint.coordinates && (
+                        <p className="text-gray-500 text-xs">
+                          <strong>Coordinates:</strong> {complaint.coordinates}
+                        </p>
+                      )}
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
@@ -459,20 +493,54 @@ const ComplaintDetails: React.FC = () => {
                   </h3>
                   <div className="space-y-1 text-sm">
                     <p className="text-gray-600">
-                      Submitted:{" "}
+                      <strong>Submitted:</strong>{" "}
                       {new Date(complaint.submittedOn).toLocaleString()}
                     </p>
                     {complaint.assignedOn && (
                       <p className="text-gray-600">
-                        Assigned:{" "}
+                        <strong>Assigned:</strong>{" "}
                         {new Date(complaint.assignedOn).toLocaleString()}
                       </p>
                     )}
                     {complaint.resolvedOn && (
                       <p className="text-gray-600">
-                        Resolved:{" "}
+                        <strong>Resolved:</strong>{" "}
                         {new Date(complaint.resolvedOn).toLocaleString()}
                       </p>
+                    )}
+                    {complaint.closedOn && (
+                      <p className="text-gray-600">
+                        <strong>Closed:</strong>{" "}
+                        {new Date(complaint.closedOn).toLocaleString()}
+                      </p>
+                    )}
+                    {/* Show deadline and SLA status for admin/ward managers */}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") && (
+                      <>
+                        {complaint.deadline && (
+                          <p className="text-gray-600">
+                            <strong>Deadline:</strong>{" "}
+                            {new Date(complaint.deadline).toLocaleString()}
+                          </p>
+                        )}
+                        {complaint.slaStatus && (
+                          <p
+                            className={`text-sm font-medium ${
+                              complaint.slaStatus === "OVERDUE"
+                                ? "text-red-600"
+                                : complaint.slaStatus === "WARNING"
+                                  ? "text-orange-600"
+                                  : complaint.slaStatus === "ON_TIME"
+                                    ? "text-green-600"
+                                    : "text-gray-600"
+                            }`}
+                          >
+                            <strong>SLA Status:</strong>{" "}
+                            {complaint.slaStatus.replace("_", " ")}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -618,13 +686,111 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Administrative Information - Only for admin/ward managers */}
+          {(user?.role === "ADMINISTRATOR" ||
+            user?.role === "WARD_OFFICER") && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="h-5 w-5 mr-2" />
+                  Administrative Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Assignment Details</h4>
+                    <div className="space-y-1 text-sm">
+                      {complaint.submittedBy && (
+                        <p className="text-gray-600">
+                          <strong>Submitted By:</strong>{" "}
+                          {complaint.submittedBy.fullName}
+                          {complaint.submittedBy.email &&
+                            ` (${complaint.submittedBy.email})`}
+                        </p>
+                      )}
+                      {complaint.assignedTo && (
+                        <p className="text-gray-600">
+                          <strong>Assigned To:</strong>{" "}
+                          {complaint.assignedTo.fullName}
+                          {complaint.assignedTo.email &&
+                            ` (${complaint.assignedTo.email})`}
+                        </p>
+                      )}
+                      {complaint.resolvedById && (
+                        <p className="text-gray-600">
+                          <strong>Resolved By:</strong> {complaint.resolvedById}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Technical Details</h4>
+                    <div className="space-y-1 text-sm">
+                      <p className="text-gray-600">
+                        <strong>Complaint ID:</strong>{" "}
+                        {complaint.complaintId || complaint.id}
+                      </p>
+                      <p className="text-gray-600">
+                        <strong>Internal ID:</strong> {complaint.id}
+                      </p>
+                      {complaint.isAnonymous !== undefined && (
+                        <p className="text-gray-600">
+                          <strong>Anonymous:</strong>{" "}
+                          {complaint.isAnonymous ? "Yes" : "No"}
+                        </p>
+                      )}
+                      {complaint.tags && (
+                        <p className="text-gray-600">
+                          <strong>Tags:</strong>{" "}
+                          {JSON.parse(complaint.tags).join(", ")}
+                        </p>
+                      )}
+                      <p className="text-gray-500 text-xs">
+                        <strong>Created:</strong>{" "}
+                        {new Date(
+                          complaint.createdAt || complaint.submittedOn,
+                        ).toLocaleString()}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        <strong>Last Updated:</strong>{" "}
+                        {new Date(
+                          complaint.updatedAt || complaint.submittedOn,
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Citizen Feedback Section */}
+                {(complaint.citizenFeedback || complaint.rating) && (
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2">Citizen Feedback</h4>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      {complaint.rating && (
+                        <p className="text-sm text-blue-800 mb-1">
+                          <strong>Rating:</strong> {complaint.rating}/5 ⭐
+                        </p>
+                      )}
+                      {complaint.citizenFeedback && (
+                        <p className="text-sm text-blue-700">
+                          <strong>Feedback:</strong> {complaint.citizenFeedback}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* General Remarks - Hidden from citizens as they may contain internal notes */}
           {complaint.remarks && user?.role !== "CITIZEN" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="h-5 w-5 mr-2" />
-                  General Remarks
+                  Internal Remarks
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -652,44 +818,182 @@ const ComplaintDetails: React.FC = () => {
               {complaint.contactName && (
                 <div className="flex items-center">
                   <User className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{complaint.contactName}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{complaint.contactName}</span>
+                    {/* Show if submitted by registered user for admin/ward managers */}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") &&
+                      complaint.submittedBy && (
+                        <span className="text-xs text-gray-500">
+                          Registered User: {complaint.submittedBy.fullName}
+                        </span>
+                      )}
+                  </div>
                 </div>
               )}
               <div className="flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{complaint.contactPhone}</span>
+                <div className="flex flex-col">
+                  <span>{complaint.contactPhone}</span>
+                  {/* Show submitter phone for admin/ward managers if different */}
+                  {(user?.role === "ADMINISTRATOR" ||
+                    user?.role === "WARD_OFFICER") &&
+                    complaint.submittedBy?.phoneNumber &&
+                    complaint.submittedBy.phoneNumber !==
+                      complaint.contactPhone && (
+                      <span className="text-xs text-gray-500">
+                        User Phone: {complaint.submittedBy.phoneNumber}
+                      </span>
+                    )}
+                </div>
               </div>
               {complaint.contactEmail && (
                 <div className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{complaint.contactEmail}</span>
+                  <div className="flex flex-col">
+                    <span>{complaint.contactEmail}</span>
+                    {/* Show submitter email for admin/ward managers if different */}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") &&
+                      complaint.submittedBy?.email &&
+                      complaint.submittedBy.email !==
+                        complaint.contactEmail && (
+                        <span className="text-xs text-gray-500">
+                          User Email: {complaint.submittedBy.email}
+                        </span>
+                      )}
+                  </div>
                 </div>
               )}
+
+              {/* Show anonymity status for admin/ward managers */}
+              {(user?.role === "ADMINISTRATOR" ||
+                user?.role === "WARD_OFFICER") &&
+                complaint.isAnonymous && (
+                  <div className="flex items-center text-orange-600">
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-medium">
+                      Anonymous Complaint
+                    </span>
+                  </div>
+                )}
             </CardContent>
           </Card>
 
           {/* Assignment Information */}
-          {complaint.assignedTo && (
+          {(complaint.assignedTo ||
+            user?.role === "ADMINISTRATOR" ||
+            user?.role === "WARD_OFFICER") && (
             <Card>
               <CardHeader>
-                <CardTitle>Assignment Info</CardTitle>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Assignment & Status Information
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium">Assigned To</p>
-                  <p className="text-gray-600">
-                    {typeof complaint.assignedTo === "object" &&
-                    complaint.assignedTo
-                      ? complaint.assignedTo.fullName
-                      : complaint.assignedTo}
-                  </p>
-                </div>
-                {complaint.deadline && (
+              <CardContent className="space-y-4">
+                {complaint.assignedTo ? (
                   <div>
-                    <p className="text-sm font-medium">Deadline</p>
-                    <p className="text-gray-600">
-                      {new Date(complaint.deadline).toLocaleDateString()}
-                    </p>
+                    <p className="text-sm font-medium mb-1">Assigned To</p>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <p className="text-blue-800 font-medium">
+                        {typeof complaint.assignedTo === "object" &&
+                        complaint.assignedTo
+                          ? complaint.assignedTo.fullName
+                          : complaint.assignedTo}
+                      </p>
+                      {typeof complaint.assignedTo === "object" &&
+                        complaint.assignedTo?.email && (
+                          <p className="text-blue-600 text-sm">
+                            {complaint.assignedTo.email}
+                          </p>
+                        )}
+                      {complaint.assignedOn && (
+                        <p className="text-blue-600 text-xs mt-1">
+                          Assigned on:{" "}
+                          {new Date(complaint.assignedOn).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  (user?.role === "ADMINISTRATOR" ||
+                    user?.role === "WARD_OFFICER") && (
+                    <div>
+                      <p className="text-sm font-medium mb-1">
+                        Assignment Status
+                      </p>
+                      <div className="bg-yellow-50 rounded-lg p-3">
+                        <p className="text-yellow-800 font-medium">
+                          Unassigned
+                        </p>
+                        <p className="text-yellow-600 text-sm">
+                          This complaint has not been assigned to any team
+                          member yet.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                )}
+
+                {/* Show deadline information for admin/ward managers */}
+                {(user?.role === "ADMINISTRATOR" ||
+                  user?.role === "WARD_OFFICER") && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {complaint.deadline && (
+                      <div>
+                        <p className="text-sm font-medium mb-1">Deadline</p>
+                        <p
+                          className={`text-sm ${
+                            new Date(complaint.deadline) < new Date()
+                              ? "text-red-600 font-medium"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          {new Date(complaint.deadline).toLocaleString()}
+                          {new Date(complaint.deadline) < new Date() &&
+                            " (Overdue)"}
+                        </p>
+                      </div>
+                    )}
+
+                    {complaint.slaStatus && (
+                      <div>
+                        <p className="text-sm font-medium mb-1">SLA Status</p>
+                        <Badge
+                          className={
+                            complaint.slaStatus === "OVERDUE"
+                              ? "bg-red-100 text-red-800"
+                              : complaint.slaStatus === "WARNING"
+                                ? "bg-orange-100 text-orange-800"
+                                : complaint.slaStatus === "ON_TIME"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                          }
+                        >
+                          {complaint.slaStatus.replace("_", " ")}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Show priority and type for admin/ward managers */}
+                {(user?.role === "ADMINISTRATOR" ||
+                  user?.role === "WARD_OFFICER") && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
+                    <div>
+                      <p className="text-sm font-medium mb-1">Priority Level</p>
+                      <Badge className={getPriorityColor(complaint.priority)}>
+                        {complaint.priority} Priority
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium mb-1">Complaint Type</p>
+                      <Badge variant="outline">
+                        {complaint.type?.replace("_", " ")}
+                      </Badge>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -720,14 +1024,33 @@ const ComplaintDetails: React.FC = () => {
                         )}
                         <div>
                           <p className="font-medium text-sm">
-                            {attachment.originalName}
+                            {attachment.originalName || attachment.fileName}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {(attachment.size / 1024).toFixed(1)} KB •{" "}
-                            {new Date(
-                              attachment.uploadedAt,
-                            ).toLocaleDateString()}
-                          </p>
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <p>
+                              {(attachment.size / 1024).toFixed(1)} KB •{" "}
+                              {new Date(
+                                attachment.uploadedAt,
+                              ).toLocaleDateString()}
+                            </p>
+                            {/* Show additional details for admin/ward managers */}
+                            {(user?.role === "ADMINISTRATOR" ||
+                              user?.role === "WARD_OFFICER") && (
+                              <>
+                                <p>Type: {attachment.mimeType}</p>
+                                {attachment.fileName !==
+                                  attachment.originalName && (
+                                  <p>Stored as: {attachment.fileName}</p>
+                                )}
+                                <p>
+                                  Uploaded:{" "}
+                                  {new Date(
+                                    attachment.uploadedAt,
+                                  ).toLocaleString()}
+                                </p>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">

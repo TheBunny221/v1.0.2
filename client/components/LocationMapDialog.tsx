@@ -224,107 +224,113 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
             Select Location on Map
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Search and Current Location */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex gap-2">
-              <Input
-                placeholder="Search for a location in Kochi..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
-              <Button onClick={searchLocation} variant="outline" size="icon">
-                <Search className="h-4 w-4" />
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
+            {/* Search and Current Location */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex-1 flex gap-2">
+                <Input
+                  placeholder="Search for a location in Kochi..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1"
+                />
+                <Button onClick={searchLocation} variant="outline" size="icon" className="shrink-0">
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button
+                onClick={getCurrentLocation}
+                variant="outline"
+                disabled={isLoadingLocation}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <Navigation className="h-4 w-4" />
+                {isLoadingLocation ? "Getting..." : "Current Location"}
               </Button>
             </div>
-            <Button
-              onClick={getCurrentLocation}
-              variant="outline"
-              disabled={isLoadingLocation}
-              className="flex items-center gap-2"
-            >
-              <Navigation className="h-4 w-4" />
-              {isLoadingLocation ? "Getting..." : "Current Location"}
-            </Button>
-          </div>
 
-          {/* Map */}
-          <div className="h-96 w-full rounded-lg overflow-hidden border">
-            <MapContainer
-              key={`map-${position[0]}-${position[1]}`}
-              center={position}
-              zoom={13}
-              style={{ height: "100%", width: "100%" }}
-              scrollWheelZoom={true}
-              whenCreated={(mapInstance) => {
-                mapRef.current = mapInstance;
-              }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <MapUpdater center={position} />
-              <LocationMarker
-                position={position}
-                onPositionChange={handlePositionChange}
-              />
-            </MapContainer>
-          </div>
+            {/* Map */}
+            <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border">
+              <MapContainer
+                key={`map-${position[0]}-${position[1]}`}
+                center={position}
+                zoom={13}
+                style={{ height: "100%", width: "100%" }}
+                scrollWheelZoom={true}
+                whenCreated={(mapInstance) => {
+                  mapRef.current = mapInstance;
+                }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapUpdater center={position} />
+                <LocationMarker
+                  position={position}
+                  onPositionChange={handlePositionChange}
+                />
+              </MapContainer>
+            </div>
 
-          {/* Location Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="detected-area">Detected Area</Label>
-              <Input
-                id="detected-area"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                placeholder="Area/Locality"
-              />
+            {/* Location Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="detected-area">Detected Area</Label>
+                <Input
+                  id="detected-area"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  placeholder="Area/Locality"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="landmark">Landmark (Optional)</Label>
+                <Input
+                  id="landmark"
+                  value={landmark}
+                  onChange={(e) => setLandmark(e.target.value)}
+                  placeholder="Nearby landmark"
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="detected-address">Detected Address</Label>
+                <Input
+                  id="detected-address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Full address"
+                  className="w-full"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="landmark">Landmark (Optional)</Label>
-              <Input
-                id="landmark"
-                value={landmark}
-                onChange={(e) => setLandmark(e.target.value)}
-                placeholder="Nearby landmark"
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="detected-address">Detected Address</Label>
-              <Input
-                id="detected-address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Full address"
-                className="w-full"
-              />
-            </div>
-          </div>
 
-          {/* Coordinates Display */}
-          <div className="text-sm text-muted-foreground">
-            Selected coordinates: {position[0].toFixed(6)},{" "}
-            {position[1].toFixed(6)}
+            {/* Coordinates Display */}
+            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+              <strong>Selected coordinates:</strong> {position[0].toFixed(6)}, {position[1].toFixed(6)}
+            </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>Confirm Location</Button>
+        <DialogFooter className="px-6 py-4 border-t shrink-0 bg-background">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirm} className="w-full sm:w-auto">
+              Confirm Location
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAppSelector } from "../store/hooks";
 import {
   useUpdateComplaintStatusMutation,
@@ -94,10 +94,19 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
     useAssignComplaintMutation();
 
   const [formData, setFormData] = useState({
-    status: complaint.status,
-    assignedTo: complaint.assignedTo?.id || "unassigned",
+    status: "",
+    assignedTo: "unassigned",
     remarks: "",
   });
+
+  // Update form data when complaint changes
+  useEffect(() => {
+    setFormData({
+      status: complaint.status,
+      assignedTo: complaint.assignedTo?.id || "unassigned",
+      remarks: "",
+    });
+  }, [complaint.status, complaint.assignedTo?.id]);
 
   const isLoading = isUpdatingStatus || isAssigning;
 
@@ -107,7 +116,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       skip: !user?.wardId || user?.role !== "WARD_OFFICER",
     });
 
-  const teamMembers = teamResponse?.data?.teamMembers || [];
+  const teamMembers = teamResponse?.data?.users || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

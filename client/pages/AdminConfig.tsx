@@ -56,6 +56,7 @@ import {
 } from "../components/ui/collapsible";
 import {
   Settings,
+  Map,
   MapPin,
   FileText,
   Users,
@@ -75,6 +76,7 @@ import {
   ChevronRight,
   CheckCircle,
 } from "lucide-react";
+import WardBoundaryManager from "../components/WardBoundaryManager";
 
 interface Ward {
   id: string;
@@ -153,6 +155,9 @@ const AdminConfig: React.FC = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUploadMode, setLogoUploadMode] = useState<"url" | "file">("url");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedWardForBoundary, setSelectedWardForBoundary] =
+    useState<Ward | null>(null);
+  const [isBoundaryManagerOpen, setIsBoundaryManagerOpen] = useState(false);
 
   // Reset logo upload state
   const resetLogoUploadState = () => {
@@ -388,6 +393,44 @@ const AdminConfig: React.FC = () => {
         showErrorToast(
           "Delete Failed",
           error.message || "Failed to delete ward. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Ward Boundary Management Function
+  const handleSaveBoundaries = async (wardData: any) => {
+    setIsLoading(true);
+    try {
+      // Update ward boundaries
+      const response = await apiCall(`/wards/${wardData.wardId}/boundaries`, {
+        method: "PUT",
+        body: JSON.stringify(wardData),
+      });
+
+      // Update the ward in local state if needed
+      setWards((prev) =>
+        prev.map((ward) =>
+          ward.id === wardData.wardId ? { ...ward, ...response.data } : ward,
+        ),
+      );
+
+      setIsBoundaryManagerOpen(false);
+      setSelectedWardForBoundary(null);
+
+      dispatch(
+        showSuccessToast(
+          "Boundaries Saved",
+          "Ward boundaries have been updated successfully.",
+        ),
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save ward boundaries. Please try again.",
         ),
       );
     } finally {
@@ -922,6 +965,14 @@ const AdminConfig: React.FC = () => {
                           >
                             {ward.isActive ? "Active" : "Inactive"}
                           </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenBoundaryManager(ward)}
+                            title="Set Geographic Boundaries"
+                          >
+                            <Map className="h-3 w-3" />
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -1831,6 +1882,20 @@ const AdminConfig: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Ward Boundary Manager */}
+      {selectedWardForBoundary && (
+        <WardBoundaryManager
+          isOpen={isBoundaryManagerOpen}
+          onClose={() => {
+            setIsBoundaryManagerOpen(false);
+            setSelectedWardForBoundary(null);
+          }}
+          ward={selectedWardForBoundary}
+          subZones={selectedWardForBoundary.subZones || []}
+          onSave={handleSaveBoundaries}
+        />
+      )}
 
       {/* Sub-Zone Dialog */}
       <Dialog open={isSubZoneDialogOpen} onOpenChange={setIsSubZoneDialogOpen}>

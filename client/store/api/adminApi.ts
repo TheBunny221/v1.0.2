@@ -1,5 +1,50 @@
 import { baseApi, ApiResponse } from "./baseApi";
 
+// Ward and boundary related interfaces
+export interface Ward {
+  id: string;
+  name: string;
+  description?: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+  subZones?: SubZone[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubZone {
+  id: string;
+  name: string;
+  wardId: string;
+  description?: string;
+  boundaries?: string;
+  centerLat?: number;
+  centerLng?: number;
+  boundingBox?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LocationDetection {
+  exact: {
+    ward: Ward | null;
+    subZone: SubZone | null;
+  };
+  nearest: {
+    ward: Ward | null;
+    subZone: SubZone | null;
+    distance: number;
+  };
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
 // Admin API types
 export interface AdminUser {
   id: string;
@@ -406,6 +451,29 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => "/admin/system-health",
       providesTags: ["Analytics"],
     }),
+
+    // Get wards with sub-zones for filtering
+    getWardsForFiltering: builder.query<
+      ApiResponse<{
+        wards: Array<{
+          id: string;
+          name: string;
+          description?: string;
+          isActive: boolean;
+          subZones?: Array<{
+            id: string;
+            name: string;
+            wardId: string;
+            description?: string;
+            isActive: boolean;
+          }>;
+        }>;
+      }>,
+      void
+    >({
+      query: () => "/users/wards?include=subzones",
+      providesTags: ["Ward"],
+    }),
   }),
 });
 
@@ -428,6 +496,7 @@ export const {
   useGetDashboardStatsQuery,
   useGetUserActivityQuery,
   useGetSystemHealthQuery,
+  useGetWardsForFilteringQuery,
 } = adminApi;
 
 // Re-export for convenience
