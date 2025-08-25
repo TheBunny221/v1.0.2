@@ -852,27 +852,92 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Assignment Information */}
-          {complaint.assignedTo && (
+          {(complaint.assignedTo || (user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER")) && (
             <Card>
               <CardHeader>
-                <CardTitle>Assignment Info</CardTitle>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Assignment & Status Information
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium">Assigned To</p>
-                  <p className="text-gray-600">
-                    {typeof complaint.assignedTo === "object" &&
-                    complaint.assignedTo
-                      ? complaint.assignedTo.fullName
-                      : complaint.assignedTo}
-                  </p>
-                </div>
-                {complaint.deadline && (
+              <CardContent className="space-y-4">
+                {complaint.assignedTo ? (
                   <div>
-                    <p className="text-sm font-medium">Deadline</p>
-                    <p className="text-gray-600">
-                      {new Date(complaint.deadline).toLocaleDateString()}
-                    </p>
+                    <p className="text-sm font-medium mb-1">Assigned To</p>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <p className="text-blue-800 font-medium">
+                        {typeof complaint.assignedTo === "object" && complaint.assignedTo
+                          ? complaint.assignedTo.fullName
+                          : complaint.assignedTo}
+                      </p>
+                      {typeof complaint.assignedTo === "object" && complaint.assignedTo?.email && (
+                        <p className="text-blue-600 text-sm">{complaint.assignedTo.email}</p>
+                      )}
+                      {complaint.assignedOn && (
+                        <p className="text-blue-600 text-xs mt-1">
+                          Assigned on: {new Date(complaint.assignedOn).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  (user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                    <div>
+                      <p className="text-sm font-medium mb-1">Assignment Status</p>
+                      <div className="bg-yellow-50 rounded-lg p-3">
+                        <p className="text-yellow-800 font-medium">Unassigned</p>
+                        <p className="text-yellow-600 text-sm">This complaint has not been assigned to any team member yet.</p>
+                      </div>
+                    </div>
+                  )
+                )}
+
+                {/* Show deadline information for admin/ward managers */}
+                {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {complaint.deadline && (
+                      <div>
+                        <p className="text-sm font-medium mb-1">Deadline</p>
+                        <p className={`text-sm ${
+                          new Date(complaint.deadline) < new Date() ? "text-red-600 font-medium" : "text-gray-600"
+                        }`}>
+                          {new Date(complaint.deadline).toLocaleString()}
+                          {new Date(complaint.deadline) < new Date() && " (Overdue)"}
+                        </p>
+                      </div>
+                    )}
+
+                    {complaint.slaStatus && (
+                      <div>
+                        <p className="text-sm font-medium mb-1">SLA Status</p>
+                        <Badge className={
+                          complaint.slaStatus === "OVERDUE" ? "bg-red-100 text-red-800" :
+                          complaint.slaStatus === "WARNING" ? "bg-orange-100 text-orange-800" :
+                          complaint.slaStatus === "ON_TIME" ? "bg-green-100 text-green-800" :
+                          "bg-gray-100 text-gray-800"
+                        }>
+                          {complaint.slaStatus.replace("_", " ")}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Show priority and type for admin/ward managers */}
+                {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
+                    <div>
+                      <p className="text-sm font-medium mb-1">Priority Level</p>
+                      <Badge className={getPriorityColor(complaint.priority)}>
+                        {complaint.priority} Priority
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium mb-1">Complaint Type</p>
+                      <Badge variant="outline">
+                        {complaint.type?.replace("_", " ")}
+                      </Badge>
+                    </div>
                   </div>
                 )}
               </CardContent>
