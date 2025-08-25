@@ -66,7 +66,10 @@ export const exportToPDF = async (
   categoriesData: CategoryData[],
   options: ExportOptions,
 ) => {
-  const doc = new jsPDF();
+  try {
+    // Dynamically import jsPDF
+    const { default: jsPDF } = await import("jspdf");
+    const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
   let yPosition = 20;
@@ -436,16 +439,23 @@ export const exportToPDF = async (
   // Save the PDF
   const fileName = `${options.systemConfig.appName.replace(/\s+/g, "-")}-Report-${Date.now()}.pdf`;
   doc.save(fileName);
+  } catch (error) {
+    console.error("Failed to export PDF:", error);
+    throw new Error("PDF export failed. Please try again or contact support if the issue persists.");
+  }
 };
 
 // Enhanced Excel export with multiple sheets and formatting
-export const exportToExcel = (
+export const exportToExcel = async (
   data: ExportData,
   trendsData: ChartDataPoint[],
   categoriesData: CategoryData[],
   options: ExportOptions,
 ) => {
-  const workbook = XLSX.utils.book_new();
+  try {
+    // Dynamically import XLSX
+    const XLSX = await import("xlsx");
+    const workbook = XLSX.utils.book_new();
 
   // Calculate actual metrics from complaint data for consistency
   const actualTotal = data.complaints.length;
@@ -678,10 +688,17 @@ export const exportToExcel = (
   // Save the Excel file
   const fileName = `${options.systemConfig.appName.replace(/\s+/g, "-")}-Report-${Date.now()}.xlsx`;
   XLSX.writeFile(workbook, fileName);
+  } catch (error) {
+    console.error("Failed to export Excel:", error);
+    throw new Error("Excel export failed. Please try again or contact support if the issue persists.");
+  }
 };
 
 // Enhanced CSV export with proper complaint IDs
-export const exportToCSV = (data: ExportData, options: ExportOptions) => {
+export const exportToCSV = async (data: ExportData, options: ExportOptions) => {
+  try {
+    // Dynamically import XLSX for CSV conversion
+    const XLSX = await import("xlsx");
   const complaintsData = data.complaints.map((complaint) => {
     const complaintId = formatComplaintId(
       complaint.id,
@@ -733,6 +750,10 @@ export const exportToCSV = (data: ExportData, options: ExportOptions) => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to export CSV:", error);
+    throw new Error("CSV export failed. Please try again or contact support if the issue persists.");
+  }
 };
 
 // Utility function to capture chart as image for PDF inclusion
@@ -740,6 +761,16 @@ export const captureChartAsImage = async (
   chartElementId: string,
 ): Promise<string | null> => {
   try {
+    // Dynamically import html2canvas if available
+    let html2canvas;
+    try {
+      const html2canvasModule = await import("html2canvas");
+      html2canvas = html2canvasModule.default;
+    } catch (importError) {
+      console.warn("html2canvas not available, skipping chart capture");
+      return null;
+    }
+
     const chartElement = document.getElementById(chartElementId);
     if (!chartElement) return null;
 
