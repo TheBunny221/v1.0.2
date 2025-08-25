@@ -480,7 +480,7 @@ interface QuickActionButtonProps {
   label: string;
   onClick: () => void;
   variant?: "default" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
 }
 
