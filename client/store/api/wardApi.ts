@@ -125,6 +125,30 @@ export const wardApi = createApi({
         body,
       }),
     }),
+
+    getWardTeamMembers: builder.query<
+      WardTeamMembersResponse,
+      string
+    >({
+      query: (wardId) => `/ward-users?wardId=${wardId}&role=MAINTENANCE_TEAM&limit=100`,
+      transformResponse: (response: any) => {
+        // Transform the response to match expected format
+        return {
+          success: response.success,
+          message: response.message,
+          data: {
+            teamMembers: response.data?.users || [],
+            pagination: response.data?.pagination || {
+              page: 1,
+              limit: 100,
+              total: 0,
+              pages: 0
+            }
+          }
+        };
+      },
+      providesTags: ["Ward"],
+    }),
   }),
 });
 
