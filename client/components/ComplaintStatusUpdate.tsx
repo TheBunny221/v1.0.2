@@ -116,7 +116,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       skip: !user?.wardId || user?.role !== "WARD_OFFICER",
     });
 
-  const teamMembers = teamResponse?.data?.teamMembers || [];
+  const teamMembers = teamResponse?.data?.users || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
