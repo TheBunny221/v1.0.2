@@ -75,6 +75,7 @@ import {
   ChevronRight,
   CheckCircle,
 } from "lucide-react";
+import WardBoundaryManager from "../components/WardBoundaryManager";
 
 interface Ward {
   id: string;
