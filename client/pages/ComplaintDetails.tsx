@@ -33,7 +33,7 @@ import {
   Image,
   Download,
 } from "lucide-react";
-import jsPDF from "jspdf";
+// Dynamic import for jsPDF to avoid build issues
 
 const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,13 +94,16 @@ const ComplaintDetails: React.FC = () => {
     }
   };
 
-  const handleExportDetails = () => {
+  const handleExportDetails = async () => {
     if (!complaint) {
       console.error("No complaint data available for export");
       return;
     }
 
     try {
+      // Dynamically import jsPDF to avoid build issues
+      const { default: jsPDF } = await import("jspdf");
+
       // Get current translations for the user's language
       const t = translations || {};
 
@@ -323,6 +326,8 @@ const ComplaintDetails: React.FC = () => {
       console.log("Complaint details exported as PDF successfully");
     } catch (error) {
       console.error("Failed to export complaint details as PDF:", error);
+      // Show user-friendly error message
+      alert("Failed to export complaint details. Please try again or contact support if the issue persists.");
     }
   };
 
