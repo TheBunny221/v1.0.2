@@ -473,9 +473,6 @@ export const {
   useGetDashboardStatsQuery,
   useGetUserActivityQuery,
   useGetSystemHealthQuery,
-  useGetWardsWithBoundariesQuery,
-  useUpdateWardBoundariesMutation,
-  useDetectLocationAreaMutation,
 } = adminApi;
 
 // Re-export for convenience
