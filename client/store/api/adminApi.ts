@@ -494,7 +494,4 @@ export const useAdminApi = {
   useGetDashboardStatsQuery,
   useGetUserActivityQuery,
   useGetSystemHealthQuery,
-  useGetWardsWithBoundariesQuery,
-  useUpdateWardBoundariesMutation,
-  useDetectLocationAreaMutation,
 };
