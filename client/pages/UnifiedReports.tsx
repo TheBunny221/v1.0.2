@@ -678,14 +678,39 @@ const UnifiedReports: React.FC = () => {
 
     console.log("Processing chart data:", analyticsData);
 
-    return {
-      trendsData:
-        analyticsData.trends?.map((trend) => ({
+    let trendsData = [];
+    if (analyticsData.trends) {
+      if (dateFnsLoaded && dynamicLibraries.dateFns) {
+        try {
+          const { format } = dynamicLibraries.dateFns;
+          trendsData = analyticsData.trends.map((trend) => ({
+            ...trend,
+            date: format(new Date(trend.date), "MMM dd"),
+            fullDate: format(new Date(trend.date), "MMM dd, yyyy"),
+            rawDate: trend.date,
+          }));
+        } catch (error) {
+          console.error("Error formatting trend dates:", error);
+          trendsData = analyticsData.trends.map((trend) => ({
+            ...trend,
+            date: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            fullDate: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            rawDate: trend.date,
+          }));
+        }
+      } else {
+        // Fallback formatting without date-fns
+        trendsData = analyticsData.trends.map((trend) => ({
           ...trend,
-          date: format(new Date(trend.date), "MMM dd"),
-          fullDate: format(new Date(trend.date), "MMM dd, yyyy"),
+          date: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          fullDate: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
           rawDate: trend.date,
-        })) || [],
+        }));
+      }
+    }
+
+    return {
+      trendsData,
       categoriesWithColors:
         analyticsData.categories?.map((category, index) => ({
           ...category,
@@ -698,7 +723,7 @@ const UnifiedReports: React.FC = () => {
             ward.complaints > 0 ? (ward.resolved / ward.complaints) * 100 : 0,
         })) || [],
     };
-  }, [analyticsData, filters]); // Added filters dependency to force re-processing
+  }, [analyticsData, filters, dateFnsLoaded, dynamicLibraries.dateFns]); // Added dependencies
 
   if (isLoading) {
     return (
