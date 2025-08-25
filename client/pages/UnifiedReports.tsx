@@ -154,6 +154,24 @@ const UnifiedReports: React.FC = () => {
     loadDynamicLibraries();
   }, [loadDynamicLibraries]);
 
+  // Initialize date filters when date-fns is loaded
+  useEffect(() => {
+    if (dateFnsLoaded && dynamicLibraries.dateFns) {
+      const { format, startOfMonth, endOfMonth } = dynamicLibraries.dateFns;
+      try {
+        setFilters(prev => ({
+          ...prev,
+          dateRange: {
+            from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+            to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+          }
+        }));
+      } catch (error) {
+        console.error("Error initializing date filters:", error);
+      }
+    }
+  }, [dateFnsLoaded, dynamicLibraries.dateFns]);
+
   // State for filters - initialize with current date strings
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: {
