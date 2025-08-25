@@ -55,13 +55,7 @@ import {
   FileSpreadsheet,
   Calendar,
 } from "lucide-react";
-import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
-import {
-  exportToPDF,
-  exportToExcel,
-  exportToCSV,
-  validateExportPermissions,
-} from "../utils/exportUtils";
+// date-fns and export utilities will be loaded dynamically
 
 interface AnalyticsData {
   complaints: {
