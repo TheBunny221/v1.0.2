@@ -752,6 +752,33 @@ const UnifiedReports: React.FC = () => {
     );
   }
 
+  if (libraryLoadError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Feature Loading Error</h2>
+          <p className="text-gray-600 mb-4">{libraryLoadError}</p>
+          <Button onClick={loadDynamicLibraries}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry Loading Features
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!rechartsLoaded || !dateFnsLoaded) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <RefreshCw className="h-6 w-6 animate-spin" />
+          <span>Loading chart libraries...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
