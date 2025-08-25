@@ -10,7 +10,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
-import { useDetectLocationAreaMutation } from "../store/api/adminApi";
+import { useDetectLocationAreaMutation } from "../store/api/wardApi";
 import { detectLocationArea } from "../utils/geoUtils";
 
 interface LocationData {
