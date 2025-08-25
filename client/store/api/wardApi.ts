@@ -131,7 +131,7 @@ export const wardApi = createApi({
       string
     >({
       query: (wardId) => ({
-        url: `/complaints/ward-users?wardId=${wardId}&role=MAINTENANCE_TEAM&limit=100`,
+        url: `/api/complaints/ward-users?wardId=${wardId}&role=MAINTENANCE_TEAM&limit=100`,
         method: 'GET',
       }),
       transformResponse: (response: any) => {
