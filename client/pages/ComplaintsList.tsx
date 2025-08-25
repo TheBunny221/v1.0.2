@@ -76,6 +76,20 @@ const ComplaintsList: React.FC = () => {
   // Data management
   const { cacheComplaintsList } = useDataManager();
 
+  // Fetch wards for filtering (only for admin users)
+  const {
+    data: wardsResponse,
+    isLoading: isLoadingWards,
+  } = useGetWardsForFilteringQuery(undefined, {
+    skip: !isAuthenticated || user?.role === "CITIZEN",
+  });
+
+  const wards = wardsResponse?.data?.wards || [];
+
+  // Get sub-zones for selected ward
+  const selectedWard = wards.find(ward => ward.id === wardFilter);
+  const availableSubZones = selectedWard?.subZones || [];
+
   // Debounce search term for better performance
   useEffect(() => {
     const timer = setTimeout(() => {
