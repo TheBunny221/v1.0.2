@@ -140,19 +140,19 @@ export const DashboardSkeleton: React.FC<{ className?: string }> = ({
 
 // Loading States
 interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "default" | "lg";
   text?: string;
   className?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = "md",
+  size = "default",
   text,
   className,
 }) => {
   const sizeClasses = {
     sm: "h-4 w-4",
-    md: "h-6 w-6",
+    default: "h-6 w-6",
     lg: "h-8 w-8",
   };
 
@@ -315,7 +315,7 @@ export const NoPermissionEmpty: React.FC<{ className?: string }> = ({
 interface StatusIndicatorProps {
   status: "success" | "error" | "warning" | "info" | "pending";
   text?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "default" | "lg";
   showIcon?: boolean;
   className?: string;
 }
@@ -323,7 +323,7 @@ interface StatusIndicatorProps {
 export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   status,
   text,
-  size = "md",
+  size = "default",
   showIcon = true,
   className,
 }) => {
@@ -360,13 +360,13 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 
   const sizeClasses = {
     sm: "text-xs px-2 py-1",
-    md: "text-sm px-2.5 py-1.5",
+    default: "text-sm px-2.5 py-1.5",
     lg: "text-base px-3 py-2",
   };
 
   const iconSizes = {
     sm: "h-3 w-3",
-    md: "h-4 w-4",
+    default: "h-4 w-4",
     lg: "h-5 w-5",
   };
 
@@ -480,7 +480,7 @@ interface QuickActionButtonProps {
   label: string;
   onClick: () => void;
   variant?: "default" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
 }
 
@@ -489,7 +489,7 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   label,
   onClick,
   variant = "outline",
-  size = "md",
+  size = "default",
   className,
 }) => (
   <Button
@@ -575,24 +575,4 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       )}
     </div>
   );
-};
-
-export {
-  CardSkeleton,
-  TableSkeleton,
-  ListSkeleton,
-  FormSkeleton,
-  DashboardSkeleton,
-  LoadingSpinner,
-  LoadingOverlay,
-  EmptyState,
-  NoDataEmpty,
-  NoSearchResultsEmpty,
-  ErrorEmpty,
-  NoPermissionEmpty,
-  StatusIndicator,
-  ProgressStepper,
-  DataDisplay,
-  QuickActionButton,
-  FileDropzone,
 };
