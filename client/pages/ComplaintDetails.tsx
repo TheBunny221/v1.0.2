@@ -454,14 +454,39 @@ const ComplaintDetails: React.FC = () => {
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
-                    Location
+                    Location Information
                   </h3>
-                  <p className="text-gray-600">{complaint.area}</p>
-                  {complaint.landmark && (
-                    <p className="text-sm text-gray-500">
-                      Near: {complaint.landmark}
+                  <div className="space-y-1 text-sm">
+                    <p className="text-gray-600">
+                      <strong>Area:</strong> {complaint.area}
                     </p>
-                  )}
+                    {complaint.ward && (
+                      <p className="text-gray-600">
+                        <strong>Ward:</strong> {complaint.ward.name}
+                      </p>
+                    )}
+                    {complaint.subZone && (
+                      <p className="text-gray-600">
+                        <strong>Sub-Zone:</strong> {complaint.subZone.name}
+                      </p>
+                    )}
+                    {complaint.landmark && (
+                      <p className="text-gray-600">
+                        <strong>Landmark:</strong> {complaint.landmark}
+                      </p>
+                    )}
+                    {complaint.address && (
+                      <p className="text-gray-600">
+                        <strong>Address:</strong> {complaint.address}
+                      </p>
+                    )}
+                    {/* Show coordinates for admin/ward managers */}
+                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && complaint.coordinates && (
+                      <p className="text-gray-500 text-xs">
+                        <strong>Coordinates:</strong> {complaint.coordinates}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
@@ -470,20 +495,47 @@ const ComplaintDetails: React.FC = () => {
                   </h3>
                   <div className="space-y-1 text-sm">
                     <p className="text-gray-600">
-                      Submitted:{" "}
+                      <strong>Submitted:</strong>{" "}
                       {new Date(complaint.submittedOn).toLocaleString()}
                     </p>
                     {complaint.assignedOn && (
                       <p className="text-gray-600">
-                        Assigned:{" "}
+                        <strong>Assigned:</strong>{" "}
                         {new Date(complaint.assignedOn).toLocaleString()}
                       </p>
                     )}
                     {complaint.resolvedOn && (
                       <p className="text-gray-600">
-                        Resolved:{" "}
+                        <strong>Resolved:</strong>{" "}
                         {new Date(complaint.resolvedOn).toLocaleString()}
                       </p>
+                    )}
+                    {complaint.closedOn && (
+                      <p className="text-gray-600">
+                        <strong>Closed:</strong>{" "}
+                        {new Date(complaint.closedOn).toLocaleString()}
+                      </p>
+                    )}
+                    {/* Show deadline and SLA status for admin/ward managers */}
+                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                      <>
+                        {complaint.deadline && (
+                          <p className="text-gray-600">
+                            <strong>Deadline:</strong>{" "}
+                            {new Date(complaint.deadline).toLocaleString()}
+                          </p>
+                        )}
+                        {complaint.slaStatus && (
+                          <p className={`text-sm font-medium ${
+                            complaint.slaStatus === "OVERDUE" ? "text-red-600" :
+                            complaint.slaStatus === "WARNING" ? "text-orange-600" :
+                            complaint.slaStatus === "ON_TIME" ? "text-green-600" :
+                            "text-gray-600"
+                          }`}>
+                            <strong>SLA Status:</strong> {complaint.slaStatus.replace("_", " ")}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
