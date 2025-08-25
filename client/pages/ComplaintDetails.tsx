@@ -681,13 +681,97 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Administrative Information - Only for admin/ward managers */}
+          {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="h-5 w-5 mr-2" />
+                  Administrative Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Assignment Details</h4>
+                    <div className="space-y-1 text-sm">
+                      {complaint.submittedBy && (
+                        <p className="text-gray-600">
+                          <strong>Submitted By:</strong> {complaint.submittedBy.fullName}
+                          {complaint.submittedBy.email && ` (${complaint.submittedBy.email})`}
+                        </p>
+                      )}
+                      {complaint.assignedTo && (
+                        <p className="text-gray-600">
+                          <strong>Assigned To:</strong> {complaint.assignedTo.fullName}
+                          {complaint.assignedTo.email && ` (${complaint.assignedTo.email})`}
+                        </p>
+                      )}
+                      {complaint.resolvedById && (
+                        <p className="text-gray-600">
+                          <strong>Resolved By:</strong> {complaint.resolvedById}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Technical Details</h4>
+                    <div className="space-y-1 text-sm">
+                      <p className="text-gray-600">
+                        <strong>Complaint ID:</strong> {complaint.complaintId || complaint.id}
+                      </p>
+                      <p className="text-gray-600">
+                        <strong>Internal ID:</strong> {complaint.id}
+                      </p>
+                      {complaint.isAnonymous !== undefined && (
+                        <p className="text-gray-600">
+                          <strong>Anonymous:</strong> {complaint.isAnonymous ? "Yes" : "No"}
+                        </p>
+                      )}
+                      {complaint.tags && (
+                        <p className="text-gray-600">
+                          <strong>Tags:</strong> {JSON.parse(complaint.tags).join(", ")}
+                        </p>
+                      )}
+                      <p className="text-gray-500 text-xs">
+                        <strong>Created:</strong> {new Date(complaint.createdAt || complaint.submittedOn).toLocaleString()}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        <strong>Last Updated:</strong> {new Date(complaint.updatedAt || complaint.submittedOn).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Citizen Feedback Section */}
+                {(complaint.citizenFeedback || complaint.rating) && (
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2">Citizen Feedback</h4>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      {complaint.rating && (
+                        <p className="text-sm text-blue-800 mb-1">
+                          <strong>Rating:</strong> {complaint.rating}/5 ⭐
+                        </p>
+                      )}
+                      {complaint.citizenFeedback && (
+                        <p className="text-sm text-blue-700">
+                          <strong>Feedback:</strong> {complaint.citizenFeedback}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* General Remarks - Hidden from citizens as they may contain internal notes */}
           {complaint.remarks && user?.role !== "CITIZEN" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="h-5 w-5 mr-2" />
-                  General Remarks
+                  Internal Remarks
                 </CardTitle>
               </CardHeader>
               <CardContent>
