@@ -40,6 +40,10 @@ export interface GuestComplaintData {
 
   // Step 3: Attachments
   attachments?: AttachmentFile[];
+
+  // step 4 : Captcha
+  captchaId?: string;
+  captchaText?: string;
 }
 
 export interface GuestServiceRequestData {
@@ -280,6 +284,10 @@ export const submitGuestComplaint = createAsyncThunk(
         formData.append("landmark", complaintData.landmark);
       if (complaintData.address)
         formData.append("address", complaintData.address);
+      if(complaintData.captchaId)
+        formData.append("captchaId",complaintData.captchaId);
+      if(complaintData.captchaText)
+        formData.append("captchaText",complaintData.captchaText);
 
       // Add coordinates
       if (complaintData.coordinates) {

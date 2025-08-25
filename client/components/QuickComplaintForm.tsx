@@ -20,6 +20,7 @@ import {
   submitGuestComplaint,
   clearGuestData,
   FileAttachment,
+  GuestComplaintData,
 } from "../store/slices/guestSlice";
 import {
   useGetWardsQuery,
@@ -296,7 +297,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             landmark: formData.location,
             address: formData.address,
             coordinates: formData.coordinates,
-            captcha: captcha,
+            captchaText: captcha,
             captchaId: captchaId,
             contactName: user?.fullName || "",
             contactEmail: formData.email,
@@ -318,7 +319,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           onSuccess?.(result.id);
         } else {
           // Guest flow: Submit complaint and send OTP
-          const guestFormData = {
+          const guestFormData : GuestComplaintData = {
             fullName: formData.fullName,
             email: formData.email,
             phoneNumber: formData.mobile,
@@ -332,7 +333,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             description: formData.description,
             coordinates: formData.coordinates,
             captchaId: captchaId,
-            captcha: captcha,
+            captchaText: captcha,
           };
 
           // Convert files to FileAttachment format

@@ -260,8 +260,8 @@ export function createApp() {
 
     // SPA fallback - serve index.html for all non-API routes
     app.get("*", (req, res, next) => {
-      // Skip API routes
-      if (req.path.startsWith("/api")) {
+      // Skip API routes and static asset requests (those containing a dot)
+      if (req.path.startsWith("/api") || req.path.includes(".")) {
         return next();
       }
 
