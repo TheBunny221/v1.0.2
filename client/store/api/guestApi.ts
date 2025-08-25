@@ -13,6 +13,8 @@ export interface GuestComplaintRequest {
   area: string;
   landmark?: string;
   address?: string;
+  captchaId: string;
+  captchaText: string;
   coordinates?: {
     latitude: number;
     longitude: number;

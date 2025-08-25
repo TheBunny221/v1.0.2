@@ -23,15 +23,14 @@ const createPrismaClient = () => {
 
     // Connection pool settings for PostgreSQL in production
     if (process.env.DATABASE_URL?.includes("postgresql")) {
-      config.datasourceUrl = process.env.DATABASE_URL;
-      // Additional PostgreSQL-specific optimizations can be added here
+        // Additional PostgreSQL-specific optimizations can be added here
     }
   }
 
   return new PrismaClient(config);
 };
 
-let prisma = createPrismaClient();
+export const prisma = createPrismaClient();
 
 const ensureDatabaseAccess = async () => {
   try {

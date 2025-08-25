@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
@@ -173,7 +173,7 @@ async function main() {
 
     // 4. Create Sub-zones for each ward
     console.log("📍 Creating sub-zones...");
-    const subZoneData: Record<string, string[]> = {
+    const subZoneData = {
       "Ward 1 - Fort Kochi": [
         "Princess Street Area",
         "Fort Kochi Beach",
@@ -230,7 +230,7 @@ async function main() {
     console.log("👥 Creating users...");
 
     // Hash password function
-    const hashPassword = async (password: string) => {
+    const hashPassword = async (password) => {
       const salt = await bcrypt.genSalt(10);
       return await bcrypt.hash(password, salt);
     };

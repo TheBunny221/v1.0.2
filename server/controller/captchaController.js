@@ -173,6 +173,7 @@ export const verifyCaptcha = async (req, res) => {
 
 // Utility function to verify CAPTCHA for other controllers
 export const verifyCaptchaForComplaint = (captchaId, captchaText) => {
+  console.log(captchaId, captchaText)
   return new Promise((resolve, reject) => {
     if (!captchaId || !captchaText) {
       return reject(new Error("CAPTCHA ID and text are required"));

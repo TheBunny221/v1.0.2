@@ -269,7 +269,7 @@ async function main() {
 
     // 4. Create Sub-zones for major wards
     console.log("📍 Creating sub-zones for major wards...");
-    const majorWardSubZones: Record<string, string[]> = {
+    const majorWardSubZones = {
       "Ward 1 - Fort Kochi": [
         "Princess Street",
         "Parade Ground",
@@ -309,13 +309,8 @@ async function main() {
       ];
 
       for (const zoneName of subZones) {
-        await prisma.subZone.upsert({
-          where: {
-            // Using a unique combination since Prisma requires a unique field for upsert
-            name: `${zoneName}-${ward.id}`,
-          },
-          update: {},
-          create: {
+        await prisma.subZone.create({
+          data: {
             name: zoneName,
             wardId: ward.id,
             description: `${zoneName} area in ${ward.name}`,

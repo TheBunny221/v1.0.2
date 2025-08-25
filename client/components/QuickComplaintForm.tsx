@@ -65,6 +65,7 @@ interface QuickComplaintFormProps {
 }
 
 interface FormData {
+  fullName: string;
   mobile: string;
   email: string;
   problemType: string;
@@ -95,6 +96,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
   // Form state
   const [formData, setFormData] = useState<FormData>({
+    fullName: "",
     mobile: "",
     email: "",
     problemType: "",
@@ -130,6 +132,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       setSubmissionMode("citizen");
       setFormData((prev) => ({
         ...prev,
+        fullName: user.fullName || "",
         mobile: user.phoneNumber || "",
         email: user.email || "",
         ward: user.wardId || "",
@@ -196,9 +199,27 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const handleFileUpload = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFiles = Array.from(event.target.files || []);
-      setFiles((prev) => [...prev, ...selectedFiles]);
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const validFiles: File[] = [];
+
+      selectedFiles.forEach((file) => {
+        if (allowedTypes.includes(file.type)) {
+          validFiles.push(file);
+        } else {
+          dispatch(
+            showErrorToast(
+              "Invalid File Type",
+              "Only JPG and PNG images are allowed",
+            ),
+          );
+        }
+      });
+
+      if (validFiles.length) {
+        setFiles((prev) => [...prev, ...validFiles]);
+      }
     },
-    [],
+    [dispatch],
   );
 
   const removeFile = useCallback((index: number) => {
@@ -244,6 +265,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       }
 
       if (
+        !formData.fullName ||
         !formData.mobile ||
         !formData.problemType ||
         !formData.ward ||
@@ -274,12 +296,12 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             landmark: formData.location,
             address: formData.address,
             coordinates: formData.coordinates,
+            captcha: captcha,
+            captchaId: captchaId,
             contactName: user?.fullName || "",
             contactEmail: formData.email,
             contactPhone: formData.mobile,
             isAnonymous: false,
-            captchaId,
-            captchaText: captcha,
           };
 
           const result = await dispatch(
@@ -297,7 +319,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         } else {
           // Guest flow: Submit complaint and send OTP
           const guestFormData = {
-            fullName: "Guest User",
+            fullName: formData.fullName,
             email: formData.email,
             phoneNumber: formData.mobile,
             type: formData.problemType,
@@ -309,8 +331,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             address: formData.address,
             description: formData.description,
             coordinates: formData.coordinates,
-            captchaId,
-            captchaText: captcha,
+            captchaId: captchaId,
+            captcha: captcha,
           };
 
           // Convert files to FileAttachment format
@@ -439,6 +461,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
   const resetForm = useCallback(() => {
     setFormData({
+      fullName: "",
       mobile: isAuthenticated && user ? user.phoneNumber || "" : "",
       email: isAuthenticated && user ? user.email || "" : "",
       problemType: "",
@@ -494,6 +517,21 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                   "Contact Information"}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">
+                    {translations?.auth?.fullName || "Full Name"} *
+                  </Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      handleInputChange("fullName", e.target.value)
+                    }
+                    placeholder={`${translations?.common?.name || "Enter your"} ${translations?.auth?.fullName || "full name"}`}
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="mobile">
                     {translations?.complaints?.mobile || "Mobile Number"} *
@@ -738,7 +776,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                   <input
                     type="file"
                     multiple
-                    accept="image/*,video/*,.pdf"
+                    accept="image/jpeg,image/png"
                     onChange={handleFileUpload}
                     className="hidden"
                     id="file-upload"
