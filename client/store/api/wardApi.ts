@@ -156,4 +156,5 @@ export const {
   useGetWardsWithBoundariesQuery,
   useUpdateWardBoundariesMutation,
   useDetectLocationAreaMutation,
+  useGetWardTeamMembersQuery,
 } = wardApi;
