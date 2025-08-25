@@ -799,17 +799,53 @@ const ComplaintDetails: React.FC = () => {
               {complaint.contactName && (
                 <div className="flex items-center">
                   <User className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{complaint.contactName}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{complaint.contactName}</span>
+                    {/* Show if submitted by registered user for admin/ward managers */}
+                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && complaint.submittedBy && (
+                      <span className="text-xs text-gray-500">
+                        Registered User: {complaint.submittedBy.fullName}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
               <div className="flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{complaint.contactPhone}</span>
+                <div className="flex flex-col">
+                  <span>{complaint.contactPhone}</span>
+                  {/* Show submitter phone for admin/ward managers if different */}
+                  {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") &&
+                   complaint.submittedBy?.phoneNumber &&
+                   complaint.submittedBy.phoneNumber !== complaint.contactPhone && (
+                    <span className="text-xs text-gray-500">
+                      User Phone: {complaint.submittedBy.phoneNumber}
+                    </span>
+                  )}
+                </div>
               </div>
               {complaint.contactEmail && (
                 <div className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{complaint.contactEmail}</span>
+                  <div className="flex flex-col">
+                    <span>{complaint.contactEmail}</span>
+                    {/* Show submitter email for admin/ward managers if different */}
+                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") &&
+                     complaint.submittedBy?.email &&
+                     complaint.submittedBy.email !== complaint.contactEmail && (
+                      <span className="text-xs text-gray-500">
+                        User Email: {complaint.submittedBy.email}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Show anonymity status for admin/ward managers */}
+              {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && complaint.isAnonymous && (
+                <div className="flex items-center text-orange-600">
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="text-sm font-medium">Anonymous Complaint</span>
                 </div>
               )}
             </CardContent>
