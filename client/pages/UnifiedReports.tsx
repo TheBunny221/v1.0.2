@@ -120,6 +120,40 @@ const UnifiedReports: React.FC = () => {
   const [dynamicLibraries, setDynamicLibraries] = useState<any>({});
   const [libraryLoadError, setLibraryLoadError] = useState<string | null>(null);
 
+  // Load dynamic libraries
+  const loadDynamicLibraries = useCallback(async () => {
+    try {
+      // Load recharts
+      if (!rechartsLoaded) {
+        const recharts = await import("recharts");
+        setDynamicLibraries(prev => ({ ...prev, recharts }));
+        setRechartsLoaded(true);
+      }
+
+      // Load date-fns
+      if (!dateFnsLoaded) {
+        const dateFns = await import("date-fns");
+        setDynamicLibraries(prev => ({ ...prev, dateFns }));
+        setDateFnsLoaded(true);
+      }
+
+      // Load export utilities
+      if (!exportUtilsLoaded) {
+        const exportUtils = await import("../utils/exportUtils");
+        setDynamicLibraries(prev => ({ ...prev, exportUtils }));
+        setExportUtilsLoaded(true);
+      }
+    } catch (error) {
+      console.error("Failed to load dynamic libraries:", error);
+      setLibraryLoadError("Failed to load required libraries. Some features may not work.");
+    }
+  }, [rechartsLoaded, dateFnsLoaded, exportUtilsLoaded]);
+
+  // Load libraries on component mount
+  useEffect(() => {
+    loadDynamicLibraries();
+  }, [loadDynamicLibraries]);
+
   // State for filters
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: {
