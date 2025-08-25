@@ -968,14 +968,24 @@ const ComplaintDetails: React.FC = () => {
                         )}
                         <div>
                           <p className="font-medium text-sm">
-                            {attachment.originalName}
+                            {attachment.originalName || attachment.fileName}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {(attachment.size / 1024).toFixed(1)} KB •{" "}
-                            {new Date(
-                              attachment.uploadedAt,
-                            ).toLocaleDateString()}
-                          </p>
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <p>
+                              {(attachment.size / 1024).toFixed(1)} KB •{" "}
+                              {new Date(attachment.uploadedAt).toLocaleDateString()}
+                            </p>
+                            {/* Show additional details for admin/ward managers */}
+                            {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                              <>
+                                <p>Type: {attachment.mimeType}</p>
+                                {attachment.fileName !== attachment.originalName && (
+                                  <p>Stored as: {attachment.fileName}</p>
+                                )}
+                                <p>Uploaded: {new Date(attachment.uploadedAt).toLocaleString()}</p>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
