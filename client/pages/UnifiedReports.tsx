@@ -429,8 +429,15 @@ const UnifiedReports: React.FC = () => {
       return;
     }
 
+    if (!exportUtilsLoaded || !dynamicLibraries.exportUtils) {
+      alert("Export functionality is still loading. Please try again in a moment.");
+      return;
+    }
+
     setIsExporting(true);
     try {
+      const { validateExportPermissions, exportToPDF, exportToExcel, exportToCSV } = dynamicLibraries.exportUtils;
+
       const queryParams = new URLSearchParams({
         from: filters.dateRange.from,
         to: filters.dateRange.to,
