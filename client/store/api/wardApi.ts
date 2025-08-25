@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseApi, ApiResponse } from "./baseApi";
 
 interface Ward {
   id: string;
@@ -81,19 +81,7 @@ interface WardTeamMembersResponse {
   };
 }
 
-export const wardApi = createApi({
-  reducerPath: "wardApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api/wards",
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.token;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-  tagTypes: ["Ward", "Boundaries"],
+export const wardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getWardsWithBoundaries: builder.query<
       { success: boolean; message: string; data: Ward[] },
