@@ -202,7 +202,15 @@ const ComplaintsList: React.FC = () => {
     setSearchTerm("");
     setStatusFilter("all");
     setPriorityFilter("all");
+    setWardFilter("all");
+    setSubZoneFilter("all");
     setDebouncedSearchTerm("");
+  };
+
+  // Reset sub-zone when ward changes
+  const handleWardChange = (value: string) => {
+    setWardFilter(value);
+    setSubZoneFilter("all");
   };
 
   return (
