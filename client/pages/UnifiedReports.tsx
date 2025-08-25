@@ -1480,23 +1480,21 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="ward-performance-chart">
-                    <ResponsiveContainer width="100%" height={400}>
-                      <BarChart data={processedChartData?.wardsData || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fontSize: 11 }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="complaints" fill="#8884d8" />
-                        <Bar dataKey="resolved" fill="#82ca9d" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    {renderChart('bar', {
+                      data: processedChartData?.wardsData || [],
+                      height: 400,
+                      xAxis: {
+                        dataKey: "name",
+                        tick: { fontSize: 11 },
+                        angle: -45,
+                        textAnchor: "end",
+                        height: 80
+                      },
+                      bars: [
+                        { dataKey: "complaints", fill: "#8884d8" },
+                        { dataKey: "resolved", fill: "#82ca9d" }
+                      ]
+                    })}
                   </div>
                 </CardContent>
               </Card>
