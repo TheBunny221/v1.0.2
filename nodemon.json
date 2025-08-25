@@ -1,0 +1,14 @@
+{
+  "watch": ["server/**/*"],
+  "ext": "js,mjs,json",
+  "ignore": [
+    "client/**/*",
+    "dist/**/*",
+    "node_modules/**/*",
+    "prisma/**/*",
+    "*.log",
+    "*.db"
+  ],
+  "delay": "1000",
+  "verbose": false
+}
