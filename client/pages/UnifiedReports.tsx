@@ -113,6 +113,13 @@ const UnifiedReports: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
   const { appName, appLogoUrl, getConfig } = useSystemConfig();
 
+  // Dynamic imports state
+  const [rechartsLoaded, setRechartsLoaded] = useState(false);
+  const [dateFnsLoaded, setDateFnsLoaded] = useState(false);
+  const [exportUtilsLoaded, setExportUtilsLoaded] = useState(false);
+  const [dynamicLibraries, setDynamicLibraries] = useState<any>({});
+  const [libraryLoadError, setLibraryLoadError] = useState<string | null>(null);
+
   // State for filters
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: {
