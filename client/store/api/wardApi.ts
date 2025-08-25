@@ -58,6 +58,29 @@ interface DetectAreaRequest {
   longitude: number;
 }
 
+interface TeamMember {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  department?: string;
+  isActive: boolean;
+}
+
+interface WardTeamMembersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    teamMembers: TeamMember[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+}
+
 export const wardApi = createApi({
   reducerPath: "wardApi",
   baseQuery: fetchBaseQuery({
