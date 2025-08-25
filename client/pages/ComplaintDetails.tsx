@@ -327,7 +327,9 @@ const ComplaintDetails: React.FC = () => {
     } catch (error) {
       console.error("Failed to export complaint details as PDF:", error);
       // Show user-friendly error message
-      alert("Failed to export complaint details. Please try again or contact support if the issue persists.");
+      alert(
+        "Failed to export complaint details. Please try again or contact support if the issue persists.",
+      );
     }
   };
 
@@ -481,11 +483,13 @@ const ComplaintDetails: React.FC = () => {
                       </p>
                     )}
                     {/* Show coordinates for admin/ward managers */}
-                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && complaint.coordinates && (
-                      <p className="text-gray-500 text-xs">
-                        <strong>Coordinates:</strong> {complaint.coordinates}
-                      </p>
-                    )}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") &&
+                      complaint.coordinates && (
+                        <p className="text-gray-500 text-xs">
+                          <strong>Coordinates:</strong> {complaint.coordinates}
+                        </p>
+                      )}
                   </div>
                 </div>
                 <div>
@@ -517,7 +521,8 @@ const ComplaintDetails: React.FC = () => {
                       </p>
                     )}
                     {/* Show deadline and SLA status for admin/ward managers */}
-                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") && (
                       <>
                         {complaint.deadline && (
                           <p className="text-gray-600">
@@ -526,13 +531,19 @@ const ComplaintDetails: React.FC = () => {
                           </p>
                         )}
                         {complaint.slaStatus && (
-                          <p className={`text-sm font-medium ${
-                            complaint.slaStatus === "OVERDUE" ? "text-red-600" :
-                            complaint.slaStatus === "WARNING" ? "text-orange-600" :
-                            complaint.slaStatus === "ON_TIME" ? "text-green-600" :
-                            "text-gray-600"
-                          }`}>
-                            <strong>SLA Status:</strong> {complaint.slaStatus.replace("_", " ")}
+                          <p
+                            className={`text-sm font-medium ${
+                              complaint.slaStatus === "OVERDUE"
+                                ? "text-red-600"
+                                : complaint.slaStatus === "WARNING"
+                                  ? "text-orange-600"
+                                  : complaint.slaStatus === "ON_TIME"
+                                    ? "text-green-600"
+                                    : "text-gray-600"
+                            }`}
+                          >
+                            <strong>SLA Status:</strong>{" "}
+                            {complaint.slaStatus.replace("_", " ")}
                           </p>
                         )}
                       </>
@@ -682,7 +693,8 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Administrative Information - Only for admin/ward managers */}
-          {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+          {(user?.role === "ADMINISTRATOR" ||
+            user?.role === "WARD_OFFICER") && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -697,14 +709,18 @@ const ComplaintDetails: React.FC = () => {
                     <div className="space-y-1 text-sm">
                       {complaint.submittedBy && (
                         <p className="text-gray-600">
-                          <strong>Submitted By:</strong> {complaint.submittedBy.fullName}
-                          {complaint.submittedBy.email && ` (${complaint.submittedBy.email})`}
+                          <strong>Submitted By:</strong>{" "}
+                          {complaint.submittedBy.fullName}
+                          {complaint.submittedBy.email &&
+                            ` (${complaint.submittedBy.email})`}
                         </p>
                       )}
                       {complaint.assignedTo && (
                         <p className="text-gray-600">
-                          <strong>Assigned To:</strong> {complaint.assignedTo.fullName}
-                          {complaint.assignedTo.email && ` (${complaint.assignedTo.email})`}
+                          <strong>Assigned To:</strong>{" "}
+                          {complaint.assignedTo.fullName}
+                          {complaint.assignedTo.email &&
+                            ` (${complaint.assignedTo.email})`}
                         </p>
                       )}
                       {complaint.resolvedById && (
@@ -718,26 +734,35 @@ const ComplaintDetails: React.FC = () => {
                     <h4 className="font-medium mb-2">Technical Details</h4>
                     <div className="space-y-1 text-sm">
                       <p className="text-gray-600">
-                        <strong>Complaint ID:</strong> {complaint.complaintId || complaint.id}
+                        <strong>Complaint ID:</strong>{" "}
+                        {complaint.complaintId || complaint.id}
                       </p>
                       <p className="text-gray-600">
                         <strong>Internal ID:</strong> {complaint.id}
                       </p>
                       {complaint.isAnonymous !== undefined && (
                         <p className="text-gray-600">
-                          <strong>Anonymous:</strong> {complaint.isAnonymous ? "Yes" : "No"}
+                          <strong>Anonymous:</strong>{" "}
+                          {complaint.isAnonymous ? "Yes" : "No"}
                         </p>
                       )}
                       {complaint.tags && (
                         <p className="text-gray-600">
-                          <strong>Tags:</strong> {JSON.parse(complaint.tags).join(", ")}
+                          <strong>Tags:</strong>{" "}
+                          {JSON.parse(complaint.tags).join(", ")}
                         </p>
                       )}
                       <p className="text-gray-500 text-xs">
-                        <strong>Created:</strong> {new Date(complaint.createdAt || complaint.submittedOn).toLocaleString()}
+                        <strong>Created:</strong>{" "}
+                        {new Date(
+                          complaint.createdAt || complaint.submittedOn,
+                        ).toLocaleString()}
                       </p>
                       <p className="text-gray-500 text-xs">
-                        <strong>Last Updated:</strong> {new Date(complaint.updatedAt || complaint.submittedOn).toLocaleString()}
+                        <strong>Last Updated:</strong>{" "}
+                        {new Date(
+                          complaint.updatedAt || complaint.submittedOn,
+                        ).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -802,11 +827,13 @@ const ComplaintDetails: React.FC = () => {
                   <div className="flex flex-col">
                     <span className="font-medium">{complaint.contactName}</span>
                     {/* Show if submitted by registered user for admin/ward managers */}
-                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && complaint.submittedBy && (
-                      <span className="text-xs text-gray-500">
-                        Registered User: {complaint.submittedBy.fullName}
-                      </span>
-                    )}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") &&
+                      complaint.submittedBy && (
+                        <span className="text-xs text-gray-500">
+                          Registered User: {complaint.submittedBy.fullName}
+                        </span>
+                      )}
                   </div>
                 </div>
               )}
@@ -815,13 +842,15 @@ const ComplaintDetails: React.FC = () => {
                 <div className="flex flex-col">
                   <span>{complaint.contactPhone}</span>
                   {/* Show submitter phone for admin/ward managers if different */}
-                  {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") &&
-                   complaint.submittedBy?.phoneNumber &&
-                   complaint.submittedBy.phoneNumber !== complaint.contactPhone && (
-                    <span className="text-xs text-gray-500">
-                      User Phone: {complaint.submittedBy.phoneNumber}
-                    </span>
-                  )}
+                  {(user?.role === "ADMINISTRATOR" ||
+                    user?.role === "WARD_OFFICER") &&
+                    complaint.submittedBy?.phoneNumber &&
+                    complaint.submittedBy.phoneNumber !==
+                      complaint.contactPhone && (
+                      <span className="text-xs text-gray-500">
+                        User Phone: {complaint.submittedBy.phoneNumber}
+                      </span>
+                    )}
                 </div>
               </div>
               {complaint.contactEmail && (
@@ -830,29 +859,37 @@ const ComplaintDetails: React.FC = () => {
                   <div className="flex flex-col">
                     <span>{complaint.contactEmail}</span>
                     {/* Show submitter email for admin/ward managers if different */}
-                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") &&
-                     complaint.submittedBy?.email &&
-                     complaint.submittedBy.email !== complaint.contactEmail && (
-                      <span className="text-xs text-gray-500">
-                        User Email: {complaint.submittedBy.email}
-                      </span>
-                    )}
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") &&
+                      complaint.submittedBy?.email &&
+                      complaint.submittedBy.email !==
+                        complaint.contactEmail && (
+                        <span className="text-xs text-gray-500">
+                          User Email: {complaint.submittedBy.email}
+                        </span>
+                      )}
                   </div>
                 </div>
               )}
 
               {/* Show anonymity status for admin/ward managers */}
-              {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && complaint.isAnonymous && (
-                <div className="flex items-center text-orange-600">
-                  <User className="h-4 w-4 mr-2" />
-                  <span className="text-sm font-medium">Anonymous Complaint</span>
-                </div>
-              )}
+              {(user?.role === "ADMINISTRATOR" ||
+                user?.role === "WARD_OFFICER") &&
+                complaint.isAnonymous && (
+                  <div className="flex items-center text-orange-600">
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-medium">
+                      Anonymous Complaint
+                    </span>
+                  </div>
+                )}
             </CardContent>
           </Card>
 
           {/* Assignment Information */}
-          {(complaint.assignedTo || (user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER")) && (
+          {(complaint.assignedTo ||
+            user?.role === "ADMINISTRATOR" ||
+            user?.role === "WARD_OFFICER") && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -866,43 +903,62 @@ const ComplaintDetails: React.FC = () => {
                     <p className="text-sm font-medium mb-1">Assigned To</p>
                     <div className="bg-blue-50 rounded-lg p-3">
                       <p className="text-blue-800 font-medium">
-                        {typeof complaint.assignedTo === "object" && complaint.assignedTo
+                        {typeof complaint.assignedTo === "object" &&
+                        complaint.assignedTo
                           ? complaint.assignedTo.fullName
                           : complaint.assignedTo}
                       </p>
-                      {typeof complaint.assignedTo === "object" && complaint.assignedTo?.email && (
-                        <p className="text-blue-600 text-sm">{complaint.assignedTo.email}</p>
-                      )}
+                      {typeof complaint.assignedTo === "object" &&
+                        complaint.assignedTo?.email && (
+                          <p className="text-blue-600 text-sm">
+                            {complaint.assignedTo.email}
+                          </p>
+                        )}
                       {complaint.assignedOn && (
                         <p className="text-blue-600 text-xs mt-1">
-                          Assigned on: {new Date(complaint.assignedOn).toLocaleString()}
+                          Assigned on:{" "}
+                          {new Date(complaint.assignedOn).toLocaleString()}
                         </p>
                       )}
                     </div>
                   </div>
                 ) : (
-                  (user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                  (user?.role === "ADMINISTRATOR" ||
+                    user?.role === "WARD_OFFICER") && (
                     <div>
-                      <p className="text-sm font-medium mb-1">Assignment Status</p>
+                      <p className="text-sm font-medium mb-1">
+                        Assignment Status
+                      </p>
                       <div className="bg-yellow-50 rounded-lg p-3">
-                        <p className="text-yellow-800 font-medium">Unassigned</p>
-                        <p className="text-yellow-600 text-sm">This complaint has not been assigned to any team member yet.</p>
+                        <p className="text-yellow-800 font-medium">
+                          Unassigned
+                        </p>
+                        <p className="text-yellow-600 text-sm">
+                          This complaint has not been assigned to any team
+                          member yet.
+                        </p>
                       </div>
                     </div>
                   )
                 )}
 
                 {/* Show deadline information for admin/ward managers */}
-                {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                {(user?.role === "ADMINISTRATOR" ||
+                  user?.role === "WARD_OFFICER") && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {complaint.deadline && (
                       <div>
                         <p className="text-sm font-medium mb-1">Deadline</p>
-                        <p className={`text-sm ${
-                          new Date(complaint.deadline) < new Date() ? "text-red-600 font-medium" : "text-gray-600"
-                        }`}>
+                        <p
+                          className={`text-sm ${
+                            new Date(complaint.deadline) < new Date()
+                              ? "text-red-600 font-medium"
+                              : "text-gray-600"
+                          }`}
+                        >
                           {new Date(complaint.deadline).toLocaleString()}
-                          {new Date(complaint.deadline) < new Date() && " (Overdue)"}
+                          {new Date(complaint.deadline) < new Date() &&
+                            " (Overdue)"}
                         </p>
                       </div>
                     )}
@@ -910,12 +966,17 @@ const ComplaintDetails: React.FC = () => {
                     {complaint.slaStatus && (
                       <div>
                         <p className="text-sm font-medium mb-1">SLA Status</p>
-                        <Badge className={
-                          complaint.slaStatus === "OVERDUE" ? "bg-red-100 text-red-800" :
-                          complaint.slaStatus === "WARNING" ? "bg-orange-100 text-orange-800" :
-                          complaint.slaStatus === "ON_TIME" ? "bg-green-100 text-green-800" :
-                          "bg-gray-100 text-gray-800"
-                        }>
+                        <Badge
+                          className={
+                            complaint.slaStatus === "OVERDUE"
+                              ? "bg-red-100 text-red-800"
+                              : complaint.slaStatus === "WARNING"
+                                ? "bg-orange-100 text-orange-800"
+                                : complaint.slaStatus === "ON_TIME"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                          }
+                        >
                           {complaint.slaStatus.replace("_", " ")}
                         </Badge>
                       </div>
@@ -924,7 +985,8 @@ const ComplaintDetails: React.FC = () => {
                 )}
 
                 {/* Show priority and type for admin/ward managers */}
-                {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                {(user?.role === "ADMINISTRATOR" ||
+                  user?.role === "WARD_OFFICER") && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
                     <div>
                       <p className="text-sm font-medium mb-1">Priority Level</p>
@@ -973,16 +1035,25 @@ const ComplaintDetails: React.FC = () => {
                           <div className="text-xs text-gray-500 space-y-1">
                             <p>
                               {(attachment.size / 1024).toFixed(1)} KB •{" "}
-                              {new Date(attachment.uploadedAt).toLocaleDateString()}
+                              {new Date(
+                                attachment.uploadedAt,
+                              ).toLocaleDateString()}
                             </p>
                             {/* Show additional details for admin/ward managers */}
-                            {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                            {(user?.role === "ADMINISTRATOR" ||
+                              user?.role === "WARD_OFFICER") && (
                               <>
                                 <p>Type: {attachment.mimeType}</p>
-                                {attachment.fileName !== attachment.originalName && (
+                                {attachment.fileName !==
+                                  attachment.originalName && (
                                   <p>Stored as: {attachment.fileName}</p>
                                 )}
-                                <p>Uploaded: {new Date(attachment.uploadedAt).toLocaleString()}</p>
+                                <p>
+                                  Uploaded:{" "}
+                                  {new Date(
+                                    attachment.uploadedAt,
+                                  ).toLocaleString()}
+                                </p>
                               </>
                             )}
                           </div>

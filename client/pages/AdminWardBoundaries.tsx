@@ -1,6 +1,14 @@
 import React, { useState } from "react";
-import { useGetWardsWithBoundariesQuery, useUpdateWardBoundariesMutation } from "../store/api/wardApi";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  useGetWardsWithBoundariesQuery,
+  useUpdateWardBoundariesMutation,
+} from "../store/api/wardApi";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
@@ -55,7 +63,10 @@ const AdminWardBoundaries: React.FC = () => {
     setError(null);
   };
 
-  const handleSaveBoundaries = async (wardData: Ward, subZoneData?: SubZone[]) => {
+  const handleSaveBoundaries = async (
+    wardData: Ward,
+    subZoneData?: SubZone[],
+  ) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -66,7 +77,7 @@ const AdminWardBoundaries: React.FC = () => {
         centerLat: wardData.centerLat,
         centerLng: wardData.centerLng,
         boundingBox: wardData.boundingBox,
-        subZones: subZoneData?.map(sz => ({
+        subZones: subZoneData?.map((sz) => ({
           id: sz.id,
           boundaries: sz.boundaries,
           centerLat: sz.centerLat,
@@ -87,7 +98,9 @@ const AdminWardBoundaries: React.FC = () => {
 
   const getWardBoundaryStatus = (ward: Ward) => {
     const hasBoundary = ward.boundaries && ward.boundaries !== "null";
-    const subZonesWithBoundaries = ward.subZones?.filter(sz => sz.boundaries && sz.boundaries !== "null").length || 0;
+    const subZonesWithBoundaries =
+      ward.subZones?.filter((sz) => sz.boundaries && sz.boundaries !== "null")
+        .length || 0;
     const totalSubZones = ward.subZones?.length || 0;
 
     return {
@@ -120,7 +133,8 @@ const AdminWardBoundaries: React.FC = () => {
             Ward Geographic Boundaries
           </h1>
           <p className="text-muted-foreground mt-2">
-            Configure geographic boundaries for wards and sub-zones to enable automatic location detection
+            Configure geographic boundaries for wards and sub-zones to enable
+            automatic location detection
           </p>
         </div>
         <Button
@@ -128,7 +142,9 @@ const AdminWardBoundaries: React.FC = () => {
           variant="outline"
           disabled={isLoadingWards}
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingWards ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${isLoadingWards ? "animate-spin" : ""}`}
+          />
           Refresh
         </Button>
       </div>
@@ -137,8 +153,10 @@ const AdminWardBoundaries: React.FC = () => {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Setting geographic boundaries allows the system to automatically detect which ward and sub-zone a complaint location belongs to.
-          This improves the user experience and helps with automatic assignment of complaints to the appropriate officers.
+          Setting geographic boundaries allows the system to automatically
+          detect which ward and sub-zone a complaint location belongs to. This
+          improves the user experience and helps with automatic assignment of
+          complaints to the appropriate officers.
         </AlertDescription>
       </Alert>
 
@@ -146,9 +164,7 @@ const AdminWardBoundaries: React.FC = () => {
       {error && (
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            {error}
-          </AlertDescription>
+          <AlertDescription className="text-red-800">{error}</AlertDescription>
         </Alert>
       )}
 
@@ -181,7 +197,7 @@ const AdminWardBoundaries: React.FC = () => {
                     </p>
                   )}
                 </CardHeader>
-                
+
                 <CardContent className="space-y-4">
                   {/* Boundary Status */}
                   <div className="space-y-2">
@@ -194,11 +210,15 @@ const AdminWardBoundaries: React.FC = () => {
                         {status.hasBoundary ? "Set" : "Not Set"}
                       </Badge>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-sm">
                       <span>Sub-Zone Boundaries:</span>
                       <Badge
-                        variant={status.subZonesWithBoundaries > 0 ? "default" : "outline"}
+                        variant={
+                          status.subZonesWithBoundaries > 0
+                            ? "default"
+                            : "outline"
+                        }
                         className="text-xs"
                       >
                         {status.subZonesWithBoundaries}/{status.totalSubZones}
@@ -210,7 +230,8 @@ const AdminWardBoundaries: React.FC = () => {
                   {ward.centerLat && ward.centerLng && (
                     <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                       <MapPin className="h-3 w-3 inline mr-1" />
-                      Center: {ward.centerLat.toFixed(4)}, {ward.centerLng.toFixed(4)}
+                      Center: {ward.centerLat.toFixed(4)},{" "}
+                      {ward.centerLng.toFixed(4)}
                     </div>
                   )}
 
@@ -220,10 +241,15 @@ const AdminWardBoundaries: React.FC = () => {
                       <p className="text-sm font-medium">Sub-Zones:</p>
                       <div className="space-y-1">
                         {ward.subZones.map((subZone) => (
-                          <div key={subZone.id} className="flex items-center justify-between text-xs">
+                          <div
+                            key={subZone.id}
+                            className="flex items-center justify-between text-xs"
+                          >
                             <span className="truncate">{subZone.name}</span>
                             <Badge
-                              variant={subZone.boundaries ? "default" : "outline"}
+                              variant={
+                                subZone.boundaries ? "default" : "outline"
+                              }
                               className="text-xs"
                             >
                               {subZone.boundaries ? "Set" : "Not Set"}

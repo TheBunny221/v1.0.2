@@ -126,26 +126,28 @@ const UnifiedReports: React.FC = () => {
       // Load recharts
       if (!rechartsLoaded) {
         const recharts = await import("recharts");
-        setDynamicLibraries(prev => ({ ...prev, recharts }));
+        setDynamicLibraries((prev) => ({ ...prev, recharts }));
         setRechartsLoaded(true);
       }
 
       // Load date-fns
       if (!dateFnsLoaded) {
         const dateFns = await import("date-fns");
-        setDynamicLibraries(prev => ({ ...prev, dateFns }));
+        setDynamicLibraries((prev) => ({ ...prev, dateFns }));
         setDateFnsLoaded(true);
       }
 
       // Load export utilities
       if (!exportUtilsLoaded) {
         const exportUtils = await import("../utils/exportUtils");
-        setDynamicLibraries(prev => ({ ...prev, exportUtils }));
+        setDynamicLibraries((prev) => ({ ...prev, exportUtils }));
         setExportUtilsLoaded(true);
       }
     } catch (error) {
       console.error("Failed to load dynamic libraries:", error);
-      setLibraryLoadError("Failed to load required libraries. Some features may not work.");
+      setLibraryLoadError(
+        "Failed to load required libraries. Some features may not work.",
+      );
     }
   }, [rechartsLoaded, dateFnsLoaded, exportUtilsLoaded]);
 
@@ -159,12 +161,12 @@ const UnifiedReports: React.FC = () => {
     if (dateFnsLoaded && dynamicLibraries.dateFns) {
       const { format, startOfMonth, endOfMonth } = dynamicLibraries.dateFns;
       try {
-        setFilters(prev => ({
+        setFilters((prev) => ({
           ...prev,
           dateRange: {
             from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
             to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-          }
+          },
         }));
       } catch (error) {
         console.error("Error initializing date filters:", error);
@@ -175,8 +177,8 @@ const UnifiedReports: React.FC = () => {
   // State for filters - initialize with current date strings
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: {
-      from: new Date().toISOString().split('T')[0], // Will be updated when date-fns loads
-      to: new Date().toISOString().split('T')[0],
+      from: new Date().toISOString().split("T")[0], // Will be updated when date-fns loads
+      to: new Date().toISOString().split("T")[0],
     },
     ward: "all",
     complaintType: "all",
@@ -260,8 +262,10 @@ const UnifiedReports: React.FC = () => {
               .sort((a, b) => a.getTime() - b.getTime());
 
             // Use fallback date formatting since date-fns might not be loaded yet
-            const earliestDate = dates[0].toISOString().split('T')[0];
-            const latestDate = dates[dates.length - 1].toISOString().split('T')[0];
+            const earliestDate = dates[0].toISOString().split("T")[0];
+            const latestDate = dates[dates.length - 1]
+              .toISOString()
+              .split("T")[0];
 
             console.log("Setting initial date range:", {
               earliestDate,
@@ -432,13 +436,20 @@ const UnifiedReports: React.FC = () => {
     }
 
     if (!exportUtilsLoaded || !dynamicLibraries.exportUtils) {
-      alert("Export functionality is still loading. Please try again in a moment.");
+      alert(
+        "Export functionality is still loading. Please try again in a moment.",
+      );
       return;
     }
 
     setIsExporting(true);
     try {
-      const { validateExportPermissions, exportToPDF, exportToExcel, exportToCSV } = dynamicLibraries.exportUtils;
+      const {
+        validateExportPermissions,
+        exportToPDF,
+        exportToExcel,
+        exportToCSV,
+      } = dynamicLibraries.exportUtils;
 
       const queryParams = new URLSearchParams({
         from: filters.dateRange.from,
@@ -695,8 +706,15 @@ const UnifiedReports: React.FC = () => {
           console.error("Error formatting trend dates:", error);
           trendsData = analyticsData.trends.map((trend) => ({
             ...trend,
-            date: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-            fullDate: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            date: new Date(trend.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            }),
+            fullDate: new Date(trend.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }),
             rawDate: trend.date,
           }));
         }
@@ -704,8 +722,15 @@ const UnifiedReports: React.FC = () => {
         // Fallback formatting without date-fns
         trendsData = analyticsData.trends.map((trend) => ({
           ...trend,
-          date: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          fullDate: new Date(trend.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          date: new Date(trend.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          }),
+          fullDate: new Date(trend.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
           rawDate: trend.date,
         }));
       }
@@ -763,7 +788,7 @@ const UnifiedReports: React.FC = () => {
       const { data, ...otherProps } = chartProps;
 
       switch (chartType) {
-        case 'area':
+        case "area":
           return (
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={data}>
@@ -778,7 +803,7 @@ const UnifiedReports: React.FC = () => {
               </AreaChart>
             </ResponsiveContainer>
           );
-        case 'pie':
+        case "pie":
           return (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -791,7 +816,7 @@ const UnifiedReports: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
           );
-        case 'bar':
+        case "bar":
           return (
             <ResponsiveContainer width="100%" height={otherProps.height || 300}>
               <BarChart data={data}>
@@ -806,7 +831,7 @@ const UnifiedReports: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           );
-        case 'composed':
+        case "composed":
           return (
             <ResponsiveContainer width="100%" height={otherProps.height || 400}>
               <ComposedChart data={data}>
@@ -1076,8 +1101,10 @@ const UnifiedReports: React.FC = () => {
                     .map((t) => new Date(t.date))
                     .sort((a, b) => a.getTime() - b.getTime());
                   // Use fallback date formatting
-                  const earliestDate = dates[0].toISOString().split('T')[0];
-                  const latestDate = dates[dates.length - 1].toISOString().split('T')[0];
+                  const earliestDate = dates[0].toISOString().split("T")[0];
+                  const latestDate = dates[dates.length - 1]
+                    .toISOString()
+                    .split("T")[0];
 
                   setFilters({
                     dateRange: {
@@ -1092,13 +1119,21 @@ const UnifiedReports: React.FC = () => {
                 } else {
                   // Fallback to current month if no data
                   const now = new Date();
-                  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-                  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                  const firstDay = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    1,
+                  );
+                  const lastDay = new Date(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    0,
+                  );
 
                   setFilters({
                     dateRange: {
-                      from: firstDay.toISOString().split('T')[0],
-                      to: lastDay.toISOString().split('T')[0],
+                      from: firstDay.toISOString().split("T")[0],
+                      to: lastDay.toISOString().split("T")[0],
                     },
                     ward: permissions.defaultWard,
                     complaintType: "all",
@@ -1236,14 +1271,14 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="trends-chart">
                     {processedChartData?.trendsData?.length > 0 ? (
-                      renderChart('area', {
+                      renderChart("area", {
                         data: processedChartData.trendsData,
                         xAxis: {
                           dataKey: "date",
                           tick: { fontSize: 12 },
                           angle: -45,
                           textAnchor: "end",
-                          height: 60
+                          height: 60,
                         },
                         tooltip: {
                           labelFormatter: (label: any, payload: any) => {
@@ -1257,7 +1292,7 @@ const UnifiedReports: React.FC = () => {
                             name === "complaints"
                               ? "Total Complaints"
                               : "Resolved Complaints",
-                          ]
+                          ],
                         },
                         areas: [
                           {
@@ -1265,16 +1300,16 @@ const UnifiedReports: React.FC = () => {
                             dataKey: "complaints",
                             stackId: "1",
                             stroke: "#8884d8",
-                            fill: "#8884d8"
+                            fill: "#8884d8",
                           },
                           {
                             type: "monotone",
                             dataKey: "resolved",
                             stackId: "1",
                             stroke: "#82ca9d",
-                            fill: "#82ca9d"
-                          }
-                        ]
+                            fill: "#82ca9d",
+                          },
+                        ],
                       })
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -1305,7 +1340,7 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="categories-chart">
                     {processedChartData?.categoriesWithColors?.length > 0 ? (
-                      renderChart('pie', {
+                      renderChart("pie", {
                         data: processedChartData.categoriesWithColors,
                         pie: {
                           cx: "50%",
@@ -1315,15 +1350,15 @@ const UnifiedReports: React.FC = () => {
                             `${name}: ${(percent * 100).toFixed(0)}%`,
                           outerRadius: 80,
                           fill: "#8884d8",
-                          dataKey: "count"
+                          dataKey: "count",
                         },
                         tooltip: {
                           formatter: (value: any, name: any) => [
                             `${value} complaints`,
                             name,
                           ],
-                          labelFormatter: (label: any) => `Category: ${label}`
-                        }
+                          labelFormatter: (label: any) => `Category: ${label}`,
+                        },
                       })
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -1356,7 +1391,7 @@ const UnifiedReports: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div id="detailed-trends-chart">
-                  {renderChart('composed', {
+                  {renderChart("composed", {
                     data: processedChartData?.trendsData || [],
                     height: 400,
                     xAxis: {
@@ -1364,7 +1399,7 @@ const UnifiedReports: React.FC = () => {
                       tick: { fontSize: 12 },
                       angle: -45,
                       textAnchor: "end",
-                      height: 60
+                      height: 60,
                     },
                     tooltip: {
                       labelFormatter: (label: any, payload: any) => {
@@ -1376,20 +1411,24 @@ const UnifiedReports: React.FC = () => {
                       formatter: (value: any, name: any) => [
                         name === "slaCompliance" ? `${value}%` : value,
                         name === "slaCompliance" ? "SLA Compliance" : name,
-                      ]
+                      ],
                     },
                     bars: [
-                      { yAxisId: "left", dataKey: "complaints", fill: "#8884d8" },
-                      { yAxisId: "left", dataKey: "resolved", fill: "#82ca9d" }
+                      {
+                        yAxisId: "left",
+                        dataKey: "complaints",
+                        fill: "#8884d8",
+                      },
+                      { yAxisId: "left", dataKey: "resolved", fill: "#82ca9d" },
                     ],
                     lines: [
                       {
                         yAxisId: "right",
                         type: "monotone",
                         dataKey: "slaCompliance",
-                        stroke: "#ff7300"
-                      }
-                    ]
+                        stroke: "#ff7300",
+                      },
+                    ],
                   })}
                 </div>
               </CardContent>
@@ -1449,18 +1488,16 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="resolution-time-chart">
-                    {renderChart('bar', {
+                    {renderChart("bar", {
                       data: processedChartData?.categoriesWithColors || [],
                       xAxis: {
                         dataKey: "name",
                         tick: { fontSize: 11 },
                         angle: -45,
                         textAnchor: "end",
-                        height: 80
+                        height: 80,
                       },
-                      bars: [
-                        { dataKey: "avgTime", fill: "#8884d8" }
-                      ]
+                      bars: [{ dataKey: "avgTime", fill: "#8884d8" }],
                     })}
                   </div>
                 </CardContent>
@@ -1480,7 +1517,7 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="ward-performance-chart">
-                    {renderChart('bar', {
+                    {renderChart("bar", {
                       data: processedChartData?.wardsData || [],
                       height: 400,
                       xAxis: {
@@ -1488,12 +1525,12 @@ const UnifiedReports: React.FC = () => {
                         tick: { fontSize: 11 },
                         angle: -45,
                         textAnchor: "end",
-                        height: 80
+                        height: 80,
                       },
                       bars: [
                         { dataKey: "complaints", fill: "#8884d8" },
-                        { dataKey: "resolved", fill: "#82ca9d" }
-                      ]
+                        { dataKey: "resolved", fill: "#82ca9d" },
+                      ],
                     })}
                   </div>
                 </CardContent>

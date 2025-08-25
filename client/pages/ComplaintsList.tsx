@@ -77,17 +77,15 @@ const ComplaintsList: React.FC = () => {
   const { cacheComplaintsList } = useDataManager();
 
   // Fetch wards for filtering (only for admin users)
-  const {
-    data: wardsResponse,
-    isLoading: isLoadingWards,
-  } = useGetWardsForFilteringQuery(undefined, {
-    skip: !isAuthenticated || user?.role === "CITIZEN",
-  });
+  const { data: wardsResponse, isLoading: isLoadingWards } =
+    useGetWardsForFilteringQuery(undefined, {
+      skip: !isAuthenticated || user?.role === "CITIZEN",
+    });
 
   const wards = wardsResponse?.data?.wards || [];
 
   // Get sub-zones for selected ward
-  const selectedWard = wards.find(ward => ward.id === wardFilter);
+  const selectedWard = wards.find((ward) => ward.id === wardFilter);
   const availableSubZones = selectedWard?.subZones || [];
 
   // Debounce search term for better performance
@@ -304,7 +302,8 @@ const ComplaintsList: React.FC = () => {
             </Select>
 
             {/* Ward Filter - Only for admin and ward officers */}
-            {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+            {(user?.role === "ADMINISTRATOR" ||
+              user?.role === "WARD_OFFICER") && (
               <Select value={wardFilter} onValueChange={handleWardChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by ward" />
@@ -321,21 +320,23 @@ const ComplaintsList: React.FC = () => {
             )}
 
             {/* Sub-Zone Filter - Only for admin and when ward is selected */}
-            {user?.role === "ADMINISTRATOR" && wardFilter !== "all" && availableSubZones.length > 0 && (
-              <Select value={subZoneFilter} onValueChange={setSubZoneFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by sub-zone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sub-Zones</SelectItem>
-                  {availableSubZones.map((subZone) => (
-                    <SelectItem key={subZone.id} value={subZone.id}>
-                      {subZone.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            {user?.role === "ADMINISTRATOR" &&
+              wardFilter !== "all" &&
+              availableSubZones.length > 0 && (
+                <Select value={subZoneFilter} onValueChange={setSubZoneFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by sub-zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sub-Zones</SelectItem>
+                    {availableSubZones.map((subZone) => (
+                      <SelectItem key={subZone.id} value={subZone.id}>
+                        {subZone.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             <Button variant="outline" onClick={clearFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters

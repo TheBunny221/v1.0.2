@@ -155,7 +155,8 @@ const AdminConfig: React.FC = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUploadMode, setLogoUploadMode] = useState<"url" | "file">("url");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [selectedWardForBoundary, setSelectedWardForBoundary] = useState<Ward | null>(null);
+  const [selectedWardForBoundary, setSelectedWardForBoundary] =
+    useState<Ward | null>(null);
   const [isBoundaryManagerOpen, setIsBoundaryManagerOpen] = useState(false);
 
   // Reset logo upload state
@@ -412,10 +413,8 @@ const AdminConfig: React.FC = () => {
       // Update the ward in local state if needed
       setWards((prev) =>
         prev.map((ward) =>
-          ward.id === wardData.wardId
-            ? { ...ward, ...response.data }
-            : ward
-        )
+          ward.id === wardData.wardId ? { ...ward, ...response.data } : ward,
+        ),
       );
 
       setIsBoundaryManagerOpen(false);

@@ -175,7 +175,10 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   }, []);
 
   // Detect administrative area based on coordinates
-  const detectAdministrativeArea = async (coords: { lat: number; lng: number }) => {
+  const detectAdministrativeArea = async (coords: {
+    lat: number;
+    lng: number;
+  }) => {
     try {
       setIsDetectingArea(true);
 
@@ -207,7 +210,6 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       } catch (apiError) {
         console.log("API area detection failed, falling back to geocoding");
       }
-
     } catch (error) {
       console.error("Error in area detection:", error);
     } finally {
@@ -340,7 +342,12 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                   onKeyPress={handleKeyPress}
                   className="flex-1"
                 />
-                <Button onClick={searchLocation} variant="outline" size="icon" className="shrink-0">
+                <Button
+                  onClick={searchLocation}
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                >
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -419,7 +426,9 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-800">
-                    {isDetectingArea ? "Detecting Area..." : "Detected Administrative Area"}
+                    {isDetectingArea
+                      ? "Detecting Area..."
+                      : "Detected Administrative Area"}
                   </span>
                 </div>
                 {detectedWard && (
@@ -437,14 +446,19 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
 
             {/* Coordinates Display */}
             <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-              <strong>Selected coordinates:</strong> {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
+              <strong>Selected coordinates:</strong> {position.lat.toFixed(6)},{" "}
+              {position.lng.toFixed(6)}
             </div>
           </div>
         </div>
 
         <DialogFooter className="px-6 py-4 border-t shrink-0 bg-background">
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
-            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
             <Button onClick={handleConfirm} className="w-full sm:w-auto">

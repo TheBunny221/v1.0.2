@@ -83,10 +83,7 @@ interface WardTeamMembersResponse {
 
 export const wardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getWardsWithBoundaries: builder.query<
-      ApiResponse<Ward[]>,
-      void
-    >({
+    getWardsWithBoundaries: builder.query<ApiResponse<Ward[]>, void>({
       query: () => "/wards/boundaries",
       providesTags: ["Ward"],
     }),
@@ -118,7 +115,8 @@ export const wardApi = baseApi.injectEndpoints({
       ApiResponse<{ users: TeamMember[]; pagination: any }>,
       string
     >({
-      query: (wardId) => `/complaints/ward-users?role=MAINTENANCE_TEAM&limit=100`,
+      query: (wardId) =>
+        `/complaints/ward-users?role=MAINTENANCE_TEAM&limit=100`,
       providesTags: ["Ward"],
     }),
   }),

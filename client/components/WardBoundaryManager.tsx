@@ -11,15 +11,15 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Alert, AlertDescription } from "./ui/alert";
-import { 
-  MapPin, 
-  Navigation, 
-  Save, 
-  Trash2, 
+import {
+  MapPin,
+  Navigation,
+  Save,
+  Trash2,
   Info,
   RotateCcw,
   Square,
-  AlertCircle 
+  AlertCircle,
 } from "lucide-react";
 
 interface Ward {
@@ -63,17 +63,21 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const drawingRef = useRef<any>(null);
-  
+
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [wardBoundary, setWardBoundary] = useState<any[]>([]);
-  const [subZoneBoundaries, setSubZoneBoundaries] = useState<{[key: string]: any[]}>({});
-  const [editingMode, setEditingMode] = useState<'ward' | 'subzone' | null>(null);
+  const [subZoneBoundaries, setSubZoneBoundaries] = useState<{
+    [key: string]: any[];
+  }>({});
+  const [editingMode, setEditingMode] = useState<"ward" | "subzone" | null>(
+    null,
+  );
   const [selectedSubZone, setSelectedSubZone] = useState<string | null>(null);
   const [centerCoordinates, setCenterCoordinates] = useState(
-    ward.centerLat && ward.centerLng 
+    ward.centerLat && ward.centerLng
       ? { lat: ward.centerLat, lng: ward.centerLng }
-      : defaultCenter
+      : defaultCenter,
   );
 
   // Initialize map when dialog opens
@@ -89,14 +93,20 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
         try {
           await import("leaflet-draw");
         } catch (drawError) {
-          console.warn("Leaflet-draw failed to load, drawing features may be limited:", drawError);
+          console.warn(
+            "Leaflet-draw failed to load, drawing features may be limited:",
+            drawError,
+          );
         }
 
         // Set up the default icon
         const DefaultIcon = L.icon({
-          iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-          iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-          shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+          iconRetinaUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
           iconSize: [25, 41],
           iconAnchor: [12, 41],
           popupAnchor: [1, -34],
@@ -114,7 +124,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
 
           // Add tile layer
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           }).addTo(leafletMapRef.current);
 
           // Create feature groups for drawn layers
@@ -123,38 +134,38 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
 
           // Add drawing controls
           const drawControl = new (L as any).Control.Draw({
-            position: 'topright',
+            position: "topright",
             draw: {
               polygon: {
                 allowIntersection: false,
                 drawError: {
-                  color: '#e1e100',
-                  message: '<strong>Error:</strong> Shape edges cannot cross!'
+                  color: "#e1e100",
+                  message: "<strong>Error:</strong> Shape edges cannot cross!",
                 },
                 shapeOptions: {
-                  color: '#2563eb',
+                  color: "#2563eb",
                   weight: 3,
                   opacity: 0.8,
-                  fillOpacity: 0.2
-                }
+                  fillOpacity: 0.2,
+                },
               },
               rectangle: {
                 shapeOptions: {
-                  color: '#dc2626',
+                  color: "#dc2626",
                   weight: 3,
                   opacity: 0.8,
-                  fillOpacity: 0.2
-                }
+                  fillOpacity: 0.2,
+                },
               },
               circle: false,
               marker: false,
               polyline: false,
-              circlemarker: false
+              circlemarker: false,
             },
             edit: {
               featureGroup: drawnItems,
-              remove: true
-            }
+              remove: true,
+            },
           });
 
           leafletMapRef.current.addControl(drawControl);
@@ -163,35 +174,39 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           // Handle drawing events
           leafletMapRef.current.on((L as any).Draw.Event.CREATED, (e: any) => {
             const { layer, layerType } = e;
-            
-            if (editingMode === 'ward') {
+
+            if (editingMode === "ward") {
               // Clear existing ward boundary
               setWardBoundary([]);
               drawnItems.clearLayers();
-              
+
               drawnItems.addLayer(layer);
-              
-              if (layerType === 'polygon' || layerType === 'rectangle') {
-                const coords = layer.getLatLngs()[0].map((latlng: any) => [latlng.lat, latlng.lng]);
+
+              if (layerType === "polygon" || layerType === "rectangle") {
+                const coords = layer
+                  .getLatLngs()[0]
+                  .map((latlng: any) => [latlng.lat, latlng.lng]);
                 setWardBoundary(coords);
-                
+
                 // Calculate center
                 const center = calculatePolygonCenter(coords);
                 setCenterCoordinates(center);
               }
-            } else if (editingMode === 'subzone' && selectedSubZone) {
+            } else if (editingMode === "subzone" && selectedSubZone) {
               // Clear existing subzone boundary for this subzone
               const newBoundaries = { ...subZoneBoundaries };
               delete newBoundaries[selectedSubZone];
               setSubZoneBoundaries(newBoundaries);
-              
+
               drawnItems.addLayer(layer);
-              
-              if (layerType === 'polygon' || layerType === 'rectangle') {
-                const coords = layer.getLatLngs()[0].map((latlng: any) => [latlng.lat, latlng.lng]);
-                setSubZoneBoundaries(prev => ({
+
+              if (layerType === "polygon" || layerType === "rectangle") {
+                const coords = layer
+                  .getLatLngs()[0]
+                  .map((latlng: any) => [latlng.lat, latlng.lng]);
+                setSubZoneBoundaries((prev) => ({
                   ...prev,
-                  [selectedSubZone]: coords
+                  [selectedSubZone]: coords,
                 }));
               }
             }
@@ -210,7 +225,13 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
 
     const timer = setTimeout(initializeMap, 100);
     return () => clearTimeout(timer);
-  }, [isOpen, centerCoordinates.lat, centerCoordinates.lng, editingMode, selectedSubZone]);
+  }, [
+    isOpen,
+    centerCoordinates.lat,
+    centerCoordinates.lng,
+    editingMode,
+    selectedSubZone,
+  ]);
 
   // Load existing boundaries from ward and subzones data
   const loadExistingBoundaries = async (L: any, drawnItems: any) => {
@@ -219,26 +240,31 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
       if (ward.boundaries) {
         const coords = JSON.parse(ward.boundaries);
         setWardBoundary(coords);
-        
+
         if (coords.length > 0) {
-          const polygon = L.polygon(coords, { color: '#2563eb', weight: 3, opacity: 0.8, fillOpacity: 0.2 });
+          const polygon = L.polygon(coords, {
+            color: "#2563eb",
+            weight: 3,
+            opacity: 0.8,
+            fillOpacity: 0.2,
+          });
           drawnItems.addLayer(polygon);
         }
       }
 
       // Load subzone boundaries
-      const loadedSubZoneBoundaries: {[key: string]: any[]} = {};
+      const loadedSubZoneBoundaries: { [key: string]: any[] } = {};
       for (const subZone of subZones) {
         if (subZone.boundaries) {
           const coords = JSON.parse(subZone.boundaries);
           loadedSubZoneBoundaries[subZone.id] = coords;
-          
+
           if (coords.length > 0) {
-            const polygon = L.polygon(coords, { 
-              color: '#dc2626', 
-              weight: 2, 
-              opacity: 0.8, 
-              fillOpacity: 0.1 
+            const polygon = L.polygon(coords, {
+              color: "#dc2626",
+              weight: 2,
+              opacity: 0.8,
+              fillOpacity: 0.1,
             });
             drawnItems.addLayer(polygon);
           }
@@ -251,25 +277,29 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   };
 
   // Calculate polygon center point
-  const calculatePolygonCenter = (coords: [number, number][]): { lat: number; lng: number } => {
+  const calculatePolygonCenter = (
+    coords: [number, number][],
+  ): { lat: number; lng: number } => {
     const latSum = coords.reduce((sum, coord) => sum + coord[0], 0);
     const lngSum = coords.reduce((sum, coord) => sum + coord[1], 0);
     return {
       lat: latSum / coords.length,
-      lng: lngSum / coords.length
+      lng: lngSum / coords.length,
     };
   };
 
   // Calculate bounding box for polygon
-  const calculateBoundingBox = (coords: [number, number][]): {north: number, south: number, east: number, west: number} => {
-    const lats = coords.map(coord => coord[0]);
-    const lngs = coords.map(coord => coord[1]);
-    
+  const calculateBoundingBox = (
+    coords: [number, number][],
+  ): { north: number; south: number; east: number; west: number } => {
+    const lats = coords.map((coord) => coord[0]);
+    const lngs = coords.map((coord) => coord[1]);
+
     return {
       north: Math.max(...lats),
       south: Math.min(...lats),
       east: Math.max(...lngs),
-      west: Math.min(...lngs)
+      west: Math.min(...lngs),
     };
   };
 
@@ -295,7 +325,9 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
         (error) => {
           console.error("Error getting location:", error);
           setIsLoadingLocation(false);
-          alert("Could not get your location. Please ensure location access is enabled.");
+          alert(
+            "Could not get your location. Please ensure location access is enabled.",
+          );
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
       );
@@ -320,20 +352,36 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   const handleSave = () => {
     const updatedWard: Ward = {
       ...ward,
-      boundaries: wardBoundary.length > 0 ? JSON.stringify(wardBoundary) : undefined,
+      boundaries:
+        wardBoundary.length > 0 ? JSON.stringify(wardBoundary) : undefined,
       centerLat: centerCoordinates.lat,
       centerLng: centerCoordinates.lng,
-      boundingBox: wardBoundary.length > 0 ? JSON.stringify(calculateBoundingBox(wardBoundary)) : undefined,
+      boundingBox:
+        wardBoundary.length > 0
+          ? JSON.stringify(calculateBoundingBox(wardBoundary))
+          : undefined,
     };
 
-    const updatedSubZones: SubZone[] = subZones.map(subZone => {
+    const updatedSubZones: SubZone[] = subZones.map((subZone) => {
       const boundaries = subZoneBoundaries[subZone.id];
       return {
         ...subZone,
-        boundaries: boundaries && boundaries.length > 0 ? JSON.stringify(boundaries) : undefined,
-        centerLat: boundaries && boundaries.length > 0 ? calculatePolygonCenter(boundaries).lat : undefined,
-        centerLng: boundaries && boundaries.length > 0 ? calculatePolygonCenter(boundaries).lng : undefined,
-        boundingBox: boundaries && boundaries.length > 0 ? JSON.stringify(calculateBoundingBox(boundaries)) : undefined,
+        boundaries:
+          boundaries && boundaries.length > 0
+            ? JSON.stringify(boundaries)
+            : undefined,
+        centerLat:
+          boundaries && boundaries.length > 0
+            ? calculatePolygonCenter(boundaries).lat
+            : undefined,
+        centerLng:
+          boundaries && boundaries.length > 0
+            ? calculatePolygonCenter(boundaries).lng
+            : undefined,
+        boundingBox:
+          boundaries && boundaries.length > 0
+            ? JSON.stringify(calculateBoundingBox(boundaries))
+            : undefined,
       };
     });
 
@@ -367,7 +415,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription className="text-sm">
-                  Use the drawing tools on the map to define geographic boundaries for wards and sub-zones.
+                  Use the drawing tools on the map to define geographic
+                  boundaries for wards and sub-zones.
                 </AlertDescription>
               </Alert>
 
@@ -375,27 +424,34 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="font-medium">Ward Boundary</Label>
-                  <Badge variant={wardBoundary.length > 0 ? "default" : "secondary"}>
+                  <Badge
+                    variant={wardBoundary.length > 0 ? "default" : "secondary"}
+                  >
                     {wardBoundary.length > 0 ? "Set" : "Not Set"}
                   </Badge>
                 </div>
-                
+
                 <Button
                   onClick={() => {
-                    setEditingMode('ward');
+                    setEditingMode("ward");
                     setSelectedSubZone(null);
                   }}
-                  variant={editingMode === 'ward' ? "default" : "outline"}
+                  variant={editingMode === "ward" ? "default" : "outline"}
                   className="w-full"
                 >
                   <Square className="h-4 w-4 mr-2" />
-                  {editingMode === 'ward' ? "Drawing Ward..." : "Set Ward Boundary"}
+                  {editingMode === "ward"
+                    ? "Drawing Ward..."
+                    : "Set Ward Boundary"}
                 </Button>
 
                 {wardBoundary.length > 0 && (
                   <div className="text-xs text-gray-600 bg-white p-2 rounded">
                     <div>Points: {wardBoundary.length}</div>
-                    <div>Center: {centerCoordinates.lat.toFixed(4)}, {centerCoordinates.lng.toFixed(4)}</div>
+                    <div>
+                      Center: {centerCoordinates.lat.toFixed(4)},{" "}
+                      {centerCoordinates.lng.toFixed(4)}
+                    </div>
                   </div>
                 )}
               </div>
@@ -403,30 +459,44 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
               {/* Sub-Zone Boundaries */}
               <div className="space-y-3">
                 <Label className="font-medium">Sub-Zone Boundaries</Label>
-                
+
                 {subZones.map((subZone) => (
                   <div key={subZone.id} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{subZone.name}</span>
-                      <Badge variant={subZoneBoundaries[subZone.id] ? "default" : "secondary"} className="text-xs">
+                      <span className="text-sm font-medium">
+                        {subZone.name}
+                      </span>
+                      <Badge
+                        variant={
+                          subZoneBoundaries[subZone.id]
+                            ? "default"
+                            : "secondary"
+                        }
+                        className="text-xs"
+                      >
                         {subZoneBoundaries[subZone.id] ? "Set" : "Not Set"}
                       </Badge>
                     </div>
-                    
+
                     <Button
                       onClick={() => {
-                        setEditingMode('subzone');
+                        setEditingMode("subzone");
                         setSelectedSubZone(subZone.id);
                       }}
-                      variant={editingMode === 'subzone' && selectedSubZone === subZone.id ? "default" : "outline"}
+                      variant={
+                        editingMode === "subzone" &&
+                        selectedSubZone === subZone.id
+                          ? "default"
+                          : "outline"
+                      }
                       size="sm"
                       className="w-full"
                     >
                       <Square className="h-3 w-3 mr-2" />
-                      {editingMode === 'subzone' && selectedSubZone === subZone.id 
-                        ? "Drawing..." 
-                        : "Set Boundary"
-                      }
+                      {editingMode === "subzone" &&
+                      selectedSubZone === subZone.id
+                        ? "Drawing..."
+                        : "Set Boundary"}
                     </Button>
 
                     {subZoneBoundaries[subZone.id] && (
@@ -465,7 +535,10 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-sm">
-                    <strong>Drawing Mode:</strong> {editingMode === 'ward' ? 'Ward Boundary' : `Sub-Zone: ${subZones.find(z => z.id === selectedSubZone)?.name}`}
+                    <strong>Drawing Mode:</strong>{" "}
+                    {editingMode === "ward"
+                      ? "Ward Boundary"
+                      : `Sub-Zone: ${subZones.find((z) => z.id === selectedSubZone)?.name}`}
                     <br />
                     Click on the map to start drawing a polygon.
                   </AlertDescription>

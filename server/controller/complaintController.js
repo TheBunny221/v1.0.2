@@ -443,7 +443,6 @@ export const createComplaint = asyncHandler(async (req, res) => {
   });
 });
 
-
 // ✅ Transaction-safe complaint ID generator
 const generateComplaintId = async () => {
   return await prisma.$transaction(async (tx) => {
@@ -479,7 +478,9 @@ const generateComplaintId = async () => {
     // Determine the next number in sequence
     let nextNumber = startNumber;
     if (lastComplaint?.complaintId) {
-      const lastNumber = parseInt(lastComplaint.complaintId.replace(prefix, ""));
+      const lastNumber = parseInt(
+        lastComplaint.complaintId.replace(prefix, ""),
+      );
       if (!isNaN(lastNumber)) {
         nextNumber = lastNumber + 1;
       }
@@ -490,7 +491,6 @@ const generateComplaintId = async () => {
   });
 };
 
-
 // ✅ Retry wrapper to avoid unique constraint failure
 const createComplaintWithUniqueId = async (data) => {
   let retries = 3;
@@ -499,7 +499,7 @@ const createComplaintWithUniqueId = async (data) => {
       // Generate a new complaintId for each attempt
       const complaintId = await generateComplaintId();
       console.log(`Attempting to create complaint with ID: ${complaintId}`);
-      
+
       return await prisma.complaint.create({
         data: { ...data, complaintId },
         include: {
@@ -528,7 +528,9 @@ const createComplaintWithUniqueId = async (data) => {
     } catch (err) {
       if (err.code === "P2002" && err.meta?.target?.includes("complaintId")) {
         retries--;
-        console.log(`Complaint ID collision detected. Retries left: ${retries}`);
+        console.log(
+          `Complaint ID collision detected. Retries left: ${retries}`,
+        );
         // Continue to next iteration which will generate a new ID
         if (retries === 0) throw err;
       } else {
@@ -536,11 +538,10 @@ const createComplaintWithUniqueId = async (data) => {
       }
     }
   }
-  throw new Error("Failed to create complaint with unique ID after multiple attempts");
+  throw new Error(
+    "Failed to create complaint with unique ID after multiple attempts",
+  );
 };
-
-
-
 
 // @desc    Get all complaints with filters
 // @route   GET /api/complaints
