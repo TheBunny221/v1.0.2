@@ -302,6 +302,40 @@ const ComplaintsList: React.FC = () => {
                 <SelectItem value="high_critical">High & Critical</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Ward Filter - Only for admin and ward officers */}
+            {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+              <Select value={wardFilter} onValueChange={handleWardChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by ward" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Wards</SelectItem>
+                  {wards.map((ward) => (
+                    <SelectItem key={ward.id} value={ward.id}>
+                      {ward.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Sub-Zone Filter - Only for admin and when ward is selected */}
+            {user?.role === "ADMINISTRATOR" && wardFilter !== "all" && availableSubZones.length > 0 && (
+              <Select value={subZoneFilter} onValueChange={setSubZoneFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by sub-zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sub-Zones</SelectItem>
+                  {availableSubZones.map((subZone) => (
+                    <SelectItem key={subZone.id} value={subZone.id}>
+                      {subZone.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Button variant="outline" onClick={clearFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
