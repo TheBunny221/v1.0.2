@@ -621,29 +621,39 @@ const UnifiedReports: React.FC = () => {
 
   // Calculate time period for chart titles
   const getTimePeriodLabel = useCallback(() => {
-    const fromDate = new Date(filters.dateRange.from);
-    const toDate = new Date(filters.dateRange.to);
-    const diffTime = Math.abs(toDate - fromDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    // Format dates for display
-    const formatDate = (date) => format(date, "MMM dd, yyyy");
-    const fromFormatted = formatDate(fromDate);
-    const toFormatted = formatDate(toDate);
-
-    // Determine period type
-    if (diffDays <= 1) {
-      return `${fromFormatted}`;
-    } else if (diffDays <= 7) {
-      return `Past Week (${fromFormatted} - ${toFormatted})`;
-    } else if (diffDays <= 31) {
-      return `Past Month (${fromFormatted} - ${toFormatted})`;
-    } else if (diffDays <= 90) {
-      return `Past 3 Months (${fromFormatted} - ${toFormatted})`;
-    } else {
-      return `${fromFormatted} - ${toFormatted}`;
+    if (!dateFnsLoaded || !dynamicLibraries.dateFns) {
+      return `${filters.dateRange.from} - ${filters.dateRange.to}`;
     }
-  }, [filters.dateRange]);
+
+    try {
+      const { format } = dynamicLibraries.dateFns;
+      const fromDate = new Date(filters.dateRange.from);
+      const toDate = new Date(filters.dateRange.to);
+      const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // Format dates for display
+      const formatDate = (date: Date) => format(date, "MMM dd, yyyy");
+      const fromFormatted = formatDate(fromDate);
+      const toFormatted = formatDate(toDate);
+
+      // Determine period type
+      if (diffDays <= 1) {
+        return `${fromFormatted}`;
+      } else if (diffDays <= 7) {
+        return `Past Week (${fromFormatted} - ${toFormatted})`;
+      } else if (diffDays <= 31) {
+        return `Past Month (${fromFormatted} - ${toFormatted})`;
+      } else if (diffDays <= 90) {
+        return `Past 3 Months (${fromFormatted} - ${toFormatted})`;
+      } else {
+        return `${fromFormatted} - ${toFormatted}`;
+      }
+    } catch (error) {
+      console.error("Error formatting date period:", error);
+      return `${filters.dateRange.from} - ${filters.dateRange.to}`;
+    }
+  }, [filters.dateRange, dateFnsLoaded, dynamicLibraries.dateFns]);
 
   // Chart colors
   const COLORS = [
