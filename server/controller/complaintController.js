@@ -654,11 +654,13 @@ export const getComplaints = asyncHandler(async (req, res) => {
   // --- admin-only overrides ---
   if (req.user.role === "ADMINISTRATOR") {
     if (wardId) filters.wardId = wardId;
+    if (subZoneId) filters.subZoneId = subZoneId;
     if (assignedToId) filters.assignedToId = assignedToId;
     if (submittedById) filters.submittedById = submittedById;
-  } else if (wardId || assignedToId || submittedById) {
+  } else if (wardId || subZoneId || assignedToId || submittedById) {
     dbg("ignored query overrides for non-admin", {
       wardId,
+      subZoneId,
       assignedToId,
       submittedById,
     });
