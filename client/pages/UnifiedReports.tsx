@@ -725,6 +725,124 @@ const UnifiedReports: React.FC = () => {
     };
   }, [analyticsData, filters, dateFnsLoaded, dynamicLibraries.dateFns]); // Added dependencies
 
+  // Helper function to render charts with dynamic recharts
+  const renderChart = (chartType: string, chartProps: any) => {
+    if (!rechartsLoaded || !dynamicLibraries.recharts) {
+      return (
+        <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+          <div className="text-center">
+            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
+            <p>Loading chart...</p>
+          </div>
+        </div>
+      );
+    }
+
+    try {
+      const {
+        ResponsiveContainer,
+        AreaChart,
+        Area,
+        PieChart,
+        Pie,
+        Cell,
+        BarChart,
+        Bar,
+        ComposedChart,
+        LineChart,
+        Line,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        Legend,
+      } = dynamicLibraries.recharts;
+
+      const { data, ...otherProps } = chartProps;
+
+      switch (chartType) {
+        case 'area':
+          return (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis {...otherProps.xAxis} />
+                <YAxis />
+                <Tooltip {...otherProps.tooltip} />
+                <Legend />
+                {otherProps.areas?.map((area: any, index: number) => (
+                  <Area key={index} {...area} />
+                ))}
+              </AreaChart>
+            </ResponsiveContainer>
+          );
+        case 'pie':
+          return (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie {...otherProps.pie} data={data}>
+                  {data.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip {...otherProps.tooltip} />
+              </PieChart>
+            </ResponsiveContainer>
+          );
+        case 'bar':
+          return (
+            <ResponsiveContainer width="100%" height={otherProps.height || 300}>
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis {...otherProps.xAxis} />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                {otherProps.bars?.map((bar: any, index: number) => (
+                  <Bar key={index} {...bar} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          );
+        case 'composed':
+          return (
+            <ResponsiveContainer width="100%" height={otherProps.height || 400}>
+              <ComposedChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis {...otherProps.xAxis} />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip {...otherProps.tooltip} />
+                <Legend />
+                {otherProps.bars?.map((bar: any, index: number) => (
+                  <Bar key={index} {...bar} />
+                ))}
+                {otherProps.lines?.map((line: any, index: number) => (
+                  <Line key={index} {...line} />
+                ))}
+              </ComposedChart>
+            </ResponsiveContainer>
+          );
+        default:
+          return (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              <p>Chart type not supported</p>
+            </div>
+          );
+      }
+    } catch (error) {
+      console.error("Error rendering chart:", error);
+      return (
+        <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+          <div className="text-center">
+            <AlertTriangle className="h-6 w-6 mx-auto mb-2 text-red-500" />
+            <p>Error loading chart</p>
+          </div>
+        </div>
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
