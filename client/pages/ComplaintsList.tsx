@@ -120,6 +120,10 @@ const ComplaintsList: React.FC = () => {
       }
     }
 
+    // Add ward and sub-zone filters
+    if (wardFilter !== "all") params.wardId = wardFilter;
+    if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
+
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
     // For MAINTENANCE_TEAM users, show only their own complaints
@@ -131,6 +135,8 @@ const ComplaintsList: React.FC = () => {
   }, [
     statusFilter,
     priorityFilter,
+    wardFilter,
+    subZoneFilter,
     debouncedSearchTerm,
     user?.role,
     user?.id,
