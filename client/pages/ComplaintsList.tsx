@@ -62,6 +62,12 @@ const ComplaintsList: React.FC = () => {
     }
     return priority || "all";
   });
+  const [wardFilter, setWardFilter] = useState(
+    searchParams.get("ward") || "all",
+  );
+  const [subZoneFilter, setSubZoneFilter] = useState(
+    searchParams.get("subZone") || "all",
+  );
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
