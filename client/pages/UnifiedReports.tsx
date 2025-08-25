@@ -1232,48 +1232,46 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="trends-chart">
                     {processedChartData?.trendsData?.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={processedChartData.trendsData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis
-                            dataKey="date"
-                            tick={{ fontSize: 12 }}
-                            angle={-45}
-                            textAnchor="end"
-                            height={60}
-                          />
-                          <YAxis />
-                          <Tooltip
-                            labelFormatter={(label, payload) => {
-                              if (payload && payload[0]) {
-                                return `Date: ${payload[0].payload.fullDate || label}`;
-                              }
-                              return `Date: ${label}`;
-                            }}
-                            formatter={(value, name) => [
-                              value,
-                              name === "complaints"
-                                ? "Total Complaints"
-                                : "Resolved Complaints",
-                            ]}
-                          />
-                          <Legend />
-                          <Area
-                            type="monotone"
-                            dataKey="complaints"
-                            stackId="1"
-                            stroke="#8884d8"
-                            fill="#8884d8"
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="resolved"
-                            stackId="1"
-                            stroke="#82ca9d"
-                            fill="#82ca9d"
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      renderChart('area', {
+                        data: processedChartData.trendsData,
+                        xAxis: {
+                          dataKey: "date",
+                          tick: { fontSize: 12 },
+                          angle: -45,
+                          textAnchor: "end",
+                          height: 60
+                        },
+                        tooltip: {
+                          labelFormatter: (label: any, payload: any) => {
+                            if (payload && payload[0]) {
+                              return `Date: ${payload[0].payload.fullDate || label}`;
+                            }
+                            return `Date: ${label}`;
+                          },
+                          formatter: (value: any, name: any) => [
+                            value,
+                            name === "complaints"
+                              ? "Total Complaints"
+                              : "Resolved Complaints",
+                          ]
+                        },
+                        areas: [
+                          {
+                            type: "monotone",
+                            dataKey: "complaints",
+                            stackId: "1",
+                            stroke: "#8884d8",
+                            fill: "#8884d8"
+                          },
+                          {
+                            type: "monotone",
+                            dataKey: "resolved",
+                            stackId: "1",
+                            stroke: "#82ca9d",
+                            fill: "#82ca9d"
+                          }
+                        ]
+                      })
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                         <div className="text-center">
