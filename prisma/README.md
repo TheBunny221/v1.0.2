@@ -96,6 +96,7 @@ The project maintains separate schema files for different environments:
 ## 🛠️ Development Environment (SQLite)
 
 ### Features
+
 - ✅ Lightweight SQLite database
 - ✅ No external database setup required
 - ✅ Sample data with `.dev` email domains
@@ -132,6 +133,7 @@ Citizen:       arjun.menon@email.dev / citizen123
 ## 🏭 Production Environment (PostgreSQL)
 
 ### Features
+
 - ✅ PostgreSQL with full ACID compliance
 - ✅ Advanced indexing and performance optimization
 - ✅ Proper enums and data types
@@ -275,6 +277,7 @@ npm run db:setup:fresh:prod       # Fresh setup (reset + setup)
 ### Development Seeding (`seed.dev.ts`)
 
 **What it includes:**
+
 - 8 Kochi Corporation wards with sub-zones
 - 1 Administrator account
 - 8 Ward Officers (one per ward)
@@ -290,6 +293,7 @@ npm run db:setup:fresh:prod       # Fresh setup (reset + setup)
 ### Production Seeding (`seed.prod.ts`)
 
 **What it includes:**
+
 - 20 Real Kochi Corporation wards
 - Sub-zones for major wards
 - 1 System Administrator account
@@ -335,6 +339,7 @@ npm run db:setup:fresh:prod       # Fresh setup (reset + setup)
 #### SQLite Issues (Development)
 
 **Problem**: Database locked
+
 ```bash
 # Solution: Close all connections and restart
 rm prisma/dev.db
@@ -342,6 +347,7 @@ npm run db:setup:fresh:dev
 ```
 
 **Problem**: Migration failed
+
 ```bash
 # Solution: Reset and recreate
 npm run db:migrate:reset:dev
@@ -351,6 +357,7 @@ npm run db:setup:dev
 #### PostgreSQL Issues (Production)
 
 **Problem**: Connection refused
+
 ```bash
 # Check: Database server running?
 # Check: Correct host and port in DATABASE_URL?
@@ -359,6 +366,7 @@ npm run db:setup:validate
 ```
 
 **Problem**: Authentication failed
+
 ```bash
 # Check: Username and password correct?
 # Check: User has proper permissions?
@@ -366,6 +374,7 @@ npm run db:setup:validate
 ```
 
 **Problem**: Database does not exist
+
 ```bash
 # Create database first:
 createdb kochi_smart_city
@@ -376,6 +385,7 @@ npm run db:setup:prod
 #### Schema Sync Issues
 
 **Problem**: Schemas out of sync
+
 ```bash
 # Validate both schemas
 npm run db:validate:dev
@@ -389,6 +399,7 @@ npm run db:format:prod
 ### Environment Variable Issues
 
 **Problem**: Missing required variables
+
 ```bash
 # Run validation
 npm run db:setup:validate
@@ -409,12 +420,14 @@ npm run db:setup:validate
 ### Reset Everything (Nuclear Option)
 
 **Development:**
+
 ```bash
 rm prisma/dev.db
 npm run db:setup:fresh:dev
 ```
 
 **Production (DANGEROUS - Backup First!):**
+
 ```bash
 npm run db:backup
 npm run db:setup:fresh:prod

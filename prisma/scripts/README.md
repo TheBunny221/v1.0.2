@@ -81,6 +81,7 @@ This will present a menu-driven interface to choose your setup option.
 5. **Seed Data** - Adds sample data including test accounts
 
 **Creates:**
+
 - SQLite database file (`prisma/dev.db`)
 - Test user accounts with `.dev` email domains
 - Sample complaints and service requests
@@ -96,6 +97,7 @@ This will present a menu-driven interface to choose your setup option.
 6. **Seed Data** - Adds essential production data only
 
 **Creates:**
+
 - PostgreSQL database schema
 - System administrator account
 - Real Kochi Corporation wards
@@ -105,6 +107,7 @@ This will present a menu-driven interface to choose your setup option.
 ### Migration Scripts (`migrate-*.*`)
 
 Focused scripts that only handle database schema migrations:
+
 - Generate Prisma client
 - Apply/deploy migrations
 - Handle migration failures with reset options
@@ -112,17 +115,20 @@ Focused scripts that only handle database schema migrations:
 ### Seeding Scripts (`seed-*.*`)
 
 Focused scripts that only handle data seeding:
+
 - Development: Sample data with test accounts
 - Production: Essential data with safety checks
 
 ## Safety Features
 
 ### Development Scripts
+
 - ✅ Can be run multiple times safely
 - ✅ Automatically reset database if migration fails
 - ✅ Clear error messages and recovery suggestions
 
 ### Production Scripts
+
 - ✅ Confirmation prompts before destructive operations
 - ✅ Environment variable validation
 - ✅ Safety checks to prevent data loss
@@ -147,6 +153,7 @@ Unix/Linux scripts support additional arguments:
 - `--force` - Skip confirmation prompts (production scripts)
 
 Example:
+
 ```bash
 ./prisma/scripts/setup-prod.sh --force
 ```
@@ -165,6 +172,7 @@ Scripts respect the following environment variables:
 ### Common Issues
 
 1. **Permission Denied (Unix/Linux)**
+
    ```bash
    chmod +x prisma/scripts/*.sh
    ```
