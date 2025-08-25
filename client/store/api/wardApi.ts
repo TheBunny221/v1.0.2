@@ -84,57 +84,41 @@ interface WardTeamMembersResponse {
 export const wardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getWardsWithBoundaries: builder.query<
-      { success: boolean; message: string; data: Ward[] },
+      ApiResponse<Ward[]>,
       void
     >({
-      query: () => "/boundaries",
-      providesTags: ["Ward", "Boundaries"],
+      query: () => "/wards/boundaries",
+      providesTags: ["Ward"],
     }),
 
     updateWardBoundaries: builder.mutation<
-      { success: boolean; message: string; data: Ward },
+      ApiResponse<Ward>,
       UpdateBoundariesRequest
     >({
       query: ({ wardId, ...body }) => ({
-        url: `/${wardId}/boundaries`,
+        url: `/wards/${wardId}/boundaries`,
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Ward", "Boundaries"],
+      invalidatesTags: ["Ward"],
     }),
 
     detectLocationArea: builder.mutation<
-      { success: boolean; message: string; data: LocationDetection },
+      ApiResponse<LocationDetection>,
       DetectAreaRequest
     >({
       query: (body) => ({
-        url: "/detect-area",
+        url: "/wards/detect-area",
         method: "POST",
         body,
       }),
     }),
 
     getWardTeamMembers: builder.query<
-      WardTeamMembersResponse,
+      ApiResponse<{ users: TeamMember[]; pagination: any }>,
       string
     >({
-      query: (wardId) => `../complaints/ward-users?wardId=${wardId}&role=MAINTENANCE_TEAM&limit=100`,
-      transformResponse: (response: any) => {
-        // Transform the response to match expected format
-        return {
-          success: response.success,
-          message: response.message,
-          data: {
-            teamMembers: response.data?.users || [],
-            pagination: response.data?.pagination || {
-              page: 1,
-              limit: 100,
-              total: 0,
-              pages: 0
-            }
-          }
-        };
-      },
+      query: (wardId) => `/complaints/ward-users?role=MAINTENANCE_TEAM&limit=100`,
       providesTags: ["Ward"],
     }),
   }),
