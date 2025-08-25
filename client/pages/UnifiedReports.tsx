@@ -1356,41 +1356,41 @@ const UnifiedReports: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div id="detailed-trends-chart">
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={processedChartData?.trendsData || []}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 12 }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip
-                        labelFormatter={(label, payload) => {
-                          if (payload && payload[0]) {
-                            return `Date: ${payload[0].payload.fullDate || label}`;
-                          }
-                          return `Date: ${label}`;
-                        }}
-                        formatter={(value, name) => [
-                          name === "slaCompliance" ? `${value}%` : value,
-                          name === "slaCompliance" ? "SLA Compliance" : name,
-                        ]}
-                      />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="complaints" fill="#8884d8" />
-                      <Bar yAxisId="left" dataKey="resolved" fill="#82ca9d" />
-                      <Line
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="slaCompliance"
-                        stroke="#ff7300"
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  {renderChart('composed', {
+                    data: processedChartData?.trendsData || [],
+                    height: 400,
+                    xAxis: {
+                      dataKey: "date",
+                      tick: { fontSize: 12 },
+                      angle: -45,
+                      textAnchor: "end",
+                      height: 60
+                    },
+                    tooltip: {
+                      labelFormatter: (label: any, payload: any) => {
+                        if (payload && payload[0]) {
+                          return `Date: ${payload[0].payload.fullDate || label}`;
+                        }
+                        return `Date: ${label}`;
+                      },
+                      formatter: (value: any, name: any) => [
+                        name === "slaCompliance" ? `${value}%` : value,
+                        name === "slaCompliance" ? "SLA Compliance" : name,
+                      ]
+                    },
+                    bars: [
+                      { yAxisId: "left", dataKey: "complaints", fill: "#8884d8" },
+                      { yAxisId: "left", dataKey: "resolved", fill: "#82ca9d" }
+                    ],
+                    lines: [
+                      {
+                        yAxisId: "right",
+                        type: "monotone",
+                        dataKey: "slaCompliance",
+                        stroke: "#ff7300"
+                      }
+                    ]
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -1449,23 +1449,19 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="resolution-time-chart">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart
-                        data={processedChartData?.categoriesWithColors || []}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fontSize: 11 }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="avgTime" fill="#8884d8" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    {renderChart('bar', {
+                      data: processedChartData?.categoriesWithColors || [],
+                      xAxis: {
+                        dataKey: "name",
+                        tick: { fontSize: 11 },
+                        angle: -45,
+                        textAnchor: "end",
+                        height: 80
+                      },
+                      bars: [
+                        { dataKey: "avgTime", fill: "#8884d8" }
+                      ]
+                    })}
                   </div>
                 </CardContent>
               </Card>
