@@ -154,11 +154,11 @@ const UnifiedReports: React.FC = () => {
     loadDynamicLibraries();
   }, [loadDynamicLibraries]);
 
-  // State for filters
+  // State for filters - initialize with current date strings
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: {
-      from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-      to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+      from: new Date().toISOString().split('T')[0], // Will be updated when date-fns loads
+      to: new Date().toISOString().split('T')[0],
     },
     ward: "all",
     complaintType: "all",
