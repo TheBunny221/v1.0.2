@@ -56,6 +56,7 @@ import {
 } from "../components/ui/collapsible";
 import {
   Settings,
+  Map,
   MapPin,
   FileText,
   Users,
