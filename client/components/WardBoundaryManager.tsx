@@ -105,7 +105,7 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
 
         // Create map if it doesn't exist
         if (!leafletMapRef.current && mapRef.current) {
-          leafletMapRef.current = L.map(mapRef.current, {
+          leafletMapRef.current = new L.Map(mapRef.current, {
             center: [centerCoordinates.lat, centerCoordinates.lng],
             zoom: 13,
             scrollWheelZoom: true,
