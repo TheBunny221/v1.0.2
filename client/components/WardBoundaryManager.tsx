@@ -84,7 +84,13 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
       try {
         // Dynamically import leaflet and plugins
         const L = await import("leaflet");
-        await import("leaflet-draw");
+
+        // Import leaflet-draw with error handling
+        try {
+          await import("leaflet-draw");
+        } catch (drawError) {
+          console.warn("Leaflet-draw failed to load, drawing features may be limited:", drawError);
+        }
 
         // Set up the default icon
         const DefaultIcon = L.icon({
