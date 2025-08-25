@@ -130,7 +130,10 @@ export const wardApi = createApi({
       WardTeamMembersResponse,
       string
     >({
-      query: (wardId) => `/complaints/ward-users?wardId=${wardId}&role=MAINTENANCE_TEAM&limit=100`,
+      query: (wardId) => ({
+        url: `/complaints/ward-users?wardId=${wardId}&role=MAINTENANCE_TEAM&limit=100`,
+        method: 'GET',
+      }),
       transformResponse: (response: any) => {
         // Transform the response to match expected format
         return {
