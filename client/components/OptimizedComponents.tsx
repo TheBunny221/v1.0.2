@@ -605,16 +605,3 @@ export const OptimizedSelect: React.FC<OptimizedSelectProps> = memo(
 );
 
 OptimizedSelect.displayName = "OptimizedSelect";
-
-export {
-  VirtualList,
-  LazyImage,
-  InfiniteScroll,
-  OptimizedCardGrid,
-  LazySection,
-  OptimizedTableRow,
-  DebouncedInput,
-  MemoizedList,
-  ProgressiveEnhancement,
-  OptimizedSelect,
-};
