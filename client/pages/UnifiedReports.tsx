@@ -1301,38 +1301,26 @@ const UnifiedReports: React.FC = () => {
                 <CardContent>
                   <div id="categories-chart">
                     {processedChartData?.categoriesWithColors?.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={processedChartData.categoriesWithColors}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) =>
-                              `${name}: ${(percent * 100).toFixed(0)}%`
-                            }
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="count"
-                          >
-                            {processedChartData.categoriesWithColors.map(
-                              (entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={entry.color}
-                                />
-                              ),
-                            )}
-                          </Pie>
-                          <Tooltip
-                            formatter={(value, name) => [
-                              `${value} complaints`,
-                              name,
-                            ]}
-                            labelFormatter={(label) => `Category: ${label}`}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      renderChart('pie', {
+                        data: processedChartData.categoriesWithColors,
+                        pie: {
+                          cx: "50%",
+                          cy: "50%",
+                          labelLine: false,
+                          label: ({ name, percent }: any) =>
+                            `${name}: ${(percent * 100).toFixed(0)}%`,
+                          outerRadius: 80,
+                          fill: "#8884d8",
+                          dataKey: "count"
+                        },
+                        tooltip: {
+                          formatter: (value: any, name: any) => [
+                            `${value} complaints`,
+                            name,
+                          ],
+                          labelFormatter: (label: any) => `Category: ${label}`
+                        }
+                      })
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                         <div className="text-center">
