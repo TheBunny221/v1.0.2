@@ -94,10 +94,19 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
     useAssignComplaintMutation();
 
   const [formData, setFormData] = useState({
-    status: complaint.status,
-    assignedTo: complaint.assignedTo?.id || "unassigned",
+    status: "",
+    assignedTo: "unassigned",
     remarks: "",
   });
+
+  // Update form data when complaint changes
+  useEffect(() => {
+    setFormData({
+      status: complaint.status,
+      assignedTo: complaint.assignedTo?.id || "unassigned",
+      remarks: "",
+    });
+  }, [complaint.status, complaint.assignedTo?.id]);
 
   const isLoading = isUpdatingStatus || isAssigning;
 
