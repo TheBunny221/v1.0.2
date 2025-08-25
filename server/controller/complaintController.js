@@ -614,6 +614,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
       priority,
       type,
       wardId,
+      subZoneId,
       assignedToId,
       submittedById,
       dateFrom,
