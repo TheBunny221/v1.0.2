@@ -32,26 +32,7 @@ import {
   DialogFooter,
 } from "../components/ui/dialog";
 import { Progress } from "../components/ui/progress";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
-  ComposedChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-} from "recharts";
+// Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
   Download,
