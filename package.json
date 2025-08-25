@@ -23,17 +23,36 @@
     "e2e": "start-server-and-test 'npm run dev' http://localhost:3000 'npm run cypress:run'",
     "seed:dev": "NODE_ENV=development node prisma/seed.dev.js",
     "seed:prod": "NODE_ENV=production node prisma/seed.prod.js",
+    "seed": "node prisma/seed.js",
     "db:generate:dev": "npx prisma generate --schema=prisma/schema.dev.prisma",
-    "db:migrate:dev": "npx prisma migrate dev --schema=prisma/schema.dev.prisma",
-    "db:reset:dev": "npx prisma migrate reset --force --schema=prisma/schema.dev.prisma",
-    "db:setup:dev": "npm run db:generate:dev && npm run db:migrate:dev && npm run seed:dev",
     "db:generate:prod": "npx prisma generate --schema=prisma/schema.prod.prisma",
+    "db:generate": "npx prisma generate",
+    "db:migrate:dev": "npx prisma migrate dev --schema=prisma/schema.dev.prisma",
     "db:migrate:prod": "npx prisma migrate deploy --schema=prisma/schema.prod.prisma",
+    "db:migrate:create": "npx prisma migrate dev --create-only --schema=prisma/schema.dev.prisma",
+    "db:migrate:status": "npx prisma migrate status",
+    "db:migrate:reset:dev": "npx prisma migrate reset --force --schema=prisma/schema.dev.prisma",
+    "db:migrate:reset:prod": "npx prisma migrate reset --force --schema=prisma/schema.prod.prisma",
+    "db:migrate:reset": "npx prisma migrate reset --force",
+    "db:push:dev": "npx prisma db push --schema=prisma/schema.dev.prisma",
     "db:push:prod": "npx prisma db push --schema=prisma/schema.prod.prisma",
+    "db:push": "npx prisma db push",
+    "db:studio:dev": "npx prisma studio --schema=prisma/schema.dev.prisma",
     "db:studio:prod": "npx prisma studio --schema=prisma/schema.prod.prisma",
-    "db:seed:prod": "NODE_ENV=production node prisma/seed.prod.js",
-    "db:reset:prod": "npx prisma migrate reset --force --schema=prisma/schema.prod.prisma",
-    "db:setup:prod": "npm run db:generate:prod && npm run db:push:prod && npm run db:seed:prod",
+    "db:studio": "npx prisma studio",
+    "db:validate": "npx prisma validate",
+    "db:format": "npx prisma format",
+    "db:setup:dev": "npm run db:generate:dev && npm run db:push:dev && npm run seed:dev",
+    "db:setup:prod": "npm run db:generate:prod && npm run db:migrate:prod && npm run seed:prod",
+    "db:setup": "npm run db:generate && npm run db:migrate:prod && npm run seed",
+    "db:setup:fresh:dev": "npm run db:migrate:reset:dev && npm run db:setup:dev",
+    "db:setup:fresh:prod": "npm run db:migrate:reset:prod && npm run db:setup:prod",
+    "db:setup:fresh": "npm run db:migrate:reset && npm run db:setup",
+    "db:backup": "node prisma/migration-utils.js backup",
+    "db:restore": "node prisma/migration-utils.js restore",
+    "db:stats": "node prisma/migration-utils.js stats",
+    "db:cleanup": "node prisma/migration-utils.js cleanup",
+    "db:check": "node prisma/migration-utils.js check",
     "postinstall": "npm run db:generate:dev"
   },
   "dependencies": {
@@ -75,9 +94,7 @@
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "html2canvas": "^1.4.1",
-    "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
-    "jspdf": "^3.0.1",
     "jspdf": "^3.0.1",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
@@ -95,8 +112,6 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "tailwind-merge": "^2.2.0",
-    "tailwindcss-animate": "^1.0.7",
-    "xlsx": "^0.18.5"
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5"
   },
@@ -132,8 +147,8 @@
     "start-server-and-test": "^2.0.3",
     "tailwindcss": "^3.3.6",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8",
-    "vitest": "^1.1.0"
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
   },
   "prisma": {
     "seed": "node prisma/seed.prod.js"
@@ -152,6 +167,6 @@
     "prisma",
     "postgresql"
   ],
-  "author": "Harihar Upadhyay ",
+  "author": "Harihar Upadhyay <hariharupadhyay21@gnu.ac.in>",
   "license": "MIT"
 }
