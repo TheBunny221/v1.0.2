@@ -153,6 +153,8 @@ const AdminConfig: React.FC = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUploadMode, setLogoUploadMode] = useState<"url" | "file">("url");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedWardForBoundary, setSelectedWardForBoundary] = useState<Ward | null>(null);
+  const [isBoundaryManagerOpen, setIsBoundaryManagerOpen] = useState(false);
 
   // Reset logo upload state
   const resetLogoUploadState = () => {
