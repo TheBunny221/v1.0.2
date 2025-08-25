@@ -397,6 +397,46 @@ const AdminConfig: React.FC = () => {
     }
   };
 
+  // Ward Boundary Management Function
+  const handleSaveBoundaries = async (wardData: any) => {
+    setIsLoading(true);
+    try {
+      // Update ward boundaries
+      const response = await apiCall(`/wards/${wardData.wardId}/boundaries`, {
+        method: "PUT",
+        body: JSON.stringify(wardData),
+      });
+
+      // Update the ward in local state if needed
+      setWards((prev) =>
+        prev.map((ward) =>
+          ward.id === wardData.wardId
+            ? { ...ward, ...response.data }
+            : ward
+        )
+      );
+
+      setIsBoundaryManagerOpen(false);
+      setSelectedWardForBoundary(null);
+
+      dispatch(
+        showSuccessToast(
+          "Boundaries Saved",
+          "Ward boundaries have been updated successfully.",
+        ),
+      );
+    } catch (error: any) {
+      dispatch(
+        showErrorToast(
+          "Save Failed",
+          error.message || "Failed to save ward boundaries. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Sub-Zone Management Functions
   const handleSaveSubZone = async (subZone: SubZone) => {
     setIsLoading(true);
