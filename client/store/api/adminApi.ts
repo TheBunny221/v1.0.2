@@ -496,6 +496,7 @@ export const {
   useGetDashboardStatsQuery,
   useGetUserActivityQuery,
   useGetSystemHealthQuery,
+  useGetWardsForFilteringQuery,
 } = adminApi;
 
 // Re-export for convenience
