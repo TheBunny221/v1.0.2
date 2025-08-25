@@ -1075,11 +1075,9 @@ const UnifiedReports: React.FC = () => {
                   const dates = analyticsData.trends
                     .map((t) => new Date(t.date))
                     .sort((a, b) => a.getTime() - b.getTime());
-                  const earliestDate = format(dates[0], "yyyy-MM-dd");
-                  const latestDate = format(
-                    dates[dates.length - 1],
-                    "yyyy-MM-dd",
-                  );
+                  // Use fallback date formatting
+                  const earliestDate = dates[0].toISOString().split('T')[0];
+                  const latestDate = dates[dates.length - 1].toISOString().split('T')[0];
 
                   setFilters({
                     dateRange: {
@@ -1093,10 +1091,14 @@ const UnifiedReports: React.FC = () => {
                   });
                 } else {
                   // Fallback to current month if no data
+                  const now = new Date();
+                  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
                   setFilters({
                     dateRange: {
-                      from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-                      to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+                      from: firstDay.toISOString().split('T')[0],
+                      to: lastDay.toISOString().split('T')[0],
                     },
                     ward: permissions.defaultWard,
                     complaintType: "all",
