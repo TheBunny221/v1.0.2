@@ -111,6 +111,9 @@ const WardOfficerDashboard: React.FC = () => {
     return filterParams;
   };
 
+  // Calculate if we have active filters
+  const hasActiveFilters = filters.mainFilter !== 'none' || filters.overdue || filters.urgent;
+
   // Fetch complaints based on active filters
   const complaintsFilter = buildComplaintsFilter();
 
