@@ -114,23 +114,8 @@ const WardOfficerDashboard: React.FC = () => {
   // Calculate if we have active filters
   const hasActiveFilters = filters.mainFilter !== 'none' || filters.overdue || filters.urgent;
 
-  // Fetch complaints based on active filters
+  // Build complaints filter for the widget
   const complaintsFilter = buildComplaintsFilter();
-
-
-  const {
-    data: complaintsResponse,
-    isLoading: complaintsLoading,
-    refetch: refetchComplaints,
-  } = useGetComplaintsQuery({
-    ...complaintsFilter,
-    page: 1,
-    limit: 50,
-  }, {
-    skip: !hasActiveFilters // Only fetch when we have active filters
-  });
-
-  const filteredComplaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
 
   const handleMainFilterChange = (value: string) => {
     setFilters(prev => ({
