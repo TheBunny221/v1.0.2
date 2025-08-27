@@ -159,17 +159,15 @@ export const detectLocationArea = async (req, res) => {
 
     console.log(`🗺️ Detecting area for coordinates: ${latitude}, ${longitude}`);
 
-    // Get all wards with boundaries
+    // Get all wards (boundaries feature not implemented in current schema)
     const wards = await prisma.ward.findMany({
-      where: { 
-        isActive: true,
-        boundaries: { not: null }
+      where: {
+        isActive: true
       },
       include: {
         subZones: {
-          where: { 
-            isActive: true,
-            boundaries: { not: null }
+          where: {
+            isActive: true
           },
           orderBy: { name: 'asc' }
         }
