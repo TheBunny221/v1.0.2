@@ -237,103 +237,101 @@ const WardOfficerDashboard: React.FC = () => {
       </div>
 
       {/* Statistics Cards with Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.pending ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="pending-filter"
-                  checked={filters.pending}
-                  onCheckedChange={(checked) => handleFilterChange('pending', checked as boolean)}
-                />
-                <label htmlFor="pending-filter" className="cursor-pointer">Pending Work</label>
+      <RadioGroup value={filters.mainFilter} onValueChange={handleMainFilterChange}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'pending' ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="pending-filter"
+                    value="pending"
+                  />
+                  <label htmlFor="pending-filter" className="cursor-pointer">Pending Work</label>
+                </div>
+              </CardTitle>
+              <Clock className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {stats?.summary.pendingWork || 0}
               </div>
-            </CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {stats?.summary.pendingWork || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Registered + Assigned
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground">
+                Registered + Assigned
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.inProgress ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="progress-filter"
-                  checked={filters.inProgress}
-                  onCheckedChange={(checked) => handleFilterChange('inProgress', checked as boolean)}
-                />
-                <label htmlFor="progress-filter" className="cursor-pointer">In Progress</label>
+          <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'inProgress' ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="progress-filter"
+                    value="inProgress"
+                  />
+                  <label htmlFor="progress-filter" className="cursor-pointer">In Progress</label>
+                </div>
+              </CardTitle>
+              <Settings className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">
+                {stats?.summary.activeWork || 0}
               </div>
-            </CardTitle>
-            <Settings className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {stats?.summary.activeWork || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Active complaints
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground">
+                Active complaints
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.completed ? 'ring-2 ring-green-500 bg-green-50' : ''}`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="completed-filter"
-                  checked={filters.completed}
-                  onCheckedChange={(checked) => handleFilterChange('completed', checked as boolean)}
-                />
-                <label htmlFor="completed-filter" className="cursor-pointer">Completed</label>
+          <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'completed' ? 'ring-2 ring-green-500 bg-green-50' : ''}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="completed-filter"
+                    value="completed"
+                  />
+                  <label htmlFor="completed-filter" className="cursor-pointer">Completed</label>
+                </div>
+              </CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {stats?.summary.completedWork || 0}
               </div>
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {stats?.summary.completedWork || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Resolved + Closed
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground">
+                Resolved + Closed
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.needsTeamAssignment ? 'ring-2 ring-purple-500 bg-purple-50' : ''}`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="team-assignment-filter"
-                  checked={filters.needsTeamAssignment}
-                  onCheckedChange={(checked) => handleFilterChange('needsTeamAssignment', checked as boolean)}
-                />
-                <label htmlFor="team-assignment-filter" className="cursor-pointer">Needs Team Assignment</label>
+          <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'needsTeamAssignment' ? 'ring-2 ring-purple-500 bg-purple-50' : ''}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="team-assignment-filter"
+                    value="needsTeamAssignment"
+                  />
+                  <label htmlFor="team-assignment-filter" className="cursor-pointer">Needs Team Assignment</label>
+                </div>
+              </CardTitle>
+              <Briefcase className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">
+                {stats?.summary.needsTeamAssignment || 0}
               </div>
-            </CardTitle>
-            <Briefcase className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
-              {stats?.summary.needsTeamAssignment || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              To assign to maintenance
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+              <p className="text-xs text-muted-foreground">
+                To assign to maintenance
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </RadioGroup>
 
       {/* Additional Filter Options */}
       <Card>
