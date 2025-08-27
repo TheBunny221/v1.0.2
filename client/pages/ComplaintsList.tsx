@@ -246,7 +246,10 @@ const ComplaintsList: React.FC = () => {
             <FileText className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          {(user?.role === "CITIZEN" || user?.role === "MAINTENANCE_TEAM") && (
+          {(user?.role === "CITIZEN" ||
+            user?.role === "MAINTENANCE_TEAM" ||
+            user?.role === "ADMINISTRATOR" ||
+            user?.role === "WARD_OFFICER") && (
             <Button onClick={() => setIsQuickFormOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               New Complaint
