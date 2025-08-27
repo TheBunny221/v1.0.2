@@ -118,7 +118,7 @@ const WardOfficerDashboard: React.FC = () => {
     limit: 50,
   });
 
-  const filteredComplaints = complaintsResponse?.data || [];
+  const filteredComplaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
 
   const handleFilterChange = (filterKey: keyof FilterState, checked: boolean) => {
     setFilters(prev => ({
