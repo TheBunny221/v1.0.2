@@ -40,7 +40,12 @@ import {
 } from "lucide-react";
 
 interface FilterState {
-  mainFilter: 'none' | 'pending' | 'inProgress' | 'completed' | 'needsTeamAssignment';
+  mainFilter:
+    | "none"
+    | "pending"
+    | "inProgress"
+    | "completed"
+    | "needsTeamAssignment";
   overdue: boolean;
   urgent: boolean;
 }
@@ -51,7 +56,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   // State for filters
   const [filters, setFilters] = useState<FilterState>({
-    mainFilter: 'none',
+    mainFilter: "none",
     overdue: false,
     urgent: false,
   });
@@ -74,16 +79,16 @@ const WardOfficerDashboard: React.FC = () => {
 
     // Main filter logic
     switch (filters.mainFilter) {
-      case 'pending':
+      case "pending":
         statusFilters.push("REGISTERED", "ASSIGNED");
         break;
-      case 'inProgress':
+      case "inProgress":
         statusFilters.push("IN_PROGRESS");
         break;
-      case 'completed':
+      case "completed":
         statusFilters.push("RESOLVED", "CLOSED");
         break;
-      case 'needsTeamAssignment':
+      case "needsTeamAssignment":
         filterParams.assignToTeam = true;
         break;
       default:
@@ -112,35 +117,43 @@ const WardOfficerDashboard: React.FC = () => {
   };
 
   // Calculate if we have active filters
-  const hasActiveFilters = filters.mainFilter !== 'none' || filters.overdue || filters.urgent;
+  const hasActiveFilters =
+    filters.mainFilter !== "none" || filters.overdue || filters.urgent;
 
   // Fetch complaints based on active filters
   const complaintsFilter = buildComplaintsFilter();
-
 
   const {
     data: complaintsResponse,
     isLoading: complaintsLoading,
     refetch: refetchComplaints,
-  } = useGetComplaintsQuery({
-    ...complaintsFilter,
-    page: 1,
-    limit: 50,
-  }, {
-    skip: !hasActiveFilters // Only fetch when we have active filters
-  });
+  } = useGetComplaintsQuery(
+    {
+      ...complaintsFilter,
+      page: 1,
+      limit: 50,
+    },
+    {
+      skip: !hasActiveFilters, // Only fetch when we have active filters
+    },
+  );
 
-  const filteredComplaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
+  const filteredComplaints = Array.isArray(complaintsResponse?.data)
+    ? complaintsResponse.data
+    : [];
 
   const handleMainFilterChange = (value: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      mainFilter: value as FilterState['mainFilter'],
+      mainFilter: value as FilterState["mainFilter"],
     }));
   };
 
-  const handleFilterChange = (filterKey: keyof FilterState, checked: boolean) => {
-    setFilters(prev => ({
+  const handleFilterChange = (
+    filterKey: keyof FilterState,
+    checked: boolean,
+  ) => {
+    setFilters((prev) => ({
       ...prev,
       [filterKey]: checked,
     }));
@@ -148,7 +161,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   const clearAllFilters = () => {
     setFilters({
-      mainFilter: 'none',
+      mainFilter: "none",
       overdue: false,
       urgent: false,
     });
@@ -191,7 +204,7 @@ const WardOfficerDashboard: React.FC = () => {
     const searchParams = new URLSearchParams();
     Object.entries(filterParams).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        searchParams.append(key, value.join(','));
+        searchParams.append(key, value.join(","));
       } else {
         searchParams.append(key, value.toString());
       }
@@ -207,17 +220,19 @@ const WardOfficerDashboard: React.FC = () => {
           <p className="text-blue-100">Loading ward statistics...</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="space-y-0 pb-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader className="space-y-0 pb-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </div>
     );
@@ -232,7 +247,9 @@ const WardOfficerDashboard: React.FC = () => {
         </div>
         <Card>
           <CardContent className="p-6">
-            <p className="text-center text-gray-500 mb-4">Failed to load dashboard data</p>
+            <p className="text-center text-gray-500 mb-4">
+              Failed to load dashboard data
+            </p>
             <Button onClick={() => refetchStats()} className="w-full">
               Retry
             </Button>
@@ -256,21 +273,30 @@ const WardOfficerDashboard: React.FC = () => {
       {/* Statistics Cards with Filters */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Filter by Status</h2>
-        {filters.mainFilter !== 'none' && (
+        {filters.mainFilter !== "none" && (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setFilters(prev => ({ ...prev, mainFilter: 'none' }))}
+            onClick={() =>
+              setFilters((prev) => ({ ...prev, mainFilter: "none" }))
+            }
           >
             Clear Filter
           </Button>
         )}
       </div>
-      <RadioGroup value={filters.mainFilter} onValueChange={handleMainFilterChange}>
+      <RadioGroup
+        value={filters.mainFilter}
+        onValueChange={handleMainFilterChange}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'pending' ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
-            onClick={() => handleMainFilterChange(filters.mainFilter === 'pending' ? 'none' : 'pending')}
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "pending" ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "pending" ? "none" : "pending",
+              )
+            }
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -296,8 +322,12 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'inProgress' ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}
-            onClick={() => handleMainFilterChange(filters.mainFilter === 'inProgress' ? 'none' : 'inProgress')}
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "inProgress" ? "ring-2 ring-orange-500 bg-orange-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "inProgress" ? "none" : "inProgress",
+              )
+            }
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -316,15 +346,17 @@ const WardOfficerDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-orange-600">
                 {stats?.summary.activeWork || 0}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Active complaints
-              </p>
+              <p className="text-xs text-muted-foreground">Active complaints</p>
             </CardContent>
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'completed' ? 'ring-2 ring-green-500 bg-green-50' : ''}`}
-            onClick={() => handleMainFilterChange(filters.mainFilter === 'completed' ? 'none' : 'completed')}
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "completed" ? "ring-2 ring-green-500 bg-green-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "completed" ? "none" : "completed",
+              )
+            }
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -343,15 +375,19 @@ const WardOfficerDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-green-600">
                 {stats?.summary.completedWork || 0}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Resolved + Closed
-              </p>
+              <p className="text-xs text-muted-foreground">Resolved + Closed</p>
             </CardContent>
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'needsTeamAssignment' ? 'ring-2 ring-purple-500 bg-purple-50' : ''}`}
-            onClick={() => handleMainFilterChange(filters.mainFilter === 'needsTeamAssignment' ? 'none' : 'needsTeamAssignment')}
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "needsTeamAssignment" ? "ring-2 ring-purple-500 bg-purple-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "needsTeamAssignment"
+                  ? "none"
+                  : "needsTeamAssignment",
+              )
+            }
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -392,9 +428,14 @@ const WardOfficerDashboard: React.FC = () => {
               <Checkbox
                 id="overdue-filter"
                 checked={filters.overdue}
-                onCheckedChange={(checked) => handleFilterChange('overdue', checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("overdue", checked as boolean)
+                }
               />
-              <label htmlFor="overdue-filter" className="cursor-pointer flex items-center">
+              <label
+                htmlFor="overdue-filter"
+                className="cursor-pointer flex items-center"
+              >
                 <AlertTriangle className="h-4 w-4 mr-1 text-red-600" />
                 Overdue ({stats?.summary.overdueComplaints || 0})
               </label>
@@ -403,9 +444,14 @@ const WardOfficerDashboard: React.FC = () => {
               <Checkbox
                 id="urgent-filter"
                 checked={filters.urgent}
-                onCheckedChange={(checked) => handleFilterChange('urgent', checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("urgent", checked as boolean)
+                }
               />
-              <label htmlFor="urgent-filter" className="cursor-pointer flex items-center">
+              <label
+                htmlFor="urgent-filter"
+                className="cursor-pointer flex items-center"
+              >
                 <AlertTriangle className="h-4 w-4 mr-1 text-orange-600" />
                 Urgent Priority ({stats?.summary.urgentComplaints || 0})
               </label>
@@ -425,8 +471,8 @@ const WardOfficerDashboard: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Filtered Complaints ({filteredComplaints.length})</span>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => navigateToComplaints(complaintsFilter)}
               >
@@ -437,18 +483,25 @@ const WardOfficerDashboard: React.FC = () => {
           <CardContent>
             {complaintsLoading ? (
               <div className="space-y-4">
-                {Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="border rounded-lg p-4 animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
+                {Array(3)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div
+                      key={i}
+                      className="border rounded-lg p-4 animate-pulse"
+                    >
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  ))}
               </div>
             ) : filteredComplaints.length === 0 ? (
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">No complaints match the selected filters</p>
+                <p className="text-gray-500">
+                  No complaints match the selected filters
+                </p>
               </div>
             ) : (
               <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -459,7 +512,8 @@ const WardOfficerDashboard: React.FC = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-medium text-sm">
-                        {complaint.title || `Complaint #${complaint.complaintId || complaint.id.slice(-6)}`}
+                        {complaint.title ||
+                          `Complaint #${complaint.complaintId || complaint.id.slice(-6)}`}
                       </h3>
                       <div className="flex space-x-2">
                         <Badge className={getStatusColor(complaint.status)}>
@@ -495,8 +549,8 @@ const WardOfficerDashboard: React.FC = () => {
                 ))}
                 {filteredComplaints.length > 10 && (
                   <div className="text-center pt-4">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => navigateToComplaints(complaintsFilter)}
                     >
                       View All {filteredComplaints.length} Complaints
@@ -516,7 +570,7 @@ const WardOfficerDashboard: React.FC = () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button 
+            <Button
               className="w-full justify-start"
               onClick={() => navigateToComplaints({ status: ["REGISTERED"] })}
             >
@@ -526,13 +580,15 @@ const WardOfficerDashboard: React.FC = () => {
             <Button
               variant="destructive"
               className="w-full justify-start"
-              onClick={() => navigateToComplaints({ priority: ["CRITICAL", "HIGH"] })}
+              onClick={() =>
+                navigateToComplaints({ priority: ["CRITICAL", "HIGH"] })
+              }
             >
               <AlertTriangle className="h-4 w-4 mr-2" />
               Handle Urgent ({stats?.summary.urgentComplaints || 0})
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full justify-start"
               onClick={() => navigateToComplaints({ assignToTeam: true })}
             >
@@ -560,8 +616,13 @@ const WardOfficerDashboard: React.FC = () => {
                 <span>{stats?.summary.totalComplaints || 0}</span>
               </div>
               <Progress
-                value={stats?.summary.totalComplaints ? 
-                  (stats.summary.completedWork / stats.summary.totalComplaints) * 100 : 0}
+                value={
+                  stats?.summary.totalComplaints
+                    ? (stats.summary.completedWork /
+                        stats.summary.totalComplaints) *
+                      100
+                    : 0
+                }
                 className="h-2"
               />
               <p className="text-xs text-gray-500 mt-1">

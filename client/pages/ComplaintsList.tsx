@@ -131,7 +131,8 @@ const ComplaintsList: React.FC = () => {
 
     // Add new filters
     if (assignToTeamFilter) params.assignToTeam = true;
-    if (slaStatusFilter !== "all") params.slaStatus = slaStatusFilter.toUpperCase();
+    if (slaStatusFilter !== "all")
+      params.slaStatus = slaStatusFilter.toUpperCase();
 
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
@@ -375,7 +376,10 @@ const ComplaintsList: React.FC = () => {
                   checked={assignToTeamFilter}
                   onCheckedChange={setAssignToTeamFilter}
                 />
-                <label htmlFor="assignToTeam" className="text-sm cursor-pointer">
+                <label
+                  htmlFor="assignToTeam"
+                  className="text-sm cursor-pointer"
+                >
                   Needs Team Assignment
                 </label>
               </div>

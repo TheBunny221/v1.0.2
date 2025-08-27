@@ -660,7 +660,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
-  if (assignToTeam === "true" || assignToTeam === true) filters.assignToTeam = true;
+  if (assignToTeam === "true" || assignToTeam === true)
+    filters.assignToTeam = true;
   if (slaStatus) filters.slaStatus = slaStatus;
 
   // --- admin-only overrides ---
@@ -1526,35 +1527,37 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Status counts
   const statusCounts = {
-    registered: wardComplaints.filter(c => c.status === "REGISTERED").length,
-    assigned: wardComplaints.filter(c => c.status === "ASSIGNED").length,
-    in_progress: wardComplaints.filter(c => c.status === "IN_PROGRESS").length,
-    resolved: wardComplaints.filter(c => c.status === "RESOLVED").length,
-    closed: wardComplaints.filter(c => c.status === "CLOSED").length,
-    reopened: wardComplaints.filter(c => c.status === "REOPENED").length,
+    registered: wardComplaints.filter((c) => c.status === "REGISTERED").length,
+    assigned: wardComplaints.filter((c) => c.status === "ASSIGNED").length,
+    in_progress: wardComplaints.filter((c) => c.status === "IN_PROGRESS")
+      .length,
+    resolved: wardComplaints.filter((c) => c.status === "RESOLVED").length,
+    closed: wardComplaints.filter((c) => c.status === "CLOSED").length,
+    reopened: wardComplaints.filter((c) => c.status === "REOPENED").length,
   };
 
   // Priority counts
   const priorityCounts = {
-    low: wardComplaints.filter(c => c.priority === "LOW").length,
-    medium: wardComplaints.filter(c => c.priority === "MEDIUM").length,
-    high: wardComplaints.filter(c => c.priority === "HIGH").length,
-    critical: wardComplaints.filter(c => c.priority === "CRITICAL").length,
+    low: wardComplaints.filter((c) => c.priority === "LOW").length,
+    medium: wardComplaints.filter((c) => c.priority === "MEDIUM").length,
+    high: wardComplaints.filter((c) => c.priority === "HIGH").length,
+    critical: wardComplaints.filter((c) => c.priority === "CRITICAL").length,
   };
 
   // SLA status counts
   const slaCounts = {
-    on_time: wardComplaints.filter(c => c.slaStatus === "ON_TIME").length,
-    warning: wardComplaints.filter(c => c.slaStatus === "WARNING").length,
-    overdue: wardComplaints.filter(c => c.slaStatus === "OVERDUE").length,
-    completed: wardComplaints.filter(c => c.slaStatus === "COMPLETED").length,
+    on_time: wardComplaints.filter((c) => c.slaStatus === "ON_TIME").length,
+    warning: wardComplaints.filter((c) => c.slaStatus === "WARNING").length,
+    overdue: wardComplaints.filter((c) => c.slaStatus === "OVERDUE").length,
+    completed: wardComplaints.filter((c) => c.slaStatus === "COMPLETED").length,
   };
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter(c => c.assignToTeam === true).length,
-    unassigned: wardComplaints.filter(c => !c.assignedToId).length,
-    assigned: wardComplaints.filter(c => c.assignedToId).length,
+    needsAssignmentToTeam: wardComplaints.filter((c) => c.assignToTeam === true)
+      .length,
+    unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
+    assigned: wardComplaints.filter((c) => c.assignedToId).length,
   };
 
   // Calculate pending work (registered + assigned statuses)
