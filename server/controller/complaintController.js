@@ -468,24 +468,32 @@ const generateComplaintId = async () => {
     const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
     const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
 
-    // Find the highest existing complaint ID with this prefix
-    const lastComplaint = await tx.complaint.findFirst({
-      where: { complaintId: { startsWith: prefix } },
-      orderBy: { createdAt: "desc" },
+    // Find the highest existing complaint ID with this prefix and extract the highest number
+    const existingComplaints = await tx.complaint.findMany({
+      where: {
+        complaintId: {
+          startsWith: prefix,
+          not: null
+        }
+      },
       select: { complaintId: true },
+      orderBy: { complaintId: "desc" }
     });
 
-    // Determine the next number in sequence
-    let nextNumber = startNumber;
-    if (lastComplaint?.complaintId) {
-      const lastNumber = parseInt(
-        lastComplaint.complaintId.replace(prefix, ""),
-      );
-      if (!isNaN(lastNumber)) {
-        nextNumber = lastNumber + 1;
+    // Find the highest number used
+    let maxNumber = startNumber - 1;
+    for (const complaint of existingComplaints) {
+      if (complaint.complaintId) {
+        const numberPart = complaint.complaintId.replace(prefix, "");
+        const number = parseInt(numberPart);
+        if (!isNaN(number) && number > maxNumber) {
+          maxNumber = number;
+        }
       }
     }
 
+    // Generate next number
+    const nextNumber = maxNumber + 1;
     const formattedNumber = nextNumber.toString().padStart(idLength, "0");
     return `${prefix}${formattedNumber}`;
   });
