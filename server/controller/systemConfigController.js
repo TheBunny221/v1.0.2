@@ -1,7 +1,7 @@
-import { getPrisma } from "../db/connection.js";
+import { getPrismaClient } from "../config/environment.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 
-const prisma = getPrisma();
+const prisma = await getPrismaClient();
 
 // @desc    Get all system settings
 // @route   GET /api/system-config
