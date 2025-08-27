@@ -145,6 +145,7 @@ export const updateWardBoundaries = async (req, res) => {
 
 /**
  * Detect location area based on coordinates
+ * Simplified version for current schema without geographic boundaries
  */
 export const detectLocationArea = async (req, res) => {
   try {
@@ -159,7 +160,7 @@ export const detectLocationArea = async (req, res) => {
 
     console.log(`🗺️ Detecting area for coordinates: ${latitude}, ${longitude}`);
 
-    // Get all wards (boundaries feature not implemented in current schema)
+    // Get all active wards with sub-zones
     const wards = await prisma.ward.findMany({
       where: {
         isActive: true
@@ -175,119 +176,38 @@ export const detectLocationArea = async (req, res) => {
       orderBy: { name: 'asc' }
     });
 
-    let matchedWard = null;
-    let matchedSubZone = null;
-    let nearestWard = null;
-    let nearestSubZone = null;
-    let minDistance = Infinity;
-
-    // Check each ward
-    for (const ward of wards) {
-      if (ward.boundaries) {
-        try {
-          const boundaries = JSON.parse(ward.boundaries);
-          
-          // Quick bounding box check if available
-          if (ward.boundingBox) {
-            const boundingBox = JSON.parse(ward.boundingBox);
-            if (
-              latitude < boundingBox.south ||
-              latitude > boundingBox.north ||
-              longitude < boundingBox.west ||
-              longitude > boundingBox.east
-            ) {
-              continue; // Skip detailed check if outside bounding box
-            }
-          }
-
-          // Point-in-polygon check using ray casting
-          if (isPointInPolygon({ lat: latitude, lng: longitude }, boundaries)) {
-            matchedWard = ward;
-            
-            // Check sub-zones within this ward
-            for (const subZone of ward.subZones) {
-              if (subZone.boundaries) {
-                try {
-                  const subBoundaries = JSON.parse(subZone.boundaries);
-                  
-                  // Quick bounding box check for sub-zone
-                  if (subZone.boundingBox) {
-                    const subBoundingBox = JSON.parse(subZone.boundingBox);
-                    if (
-                      latitude < subBoundingBox.south ||
-                      latitude > subBoundingBox.north ||
-                      longitude < subBoundingBox.west ||
-                      longitude > subBoundingBox.east
-                    ) {
-                      continue;
-                    }
-                  }
-
-                  if (isPointInPolygon({ lat: latitude, lng: longitude }, subBoundaries)) {
-                    matchedSubZone = subZone;
-                    break;
-                  }
-                } catch (error) {
-                  console.error(`Error parsing sub-zone boundaries for ${subZone.name}:`, error);
-                }
-              }
-            }
-            break;
-          }
-        } catch (error) {
-          console.error(`Error parsing ward boundaries for ${ward.name}:`, error);
-        }
-      }
-
-      // Calculate distance to ward center for fallback
-      if (ward.centerLat && ward.centerLng) {
-        const distance = calculateDistance(
-          { lat: latitude, lng: longitude },
-          { lat: ward.centerLat, lng: ward.centerLng }
-        );
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestWard = ward;
-          
-          // Find nearest sub-zone within this ward
-          let minSubZoneDistance = Infinity;
-          nearestSubZone = null;
-          for (const subZone of ward.subZones) {
-            if (subZone.centerLat && subZone.centerLng) {
-              const subDistance = calculateDistance(
-                { lat: latitude, lng: longitude },
-                { lat: subZone.centerLat, lng: subZone.centerLng }
-              );
-
-              if (subDistance < minSubZoneDistance) {
-                minSubZoneDistance = subDistance;
-                nearestSubZone = subZone;
-              }
-            }
-          }
-        }
-      }
+    if (wards.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No active wards found",
+      });
     }
+
+    // Since geographic boundaries are not implemented in current schema,
+    // return the first active ward as a fallback
+    const defaultWard = wards[0];
+    const defaultSubZone = defaultWard.subZones.length > 0 ? defaultWard.subZones[0] : null;
+
+    console.log(`⚠️ Geographic boundaries not configured, returning default ward: ${defaultWard.name}`);
 
     const result = {
       exact: {
-        ward: matchedWard,
-        subZone: matchedSubZone,
+        ward: defaultWard,
+        subZone: defaultSubZone,
       },
       nearest: {
-        ward: nearestWard,
-        subZone: nearestSubZone,
-        distance: minDistance,
+        ward: defaultWard,
+        subZone: defaultSubZone,
+        distance: 0,
       },
       coordinates: { latitude, longitude },
+      method: 'fallback',
+      note: 'Geographic boundaries not configured - using default ward'
     };
-
-    console.log(`✅ Area detection completed: ${matchedWard ? matchedWard.name : 'No exact match'}`);
 
     res.status(200).json({
       success: true,
-      message: "Location area detected successfully",
+      message: "Location area detected (using fallback method)",
       data: result,
     });
   } catch (error) {
