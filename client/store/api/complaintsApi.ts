@@ -324,6 +324,53 @@ export const complaintsApi = baseApi.injectEndpoints({
       providesTags: ["Analytics"],
     }),
 
+    // Get ward-specific dashboard statistics (Ward Officer only)
+    getWardDashboardStatistics: builder.query<
+      ApiResponse<{
+        stats: {
+          summary: {
+            totalComplaints: number;
+            pendingWork: number;
+            activeWork: number;
+            completedWork: number;
+            needsTeamAssignment: number;
+            overdueComplaints: number;
+            urgentComplaints: number;
+          };
+          statusBreakdown: {
+            registered: number;
+            assigned: number;
+            in_progress: number;
+            resolved: number;
+            closed: number;
+            reopened: number;
+          };
+          priorityBreakdown: {
+            low: number;
+            medium: number;
+            high: number;
+            critical: number;
+          };
+          slaBreakdown: {
+            on_time: number;
+            warning: number;
+            overdue: number;
+            completed: number;
+          };
+          assignmentBreakdown: {
+            needsAssignmentToTeam: number;
+            unassigned: number;
+            assigned: number;
+          };
+        };
+        wardId: string;
+      }>,
+      void
+    >({
+      query: () => "/complaints/ward-dashboard-stats",
+      providesTags: ["Analytics"],
+    }),
+
     // Get ward users for assignment (role-based access)
     getWardUsers: builder.query<
       ApiResponse<{
