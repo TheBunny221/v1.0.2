@@ -344,7 +344,7 @@ const WardOfficerDashboard: React.FC = () => {
                     value="needsTeamAssignment"
                     className="sr-only"
                   />
-                  <label htmlFor="team-assignment-filter" className="cursor-pointer">Needs Team Assignment</label>
+                  <span className="cursor-pointer">Needs Team Assignment</span>
                 </div>
               </CardTitle>
               <Briefcase className="h-4 w-4 text-purple-600" />
