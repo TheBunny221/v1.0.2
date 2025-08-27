@@ -1,4 +1,4 @@
-import { getPrisma } from "../db/connection.js";
+import { getPrisma } from "../db/connection.dev.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 
 const prisma = getPrisma();

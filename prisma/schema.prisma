@@ -170,6 +170,7 @@ model Complaint {
   submittedById   String?
   assignedToId    String?
   resolvedById    String?
+  assignToTeam    Boolean           @default(false) // Track if needs assignment to maintenance team
   
   // Timestamps
   submittedOn     DateTime          @default(now())

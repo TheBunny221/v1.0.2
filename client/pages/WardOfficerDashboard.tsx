@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import {
-  useGetComplaintsQuery,
-  useUpdateComplaintMutation,
-  useAssignComplaintMutation,
-  useGetComplaintStatisticsQuery,
-} from "../store/api/complaintsApi";
+import { useGetWardDashboardStatisticsQuery } from "../store/api/complaintsApi";
+import ComplaintsListWidget from "../components/ComplaintsListWidget";
 import {
   Card,
   CardContent,
@@ -16,6 +12,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
+import { Checkbox } from "../components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import {
   Tabs,
   TabsContent,
@@ -27,472 +25,496 @@ import {
   Clock,
   Users,
   BarChart3,
-  Calendar,
-  MapPin,
   CheckCircle,
   XCircle,
   TrendingUp,
   FileText,
   Settings,
   MessageSquare,
+  Filter,
+  Briefcase,
 } from "lucide-react";
+
+interface FilterState {
+  mainFilter:
+    | "none"
+    | "pending"
+    | "inProgress"
+    | "completed"
+    | "needsTeamAssignment";
+  overdue: boolean;
+  urgent: boolean;
+}
 
 const WardOfficerDashboard: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const { translations } = useAppSelector((state) => state.language);
+  const navigate = useNavigate();
 
-  // Fetch complaints for the ward officer's ward
+  // State for filters
+  const [filters, setFilters] = useState<FilterState>({
+    mainFilter: "none",
+    overdue: false,
+    urgent: false,
+  });
+
+  // Fetch ward dashboard statistics
   const {
-    data: complaintsResponse,
-    isLoading,
-    error,
-    refetch: refetchComplaints,
-  } = useGetComplaintsQuery({
-    ward: user?.ward.id,
-    page: 1,
-    limit: 100,
-  });
+    data: statsResponse,
+    isLoading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useGetWardDashboardStatisticsQuery();
 
-  const complaints = complaintsResponse?.data || [];
+  const stats = statsResponse?.data?.stats;
 
-  // Fetch complaint statistics
-  const { data: statsResponse, isLoading: statsLoading } =
-    useGetComplaintStatisticsQuery({
-      ward: user?.wardId,
-    });
+  // Build filter params for complaints query based on active filters
+  const buildComplaintsFilter = () => {
+    const filterParams: any = {};
+    const statusFilters: string[] = [];
+    const priorityFilters: string[] = [];
 
-  const [updateComplaint] = useUpdateComplaintMutation();
-  const [assignComplaintMutation] = useAssignComplaintMutation();
-
-  const [dashboardStats, setDashboardStats] = useState({
-    totalAssigned: 0,
-    pending: 0,
-    inProgress: 0,
-    overdue: 0,
-    resolved: 0,
-    slaCompliance: 85,
-    avgResolutionTime: 2.8,
-  });
-
-  // Data fetching is handled by RTK Query hooks automatically
-
-  useEffect(() => {
-    // Filter complaints for this ward officer
-    const wardComplaints = Array.isArray(complaints) 
-    ? complaints.filter((c) => c.assignedTo === user?.id || c.ward === user?.wardId)
-    : [];
-
-    const totalAssigned = wardComplaints.length;
-    const pending = wardComplaints.filter(
-      (c) => c.status === "registered",
-    ).length;
-    const inProgress = wardComplaints.filter(
-      (c) => c.status === "in_progress",
-    ).length;
-    const resolved = wardComplaints.filter(
-      (c) => c.status === "resolved",
-    ).length;
-    const overdue = wardComplaints.filter((c) => {
-      if (!c.slaDeadline) return false;
-      return new Date(c.slaDeadline) < new Date() && c.status !== "resolved";
-    }).length;
-
-    setDashboardStats({
-      totalAssigned,
-      pending,
-      inProgress,
-      overdue,
-      resolved,
-      slaCompliance: 85, // Mock calculation
-      avgResolutionTime: 2.8, // Mock calculation
-    });
-  }, [complaints, user]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "REGISTERED":
-        return "bg-yellow-100 text-yellow-800";
-      case "ASSIGNED":
-        return "bg-blue-100 text-blue-800";
-      case "IN_PROGRESS":
-        return "bg-orange-100 text-orange-800";
-      case "RESOLVED":
-        return "bg-green-100 text-green-800";
-      case "CLOSED":
-        return "bg-gray-100 text-gray-800";
+    // Main filter logic
+    switch (filters.mainFilter) {
+      case "pending":
+        statusFilters.push("REGISTERED", "ASSIGNED");
+        break;
+      case "inProgress":
+        statusFilters.push("IN_PROGRESS");
+        break;
+      case "completed":
+        statusFilters.push("RESOLVED", "CLOSED");
+        break;
+      case "needsTeamAssignment":
+        filterParams.assignToTeam = true;
+        break;
       default:
-        return "bg-gray-100 text-gray-800";
+        // No main filter applied
+        break;
     }
+
+    // Additional filters
+    if (filters.urgent) {
+      priorityFilters.push("HIGH", "CRITICAL");
+    }
+
+    if (filters.overdue) {
+      filterParams.slaStatus = "OVERDUE";
+    }
+
+    // Only add arrays if they have content
+    if (statusFilters.length > 0) {
+      filterParams.status = statusFilters;
+    }
+    if (priorityFilters.length > 0) {
+      filterParams.priority = priorityFilters;
+    }
+
+    return filterParams;
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "LOW":
-        return "bg-green-100 text-green-800";
-      case "MEDIUM":
-        return "bg-yellow-100 text-yellow-800";
-      case "HIGH":
-        return "bg-orange-100 text-orange-800";
-      case "CRITICAL":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  // Calculate if we have active filters
+  const hasActiveFilters =
+    filters.mainFilter !== "none" || filters.overdue || filters.urgent;
+
+  // Build complaints filter for the widget
+  const complaintsFilter = buildComplaintsFilter();
+
+  const handleMainFilterChange = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      mainFilter: value as FilterState["mainFilter"],
+    }));
   };
 
-  const wardComplaints = Array.isArray(complaints) 
-    ? complaints.filter((c) => c.assignedTo === user?.id || c.ward === user?.wardId)
-    : [];
+  const handleFilterChange = (
+    filterKey: keyof FilterState,
+    checked: boolean,
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterKey]: checked,
+    }));
+  };
 
-  const urgentComplaints = wardComplaints
-    .filter((c) => c.priority === "critical" || c.priority === "high")
-    .slice(0, 5);
+  const clearAllFilters = () => {
+    setFilters({
+      mainFilter: "none",
+      overdue: false,
+      urgent: false,
+    });
+  };
 
-  const recentComplaints = wardComplaints.slice(0, 5);
+  // Handle navigation to complaints page with filters
+  const navigateToComplaints = (filterParams: any) => {
+    const searchParams = new URLSearchParams();
+    Object.entries(filterParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        searchParams.append(key, value.join(","));
+      } else {
+        searchParams.append(key, value.toString());
+      }
+    });
+    navigate(`/complaints?${searchParams.toString()}`);
+  };
+
+  if (statsLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <p className="text-blue-100">Loading ward statistics...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader className="space-y-0 pb-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-lg p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <p className="text-red-100">Error loading ward statistics</p>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-center text-gray-500 mb-4">
+              Failed to load dashboard data
+            </p>
+            <Button onClick={() => refetchStats()} className="w-full">
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">🚧 Ward Officer Dashboard 🛠️</h1>
+        <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
         <p className="text-blue-100">
           Manage complaints for {user?.ward?.name || "your assigned ward"} and
           monitor team performance.
         </p>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Assigned
-            </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {dashboardStats.totalAssigned}
+      {/* Statistics Cards with Filters */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Filter by Status</h2>
+        {filters.mainFilter !== "none" && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setFilters((prev) => ({ ...prev, mainFilter: "none" }))
+            }
+          >
+            Clear Filter
+          </Button>
+        )}
+      </div>
+      <RadioGroup
+        value={filters.mainFilter}
+        onValueChange={handleMainFilterChange}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "pending" ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "pending" ? "none" : "pending",
+              )
+            }
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="pending-filter"
+                    value="pending"
+                    className="sr-only"
+                  />
+                  <span className="cursor-pointer">Pending Work</span>
+                </div>
+              </CardTitle>
+              <Clock className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {stats?.summary.pendingWork || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Registered + Assigned
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "inProgress" ? "ring-2 ring-orange-500 bg-orange-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "inProgress" ? "none" : "inProgress",
+              )
+            }
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="progress-filter"
+                    value="inProgress"
+                    className="sr-only"
+                  />
+                  <span className="cursor-pointer">In Progress</span>
+                </div>
+              </CardTitle>
+              <Settings className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">
+                {stats?.summary.activeWork || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Active complaints</p>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "completed" ? "ring-2 ring-green-500 bg-green-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "completed" ? "none" : "completed",
+              )
+            }
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="completed-filter"
+                    value="completed"
+                    className="sr-only"
+                  />
+                  <span className="cursor-pointer">Completed</span>
+                </div>
+              </CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {stats?.summary.completedWork || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Resolved + Closed</p>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "needsTeamAssignment" ? "ring-2 ring-purple-500 bg-purple-50" : ""}`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "needsTeamAssignment"
+                  ? "none"
+                  : "needsTeamAssignment",
+              )
+            }
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="team-assignment-filter"
+                    value="needsTeamAssignment"
+                    className="sr-only"
+                  />
+                  <span className="cursor-pointer">Needs Team Assignment</span>
+                </div>
+              </CardTitle>
+              <Briefcase className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">
+                {stats?.summary.needsTeamAssignment || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                To assign to maintenance
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </RadioGroup>
+
+      {/* Additional Filter Options */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Filter className="h-5 w-5 mr-2" />
+            Additional Filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="overdue-filter"
+                checked={filters.overdue}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("overdue", checked as boolean)
+                }
+              />
+              <label
+                htmlFor="overdue-filter"
+                className="cursor-pointer flex items-center"
+              >
+                <AlertTriangle className="h-4 w-4 mr-1 text-red-600" />
+                Overdue ({stats?.summary.overdueComplaints || 0})
+              </label>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Complaints in your ward
-            </p>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="urgent-filter"
+                checked={filters.urgent}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("urgent", checked as boolean)
+                }
+              />
+              <label
+                htmlFor="urgent-filter"
+                className="cursor-pointer flex items-center"
+              >
+                <AlertTriangle className="h-4 w-4 mr-1 text-orange-600" />
+                Urgent Priority ({stats?.summary.urgentComplaints || 0})
+              </label>
+            </div>
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                Clear All Filters
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Filtered Complaints List */}
+      {hasActiveFilters && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Filtered Complaints</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigateToComplaints(complaintsFilter)}
+            >
+              View All in Complaints Page
+            </Button>
+          </div>
+          <ComplaintsListWidget
+            filters={complaintsFilter}
+            title="Filtered Results"
+            maxHeight="500px"
+            showActions={true}
+          />
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              className="w-full justify-start"
+              onClick={() => navigateToComplaints({ status: ["REGISTERED"] })}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Assign New Complaints ({stats?.statusBreakdown.registered || 0})
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-full justify-start"
+              onClick={() =>
+                navigateToComplaints({ priority: ["CRITICAL", "HIGH"] })
+              }
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Handle Urgent ({stats?.summary.urgentComplaints || 0})
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigateToComplaints({ assignToTeam: true })}
+            >
+              <Briefcase className="h-4 w-4 mr-2" />
+              Assign to Team ({stats?.summary.needsTeamAssignment || 0})
+            </Button>
+            <Link to="/reports" className="block">
+              <Button variant="outline" className="w-full justify-start">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Generate Reports
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
+        {/* Performance Overview */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Action
-            </CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+          <CardHeader>
+            <CardTitle>Ward Performance</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {dashboardStats.pending}
+          <CardContent className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span>Total Complaints</span>
+                <span>{stats?.summary.totalComplaints || 0}</span>
+              </div>
+              <Progress
+                value={
+                  stats?.summary.totalComplaints
+                    ? (stats.summary.completedWork /
+                        stats.summary.totalComplaints) *
+                      100
+                    : 0
+                }
+                className="h-2"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {stats?.summary.completedWork || 0} completed
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">Awaiting assignment</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {dashboardStats.overdue}
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats?.statusBreakdown.in_progress || 0}
+                </div>
+                <p className="text-xs text-gray-500">Active</p>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-red-600">
+                  {stats?.summary.overdueComplaints || 0}
+                </div>
+                <p className="text-xs text-gray-500">Overdue</p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">Past deadline</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              SLA Compliance
-            </CardTitle>
-            <BarChart3 className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {dashboardStats.slaCompliance}%
-            </div>
-            <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
       </div>
-
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="urgent">
-            Urgent ({urgentComplaints.length})
-          </TabsTrigger>
-          <TabsTrigger value="assignments">Assignments</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Complaints */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Recent Complaints
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {recentComplaints.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-500">No complaints in your ward</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recentComplaints.map((complaint) => (
-                      <div
-                        key={complaint.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-medium text-sm">
-                            {complaint.title ||
-                              `Complaint #${complaint.id.slice(-6)}`}
-                          </h3>
-                          <div className="flex space-x-2">
-                            <Badge className={getStatusColor(complaint.status)}>
-                              {complaint.status.replace("_", " ")}
-                            </Badge>
-                            <Badge
-                              className={getPriorityColor(complaint.priority)}
-                            >
-                              {complaint.priority}
-                            </Badge>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                          {complaint.description}
-                        </p>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center text-xs text-gray-500">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            {complaint.area}
-                            <Calendar className="h-3 w-3 ml-3 mr-1" />
-                            {new Date(
-                              complaint.submittedOn,
-                            ).toLocaleDateString()}
-                          </div>
-                          <Link to={`/complaints/${complaint.id}`}>
-                            <Button variant="outline" size="sm">
-                              Manage
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to="/complaints?status=REGISTERED" className="block">
-                  <Button className="w-full justify-start">
-                    <Users className="h-4 w-4 mr-2" />
-                    Assign Complaints ({dashboardStats.pending})
-                  </Button>
-                </Link>
-                <Link to="/complaints?priority=CRITICAL,HIGH" className="block">
-                  <Button
-                    variant="destructive"
-                    className="w-full justify-start"
-                  >
-                    <AlertTriangle className="h-4 w-4 mr-2" />
-                    Handle Urgent ({urgentComplaints.length})
-                  </Button>
-                </Link>
-                <Link to="/reports" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Generate Reports
-                  </Button>
-                </Link>
-                <Link to="/messages" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Team Communication
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="urgent" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-red-600">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                Urgent Complaints Requiring Immediate Attention
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {urgentComplaints.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 mx-auto text-green-400 mb-4" />
-                  <p className="text-gray-500">
-                    No urgent complaints! Great job!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {urgentComplaints.map((complaint) => (
-                    <div
-                      key={complaint.id}
-                      className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-sm">
-                          {complaint.title ||
-                            `Complaint #${complaint.id.slice(-6)}`}
-                        </h3>
-                        <div className="flex space-x-2">
-                          <Badge className="bg-red-100 text-red-800">
-                            {complaint.priority}
-                          </Badge>
-                          <Badge className={getStatusColor(complaint.status)}>
-                            {complaint.status.replace("_", " ")}
-                          </Badge>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-700 mb-2">
-                        {complaint.description}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center text-xs text-gray-600">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {complaint.area}
-                          <Clock className="h-3 w-3 ml-3 mr-1" />
-                          {complaint.deadline &&
-                            new Date(complaint.deadline).toLocaleDateString()}
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="destructive">
-                            Assign Now
-                          </Button>
-                          <Link to={`/complaints/${complaint.id}`}>
-                            <Button size="sm" variant="outline">
-                              View Details
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="assignments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Complaint Assignment Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Unassigned Complaints</h3>
-                  <Badge variant="secondary">
-                    {dashboardStats.pending} pending
-                  </Badge>
-                </div>
-                {/* Assignment interface would go here */}
-                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">
-                    Assignment interface will be implemented here
-                  </p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Drag and drop complaints to maintenance team members
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="performance" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>SLA Performance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Resolution Rate</span>
-                    <span>{dashboardStats.slaCompliance}%</span>
-                  </div>
-                  <Progress
-                    value={dashboardStats.slaCompliance}
-                    className="h-2"
-                  />
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {dashboardStats.avgResolutionTime}
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Average Resolution Time (days)
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Monthly Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Complaints Resolved</span>
-                    <div className="flex items-center">
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">+12%</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Response Time</span>
-                    <div className="flex items-center">
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">-8%</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Citizen Satisfaction</span>
-                    <div className="flex items-center">
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">4.2/5</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
