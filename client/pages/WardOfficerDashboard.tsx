@@ -193,8 +193,6 @@ const WardOfficerDashboard: React.FC = () => {
     }
   };
 
-  const hasActiveFilters = filters.mainFilter !== 'none' || filters.overdue || filters.urgent;
-
   // Handle navigation to complaints page with filters
   const navigateToComplaints = (filterParams: any) => {
     const searchParams = new URLSearchParams();
