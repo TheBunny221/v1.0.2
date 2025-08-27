@@ -351,6 +351,20 @@ const ComplaintsList: React.FC = () => {
                   </SelectContent>
                 </Select>
               )}
+
+            {/* SLA Status Filter */}
+            <Select value={slaStatusFilter} onValueChange={setSlaStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by SLA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All SLA Status</SelectItem>
+                <SelectItem value="ON_TIME">On Time</SelectItem>
+                <SelectItem value="WARNING">Warning</SelectItem>
+                <SelectItem value="OVERDUE">Overdue</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={clearFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
