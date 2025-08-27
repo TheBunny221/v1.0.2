@@ -465,9 +465,16 @@ const ComplaintsList: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getPriorityColor(complaint.priority)}>
-                        {complaint.priority}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={getPriorityColor(complaint.priority)}>
+                          {complaint.priority}
+                        </Badge>
+                        {complaint.assignToTeam && (
+                          <Badge className="bg-purple-100 text-purple-800 text-xs">
+                            Needs Team Assignment
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center text-sm">
