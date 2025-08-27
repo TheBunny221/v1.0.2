@@ -72,28 +72,40 @@ const WardOfficerDashboard: React.FC = () => {
     const statusFilters: string[] = [];
     const priorityFilters: string[] = [];
 
-    if (filters.mainFilter === 'pending') {
-      statusFilters.push("REGISTERED", "ASSIGNED");
-    } else if (filters.mainFilter === 'inProgress') {
-      statusFilters.push("IN_PROGRESS");
-    } else if (filters.mainFilter === 'completed') {
-      statusFilters.push("RESOLVED", "CLOSED");
+    // Main filter logic
+    switch (filters.mainFilter) {
+      case 'pending':
+        statusFilters.push("REGISTERED", "ASSIGNED");
+        break;
+      case 'inProgress':
+        statusFilters.push("IN_PROGRESS");
+        break;
+      case 'completed':
+        statusFilters.push("RESOLVED", "CLOSED");
+        break;
+      case 'needsTeamAssignment':
+        filterParams.assignToTeam = true;
+        break;
+      default:
+        // No main filter applied
+        break;
     }
+
+    // Additional filters
     if (filters.urgent) {
       priorityFilters.push("HIGH", "CRITICAL");
     }
 
+    if (filters.overdue) {
+      filterParams.slaStatus = "OVERDUE";
+    }
+
+    // Only add arrays if they have content
     if (statusFilters.length > 0) {
       filterParams.status = statusFilters;
     }
     if (priorityFilters.length > 0) {
       filterParams.priority = priorityFilters;
-    }
-    if (filters.overdue) {
-      filterParams.slaStatus = "OVERDUE";
-    }
-    if (filters.mainFilter === 'needsTeamAssignment') {
-      filterParams.assignToTeam = true;
     }
 
     return filterParams;
