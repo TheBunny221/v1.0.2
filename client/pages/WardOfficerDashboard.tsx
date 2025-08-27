@@ -132,9 +132,6 @@ const WardOfficerDashboard: React.FC = () => {
 
   const filteredComplaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
 
-  console.log('Complaints response:', complaintsResponse);
-  console.log('Filtered complaints:', filteredComplaints);
-
   const handleMainFilterChange = (value: string) => {
     setFilters(prev => ({
       ...prev,
