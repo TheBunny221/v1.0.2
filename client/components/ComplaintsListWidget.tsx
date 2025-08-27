@@ -1,12 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
@@ -17,14 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import {
-  FileText,
-  Calendar,
-  MapPin,
-  Eye,
-  Edit,
-  RefreshCw,
-} from "lucide-react";
+import { FileText, Calendar, MapPin, Eye, Edit, RefreshCw } from "lucide-react";
 
 interface ComplaintsListWidgetProps {
   filters: any;
@@ -56,8 +44,8 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
     ? complaintsResponse.data.complaints
     : Array.isArray(complaintsResponse?.data)
-    ? complaintsResponse.data
-    : [];
+      ? complaintsResponse.data
+      : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -91,11 +79,12 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
     }
   };
 
-  const hasFilters = Object.keys(filters).some(key => 
-    filters[key] !== undefined && 
-    filters[key] !== null && 
-    filters[key] !== '' &&
-    !(Array.isArray(filters[key]) && filters[key].length === 0)
+  const hasFilters = Object.keys(filters).some(
+    (key) =>
+      filters[key] !== undefined &&
+      filters[key] !== null &&
+      filters[key] !== "" &&
+      !(Array.isArray(filters[key]) && filters[key].length === 0),
   );
 
   return (
@@ -141,7 +130,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
             </p>
           </div>
         ) : (
-          <div style={{ maxHeight, overflowY: 'auto' }}>
+          <div style={{ maxHeight, overflowY: "auto" }}>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -196,7 +185,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                     <TableCell>
                       <div className="flex items-center text-sm">
                         <Calendar className="h-3 w-3 mr-1" />
-                        {complaint.submittedOn 
+                        {complaint.submittedOn
                           ? new Date(complaint.submittedOn).toLocaleDateString()
                           : "N/A"}
                       </div>
