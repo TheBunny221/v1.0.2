@@ -15,6 +15,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { Checkbox } from "../components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import {
   Tabs,
   TabsContent,
@@ -39,10 +40,7 @@ import {
 } from "lucide-react";
 
 interface FilterState {
-  pending: boolean;
-  inProgress: boolean;
-  completed: boolean;
-  needsTeamAssignment: boolean;
+  mainFilter: 'none' | 'pending' | 'inProgress' | 'completed' | 'needsTeamAssignment';
   overdue: boolean;
   urgent: boolean;
 }
@@ -53,10 +51,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   // State for filters
   const [filters, setFilters] = useState<FilterState>({
-    pending: false,
-    inProgress: false,
-    completed: false,
-    needsTeamAssignment: false,
+    mainFilter: 'none',
     overdue: false,
     urgent: false,
   });
@@ -77,13 +72,11 @@ const WardOfficerDashboard: React.FC = () => {
     const statusFilters: string[] = [];
     const priorityFilters: string[] = [];
 
-    if (filters.pending) {
+    if (filters.mainFilter === 'pending') {
       statusFilters.push("REGISTERED", "ASSIGNED");
-    }
-    if (filters.inProgress) {
+    } else if (filters.mainFilter === 'inProgress') {
       statusFilters.push("IN_PROGRESS");
-    }
-    if (filters.completed) {
+    } else if (filters.mainFilter === 'completed') {
       statusFilters.push("RESOLVED", "CLOSED");
     }
     if (filters.urgent) {
@@ -99,7 +92,7 @@ const WardOfficerDashboard: React.FC = () => {
     if (filters.overdue) {
       filterParams.slaStatus = "OVERDUE";
     }
-    if (filters.needsTeamAssignment) {
+    if (filters.mainFilter === 'needsTeamAssignment') {
       filterParams.assignToTeam = true;
     }
 
@@ -120,6 +113,13 @@ const WardOfficerDashboard: React.FC = () => {
 
   const filteredComplaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
 
+  const handleMainFilterChange = (value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      mainFilter: value as FilterState['mainFilter'],
+    }));
+  };
+
   const handleFilterChange = (filterKey: keyof FilterState, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
@@ -129,10 +129,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   const clearAllFilters = () => {
     setFilters({
-      pending: false,
-      inProgress: false,
-      completed: false,
-      needsTeamAssignment: false,
+      mainFilter: 'none',
       overdue: false,
       urgent: false,
     });
@@ -170,7 +167,7 @@ const WardOfficerDashboard: React.FC = () => {
     }
   };
 
-  const hasActiveFilters = Object.values(filters).some(Boolean);
+  const hasActiveFilters = filters.mainFilter !== 'none' || filters.overdue || filters.urgent;
 
   // Handle navigation to complaints page with filters
   const navigateToComplaints = (filterParams: any) => {
