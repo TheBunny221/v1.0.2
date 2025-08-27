@@ -643,7 +643,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
   if (Object.keys(enforced).length) dbg("role enforcement applied", enforced);
 
   // --- generic filters ---
-  if (status) filters.status = status;
+  if (status) {
+    // Handle both single values and arrays for status
+    if (Array.isArray(status)) {
+      filters.status = { in: status };
+    } else {
+      filters.status = status;
+    }
+  }
   if (priority) {
     // Handle both single values and arrays for priority
     if (Array.isArray(priority)) {
@@ -653,6 +660,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
+  if (assignToTeam === "true" || assignToTeam === true) filters.assignToTeam = true;
+  if (slaStatus) filters.slaStatus = slaStatus;
 
   // --- admin-only overrides ---
   if (req.user.role === "ADMINISTRATOR") {
