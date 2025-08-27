@@ -117,10 +117,6 @@ const WardOfficerDashboard: React.FC = () => {
   // Fetch complaints based on active filters
   const complaintsFilter = buildComplaintsFilter();
 
-  // Debug logging
-  console.log('Current filters:', filters);
-  console.log('Complaints filter:', complaintsFilter);
-  console.log('Has active filters:', hasActiveFilters);
 
   const {
     data: complaintsResponse,
