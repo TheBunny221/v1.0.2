@@ -11,6 +11,7 @@ import {
   reopenComplaint,
   getComplaintStats,
   getWardUsers,
+  getWardDashboardStats,
 } from "../controller/complaintController.js";
 
 const router = express.Router();
@@ -35,6 +36,13 @@ router.get(
   "/ward-users",
   authorize("WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"),
   getWardUsers,
+);
+
+// Get ward-specific dashboard statistics (Ward Officer only)
+router.get(
+  "/ward-dashboard-stats",
+  authorize("WARD_OFFICER"),
+  getWardDashboardStats,
 );
 
 // Get single complaint
