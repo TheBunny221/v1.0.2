@@ -712,7 +712,7 @@ async function main() {
     // Admin user
     const adminUser = await prisma.user.create({
       data: {
-        email: "admin@cochinsmartcity.dev",
+        email: "admin@cochinsmartcity.gov.in",
         fullName: "Development Administrator",
         phoneNumber: "+91-9876543210",
         password: await hashPassword("admin123"),
@@ -740,7 +740,7 @@ async function main() {
       const ward = createdWards[i];
       const officer = await prisma.user.create({
         data: {
-          email: `officer${i + 1}@cochinsmartcity.dev`,
+          email: `officer${i + 1}@cochinsmartcity.gov.in`,
           fullName: officerNames[i] || `Ward Officer ${i + 1}`,
           phoneNumber: `+91-98765432${10 + i}`,
           password: await hashPassword("officer123"),
@@ -760,22 +760,22 @@ async function main() {
       {
         name: "Suresh Kumar",
         dept: "Public Works",
-        email: "suresh.kumar@cochinsmartcity.dev",
+        email: "suresh.kumar@cochinsmartcity.gov.in",
       },
       {
         name: "Leela Devi",
         dept: "Water Supply",
-        email: "leela.devi@cochinsmartcity.dev",
+        email: "leela.devi@cochinsmartcity.gov.in",
       },
       {
         name: "Vinod Electrician",
         dept: "Electricity",
-        email: "vinod.electric@cochinsmartcity.dev",
+        email: "vinod.electric@cochinsmartcity.gov.in",
       },
       {
         name: "Ramesh Cleaner",
         dept: "Waste Management",
-        email: "ramesh.waste@cochinsmartcity.dev",
+        email: "ramesh.waste@cochinsmartcity.gov.in",
       },
     ];
 
@@ -802,42 +802,42 @@ async function main() {
     const citizenData = [
       {
         name: "Arjun Menon",
-        email: "arjun.menon@email.dev",
+        email: "arjun.menon@email.com",
         phone: "+91-9876540001",
       },
       {
         name: "Kavya Nair",
-        email: "kavya.nair@email.dev",
+        email: "kavya.nair@email.com",
         phone: "+91-9876540002",
       },
       {
         name: "Joseph Cherian",
-        email: "joseph.cherian@email.dev",
+        email: "joseph.cherian@email.com",
         phone: "+91-9876540003",
       },
       {
         name: "Lakshmi Pillai",
-        email: "lakshmi.pillai@email.dev",
+        email: "lakshmi.pillai@email.com",
         phone: "+91-9876540004",
       },
       {
         name: "Anand Kumar",
-        email: "anand.kumar@email.dev",
+        email: "anand.kumar@email.com",
         phone: "+91-9876540005",
       },
       {
         name: "Maya George",
-        email: "maya.george@email.dev",
+        email: "maya.george@email.com",
         phone: "+91-9876540006",
       },
       {
         name: "Vishnu Warrier",
-        email: "vishnu.warrier@email.dev",
+        email: "vishnu.warrier@email.com",
         phone: "+91-9876540007",
       },
       {
         name: "Nisha Kumari",
-        email: "nisha.kumari@email.dev",
+        email: "nisha.kumari@email.com",
         phone: "+91-9876540008",
       },
     ];
