@@ -593,6 +593,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
     subZoneId,
     assignedToId,
     submittedById,
+    assignToTeam,
+    slaStatus,
     dateFrom,
     dateTo,
     search,
@@ -641,7 +643,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
   if (Object.keys(enforced).length) dbg("role enforcement applied", enforced);
 
   // --- generic filters ---
-  if (status) filters.status = status;
+  if (status) {
+    // Handle both single values and arrays for status
+    if (Array.isArray(status)) {
+      filters.status = { in: status };
+    } else {
+      filters.status = status;
+    }
+  }
   if (priority) {
     // Handle both single values and arrays for priority
     if (Array.isArray(priority)) {
@@ -651,6 +660,9 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
+  if (assignToTeam === "true" || assignToTeam === true)
+    filters.assignToTeam = true;
+  if (slaStatus) filters.slaStatus = slaStatus;
 
   // --- admin-only overrides ---
   if (req.user.role === "ADMINISTRATOR") {
@@ -1470,5 +1482,115 @@ export const getWardUsers = asyncHandler(async (req, res) => {
         pages: Math.ceil(total / parseInt(limit)),
       },
     },
+  });
+});
+
+// @desc    Get ward-specific dashboard statistics
+// @route   GET /api/complaints/ward-dashboard-stats
+// @access  Private (Ward Officer only)
+export const getWardDashboardStats = asyncHandler(async (req, res) => {
+  // Only ward officers can access this endpoint
+  if (req.user.role !== "WARD_OFFICER") {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Ward officers only.",
+    });
+  }
+
+  const wardId = req.user.wardId;
+
+  if (!wardId) {
+    return res.status(400).json({
+      success: false,
+      message: "Ward officer must be assigned to a ward",
+    });
+  }
+
+  // Get all complaints in this ward
+  const wardComplaints = await prisma.complaint.findMany({
+    where: { wardId },
+    select: {
+      id: true,
+      status: true,
+      priority: true,
+      slaStatus: true,
+      assignToTeam: true,
+      assignedToId: true,
+      submittedOn: true,
+      resolvedOn: true,
+      deadline: true,
+    },
+  });
+
+  // Calculate statistics
+  const totalComplaints = wardComplaints.length;
+
+  // Status counts
+  const statusCounts = {
+    registered: wardComplaints.filter((c) => c.status === "REGISTERED").length,
+    assigned: wardComplaints.filter((c) => c.status === "ASSIGNED").length,
+    in_progress: wardComplaints.filter((c) => c.status === "IN_PROGRESS")
+      .length,
+    resolved: wardComplaints.filter((c) => c.status === "RESOLVED").length,
+    closed: wardComplaints.filter((c) => c.status === "CLOSED").length,
+    reopened: wardComplaints.filter((c) => c.status === "REOPENED").length,
+  };
+
+  // Priority counts
+  const priorityCounts = {
+    low: wardComplaints.filter((c) => c.priority === "LOW").length,
+    medium: wardComplaints.filter((c) => c.priority === "MEDIUM").length,
+    high: wardComplaints.filter((c) => c.priority === "HIGH").length,
+    critical: wardComplaints.filter((c) => c.priority === "CRITICAL").length,
+  };
+
+  // SLA status counts
+  const slaCounts = {
+    on_time: wardComplaints.filter((c) => c.slaStatus === "ON_TIME").length,
+    warning: wardComplaints.filter((c) => c.slaStatus === "WARNING").length,
+    overdue: wardComplaints.filter((c) => c.slaStatus === "OVERDUE").length,
+    completed: wardComplaints.filter((c) => c.slaStatus === "COMPLETED").length,
+  };
+
+  // Assignment tracking
+  const assignmentCounts = {
+    needsAssignmentToTeam: wardComplaints.filter((c) => c.assignToTeam === true)
+      .length,
+    unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
+    assigned: wardComplaints.filter((c) => c.assignedToId).length,
+  };
+
+  // Calculate pending work (registered + assigned statuses)
+  const pendingWork = statusCounts.registered + statusCounts.assigned;
+
+  // Calculate active work (in progress)
+  const activeWork = statusCounts.in_progress;
+
+  // Calculate completed work (resolved + closed)
+  const completedWork = statusCounts.resolved + statusCounts.closed;
+
+  // Calculate quick summary stats
+  const dashboardSummary = {
+    totalComplaints,
+    pendingWork,
+    activeWork,
+    completedWork,
+    needsTeamAssignment: assignmentCounts.needsAssignmentToTeam,
+    overdueComplaints: slaCounts.overdue,
+    urgentComplaints: priorityCounts.critical + priorityCounts.high,
+  };
+
+  const stats = {
+    summary: dashboardSummary,
+    statusBreakdown: statusCounts,
+    priorityBreakdown: priorityCounts,
+    slaBreakdown: slaCounts,
+    assignmentBreakdown: assignmentCounts,
+  };
+
+  res.status(200).json({
+    success: true,
+    message: "Ward dashboard statistics retrieved successfully",
+    data: { stats, wardId },
   });
 });

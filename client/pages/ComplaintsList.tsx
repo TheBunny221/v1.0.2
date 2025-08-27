@@ -13,6 +13,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import { Checkbox } from "../components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -68,6 +69,12 @@ const ComplaintsList: React.FC = () => {
   const [subZoneFilter, setSubZoneFilter] = useState(
     searchParams.get("subZone") || "all",
   );
+  const [assignToTeamFilter, setAssignToTeamFilter] = useState(
+    searchParams.get("assignToTeam") === "true" || false,
+  );
+  const [slaStatusFilter, setSlaStatusFilter] = useState(
+    searchParams.get("slaStatus") || "all",
+  );
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -122,6 +129,11 @@ const ComplaintsList: React.FC = () => {
     if (wardFilter !== "all") params.wardId = wardFilter;
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
+    // Add new filters
+    if (assignToTeamFilter) params.assignToTeam = true;
+    if (slaStatusFilter !== "all")
+      params.slaStatus = slaStatusFilter.toUpperCase();
+
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
     // For MAINTENANCE_TEAM users, show only their own complaints
@@ -139,6 +151,8 @@ const ComplaintsList: React.FC = () => {
     user?.role,
     user?.id,
     searchParams,
+    assignToTeamFilter,
+    slaStatusFilter,
   ]);
 
   // Use RTK Query for better authentication handling
@@ -202,6 +216,8 @@ const ComplaintsList: React.FC = () => {
     setPriorityFilter("all");
     setWardFilter("all");
     setSubZoneFilter("all");
+    setAssignToTeamFilter(false);
+    setSlaStatusFilter("all");
     setDebouncedSearchTerm("");
   };
 
@@ -242,7 +258,7 @@ const ComplaintsList: React.FC = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             <div className="space-y-1">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -337,6 +353,37 @@ const ComplaintsList: React.FC = () => {
                   </SelectContent>
                 </Select>
               )}
+
+            {/* SLA Status Filter */}
+            <Select value={slaStatusFilter} onValueChange={setSlaStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by SLA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All SLA Status</SelectItem>
+                <SelectItem value="ON_TIME">On Time</SelectItem>
+                <SelectItem value="WARNING">Warning</SelectItem>
+                <SelectItem value="OVERDUE">Overdue</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Needs Team Assignment Filter - Only for Ward Officers */}
+            {user?.role === "WARD_OFFICER" && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="assignToTeam"
+                  checked={assignToTeamFilter}
+                  onCheckedChange={setAssignToTeamFilter}
+                />
+                <label
+                  htmlFor="assignToTeam"
+                  className="text-sm cursor-pointer"
+                >
+                  Needs Team Assignment
+                </label>
+              </div>
+            )}
             <Button variant="outline" onClick={clearFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Clear Filters
@@ -422,9 +469,16 @@ const ComplaintsList: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getPriorityColor(complaint.priority)}>
-                        {complaint.priority}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={getPriorityColor(complaint.priority)}>
+                          {complaint.priority}
+                        </Badge>
+                        {complaint.assignToTeam && (
+                          <Badge className="bg-purple-100 text-purple-800 text-xs">
+                            Needs Team Assignment
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center text-sm">
