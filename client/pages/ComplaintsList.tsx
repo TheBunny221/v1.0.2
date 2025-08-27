@@ -68,6 +68,12 @@ const ComplaintsList: React.FC = () => {
   const [subZoneFilter, setSubZoneFilter] = useState(
     searchParams.get("subZone") || "all",
   );
+  const [assignToTeamFilter, setAssignToTeamFilter] = useState(
+    searchParams.get("assignToTeam") === "true" || false,
+  );
+  const [slaStatusFilter, setSlaStatusFilter] = useState(
+    searchParams.get("slaStatus") || "all",
+  );
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -122,6 +128,10 @@ const ComplaintsList: React.FC = () => {
     if (wardFilter !== "all") params.wardId = wardFilter;
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
+    // Add new filters
+    if (assignToTeamFilter) params.assignToTeam = true;
+    if (slaStatusFilter !== "all") params.slaStatus = slaStatusFilter.toUpperCase();
+
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
     // For MAINTENANCE_TEAM users, show only their own complaints
@@ -139,6 +149,8 @@ const ComplaintsList: React.FC = () => {
     user?.role,
     user?.id,
     searchParams,
+    assignToTeamFilter,
+    slaStatusFilter,
   ]);
 
   // Use RTK Query for better authentication handling
@@ -202,6 +214,8 @@ const ComplaintsList: React.FC = () => {
     setPriorityFilter("all");
     setWardFilter("all");
     setSubZoneFilter("all");
+    setAssignToTeamFilter(false);
+    setSlaStatusFilter("all");
     setDebouncedSearchTerm("");
   };
 
