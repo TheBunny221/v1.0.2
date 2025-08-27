@@ -539,6 +539,8 @@ const createComplaintWithUniqueId = async (data) => {
         console.log(
           `Complaint ID collision detected. Retries left: ${retries}`,
         );
+        // Add a small delay to reduce chance of concurrent collision
+        await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 20));
         // Continue to next iteration which will generate a new ID
         if (retries === 0) throw err;
       } else {
