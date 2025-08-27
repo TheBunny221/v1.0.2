@@ -101,6 +101,12 @@ const WardOfficerDashboard: React.FC = () => {
 
   // Fetch complaints based on active filters
   const complaintsFilter = buildComplaintsFilter();
+
+  // Debug logging
+  console.log('Current filters:', filters);
+  console.log('Complaints filter:', complaintsFilter);
+  console.log('Has active filters:', hasActiveFilters);
+
   const {
     data: complaintsResponse,
     isLoading: complaintsLoading,
@@ -109,9 +115,14 @@ const WardOfficerDashboard: React.FC = () => {
     ...complaintsFilter,
     page: 1,
     limit: 50,
+  }, {
+    skip: !hasActiveFilters // Only fetch when we have active filters
   });
 
   const filteredComplaints = Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : [];
+
+  console.log('Complaints response:', complaintsResponse);
+  console.log('Filtered complaints:', filteredComplaints);
 
   const handleMainFilterChange = (value: string) => {
     setFilters(prev => ({
