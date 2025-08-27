@@ -237,6 +237,18 @@ const WardOfficerDashboard: React.FC = () => {
       </div>
 
       {/* Statistics Cards with Filters */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Filter by Status</h2>
+        {filters.mainFilter !== 'none' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilters(prev => ({ ...prev, mainFilter: 'none' }))}
+          >
+            Clear Filter
+          </Button>
+        )}
+      </div>
       <RadioGroup value={filters.mainFilter} onValueChange={handleMainFilterChange}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === 'pending' ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
