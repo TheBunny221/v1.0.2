@@ -275,6 +275,8 @@ export const createComplaint = createAsyncThunk(
       contactEmail?: string;
       contactPhone?: string;
       isAnonymous?: boolean;
+      captchaId?: string;
+      captchaText?: string;
       isSubmitting?: boolean;
     },
     { rejectWithValue },
