@@ -27,8 +27,6 @@ import {
   Clock,
   Users,
   BarChart3,
-  Calendar,
-  MapPin,
   CheckCircle,
   XCircle,
   TrendingUp,
