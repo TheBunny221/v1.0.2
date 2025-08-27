@@ -1514,7 +1514,6 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
       status: true,
       priority: true,
       slaStatus: true,
-      assignToTeam: true,
       assignedToId: true,
       submittedOn: true,
       resolvedOn: true,

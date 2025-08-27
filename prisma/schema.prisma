@@ -100,12 +100,6 @@ model Ward {
   description String?
   isActive    Boolean @default(true)
 
-  // Geographic Boundaries
-  boundaries  String? // JSON string for polygon coordinates
-  centerLat   Float?  // Center point latitude
-  centerLng   Float?  // Center point longitude
-  boundingBox String? // JSON string for bounding box {north, south, east, west}
-
   // Relations
   users       User[]
   complaints  Complaint[]
@@ -124,20 +118,14 @@ model SubZone {
   wardId      String
   description String?
   isActive    Boolean @default(true)
-
-  // Geographic Boundaries
-  boundaries  String? // JSON string for polygon coordinates
-  centerLat   Float?  // Center point latitude
-  centerLng   Float?  // Center point longitude
-  boundingBox String? // JSON string for bounding box {north, south, east, west}
-
+  
   // Relations
   ward        Ward        @relation(fields: [wardId], references: [id], onDelete: Cascade)
   complaints  Complaint[]
-
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   @@index([wardId])
   @@map("sub_zones")
 }
@@ -170,7 +158,6 @@ model Complaint {
   submittedById   String?
   assignedToId    String?
   resolvedById    String?
-  assignToTeam    Boolean           @default(false) // Track if needs assignment to maintenance team
   
   // Timestamps
   submittedOn     DateTime          @default(now())
@@ -208,41 +195,6 @@ model Complaint {
   @@index([status, createdAt])
   @@index([type, createdAt])
   @@map("complaints")
-}
-
-model GuestComplaint {
-  id              String            @id @default(cuid())
-  complaintId     String?           @unique // Human-readable complaint ID like KSC0001
-  title           String?
-  description     String
-  type            String
-  status          ComplaintStatus   @default(REGISTERED)
-  priority        Priority          @default(MEDIUM)
-  slaStatus       SLAStatus         @default(ON_TIME)
-
-  // Location Information
-  wardId          String
-  subZoneId       String?
-  area            String
-  landmark        String?
-  address         String?
-  coordinates     String?           // JSON string for lat/lng
-
-  // Contact Information
-  contactName     String
-  contactEmail    String
-  contactPhone    String
-  isAnonymous       Boolean
-  tempAttachmentPaths Json? // Store temporary attachment paths/details
-
-  otpCode           String
-  otpExpiresAt      DateTime
-  isVerified        Boolean @default(false)
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@map("guest_complaints")
 }
 
 model StatusLog {

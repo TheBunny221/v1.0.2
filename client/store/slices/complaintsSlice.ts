@@ -1,6 +1,16 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
 
 // Types matching backend Prisma schema
+export interface WardDashboardStats {
+  totalComplaints: number;
+  needToAssign: number;
+  complaintsByStatus: {
+    status: ComplaintStatus;
+    _count: number;
+  }[];
+}
+
 export type ComplaintStatus =
   | "REGISTERED"
   | "ASSIGNED"
@@ -117,32 +127,26 @@ export interface Complaint {
 
 export interface ComplaintsState {
   complaints: Complaint[];
-  currentComplaint: Complaint | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
-  filters: {
-    status?: ComplaintStatus;
-    type?: ComplaintType;
-    priority?: Priority;
-    assignedToId?: string;
-    wardId?: string;
-    search?: string;
-  };
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    limit: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
-  statistics: {
-    total: number;
-    byStatus: Record<ComplaintStatus, number>;
-    byPriority: Record<Priority, number>;
-    byType: Record<ComplaintType, number>;
-  } | null;
+  selectedComplaint: Complaint | null;
+  wardDashboardStats: WardDashboardStats | null;
+  currentComplaint: Complaint | null;
+  filters: any;
+  isLoading: boolean;
+  pagination: any;
 }
+
+// Thunk for fetching ward dashboard stats
+export const fetchWardDashboardStats = createAsyncThunk(
+  "complaints/fetchWardDashboardStats",
+  async (wardId: string) => {
+    const response = await axios.get(`/api/complaints/ward-dashboard-stats`, {
+      params: { wardId }
+    });
+    return response.data.data;
+  }
+);
 
 // Initial state
 const initialState: ComplaintsState = {
@@ -477,6 +481,20 @@ const complaintsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Ward Dashboard Stats
+    builder
+      .addCase(fetchWardDashboardStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchWardDashboardStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.wardDashboardStats = action.payload;
+      })
+      .addCase(fetchWardDashboardStats.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch ward dashboard stats";
+      })
     builder
       // Fetch complaints
       .addCase(fetchComplaints.pending, (state) => {

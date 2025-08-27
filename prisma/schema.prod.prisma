@@ -170,6 +170,7 @@ model Complaint {
   remarks         String?
   citizenFeedback String?
   rating          Int?              // 1-5 rating
+  assignToTeam    Boolean   @default(false)  // added field for team assignment in ward dashboard
   tags            String?           // JSON array of tags
   
   // Relations
