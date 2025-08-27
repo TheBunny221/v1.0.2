@@ -406,92 +406,24 @@ const WardOfficerDashboard: React.FC = () => {
 
       {/* Filtered Complaints List */}
       {hasActiveFilters && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Filtered Complaints ({filteredComplaints.length})</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigateToComplaints(complaintsFilter)}
-              >
-                View All in Complaints Page
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {complaintsLoading ? (
-              <div className="space-y-4">
-                {Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="border rounded-lg p-4 animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            ) : filteredComplaints.length === 0 ? (
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">No complaints match the selected filters</p>
-              </div>
-            ) : (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {filteredComplaints.slice(0, 10).map((complaint) => (
-                  <div
-                    key={complaint.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-sm">
-                        {complaint.title || `Complaint #${complaint.complaintId || complaint.id.slice(-6)}`}
-                      </h3>
-                      <div className="flex space-x-2">
-                        <Badge className={getStatusColor(complaint.status)}>
-                          {complaint.status.replace("_", " ")}
-                        </Badge>
-                        <Badge className={getPriorityColor(complaint.priority)}>
-                          {complaint.priority}
-                        </Badge>
-                        {complaint.assignToTeam && (
-                          <Badge className="bg-purple-100 text-purple-800">
-                            Needs Team Assignment
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {complaint.description}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {complaint.area}
-                        <Calendar className="h-3 w-3 ml-3 mr-1" />
-                        {new Date(complaint.submittedOn).toLocaleDateString()}
-                      </div>
-                      <Link to={`/complaints?id=${complaint.id}`}>
-                        <Button variant="outline" size="sm">
-                          Manage
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-                {filteredComplaints.length > 10 && (
-                  <div className="text-center pt-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => navigateToComplaints(complaintsFilter)}
-                    >
-                      View All {filteredComplaints.length} Complaints
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Filtered Complaints</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigateToComplaints(complaintsFilter)}
+            >
+              View All in Complaints Page
+            </Button>
+          </div>
+          <ComplaintsListWidget
+            filters={complaintsFilter}
+            title="Filtered Results"
+            maxHeight="500px"
+            showActions={true}
+          />
+        </div>
       )}
 
       {/* Quick Actions */}
