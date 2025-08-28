@@ -172,7 +172,22 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       }
     }
 
-    // Create complaint immediately with status "REGISTERED"
+    // Find and assign ward officer automatically
+    const wardOfficer = await prisma.user.findFirst({
+      where: {
+        role: "WARD_OFFICER",
+        wardId: wardId,
+        isActive: true,
+      },
+      orderBy: {
+        // Assign to ward officer with least assigned complaints for load balancing
+        _count: {
+          wardOfficerComplaints: "asc",
+        },
+      },
+    });
+
+    // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
     const complaint = await prisma.complaint.create({
       data: {
         title: `${type} complaint`,
@@ -192,10 +207,20 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
         contactPhone: phoneNumber,
         isAnonymous: false,
         deadline,
+        wardOfficerId: wardOfficer?.id || null,
+        isMaintenanceUnassigned: true,
         // Don't assign submittedById yet - will be set after OTP verification
       },
       include: {
         ward: true,
+        wardOfficer: wardOfficer ? {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            role: true,
+          },
+        } : false,
       },
     });
 
