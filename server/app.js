@@ -109,21 +109,34 @@ export function createApp() {
     }),
   );
 
-  // Rate limiting - more lenient for development
+  // Rate limiting - more lenient for development and admin operations
   const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
     max:
       parseInt(process.env.RATE_LIMIT_MAX) ||
-      (process.env.NODE_ENV === "development" ? 1000 : 100), // Higher limit for development
+      (process.env.NODE_ENV === "development" ? 2000 : 200), // Higher limit for development
     message: {
       success: false,
       message: "Too many requests from this IP, please try again later.",
     },
     standardHeaders: true,
     legacyHeaders: false,
-    // Skip rate limiting for certain conditions in development
+    // Skip rate limiting for certain conditions
     skip: (req) => {
-      return process.env.NODE_ENV === "development" && req.ip === "127.0.0.1";
+      // Skip for development environment
+      if (process.env.NODE_ENV === "development") {
+        return true;
+      }
+      // Skip for admin operations (authenticated users with admin endpoints)
+      if (req.path.startsWith("/api/admin") ||
+          req.path.startsWith("/api/system-config") ||
+          req.path.startsWith("/api/users/wards")) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          return true; // Skip rate limiting for authenticated admin operations
+        }
+      }
+      return false;
     },
   });
 
