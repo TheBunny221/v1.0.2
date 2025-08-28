@@ -159,7 +159,7 @@ export const requestComplaintOtp = async (req, res) => {
   }
 };
 
-// Verify OTP and return complaint details
+// Verify OTP and return complaint details with auto-login
 export const verifyComplaintOtp = async (req, res) => {
   try {
     const { complaintId, otpCode } = req.body;
@@ -171,63 +171,74 @@ export const verifyComplaintOtp = async (req, res) => {
       });
     }
 
-    // Find valid OTP
-    const otpRecord = await prisma.otpVerification.findFirst({
+    // Find valid OTP in OTPSession table
+    const otpSession = await prisma.oTPSession.findFirst({
       where: {
         otpCode: otpCode.trim(),
         expiresAt: {
           gt: new Date(),
         },
-        type: "COMPLAINT_TRACKING",
+        purpose: "COMPLAINT_TRACKING",
+        isVerified: false,
       },
     });
 
-    if (!otpRecord) {
+    if (!otpSession) {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired OTP",
       });
     }
 
-    // Verify complaint ID matches
-    const metadata = JSON.parse(otpRecord.metadata || "{}");
-    if (metadata.complaintId !== complaintId.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP does not match the provided complaint ID",
-      });
-    }
-
-    // Get detailed complaint information
-    const complaint = await prisma.complaint.findUnique({
+    // Find the complaint
+    const complaint = await prisma.complaint.findFirst({
       where: {
-        id: complaintId.trim(),
+        OR: [
+          { complaintId: complaintId.trim() },
+          { id: complaintId.trim() },
+        ],
       },
       include: {
-        user: {
-          select: {
-            fullName: true,
-            email: true,
-            phone: true,
-          },
-        },
-        complaintType: {
-          select: {
-            name: true,
-          },
-        },
         ward: {
           select: {
+            id: true,
             name: true,
           },
         },
-        assignedTo: {
+        subZone: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        submittedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+            wardId: true,
+          },
+        },
+        wardOfficer: {
           select: {
             fullName: true,
             role: true,
           },
         },
         attachments: true,
+        statusLogs: {
+          orderBy: { timestamp: "desc" },
+          include: {
+            user: {
+              select: {
+                fullName: true,
+                role: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -238,51 +249,92 @@ export const verifyComplaintOtp = async (req, res) => {
       });
     }
 
-    // Mark OTP as used
-    await prisma.otpVerification.delete({
-      where: {
-        id: otpRecord.id,
+    // Verify the OTP email matches the complaint contact email
+    const complaintEmail = complaint.submittedBy?.email || complaint.contactEmail;
+    if (otpSession.email !== complaintEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP does not match the complaint contact email",
+      });
+    }
+
+    let user = complaint.submittedBy;
+    let isNewUser = false;
+
+    // If no user exists, auto-register as citizen
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          fullName: complaint.contactName,
+          email: complaint.contactEmail,
+          phoneNumber: complaint.contactPhone,
+          role: "CITIZEN",
+          isActive: true,
+          joinedOn: new Date(),
+        },
+      });
+
+      // Link the complaint to the new user
+      await prisma.complaint.update({
+        where: { id: complaint.id },
+        data: { submittedById: user.id },
+      });
+
+      isNewUser = true;
+    }
+
+    // Mark OTP as verified
+    await prisma.oTPSession.update({
+      where: { id: otpSession.id },
+      data: {
+        isVerified: true,
+        verifiedAt: new Date(),
+        userId: user.id,
       },
     });
 
-    // Send detailed complaint info via email
-    await sendComplaintDetailsEmail(complaint);
+    // Update user last login
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() },
+    });
 
-    // Return complaint details
+    // Generate JWT token for auto-login
+    const token = generateJWTToken(user);
+
+    // Remove password from user response
+    const { password: _, ...userResponse } = user;
+
+    // Return complaint details with auth token for auto-login
     res.json({
       success: true,
-      message: "OTP verified successfully",
+      message: "OTP verified successfully. You are now logged in.",
       data: {
         complaint: {
           id: complaint.id,
+          complaintId: complaint.complaintId,
+          title: complaint.title,
           description: complaint.description,
           status: complaint.status,
           priority: complaint.priority,
-          type: complaint.complaintType?.name,
+          type: complaint.type,
           area: complaint.area,
           address: complaint.address,
           landmark: complaint.landmark,
-          ward: complaint.ward?.name,
-          submittedOn: complaint.createdAt,
-          assignedOn: complaint.assignedAt,
-          resolvedOn: complaint.resolvedAt,
-          assignedTo: complaint.assignedTo
-            ? {
-                name: complaint.assignedTo.fullName,
-                role: complaint.assignedTo.role,
-              }
-            : null,
+          ward: complaint.ward,
+          subZone: complaint.subZone,
+          submittedOn: complaint.submittedOn,
+          assignedOn: complaint.assignedOn,
+          resolvedOn: complaint.resolvedOn,
+          wardOfficer: complaint.wardOfficer,
           attachments: complaint.attachments,
-          estimatedResolution: getEstimatedResolution(
-            complaint.priority,
-            complaint.complaintType?.name,
-          ),
+          statusLogs: complaint.statusLogs,
+          coordinates: complaint.coordinates ? JSON.parse(complaint.coordinates) : null,
         },
-        user: {
-          name: complaint.user.fullName,
-          email: complaint.user.email,
-          phone: complaint.user.phone,
-        },
+        user: userResponse,
+        token, // JWT token for auto-login
+        isNewUser,
+        redirectTo: `/citizen/complaints/${complaint.id}`, // Redirect path for frontend
       },
     });
   } catch (error) {
