@@ -284,6 +284,9 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
 // @route   POST /api/complaints
 // @access  Private (Citizen, Admin)
 export const createComplaint = asyncHandler(async (req, res) => {
+  console.log("🔥 [createComplaint] Request body:", JSON.stringify(req.body, null, 2));
+  console.log("🔥 [createComplaint] User:", req.user?.id, req.user?.role);
+
   const {
     title,
     description,
@@ -306,8 +309,11 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // Verify CAPTCHA for all complaint submissions
   try {
+    console.log("🔥 [createComplaint] Verifying CAPTCHA:", captchaId, captchaText);
     await verifyCaptchaForComplaint(captchaId, captchaText);
+    console.log("🔥 [createComplaint] CAPTCHA verified successfully");
   } catch (error) {
+    console.log("🔥 [createComplaint] CAPTCHA verification failed:", error.message);
     return res.status(400).json({
       success: false,
       message: error.message || "CAPTCHA verification failed",
