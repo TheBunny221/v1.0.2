@@ -314,10 +314,11 @@ model SystemConfig {
   id          String    @id @default(cuid())
   key         String    @unique
   value       String
+  type        String?   // Type to categorize the setting (e.g., 'app', 'complaint', 'contact', 'system')
   description String?
   isActive    Boolean   @default(true)
   updatedAt   DateTime  @updatedAt
-  
+
   @@index([key, isActive])
   @@map("system_config")
 }
