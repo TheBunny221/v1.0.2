@@ -35,9 +35,17 @@ export const requestLogger = (req, res, next) => {
 
     const resetColor = "\x1b[0m";
 
-    console.log(
-      `${statusColor}${logData.method} ${logData.url} ${logData.statusCode} ${logData.duration}${resetColor} - ${logData.ip}`,
-    );
+    // Only log in development for important requests or errors
+    const shouldLog = process.env.NODE_ENV === "production" ||
+                     res.statusCode >= 400 ||
+                     req.originalUrl.startsWith('/api/') ||
+                     logData.duration > 1000; // Log slow requests
+
+    if (shouldLog) {
+      console.log(
+        `${statusColor}${logData.method} ${logData.url} ${logData.statusCode} ${logData.duration}${resetColor} - ${logData.ip}`,
+      );
+    }
 
     // In production, you might want to send this to a logging service
     if (process.env.NODE_ENV === "production") {
