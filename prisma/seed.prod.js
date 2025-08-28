@@ -556,7 +556,11 @@ async function main() {
       "REOPENED",
     ];
 
-    for (let i = 0; i < 60; i++) {
+    // Generate 94 sample complaints for production with 6-month data
+    const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+
+    for (let i = 0; i < 94; i++) {
       const randomWard =
         createdWards[Math.floor(Math.random() * createdWards.length)];
       const randomCitizen =
@@ -573,17 +577,20 @@ async function main() {
       const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
 
+      // Generate random date within last 6 months
+      const timeRange = now.getTime() - sixMonthsAgo.getTime();
       const complaintDate = new Date(
-        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        sixMonthsAgo.getTime() + Math.random() * timeRange
       );
       const deadline = new Date(
         complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
 
       // Decide if this complaint should be assigned to a maintenance team member
-      const assignToTeam = Math.random() < 0.5; // ~50% chance
-      const randomTeamMember = assignToTeam
-        ? maintenanceTeam[Math.floor(Math.random() * maintenanceTeam.length)]
+      const wardMaintenanceTeam = maintenanceTeam.filter(member => member.wardId === randomWard.id);
+      const assignToTeam = Math.random() < 0.6; // 60% chance of team assignment
+      const randomTeamMember = assignToTeam && wardMaintenanceTeam.length > 0
+        ? wardMaintenanceTeam[Math.floor(Math.random() * wardMaintenanceTeam.length)]
         : null;
 
       const complaint = await prisma.complaint.create({
@@ -592,7 +599,7 @@ async function main() {
           title: `${complaintType.replace("_", " ")} Issue in ${
             randomWard.name
           }`,
-          description: `Development complaint regarding ${complaintType
+          description: `Production complaint regarding ${complaintType
             .toLowerCase()
             .replace("_", " ")} issue that requires attention. Submitted by ${
             randomCitizen.fullName
@@ -611,8 +618,10 @@ async function main() {
           contactEmail: randomCitizen.email,
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
-          assignedToId: null,
-          createdAt: new Date("2025-08-26T07:35:57.824Z"),
+          assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
+          teamId: randomTeamMember?.id || null,
+          assignToTeam: assignToTeam,
+          createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:
             status !== "REGISTERED"
