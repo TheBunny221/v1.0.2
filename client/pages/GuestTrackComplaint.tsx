@@ -87,6 +87,23 @@ const GuestTrackComplaint: React.FC = () => {
       const result = await verifyOtp(data).unwrap();
 
       if (result.success) {
+        // Handle auto-login if token is provided
+        if (result.data.token) {
+          // Store auth token in localStorage
+          localStorage.setItem("token", result.data.token);
+
+          // Store user data in localStorage or dispatch to Redux store
+          localStorage.setItem("user", JSON.stringify(result.data.user));
+
+          // If there's a redirect path, redirect to citizen dashboard
+          if (result.data.redirectTo) {
+            // Redirect to citizen dashboard complaint details page
+            window.location.href = result.data.redirectTo;
+            return;
+          }
+        }
+
+        // Fallback: show complaint details in modal
         setVerifiedComplaint(result.data.complaint);
         setVerifiedUser(result.data.user);
         setShowOtpModal(false);
