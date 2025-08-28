@@ -1110,34 +1110,51 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
   }
 
-  const updateData = {
-    status,
-    slaStatus: calculateSLAStatus(
+  const updateData = {};
+
+  // Update status if provided
+  if (status && status !== complaint.status) {
+    updateData.status = status;
+    updateData.slaStatus = calculateSLAStatus(
       complaint.submittedOn,
       complaint.deadline,
       status,
-    ),
-  };
+    );
+  }
 
   // Update priority if provided
   if (priority && priority !== complaint.priority) {
     updateData.priority = priority;
   }
 
-  // Set timestamps based on status
-  if (status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
-    updateData.assignedOn = new Date();
-    if (assignedToId) {
-      updateData.assignedToId = assignedToId;
+  // Handle maintenance team assignment
+  if (maintenanceTeamId) {
+    updateData.maintenanceTeamId = maintenanceTeamId;
+    updateData.isMaintenanceUnassigned = false;
+
+    // If assigning maintenance team, also update status to ASSIGNED if not already
+    if (!status && complaint.status === "REGISTERED") {
+      updateData.status = "ASSIGNED";
+      updateData.assignedOn = new Date();
     }
   }
 
-  if (status === "RESOLVED" && complaint.status !== "RESOLVED") {
+  // Legacy assignedToId handling (backward compatibility)
+  if (assignedToId) {
+    updateData.assignedToId = assignedToId;
+  }
+
+  // Set timestamps based on status changes
+  if (updateData.status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
+    updateData.assignedOn = new Date();
+  }
+
+  if (updateData.status === "RESOLVED" && complaint.status !== "RESOLVED") {
     updateData.resolvedOn = new Date();
     updateData.resolvedById = req.user.id;
   }
 
-  if (status === "CLOSED" && complaint.status !== "CLOSED") {
+  if (updateData.status === "CLOSED" && complaint.status !== "CLOSED") {
     updateData.closedOn = new Date();
   }
 
@@ -1154,6 +1171,22 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
           fullName: true,
           email: true,
           phoneNumber: true,
+        },
+      },
+      wardOfficer: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+        },
+      },
+      maintenanceTeam: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
         },
       },
       assignedTo: {
