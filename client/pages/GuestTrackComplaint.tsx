@@ -92,18 +92,21 @@ const GuestTrackComplaint: React.FC = () => {
         // Handle auto-login if token is provided
         if (result.data.token && result.data.user) {
           // Dispatch auth credentials to Redux store
-          dispatch(setCredentials({
-            user: result.data.user,
-            token: result.data.token,
-          }));
+          dispatch(
+            setCredentials({
+              user: result.data.user,
+              token: result.data.token,
+            }),
+          );
 
           // Store token in localStorage for persistence
           localStorage.setItem("token", result.data.token);
 
           // Show success message
-          console.log(result.data.isNewUser ?
-            "Account created and logged in successfully!" :
-            "Logged in successfully!"
+          console.log(
+            result.data.isNewUser
+              ? "Account created and logged in successfully!"
+              : "Logged in successfully!",
           );
 
           // Navigate to complaint details page

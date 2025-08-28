@@ -36,10 +36,11 @@ export const requestLogger = (req, res, next) => {
     const resetColor = "\x1b[0m";
 
     // Only log in development for important requests or errors
-    const shouldLog = process.env.NODE_ENV === "production" ||
-                     res.statusCode >= 400 ||
-                     req.originalUrl.startsWith('/api/') ||
-                     logData.duration > 1000; // Log slow requests
+    const shouldLog =
+      process.env.NODE_ENV === "production" ||
+      res.statusCode >= 400 ||
+      req.originalUrl.startsWith("/api/") ||
+      logData.duration > 1000; // Log slow requests
 
     if (shouldLog) {
       console.log(

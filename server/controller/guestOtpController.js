@@ -193,10 +193,7 @@ export const verifyComplaintOtp = async (req, res) => {
     // Find the complaint
     const complaint = await prisma.complaint.findFirst({
       where: {
-        OR: [
-          { complaintId: complaintId.trim() },
-          { id: complaintId.trim() },
-        ],
+        OR: [{ complaintId: complaintId.trim() }, { id: complaintId.trim() }],
       },
       include: {
         ward: {
@@ -250,7 +247,8 @@ export const verifyComplaintOtp = async (req, res) => {
     }
 
     // Verify the OTP email matches the complaint contact email
-    const complaintEmail = complaint.submittedBy?.email || complaint.contactEmail;
+    const complaintEmail =
+      complaint.submittedBy?.email || complaint.contactEmail;
     if (otpSession.email !== complaintEmail) {
       return res.status(400).json({
         success: false,
@@ -329,7 +327,9 @@ export const verifyComplaintOtp = async (req, res) => {
           wardOfficer: complaint.wardOfficer,
           attachments: complaint.attachments,
           statusLogs: complaint.statusLogs,
-          coordinates: complaint.coordinates ? JSON.parse(complaint.coordinates) : null,
+          coordinates: complaint.coordinates
+            ? JSON.parse(complaint.coordinates)
+            : null,
         },
         user: userResponse,
         token, // JWT token for auto-login
