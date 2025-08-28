@@ -736,22 +736,22 @@ async function main() {
       });
     }
 
-    console.log("✅ Development database seeding completed successfully!");
+    console.log("✅ Production database seeding completed successfully!");
     console.log("\n📊 Seeded Data Summary:");
     console.log(`• ${createdWards.length} Wards`);
     console.log(`• ${subZoneCount} Sub-zones`);
     console.log(`• 1 Administrator`);
     console.log(`• ${wardOfficers.length} Ward Officers`);
-    console.log(`• ${maintenanceTeam.length} Maintenance Team Members`);
+    console.log(`• ${maintenanceTeam.length} Maintenance Team Members (3 per ward)`);
     console.log(`• ${citizens.length} Citizens`);
-    console.log(`• 60 Sample Complaints`);
+    console.log(`• 94 Sample Complaints (last 6 months)`);
     console.log(`• 10 Sample Service Requests`);
 
-    console.log("\n🔑 Development Login Credentials:");
+    console.log("\n🔑 Production Login Credentials:");
     console.log("Administrator: admin@cochinsmartcity.gov.in / admin123");
     console.log("Ward Officer: officer1@cochinsmartcity.gov.in / officer123");
     console.log(
-      "Maintenance: suresh.kumar@cochinsmartcity.gov.in / maintenance123",
+      "Maintenance: maintenance1@cochinsmartcity.gov.in / maintenance123",
     );
     console.log("Citizen: arjun.menon@email.com / citizen123");
   } catch (error) {
