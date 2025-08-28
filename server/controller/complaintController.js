@@ -349,27 +349,28 @@ export const createComplaint = asyncHandler(async (req, res) => {
     where: { key: "AUTO_ASSIGN_COMPLAINTS" },
   });
 
-  const isAutoAssignEnabled = autoAssignSetting?.value === "true";
-  let assignedToId = null;
+  // Auto-assign ward officer (always enabled according to new requirements)
+  let wardOfficerId = null;
   let initialStatus = "REGISTERED";
 
-  // Auto-assign to ward officer if enabled
-  if (isAutoAssignEnabled && wardId) {
-    const wardOfficer = await prisma.user.findFirst({
-      where: {
-        role: "WARD_OFFICER",
-        wardId: wardId,
-        isActive: true,
+  // Find an available ward officer for this ward
+  const wardOfficer = await prisma.user.findFirst({
+    where: {
+      role: "WARD_OFFICER",
+      wardId: wardId,
+      isActive: true,
+    },
+    orderBy: {
+      // Assign to ward officer with least assigned complaints for load balancing
+      _count: {
+        wardOfficerComplaints: "asc",
       },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
+    },
+  });
 
-    if (wardOfficer) {
-      assignedToId = wardOfficer.id;
-      initialStatus = "ASSIGNED";
-    }
+  if (wardOfficer) {
+    wardOfficerId = wardOfficer.id;
+    // Status remains "REGISTERED" - ward officer will change it to "ASSIGNED" when they take action
   }
 
   // ✅ Create complaint with retry wrapper to avoid duplicate complaintId issue
@@ -391,8 +392,8 @@ export const createComplaint = asyncHandler(async (req, res) => {
     contactPhone: contactPhone || req.user.phoneNumber,
     isAnonymous: isAnonymous || false,
     submittedById: req.user.id,
-    assignedToId,
-    assignedOn: assignedToId ? new Date() : null,
+    wardOfficerId,
+    isMaintenanceUnassigned: true, // New field - no maintenance team assigned yet
     deadline,
   });
 
