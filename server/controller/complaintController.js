@@ -1201,31 +1201,46 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   });
 
   // Create status log
+  const statusLogComment = remarks ||
+    (maintenanceTeamId ? `Assigned to maintenance team` :
+     (updateData.status ? `Status updated to ${updateData.status}` : 'Complaint updated'));
+
   await prisma.statusLog.create({
     data: {
       complaintId,
       userId: req.user.id,
       fromStatus: complaint.status,
-      toStatus: status,
-      comment: remarks || `Status updated to ${status}`,
+      toStatus: updateData.status || complaint.status,
+      comment: statusLogComment,
     },
   });
 
   // Send notifications
   const notifications = [];
 
-  // Notify citizen
-  if (complaint.submittedBy) {
+  // Notify citizen of status changes
+  if (complaint.submittedBy && updateData.status) {
     notifications.push({
       userId: complaint.submittedBy.id,
       complaintId,
       type: "EMAIL",
       title: `Complaint Status Updated`,
-      message: `Your complaint status has been updated to ${status}.`,
+      message: `Your complaint status has been updated to ${updateData.status}.`,
     });
   }
 
-  // Notify assigned user if different from current user
+  // Notify maintenance team member if assigned
+  if (maintenanceTeamId && maintenanceTeamId !== req.user.id) {
+    notifications.push({
+      userId: maintenanceTeamId,
+      complaintId,
+      type: "IN_APP",
+      title: `New Maintenance Assignment`,
+      message: `A complaint has been assigned to you for maintenance.`,
+    });
+  }
+
+  // Legacy notification for assignedToId (backward compatibility)
   if (assignedToId && assignedToId !== req.user.id) {
     notifications.push({
       userId: assignedToId,
