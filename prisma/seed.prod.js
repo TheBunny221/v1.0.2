@@ -142,7 +142,6 @@ async function main() {
           update: {
             value: config.value,
             description: config.description,
-            type: config.type,
           },
           create: config,
         }),
