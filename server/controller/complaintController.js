@@ -956,7 +956,8 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, priority, remarks, assignedToId, maintenanceTeamId } = req.body;
+  const { status, priority, remarks, assignedToId, maintenanceTeamId } =
+    req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -982,9 +983,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
     (req.user.role === "WARD_OFFICER" &&
-      (complaint.wardId === req.user.wardId || complaint.wardOfficerId === req.user.id)) ||
+      (complaint.wardId === req.user.wardId ||
+        complaint.wardOfficerId === req.user.id)) ||
     (req.user.role === "MAINTENANCE_TEAM" &&
-      (complaint.assignedToId === req.user.id || complaint.maintenanceTeamId === req.user.id));
+      (complaint.assignedToId === req.user.id ||
+        complaint.maintenanceTeamId === req.user.id));
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -998,9 +1001,9 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   if (req.user.role === "WARD_OFFICER") {
     // Ward officers can only transition: REGISTERED → ASSIGNED → OPEN
     const allowedTransitions = {
-      "REGISTERED": ["ASSIGNED"],
-      "ASSIGNED": ["OPEN"],
-      "OPEN": ["ASSIGNED"] // Allow going back to assigned if needed
+      REGISTERED: ["ASSIGNED"],
+      ASSIGNED: ["OPEN"],
+      OPEN: ["ASSIGNED"], // Allow going back to assigned if needed
     };
 
     if (status && status !== complaint.status) {
@@ -1016,9 +1019,9 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   } else if (req.user.role === "MAINTENANCE_TEAM") {
     // Maintenance team can update progress and mark as resolved
     const allowedTransitions = {
-      "ASSIGNED": ["IN_PROGRESS"],
-      "OPEN": ["IN_PROGRESS"],
-      "IN_PROGRESS": ["RESOLVED", "ASSIGNED", "OPEN"]
+      ASSIGNED: ["IN_PROGRESS"],
+      OPEN: ["IN_PROGRESS"],
+      IN_PROGRESS: ["RESOLVED", "ASSIGNED", "OPEN"],
     };
 
     if (status && status !== complaint.status) {
@@ -1065,7 +1068,10 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
 
     // Ward officers can only assign maintenance team members from their ward
-    if (req.user.role === "WARD_OFFICER" && maintenanceUser.wardId !== req.user.wardId) {
+    if (
+      req.user.role === "WARD_OFFICER" &&
+      maintenanceUser.wardId !== req.user.wardId
+    ) {
       return res.status(400).json({
         success: false,
         message: "Can only assign maintenance team members from your ward",
@@ -1201,9 +1207,13 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   });
 
   // Create status log
-  const statusLogComment = remarks ||
-    (maintenanceTeamId ? `Assigned to maintenance team` :
-     (updateData.status ? `Status updated to ${updateData.status}` : 'Complaint updated'));
+  const statusLogComment =
+    remarks ||
+    (maintenanceTeamId
+      ? `Assigned to maintenance team`
+      : updateData.status
+        ? `Status updated to ${updateData.status}`
+        : "Complaint updated");
 
   await prisma.statusLog.create({
     data: {

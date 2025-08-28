@@ -213,14 +213,16 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       },
       include: {
         ward: true,
-        wardOfficer: wardOfficer ? {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            role: true,
-          },
-        } : false,
+        wardOfficer: wardOfficer
+          ? {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                role: true,
+              },
+            }
+          : false,
       },
     });
 
@@ -454,14 +456,16 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     },
     include: {
       ward: true,
-      wardOfficer: wardOfficer ? {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          role: true,
-        },
-      } : false,
+      wardOfficer: wardOfficer
+        ? {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+            },
+          }
+        : false,
     },
   });
 

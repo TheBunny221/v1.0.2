@@ -117,7 +117,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
           : complaint.assignedTo || "none";
 
       const maintenanceTeamId =
-        typeof complaint.maintenanceTeam === "object" && complaint.maintenanceTeam?.id
+        typeof complaint.maintenanceTeam === "object" &&
+        complaint.maintenanceTeam?.id
           ? complaint.maintenanceTeam.id
           : complaint.maintenanceTeam || "none";
 
@@ -192,7 +193,10 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
       // For ward officers, use maintenanceTeamId
       if (user?.role === "WARD_OFFICER") {
-        if (formData.maintenanceTeamId && formData.maintenanceTeamId !== "none") {
+        if (
+          formData.maintenanceTeamId &&
+          formData.maintenanceTeamId !== "none"
+        ) {
           updateData.maintenanceTeamId = formData.maintenanceTeamId;
         }
       } else {
@@ -452,10 +456,17 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
               {/* User Selection */}
               <Select
-                value={user?.role === "WARD_OFFICER" ? formData.maintenanceTeamId : formData.assignedToId}
+                value={
+                  user?.role === "WARD_OFFICER"
+                    ? formData.maintenanceTeamId
+                    : formData.assignedToId
+                }
                 onValueChange={(value) => {
                   if (user?.role === "WARD_OFFICER") {
-                    setFormData((prev) => ({ ...prev, maintenanceTeamId: value }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      maintenanceTeamId: value,
+                    }));
                   } else {
                     setFormData((prev) => ({ ...prev, assignedToId: value }));
                   }
