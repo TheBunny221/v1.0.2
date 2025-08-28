@@ -108,6 +108,7 @@ model Complaint {
   submittedById   String?
   assignedToId    String?
   resolvedById    String?
+  teamId          String?           // Maintenance team member assignment
   assignToTeam    Boolean           @default(false) // Track if needs assignment to maintenance team
   
   // Timestamps
@@ -244,10 +245,11 @@ model SystemConfig {
   id          String    @id @default(cuid())
   key         String    @unique
   value       String
+  type        String?   // Type to categorize the setting (e.g., 'app', 'complaint', 'contact', 'system')
   description String?
   isActive    Boolean   @default(true)
   updatedAt   DateTime  @updatedAt
-  
+
   @@map("system_config")
 }
 

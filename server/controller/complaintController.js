@@ -284,6 +284,12 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
 // @route   POST /api/complaints
 // @access  Private (Citizen, Admin)
 export const createComplaint = asyncHandler(async (req, res) => {
+  console.log(
+    "🔥 [createComplaint] Request body:",
+    JSON.stringify(req.body, null, 2),
+  );
+  console.log("🔥 [createComplaint] User:", req.user?.id, req.user?.role);
+
   const {
     title,
     description,
@@ -306,8 +312,18 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // Verify CAPTCHA for all complaint submissions
   try {
+    console.log(
+      "🔥 [createComplaint] Verifying CAPTCHA:",
+      captchaId,
+      captchaText,
+    );
     await verifyCaptchaForComplaint(captchaId, captchaText);
+    console.log("🔥 [createComplaint] CAPTCHA verified successfully");
   } catch (error) {
+    console.log(
+      "🔥 [createComplaint] CAPTCHA verification failed:",
+      error.message,
+    );
     return res.status(400).json({
       success: false,
       message: error.message || "CAPTCHA verification failed",
@@ -468,24 +484,32 @@ const generateComplaintId = async () => {
     const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
     const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
 
-    // Find the highest existing complaint ID with this prefix
-    const lastComplaint = await tx.complaint.findFirst({
-      where: { complaintId: { startsWith: prefix } },
-      orderBy: { createdAt: "desc" },
+    // Find the highest existing complaint ID with this prefix and extract the highest number
+    const existingComplaints = await tx.complaint.findMany({
+      where: {
+        complaintId: {
+          startsWith: prefix,
+          not: null,
+        },
+      },
       select: { complaintId: true },
+      orderBy: { complaintId: "desc" },
     });
 
-    // Determine the next number in sequence
-    let nextNumber = startNumber;
-    if (lastComplaint?.complaintId) {
-      const lastNumber = parseInt(
-        lastComplaint.complaintId.replace(prefix, ""),
-      );
-      if (!isNaN(lastNumber)) {
-        nextNumber = lastNumber + 1;
+    // Find the highest number used
+    let maxNumber = startNumber - 1;
+    for (const complaint of existingComplaints) {
+      if (complaint.complaintId) {
+        const numberPart = complaint.complaintId.replace(prefix, "");
+        const number = parseInt(numberPart);
+        if (!isNaN(number) && number > maxNumber) {
+          maxNumber = number;
+        }
       }
     }
 
+    // Generate next number
+    const nextNumber = maxNumber + 1;
     const formattedNumber = nextNumber.toString().padStart(idLength, "0");
     return `${prefix}${formattedNumber}`;
   });
@@ -530,6 +554,10 @@ const createComplaintWithUniqueId = async (data) => {
         retries--;
         console.log(
           `Complaint ID collision detected. Retries left: ${retries}`,
+        );
+        // Add a small delay to reduce chance of concurrent collision
+        await new Promise((resolve) =>
+          setTimeout(resolve, 10 + Math.random() * 20),
         );
         // Continue to next iteration which will generate a new ID
         if (retries === 0) throw err;

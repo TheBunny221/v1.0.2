@@ -29,57 +29,131 @@ async function main() {
     // 1. Create or Update System Configuration
     console.log("⚙️ Creating/updating system configuration...");
     const configs = [
+      // Application Settings
       {
         key: "APP_NAME",
-        value: "Kochi Smart City [DEV]",
+        value: "Kochi Smart City",
+        type: "app",
         description: "Application name displayed across the system",
       },
       {
         key: "APP_LOGO_URL",
         value: "/logo.png",
+        type: "app",
         description: "URL for the application logo",
       },
       {
+        key: "APP_LOGO_SIZE",
+        value: "medium",
+        type: "app",
+        description: "Size of the application logo (small, medium, large)",
+      },
+
+      // Complaint ID Configuration
+      {
         key: "COMPLAINT_ID_PREFIX",
         value: "KSC",
+        type: "complaint",
         description:
           "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
       },
       {
         key: "COMPLAINT_ID_START_NUMBER",
         value: "1",
+        type: "complaint",
         description: "Starting number for complaint ID sequence",
       },
       {
         key: "COMPLAINT_ID_LENGTH",
         value: "4",
+        type: "complaint",
         description: "Length of the numeric part in complaint IDs",
       },
+
+      // Complaint Management
+      {
+        key: "AUTO_ASSIGN_COMPLAINTS",
+        value: "true",
+        type: "complaint",
+        description:
+          "Whether complaints should be auto-assigned to ward officers",
+      },
+
+      // Contact Information
+      {
+        key: "CONTACT_HELPLINE",
+        value: "+91-484-234-5678",
+        type: "contact",
+        description: "Helpline phone number for citizen support",
+      },
+      {
+        key: "CONTACT_EMAIL",
+        value: "support@cochinsmartcity.gov.in",
+        type: "contact",
+        description: "Email address for citizen support and inquiries",
+      },
+      {
+        key: "CONTACT_OFFICE_HOURS",
+        value:
+          "Monday to Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
+        type: "contact",
+        description: "Office hours for citizen services",
+      },
+      {
+        key: "CONTACT_OFFICE_ADDRESS",
+        value: "Kochi Smart City Office, Kakkanad, Ernakulam, Kerala 682037",
+        type: "contact",
+        description: "Physical address of the main office",
+      },
+
+      // System Configuration
       {
         key: "DEFAULT_LANGUAGE",
         value: "en",
+        type: "system",
         description: "Default language for the application",
       },
       {
         key: "EMAIL_ENABLED",
         value: "true",
+        type: "system",
         description: "Whether email notifications are enabled",
       },
       {
         key: "SMS_ENABLED",
-        value: "false",
+        value: "true",
+        type: "system",
         description: "Whether SMS notifications are enabled",
       },
       {
         key: "MAX_FILE_SIZE",
         value: "10485760",
+        type: "system",
         description: "Maximum file upload size in bytes (10MB)",
       },
       {
-        key: "COMPLAINT_AUTO_ASSIGN",
+        key: "NOTIFICATION_RETENTION_DAYS",
+        value: "90",
+        type: "system",
+        description: "Number of days to retain notifications before cleanup",
+      },
+      {
+        key: "SESSION_TIMEOUT_MINUTES",
+        value: "120",
+        type: "system",
+        description: "User session timeout in minutes",
+      },
+      {
+        key: "MAINTENANCE_MODE",
+        value: "false",
+        type: "system",
+        description: "Whether the application is in maintenance mode",
+      },
+      {
+        key: "ANALYTICS_ENABLED",
         value: "true",
-        description:
-          "Whether complaints should be auto-assigned to ward officers",
+        type: "system",
+        description: "Whether analytics tracking is enabled",
       },
     ];
 
@@ -87,7 +161,11 @@ async function main() {
       configs.map(async (config) =>
         prisma.systemConfig.upsert({
           where: { key: config.key },
-          update: { value: config.value },
+          update: {
+            value: config.value,
+            type: config.type,
+            description: config.description,
+          },
           create: config,
         }),
       ),
@@ -282,47 +360,44 @@ async function main() {
       wardOfficers.push(officer);
     }
 
-    // Maintenance Team Members
+    // Maintenance Team Members (3+ per ward)
     const maintenanceTeam = [];
-    const maintenanceData = [
-      {
-        name: "Suresh Kumar",
-        dept: "Public Works",
-        email: "suresh.kumar@cochinsmartcity.gov.in",
-      },
-      {
-        name: "Leela Devi",
-        dept: "Water Supply",
-        email: "leela.devi@cochinsmartcity.gov.in",
-      },
-      {
-        name: "Vinod Electrician",
-        dept: "Electricity",
-        email: "vinod.electric@cochinsmartcity.gov.in",
-      },
-      {
-        name: "Ramesh Cleaner",
-        dept: "Waste Management",
-        email: "ramesh.waste@cochinsmartcity.gov.in",
-      },
+    const departments = ["Public Works", "Water Supply", "Electricity", "Waste Management"];
+    const teamMemberNames = [
+      "Suresh Kumar", "Leela Devi", "Vinod Electrician", "Ramesh Cleaner",
+      "Pradeep Singh", "Kavitha Nair", "Ajay Menon", "Sunita Sharma",
+      "Rakesh Pillai", "Maya Jose", "Anil Thomas", "Shanti Devi",
+      "Deepak Raj", "Radha Krishnan", "Manoj Kumar", "Geetha Varma",
+      "Ravi Mohan", "Latha Nair", "Vijay Das", "Pooja Menon",
+      "Ashok Kumar", "Meera Pillai", "Ganesh Nair", "Sreeja Thomas"
     ];
 
-    for (let i = 0; i < maintenanceData.length; i++) {
-      const data = maintenanceData[i];
-      const member = await prisma.user.create({
-        data: {
-          email: data.email,
-          fullName: data.name,
-          phoneNumber: `+91-98765433${10 + i}`,
-          password: await hashPassword("maintenance123"),
-          role: "MAINTENANCE_TEAM",
-          department: data.dept,
-          language: "en",
-          isActive: true,
-          joinedOn: new Date(),
-        },
-      });
-      maintenanceTeam.push(member);
+    let memberIndex = 0;
+    for (let wardIndex = 0; wardIndex < createdWards.length; wardIndex++) {
+      const ward = createdWards[wardIndex];
+
+      // Create 3 team members per ward
+      for (let teamMemberIndex = 0; teamMemberIndex < 3; teamMemberIndex++) {
+        const department = departments[memberIndex % departments.length];
+        const name = teamMemberNames[memberIndex % teamMemberNames.length];
+
+        const member = await prisma.user.create({
+          data: {
+            email: `maintenance${memberIndex + 1}@cochinsmartcity.gov.in`,
+            fullName: `${name} - Ward ${wardIndex + 1}`,
+            phoneNumber: `+91-987654${String(memberIndex + 30).padStart(3, '0')}`,
+            password: await hashPassword("maintenance123"),
+            role: "MAINTENANCE_TEAM",
+            department: department,
+            wardId: ward.id, // Assign to specific ward
+            language: "en",
+            isActive: true,
+            joinedOn: new Date(),
+          },
+        });
+        maintenanceTeam.push(member);
+        memberIndex++;
+      }
     }
 
     // Citizens
@@ -473,9 +548,19 @@ async function main() {
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED","REOPENED"];
+    const statuses = [
+      "REGISTERED",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "RESOLVED",
+      "REOPENED",
+    ];
 
-    for (let i = 0; i < 60; i++) {
+    // Generate 94 sample complaints for production with 6-month data
+    const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+
+    for (let i = 0; i < 94; i++) {
       const randomWard =
         createdWards[Math.floor(Math.random() * createdWards.length)];
       const randomCitizen =
@@ -492,17 +577,20 @@ async function main() {
       const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
 
+      // Generate random date within last 6 months
+      const timeRange = now.getTime() - sixMonthsAgo.getTime();
       const complaintDate = new Date(
-        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        sixMonthsAgo.getTime() + Math.random() * timeRange
       );
       const deadline = new Date(
         complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
 
       // Decide if this complaint should be assigned to a maintenance team member
-      const assignToTeam = Math.random() < 0.5; // ~50% chance
-      const randomTeamMember = assignToTeam
-        ? maintenanceTeam[Math.floor(Math.random() * maintenanceTeam.length)]
+      const wardMaintenanceTeam = maintenanceTeam.filter(member => member.wardId === randomWard.id);
+      const assignToTeam = Math.random() < 0.6; // 60% chance of team assignment
+      const randomTeamMember = assignToTeam && wardMaintenanceTeam.length > 0
+        ? wardMaintenanceTeam[Math.floor(Math.random() * wardMaintenanceTeam.length)]
         : null;
 
       const complaint = await prisma.complaint.create({
@@ -511,7 +599,7 @@ async function main() {
           title: `${complaintType.replace("_", " ")} Issue in ${
             randomWard.name
           }`,
-          description: `Development complaint regarding ${complaintType
+          description: `Production complaint regarding ${complaintType
             .toLowerCase()
             .replace("_", " ")} issue that requires attention. Submitted by ${
             randomCitizen.fullName
@@ -530,8 +618,10 @@ async function main() {
           contactEmail: randomCitizen.email,
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
-          assignedToId: null,
-          createdAt: new Date("2025-08-26T07:35:57.824Z"),
+          assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
+          teamId: randomTeamMember?.id || null,
+          assignToTeam: assignToTeam,
+          createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:
             status !== "REGISTERED"
@@ -626,9 +716,7 @@ async function main() {
           submittedOn: new Date(
             Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
           ),
-          expectedCompletion: new Date(
-            Date.now() + 14 * 24 * 60 * 60 * 1000,
-          ),
+          expectedCompletion: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         },
       });
     }
@@ -640,30 +728,30 @@ async function main() {
         data: {
           userId: citizen.id,
           type: "IN_APP",
-          title: "Welcome to Kochi Smart City [DEV]",
+          title: "Welcome to Kochi Smart City",
           message:
-            "Thank you for registering with our development platform. You can now submit complaints and track their progress.",
+            "Thank you for registering with our platform. You can now submit complaints and track their progress.",
           sentAt: new Date(),
         },
       });
     }
 
-    console.log("✅ Development database seeding completed successfully!");
+    console.log("✅ Production database seeding completed successfully!");
     console.log("\n📊 Seeded Data Summary:");
     console.log(`• ${createdWards.length} Wards`);
     console.log(`• ${subZoneCount} Sub-zones`);
     console.log(`• 1 Administrator`);
     console.log(`• ${wardOfficers.length} Ward Officers`);
-    console.log(`• ${maintenanceTeam.length} Maintenance Team Members`);
+    console.log(`• ${maintenanceTeam.length} Maintenance Team Members (3 per ward)`);
     console.log(`• ${citizens.length} Citizens`);
-    console.log(`• 60 Sample Complaints`);
+    console.log(`• 94 Sample Complaints (last 6 months)`);
     console.log(`• 10 Sample Service Requests`);
 
-    console.log("\n🔑 Development Login Credentials:");
+    console.log("\n🔑 Production Login Credentials:");
     console.log("Administrator: admin@cochinsmartcity.gov.in / admin123");
     console.log("Ward Officer: officer1@cochinsmartcity.gov.in / officer123");
     console.log(
-      "Maintenance: suresh.kumar@cochinsmartcity.gov.in / maintenance123",
+      "Maintenance: maintenance1@cochinsmartcity.gov.in / maintenance123",
     );
     console.log("Citizen: arjun.menon@email.com / citizen123");
   } catch (error) {

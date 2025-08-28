@@ -128,7 +128,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   const handleFilterChange = (
     filterKey: keyof FilterState,
-    checked: boolean,
+    checked: boolean
   ) => {
     setFilters((prev) => ({
       ...prev,
@@ -236,10 +236,14 @@ const WardOfficerDashboard: React.FC = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "pending" ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "pending"
+                ? "ring-2 ring-blue-500 bg-blue-50"
+                : ""
+            }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "pending" ? "none" : "pending",
+                filters.mainFilter === "pending" ? "none" : "pending"
               )
             }
           >
@@ -250,6 +254,7 @@ const WardOfficerDashboard: React.FC = () => {
                     id="pending-filter"
                     value="pending"
                     className="sr-only"
+                    selected
                   />
                   <span className="cursor-pointer">Pending Work</span>
                 </div>
@@ -267,10 +272,14 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "inProgress" ? "ring-2 ring-orange-500 bg-orange-50" : ""}`}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "inProgress"
+                ? "ring-2 ring-orange-500 bg-orange-50"
+                : ""
+            }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "inProgress" ? "none" : "inProgress",
+                filters.mainFilter === "inProgress" ? "none" : "inProgress"
               )
             }
           >
@@ -296,10 +305,14 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "completed" ? "ring-2 ring-green-500 bg-green-50" : ""}`}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "completed"
+                ? "ring-2 ring-green-500 bg-green-50"
+                : ""
+            }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "completed" ? "none" : "completed",
+                filters.mainFilter === "completed" ? "none" : "completed"
               )
             }
           >
@@ -325,12 +338,16 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "needsTeamAssignment" ? "ring-2 ring-purple-500 bg-purple-50" : ""}`}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "needsTeamAssignment"
+                ? "ring-2 ring-purple-500 bg-purple-50"
+                : ""
+            }`}
             onClick={() =>
               handleMainFilterChange(
                 filters.mainFilter === "needsTeamAssignment"
                   ? "none"
-                  : "needsTeamAssignment",
+                  : "needsTeamAssignment"
               )
             }
           >
@@ -359,7 +376,7 @@ const WardOfficerDashboard: React.FC = () => {
         </div>
       </RadioGroup>
 
-      {/* Additional Filter Options */}
+      {/* Additional Filter Options
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -408,7 +425,7 @@ const WardOfficerDashboard: React.FC = () => {
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card>  */}
 
       {/* Filtered Complaints List */}
       {hasActiveFilters && (
@@ -432,7 +449,7 @@ const WardOfficerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Actions */}
+      {/* Quick Actions
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -471,50 +488,49 @@ const WardOfficerDashboard: React.FC = () => {
               </Button>
             </Link>
           </CardContent>
-        </Card>
+        </Card>  */}
 
-        {/* Performance Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ward Performance</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      {/* Performance Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ward Performance</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span>Total Complaints</span>
+              <span>{stats?.summary.totalComplaints || 0}</span>
+            </div>
+            <Progress
+              value={
+                stats?.summary.totalComplaints
+                  ? (stats.summary.completedWork /
+                      stats.summary.totalComplaints) *
+                    100
+                  : 0
+              }
+              className="h-2"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {stats?.summary.completedWork || 0} completed
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Total Complaints</span>
-                <span>{stats?.summary.totalComplaints || 0}</span>
+              <div className="text-2xl font-bold text-blue-600">
+                {stats?.statusBreakdown.in_progress || 0}
               </div>
-              <Progress
-                value={
-                  stats?.summary.totalComplaints
-                    ? (stats.summary.completedWork /
-                        stats.summary.totalComplaints) *
-                      100
-                    : 0
-                }
-                className="h-2"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {stats?.summary.completedWork || 0} completed
-              </p>
+              <p className="text-xs text-gray-500">Active</p>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {stats?.statusBreakdown.in_progress || 0}
-                </div>
-                <p className="text-xs text-gray-500">Active</p>
+            <div>
+              <div className="text-2xl font-bold text-red-600">
+                {stats?.summary.overdueComplaints || 0}
               </div>
-              <div>
-                <div className="text-2xl font-bold text-red-600">
-                  {stats?.summary.overdueComplaints || 0}
-                </div>
-                <p className="text-xs text-gray-500">Overdue</p>
-              </div>
+              <p className="text-xs text-gray-500">Overdue</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

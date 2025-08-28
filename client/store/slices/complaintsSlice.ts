@@ -142,10 +142,10 @@ export const fetchWardDashboardStats = createAsyncThunk(
   "complaints/fetchWardDashboardStats",
   async (wardId: string) => {
     const response = await axios.get(`/api/complaints/ward-dashboard-stats`, {
-      params: { wardId }
+      params: { wardId },
     });
     return response.data.data;
-  }
+  },
 );
 
 // Initial state
@@ -275,6 +275,8 @@ export const createComplaint = createAsyncThunk(
       contactEmail?: string;
       contactPhone?: string;
       isAnonymous?: boolean;
+      captchaId?: string;
+      captchaText?: string;
       isSubmitting?: boolean;
     },
     { rejectWithValue },
@@ -493,8 +495,9 @@ const complaintsSlice = createSlice({
       })
       .addCase(fetchWardDashboardStats.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch ward dashboard stats";
-      })
+        state.error =
+          action.error.message || "Failed to fetch ward dashboard stats";
+      });
     builder
       // Fetch complaints
       .addCase(fetchComplaints.pending, (state) => {
