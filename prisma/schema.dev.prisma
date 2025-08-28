@@ -30,6 +30,8 @@ model User {
   ward              Ward?              @relation(fields: [wardId], references: [id])
   submittedComplaints Complaint[]      @relation("SubmittedBy")
   assignedComplaints  Complaint[]      @relation("AssignedTo")
+  wardOfficerComplaints Complaint[]    @relation("WardOfficer")
+  maintenanceTeamComplaints Complaint[] @relation("MaintenanceTeam")
   submittedServiceRequests ServiceRequest[] @relation("ServiceSubmittedBy")
   assignedServiceRequests  ServiceRequest[] @relation("ServiceAssignedTo")
   statusLogs        StatusLog[]
