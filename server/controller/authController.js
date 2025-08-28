@@ -172,8 +172,6 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   try {
-    console.log(`🔍 Login attempt for email: ${email}`);
-
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
@@ -182,13 +180,7 @@ export const login = asyncHandler(async (req, res) => {
       },
     });
 
-    console.log(`👤 User found: ${user ? 'YES' : 'NO'}`);
-    if (user) {
-      console.log(`🔑 User details: email=${user.email}, role=${user.role}, isActive=${user.isActive}, hasPassword=${!!user.password}`);
-    }
-
     if (!user) {
-      console.log(`❌ No user found for email: ${email}`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -215,12 +207,9 @@ export const login = asyncHandler(async (req, res) => {
     }
 
     // Check password
-    console.log(`🔐 Comparing password for user: ${user.email}`);
     const isPasswordMatch = await comparePassword(password, user.password);
-    console.log(`🔐 Password match result: ${isPasswordMatch}`);
 
     if (!isPasswordMatch) {
-      console.log(`❌ Password mismatch for user: ${user.email}`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
