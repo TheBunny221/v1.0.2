@@ -187,9 +187,16 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         priority: formData.priority,
       };
 
-      // Only include assignedToId if it's provided and not "none"
-      if (formData.assignedToId && formData.assignedToId !== "none") {
-        updateData.assignedToId = formData.assignedToId;
+      // For ward officers, use maintenanceTeamId
+      if (user?.role === "WARD_OFFICER") {
+        if (formData.maintenanceTeamId && formData.maintenanceTeamId !== "none") {
+          updateData.maintenanceTeamId = formData.maintenanceTeamId;
+        }
+      } else {
+        // For administrators and others, use legacy assignedToId
+        if (formData.assignedToId && formData.assignedToId !== "none") {
+          updateData.assignedToId = formData.assignedToId;
+        }
       }
 
       // Only include remarks if provided
@@ -224,6 +231,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
       status: "",
       priority: "",
       assignedToId: "none",
+      maintenanceTeamId: "none",
       remarks: "",
     });
     setSearchTerm("");
