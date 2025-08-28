@@ -10,6 +10,7 @@
     "dev:setup": "node scripts/setup-dev-environment.js setup",
     "dev:reset": "node scripts/setup-dev-environment.js reset",
     "client:dev": "vite",
+    "dev:frontend": "npm run client:dev",
     "server:dev": "NODE_ENV=development nodemon server/server.js",
     "server:prod": "NODE_ENV=production node server/server.js",
     "build": "tsc && vite build",
