@@ -284,8 +284,14 @@ const AdminConfig: React.FC = () => {
         setWards(wardsData);
       } catch (error: any) {
         console.error("Failed to load wards:", error);
+        if (error.message.includes("HTTP 429")) {
+          dispatch(showErrorToast("Rate Limit", "Too many requests. Please wait a moment and try again."));
+        }
         setWards([]);
       }
+
+      // Add a small delay between API calls to prevent rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Complaint types are loaded via RTK Query hooks
 
@@ -296,7 +302,9 @@ const AdminConfig: React.FC = () => {
         setSystemSettings(settingsResponse.data || []);
       } catch (error: any) {
         console.error("Failed to load system settings:", error);
-        if (
+        if (error.message.includes("HTTP 429")) {
+          dispatch(showErrorToast("Rate Limit", "Too many requests. Please wait a moment and try again."));
+        } else if (
           error.message.includes("Not authorized") ||
           error.message.includes("Authentication")
         ) {
