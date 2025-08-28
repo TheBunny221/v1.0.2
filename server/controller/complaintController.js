@@ -360,12 +360,18 @@ export const createComplaint = asyncHandler(async (req, res) => {
       wardId: wardId,
       isActive: true,
     },
-    orderBy: {
-      // Assign to ward officer with least assigned complaints for load balancing
+    include: {
       _count: {
-        wardOfficerComplaints: "asc",
-      },
+        select: {
+          assignedComplaints: true
+        }
+      }
     },
+    orderBy: {
+      assignedComplaints: {
+        _count: "asc"
+      }
+    }
   });
 
   if (wardOfficer) {

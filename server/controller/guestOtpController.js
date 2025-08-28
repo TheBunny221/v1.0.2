@@ -24,18 +24,18 @@ export const requestComplaintOtp = async (req, res) => {
     // Find the complaint by ID
     const complaint = await prisma.complaint.findFirst({
       where: {
-        id: complaintId.trim(),
+        complaintId: complaintId.trim(),  // use complaintId field instead of id
       },
-      include: {
-        user: {
+      select: {
+        complaintId: true,
+        title: true,
+        type: true,        // direct field, not a relation
+        contactEmail: true,
+        contactName: true,
+        submittedBy: {     // correct relation name
           select: {
             email: true,
             fullName: true,
-          },
-        },
-        complaintType: {
-          select: {
-            name: true,
           },
         },
       },
