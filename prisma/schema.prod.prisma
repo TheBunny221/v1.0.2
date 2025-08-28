@@ -77,6 +77,8 @@ model User {
   ward              Ward?              @relation(fields: [wardId], references: [id])
   submittedComplaints Complaint[]      @relation("SubmittedBy")
   assignedComplaints  Complaint[]      @relation("AssignedTo")
+  wardOfficerComplaints Complaint[]    @relation("WardOfficer")
+  maintenanceTeamComplaints Complaint[] @relation("MaintenanceTeam")
   submittedServiceRequests ServiceRequest[] @relation("ServiceSubmittedBy")
   assignedServiceRequests  ServiceRequest[] @relation("ServiceAssignedTo")
   statusLogs        StatusLog[]
@@ -156,9 +158,12 @@ model Complaint {
   
   // Assignment and Tracking
   submittedById   String?
-  assignedToId    String?
+  assignedToId    String?           // Generic assignment field (kept for backward compatibility)
   resolvedById    String?
-  teamId          String?           // Maintenance team member assignment
+  wardOfficerId   String?           // Automatically assigned ward officer
+  maintenanceTeamId String?         // Assigned maintenance team member
+  teamId          String?           // Maintenance team member assignment (legacy)
+  isMaintenanceUnassigned Boolean   @default(true)    // true = no maintenance team assigned, false = assigned
   
   // Timestamps
   submittedOn     DateTime          @default(now())
@@ -179,6 +184,8 @@ model Complaint {
   subZone         SubZone?          @relation(fields: [subZoneId], references: [id])
   submittedBy     User?             @relation("SubmittedBy", fields: [submittedById], references: [id])
   assignedTo      User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
+  wardOfficer     User?             @relation("WardOfficer", fields: [wardOfficerId], references: [id])
+  maintenanceTeam User?             @relation("MaintenanceTeam", fields: [maintenanceTeamId], references: [id])
   statusLogs      StatusLog[]
   attachments     Attachment[]
   notifications   Notification[]
