@@ -512,7 +512,7 @@ const AdminDashboard: React.FC = () => {
 
         <TabsContent value="performance" className="space-y-6">
           {/* Performance KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Response Time</CardTitle>
