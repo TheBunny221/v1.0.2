@@ -730,16 +730,16 @@ async function main() {
     console.log(`• ${createdWards.length * 3} Sub-zones`);
     console.log(`• 1 Administrator`);
     console.log(`• ${wardOfficers.length} Ward Officers`);
-    console.log(`• ${maintenanceTeam.length} Maintenance Team Members`);
+    console.log(`• ${maintenanceTeam.length} Maintenance Team Members (3 per ward)`);
     console.log(`• ${citizens.length} Citizens`);
-    console.log(`• 20 Sample Complaints`);
+    console.log(`• 94 Sample Complaints (last 6 months)`);
     console.log(`• 10 Sample Service Requests`);
 
     console.log("\n🔑 Development Login Credentials:");
     console.log("Administrator: admin@cochinsmartcity.dev / admin123");
     console.log("Ward Officer: officer1@cochinsmartcity.dev / officer123");
     console.log(
-      "Maintenance: suresh.kumar@cochinsmartcity.dev / maintenance123",
+      "Maintenance: maintenance1@cochinsmartcity.dev / maintenance123",
     );
     console.log("Citizen: arjun.menon@email.dev / citizen123");
   } catch (error) {
