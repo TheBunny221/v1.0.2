@@ -31,8 +31,7 @@ const router = express.Router();
 
 // Configure multer for guest complaint file uploads
 const uploadDir = process.env.UPLOAD_PATH || "./uploads";
-// const guestUploadDir = path.join(uploadDir, "guest-complaints");
-const guestUploadDir = uploadDir;
+const guestUploadDir = path.join(uploadDir, "complaints"); // Use same directory as authenticated complaints
 
 // Ensure upload directory exists
 if (!fs.existsSync(guestUploadDir)) {
@@ -52,9 +51,9 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter for guest complaints
+// File filter for guest complaints - allow same types as authenticated complaints
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png/;
+  const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt/;
   const fileExtension = path
     .extname(file.originalname)
     .toLowerCase()
@@ -63,7 +62,12 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.test(fileExtension)) {
     cb(null, true);
   } else {
-    cb(new Error("Only JPG and PNG images are allowed"), false);
+    cb(
+      new Error(
+        "Invalid file type. Only images (JPEG, PNG, GIF) and documents (PDF, DOC, DOCX, TXT) are allowed",
+      ),
+      false,
+    );
   }
 };
 

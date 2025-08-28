@@ -71,6 +71,7 @@ export interface UpdateComplaintRequest {
   id: string;
   status?: Complaint["status"];
   assignedToId?: string;
+  maintenanceTeamId?: string;
   remarks?: string;
   priority?: Complaint["priority"];
 }

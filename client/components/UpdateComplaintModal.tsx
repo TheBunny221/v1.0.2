@@ -45,6 +45,9 @@ interface Complaint {
   description: string;
   area: string;
   assignedTo?: any;
+  wardOfficer?: any;
+  maintenanceTeam?: any;
+  isMaintenanceUnassigned?: boolean;
 }
 
 interface UpdateComplaintModalProps {
@@ -66,6 +69,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     status: "",
     priority: "",
     assignedToId: "",
+    maintenanceTeamId: "",
     remarks: "",
   });
 
@@ -106,13 +110,23 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
   useEffect(() => {
     if (complaint && isOpen) {
+      // Handle both legacy assignedTo and new maintenanceTeam fields
+      const assignedToId =
+        typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
+          ? complaint.assignedTo.id
+          : complaint.assignedTo || "none";
+
+      const maintenanceTeamId =
+        typeof complaint.maintenanceTeam === "object" &&
+        complaint.maintenanceTeam?.id
+          ? complaint.maintenanceTeam.id
+          : complaint.maintenanceTeam || "none";
+
       setFormData({
         status: complaint.status,
         priority: complaint.priority,
-        assignedToId:
-          typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
-            ? complaint.assignedTo.id
-            : complaint.assignedTo || "none",
+        assignedToId,
+        maintenanceTeamId,
         remarks: "",
       });
       setSearchTerm("");
@@ -123,35 +137,37 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   const validateForm = () => {
     const errors: string[] = [];
 
-    // Check if status is being changed to ASSIGNED but no user is selected
-    if (
-      formData.status === "ASSIGNED" &&
-      (!formData.assignedToId || formData.assignedToId === "none")
-    ) {
-      if (user?.role === "ADMINISTRATOR") {
+    // For ward officers, validate maintenance team assignment
+    if (user?.role === "WARD_OFFICER") {
+      if (
+        formData.status === "ASSIGNED" &&
+        (!formData.maintenanceTeamId || formData.maintenanceTeamId === "none")
+      ) {
         errors.push(
-          "Please select a Ward Officer before assigning the complaint.",
+          "Please select a Maintenance Team member before assigning the complaint.",
         );
-      } else if (user?.role === "WARD_OFFICER") {
+      }
+
+      // Check if transitioning from REGISTERED to ASSIGNED
+      if (
+        complaint?.status === "REGISTERED" &&
+        formData.status === "ASSIGNED" &&
+        (!formData.maintenanceTeamId || formData.maintenanceTeamId === "none")
+      ) {
         errors.push(
           "Please select a Maintenance Team member before assigning the complaint.",
         );
       }
     }
 
-    // Check if status is being changed from REGISTERED to ASSIGNED
-    if (
-      complaint?.status === "REGISTERED" &&
-      formData.status === "ASSIGNED" &&
-      (!formData.assignedToId || formData.assignedToId === "none")
-    ) {
-      if (user?.role === "ADMINISTRATOR") {
+    // For administrators, validate ward officer assignment (legacy)
+    if (user?.role === "ADMINISTRATOR") {
+      if (
+        formData.status === "ASSIGNED" &&
+        (!formData.assignedToId || formData.assignedToId === "none")
+      ) {
         errors.push(
           "Please select a Ward Officer before assigning the complaint.",
-        );
-      } else if (user?.role === "WARD_OFFICER") {
-        errors.push(
-          "Please select a Maintenance Team member before assigning the complaint.",
         );
       }
     }
@@ -175,9 +191,19 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         priority: formData.priority,
       };
 
-      // Only include assignedToId if it's provided and not "none"
-      if (formData.assignedToId && formData.assignedToId !== "none") {
-        updateData.assignedToId = formData.assignedToId;
+      // For ward officers, use maintenanceTeamId
+      if (user?.role === "WARD_OFFICER") {
+        if (
+          formData.maintenanceTeamId &&
+          formData.maintenanceTeamId !== "none"
+        ) {
+          updateData.maintenanceTeamId = formData.maintenanceTeamId;
+        }
+      } else {
+        // For administrators and others, use legacy assignedToId
+        if (formData.assignedToId && formData.assignedToId !== "none") {
+          updateData.assignedToId = formData.assignedToId;
+        }
       }
 
       // Only include remarks if provided
@@ -212,6 +238,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
       status: "",
       priority: "",
       assignedToId: "none",
+      maintenanceTeamId: "none",
       remarks: "",
     });
     setSearchTerm("");
@@ -429,9 +456,20 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
               {/* User Selection */}
               <Select
-                value={formData.assignedToId}
+                value={
+                  user?.role === "WARD_OFFICER"
+                    ? formData.maintenanceTeamId
+                    : formData.assignedToId
+                }
                 onValueChange={(value) => {
-                  setFormData((prev) => ({ ...prev, assignedToId: value }));
+                  if (user?.role === "WARD_OFFICER") {
+                    setFormData((prev) => ({
+                      ...prev,
+                      maintenanceTeamId: value,
+                    }));
+                  } else {
+                    setFormData((prev) => ({ ...prev, assignedToId: value }));
+                  }
                   // Clear validation errors when user makes a selection
                   setValidationErrors([]);
                 }}
