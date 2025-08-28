@@ -432,7 +432,7 @@ const WardOfficerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Actions */}
+      {/* Quick Actions
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -471,7 +471,7 @@ const WardOfficerDashboard: React.FC = () => {
               </Button>
             </Link>
           </CardContent>
-        </Card>
+        </Card>  */}
 
         {/* Performance Overview */}
         <Card>
