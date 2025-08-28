@@ -535,7 +535,7 @@ async function main() {
     }
 
     // 7. Create Sample Complaints
-    console.log("📝 Creating sample complaints...");
+    console.log("📝 Creating sample complaints (94 with 6-month data)...");
     const complaintTypes = [
       "WATER_SUPPLY",
       "ELECTRICITY",
@@ -546,10 +546,13 @@ async function main() {
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"];
+    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"];
 
-    // Generate 20 sample complaints for development
-    for (let i = 0; i < 20; i++) {
+    // Generate 94 sample complaints for development with 6-month data
+    const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+
+    for (let i = 0; i < 94; i++) {
       const randomWard =
         createdWards[Math.floor(Math.random() * createdWards.length)];
       const randomCitizen =
@@ -567,13 +570,21 @@ async function main() {
       const complaintNumber = (i + 1).toString().padStart(4, "0");
       const complaintId = `KSC${complaintNumber}`;
 
-      // Generate random date within last 30 days
+      // Generate random date within last 6 months
+      const timeRange = now.getTime() - sixMonthsAgo.getTime();
       const complaintDate = new Date(
-        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        sixMonthsAgo.getTime() + Math.random() * timeRange
       );
       const deadline = new Date(
         complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
+
+      // Decide if this complaint should be assigned to a maintenance team member
+      const wardMaintenanceTeam = maintenanceTeam.filter(member => member.wardId === randomWard.id);
+      const assignToTeam = Math.random() < 0.6; // 60% chance of team assignment
+      const randomTeamMember = assignToTeam && wardMaintenanceTeam.length > 0
+        ? wardMaintenanceTeam[Math.floor(Math.random() * wardMaintenanceTeam.length)]
+        : null;
 
       const complaint = await prisma.complaint.create({
         data: {
@@ -601,6 +612,8 @@ async function main() {
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
+          teamId: randomTeamMember?.id || null,
+          assignToTeam: assignToTeam,
           createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:
