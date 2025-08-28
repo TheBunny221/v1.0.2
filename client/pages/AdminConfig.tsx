@@ -166,11 +166,13 @@ const AdminConfig: React.FC = () => {
     setLogoUploadMode("url");
   };
 
-  // API calls
-  const apiCall = async (url: string, options: RequestInit = {}) => {
+  // API calls with retry logic for rate limiting
+  const apiCall = async (url: string, options: RequestInit = {}, retryCount = 0): Promise<any> => {
     const token = localStorage.getItem("token");
+    const maxRetries = 3;
+    const baseDelay = 1000; // 1 second
 
-    console.log(`[AdminConfig] Making API call to: ${url}`);
+    console.log(`[AdminConfig] Making API call to: ${url} (attempt ${retryCount + 1})`);
 
     const response = await fetch(`/api${url}`, {
       ...options,
@@ -194,6 +196,14 @@ const AdminConfig: React.FC = () => {
 
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}`;
+
+      // Handle rate limiting with retry
+      if (response.status === 429 && retryCount < maxRetries) {
+        const delay = baseDelay * Math.pow(2, retryCount); // Exponential backoff
+        console.log(`[AdminConfig] Rate limited, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return apiCall(url, options, retryCount + 1);
+      }
 
       if (isJson) {
         try {
