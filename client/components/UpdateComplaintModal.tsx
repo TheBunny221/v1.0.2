@@ -45,6 +45,9 @@ interface Complaint {
   description: string;
   area: string;
   assignedTo?: any;
+  wardOfficer?: any;
+  maintenanceTeam?: any;
+  isMaintenanceUnassigned?: boolean;
 }
 
 interface UpdateComplaintModalProps {
