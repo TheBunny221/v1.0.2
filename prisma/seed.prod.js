@@ -728,9 +728,9 @@ async function main() {
         data: {
           userId: citizen.id,
           type: "IN_APP",
-          title: "Welcome to Kochi Smart City [DEV]",
+          title: "Welcome to Kochi Smart City",
           message:
-            "Thank you for registering with our development platform. You can now submit complaints and track their progress.",
+            "Thank you for registering with our platform. You can now submit complaints and track their progress.",
           sentAt: new Date(),
         },
       });
