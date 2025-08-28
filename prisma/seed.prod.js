@@ -34,19 +34,16 @@ async function main() {
         key: "APP_NAME",
         value: "Kochi Smart City",
         description: "Application name displayed across the system",
-        type: "string",
       },
       {
         key: "APP_LOGO_URL",
         value: "/logo.png",
         description: "URL for the application logo",
-        type: "string",
       },
       {
         key: "APP_LOGO_SIZE",
         value: "medium",
         description: "Size of the application logo (small, medium, large)",
-        type: "string",
       },
 
       // Complaint ID Configuration
@@ -54,19 +51,16 @@ async function main() {
         key: "COMPLAINT_ID_PREFIX",
         value: "KSC",
         description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
-        type: "string",
       },
       {
         key: "COMPLAINT_ID_START_NUMBER",
         value: "1",
         description: "Starting number for complaint ID sequence",
-        type: "number",
       },
       {
         key: "COMPLAINT_ID_LENGTH",
         value: "4",
         description: "Length of the numeric part in complaint IDs",
-        type: "number",
       },
 
       // Complaint Management
@@ -74,7 +68,6 @@ async function main() {
         key: "AUTO_ASSIGN_COMPLAINTS",
         value: "true",
         description: "Whether complaints should be auto-assigned to ward officers",
-        type: "boolean",
       },
 
       // Contact Information
@@ -82,25 +75,21 @@ async function main() {
         key: "CONTACT_HELPLINE",
         value: "+91-484-234-5678",
         description: "Helpline phone number for citizen support",
-        type: "string",
       },
       {
         key: "CONTACT_EMAIL",
         value: "support@cochinsmartcity.gov.in",
         description: "Email address for citizen support and inquiries",
-        type: "string",
       },
       {
         key: "CONTACT_OFFICE_HOURS",
         value: "Monday to Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
         description: "Office hours for citizen services",
-        type: "string",
       },
       {
         key: "CONTACT_OFFICE_ADDRESS",
         value: "Kochi Smart City Office, Kakkanad, Ernakulam, Kerala 682037",
         description: "Physical address of the main office",
-        type: "string",
       },
 
       // System Configuration
@@ -108,49 +97,41 @@ async function main() {
         key: "DEFAULT_LANGUAGE",
         value: "en",
         description: "Default language for the application",
-        type: "string",
       },
       {
         key: "EMAIL_ENABLED",
         value: "true",
         description: "Whether email notifications are enabled",
-        type: "boolean",
       },
       {
         key: "SMS_ENABLED",
         value: "true",
         description: "Whether SMS notifications are enabled",
-        type: "boolean",
       },
       {
         key: "MAX_FILE_SIZE",
         value: "10485760",
         description: "Maximum file upload size in bytes (10MB)",
-        type: "number",
       },
       {
         key: "NOTIFICATION_RETENTION_DAYS",
         value: "90",
         description: "Number of days to retain notifications before cleanup",
-        type: "number",
       },
       {
         key: "SESSION_TIMEOUT_MINUTES",
         value: "120",
         description: "User session timeout in minutes",
-        type: "number",
       },
       {
         key: "MAINTENANCE_MODE",
         value: "false",
         description: "Whether the application is in maintenance mode",
-        type: "boolean",
       },
       {
         key: "ANALYTICS_ENABLED",
         value: "true",
         description: "Whether analytics tracking is enabled",
-        type: "boolean",
       },
     ];
 
