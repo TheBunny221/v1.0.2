@@ -1,5 +1,6 @@
 import { getPrisma } from "../db/connection.js";
 import { sendEmail } from "../utils/emailService.js";
+import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
 const prisma = getPrisma();
