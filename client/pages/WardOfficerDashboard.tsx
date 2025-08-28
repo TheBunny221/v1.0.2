@@ -254,6 +254,7 @@ const WardOfficerDashboard: React.FC = () => {
                     id="pending-filter"
                     value="pending"
                     className="sr-only"
+                    selected
                   />
                   <span className="cursor-pointer">Pending Work</span>
                 </div>
