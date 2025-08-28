@@ -10,6 +10,20 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+// Helper function to generate JWT token
+const generateJWTToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      wardId: user.wardId,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE || "7d" },
+  );
+};
+
 // Request OTP for complaint tracking
 export const requestComplaintOtp = async (req, res) => {
   try {
