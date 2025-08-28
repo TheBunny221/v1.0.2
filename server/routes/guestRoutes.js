@@ -62,7 +62,12 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.test(fileExtension)) {
     cb(null, true);
   } else {
-    cb(new Error("Invalid file type. Only images (JPEG, PNG, GIF) and documents (PDF, DOC, DOCX, TXT) are allowed"), false);
+    cb(
+      new Error(
+        "Invalid file type. Only images (JPEG, PNG, GIF) and documents (PDF, DOC, DOCX, TXT) are allowed",
+      ),
+      false,
+    );
   }
 };
 

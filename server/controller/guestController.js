@@ -1175,9 +1175,6 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
 //       },
 //     });
 
-
-
-
 //   },
 // );
 
@@ -1522,7 +1519,6 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
 //       isNewUser,
 //     },
 //   });
-
 
 // });
 
