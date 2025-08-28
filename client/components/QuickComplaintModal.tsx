@@ -18,10 +18,8 @@ const QuickComplaintModal: React.FC<QuickComplaintModalProps> = ({
   const { translations } = useAppSelector((state) => state.language);
 
   const handleSuccess = (complaintId: string) => {
-    // Close modal first to prevent re-opening during state updates
-    onClose();
-    // Then call onSuccess which may trigger data refreshes
     onSuccess?.(complaintId);
+    onClose();
   };
 
   return (
