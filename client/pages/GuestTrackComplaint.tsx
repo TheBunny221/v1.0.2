@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../store/hooks";
 import { trackGuestComplaint } from "../store/slices/guestSlice";
+import { setCredentials } from "../store/slices/authSlice";
 import {
   useRequestComplaintOtpMutation,
   useVerifyComplaintOtpMutation,
@@ -34,6 +35,7 @@ import ComplaintDetailsModal from "../components/ComplaintDetailsModal";
 
 const GuestTrackComplaint: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [complaintId, setComplaintId] = useState("");
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -88,17 +90,25 @@ const GuestTrackComplaint: React.FC = () => {
 
       if (result.success) {
         // Handle auto-login if token is provided
-        if (result.data.token) {
-          // Store auth token in localStorage
+        if (result.data.token && result.data.user) {
+          // Dispatch auth credentials to Redux store
+          dispatch(setCredentials({
+            user: result.data.user,
+            token: result.data.token,
+          }));
+
+          // Store token in localStorage for persistence
           localStorage.setItem("token", result.data.token);
 
-          // Store user data in localStorage or dispatch to Redux store
-          localStorage.setItem("user", JSON.stringify(result.data.user));
+          // Show success message
+          console.log(result.data.isNewUser ?
+            "Account created and logged in successfully!" :
+            "Logged in successfully!"
+          );
 
-          // If there's a redirect path, redirect to citizen dashboard
+          // Navigate to complaint details page
           if (result.data.redirectTo) {
-            // Redirect to citizen dashboard complaint details page
-            window.location.href = result.data.redirectTo;
+            navigate(result.data.redirectTo);
             return;
           }
         }
