@@ -538,6 +538,26 @@ const createComplaintWithUniqueId = async (data) => {
               phoneNumber: true,
             },
           },
+          wardOfficer: data.wardOfficerId
+            ? {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  role: true,
+                },
+              }
+            : false,
+          maintenanceTeam: data.maintenanceTeamId
+            ? {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  role: true,
+                },
+              }
+            : false,
           assignedTo: data.assignedToId
             ? {
                 select: {
