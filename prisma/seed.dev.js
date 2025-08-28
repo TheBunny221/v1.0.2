@@ -158,7 +158,11 @@ async function main() {
       configs.map(async (config) =>
         prisma.systemConfig.upsert({
           where: { key: config.key },
-          update: { value: config.value },
+          update: {
+            value: config.value,
+            description: config.description,
+            type: config.type,
+          },
           create: config,
         }),
       ),
