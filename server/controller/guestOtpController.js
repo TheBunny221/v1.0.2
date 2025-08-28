@@ -21,19 +21,24 @@ export const requestComplaintOtp = async (req, res) => {
       });
     }
 
-    // Find the complaint by ID
+    // Find the complaint by complaintId (human-readable ID like KSC0001)
     const complaint = await prisma.complaint.findFirst({
       where: {
-        complaintId: complaintId.trim(),  // use complaintId field instead of id
+        OR: [
+          { complaintId: complaintId.trim() },
+          { id: complaintId.trim() }, // Fallback to UUID if needed
+        ],
       },
       select: {
+        id: true,
         complaintId: true,
         title: true,
-        type: true,        // direct field, not a relation
+        type: true,
         contactEmail: true,
         contactName: true,
-        submittedBy: {     // correct relation name
+        submittedBy: {
           select: {
+            id: true,
             email: true,
             fullName: true,
           },
@@ -48,37 +53,45 @@ export const requestComplaintOtp = async (req, res) => {
       });
     }
 
+    // Use contact email if no user is linked (guest complaint)
+    const email = complaint.submittedBy?.email || complaint.contactEmail;
+    const fullName = complaint.submittedBy?.fullName || complaint.contactName;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "No email associated with this complaint",
+      });
+    }
+
     // Generate OTP
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Store OTP in database with complaint reference
-    await prisma.otpVerification.create({
+    // Store OTP in OTPSession table (correct table name)
+    await prisma.oTPSession.create({
       data: {
-        email: complaint.user.email,
+        email: email,
         otpCode: otp,
         expiresAt: otpExpiry,
-        type: "COMPLAINT_TRACKING",
-        metadata: JSON.stringify({
-          complaintId: complaint.id,
-          userId: complaint.userId,
-        }),
+        purpose: "COMPLAINT_TRACKING",
+        userId: complaint.submittedBy?.id || null,
       },
     });
 
     // Send OTP email
-    const emailSubject = `OTP for Complaint Tracking - ${complaint.id}`;
+    const emailSubject = `OTP for Complaint Tracking - ${complaint.complaintId || complaint.id}`;
     const emailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
         <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #2563eb; margin: 0; font-size: 28px;">🔐 Complaint Verification</h1>
           </div>
-          
+
           <div style="background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
-            <h2 style="color: #1e40af; margin: 0 0 10px 0; font-size: 20px;">Hello ${complaint.user.fullName},</h2>
+            <h2 style="color: #1e40af; margin: 0 0 10px 0; font-size: 20px;">Hello ${fullName},</h2>
             <p style="margin: 0; color: #374151; line-height: 1.6;">
-              You've requested to track your complaint <strong>${complaint.id}</strong>. 
+              You've requested to track your complaint <strong>${complaint.complaintId || complaint.id}</strong>.
               Please use the verification code below to access your complaint details.
             </p>
           </div>
@@ -107,14 +120,18 @@ export const requestComplaintOtp = async (req, res) => {
       </div>
     `;
 
-    await sendEmail(complaint.user.email, emailSubject, emailContent);
+    await sendEmail({
+      to: email,
+      subject: emailSubject,
+      html: emailContent,
+    });
 
     res.json({
       success: true,
       message: "OTP sent successfully to your registered email address",
       data: {
-        complaintId: complaint.id,
-        email: complaint.user.email.replace(/(.{2}).*(@.*)/, "$1***$2"), // Masked email
+        complaintId: complaint.complaintId || complaint.id,
+        email: email.replace(/(.{2}).*(@.*)/, "$1***$2"), // Masked email
       },
     });
   } catch (error) {
