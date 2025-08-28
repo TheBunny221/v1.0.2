@@ -956,7 +956,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, priority, remarks, assignedToId } = req.body;
+  const { status, priority, remarks, assignedToId, maintenanceTeamId } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -964,6 +964,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     include: {
       submittedBy: true,
       assignedTo: true,
+      wardOfficer: true,
+      maintenanceTeam: true,
       ward: true,
     },
   });
@@ -976,13 +978,13 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     });
   }
 
-  // Authorization check
+  // Enhanced authorization check based on new workflow
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
     (req.user.role === "WARD_OFFICER" &&
-      complaint.wardId === req.user.wardId) ||
+      (complaint.wardId === req.user.wardId || complaint.wardOfficerId === req.user.id)) ||
     (req.user.role === "MAINTENANCE_TEAM" &&
-      complaint.assignedToId === req.user.id);
+      (complaint.assignedToId === req.user.id || complaint.maintenanceTeamId === req.user.id));
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -992,37 +994,96 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     });
   }
 
-  // Validation: Check if status is being changed to ASSIGNED but no assignee is provided
-  if (status === "ASSIGNED" && !assignedToId && !complaint.assignedToId) {
-    let errorMessage =
-      "Please select an assignee before setting status to ASSIGNED.";
+  // Role-based status transition validation
+  if (req.user.role === "WARD_OFFICER") {
+    // Ward officers can only transition: REGISTERED → ASSIGNED → OPEN
+    const allowedTransitions = {
+      "REGISTERED": ["ASSIGNED"],
+      "ASSIGNED": ["OPEN"],
+      "OPEN": ["ASSIGNED"] // Allow going back to assigned if needed
+    };
 
-    // Customize error message based on user role
-    if (req.user.role === "ADMINISTRATOR") {
-      errorMessage =
-        "Please select a Ward Officer before assigning the complaint.";
-    } else if (req.user.role === "WARD_OFFICER") {
-      errorMessage =
-        "Please select a Maintenance Team member before assigning the complaint.";
+    if (status && status !== complaint.status) {
+      const allowedStatuses = allowedTransitions[complaint.status] || [];
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Ward officers cannot change status from ${complaint.status} to ${status}. Allowed transitions: ${allowedStatuses.join(", ") || "none"}.`,
+          data: null,
+        });
+      }
+    }
+  } else if (req.user.role === "MAINTENANCE_TEAM") {
+    // Maintenance team can update progress and mark as resolved
+    const allowedTransitions = {
+      "ASSIGNED": ["IN_PROGRESS"],
+      "OPEN": ["IN_PROGRESS"],
+      "IN_PROGRESS": ["RESOLVED", "ASSIGNED", "OPEN"]
+    };
+
+    if (status && status !== complaint.status) {
+      const allowedStatuses = allowedTransitions[complaint.status] || [];
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Maintenance team cannot change status from ${complaint.status} to ${status}. Allowed transitions: ${allowedStatuses.join(", ") || "none"}.`,
+          data: null,
+        });
+      }
+    }
+  }
+  // Administrators have full access to all status changes
+
+  // Enhanced validation for maintenance team assignment
+  if (maintenanceTeamId) {
+    const maintenanceUser = await prisma.user.findUnique({
+      where: { id: maintenanceTeamId },
+    });
+
+    if (!maintenanceUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected maintenance team member not found",
+        data: null,
+      });
     }
 
-    return res.status(400).json({
-      success: false,
-      message: errorMessage,
-      data: null,
-    });
+    if (maintenanceUser.role !== "MAINTENANCE_TEAM") {
+      return res.status(400).json({
+        success: false,
+        message: "Selected user is not a maintenance team member",
+        data: null,
+      });
+    }
+
+    if (!maintenanceUser.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign to inactive maintenance team member",
+        data: null,
+      });
+    }
+
+    // Ward officers can only assign maintenance team members from their ward
+    if (req.user.role === "WARD_OFFICER" && maintenanceUser.wardId !== req.user.wardId) {
+      return res.status(400).json({
+        success: false,
+        message: "Can only assign maintenance team members from your ward",
+        data: null,
+      });
+    }
   }
 
-  // Validation: If assignedToId is provided, verify the user exists and has the correct role
+  // Legacy assignedToId validation (kept for backward compatibility)
   if (assignedToId) {
     const assignee = await prisma.user.findUnique({
       where: { id: assignedToId },
     });
 
-    if (!assignee) {
+    if (!assignee || !assignee.isActive) {
       return res.status(400).json({
         success: false,
-        message: "Selected assignee not found",
+        message: "Selected assignee not found or inactive",
         data: null,
       });
     }
@@ -1044,14 +1105,6 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
         success: false,
         message:
           "Ward Officers can only assign complaints to Maintenance Team members",
-        data: null,
-      });
-    }
-
-    if (!assignee.isActive) {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot assign to inactive user",
         data: null,
       });
     }
