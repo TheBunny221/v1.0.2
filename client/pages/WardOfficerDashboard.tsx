@@ -359,7 +359,7 @@ const WardOfficerDashboard: React.FC = () => {
         </div>
       </RadioGroup>
 
-      {/* Additional Filter Options */}
+      {/* Additional Filter Options
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -408,7 +408,7 @@ const WardOfficerDashboard: React.FC = () => {
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card>  */}
 
       {/* Filtered Complaints List */}
       {hasActiveFilters && (
