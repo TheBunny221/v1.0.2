@@ -54,7 +54,8 @@ async function main() {
         key: "COMPLAINT_ID_PREFIX",
         value: "KSC",
         type: "complaint",
-        description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+        description:
+          "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
       },
       {
         key: "COMPLAINT_ID_START_NUMBER",
@@ -74,7 +75,8 @@ async function main() {
         key: "AUTO_ASSIGN_COMPLAINTS",
         value: "true",
         type: "complaint",
-        description: "Whether complaints should be auto-assigned to ward officers",
+        description:
+          "Whether complaints should be auto-assigned to ward officers",
       },
 
       // Contact Information
@@ -92,7 +94,8 @@ async function main() {
       },
       {
         key: "CONTACT_OFFICE_HOURS",
-        value: "Monday to Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
+        value:
+          "Monday to Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
         type: "contact",
         description: "Office hours for citizen services",
       },

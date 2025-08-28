@@ -13,11 +13,11 @@ export const getAllWardsWithBoundaries = async (req, res) => {
       include: {
         subZones: {
           where: { isActive: true },
-          orderBy: { name: 'asc' }
-        }
+          orderBy: { name: "asc" },
+        },
       },
       where: { isActive: true },
-      orderBy: { name: 'asc' }
+      orderBy: { name: "asc" },
     });
 
     console.log(`✅ Found ${wards.length} wards with boundaries`);
@@ -43,14 +43,15 @@ export const getAllWardsWithBoundaries = async (req, res) => {
 export const updateWardBoundaries = async (req, res) => {
   try {
     const { wardId } = req.params;
-    const { boundaries, centerLat, centerLng, boundingBox, subZones } = req.body;
+    const { boundaries, centerLat, centerLng, boundingBox, subZones } =
+      req.body;
 
     console.log(`🗺️ Updating boundaries for ward ${wardId}...`);
 
     // Validate ward exists
     const existingWard = await prisma.ward.findUnique({
       where: { id: wardId },
-      include: { subZones: true }
+      include: { subZones: true },
     });
 
     if (!existingWard) {
@@ -67,7 +68,8 @@ export const updateWardBoundaries = async (req, res) => {
         if (!Array.isArray(parsedBoundaries) || parsedBoundaries.length < 3) {
           return res.status(400).json({
             success: false,
-            message: "Invalid boundaries: must be an array of at least 3 coordinate pairs",
+            message:
+              "Invalid boundaries: must be an array of at least 3 coordinate pairs",
           });
         }
       } catch (error) {
@@ -90,17 +92,20 @@ export const updateWardBoundaries = async (req, res) => {
       },
       include: {
         subZones: {
-          orderBy: { name: 'asc' }
-        }
-      }
+          orderBy: { name: "asc" },
+        },
+      },
     });
 
     // Update sub-zone boundaries if provided
     if (subZones && Array.isArray(subZones)) {
       console.log(`🗺️ Updating ${subZones.length} sub-zone boundaries...`);
-      
+
       for (const subZoneData of subZones) {
-        if (subZoneData.id && existingWard.subZones.find(sz => sz.id === subZoneData.id)) {
+        if (
+          subZoneData.id &&
+          existingWard.subZones.find((sz) => sz.id === subZoneData.id)
+        ) {
           await prisma.subZone.update({
             where: { id: subZoneData.id },
             data: {
@@ -109,7 +114,7 @@ export const updateWardBoundaries = async (req, res) => {
               centerLng: subZoneData.centerLng,
               boundingBox: subZoneData.boundingBox,
               updatedAt: new Date(),
-            }
+            },
           });
         }
       }
@@ -121,12 +126,14 @@ export const updateWardBoundaries = async (req, res) => {
       include: {
         subZones: {
           where: { isActive: true },
-          orderBy: { name: 'asc' }
-        }
-      }
+          orderBy: { name: "asc" },
+        },
+      },
     });
 
-    console.log(`✅ Ward boundaries updated successfully for ${finalWard.name}`);
+    console.log(
+      `✅ Ward boundaries updated successfully for ${finalWard.name}`,
+    );
 
     res.status(200).json({
       success: true,
@@ -163,17 +170,17 @@ export const detectLocationArea = async (req, res) => {
     // Get all active wards with sub-zones
     const wards = await prisma.ward.findMany({
       where: {
-        isActive: true
+        isActive: true,
       },
       include: {
         subZones: {
           where: {
-            isActive: true
+            isActive: true,
           },
-          orderBy: { name: 'asc' }
-        }
+          orderBy: { name: "asc" },
+        },
       },
-      orderBy: { name: 'asc' }
+      orderBy: { name: "asc" },
     });
 
     if (wards.length === 0) {
@@ -186,9 +193,12 @@ export const detectLocationArea = async (req, res) => {
     // Since geographic boundaries are not implemented in current schema,
     // return the first active ward as a fallback
     const defaultWard = wards[0];
-    const defaultSubZone = defaultWard.subZones.length > 0 ? defaultWard.subZones[0] : null;
+    const defaultSubZone =
+      defaultWard.subZones.length > 0 ? defaultWard.subZones[0] : null;
 
-    console.log(`⚠️ Geographic boundaries not configured, returning default ward: ${defaultWard.name}`);
+    console.log(
+      `⚠️ Geographic boundaries not configured, returning default ward: ${defaultWard.name}`,
+    );
 
     const result = {
       exact: {
@@ -201,8 +211,8 @@ export const detectLocationArea = async (req, res) => {
         distance: 0,
       },
       coordinates: { latitude, longitude },
-      method: 'fallback',
-      note: 'Geographic boundaries not configured - using default ward'
+      method: "fallback",
+      note: "Geographic boundaries not configured - using default ward",
     };
 
     res.status(200).json({

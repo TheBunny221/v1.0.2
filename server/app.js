@@ -128,9 +128,11 @@ export function createApp() {
         return true;
       }
       // Skip for admin operations (authenticated users with admin endpoints)
-      if (req.path.startsWith("/api/admin") ||
-          req.path.startsWith("/api/system-config") ||
-          req.path.startsWith("/api/users/wards")) {
+      if (
+        req.path.startsWith("/api/admin") ||
+        req.path.startsWith("/api/system-config") ||
+        req.path.startsWith("/api/users/wards")
+      ) {
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith("Bearer ")) {
           return true; // Skip rate limiting for authenticated admin operations

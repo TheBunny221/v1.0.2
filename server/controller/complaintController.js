@@ -284,7 +284,10 @@ const calculateSLAStatus = (submittedOn, deadline, status) => {
 // @route   POST /api/complaints
 // @access  Private (Citizen, Admin)
 export const createComplaint = asyncHandler(async (req, res) => {
-  console.log("🔥 [createComplaint] Request body:", JSON.stringify(req.body, null, 2));
+  console.log(
+    "🔥 [createComplaint] Request body:",
+    JSON.stringify(req.body, null, 2),
+  );
   console.log("🔥 [createComplaint] User:", req.user?.id, req.user?.role);
 
   const {
@@ -309,11 +312,18 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // Verify CAPTCHA for all complaint submissions
   try {
-    console.log("🔥 [createComplaint] Verifying CAPTCHA:", captchaId, captchaText);
+    console.log(
+      "🔥 [createComplaint] Verifying CAPTCHA:",
+      captchaId,
+      captchaText,
+    );
     await verifyCaptchaForComplaint(captchaId, captchaText);
     console.log("🔥 [createComplaint] CAPTCHA verified successfully");
   } catch (error) {
-    console.log("🔥 [createComplaint] CAPTCHA verification failed:", error.message);
+    console.log(
+      "🔥 [createComplaint] CAPTCHA verification failed:",
+      error.message,
+    );
     return res.status(400).json({
       success: false,
       message: error.message || "CAPTCHA verification failed",
@@ -479,11 +489,11 @@ const generateComplaintId = async () => {
       where: {
         complaintId: {
           startsWith: prefix,
-          not: null
-        }
+          not: null,
+        },
       },
       select: { complaintId: true },
-      orderBy: { complaintId: "desc" }
+      orderBy: { complaintId: "desc" },
     });
 
     // Find the highest number used
@@ -546,7 +556,9 @@ const createComplaintWithUniqueId = async (data) => {
           `Complaint ID collision detected. Retries left: ${retries}`,
         );
         // Add a small delay to reduce chance of concurrent collision
-        await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 20));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 10 + Math.random() * 20),
+        );
         // Continue to next iteration which will generate a new ID
         if (retries === 0) throw err;
       } else {

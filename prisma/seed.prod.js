@@ -54,7 +54,8 @@ async function main() {
         key: "COMPLAINT_ID_PREFIX",
         value: "KSC",
         type: "complaint",
-        description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+        description:
+          "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
       },
       {
         key: "COMPLAINT_ID_START_NUMBER",
@@ -74,7 +75,8 @@ async function main() {
         key: "AUTO_ASSIGN_COMPLAINTS",
         value: "true",
         type: "complaint",
-        description: "Whether complaints should be auto-assigned to ward officers",
+        description:
+          "Whether complaints should be auto-assigned to ward officers",
       },
 
       // Contact Information
@@ -92,7 +94,8 @@ async function main() {
       },
       {
         key: "CONTACT_OFFICE_HOURS",
-        value: "Monday to Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
+        value:
+          "Monday to Friday: 9:00 AM - 6:00 PM, Saturday: 9:00 AM - 1:00 PM",
         type: "contact",
         description: "Office hours for citizen services",
       },
@@ -548,7 +551,13 @@ async function main() {
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED","REOPENED"];
+    const statuses = [
+      "REGISTERED",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "RESOLVED",
+      "REOPENED",
+    ];
 
     for (let i = 0; i < 60; i++) {
       const randomWard =
@@ -701,9 +710,7 @@ async function main() {
           submittedOn: new Date(
             Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
           ),
-          expectedCompletion: new Date(
-            Date.now() + 14 * 24 * 60 * 60 * 1000,
-          ),
+          expectedCompletion: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         },
       });
     }
