@@ -360,47 +360,44 @@ async function main() {
       wardOfficers.push(officer);
     }
 
-    // Maintenance Team Members
+    // Maintenance Team Members (3+ per ward)
     const maintenanceTeam = [];
-    const maintenanceData = [
-      {
-        name: "Suresh Kumar",
-        dept: "Public Works",
-        email: "suresh.kumar@cochinsmartcity.gov.in",
-      },
-      {
-        name: "Leela Devi",
-        dept: "Water Supply",
-        email: "leela.devi@cochinsmartcity.gov.in",
-      },
-      {
-        name: "Vinod Electrician",
-        dept: "Electricity",
-        email: "vinod.electric@cochinsmartcity.gov.in",
-      },
-      {
-        name: "Ramesh Cleaner",
-        dept: "Waste Management",
-        email: "ramesh.waste@cochinsmartcity.gov.in",
-      },
+    const departments = ["Public Works", "Water Supply", "Electricity", "Waste Management"];
+    const teamMemberNames = [
+      "Suresh Kumar", "Leela Devi", "Vinod Electrician", "Ramesh Cleaner",
+      "Pradeep Singh", "Kavitha Nair", "Ajay Menon", "Sunita Sharma",
+      "Rakesh Pillai", "Maya Jose", "Anil Thomas", "Shanti Devi",
+      "Deepak Raj", "Radha Krishnan", "Manoj Kumar", "Geetha Varma",
+      "Ravi Mohan", "Latha Nair", "Vijay Das", "Pooja Menon",
+      "Ashok Kumar", "Meera Pillai", "Ganesh Nair", "Sreeja Thomas"
     ];
 
-    for (let i = 0; i < maintenanceData.length; i++) {
-      const data = maintenanceData[i];
-      const member = await prisma.user.create({
-        data: {
-          email: data.email,
-          fullName: data.name,
-          phoneNumber: `+91-98765433${10 + i}`,
-          password: await hashPassword("maintenance123"),
-          role: "MAINTENANCE_TEAM",
-          department: data.dept,
-          language: "en",
-          isActive: true,
-          joinedOn: new Date(),
-        },
-      });
-      maintenanceTeam.push(member);
+    let memberIndex = 0;
+    for (let wardIndex = 0; wardIndex < createdWards.length; wardIndex++) {
+      const ward = createdWards[wardIndex];
+
+      // Create 3 team members per ward
+      for (let teamMemberIndex = 0; teamMemberIndex < 3; teamMemberIndex++) {
+        const department = departments[memberIndex % departments.length];
+        const name = teamMemberNames[memberIndex % teamMemberNames.length];
+
+        const member = await prisma.user.create({
+          data: {
+            email: `maintenance${memberIndex + 1}@cochinsmartcity.gov.in`,
+            fullName: `${name} - Ward ${wardIndex + 1}`,
+            phoneNumber: `+91-987654${String(memberIndex + 30).padStart(3, '0')}`,
+            password: await hashPassword("maintenance123"),
+            role: "MAINTENANCE_TEAM",
+            department: department,
+            wardId: ward.id, // Assign to specific ward
+            language: "en",
+            isActive: true,
+            joinedOn: new Date(),
+          },
+        });
+        maintenanceTeam.push(member);
+        memberIndex++;
+      }
     }
 
     // Citizens
