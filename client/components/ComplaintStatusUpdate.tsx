@@ -3,8 +3,9 @@ import { useAppSelector } from "../store/hooks";
 import {
   useUpdateComplaintStatusMutation,
   useAssignComplaintMutation,
+  useUpdateComplaintMutation,
+  useGetWardUsersQuery,
 } from "../store/api/complaintsApi";
-import { useGetWardTeamMembersQuery } from "../store/api/wardApi";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -92,6 +93,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
     useUpdateComplaintStatusMutation();
   const [assignComplaint, { isLoading: isAssigning }] =
     useAssignComplaintMutation();
+  const [updateComplaint] = useUpdateComplaintMutation();
 
   const [formData, setFormData] = useState({
     status: "",
@@ -110,13 +112,20 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
 
   const isLoading = isUpdatingStatus || isAssigning;
 
-  // Fetch team members for the current ward
-  const { data: teamResponse, isLoading: teamLoading } =
-    useGetWardTeamMembersQuery(user?.wardId || "", {
-      skip: !user?.wardId || user?.role !== "WARD_OFFICER",
-    });
+  // Fetch assignable users consistently with UpdateComplaintModal
+  const getUsersFilter = () => {
+    if (user?.role === "ADMINISTRATOR") return { role: "WARD_OFFICER" };
+    if (user?.role === "WARD_OFFICER") return { role: "MAINTENANCE_TEAM" };
+    return {} as any;
+  };
 
-  const teamMembers = teamResponse?.data?.users || [];
+  const { data: usersResponse, isLoading: usersLoading } = useGetWardUsersQuery({
+    page: 1,
+    limit: 100,
+    ...getUsersFilter(),
+  });
+
+  const assignableUsers = usersResponse?.data?.users || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,12 +147,21 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
         (mode === "both" &&
           formData.assignedTo !== (complaint.assignedTo?.id || "unassigned"))
       ) {
-        await assignComplaint({
-          id: complaint.id,
-          assignedTo:
-            formData.assignedTo === "unassigned" ? "" : formData.assignedTo,
-          remarks: formData.remarks || undefined,
-        }).unwrap();
+        if (user?.role === "WARD_OFFICER") {
+          await assignComplaint({
+            id: complaint.id,
+            assignedTo:
+              formData.assignedTo === "unassigned" ? "" : formData.assignedTo,
+            remarks: formData.remarks || undefined,
+          }).unwrap();
+        } else if (user?.role === "ADMINISTRATOR") {
+          const updateData: any = {};
+          if (formData.assignedTo !== "unassigned") {
+            updateData.assignedToId = formData.assignedTo;
+          }
+          if (formData.remarks) updateData.remarks = formData.remarks;
+          await updateComplaint({ id: complaint.id, ...updateData }).unwrap();
+        }
       }
 
       toast({
@@ -251,7 +269,11 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
           {/* Assignment */}
           {(mode === "assign" || mode === "both") && (
             <div className="space-y-2">
-              <Label htmlFor="assignedTo">Assign to Team Member</Label>
+              <Label htmlFor="assignedTo">
+                {user?.role === "ADMINISTRATOR"
+                  ? "Assign to Ward Officer"
+                  : "Assign to Team Member"}
+              </Label>
               <Select
                 value={formData.assignedTo}
                 onValueChange={(value) =>
@@ -259,22 +281,31 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select team member" />
+                  <SelectValue placeholder={
+                    user?.role === "ADMINISTRATOR"
+                      ? "Select ward officer"
+                      : "Select team member"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {teamLoading ? (
+                  {usersLoading ? (
                     <SelectItem value="loading" disabled>
-                      Loading team members...
+                      Loading users...
                     </SelectItem>
                   ) : (
-                    teamMembers.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
+                    assignableUsers.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
                         <div className="flex justify-between items-center w-full">
-                          <span>{member.displayName}</span>
-                          <span className="text-xs text-gray-500">
-                            ({member.activeAssignments} active)
-                          </span>
+                          <div className="flex flex-col">
+                            <span>{u.fullName}</span>
+                            {u.email && (
+                              <span className="text-xs text-gray-500">{u.email}</span>
+                            )}
+                            {u.ward?.name && (
+                              <span className="text-xs text-blue-600">{u.ward.name}</span>
+                            )}
+                          </div>
                         </div>
                       </SelectItem>
                     ))
