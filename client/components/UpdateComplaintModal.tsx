@@ -456,7 +456,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                       <span className="text-green-600">
                         {complaint.maintenanceTeam.fullName}
                       </span>
-                    ) : complaint.isMaintenanceUnassigned ? (
+                    ) : (complaint as any).needsTeamAssignment ? (
                       <Badge className="bg-orange-100 text-orange-800 text-xs">
                         Needs Assignment
                       </Badge>
@@ -562,7 +562,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             <div className="flex items-center justify-between">
               <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
               {user?.role === "WARD_OFFICER" &&
-                complaint?.isMaintenanceUnassigned &&
+                (complaint as any)?.needsTeamAssignment &&
                 !["RESOLVED", "CLOSED"].includes(complaint.status) && (
                   <Badge className="bg-blue-100 text-blue-800 text-xs">
                     Assignment Required
@@ -572,7 +572,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
             {/* Helpful message for ward officers - only for active complaints */}
             {user?.role === "WARD_OFFICER" &&
-              complaint?.isMaintenanceUnassigned &&
+              (complaint as any)?.needsTeamAssignment &&
               !["RESOLVED", "CLOSED"].includes(complaint.status) && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
                   <div className="flex items-center">
