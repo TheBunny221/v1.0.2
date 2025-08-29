@@ -140,12 +140,13 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
     // For ward officers, validate maintenance team assignment
     if (user?.role === "WARD_OFFICER") {
+      // If complaint is currently unassigned to maintenance team and ward officer is trying to assign it
       if (
         formData.status === "ASSIGNED" &&
         (!formData.maintenanceTeamId || formData.maintenanceTeamId === "none")
       ) {
         errors.push(
-          "Please select a Maintenance Team member before assigning the complaint.",
+          "Please select a Maintenance Team member before setting status to 'Assigned'.",
         );
       }
 
@@ -156,7 +157,18 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         (!formData.maintenanceTeamId || formData.maintenanceTeamId === "none")
       ) {
         errors.push(
-          "Please select a Maintenance Team member before assigning the complaint.",
+          "Please select a Maintenance Team member to assign this complaint.",
+        );
+      }
+
+      // Helpful message for ward officers with unassigned maintenance complaints
+      if (
+        complaint?.isMaintenanceUnassigned &&
+        !formData.maintenanceTeamId &&
+        formData.status !== "REGISTERED"
+      ) {
+        errors.push(
+          "This complaint needs a maintenance team assignment. Please select a team member.",
         );
       }
     }
