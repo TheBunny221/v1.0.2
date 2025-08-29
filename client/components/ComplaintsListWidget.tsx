@@ -181,7 +181,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                         <Badge className={getPriorityColor(complaint.priority)}>
                           {complaint.priority || "N/A"}
                         </Badge>
-                        {complaint.isMaintenanceUnassigned && (
+                        {(complaint as any).needsTeamAssignment && (
                           <Badge className="bg-purple-100 text-purple-800 text-xs">
                             Needs Team Assignment
                           </Badge>
