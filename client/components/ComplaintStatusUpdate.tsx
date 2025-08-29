@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import { useAppSelector } from "../store/hooks";
 import {
   useUpdateComplaintStatusMutation,
@@ -154,9 +155,10 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       onSuccess?.();
       onClose();
     } catch (error: any) {
+      const message = error?.data?.message || getApiErrorMessage(error) || "Failed to update complaint";
       toast({
         title: "Error",
-        description: error?.data?.message || "Failed to update complaint",
+        description: message,
         variant: "destructive",
       });
     }
