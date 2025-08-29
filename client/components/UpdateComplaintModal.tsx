@@ -111,6 +111,15 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
   useEffect(() => {
     if (complaint && isOpen) {
+      // Debug: Log complaint data structure
+      console.log("🔍 UpdateComplaintModal - Complaint data:", {
+        id: complaint.id,
+        wardOfficer: complaint.wardOfficer,
+        maintenanceTeam: complaint.maintenanceTeam,
+        isMaintenanceUnassigned: complaint.isMaintenanceUnassigned,
+        assignedTo: complaint.assignedTo,
+      });
+
       // Handle both legacy assignedTo and new maintenanceTeam fields
       const assignedToId =
         typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
@@ -122,6 +131,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         complaint.maintenanceTeam?.id
           ? complaint.maintenanceTeam.id
           : complaint.maintenanceTeam || "none";
+
+      console.log("🔍 UpdateComplaintModal - Extracted IDs:", {
+        assignedToId,
+        maintenanceTeamId,
+      });
 
       setFormData({
         status: complaint.status,
