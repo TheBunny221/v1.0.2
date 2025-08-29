@@ -119,11 +119,13 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
     return {} as any;
   };
 
-  const { data: usersResponse, isLoading: usersLoading } = useGetWardUsersQuery({
-    page: 1,
-    limit: 100,
-    ...getUsersFilter(),
-  });
+  const { data: usersResponse, isLoading: usersLoading } = useGetWardUsersQuery(
+    {
+      page: 1,
+      limit: 100,
+      ...getUsersFilter(),
+    },
+  );
 
   const assignableUsers = usersResponse?.data?.users || [];
 
@@ -281,11 +283,13 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={
-                    user?.role === "ADMINISTRATOR"
-                      ? "Select ward officer"
-                      : "Select team member"
-                  } />
+                  <SelectValue
+                    placeholder={
+                      user?.role === "ADMINISTRATOR"
+                        ? "Select ward officer"
+                        : "Select team member"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -300,10 +304,14 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                           <div className="flex flex-col">
                             <span>{u.fullName}</span>
                             {u.email && (
-                              <span className="text-xs text-gray-500">{u.email}</span>
+                              <span className="text-xs text-gray-500">
+                                {u.email}
+                              </span>
                             )}
                             {u.ward?.name && (
-                              <span className="text-xs text-blue-600">{u.ward.name}</span>
+                              <span className="text-xs text-blue-600">
+                                {u.ward.name}
+                              </span>
                             )}
                           </div>
                         </div>
