@@ -156,6 +156,7 @@ const ComplaintsList: React.FC = () => {
     user?.id,
     searchParams,
     assignToTeamFilter,
+    needsMaintenanceAssignment,
     slaStatusFilter,
   ]);
 
