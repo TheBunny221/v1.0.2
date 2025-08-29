@@ -3,15 +3,15 @@ const prisma = new PrismaClient();
 
 export const getComplaintSummary = async (req, res) => {
   try {
-    const { wardId, assignToTeam } = req.query;
+    const { wardId, needsTeamAssignment } = req.query;
     const whereClause = {};
-    
+
     if (wardId) {
       whereClause.wardId = wardId;
     }
-    
-    if (assignToTeam === "true") {
-      whereClause.assignToTeam = true;
+
+    if (needsTeamAssignment === "true") {
+      whereClause.maintenanceTeamId = null;
     }
 
     // Get total complaints
