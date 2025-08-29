@@ -45,7 +45,6 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   onUpdate,
   onShowUpdateModal,
 }) => {
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "REGISTERED":
@@ -187,7 +186,6 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
           )}
         </div>
       </div>
-
     </>
   );
 };

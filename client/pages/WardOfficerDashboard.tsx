@@ -37,11 +37,11 @@ import {
 
 interface FilterState {
   mainFilter:
-  | "none"
-  | "pending"
-  | "inProgress"
-  | "completed"
-  | "needsTeamAssignment";
+    | "none"
+    | "pending"
+    | "inProgress"
+    | "completed"
+    | "needsTeamAssignment";
   overdue: boolean;
   urgent: boolean;
 }
@@ -76,7 +76,7 @@ const WardOfficerDashboard: React.FC = () => {
     // Main filter logic
     switch (filters.mainFilter) {
       case "pending":
-        statusFilters.push("REGISTERED", "ASSIGNED");//, "REOPEN"
+        statusFilters.push("REGISTERED", "ASSIGNED"); //, "REOPEN"
         break;
       case "inProgress":
         statusFilters.push("IN_PROGRESS");
@@ -128,7 +128,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   const handleFilterChange = (
     filterKey: keyof FilterState,
-    checked: boolean
+    checked: boolean,
   ) => {
     setFilters((prev) => ({
       ...prev,
@@ -236,13 +236,14 @@ const WardOfficerDashboard: React.FC = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "pending"
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "pending"
                 ? "ring-2 ring-blue-500 bg-blue-50"
                 : ""
-              }`}
+            }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "pending" ? "none" : "pending"
+                filters.mainFilter === "pending" ? "none" : "pending",
               )
             }
           >
@@ -270,13 +271,14 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "inProgress"
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "inProgress"
                 ? "ring-2 ring-orange-500 bg-orange-50"
                 : ""
-              }`}
+            }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "inProgress" ? "none" : "inProgress"
+                filters.mainFilter === "inProgress" ? "none" : "inProgress",
               )
             }
           >
@@ -302,13 +304,14 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "completed"
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "completed"
                 ? "ring-2 ring-green-500 bg-green-50"
                 : ""
-              }`}
+            }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "completed" ? "none" : "completed"
+                filters.mainFilter === "completed" ? "none" : "completed",
               )
             }
           >
@@ -334,15 +337,16 @@ const WardOfficerDashboard: React.FC = () => {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${filters.mainFilter === "needsTeamAssignment"
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "needsTeamAssignment"
                 ? "ring-2 ring-purple-500 bg-purple-50"
                 : ""
-              }`}
+            }`}
             onClick={() =>
               handleMainFilterChange(
                 filters.mainFilter === "needsTeamAssignment"
                   ? "none"
-                  : "needsTeamAssignment"
+                  : "needsTeamAssignment",
               )
             }
           >
@@ -500,8 +504,8 @@ const WardOfficerDashboard: React.FC = () => {
               value={
                 stats?.summary.totalComplaints
                   ? (stats.summary.completedWork /
-                    stats.summary.totalComplaints) *
-                  100
+                      stats.summary.totalComplaints) *
+                    100
                   : 0
               }
               className="h-2"
