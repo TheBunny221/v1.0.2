@@ -1145,8 +1145,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     updateData.maintenanceTeamId = maintenanceTeamId;
     updateData.isMaintenanceUnassigned = false;
 
-    // Auto-transition status when maintenance team is assigned
-    if (!status) {
+    // Auto-transition status when maintenance team is assigned (only for active complaints)
+    if (!status && !["RESOLVED", "CLOSED"].includes(updateData.status || complaint.status)) {
       if (complaint.status === "REGISTERED") {
         updateData.status = "ASSIGNED";
         updateData.assignedOn = new Date();
