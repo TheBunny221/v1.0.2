@@ -199,11 +199,6 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                     {showActions && (
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Link to={`/complaints/${complaint.id}`}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
                           <ComplaintQuickActions
                             complaint={{
                               id: complaint.id,
