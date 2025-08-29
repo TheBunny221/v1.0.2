@@ -546,7 +546,7 @@ async function main() {
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"];
+    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"];
 
     // Generate 94 sample complaints for development with 6-month data
     const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
@@ -600,7 +600,7 @@ async function main() {
           type: complaintType,
           status: status,
           priority: priority,
-          slaStatus: status === "RESOLVED" ? "COMPLETED" : "ON_TIME",
+          slaStatus: (status === "RESOLVED" || status === "CLOSED") ? "COMPLETED" : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
           landmark: `Near ${
@@ -614,6 +614,8 @@ async function main() {
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
           teamId: randomTeamMember?.id || null,
           assignToTeam: assignToTeam,
+          maintenanceTeamId: randomTeamMember?.id || null,
+          isMaintenanceUnassigned: randomTeamMember ? false : true,
           createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:
@@ -621,12 +623,16 @@ async function main() {
               ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000)
               : null,
           resolvedOn:
-            status === "RESOLVED"
+            status === "RESOLVED" || status === "CLOSED"
               ? new Date(complaintDate.getTime() + 5 * 24 * 60 * 60 * 1000)
+              : null,
+          closedOn:
+            status === "CLOSED"
+              ? new Date(complaintDate.getTime() + 6 * 24 * 60 * 60 * 1000)
               : null,
           deadline: deadline,
           rating:
-            status === "RESOLVED" && Math.random() > 0.4
+            (status === "RESOLVED" || status === "CLOSED") && Math.random() > 0.4
               ? Math.floor(Math.random() * 5) + 1
               : null,
         },
