@@ -1293,6 +1293,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       },
     },
   });
+  // Derived flag for frontend
+  updatedComplaint.needsTeamAssignment = !updatedComplaint.maintenanceTeamId;
 
   // Create status log
   const statusLogComment =
