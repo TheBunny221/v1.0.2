@@ -409,6 +409,19 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             <div className="mt-4 pt-4 border-t border-gray-200">
               <h4 className="font-medium text-sm mb-2">Current Assignments</h4>
               <div className="grid grid-cols-1 gap-2 text-sm">
+                {/* Debug Information */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs">
+                    <strong>Debug:</strong>
+                    <br />
+                    wardOfficer: {JSON.stringify(complaint.wardOfficer) || 'null'}
+                    <br />
+                    maintenanceTeam: {JSON.stringify(complaint.maintenanceTeam) || 'null'}
+                    <br />
+                    isMaintenanceUnassigned: {String(complaint.isMaintenanceUnassigned)}
+                  </div>
+                )}
+
                 {/* Ward Officer Assignment */}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Ward Officer:</span>
