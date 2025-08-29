@@ -138,8 +138,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   const validateForm = () => {
     const errors: string[] = [];
 
-    // For ward officers, validate maintenance team assignment
-    if (user?.role === "WARD_OFFICER") {
+    // Skip assignment validation for resolved and closed complaints
+    const isComplaintFinalized = ["RESOLVED", "CLOSED"].includes(formData.status);
+
+    // For ward officers, validate maintenance team assignment (only for active complaints)
+    if (user?.role === "WARD_OFFICER" && !isComplaintFinalized) {
       // If complaint is currently unassigned to maintenance team and ward officer is trying to assign it
       if (
         formData.status === "ASSIGNED" &&
@@ -161,11 +164,12 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         );
       }
 
-      // Helpful message for ward officers with unassigned maintenance complaints
+      // Helpful message for ward officers with unassigned maintenance complaints (only for non-finalized complaints)
       if (
         complaint?.isMaintenanceUnassigned &&
         !formData.maintenanceTeamId &&
-        formData.status !== "REGISTERED"
+        formData.status !== "REGISTERED" &&
+        !["RESOLVED", "CLOSED"].includes(complaint.status)
       ) {
         errors.push(
           "This complaint needs a maintenance team assignment. Please select a team member.",
@@ -173,8 +177,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
       }
     }
 
-    // For administrators, validate ward officer assignment (legacy)
-    if (user?.role === "ADMINISTRATOR") {
+    // For administrators, validate ward officer assignment (legacy) - only for active complaints
+    if (user?.role === "ADMINISTRATOR" && !isComplaintFinalized) {
       if (
         formData.status === "ASSIGNED" &&
         (!formData.assignedToId || formData.assignedToId === "none")
