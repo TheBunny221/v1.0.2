@@ -85,7 +85,7 @@ const WardOfficerDashboard: React.FC = () => {
         statusFilters.push("RESOLVED", "CLOSED");
         break;
       case "needsTeamAssignment":
-        filterParams.isMaintenanceUnassigned = true;
+        filterParams.needsTeamAssignment = true;
         break;
       default:
         // No main filter applied
@@ -475,7 +475,7 @@ const WardOfficerDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() => navigateToComplaints({ isMaintenanceUnassigned: true })}
+              onClick={() => navigateToComplaints({ needsTeamAssignment: true })}
             >
               <Briefcase className="h-4 w-4 mr-2" />
               Assign to Team ({stats?.summary.needsTeamAssignment || 0})
