@@ -134,6 +134,7 @@ const ComplaintsList: React.FC = () => {
 
     // Add new filters
     if (assignToTeamFilter) params.assignToTeam = true;
+    if (needsMaintenanceAssignment) params.isMaintenanceUnassigned = true;
     if (slaStatusFilter !== "all")
       params.slaStatus = slaStatusFilter.toUpperCase();
 
