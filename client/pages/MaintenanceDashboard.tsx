@@ -74,6 +74,9 @@ const MaintenanceDashboard: React.FC = () => {
     const assignedTasks = complaints.filter(
       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
     );
+    const assignedTasks = complaints.filter(
+      (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
+    );
 
     const totalTasks = assignedTasks.length;
     const inProgress = assignedTasks.filter(
