@@ -653,7 +653,6 @@ async function main() {
           teamId: randomTeamMember?.id || null,
           assignToTeam: assignToTeam,
           maintenanceTeamId: randomTeamMember?.id || null,
-          isMaintenanceUnassigned: randomTeamMember ? false : true,
           createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:
