@@ -157,6 +157,9 @@ model Complaint {
   // Assignment and Tracking
   submittedById   String?
   assignedToId    String?
+  wardOfficerId   String?           // Specific ward officer assignment
+  maintenanceTeamId String?         // Specific maintenance team member assignment
+  isMaintenanceUnassigned Boolean   @default(true) // True when maintenance team not yet assigned
   resolvedById    String?
   
   // Timestamps
