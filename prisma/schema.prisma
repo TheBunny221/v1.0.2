@@ -180,6 +180,8 @@ model Complaint {
   subZone         SubZone?          @relation(fields: [subZoneId], references: [id])
   submittedBy     User?             @relation("SubmittedBy", fields: [submittedById], references: [id])
   assignedTo      User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
+  wardOfficer     User?             @relation("WardOfficerAssigned", fields: [wardOfficerId], references: [id])
+  maintenanceTeam User?             @relation("MaintenanceTeamAssigned", fields: [maintenanceTeamId], references: [id])
   statusLogs      StatusLog[]
   attachments     Attachment[]
   notifications   Notification[]
