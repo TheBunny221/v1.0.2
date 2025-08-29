@@ -1474,7 +1474,6 @@ export const reopenComplaint = asyncHandler(async (req, res) => {
       ),
       // Reset assignment so it goes through assignment workflow again
       maintenanceTeamId: null,
-      isMaintenanceUnassigned: true,
       assignedOn: null,
       resolvedOn: null,
       resolvedById: null,
