@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import {
-  useCreateComplaintMutation,
-  useGetComplaintTypesQuery,
-} from "../store/api/complaintsApi";
+import { useCreateComplaintMutation } from "../store/api/complaintsApi";
+import { useGetComplaintTypesQuery } from "../store/api/complaintTypesApi";
 import {
   Card,
   CardContent,
