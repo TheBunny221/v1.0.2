@@ -577,23 +577,10 @@ const ComplaintsList: React.FC = () => {
           setIsUpdateModalOpen(false);
           setSelectedComplaint(null);
         }}
-        onSuccess={async () => {
-          // Refetch data first
-          const result = await refetch();
-
-          // Update the selected complaint with fresh data if still available
-          if (selectedComplaint && result.data?.data?.complaints) {
-            const updatedComplaint = result.data.data.complaints.find(
-              (c: any) => c.id === selectedComplaint.id
-            );
-            if (updatedComplaint) {
-              setSelectedComplaint(updatedComplaint);
-            }
-          }
-
-          // Don't close the modal immediately - let user see the updated assignment
-          // setIsUpdateModalOpen(false);
-          // setSelectedComplaint(null);
+        onSuccess={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+          refetch();
         }}
       />
     </div>
