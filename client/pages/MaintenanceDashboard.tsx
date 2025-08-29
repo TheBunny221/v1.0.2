@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import {
   useGetComplaintsQuery,
-  useUpdateComplaintMutation,
-  useGetComplaintStatisticsQuery,
+  useUpdateComplaintStatusMutation,
 } from "../store/api/complaintsApi";
 import {
   Card,
@@ -53,9 +53,13 @@ const MaintenanceDashboard: React.FC = () => {
     limit: 100,
   });
 
-  const complaints = complaintsResponse?.data || [];
+  const complaints = Array.isArray(complaintsResponse?.data?.complaints)
+    ? complaintsResponse!.data!.complaints
+    : Array.isArray(complaintsResponse?.data)
+    ? (complaintsResponse as any).data
+    : [];
 
-  const [updateComplaint] = useUpdateComplaintMutation();
+  const [updateComplaintStatus] = useUpdateComplaintStatusMutation();
 
   const [dashboardStats, setDashboardStats] = useState({
     totalTasks: 0,
@@ -70,10 +74,10 @@ const MaintenanceDashboard: React.FC = () => {
   // Data fetching is handled by RTK Query hooks automatically
 
   useEffect(() => {
-    // Filter tasks assigned to this maintenance team member
-    const assignedTasks = complaints.filter(
-      (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
-    );
+    const assignedTasks = complaints.filter((c: any) => {
+      const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
+      return assigneeId === user?.id && c.status !== "REGISTERED";
+    });
 
     const totalTasks = assignedTasks.length;
     const inProgress = assignedTasks.filter(
@@ -128,9 +132,10 @@ const MaintenanceDashboard: React.FC = () => {
     }
   };
 
-  const myTasks = complaints.filter(
-    (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
-  );
+  const myTasks = complaints.filter((c: any) => {
+    const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
+    return assigneeId === user?.id && c.status !== "REGISTERED";
+  });
 
   const activeTasks = myTasks
     .filter((c) => c.status === "ASSIGNED" || c.status === "IN_PROGRESS")
@@ -140,8 +145,13 @@ const MaintenanceDashboard: React.FC = () => {
     .filter((c) => c.priority === "CRITICAL" || c.priority === "HIGH")
     .slice(0, 3);
 
-  const handleStatusUpdate = (complaintId: string, newStatus: string) => {
-    dispatch(updateComplaintStatus({ id: complaintId, status: newStatus }));
+  const handleStatusUpdate = async (complaintId: string, newStatus: string) => {
+    try {
+      await updateComplaintStatus({ id: complaintId, status: newStatus }).unwrap();
+      refetchComplaints();
+    } catch (e) {
+      console.error("Failed to update status", e);
+    }
   };
 
   return (
