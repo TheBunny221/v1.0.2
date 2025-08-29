@@ -116,7 +116,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         id: complaint.id,
         wardOfficer: complaint.wardOfficer,
         maintenanceTeam: complaint.maintenanceTeam,
-        isMaintenanceUnassigned: complaint.isMaintenanceUnassigned,
+        needsTeamAssignment: (complaint as any).needsTeamAssignment,
         assignedTo: complaint.assignedTo,
       });
 
