@@ -716,13 +716,40 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
+
+  // Handle maintenance assignment filter with status exclusion
   if (isMaintenanceUnassigned === "true" || isMaintenanceUnassigned === true) {
     filters.isMaintenanceUnassigned = true;
-    // Exclude resolved and closed complaints from maintenance assignment filter
-    filters.status = {
-      notIn: ["RESOLVED", "CLOSED"]
-    };
+
+    // If no status filter is already applied, exclude resolved and closed complaints
+    if (!filters.status) {
+      filters.status = {
+        notIn: ["RESOLVED", "CLOSED"]
+      };
+    } else if (typeof filters.status === "string") {
+      // If status is a single string, check if it's not resolved/closed
+      if (!["RESOLVED", "CLOSED"].includes(filters.status)) {
+        // Keep the existing status filter
+      } else {
+        // Remove the status filter since we're looking for unassigned maintenance
+        delete filters.status;
+        filters.status = {
+          notIn: ["RESOLVED", "CLOSED"]
+        };
+      }
+    } else if (filters.status.in) {
+      // If status is an array, filter out resolved/closed
+      const activeStatuses = filters.status.in.filter(s => !["RESOLVED", "CLOSED"].includes(s));
+      if (activeStatuses.length > 0) {
+        filters.status = { in: activeStatuses };
+      } else {
+        filters.status = {
+          notIn: ["RESOLVED", "CLOSED"]
+        };
+      }
+    }
   }
+
   if (slaStatus) filters.slaStatus = slaStatus;
 
   // --- admin-only overrides ---
