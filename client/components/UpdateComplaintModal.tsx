@@ -494,7 +494,27 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
           {/* Assignment Section */}
           <div>
-            <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
+              {user?.role === "WARD_OFFICER" && complaint?.isMaintenanceUnassigned && (
+                <Badge className="bg-blue-100 text-blue-800 text-xs">
+                  Assignment Required
+                </Badge>
+              )}
+            </div>
+
+            {/* Helpful message for ward officers */}
+            {user?.role === "WARD_OFFICER" && complaint?.isMaintenanceUnassigned && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                <div className="flex items-center">
+                  <AlertTriangle className="h-4 w-4 text-blue-500 mr-2" />
+                  <span className="text-sm text-blue-700">
+                    This complaint needs to be assigned to a maintenance team member to proceed.
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               {/* Search Box */}
               <div className="relative">
