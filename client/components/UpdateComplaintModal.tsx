@@ -128,7 +128,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
       const maintenanceTeamId =
         typeof complaint.maintenanceTeam === "object" &&
-          complaint.maintenanceTeam?.id
+        complaint.maintenanceTeam?.id
           ? complaint.maintenanceTeam.id
           : complaint.maintenanceTeam || "none";
 
@@ -262,13 +262,13 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
         const assignedToId =
           typeof updatedComplaint.assignedTo === "object" &&
-            updatedComplaint.assignedTo?.id
+          updatedComplaint.assignedTo?.id
             ? updatedComplaint.assignedTo.id
             : updatedComplaint.assignedTo || "none";
 
         const maintenanceTeamId =
           typeof updatedComplaint.maintenanceTeam === "object" &&
-            updatedComplaint.maintenanceTeam?.id
+          updatedComplaint.maintenanceTeam?.id
             ? updatedComplaint.maintenanceTeam.id
             : updatedComplaint.maintenanceTeam || "none";
 
@@ -604,7 +604,6 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     ? formData.maintenanceTeamId
                     : formData.assignedToId
                 }
-
                 onValueChange={(value) => {
                   if (user?.role === "WARD_OFFICER") {
                     setFormData((prev) => ({
@@ -617,7 +616,6 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   // Clear validation errors when user makes a selection
                   setValidationErrors([]);
                 }}
-
                 disabled={isLoadingUsers || availableUsers.length === 0}
               >
                 <SelectTrigger>

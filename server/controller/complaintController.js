@@ -742,9 +742,12 @@ export const getComplaints = asyncHandler(async (req, res) => {
       const activeStatuses = filters.status.in.filter(
         (s) => !["RESOLVED", "CLOSED"].includes(s),
       );
-      filters.status = activeStatuses.length > 0 ? { in: activeStatuses } : {
-        notIn: ["RESOLVED", "CLOSED"],
-      };
+      filters.status =
+        activeStatuses.length > 0
+          ? { in: activeStatuses }
+          : {
+              notIn: ["RESOLVED", "CLOSED"],
+            };
     }
   }
 
@@ -978,7 +981,10 @@ export const getComplaint = asyncHandler(async (req, res) => {
     },
   });
 
-  const complaint = baseComplaint && { ...baseComplaint, needsTeamAssignment: !baseComplaint.maintenanceTeamId };
+  const complaint = baseComplaint && {
+    ...baseComplaint,
+    needsTeamAssignment: !baseComplaint.maintenanceTeamId,
+  };
 
   if (!complaint) {
     return res.status(404).json({
@@ -1816,7 +1822,8 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId).length,
+    needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId)
+      .length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
     assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
   };
