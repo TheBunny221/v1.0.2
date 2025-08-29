@@ -830,7 +830,7 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/dashboard/stats
 // @access  Private (Admin only)
 export const getDashboardStats = asyncHandler(async (req, res) => {
-  const [userStats, complaintStats] = await Promise.all([
+  const [userStats, complaintStats, pendingTeamAssignments] = await Promise.all([
     // User statistics by role
     prisma.user.groupBy({
       by: ["role"],
@@ -841,6 +841,13 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     prisma.complaint.groupBy({
       by: ["status"],
       _count: true,
+    }),
+    // Pending maintenance team assignment across active complaints
+    prisma.complaint.count({
+      where: {
+        OR: [{ isMaintenanceUnassigned: true }, { maintenanceTeamId: null }],
+        status: { in: ["REGISTERED", "ASSIGNED", "REOPENED"] },
+      },
     }),
   ]);
 
@@ -879,6 +886,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       overdue: overdueComplaints,
       wardOfficers,
       maintenanceTeam,
+      pendingTeamAssignments,
     },
   });
 });
