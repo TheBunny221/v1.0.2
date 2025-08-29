@@ -360,14 +360,37 @@ async function main() {
 
     // Maintenance Team Members (3+ per ward)
     const maintenanceTeam = [];
-    const departments = ["Public Works", "Water Supply", "Electricity", "Waste Management"];
+    const departments = [
+      "Public Works",
+      "Water Supply",
+      "Electricity",
+      "Waste Management",
+    ];
     const teamMemberNames = [
-      "Suresh Kumar", "Leela Devi", "Vinod Electrician", "Ramesh Cleaner",
-      "Pradeep Singh", "Kavitha Nair", "Ajay Menon", "Sunita Sharma",
-      "Rakesh Pillai", "Maya Jose", "Anil Thomas", "Shanti Devi",
-      "Deepak Raj", "Radha Krishnan", "Manoj Kumar", "Geetha Varma",
-      "Ravi Mohan", "Latha Nair", "Vijay Das", "Pooja Menon",
-      "Ashok Kumar", "Meera Pillai", "Ganesh Nair", "Sreeja Thomas"
+      "Suresh Kumar",
+      "Leela Devi",
+      "Vinod Electrician",
+      "Ramesh Cleaner",
+      "Pradeep Singh",
+      "Kavitha Nair",
+      "Ajay Menon",
+      "Sunita Sharma",
+      "Rakesh Pillai",
+      "Maya Jose",
+      "Anil Thomas",
+      "Shanti Devi",
+      "Deepak Raj",
+      "Radha Krishnan",
+      "Manoj Kumar",
+      "Geetha Varma",
+      "Ravi Mohan",
+      "Latha Nair",
+      "Vijay Das",
+      "Pooja Menon",
+      "Ashok Kumar",
+      "Meera Pillai",
+      "Ganesh Nair",
+      "Sreeja Thomas",
     ];
 
     let memberIndex = 0;
@@ -383,7 +406,7 @@ async function main() {
           data: {
             email: `maintenance${memberIndex + 1}@cochinsmartcity.dev`,
             fullName: `${name} - Ward ${wardIndex + 1}`,
-            phoneNumber: `+91-987654${String(memberIndex + 30).padStart(3, '0')}`,
+            phoneNumber: `+91-987654${String(memberIndex + 30).padStart(3, "0")}`,
             password: await hashPassword("maintenance123"),
             role: "MAINTENANCE_TEAM",
             department: department,
@@ -546,7 +569,14 @@ async function main() {
     ];
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-    const statuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"];
+    const statuses = [
+      "REGISTERED",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "RESOLVED",
+      "CLOSED",
+      "REOPENED",
+    ];
 
     // Generate 94 sample complaints for development with 6-month data
     const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
@@ -573,18 +603,23 @@ async function main() {
       // Generate random date within last 6 months
       const timeRange = now.getTime() - sixMonthsAgo.getTime();
       const complaintDate = new Date(
-        sixMonthsAgo.getTime() + Math.random() * timeRange
+        sixMonthsAgo.getTime() + Math.random() * timeRange,
       );
       const deadline = new Date(
         complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
 
       // Decide if this complaint should be assigned to a maintenance team member
-      const wardMaintenanceTeam = maintenanceTeam.filter(member => member.wardId === randomWard.id);
+      const wardMaintenanceTeam = maintenanceTeam.filter(
+        (member) => member.wardId === randomWard.id,
+      );
       const assignToTeam = Math.random() < 0.6; // 60% chance of team assignment
-      const randomTeamMember = assignToTeam && wardMaintenanceTeam.length > 0
-        ? wardMaintenanceTeam[Math.floor(Math.random() * wardMaintenanceTeam.length)]
-        : null;
+      const randomTeamMember =
+        assignToTeam && wardMaintenanceTeam.length > 0
+          ? wardMaintenanceTeam[
+              Math.floor(Math.random() * wardMaintenanceTeam.length)
+            ]
+          : null;
 
       const complaint = await prisma.complaint.create({
         data: {
@@ -600,7 +635,10 @@ async function main() {
           type: complaintType,
           status: status,
           priority: priority,
-          slaStatus: (status === "RESOLVED" || status === "CLOSED") ? "COMPLETED" : "ON_TIME",
+          slaStatus:
+            status === "RESOLVED" || status === "CLOSED"
+              ? "COMPLETED"
+              : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
           landmark: `Near ${
@@ -632,7 +670,8 @@ async function main() {
               : null,
           deadline: deadline,
           rating:
-            (status === "RESOLVED" || status === "CLOSED") && Math.random() > 0.4
+            (status === "RESOLVED" || status === "CLOSED") &&
+            Math.random() > 0.4
               ? Math.floor(Math.random() * 5) + 1
               : null,
         },
@@ -736,7 +775,9 @@ async function main() {
     console.log(`• ${createdWards.length * 3} Sub-zones`);
     console.log(`• 1 Administrator`);
     console.log(`• ${wardOfficers.length} Ward Officers`);
-    console.log(`• ${maintenanceTeam.length} Maintenance Team Members (3 per ward)`);
+    console.log(
+      `• ${maintenanceTeam.length} Maintenance Team Members (3 per ward)`,
+    );
     console.log(`• ${citizens.length} Citizens`);
     console.log(`• 94 Sample Complaints (last 6 months)`);
     console.log(`• 10 Sample Service Requests`);

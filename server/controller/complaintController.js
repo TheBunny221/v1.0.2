@@ -1070,7 +1070,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     if (status === "REOPENED") {
       return res.status(400).json({
         success: false,
-        message: "Use the /api/complaints/:id/reopen endpoint to reopen complaints",
+        message:
+          "Use the /api/complaints/:id/reopen endpoint to reopen complaints",
         data: null,
       });
     }
@@ -1090,7 +1091,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       if (!maintenanceTeamId && !complaint.maintenanceTeamId) {
         return res.status(400).json({
           success: false,
-          message: "Assign a maintenance team member to mark complaint as ASSIGNED",
+          message:
+            "Assign a maintenance team member to mark complaint as ASSIGNED",
           data: null,
         });
       }
@@ -1100,7 +1102,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       if (!maintenanceTeamId && !complaint.maintenanceTeamId) {
         return res.status(400).json({
           success: false,
-          message: "Complaint must be assigned to a maintenance team before starting work",
+          message:
+            "Complaint must be assigned to a maintenance team before starting work",
           data: null,
         });
       }
@@ -1233,11 +1236,16 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     updateData.assignedOn = new Date();
     // Ensure assignment flag consistency
     if (!("isMaintenanceUnassigned" in updateData)) {
-      updateData.isMaintenanceUnassigned = !!complaint.maintenanceTeamId ? false : true;
+      updateData.isMaintenanceUnassigned = !!complaint.maintenanceTeamId
+        ? false
+        : true;
     }
   }
 
-  if (updateData.status === "IN_PROGRESS" && complaint.status !== "IN_PROGRESS") {
+  if (
+    updateData.status === "IN_PROGRESS" &&
+    complaint.status !== "IN_PROGRESS"
+  ) {
     // No specific timestamp, but ensure assignment exists (validated above)
   }
 
