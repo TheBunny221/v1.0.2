@@ -846,7 +846,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       // Pending maintenance team assignment across active complaints
       prisma.complaint.count({
         where: {
-          OR: [{ isMaintenanceUnassigned: true }, { maintenanceTeamId: null }],
+          maintenanceTeamId: null,
           status: { in: ["REGISTERED", "ASSIGNED", "REOPENED"] },
         },
       }),
