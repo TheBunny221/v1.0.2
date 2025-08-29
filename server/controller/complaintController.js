@@ -649,6 +649,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
     assignedToId,
     submittedById,
     assignToTeam,
+    isMaintenanceUnassigned,
     slaStatus,
     dateFrom,
     dateTo,
