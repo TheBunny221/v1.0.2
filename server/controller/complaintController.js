@@ -1743,6 +1743,8 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
       priority: true,
       slaStatus: true,
       assignedToId: true,
+      maintenanceTeamId: true,
+      isMaintenanceUnassigned: true,
       submittedOn: true,
       resolvedOn: true,
       deadline: true,
@@ -1781,10 +1783,11 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter((c) => c.assignToTeam === true)
-      .length,
+    needsAssignmentToTeam: wardComplaints.filter(
+      (c) => c.isMaintenanceUnassigned === true || !c.maintenanceTeamId,
+    ).length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
-    assigned: wardComplaints.filter((c) => c.assignedToId).length,
+    assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
   };
 
   // Calculate pending work (registered + assigned statuses)
