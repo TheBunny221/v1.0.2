@@ -72,6 +72,9 @@ const ComplaintsList: React.FC = () => {
   const [assignToTeamFilter, setAssignToTeamFilter] = useState(
     searchParams.get("assignToTeam") === "true" || false,
   );
+  const [needsMaintenanceAssignment, setNeedsMaintenanceAssignment] = useState(
+    searchParams.get("needsMaintenanceAssignment") === "true" || false,
+  );
   const [slaStatusFilter, setSlaStatusFilter] = useState(
     searchParams.get("slaStatus") || "all",
   );
