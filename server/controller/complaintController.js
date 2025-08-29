@@ -817,7 +817,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
   dbg("pagination", { skip, take: limitNum, orderBy: { submittedOn: "desc" } });
 
   try {
-    const [complaints, total] = await Promise.all([
+    const [rawComplaints, total] = await Promise.all([
       prisma.complaint.findMany({
         where: filters,
         skip,
