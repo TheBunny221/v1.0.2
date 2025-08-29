@@ -224,18 +224,42 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         updateData.remarks = formData.remarks.trim();
       }
 
-      await updateComplaint({
+      const updatedComplaintResponse = await updateComplaint({
         id: complaint.id,
         ...updateData,
       }).unwrap();
 
       toast({
         title: "Success",
-        description: "Complaint updated successfully",
+        description: "Complaint updated successfully. You can see the updated assignment below.",
       });
 
+      // Update the complaint prop with fresh data so user can see the assignment
+      if (updatedComplaintResponse?.data?.complaint) {
+        // Update the form data to reflect the new state
+        const updatedComplaint = updatedComplaintResponse.data.complaint;
+
+        const assignedToId =
+          typeof updatedComplaint.assignedTo === "object" && updatedComplaint.assignedTo?.id
+            ? updatedComplaint.assignedTo.id
+            : updatedComplaint.assignedTo || "none";
+
+        const maintenanceTeamId =
+          typeof updatedComplaint.maintenanceTeam === "object" &&
+          updatedComplaint.maintenanceTeam?.id
+            ? updatedComplaint.maintenanceTeam.id
+            : updatedComplaint.maintenanceTeam || "none";
+
+        setFormData({
+          status: updatedComplaint.status,
+          priority: updatedComplaint.priority,
+          assignedToId,
+          maintenanceTeamId,
+          remarks: "",
+        });
+      }
+
       onSuccess();
-      onClose();
     } catch (error: any) {
       const message = error?.data?.message || getApiErrorMessage(error) || "Failed to update complaint";
       toast({
