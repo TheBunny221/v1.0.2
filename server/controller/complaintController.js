@@ -1231,15 +1231,9 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     updateData.assignedToId = assignedToId;
   }
 
-  // Set timestamps and assignment flags based on status changes
+  // Set timestamps based on status changes
   if (updateData.status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
     updateData.assignedOn = new Date();
-    // Ensure assignment flag consistency
-    if (!("isMaintenanceUnassigned" in updateData)) {
-      updateData.isMaintenanceUnassigned = !!complaint.maintenanceTeamId
-        ? false
-        : true;
-    }
   }
 
   if (
