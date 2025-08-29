@@ -871,6 +871,11 @@ export const getComplaints = asyncHandler(async (req, res) => {
       prisma.complaint.count({ where: filters }),
     ]);
 
+    const complaints = rawComplaints.map((c) => ({
+      ...c,
+      needsTeamAssignment: !c.maintenanceTeamId,
+    }));
+
     const totalPages = Math.ceil(total / limitNum);
     const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
 
