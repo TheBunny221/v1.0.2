@@ -476,9 +476,26 @@ const ComplaintsList: React.FC = () => {
                         <Badge className={getPriorityColor(complaint.priority)}>
                           {complaint.priority}
                         </Badge>
+                        {/* Show maintenance assignment status */}
+                        {complaint.isMaintenanceUnassigned && (
+                          <Badge className="bg-orange-100 text-orange-800 text-xs">
+                            Needs Team Assignment
+                          </Badge>
+                        )}
+                        {complaint.maintenanceTeam && (
+                          <Badge className="bg-green-100 text-green-800 text-xs">
+                            Team: {complaint.maintenanceTeam.fullName.split(' ')[0]}
+                          </Badge>
+                        )}
+                        {complaint.wardOfficer && (
+                          <Badge className="bg-blue-100 text-blue-800 text-xs">
+                            WO: {complaint.wardOfficer.fullName.split(' ')[0]}
+                          </Badge>
+                        )}
+                        {/* Legacy support */}
                         {complaint.assignToTeam && (
                           <Badge className="bg-purple-100 text-purple-800 text-xs">
-                            Needs Team Assignment
+                            Needs Assignment
                           </Badge>
                         )}
                       </div>
