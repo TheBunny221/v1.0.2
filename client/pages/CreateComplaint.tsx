@@ -72,7 +72,9 @@ const CreateComplaint: React.FC = () => {
   // Fetch complaint types
   const { data: typesResponse, isLoading: typesLoading } =
     useGetComplaintTypesQuery();
-  const complaintTypes = Array.isArray(typesResponse?.data) ? typesResponse.data : [];
+  const complaintTypes = Array.isArray(typesResponse?.data)
+    ? typesResponse.data
+    : [];
 
   // Create complaint mutation
   const [createComplaint, { isLoading: isCreating }] =

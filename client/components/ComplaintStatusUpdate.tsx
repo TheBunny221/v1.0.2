@@ -155,7 +155,10 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      const message = error?.data?.message || getApiErrorMessage(error) || "Failed to update complaint";
+      const message =
+        error?.data?.message ||
+        getApiErrorMessage(error) ||
+        "Failed to update complaint";
       toast({
         title: "Error",
         description: message,

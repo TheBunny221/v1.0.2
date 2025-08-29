@@ -478,19 +478,22 @@ const ComplaintsList: React.FC = () => {
                         </Badge>
                         {/* Show maintenance assignment status - only for active complaints */}
                         {complaint.isMaintenanceUnassigned &&
-                         !["RESOLVED", "CLOSED"].includes(complaint.status) && (
-                          <Badge className="bg-orange-100 text-orange-800 text-xs">
-                            Needs Team Assignment
-                          </Badge>
-                        )}
+                          !["RESOLVED", "CLOSED"].includes(
+                            complaint.status,
+                          ) && (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs">
+                              Needs Team Assignment
+                            </Badge>
+                          )}
                         {complaint.maintenanceTeam && (
                           <Badge className="bg-green-100 text-green-800 text-xs">
-                            Team: {complaint.maintenanceTeam.fullName.split(' ')[0]}
+                            Team:{" "}
+                            {complaint.maintenanceTeam.fullName.split(" ")[0]}
                           </Badge>
                         )}
                         {complaint.wardOfficer && (
                           <Badge className="bg-blue-100 text-blue-800 text-xs">
-                            WO: {complaint.wardOfficer.fullName.split(' ')[0]}
+                            WO: {complaint.wardOfficer.fullName.split(" ")[0]}
                           </Badge>
                         )}
                       </div>

@@ -71,8 +71,12 @@ const MaintenanceDashboard: React.FC = () => {
     });
 
     const totalTasks = assignedTasks.length;
-    const inProgress = assignedTasks.filter((c) => c.status === "IN_PROGRESS").length;
-    const completed = assignedTasks.filter((c) => c.status === "RESOLVED").length;
+    const inProgress = assignedTasks.filter(
+      (c) => c.status === "IN_PROGRESS",
+    ).length;
+    const completed = assignedTasks.filter(
+      (c) => c.status === "RESOLVED",
+    ).length;
     const pending = assignedTasks.filter((c) => c.status === "ASSIGNED").length;
 
     const today = new Date().toDateString();
@@ -144,7 +148,10 @@ const MaintenanceDashboard: React.FC = () => {
 
   const handleStatusUpdate = async (complaintId: string, newStatus: string) => {
     try {
-      await updateComplaintStatus({ id: complaintId, status: newStatus }).unwrap();
+      await updateComplaintStatus({
+        id: complaintId,
+        status: newStatus,
+      }).unwrap();
       refetchComplaints();
     } catch (e) {
       console.error("Failed to update status", e);
