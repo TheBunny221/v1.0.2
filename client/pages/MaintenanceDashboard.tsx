@@ -70,6 +70,15 @@ const MaintenanceDashboard: React.FC = () => {
       return assigneeId === user?.id && c.status !== "REGISTERED";
     });
 
+//   useEffect(() => {
+//     // Filter tasks assigned to this maintenance team member
+//     const assignedTasks = complaints.filter(
+//       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
+//     );
+//     const assignedTasks = complaints.filter(
+//       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
+//     );
+
     const totalTasks = assignedTasks.length;
     const inProgress = assignedTasks.filter(
       (c) => c.status === "IN_PROGRESS",
