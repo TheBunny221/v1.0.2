@@ -717,8 +717,6 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
-  if (assignToTeam === "true" || assignToTeam === true)
-    filters.assignToTeam = true;
   if (isMaintenanceUnassigned === "true" || isMaintenanceUnassigned === true)
     filters.isMaintenanceUnassigned = true;
   if (slaStatus) filters.slaStatus = slaStatus;
