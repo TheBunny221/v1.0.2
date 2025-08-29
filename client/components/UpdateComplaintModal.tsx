@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from "../store/hooks";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import {
   useUpdateComplaintMutation,
   useGetWardUsersQuery,
@@ -110,6 +111,15 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
   useEffect(() => {
     if (complaint && isOpen) {
+      // Debug: Log complaint data structure
+      console.log("🔍 UpdateComplaintModal - Complaint data:", {
+        id: complaint.id,
+        wardOfficer: complaint.wardOfficer,
+        maintenanceTeam: complaint.maintenanceTeam,
+        isMaintenanceUnassigned: complaint.isMaintenanceUnassigned,
+        assignedTo: complaint.assignedTo,
+      });
+
       // Handle both legacy assignedTo and new maintenanceTeam fields
       const assignedToId =
         typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
@@ -121,6 +131,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         complaint.maintenanceTeam?.id
           ? complaint.maintenanceTeam.id
           : complaint.maintenanceTeam || "none";
+
+      console.log("🔍 UpdateComplaintModal - Extracted IDs:", {
+        assignedToId,
+        maintenanceTeamId,
+      });
 
       setFormData({
         status: complaint.status,
@@ -137,14 +152,20 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   const validateForm = () => {
     const errors: string[] = [];
 
-    // For ward officers, validate maintenance team assignment
-    if (user?.role === "WARD_OFFICER") {
+    // Skip assignment validation for resolved and closed complaints
+    const isComplaintFinalized = ["RESOLVED", "CLOSED"].includes(
+      formData.status,
+    );
+
+    // For ward officers, validate maintenance team assignment (only for active complaints)
+    if (user?.role === "WARD_OFFICER" && !isComplaintFinalized) {
+      // If complaint is currently unassigned to maintenance team and ward officer is trying to assign it
       if (
         formData.status === "ASSIGNED" &&
         (!formData.maintenanceTeamId || formData.maintenanceTeamId === "none")
       ) {
         errors.push(
-          "Please select a Maintenance Team member before assigning the complaint.",
+          "Please select a Maintenance Team member before setting status to 'Assigned'.",
         );
       }
 
@@ -155,13 +176,25 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         (!formData.maintenanceTeamId || formData.maintenanceTeamId === "none")
       ) {
         errors.push(
-          "Please select a Maintenance Team member before assigning the complaint.",
+          "Please select a Maintenance Team member to assign this complaint.",
+        );
+      }
+
+      // Helpful message for ward officers with unassigned maintenance complaints (only for non-finalized complaints)
+      if (
+        complaint?.isMaintenanceUnassigned &&
+        !formData.maintenanceTeamId &&
+        formData.status !== "REGISTERED" &&
+        !["RESOLVED", "CLOSED"].includes(complaint.status)
+      ) {
+        errors.push(
+          "This complaint needs a maintenance team assignment. Please select a team member.",
         );
       }
     }
 
-    // For administrators, validate ward officer assignment (legacy)
-    if (user?.role === "ADMINISTRATOR") {
+    // For administrators, validate ward officer assignment (legacy) - only for active complaints
+    if (user?.role === "ADMINISTRATOR" && !isComplaintFinalized) {
       if (
         formData.status === "ASSIGNED" &&
         (!formData.assignedToId || formData.assignedToId === "none")
@@ -211,23 +244,52 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         updateData.remarks = formData.remarks.trim();
       }
 
-      await updateComplaint({
+      const updatedComplaintResponse = await updateComplaint({
         id: complaint.id,
         ...updateData,
       }).unwrap();
 
       toast({
         title: "Success",
-        description: "Complaint updated successfully",
+        description:
+          "Complaint updated successfully. You can see the updated assignment below.",
       });
 
+      // Update the complaint prop with fresh data so user can see the assignment
+      if (updatedComplaintResponse?.data?.complaint) {
+        // Update the form data to reflect the new state
+        const updatedComplaint = updatedComplaintResponse.data.complaint;
+
+        const assignedToId =
+          typeof updatedComplaint.assignedTo === "object" &&
+          updatedComplaint.assignedTo?.id
+            ? updatedComplaint.assignedTo.id
+            : updatedComplaint.assignedTo || "none";
+
+        const maintenanceTeamId =
+          typeof updatedComplaint.maintenanceTeam === "object" &&
+          updatedComplaint.maintenanceTeam?.id
+            ? updatedComplaint.maintenanceTeam.id
+            : updatedComplaint.maintenanceTeam || "none";
+
+        setFormData({
+          status: updatedComplaint.status,
+          priority: updatedComplaint.priority,
+          assignedToId,
+          maintenanceTeamId,
+          remarks: "",
+        });
+      }
+
       onSuccess();
-      onClose();
     } catch (error: any) {
-      console.error("Error updating complaint:", error);
+      const message =
+        error?.data?.message ||
+        getApiErrorMessage(error) ||
+        "Failed to update complaint";
       toast({
         title: "Error",
-        description: error?.data?.message || "Failed to update complaint",
+        description: message,
         variant: "destructive",
       });
     }
@@ -349,6 +411,62 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               <span className="text-gray-600">Description:</span>
               <p className="text-sm mt-1">{complaint.description}</p>
             </div>
+
+            {/* Current Assignments */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="font-medium text-sm mb-2">Current Assignments</h4>
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                {/* Debug Information */}
+                {process.env.NODE_ENV === "development" && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs">
+                    <strong>Debug:</strong>
+                    <br />
+                    wardOfficer:{" "}
+                    {JSON.stringify(complaint.wardOfficer) || "null"}
+                    <br />
+                    maintenanceTeam:{" "}
+                    {JSON.stringify(complaint.maintenanceTeam) || "null"}
+                    <br />
+                    isMaintenanceUnassigned:{" "}
+                    {String(complaint.isMaintenanceUnassigned)}
+                  </div>
+                )}
+
+                {/* Ward Officer Assignment */}
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Ward Officer:</span>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-1" />
+                    {complaint.wardOfficer ? (
+                      <span className="text-blue-600">
+                        {complaint.wardOfficer.fullName}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Not assigned</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Maintenance Team Assignment */}
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Maintenance Team:</span>
+                  <div className="flex items-center">
+                    <Settings className="h-4 w-4 mr-1" />
+                    {complaint.maintenanceTeam ? (
+                      <span className="text-green-600">
+                        {complaint.maintenanceTeam.fullName}
+                      </span>
+                    ) : complaint.isMaintenanceUnassigned ? (
+                      <Badge className="bg-orange-100 text-orange-800 text-xs">
+                        Needs Assignment
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-400">Not assigned</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Validation Errors */}
@@ -441,7 +559,32 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
           {/* Assignment Section */}
           <div>
-            <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
+              {user?.role === "WARD_OFFICER" &&
+                complaint?.isMaintenanceUnassigned &&
+                !["RESOLVED", "CLOSED"].includes(complaint.status) && (
+                  <Badge className="bg-blue-100 text-blue-800 text-xs">
+                    Assignment Required
+                  </Badge>
+                )}
+            </div>
+
+            {/* Helpful message for ward officers - only for active complaints */}
+            {user?.role === "WARD_OFFICER" &&
+              complaint?.isMaintenanceUnassigned &&
+              !["RESOLVED", "CLOSED"].includes(complaint.status) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-4 w-4 text-blue-500 mr-2" />
+                    <span className="text-sm text-blue-700">
+                      This complaint needs to be assigned to a maintenance team
+                      member to proceed.
+                    </span>
+                  </div>
+                </div>
+              )}
+
             <div className="space-y-2">
               {/* Search Box */}
               <div className="relative">

@@ -69,8 +69,8 @@ const ComplaintsList: React.FC = () => {
   const [subZoneFilter, setSubZoneFilter] = useState(
     searchParams.get("subZone") || "all",
   );
-  const [assignToTeamFilter, setAssignToTeamFilter] = useState(
-    searchParams.get("assignToTeam") === "true" || false,
+  const [needsMaintenanceAssignment, setNeedsMaintenanceAssignment] = useState(
+    searchParams.get("needsMaintenanceAssignment") === "true" || false,
   );
   const [slaStatusFilter, setSlaStatusFilter] = useState(
     searchParams.get("slaStatus") || "all",
@@ -130,7 +130,7 @@ const ComplaintsList: React.FC = () => {
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
     // Add new filters
-    if (assignToTeamFilter) params.assignToTeam = true;
+    if (needsMaintenanceAssignment) params.isMaintenanceUnassigned = true;
     if (slaStatusFilter !== "all")
       params.slaStatus = slaStatusFilter.toUpperCase();
 
@@ -151,7 +151,7 @@ const ComplaintsList: React.FC = () => {
     user?.role,
     user?.id,
     searchParams,
-    assignToTeamFilter,
+    needsMaintenanceAssignment,
     slaStatusFilter,
   ]);
 
@@ -216,7 +216,7 @@ const ComplaintsList: React.FC = () => {
     setPriorityFilter("all");
     setWardFilter("all");
     setSubZoneFilter("all");
-    setAssignToTeamFilter(false);
+    setNeedsMaintenanceAssignment(false);
     setSlaStatusFilter("all");
     setDebouncedSearchTerm("");
   };
@@ -371,19 +371,19 @@ const ComplaintsList: React.FC = () => {
               </SelectContent>
             </Select>
 
-            {/* Needs Team Assignment Filter - Only for Ward Officers */}
+            {/* Assignment Filter - Only for Ward Officers */}
             {user?.role === "WARD_OFFICER" && (
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="assignToTeam"
-                  checked={assignToTeamFilter}
-                  onCheckedChange={setAssignToTeamFilter}
+                  id="needsMaintenanceAssignment"
+                  checked={needsMaintenanceAssignment}
+                  onCheckedChange={setNeedsMaintenanceAssignment}
                 />
                 <label
-                  htmlFor="assignToTeam"
+                  htmlFor="needsMaintenanceAssignment"
                   className="text-sm cursor-pointer"
                 >
-                  Needs Team Assignment
+                  Needs Maintenance Assignment
                 </label>
               </div>
             )}
@@ -476,9 +476,24 @@ const ComplaintsList: React.FC = () => {
                         <Badge className={getPriorityColor(complaint.priority)}>
                           {complaint.priority}
                         </Badge>
-                        {complaint.assignToTeam && (
-                          <Badge className="bg-purple-100 text-purple-800 text-xs">
-                            Needs Team Assignment
+                        {/* Show maintenance assignment status - only for active complaints */}
+                        {complaint.isMaintenanceUnassigned &&
+                          !["RESOLVED", "CLOSED"].includes(
+                            complaint.status,
+                          ) && (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs">
+                              Needs Team Assignment
+                            </Badge>
+                          )}
+                        {complaint.maintenanceTeam && (
+                          <Badge className="bg-green-100 text-green-800 text-xs">
+                            Team:{" "}
+                            {complaint.maintenanceTeam.fullName.split(" ")[0]}
+                          </Badge>
+                        )}
+                        {complaint.wardOfficer && (
+                          <Badge className="bg-blue-100 text-blue-800 text-xs">
+                            WO: {complaint.wardOfficer.fullName.split(" ")[0]}
                           </Badge>
                         )}
                       </div>

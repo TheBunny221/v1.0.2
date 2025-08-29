@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import {
-  useCreateComplaintMutation,
-  useGetComplaintTypesQuery,
-} from "../store/api/complaintsApi";
+import { useCreateComplaintMutation } from "../store/api/complaintsApi";
+import { useGetComplaintTypesQuery } from "../store/api/complaintTypesApi";
 import {
   Card,
   CardContent,
@@ -74,7 +72,9 @@ const CreateComplaint: React.FC = () => {
   // Fetch complaint types
   const { data: typesResponse, isLoading: typesLoading } =
     useGetComplaintTypesQuery();
-  const complaintTypes = Array.isArray(typesResponse?.data) ? typesResponse.data : [];
+  const complaintTypes = Array.isArray(typesResponse?.data)
+    ? typesResponse.data
+    : [];
 
   // Create complaint mutation
   const [createComplaint, { isLoading: isCreating }] =

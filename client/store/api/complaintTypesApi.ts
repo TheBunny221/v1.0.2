@@ -22,6 +22,7 @@ export interface UpdateComplaintTypeRequest extends CreateComplaintTypeRequest {
 }
 
 export const complaintTypesApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     // Get all complaint types (public)
     getComplaintTypes: builder.query<

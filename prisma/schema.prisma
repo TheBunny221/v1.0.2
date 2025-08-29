@@ -77,6 +77,8 @@ model User {
   ward              Ward?              @relation(fields: [wardId], references: [id])
   submittedComplaints Complaint[]      @relation("SubmittedBy")
   assignedComplaints  Complaint[]      @relation("AssignedTo")
+  wardOfficerComplaints Complaint[]    @relation("WardOfficerAssigned")
+  maintenanceTeamComplaints Complaint[] @relation("MaintenanceTeamAssigned")
   submittedServiceRequests ServiceRequest[] @relation("ServiceSubmittedBy")
   assignedServiceRequests  ServiceRequest[] @relation("ServiceAssignedTo")
   statusLogs        StatusLog[]
@@ -157,6 +159,9 @@ model Complaint {
   // Assignment and Tracking
   submittedById   String?
   assignedToId    String?
+  wardOfficerId   String?           // Specific ward officer assignment
+  maintenanceTeamId String?         // Specific maintenance team member assignment
+  isMaintenanceUnassigned Boolean   @default(true) // True when maintenance team not yet assigned
   resolvedById    String?
   
   // Timestamps
@@ -177,6 +182,8 @@ model Complaint {
   subZone         SubZone?          @relation(fields: [subZoneId], references: [id])
   submittedBy     User?             @relation("SubmittedBy", fields: [submittedById], references: [id])
   assignedTo      User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
+  wardOfficer     User?             @relation("WardOfficerAssigned", fields: [wardOfficerId], references: [id])
+  maintenanceTeam User?             @relation("MaintenanceTeamAssigned", fields: [maintenanceTeamId], references: [id])
   statusLogs      StatusLog[]
   attachments     Attachment[]
   notifications   Notification[]
@@ -189,6 +196,9 @@ model Complaint {
   @@index([submittedById, createdAt])
   @@index([wardId, status])
   @@index([assignedToId, status])
+  @@index([wardOfficerId, status])
+  @@index([maintenanceTeamId, status])
+  @@index([isMaintenanceUnassigned, status])
   @@index([type, status])
   @@index([priority, status])
   @@index([submittedOn])

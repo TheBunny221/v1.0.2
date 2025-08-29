@@ -363,15 +363,15 @@ export const createComplaint = asyncHandler(async (req, res) => {
     include: {
       _count: {
         select: {
-          assignedComplaints: true
-        }
-      }
+          assignedComplaints: true,
+        },
+      },
     },
     orderBy: {
       assignedComplaints: {
-        _count: "asc"
-      }
-    }
+        _count: "asc",
+      },
+    },
   });
 
   if (wardOfficer) {
@@ -648,7 +648,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
     subZoneId,
     assignedToId,
     submittedById,
-    assignToTeam,
+    isMaintenanceUnassigned,
     slaStatus,
     dateFrom,
     dateTo,
@@ -675,6 +675,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
       subZoneId,
       assignedToId,
       submittedById,
+      isMaintenanceUnassigned,
       dateFrom,
       dateTo,
       searchLen: typeof search === "string" ? search.length : 0,
@@ -715,8 +716,42 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
-  if (assignToTeam === "true" || assignToTeam === true)
-    filters.assignToTeam = true;
+
+  // Handle maintenance assignment filter with status exclusion
+  if (isMaintenanceUnassigned === "true" || isMaintenanceUnassigned === true) {
+    filters.isMaintenanceUnassigned = true;
+
+    // If no status filter is already applied, exclude resolved and closed complaints
+    if (!filters.status) {
+      filters.status = {
+        notIn: ["RESOLVED", "CLOSED"],
+      };
+    } else if (typeof filters.status === "string") {
+      // If status is a single string, check if it's not resolved/closed
+      if (!["RESOLVED", "CLOSED"].includes(filters.status)) {
+        // Keep the existing status filter
+      } else {
+        // Remove the status filter since we're looking for unassigned maintenance
+        delete filters.status;
+        filters.status = {
+          notIn: ["RESOLVED", "CLOSED"],
+        };
+      }
+    } else if (filters.status.in) {
+      // If status is an array, filter out resolved/closed
+      const activeStatuses = filters.status.in.filter(
+        (s) => !["RESOLVED", "CLOSED"].includes(s),
+      );
+      if (activeStatuses.length > 0) {
+        filters.status = { in: activeStatuses };
+      } else {
+        filters.status = {
+          notIn: ["RESOLVED", "CLOSED"],
+        };
+      }
+    }
+  }
+
   if (slaStatus) filters.slaStatus = slaStatus;
 
   // --- admin-only overrides ---
@@ -809,6 +844,22 @@ export const getComplaints = asyncHandler(async (req, res) => {
               fullName: true,
               email: true,
               phoneNumber: true,
+            },
+          },
+          wardOfficer: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+            },
+          },
+          maintenanceTeam: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
             },
           },
           attachments: true,
@@ -1144,10 +1195,21 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     updateData.maintenanceTeamId = maintenanceTeamId;
     updateData.isMaintenanceUnassigned = false;
 
-    // If assigning maintenance team, also update status to ASSIGNED if not already
-    if (!status && complaint.status === "REGISTERED") {
-      updateData.status = "ASSIGNED";
-      updateData.assignedOn = new Date();
+    // Auto-transition status when maintenance team is assigned (only for active complaints)
+    if (
+      !status &&
+      !["RESOLVED", "CLOSED"].includes(updateData.status || complaint.status)
+    ) {
+      if (complaint.status === "REGISTERED") {
+        updateData.status = "ASSIGNED";
+        updateData.assignedOn = new Date();
+      } else if (
+        complaint.status === "ASSIGNED" &&
+        req.user.role === "WARD_OFFICER"
+      ) {
+        // Ward officer is providing more specific assignment, keep as ASSIGNED
+        updateData.assignedOn = new Date();
+      }
     }
   }
 
@@ -1216,7 +1278,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   const statusLogComment =
     remarks ||
     (maintenanceTeamId
-      ? `Assigned to maintenance team`
+      ? `Assigned to maintenance team member${updateData.status ? ` and status changed to ${updateData.status}` : ""}`
       : updateData.status
         ? `Status updated to ${updateData.status}`
         : "Complaint updated");

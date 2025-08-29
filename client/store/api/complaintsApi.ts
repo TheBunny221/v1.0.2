@@ -290,18 +290,6 @@ export const complaintsApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // Get complaint types
-    getComplaintTypes: builder.query<
-      ApiResponse<
-        { id: string; name: string; description?: string; slaHours: number }[]
-      >,
-      void
-    >({
-      query: () => "/complaint-types",
-      // Let RTK Query handle response naturally
-      providesTags: ["ComplaintType"],
-    }),
-
     // Get complaint statistics
     getComplaintStatistics: builder.query<
       ApiResponse<{
@@ -426,7 +414,6 @@ export const {
   useUpdateComplaintStatusMutation,
   useAddComplaintFeedbackMutation,
   useUploadComplaintAttachmentMutation,
-  useGetComplaintTypesQuery,
   useGetComplaintStatisticsQuery,
   useGetWardDashboardStatisticsQuery,
   useGetWardUsersQuery,
