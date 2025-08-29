@@ -716,8 +716,13 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
   if (type) filters.type = type;
-  if (isMaintenanceUnassigned === "true" || isMaintenanceUnassigned === true)
+  if (isMaintenanceUnassigned === "true" || isMaintenanceUnassigned === true) {
     filters.isMaintenanceUnassigned = true;
+    // Exclude resolved and closed complaints from maintenance assignment filter
+    filters.status = {
+      notIn: ["RESOLVED", "CLOSED"]
+    };
+  }
   if (slaStatus) filters.slaStatus = slaStatus;
 
   // --- admin-only overrides ---
