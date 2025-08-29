@@ -174,18 +174,6 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                   </>
                 )}
 
-                <DropdownMenuItem onClick={() => onShowUpdateModal?.(complaint)}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Quick Status Update
-                </DropdownMenuItem>
-
-                {canAssign && (
-                  <DropdownMenuItem onClick={() => onShowUpdateModal?.(complaint)}>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Quick Reassign
-                  </DropdownMenuItem>
-                )}
-
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
