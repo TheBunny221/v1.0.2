@@ -69,9 +69,6 @@ const ComplaintsList: React.FC = () => {
   const [subZoneFilter, setSubZoneFilter] = useState(
     searchParams.get("subZone") || "all",
   );
-  const [assignToTeamFilter, setAssignToTeamFilter] = useState(
-    searchParams.get("assignToTeam") === "true" || false,
-  );
   const [needsMaintenanceAssignment, setNeedsMaintenanceAssignment] = useState(
     searchParams.get("needsMaintenanceAssignment") === "true" || false,
   );
