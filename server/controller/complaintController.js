@@ -1221,7 +1221,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   const statusLogComment =
     remarks ||
     (maintenanceTeamId
-      ? `Assigned to maintenance team`
+      ? `Assigned to maintenance team member${updateData.status ? ` and status changed to ${updateData.status}` : ""}`
       : updateData.status
         ? `Status updated to ${updateData.status}`
         : "Complaint updated");
