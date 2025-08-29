@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API calls to the backend server
         "/api": {
-          target: "http://localhost:4005",
+          target: "http://localhost:3001",
           changeOrigin: true,
           secure: false,
           timeout: 30000,
@@ -52,7 +52,7 @@ export default defineConfig(({ mode }) => {
               "Proxying request:",
               req.method,
               req.url,
-              "-> http://localhost:4005" + req.url,
+              "-> http://localhost:3001" + req.url,
             );
           },
         },
@@ -89,7 +89,9 @@ export default defineConfig(({ mode }) => {
       // Fix React runtime issues
       global: "globalThis",
       // Ensure consistent NODE_ENV usage in client code
-      "process.env.NODE_ENV": JSON.stringify(isProduction ? "production" : "development"),
+      "process.env.NODE_ENV": JSON.stringify(
+        isProduction ? "production" : "development",
+      ),
     },
     optimizeDeps: {
       include: ["react", "react-dom"],

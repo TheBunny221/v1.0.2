@@ -112,9 +112,7 @@ model Complaint {
   resolvedById    String?
   wardOfficerId   String?           // Automatically assigned ward officer
   maintenanceTeamId String?         // Assigned maintenance team member
-  teamId          String?           // Maintenance team member assignment (legacy)
   assignToTeam    Boolean           @default(false) // Track if needs assignment to maintenance team (legacy)
-  isMaintenanceUnassigned Boolean   @default(true)    // true = no maintenance team assigned, false = assigned
   
   // Timestamps
   submittedOn     DateTime          @default(now())
@@ -143,6 +141,12 @@ model Complaint {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Indexes for performance (SQLite supports simple indexes)
+  @@index([wardId, status])
+  @@index([assignedToId, status])
+  @@index([maintenanceTeamId, status])
+  @@index([submittedOn])
 
   @@map("complaints")
 }

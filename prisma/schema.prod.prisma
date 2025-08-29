@@ -162,8 +162,6 @@ model Complaint {
   resolvedById    String?
   wardOfficerId   String?           // Automatically assigned ward officer
   maintenanceTeamId String?         // Assigned maintenance team member
-  teamId          String?           // Maintenance team member assignment (legacy)
-  isMaintenanceUnassigned Boolean   @default(true)    // true = no maintenance team assigned, false = assigned
   
   // Timestamps
   submittedOn     DateTime          @default(now())
@@ -198,6 +196,7 @@ model Complaint {
   @@index([submittedById, createdAt])
   @@index([wardId, status])
   @@index([assignedToId, status])
+  @@index([maintenanceTeamId, status])
   @@index([type, status])
   @@index([priority, status])
   @@index([submittedOn])

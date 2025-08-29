@@ -116,7 +116,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         id: complaint.id,
         wardOfficer: complaint.wardOfficer,
         maintenanceTeam: complaint.maintenanceTeam,
-        isMaintenanceUnassigned: complaint.isMaintenanceUnassigned,
+        needsTeamAssignment: (complaint as any).needsTeamAssignment,
         assignedTo: complaint.assignedTo,
       });
 
@@ -128,7 +128,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
       const maintenanceTeamId =
         typeof complaint.maintenanceTeam === "object" &&
-          complaint.maintenanceTeam?.id
+        complaint.maintenanceTeam?.id
           ? complaint.maintenanceTeam.id
           : complaint.maintenanceTeam || "none";
 
@@ -262,13 +262,13 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
         const assignedToId =
           typeof updatedComplaint.assignedTo === "object" &&
-            updatedComplaint.assignedTo?.id
+          updatedComplaint.assignedTo?.id
             ? updatedComplaint.assignedTo.id
             : updatedComplaint.assignedTo || "none";
 
         const maintenanceTeamId =
           typeof updatedComplaint.maintenanceTeam === "object" &&
-            updatedComplaint.maintenanceTeam?.id
+          updatedComplaint.maintenanceTeam?.id
             ? updatedComplaint.maintenanceTeam.id
             : updatedComplaint.maintenanceTeam || "none";
 
@@ -456,7 +456,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                       <span className="text-green-600">
                         {complaint.maintenanceTeam.fullName}
                       </span>
-                    ) : complaint.isMaintenanceUnassigned ? (
+                    ) : (complaint as any).needsTeamAssignment ? (
                       <Badge className="bg-orange-100 text-orange-800 text-xs">
                         Needs Assignment
                       </Badge>
@@ -562,7 +562,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             <div className="flex items-center justify-between">
               <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
               {user?.role === "WARD_OFFICER" &&
-                complaint?.isMaintenanceUnassigned &&
+                (complaint as any)?.needsTeamAssignment &&
                 !["RESOLVED", "CLOSED"].includes(complaint.status) && (
                   <Badge className="bg-blue-100 text-blue-800 text-xs">
                     Assignment Required
@@ -572,7 +572,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
             {/* Helpful message for ward officers - only for active complaints */}
             {user?.role === "WARD_OFFICER" &&
-              complaint?.isMaintenanceUnassigned &&
+              (complaint as any)?.needsTeamAssignment &&
               !["RESOLVED", "CLOSED"].includes(complaint.status) && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
                   <div className="flex items-center">
@@ -604,7 +604,6 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     ? formData.maintenanceTeamId
                     : formData.assignedToId
                 }
-
                 onValueChange={(value) => {
                   if (user?.role === "WARD_OFFICER") {
                     setFormData((prev) => ({
@@ -617,7 +616,6 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   // Clear validation errors when user makes a selection
                   setValidationErrors([]);
                 }}
-
                 disabled={isLoadingUsers || availableUsers.length === 0}
               >
                 <SelectTrigger>

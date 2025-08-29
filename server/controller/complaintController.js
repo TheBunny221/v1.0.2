@@ -717,9 +717,14 @@ export const getComplaints = asyncHandler(async (req, res) => {
   }
   if (type) filters.type = type;
 
-  // Handle maintenance assignment filter with status exclusion
-  if (isMaintenanceUnassigned === "true" || isMaintenanceUnassigned === true) {
-    filters.isMaintenanceUnassigned = true;
+  // Handle maintenance assignment filter (supports legacy param)
+  const needsTeamAssignmentParam =
+    req.query.needsTeamAssignment === "true" ||
+    req.query.needsTeamAssignment === true ||
+    isMaintenanceUnassigned === "true" ||
+    isMaintenanceUnassigned === true;
+  if (needsTeamAssignmentParam) {
+    filters.maintenanceTeamId = null;
 
     // If no status filter is already applied, exclude resolved and closed complaints
     if (!filters.status) {
@@ -727,28 +732,22 @@ export const getComplaints = asyncHandler(async (req, res) => {
         notIn: ["RESOLVED", "CLOSED"],
       };
     } else if (typeof filters.status === "string") {
-      // If status is a single string, check if it's not resolved/closed
-      if (!["RESOLVED", "CLOSED"].includes(filters.status)) {
-        // Keep the existing status filter
-      } else {
-        // Remove the status filter since we're looking for unassigned maintenance
+      if (["RESOLVED", "CLOSED"].includes(filters.status)) {
         delete filters.status;
         filters.status = {
           notIn: ["RESOLVED", "CLOSED"],
         };
       }
     } else if (filters.status.in) {
-      // If status is an array, filter out resolved/closed
       const activeStatuses = filters.status.in.filter(
         (s) => !["RESOLVED", "CLOSED"].includes(s),
       );
-      if (activeStatuses.length > 0) {
-        filters.status = { in: activeStatuses };
-      } else {
-        filters.status = {
-          notIn: ["RESOLVED", "CLOSED"],
-        };
-      }
+      filters.status =
+        activeStatuses.length > 0
+          ? { in: activeStatuses }
+          : {
+              notIn: ["RESOLVED", "CLOSED"],
+            };
     }
   }
 
@@ -821,7 +820,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
   dbg("pagination", { skip, take: limitNum, orderBy: { submittedOn: "desc" } });
 
   try {
-    const [complaints, total] = await Promise.all([
+    const [rawComplaints, total] = await Promise.all([
       prisma.complaint.findMany({
         where: filters,
         skip,
@@ -875,6 +874,11 @@ export const getComplaints = asyncHandler(async (req, res) => {
       prisma.complaint.count({ where: filters }),
     ]);
 
+    const complaints = rawComplaints.map((c) => ({
+      ...c,
+      needsTeamAssignment: !c.maintenanceTeamId,
+    }));
+
     const totalPages = Math.ceil(total / limitNum);
     const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
 
@@ -918,7 +922,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
 // @route   GET /api/complaints/:id
 // @access  Private
 export const getComplaint = asyncHandler(async (req, res) => {
-  const complaint = await prisma.complaint.findUnique({
+  const baseComplaint = await prisma.complaint.findUnique({
     where: { id: req.params.id },
     include: {
       ward: true,
@@ -976,6 +980,11 @@ export const getComplaint = asyncHandler(async (req, res) => {
       },
     },
   });
+
+  const complaint = baseComplaint && {
+    ...baseComplaint,
+    needsTeamAssignment: !baseComplaint.maintenanceTeamId,
+  };
 
   if (!complaint) {
     return res.status(404).json({
@@ -1054,45 +1063,69 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     });
   }
 
-  // Role-based status transition validation
-  if (req.user.role === "WARD_OFFICER") {
-    // Ward officers can only transition: REGISTERED → ASSIGNED → OPEN
-    const allowedTransitions = {
+  // Enforce strict lifecycle transitions across roles
+  // Valid sequence: REGISTERED -> ASSIGNED -> IN_PROGRESS -> RESOLVED -> CLOSED, and CLOSED -> REOPENED (via dedicated endpoint)
+  if (status && status !== complaint.status) {
+    const lifecycleTransitions = {
       REGISTERED: ["ASSIGNED"],
-      ASSIGNED: ["OPEN"],
-      OPEN: ["ASSIGNED"], // Allow going back to assigned if needed
+      ASSIGNED: ["IN_PROGRESS"],
+      IN_PROGRESS: ["RESOLVED"],
+      RESOLVED: ["CLOSED"],
+      CLOSED: [],
+      REOPENED: ["ASSIGNED"],
     };
 
-    if (status && status !== complaint.status) {
-      const allowedStatuses = allowedTransitions[complaint.status] || [];
-      if (!allowedStatuses.includes(status)) {
+    // Block setting REOPENED here – must use dedicated /reopen endpoint for auditability
+    if (status === "REOPENED") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Use the /api/complaints/:id/reopen endpoint to reopen complaints",
+        data: null,
+      });
+    }
+
+    const allowedNext = lifecycleTransitions[complaint.status] || [];
+    if (!allowedNext.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status transition from ${complaint.status} to ${status}. Allowed next status: ${allowedNext.join(", ") || "none"}.`,
+        data: null,
+      });
+    }
+
+    // Preconditions for certain transitions
+    if (status === "ASSIGNED") {
+      // Require a maintenance team assignment present in request or already set
+      if (!maintenanceTeamId && !complaint.maintenanceTeamId) {
         return res.status(400).json({
           success: false,
-          message: `Ward officers cannot change status from ${complaint.status} to ${status}. Allowed transitions: ${allowedStatuses.join(", ") || "none"}.`,
+          message:
+            "Assign a maintenance team member to mark complaint as ASSIGNED",
           data: null,
         });
       }
     }
-  } else if (req.user.role === "MAINTENANCE_TEAM") {
-    // Maintenance team can update progress and mark as resolved
-    const allowedTransitions = {
-      ASSIGNED: ["IN_PROGRESS"],
-      OPEN: ["IN_PROGRESS"],
-      IN_PROGRESS: ["RESOLVED", "ASSIGNED", "OPEN"],
-    };
 
-    if (status && status !== complaint.status) {
-      const allowedStatuses = allowedTransitions[complaint.status] || [];
-      if (!allowedStatuses.includes(status)) {
+    if (status === "IN_PROGRESS") {
+      if (!maintenanceTeamId && !complaint.maintenanceTeamId) {
         return res.status(400).json({
           success: false,
-          message: `Maintenance team cannot change status from ${complaint.status} to ${status}. Allowed transitions: ${allowedStatuses.join(", ") || "none"}.`,
+          message:
+            "Complaint must be assigned to a maintenance team before starting work",
           data: null,
         });
       }
+    }
+
+    if (status === "CLOSED" && complaint.status !== "RESOLVED") {
+      return res.status(400).json({
+        success: false,
+        message: "Complaints can only be CLOSED after being RESOLVED",
+        data: null,
+      });
     }
   }
-  // Administrators have full access to all status changes
 
   // Enhanced validation for maintenance team assignment
   if (maintenanceTeamId) {
@@ -1193,23 +1226,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   // Handle maintenance team assignment
   if (maintenanceTeamId) {
     updateData.maintenanceTeamId = maintenanceTeamId;
-    updateData.isMaintenanceUnassigned = false;
 
-    // Auto-transition status when maintenance team is assigned (only for active complaints)
-    if (
-      !status &&
-      !["RESOLVED", "CLOSED"].includes(updateData.status || complaint.status)
-    ) {
-      if (complaint.status === "REGISTERED") {
-        updateData.status = "ASSIGNED";
-        updateData.assignedOn = new Date();
-      } else if (
-        complaint.status === "ASSIGNED" &&
-        req.user.role === "WARD_OFFICER"
-      ) {
-        // Ward officer is providing more specific assignment, keep as ASSIGNED
-        updateData.assignedOn = new Date();
-      }
+    // Auto-transition to ASSIGNED when a team is assigned during REGISTERED
+    if (!status && complaint.status === "REGISTERED") {
+      updateData.status = "ASSIGNED";
+      updateData.assignedOn = new Date();
     }
   }
 
@@ -1221,6 +1242,13 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   // Set timestamps based on status changes
   if (updateData.status === "ASSIGNED" && complaint.status !== "ASSIGNED") {
     updateData.assignedOn = new Date();
+  }
+
+  if (
+    updateData.status === "IN_PROGRESS" &&
+    complaint.status !== "IN_PROGRESS"
+  ) {
+    // No specific timestamp, but ensure assignment exists (validated above)
   }
 
   if (updateData.status === "RESOLVED" && complaint.status !== "RESOLVED") {
@@ -1273,6 +1301,8 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       },
     },
   });
+  // Derived flag for frontend
+  updatedComplaint.needsTeamAssignment = !updatedComplaint.maintenanceTeamId;
 
   // Create status log
   const statusLogComment =
@@ -1448,6 +1478,11 @@ export const reopenComplaint = asyncHandler(async (req, res) => {
         complaint.deadline,
         "REOPENED",
       ),
+      // Reset assignment so it goes through assignment workflow again
+      maintenanceTeamId: null,
+      assignedOn: null,
+      resolvedOn: null,
+      resolvedById: null,
       closedOn: null,
     },
   });
@@ -1610,9 +1645,14 @@ export const assignComplaint = asyncHandler(async (req, res) => {
   const updatedComplaint = await prisma.complaint.update({
     where: { id: complaintId },
     data: {
-      assignedToId,
+      assignedToId, // keep legacy field for backward compatibility
+      maintenanceTeamId: assignedToId,
       status: "ASSIGNED",
       assignedOn: new Date(),
+    },
+    include: {
+      maintenanceTeam: { select: { id: true, fullName: true, role: true } },
+      assignedTo: { select: { id: true, fullName: true, role: true } },
     },
   });
 
@@ -1743,6 +1783,7 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
       priority: true,
       slaStatus: true,
       assignedToId: true,
+      maintenanceTeamId: true,
       submittedOn: true,
       resolvedOn: true,
       deadline: true,
@@ -1781,10 +1822,10 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter((c) => c.assignToTeam === true)
+    needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId)
       .length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
-    assigned: wardComplaints.filter((c) => c.assignedToId).length,
+    assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
   };
 
   // Calculate pending work (registered + assigned statuses)
