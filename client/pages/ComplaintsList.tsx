@@ -216,7 +216,6 @@ const ComplaintsList: React.FC = () => {
     setPriorityFilter("all");
     setWardFilter("all");
     setSubZoneFilter("all");
-    setAssignToTeamFilter(false);
     setNeedsMaintenanceAssignment(false);
     setSlaStatusFilter("all");
     setDebouncedSearchTerm("");
