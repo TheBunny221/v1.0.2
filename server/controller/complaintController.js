@@ -844,6 +844,22 @@ export const getComplaints = asyncHandler(async (req, res) => {
               phoneNumber: true,
             },
           },
+          wardOfficer: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+            },
+          },
+          maintenanceTeam: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+            },
+          },
           attachments: true,
           statusLogs: {
             orderBy: { timestamp: "desc" },
