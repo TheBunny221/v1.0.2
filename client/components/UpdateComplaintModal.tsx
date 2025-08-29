@@ -350,6 +350,46 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               <span className="text-gray-600">Description:</span>
               <p className="text-sm mt-1">{complaint.description}</p>
             </div>
+
+            {/* Current Assignments */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="font-medium text-sm mb-2">Current Assignments</h4>
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                {/* Ward Officer Assignment */}
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Ward Officer:</span>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-1" />
+                    {complaint.wardOfficer ? (
+                      <span className="text-blue-600">
+                        {complaint.wardOfficer.fullName}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Not assigned</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Maintenance Team Assignment */}
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Maintenance Team:</span>
+                  <div className="flex items-center">
+                    <Settings className="h-4 w-4 mr-1" />
+                    {complaint.maintenanceTeam ? (
+                      <span className="text-green-600">
+                        {complaint.maintenanceTeam.fullName}
+                      </span>
+                    ) : complaint.isMaintenanceUnassigned ? (
+                      <Badge className="bg-orange-100 text-orange-800 text-xs">
+                        Needs Assignment
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-400">Not assigned</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Validation Errors */}
