@@ -1144,10 +1144,15 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     updateData.maintenanceTeamId = maintenanceTeamId;
     updateData.isMaintenanceUnassigned = false;
 
-    // If assigning maintenance team, also update status to ASSIGNED if not already
-    if (!status && complaint.status === "REGISTERED") {
-      updateData.status = "ASSIGNED";
-      updateData.assignedOn = new Date();
+    // Auto-transition status when maintenance team is assigned
+    if (!status) {
+      if (complaint.status === "REGISTERED") {
+        updateData.status = "ASSIGNED";
+        updateData.assignedOn = new Date();
+      } else if (complaint.status === "ASSIGNED" && req.user.role === "WARD_OFFICER") {
+        // Ward officer is providing more specific assignment, keep as ASSIGNED
+        updateData.assignedOn = new Date();
+      }
     }
   }
 
