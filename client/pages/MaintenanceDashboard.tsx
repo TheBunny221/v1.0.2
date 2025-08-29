@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import {
@@ -52,39 +52,27 @@ const MaintenanceDashboard: React.FC = () => {
     limit: 100,
   });
 
-  const complaints = Array.isArray(complaintsResponse?.data?.complaints)
-    ? complaintsResponse!.data!.complaints
-    : Array.isArray(complaintsResponse?.data)
-    ? (complaintsResponse as any).data
-    : [];
+  const complaints = useMemo(() => {
+    if (Array.isArray(complaintsResponse?.data?.complaints)) {
+      return complaintsResponse!.data!.complaints;
+    }
+    if (Array.isArray((complaintsResponse as any)?.data)) {
+      return (complaintsResponse as any).data;
+    }
+    return [] as any[];
+  }, [complaintsResponse]);
 
   const [updateComplaintStatus] = useUpdateComplaintStatusMutation();
 
-  const [dashboardStats, setDashboardStats] = useState({
-    totalTasks: 0,
-    inProgress: 0,
-    completed: 0,
-    pending: 0,
-    todayTasks: 0,
-    avgCompletionTime: 1.5,
-    efficiency: 92,
-  });
-
-  // Data fetching is handled by RTK Query hooks automatically
-
-  useEffect(() => {
+  const dashboardStats = useMemo(() => {
     const assignedTasks = complaints.filter((c: any) => {
       const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
       return assigneeId === user?.id && c.status !== "REGISTERED";
     });
 
     const totalTasks = assignedTasks.length;
-    const inProgress = assignedTasks.filter(
-      (c) => c.status === "IN_PROGRESS",
-    ).length;
-    const completed = assignedTasks.filter(
-      (c) => c.status === "RESOLVED",
-    ).length;
+    const inProgress = assignedTasks.filter((c) => c.status === "IN_PROGRESS").length;
+    const completed = assignedTasks.filter((c) => c.status === "RESOLVED").length;
     const pending = assignedTasks.filter((c) => c.status === "ASSIGNED").length;
 
     const today = new Date().toDateString();
@@ -92,16 +80,16 @@ const MaintenanceDashboard: React.FC = () => {
       (c) => new Date(c.assignedOn || c.submittedOn).toDateString() === today,
     ).length;
 
-    setDashboardStats({
+    return {
       totalTasks,
       inProgress,
       completed,
       pending,
       todayTasks,
-      avgCompletionTime: 1.5, // Mock calculation
-      efficiency: 92, // Mock calculation
-    });
-  }, [complaints, user]);
+      avgCompletionTime: 1.5,
+      efficiency: 92,
+    };
+  }, [complaints, user?.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -131,18 +119,28 @@ const MaintenanceDashboard: React.FC = () => {
     }
   };
 
-  const myTasks = complaints.filter((c: any) => {
-    const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
-    return assigneeId === user?.id && c.status !== "REGISTERED";
-  });
+  const myTasks = useMemo(() => {
+    return complaints.filter((c: any) => {
+      const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
+      return assigneeId === user?.id && c.status !== "REGISTERED";
+    });
+  }, [complaints, user?.id]);
 
-  const activeTasks = myTasks
-    .filter((c) => c.status === "ASSIGNED" || c.status === "IN_PROGRESS")
-    .slice(0, 5);
+  const activeTasks = useMemo(
+    () =>
+      myTasks
+        .filter((c) => c.status === "ASSIGNED" || c.status === "IN_PROGRESS")
+        .slice(0, 5),
+    [myTasks],
+  );
 
-  const urgentTasks = myTasks
-    .filter((c) => c.priority === "CRITICAL" || c.priority === "HIGH")
-    .slice(0, 3);
+  const urgentTasks = useMemo(
+    () =>
+      myTasks
+        .filter((c) => c.priority === "CRITICAL" || c.priority === "HIGH")
+        .slice(0, 3),
+    [myTasks],
+  );
 
   const handleStatusUpdate = async (complaintId: string, newStatus: string) => {
     try {
