@@ -371,35 +371,20 @@ const ComplaintsList: React.FC = () => {
               </SelectContent>
             </Select>
 
-            {/* Assignment Filters - Only for Ward Officers */}
+            {/* Assignment Filter - Only for Ward Officers */}
             {user?.role === "WARD_OFFICER" && (
-              <div className="col-span-2 flex flex-wrap gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="assignToTeam"
-                    checked={assignToTeamFilter}
-                    onCheckedChange={setAssignToTeamFilter}
-                  />
-                  <label
-                    htmlFor="assignToTeam"
-                    className="text-sm cursor-pointer"
-                  >
-                    Needs Team Assignment (Legacy)
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="needsMaintenanceAssignment"
-                    checked={needsMaintenanceAssignment}
-                    onCheckedChange={setNeedsMaintenanceAssignment}
-                  />
-                  <label
-                    htmlFor="needsMaintenanceAssignment"
-                    className="text-sm cursor-pointer"
-                  >
-                    Needs Maintenance Assignment
-                  </label>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="needsMaintenanceAssignment"
+                  checked={needsMaintenanceAssignment}
+                  onCheckedChange={setNeedsMaintenanceAssignment}
+                />
+                <label
+                  htmlFor="needsMaintenanceAssignment"
+                  className="text-sm cursor-pointer"
+                >
+                  Needs Maintenance Assignment
+                </label>
               </div>
             )}
             <Button variant="outline" onClick={clearFilters}>
