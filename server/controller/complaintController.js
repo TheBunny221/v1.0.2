@@ -919,7 +919,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
 // @route   GET /api/complaints/:id
 // @access  Private
 export const getComplaint = asyncHandler(async (req, res) => {
-  const complaint = await prisma.complaint.findUnique({
+  const baseComplaint = await prisma.complaint.findUnique({
     where: { id: req.params.id },
     include: {
       ward: true,
