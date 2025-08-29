@@ -1642,7 +1642,6 @@ export const assignComplaint = asyncHandler(async (req, res) => {
     data: {
       assignedToId, // keep legacy field for backward compatibility
       maintenanceTeamId: assignedToId,
-      isMaintenanceUnassigned: false,
       status: "ASSIGNED",
       assignedOn: new Date(),
     },
