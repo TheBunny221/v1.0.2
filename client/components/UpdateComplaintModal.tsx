@@ -128,7 +128,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
       const maintenanceTeamId =
         typeof complaint.maintenanceTeam === "object" &&
-        complaint.maintenanceTeam?.id
+          complaint.maintenanceTeam?.id
           ? complaint.maintenanceTeam.id
           : complaint.maintenanceTeam || "none";
 
@@ -262,13 +262,13 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
         const assignedToId =
           typeof updatedComplaint.assignedTo === "object" &&
-          updatedComplaint.assignedTo?.id
+            updatedComplaint.assignedTo?.id
             ? updatedComplaint.assignedTo.id
             : updatedComplaint.assignedTo || "none";
 
         const maintenanceTeamId =
           typeof updatedComplaint.maintenanceTeam === "object" &&
-          updatedComplaint.maintenanceTeam?.id
+            updatedComplaint.maintenanceTeam?.id
             ? updatedComplaint.maintenanceTeam.id
             : updatedComplaint.maintenanceTeam || "none";
 
@@ -422,7 +422,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     <strong>Debug:</strong>
                     <br />
                     wardOfficer:{" "}
-                    {JSON.stringify(complaint.wardOfficer) || "null"}
+                    {JSON.stringify(complaint.assignedTo) || "null"}
                     <br />
                     maintenanceTeam:{" "}
                     {JSON.stringify(complaint.maintenanceTeam) || "null"}
@@ -437,9 +437,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   <span className="text-gray-600">Ward Officer:</span>
                   <div className="flex items-center">
                     <User className="h-4 w-4 mr-1" />
-                    {complaint.wardOfficer ? (
+                    {complaint.assignedTo ? (
                       <span className="text-blue-600">
-                        {complaint.wardOfficer.fullName}
+                        {complaint.assignedTo.fullName}
                       </span>
                     ) : (
                       <span className="text-gray-400">Not assigned</span>
@@ -586,7 +586,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               )}
 
             <div className="space-y-2">
-              {/* Search Box */}
+              {/* Search Box 
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -595,7 +595,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
-              </div>
+              </div>*/}
 
               {/* User Selection */}
               <Select
@@ -604,6 +604,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     ? formData.maintenanceTeamId
                     : formData.assignedToId
                 }
+
                 onValueChange={(value) => {
                   if (user?.role === "WARD_OFFICER") {
                     setFormData((prev) => ({
@@ -616,6 +617,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   // Clear validation errors when user makes a selection
                   setValidationErrors([]);
                 }}
+
+                disabled={isLoadingUsers || availableUsers.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={getDropdownLabel()} />
@@ -629,24 +632,24 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   </SelectItem>
                   {filteredUsers.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center justify-between w-full gap-2">
                         <div className="flex items-center">
                           {getUserRoleIcon(user.role)}
-                          <div className="ml-2">
+                          <div className="ml-2 text-left">
                             <div className="font-medium">{user.fullName}</div>
                             <div className="text-xs text-gray-500">
                               {user.email}
                             </div>
-                            {user.ward && (
-                              <div className="text-xs text-blue-600">
-                                {user.ward.name}
-                              </div>
-                            )}
                           </div>
                         </div>
                         <Badge variant="outline" className="text-xs">
                           {user.role.replace("_", " ")}
                         </Badge>
+                        {user.ward && (
+                          <div className="text-xs text-blue-600">
+                            {user.ward.name}
+                          </div>
+                        )}
                       </div>
                     </SelectItem>
                   ))}
