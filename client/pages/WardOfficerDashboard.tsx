@@ -85,7 +85,7 @@ const WardOfficerDashboard: React.FC = () => {
         statusFilters.push("RESOLVED", "CLOSED");
         break;
       case "needsTeamAssignment":
-        filterParams.assignToTeam = true;
+        filterParams.isMaintenanceUnassigned = true;
         break;
       default:
         // No main filter applied
