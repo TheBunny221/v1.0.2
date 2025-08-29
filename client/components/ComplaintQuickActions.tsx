@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import ComplaintStatusUpdate from "./ComplaintStatusUpdate";
 import {
   MoreHorizontal,
   Eye,
@@ -46,8 +45,6 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   onUpdate,
   onShowUpdateModal,
 }) => {
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -122,7 +119,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setAssignDialogOpen(true)}
+                  onClick={() => onShowUpdateModal?.(complaint)}
                   title="Assign Complaint"
                   className="text-blue-600 hover:text-blue-700"
                 >
@@ -134,7 +131,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setStatusDialogOpen(true)}
+                  onClick={() => onShowUpdateModal?.(complaint)}
                   title="Start Progress"
                   className="text-orange-600 hover:text-orange-700"
                 >
@@ -146,7 +143,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setStatusDialogOpen(true)}
+                  onClick={() => onShowUpdateModal?.(complaint)}
                   title="Mark Resolved"
                   className="text-green-600 hover:text-green-700"
                 >
@@ -177,13 +174,13 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                   </>
                 )}
 
-                <DropdownMenuItem onClick={() => setStatusDialogOpen(true)}>
+                <DropdownMenuItem onClick={() => onShowUpdateModal?.(complaint)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Quick Status Update
                 </DropdownMenuItem>
 
                 {canAssign && (
-                  <DropdownMenuItem onClick={() => setAssignDialogOpen(true)}>
+                  <DropdownMenuItem onClick={() => onShowUpdateModal?.(complaint)}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Quick Reassign
                   </DropdownMenuItem>
@@ -203,29 +200,6 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
         </div>
       </div>
 
-      {/* Status Update Dialog */}
-      <ComplaintStatusUpdate
-        complaint={complaint}
-        isOpen={statusDialogOpen}
-        onClose={() => setStatusDialogOpen(false)}
-        onSuccess={() => {
-          setStatusDialogOpen(false);
-          onUpdate?.();
-        }}
-        mode="status"
-      />
-
-      {/* Assignment Dialog */}
-      <ComplaintStatusUpdate
-        complaint={complaint}
-        isOpen={assignDialogOpen}
-        onClose={() => setAssignDialogOpen(false)}
-        onSuccess={() => {
-          setAssignDialogOpen(false);
-          onUpdate?.();
-        }}
-        mode="assign"
-      />
     </>
   );
 };
