@@ -978,6 +978,8 @@ export const getComplaint = asyncHandler(async (req, res) => {
     },
   });
 
+  const complaint = baseComplaint && { ...baseComplaint, needsTeamAssignment: !baseComplaint.maintenanceTeamId };
+
   if (!complaint) {
     return res.status(404).json({
       success: false,
