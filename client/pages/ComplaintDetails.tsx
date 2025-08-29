@@ -4,7 +4,7 @@ import { useAppSelector } from "../store/hooks";
 import { useGetComplaintQuery } from "../store/api/complaintsApi";
 import { useDataManager } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
-import ComplaintStatusUpdate from "../components/ComplaintStatusUpdate";
+import UpdateComplaintModal from "../components/UpdateComplaintModal";
 import {
   Card,
   CardContent,
@@ -35,7 +35,7 @@ const ComplaintDetails: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
-  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
@@ -1096,7 +1096,7 @@ const ComplaintDetails: React.FC = () => {
                 user?.role === "ADMINISTRATOR") && (
                 <Button
                   className="w-full justify-start"
-                  onClick={() => setShowStatusDialog(true)}
+                  onClick={() => setIsUpdateModalOpen(true)}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Update Status
@@ -1130,23 +1130,13 @@ const ComplaintDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Status Update Dialog */}
-      <ComplaintStatusUpdate
-        complaint={{
-          id: complaint.id,
-          complaintId: complaint.complaintId,
-          status: complaint.status,
-          priority: complaint.priority,
-          type: complaint.type,
-          description: complaint.description,
-          area: complaint.area,
-          assignedTo: complaint.assignedTo,
-        }}
-        isOpen={showStatusDialog}
-        onClose={() => setShowStatusDialog(false)}
+      {/* Update Complaint Modal */}
+      <UpdateComplaintModal
+        complaint={complaint}
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
         onSuccess={() => {
-          setShowStatusDialog(false);
-          // The complaint data will be automatically updated by RTK Query
+          setIsUpdateModalOpen(false);
         }}
       />
 
