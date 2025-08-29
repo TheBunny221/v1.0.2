@@ -650,7 +650,6 @@ async function main() {
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
-          teamId: randomTeamMember?.id || null,
           maintenanceTeamId: randomTeamMember?.id || null,
           createdAt: complaintDate,
           submittedOn: complaintDate,
