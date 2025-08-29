@@ -222,6 +222,7 @@ const ComplaintsList: React.FC = () => {
     setWardFilter("all");
     setSubZoneFilter("all");
     setAssignToTeamFilter(false);
+    setNeedsMaintenanceAssignment(false);
     setSlaStatusFilter("all");
     setDebouncedSearchTerm("");
   };
