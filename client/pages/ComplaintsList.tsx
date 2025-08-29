@@ -130,7 +130,7 @@ const ComplaintsList: React.FC = () => {
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
     // Add new filters
-    if (needsMaintenanceAssignment) params.isMaintenanceUnassigned = true;
+    if (needsMaintenanceAssignment) params.needsTeamAssignment = true;
     if (slaStatusFilter !== "all")
       params.slaStatus = slaStatusFilter.toUpperCase();
 
@@ -477,7 +477,7 @@ const ComplaintsList: React.FC = () => {
                           {complaint.priority}
                         </Badge>
                         {/* Show maintenance assignment status - only for active complaints */}
-                        {complaint.isMaintenanceUnassigned &&
+                        {(complaint as any).needsTeamAssignment &&
                           !["RESOLVED", "CLOSED"].includes(
                             complaint.status,
                           ) && (
