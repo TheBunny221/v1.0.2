@@ -676,6 +676,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
       subZoneId,
       assignedToId,
       submittedById,
+      assignToTeam,
+      isMaintenanceUnassigned,
       dateFrom,
       dateTo,
       searchLen: typeof search === "string" ? search.length : 0,
