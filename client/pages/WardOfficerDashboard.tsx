@@ -471,7 +471,7 @@ const WardOfficerDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() => navigateToComplaints({ assignToTeam: true })}
+              onClick={() => navigateToComplaints({ isMaintenanceUnassigned: true })}
             >
               <Briefcase className="h-4 w-4 mr-2" />
               Assign to Team ({stats?.summary.needsTeamAssignment || 0})
