@@ -12,7 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { FileText, Calendar, MapPin, Eye, Edit, RefreshCw } from "lucide-react";
+import { FileText, Calendar, MapPin, Eye, RefreshCw } from "lucide-react";
+
+import ComplaintQuickActions from "./ComplaintQuickActions";
+import UpdateComplaintModal from "./UpdateComplaintModal";
 
 interface ComplaintsListWidgetProps {
   filters: any;
@@ -29,6 +32,9 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
   showActions = true,
   onComplaintUpdate,
 }) => {
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
+
   const {
     data: complaintsResponse,
     isLoading,
@@ -175,7 +181,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                         <Badge className={getPriorityColor(complaint.priority)}>
                           {complaint.priority || "N/A"}
                         </Badge>
-                        {complaint.assignToTeam && (
+                        {complaint.isMaintenanceUnassigned && (
                           <Badge className="bg-purple-100 text-purple-800 text-xs">
                             Needs Team Assignment
                           </Badge>
@@ -198,6 +204,28 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
+                          <ComplaintQuickActions
+                            complaint={{
+                              id: complaint.id,
+                              complaintId: complaint.complaintId,
+                              status: complaint.status,
+                              priority: complaint.priority,
+                              type: complaint.type,
+                              description: complaint.description,
+                              area: complaint.area,
+                              assignedTo: complaint.assignedTo,
+                            }}
+                            userRole={"WARD_OFFICER"}
+                            showDetails={false}
+                            onUpdate={() => {
+                              refetch();
+                              onComplaintUpdate?.();
+                            }}
+                            onShowUpdateModal={() => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
+                          />
                         </div>
                       </TableCell>
                     )}
@@ -208,6 +236,21 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
           </div>
         )}
       </CardContent>
+      {/* Update Complaint Modal */}
+      <UpdateComplaintModal
+        complaint={selectedComplaint}
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+        }}
+        onSuccess={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedComplaint(null);
+          refetch();
+          onComplaintUpdate?.();
+        }}
+      />
     </Card>
   );
 };
