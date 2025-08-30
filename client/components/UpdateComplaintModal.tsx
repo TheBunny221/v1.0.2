@@ -48,7 +48,7 @@ interface Complaint {
   assignedTo?: any;
   wardOfficer?: any;
   maintenanceTeam?: any;
-  isMaintenanceUnassigned?: boolean;
+  needsTeamAssignment?: boolean;
 }
 
 interface UpdateComplaintModalProps {
@@ -182,7 +182,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
       // Helpful message for ward officers with unassigned maintenance complaints (only for non-finalized complaints)
       if (
-        complaint?.isMaintenanceUnassigned &&
+        (complaint as any)?.needsTeamAssignment &&
         !formData.maintenanceTeamId &&
         formData.status !== "REGISTERED" &&
         !["RESOLVED", "CLOSED"].includes(complaint.status)
@@ -427,8 +427,8 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     maintenanceTeam:{" "}
                     {JSON.stringify(complaint.maintenanceTeam) || "null"}
                     <br />
-                    isMaintenanceUnassigned:{" "}
-                    {String(complaint.isMaintenanceUnassigned)}
+                    needsTeamAssignment:{" "}
+                    {String((complaint as any).needsTeamAssignment)}
                   </div>
                 )}
 

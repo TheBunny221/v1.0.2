@@ -399,7 +399,6 @@ export const createComplaint = asyncHandler(async (req, res) => {
     isAnonymous: isAnonymous || false,
     submittedById: req.user.id,
     wardOfficerId,
-    isMaintenanceUnassigned: true, // New field - no maintenance team assigned yet
     deadline,
   });
 
