@@ -4,19 +4,20 @@ import fs from "fs";
 
 // Function to load environment-specific configuration
 export function loadEnvironmentConfig() {
-  const NODE_ENV = process.env.NODE_ENV || 'development';
-  
-  console.log(`🔧 Loading ${NODE_ENV} environment configuration...`);
+  // Preserve the initial NODE_ENV set by the runtime (e.g., scripts)
+  const initialNodeEnv = process.env.NODE_ENV || 'development';
 
-  // Load base .env file first
+  console.log(`🔧 Loading ${initialNodeEnv} environment configuration...`);
+
+  // Load base .env file first (do not override existing env)
   const baseEnvPath = path.resolve(process.cwd(), '.env');
   if (fs.existsSync(baseEnvPath)) {
     dotenv.config({ path: baseEnvPath });
     console.log(`✅ Base environment loaded from: ${baseEnvPath}`);
   }
 
-  // Load environment-specific .env file
-  const envPath = path.resolve(process.cwd(), `.env.${NODE_ENV}`);
+  // Load environment-specific .env file (override is allowed for most vars)
+  const envPath = path.resolve(process.cwd(), `.env.${initialNodeEnv}`);
   if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath, override: true });
     console.log(`✅ Environment-specific config loaded from: ${envPath}`);
@@ -24,14 +25,22 @@ export function loadEnvironmentConfig() {
     console.log(`⚠️ No environment-specific config found at: ${envPath}`);
   }
 
+  // Ensure NODE_ENV isn't inadvertently overridden by .env files
+  if (process.env.NODE_ENV !== initialNodeEnv) {
+    console.warn(
+      `⚠️ Detected NODE_ENV override from env files ('${process.env.NODE_ENV}') — restoring '${initialNodeEnv}'`,
+    );
+    process.env.NODE_ENV = initialNodeEnv;
+  }
+
   // Validate required environment variables
   validateEnvironmentVariables();
 
   return {
-    NODE_ENV,
-    isDevelopment: NODE_ENV === 'development',
-    isProduction: NODE_ENV === 'production',
-    isTest: NODE_ENV === 'test'
+    NODE_ENV: initialNodeEnv,
+    isDevelopment: initialNodeEnv === 'development',
+    isProduction: initialNodeEnv === 'production',
+    isTest: initialNodeEnv === 'test'
   };
 }
 
@@ -70,9 +79,19 @@ function validateEnvironmentVariables() {
 
 // Function to get database connection module based on environment
 export async function getDatabaseConnection() {
-  const { isDevelopment } = loadEnvironmentConfig();
+  const envInfo = loadEnvironmentConfig();
 
-  if (isDevelopment) {
+  // Prefer DATABASE_URL scheme to decide driver, so dev can use Postgres too
+  const dbUrl = process.env.DATABASE_URL || '';
+  const usePostgres = /postgres(ql)?:/i.test(dbUrl);
+
+  if (usePostgres) {
+    console.log('📊 Using PostgreSQL database based on DATABASE_URL');
+    const { connectDB } = await import('../db/connection.js');
+    return connectDB;
+  }
+
+  if (envInfo.isDevelopment) {
     console.log('📊 Using SQLite database for development');
     const { connectDB } = await import('../db/connection.dev.js');
     return connectDB;
@@ -85,13 +104,15 @@ export async function getDatabaseConnection() {
 
 // Function to get Prisma client based on environment
 export async function getPrismaClient() {
-  const { isDevelopment } = loadEnvironmentConfig();
+  const envInfo = loadEnvironmentConfig();
+  const dbUrl = process.env.DATABASE_URL || '';
+  const usePostgres = /postgres(ql)?:/i.test(dbUrl);
 
-  if (isDevelopment) {
-    const { getPrisma } = await import('../db/connection.dev.js');
+  if (usePostgres || envInfo.isProduction) {
+    const { getPrisma } = await import('../db/connection.js');
     return getPrisma();
   } else {
-    const { getPrisma } = await import('../db/connection.js');
+    const { getPrisma } = await import('../db/connection.dev.js');
     return getPrisma();
   }
 }

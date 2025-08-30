@@ -5,7 +5,13 @@ import { initializeDatabase } from "./scripts/initDatabase.js";
 // Load environment-specific configuration
 loadEnvironmentConfig();
 
-const PORT = process.env.PORT || 4005;
+// Resolve backend port; avoid conflict with Vite HMR (3001)
+const configuredPort = Number(process.env.PORT);
+let PORT = Number.isFinite(configuredPort) && configuredPort > 0 ? configuredPort : 4005;
+if (PORT === 3001) {
+  console.warn("⚠️ PORT 3001 conflicts with Vite HMR; using 4005 instead");
+  PORT = 4005;
+}
 const HOST = process.env.HOST || "0.0.0.0";
 
 async function startServer() {

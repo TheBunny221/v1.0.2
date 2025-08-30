@@ -26,24 +26,24 @@ import {
 
 const router = express.Router();
 
-// More lenient rate limiting for auth endpoints in development
+// More lenient rate limiting for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "development" ? 50 : 10, // 50 attempts per window in dev, 10 in prod
+  max: 1000, // Increased limit
   message: {
     success: false,
     message: "Too many authentication attempts. Please try again later.",
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip for localhost in development
+  trustProxy: true,
+  // Skip for development and specific IPs
   skip: (req) => {
-    return (
-      process.env.NODE_ENV === "development" &&
-      (req.ip === "127.0.0.1" ||
-        req.ip === "::1" ||
-        req.ip.includes("localhost"))
-    );
+    return process.env.NODE_ENV === "development" || 
+           req.ip === "127.0.0.1" ||
+           req.ip === "::1" ||
+           req.ip === "199.199.50.51" ||
+           req.ip.includes("localhost");
   },
 });
 

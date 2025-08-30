@@ -171,6 +171,7 @@ export const loginWithPassword = createAsyncThunk(
         body: JSON.stringify(credentials),
       });
 
+      console.warn("login res", data);
       // Store token in localStorage
       localStorage.setItem("token", data.data.token);
 

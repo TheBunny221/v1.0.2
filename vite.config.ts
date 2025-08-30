@@ -1,9 +1,12 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
+  // Load .env values for this mode
+  const envVars = loadEnv(mode, process.cwd(), "");
+
   // Detect cloud environment
   const isCloudEnvironment =
     process.env.FLY_APP_NAME ||
@@ -12,12 +15,48 @@ export default defineConfig(({ mode }) => {
     process.env.VERCEL ||
     process.env.NETLIFY;
 
+  // Resolve client server host/port from env (with sensible defaults)
+  const clientHost =
+    envVars.VITE_CLIENT_HOST ||
+    envVars.VITE_HOST ||
+    envVars.CLIENT_HOST ||
+    envVars.HOST ||
+    "::";
+  const clientPort = Number(
+    envVars.VITE_CLIENT_PORT ||
+      envVars.VITE_PORT ||
+      envVars.CLIENT_PORT ||
+      envVars.PORT_CLIENT ||
+      3000,
+  );
+  const hmrPort = Number(
+    envVars.VITE_HMR_PORT || envVars.HMR_PORT || envVars.WS_PORT || clientPort + 1,
+  );
+
+  // Resolve API backend target
+  const backendPort = Number(
+    envVars.BACKEND_PORT ||
+      envVars.SERVER_PORT ||
+      envVars.API_PORT ||
+      envVars.PORT ||
+      4005,
+  );
+  const explicitApiUrl =
+    envVars.VITE_PROXY_TARGET ||
+    envVars.PROXY_TARGET ||
+    envVars.API_URL ||
+    envVars.VITE_API_URL ||
+    envVars.REACT_APP_API_URL ||
+    envVars.BACKEND_URL ||
+    envVars.SERVER_URL;
+  const apiHost = envVars.API_HOST || envVars.SERVER_HOST || "localhost";
+  const proxyTarget = explicitApiUrl || `http://${apiHost}:${backendPort}`;
   const isProduction = mode === "production" || isCloudEnvironment;
 
   return {
     server: {
-      host: "::",
-      port: 3000,
+      host: clientHost,
+      port: clientPort,
       fs: {
         allow: ["./client", "./shared"],
         deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
@@ -25,7 +64,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API calls to the backend server
         "/api": {
-          target: "http://localhost:3001",
+          target: proxyTarget,
           changeOrigin: true,
           secure: false,
           timeout: 30000,
@@ -52,7 +91,7 @@ export default defineConfig(({ mode }) => {
               "Proxying request:",
               req.method,
               req.url,
-              "-> http://localhost:3001" + req.url,
+              "-> " + proxyTarget + req.url,
             );
           },
         },
@@ -61,8 +100,9 @@ export default defineConfig(({ mode }) => {
         ? false
         : {
             overlay: false,
-            port: 3001,
-            clientPort: 3001,
+            host: clientHost,
+            port: hmrPort,
+            clientPort: hmrPort,
           },
       watch: {
         usePolling: false,

@@ -38,6 +38,37 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+// // Express app configuration
+// const app = express();
+
+// // Trust proxy setup
+// app.set('trust proxy', true);
+
+// // Basic middleware
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(compression());
+
+// // CORS setup
+// app.use(cors({
+//   origin: process.env.CORS_ORIGIN,
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204
+// }));
+
+// // Handle preflight requests
+// app.options('*', cors());
+
+// // Additional headers for connection handling
+// app.use((req, res, next) => {
+//   res.setHeader('Connection', 'keep-alive');
+//   res.setHeader('Keep-Alive', 'timeout=5');
+//   next();
+// });
+
 // Swagger configuration
 const swaggerOptions = {
   definition: {

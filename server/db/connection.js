@@ -30,7 +30,7 @@ const createPrismaClient = () => {
   return new PrismaClient(config);
 };
 
-export const prisma = createPrismaClient();
+let prisma = createPrismaClient();
 
 const ensureDatabaseAccess = async () => {
   try {
