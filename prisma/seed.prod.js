@@ -614,9 +614,9 @@ async function main() {
       const wardMaintenanceTeam = maintenanceTeam.filter(
         (member) => member.wardId === randomWard.id,
       );
-      const assignToTeam = Math.random() < 0.6; // 60% chance of team assignment
+      const shouldAssignTeam = Math.random() < 0.6; // 60% chance of team assignment
       const randomTeamMember =
-        assignToTeam && wardMaintenanceTeam.length > 0
+        shouldAssignTeam && wardMaintenanceTeam.length > 0
           ? wardMaintenanceTeam[
               Math.floor(Math.random() * wardMaintenanceTeam.length)
             ]
@@ -651,10 +651,7 @@ async function main() {
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
-          teamId: randomTeamMember?.id || null,
-          assignToTeam: assignToTeam,
           maintenanceTeamId: randomTeamMember?.id || null,
-          isMaintenanceUnassigned: randomTeamMember ? false : true,
           createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:

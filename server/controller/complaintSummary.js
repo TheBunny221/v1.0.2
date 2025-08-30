@@ -3,15 +3,15 @@ const prisma = new PrismaClient();
 
 export const getComplaintSummary = async (req, res) => {
   try {
-    const { wardId, assignToTeam } = req.query;
+    const { wardId, needsTeamAssignment } = req.query;
     const whereClause = {};
-    
+
     if (wardId) {
       whereClause.wardId = wardId;
     }
-    
-    if (assignToTeam === "true") {
-      whereClause.assignToTeam = true;
+
+    if (needsTeamAssignment === "true") {
+      whereClause.maintenanceTeamId = null;
     }
 
     // Get total complaints
@@ -21,7 +21,7 @@ export const getComplaintSummary = async (req, res) => {
 
     // Get complaints by status
     const complaintsByStatus = await prisma.complaint.groupBy({
-      by: ['status'],
+      by: ["status"],
       where: whereClause,
       _count: true,
     });
@@ -30,14 +30,14 @@ export const getComplaintSummary = async (req, res) => {
       success: true,
       data: {
         totalComplaints,
-        complaintsByStatus
-      }
+        complaintsByStatus,
+      },
     });
   } catch (error) {
-    console.error('Error in getComplaintSummary:', error);
+    console.error("Error in getComplaintSummary:", error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
