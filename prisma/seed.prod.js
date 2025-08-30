@@ -618,21 +618,18 @@ async function main() {
       const randomTeamMember =
         assignToTeam && wardMaintenanceTeam.length > 0
           ? wardMaintenanceTeam[
-              Math.floor(Math.random() * wardMaintenanceTeam.length)
-            ]
+          Math.floor(Math.random() * wardMaintenanceTeam.length)
+          ]
           : null;
 
       const complaint = await prisma.complaint.create({
         data: {
           complaintId: complaintId,
-          title: `${complaintType.replace("_", " ")} Issue in ${
-            randomWard.name
-          }`,
+          title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
           description: `Production complaint regarding ${complaintType
             .toLowerCase()
-            .replace("_", " ")} issue that requires attention. Submitted by ${
-            randomCitizen.fullName
-          }.`,
+            .replace("_", " ")} issue that requires attention. Submitted by ${randomCitizen.fullName
+            }.`,
           type: complaintType,
           status: status,
           priority: priority,
@@ -642,19 +639,14 @@ async function main() {
               : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
-          landmark: `Near ${
-            randomWard.name.split(" - ")[1] || "main"
-          } junction`,
+          landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
           address: `Sample address in ${randomWard.name}`,
           contactName: randomCitizen.fullName,
           contactEmail: randomCitizen.email,
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
-          teamId: randomTeamMember?.id || null,
-          assignToTeam: assignToTeam,
-          maintenanceTeamId: randomTeamMember?.id || null,
-          isMaintenanceUnassigned: randomTeamMember ? false : true,
+          maintenanceTeamId: randomTeamMember?.id || null, // ✅ replaces teamId
           createdAt: complaintDate,
           submittedOn: complaintDate,
           assignedOn:
@@ -672,11 +664,12 @@ async function main() {
           deadline: deadline,
           rating:
             (status === "RESOLVED" || status === "CLOSED") &&
-            Math.random() > 0.4
+              Math.random() > 0.4
               ? Math.floor(Math.random() * 5) + 1
               : null,
         },
       });
+
 
       // Create status log
       await prisma.statusLog.create({
