@@ -149,6 +149,14 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     }
   }, [isOpen]);
 
+  // On open, populate address/area for initial position (from system-config default or provided initialLocation)
+  useEffect(() => {
+    if (!isOpen) return;
+    const coords = { lat: position.lat, lng: position.lng };
+    detectAdministrativeArea(coords);
+    reverseGeocode(coords);
+  }, [isOpen]);
+
   // Get current location
   const getCurrentLocation = useCallback(() => {
     setIsLoadingLocation(true);
