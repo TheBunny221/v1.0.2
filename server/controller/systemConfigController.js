@@ -376,6 +376,17 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
       value: "true",
       description: "Allow citizen self-registration",
     },
+    {
+      key: "COMPLAINT_PRIORITIES",
+      value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
+      description: "Available complaint priorities",
+    },
+    {
+      key: "COMPLAINT_STATUSES",
+      value:
+        '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
+      description: "Available complaint statuses",
+    },
   ];
 
   await prisma.systemConfig.createMany({
@@ -459,6 +470,19 @@ const getDefaultPublicSettings = () => {
       value: "Cochin Corporation Office",
       description: "Physical address of the office",
       type: "string",
+    },
+    {
+      key: "COMPLAINT_PRIORITIES",
+      value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
+      description: "Available complaint priorities",
+      type: "json",
+    },
+    {
+      key: "COMPLAINT_STATUSES",
+      value:
+        '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
+      description: "Available complaint statuses",
+      type: "json",
     },
   ];
 };
@@ -554,6 +578,8 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
       "CONTACT_EMAIL",
       "CONTACT_OFFICE_HOURS",
       "CONTACT_OFFICE_ADDRESS",
+      "COMPLAINT_PRIORITIES",
+      "COMPLAINT_STATUSES",
     ];
 
     const settings = await prisma.systemConfig.findMany({

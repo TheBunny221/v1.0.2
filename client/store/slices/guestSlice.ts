@@ -284,10 +284,10 @@ export const submitGuestComplaint = createAsyncThunk(
         formData.append("landmark", complaintData.landmark);
       if (complaintData.address)
         formData.append("address", complaintData.address);
-      if(complaintData.captchaId)
-        formData.append("captchaId",complaintData.captchaId);
-      if(complaintData.captchaText)
-        formData.append("captchaText",complaintData.captchaText);
+      if (complaintData.captchaId)
+        formData.append("captchaId", complaintData.captchaId);
+      if (complaintData.captchaText)
+        formData.append("captchaText", complaintData.captchaText);
 
       // Add coordinates
       if (complaintData.coordinates) {
@@ -443,6 +443,17 @@ const validateStep2 = (formData: GuestComplaintData): ValidationErrors => {
 
   if (!formData.wardId) errors.wardId = "Ward selection is required";
   if (!formData.area.trim()) errors.area = "Area/locality is required";
+  if (!formData.landmark || !formData.landmark.trim())
+    errors.landmark = "Landmark is required";
+  if (!formData.address || !formData.address.trim())
+    errors.address = "Full address is required";
+  if (
+    !formData.coordinates ||
+    formData.coordinates.latitude == null ||
+    formData.coordinates.longitude == null
+  ) {
+    errors.coordinates = "Location (GPS coordinates) is required";
+  }
 
   return errors;
 };

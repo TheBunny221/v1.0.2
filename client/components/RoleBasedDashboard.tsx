@@ -3,7 +3,7 @@ import { useAppSelector } from "../store/hooks";
 import AdminDashboard from "../pages/AdminDashboard";
 import CitizenDashboard from "../pages/CitizenDashboard";
 import WardOfficerDashboard from "../pages/WardOfficerDashboard";
-import MaintenanceDashboard from "../pages/MaintenanceDashboard";
+import MaintenanceTasks from "../pages/MaintenanceTasks";
 import Unauthorized from "../pages/Unauthorized";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -26,7 +26,7 @@ const RoleBasedDashboard: React.FC = () => {
     case "WARD_OFFICER":
       return <WardOfficerDashboard />;
     case "MAINTENANCE_TEAM":
-      return <MaintenanceDashboard />;
+      return <MaintenanceTasks />;
     default:
       return (
         <div className="flex items-center justify-center min-h-screen p-4">

@@ -684,6 +684,10 @@ export const getComplaints = asyncHandler(async (req, res) => {
   const filters = {};
   const enforced = {};
 
+  // Hold composite OR blocks so we can AND them safely later
+  let roleOr = null;
+  let searchOr = null;
+
   // --- role-based enforcement ---
   if (req.user.role === "CITIZEN") {
     filters.submittedById = req.user.id;
@@ -692,9 +696,9 @@ export const getComplaints = asyncHandler(async (req, res) => {
     filters.wardId = req.user.wardId;
     enforced.wardId = req.user.wardId;
   } else if (req.user.role === "MAINTENANCE_TEAM") {
-    filters.OR = [
+    roleOr = [
       { assignedToId: req.user.id },
-      { maintenanceTeamId: req.user.id }
+      { maintenanceTeamId: req.user.id },
     ];
     enforced.maintenanceTeamFilter = req.user.id;
   }
@@ -792,7 +796,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
     const upperSearchTerm = searchTerm.toUpperCase();
     const lowerSearchTerm = searchTerm.toLowerCase();
 
-    filters.OR = [
+    searchOr = [
       { title: { contains: searchTerm } },
       { title: { contains: lowerSearchTerm } },
       { description: { contains: searchTerm } },
@@ -807,24 +811,33 @@ export const getComplaints = asyncHandler(async (req, res) => {
 
     // If search looks like a complaint ID (starts with letters), prioritize exact matches
     if (/^[A-Za-z]/.test(searchTerm)) {
-      filters.OR.unshift({ complaintId: { equals: upperSearchTerm } });
+      searchOr.unshift({ complaintId: { equals: upperSearchTerm } });
     }
 
     // If search is purely numeric, it might be searching for the numeric part of complaint ID
     if (/^\d+$/.test(searchTerm)) {
-      filters.OR.unshift({
+      searchOr.unshift({
         complaintId: { contains: searchTerm.padStart(4, "0") },
       });
     }
   }
 
-  dbg("final prisma.where filters", filters);
+  const finalWhere = { ...filters };
+  if (roleOr || searchOr) {
+    finalWhere.AND = [
+      ...(finalWhere.AND || []),
+      ...(roleOr ? [{ OR: roleOr }] : []),
+      ...(searchOr ? [{ OR: searchOr }] : []),
+    ];
+  }
+
+  dbg("final prisma.where filters", finalWhere);
   dbg("pagination", { skip, take: limitNum, orderBy: { submittedOn: "desc" } });
 
   try {
     const [rawComplaints, total] = await Promise.all([
       prisma.complaint.findMany({
-        where: filters,
+        where: finalWhere,
         skip,
         take: limitNum,
         orderBy: { submittedOn: "desc" },
@@ -873,7 +886,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
           },
         },
       }),
-      prisma.complaint.count({ where: filters }),
+      prisma.complaint.count({ where: finalWhere }),
     ]);
 
     const complaints = rawComplaints.map((c) => ({

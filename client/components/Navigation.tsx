@@ -177,17 +177,15 @@ const Navigation: React.FC = () => {
   const filteredNavItems = navigationItems.filter((item) => {
     if (!user) return false;
 
-    // Hide Home tab for logged-in users (should only show for guests/non-authenticated)
     if (item.path === "/" && user) {
       return false;
     }
 
-    // For MAINTENANCE_TEAM users, show only Maintenance and Complaints
+    // For MAINTENANCE_TEAM users, show only Dashboard and Complaints
     if (user.role === "MAINTENANCE_TEAM") {
-      return item.path === "/maintenance" || item.path === "/complaints";
+      return item.path === "/dashboard" || item.path === "/complaints";
     }
 
-    // For other roles, use the original filtering logic
     return item.roles.includes(user.role as UserRole);
   });
 
@@ -256,7 +254,6 @@ const Navigation: React.FC = () => {
               </Button>
             </div>
 
-
             {/* Desktop Navigation for unauthenticated users */}
             <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
               <DropdownMenu>
@@ -313,8 +310,9 @@ const Navigation: React.FC = () => {
 
           {/* Mobile Navigation Menu for unauthenticated users */}
           <div
-            className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-              }`}
+            className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${
+              isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            }`}
           >
             <div className="px-4 pt-3 pb-4 space-y-3 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
               <DropdownMenu>
@@ -413,7 +411,6 @@ const Navigation: React.FC = () => {
             </Button>
           </div>
 
-
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
@@ -444,8 +441,9 @@ const Navigation: React.FC = () => {
                     notifications.slice(0, 5).map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-2 rounded-md mb-2 ${notification.isRead ? "bg-gray-50" : "bg-blue-50"
-                          }`}
+                        className={`p-2 rounded-md mb-2 ${
+                          notification.isRead ? "bg-gray-50" : "bg-blue-50"
+                        }`}
                       >
                         <p className="text-sm font-medium">
                           {notification.title}
@@ -537,8 +535,9 @@ const Navigation: React.FC = () => {
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-          }`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-sm ${
+          isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
         <div className="px-4 pt-3 pb-4 space-y-2 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-md">
           {/* Mobile Navigation Items */}
@@ -547,10 +546,11 @@ const Navigation: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${location.pathname === item.path
-                  ? "bg-primary text-primary-foreground"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  location.pathname === item.path
+                    ? "bg-primary text-primary-foreground"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <div className="flex items-center space-x-3">

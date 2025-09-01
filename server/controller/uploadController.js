@@ -211,6 +211,7 @@ export const getAttachment = asyncHandler(async (req, res) => {
     path.join(uploadDir, "complaints", filename), // In complaints subdirectory
     path.join(uploadDir, "profiles", filename), // In profiles subdirectory
     path.join(uploadDir, "logos", filename), // In logos subdirectory
+    path.join(uploadDir, "complaint-photos", filename), // In complaint-photos subdirectory
   ];
 
   let filePath = null;

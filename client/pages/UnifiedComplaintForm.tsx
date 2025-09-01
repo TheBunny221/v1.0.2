@@ -1091,7 +1091,9 @@ const UnifiedComplaintForm: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="landmark">Landmark (Optional)</Label>
+                      <Label htmlFor="landmark">
+                        Landmark <span className="text-red-500">*</span>
+                      </Label>
                       <div className="flex space-x-2">
                         <Input
                           id="landmark"
@@ -1099,7 +1101,7 @@ const UnifiedComplaintForm: React.FC = () => {
                           placeholder="Nearby landmark"
                           value={formData.landmark}
                           onChange={handleInputChange}
-                          className="flex-1"
+                          className={`flex-1 ${validationErrors.landmark ? "border-red-500 focus:ring-red-500" : ""}`}
                         />
                         <Button
                           type="button"
@@ -1114,14 +1116,26 @@ const UnifiedComplaintForm: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address">Full Address (Optional)</Label>
+                      <Label htmlFor="address">
+                        Full Address <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="address"
                         name="address"
                         placeholder="Complete address"
                         value={formData.address}
                         onChange={handleInputChange}
+                        className={
+                          validationErrors.address
+                            ? "border-red-500 focus:ring-red-500"
+                            : ""
+                        }
                       />
+                      {validationErrors.address && (
+                        <p className="text-sm text-red-600" role="alert">
+                          {validationErrors.address}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -1137,6 +1151,11 @@ const UnifiedComplaintForm: React.FC = () => {
                     </div>
                   )}
                 </div>
+                {validationErrors.coordinates && (
+                  <p className="text-sm text-red-600" role="alert">
+                    {validationErrors.coordinates}
+                  </p>
+                )}
               </div>
             )}
 
