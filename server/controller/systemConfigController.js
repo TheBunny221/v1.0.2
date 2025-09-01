@@ -460,6 +460,18 @@ const getDefaultPublicSettings = () => {
       description: "Physical address of the office",
       type: "string",
     },
+    {
+      key: "COMPLAINT_PRIORITIES",
+      value: "[\"LOW\",\"MEDIUM\",\"HIGH\",\"CRITICAL\"]",
+      description: "Available complaint priorities",
+      type: "json",
+    },
+    {
+      key: "COMPLAINT_STATUSES",
+      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\"]",
+      description: "Available complaint statuses",
+      type: "json",
+    },
   ];
 };
 
