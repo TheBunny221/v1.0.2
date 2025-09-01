@@ -570,7 +570,7 @@ const MaintenanceTasks: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header 
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -578,7 +578,7 @@ const MaintenanceTasks: React.FC = () => {
           </h1>
           <p className="text-gray-600">Manage your assigned maintenance work</p>
         </div>
-      </div>
+      </div>*/}
 
       {/* Welcome Hero */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
