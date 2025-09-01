@@ -117,9 +117,9 @@ const ComplaintsList: React.FC = () => {
       const parsed = raw ? JSON.parse(raw) : null;
       return Array.isArray(parsed) && parsed.length
         ? parsed
-        : ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+        : ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"];
     } catch {
-      return ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+      return ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"];
     }
   }, [settings]);
 
