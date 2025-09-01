@@ -27,7 +27,7 @@ const RoleBasedDashboard: React.FC = () => {
     case "WARD_OFFICER":
       return <WardOfficerDashboard />;
     case "MAINTENANCE_TEAM":
-      return <MaintenanceDashboard />;
+      return <MaintenanceTasks />;
     default:
       return (
         <div className="flex items-center justify-center min-h-screen p-4">
