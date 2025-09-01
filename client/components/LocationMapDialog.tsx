@@ -18,6 +18,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { MapPin, Navigation, Search } from "lucide-react";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 
 // Fix for default markers in react-leaflet
 const DefaultIcon = L.icon({
@@ -85,8 +86,17 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   onLocationSelect,
   initialLocation,
 }) => {
-  // Default to Kochi, India coordinates
-  const defaultPosition: [number, number] = [9.9312, 76.2673];
+  const { getConfig } = useSystemConfig();
+  const defaultLat = parseFloat(getConfig("MAP_DEFAULT_LAT", "9.9312")) || 9.9312;
+  const defaultLng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
+  const mapPlace = getConfig("MAP_SEARCH_PLACE", "Kochi, Kerala, India");
+  const countryCodes = getConfig("MAP_COUNTRY_CODES", "in").trim();
+  const bboxNorth = getConfig("MAP_BBOX_NORTH", "");
+  const bboxSouth = getConfig("MAP_BBOX_SOUTH", "");
+  const bboxEast = getConfig("MAP_BBOX_EAST", "");
+  const bboxWest = getConfig("MAP_BBOX_WEST", "");
+  const hasBbox = [bboxWest, bboxSouth, bboxEast, bboxNorth].every((v) => v && !Number.isNaN(parseFloat(v)));
+  const defaultPosition: [number, number] = [defaultLat, defaultLng];
   const [position, setPosition] = useState<[number, number]>(
     initialLocation
       ? [initialLocation.latitude, initialLocation.longitude]
@@ -160,8 +170,13 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     if (!searchQuery.trim()) return;
 
     try {
+      const viewbox = hasBbox
+        ? `&viewbox=${encodeURIComponent(`${bboxWest},${bboxNorth},${bboxEast},${bboxSouth}`)}&bounded=1`
+        : "";
+      const cc = countryCodes ? `&countrycodes=${encodeURIComponent(countryCodes)}` : "";
+      const q = `${searchQuery}, ${mapPlace}`;
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", Kochi, Kerala, India")}&format=json&limit=1&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1${viewbox}${cc}`,
       );
       const data = await response.json();
 
@@ -238,7 +253,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 flex gap-2">
                 <Input
-                  placeholder="Search for a location in Kochi..."
+                  placeholder={`Search for a location in ${mapPlace}`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
