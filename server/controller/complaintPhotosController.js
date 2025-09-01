@@ -12,13 +12,14 @@ const prisma = getPrisma();
 // Configure multer for photo uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../../uploads/complaint-photos");
-    
+    const baseUploadDir = process.env.UPLOAD_PATH || path.join(__dirname, "../../uploads");
+    const uploadDir = path.join(baseUploadDir, "complaint-photos");
+
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-    
+
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
@@ -289,10 +290,11 @@ export const deleteComplaintPhoto = asyncHandler(async (req, res) => {
     });
 
     // Delete physical file
-    const filePath = path.join(__dirname, "../../uploads/complaint-photos", photo.fileName);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+  const baseUploadDir = process.env.UPLOAD_PATH || path.join(__dirname, "../../uploads");
+  const filePath = path.join(baseUploadDir, "complaint-photos", photo.fileName);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
 
     res.status(200).json({
       success: true,
