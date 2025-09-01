@@ -550,7 +550,7 @@ const MaintenanceTasks: React.FC = () => {
               key={f.key}
               variant="outline"
               size="sm"
-              className={`h-7 rounded-full px-2.5 py-1 border-white/30 text-white/90 hover:bg-white/20 ${activeFilter === f.key ? "bg-white/25 ring-2 ring-white/60 text-white" : ""}`}
+              className={`h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-blue-700/30 text-white hover:bg-blue-600/40 hover:border-blue-100/50 ${activeFilter === f.key ? "bg-white text-blue-700 border-transparent shadow-sm" : ""}`}
               onClick={() => setActiveFilter(f.key)}
             >
               <span className="flex items-center gap-1">
