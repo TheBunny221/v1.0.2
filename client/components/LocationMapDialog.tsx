@@ -144,10 +144,41 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     reverseGeocode(position);
   }, [isOpen]);
 
+  const getGeoErrorMessage = (err: GeolocationPositionError | any) => {
+    const insecure = typeof window !== "undefined" && !window.isSecureContext;
+    if (insecure) return "Location requires HTTPS. Please use a secure connection.";
+    if (!err || typeof err !== "object") return "Unable to fetch your location.";
+    switch (err.code) {
+      case 1:
+        return "Location permission denied. Enable location access in your browser settings.";
+      case 2:
+        return "Location unavailable. Please check GPS or network and try again.";
+      case 3:
+        return "Location request timed out. Try again or move to an open area.";
+      default:
+        return err.message || "Unable to fetch your location.";
+    }
+  };
+
   // Get current location
-  const getCurrentLocation = () => {
+  const getCurrentLocation = async () => {
     setIsLoadingLocation(true);
-    if (navigator.geolocation) {
+    try {
+      if (!("geolocation" in navigator)) {
+        setIsLoadingLocation(false);
+        alert("Geolocation is not supported by this browser.");
+        return;
+      }
+
+      try {
+        const perm: any = (navigator as any).permissions && (await (navigator as any).permissions.query({ name: "geolocation" } as any));
+        if (perm && perm.state === "denied") {
+          setIsLoadingLocation(false);
+          alert("Location permission denied. Enable it in browser settings.");
+          return;
+        }
+      } catch {}
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const newPos: [number, number] = [
@@ -160,14 +191,16 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
           setIsLoadingLocation(false);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error("Error getting location:", { code: error?.code, message: error?.message });
           setIsLoadingLocation(false);
+          alert(getGeoErrorMessage(error));
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 600000 },
       );
-    } else {
+    } catch (e) {
+      console.error("Unexpected geolocation error:", e);
       setIsLoadingLocation(false);
-      alert("Geolocation is not supported by this browser.");
+      alert("Unable to fetch your location. Try again.");
     }
   };
 
