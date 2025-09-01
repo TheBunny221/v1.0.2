@@ -1114,14 +1114,18 @@ const UnifiedComplaintForm: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address">Full Address (Optional)</Label>
+                      <Label htmlFor="address">Full Address <span className='text-red-500'>*</span></Label>
                       <Input
                         id="address"
                         name="address"
                         placeholder="Complete address"
                         value={formData.address}
                         onChange={handleInputChange}
+                        className={validationErrors.address ? 'border-red-500 focus:ring-red-500' : ''}
                       />
+                      {validationErrors.address && (
+                        <p className="text-sm text-red-600" role="alert">{validationErrors.address}</p>
+                      )}
                     </div>
                   </div>
 
