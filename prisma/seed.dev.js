@@ -49,6 +49,56 @@ async function main() {
         description: "Size of the application logo (small, medium, large)",
       },
 
+      // Map & Location Settings
+      {
+        key: "MAP_SEARCH_PLACE",
+        value: "Kochi, Kerala, India",
+        type: "map",
+        description: "Place context appended to searches to bias results",
+      },
+      {
+        key: "MAP_COUNTRY_CODES",
+        value: "in",
+        type: "map",
+        description: "ISO2 country codes for Nominatim bias (comma-separated)",
+      },
+      {
+        key: "MAP_DEFAULT_LAT",
+        value: "9.9312",
+        type: "map",
+        description: "Default map center latitude",
+      },
+      {
+        key: "MAP_DEFAULT_LNG",
+        value: "76.2673",
+        type: "map",
+        description: "Default map center longitude",
+      },
+      {
+        key: "MAP_BBOX_NORTH",
+        value: "10.05",
+        type: "map",
+        description: "North latitude of bounding box (search constrained)",
+      },
+      {
+        key: "MAP_BBOX_SOUTH",
+        value: "9.85",
+        type: "map",
+        description: "South latitude of bounding box (search constrained)",
+      },
+      {
+        key: "MAP_BBOX_EAST",
+        value: "76.39",
+        type: "map",
+        description: "East longitude of bounding box (search constrained)",
+      },
+      {
+        key: "MAP_BBOX_WEST",
+        value: "76.20",
+        type: "map",
+        description: "West longitude of bounding box (search constrained)",
+      },
+
       // Complaint ID Configuration
       {
         key: "COMPLAINT_ID_PREFIX",
