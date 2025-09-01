@@ -1099,7 +1099,7 @@ const UnifiedComplaintForm: React.FC = () => {
                           placeholder="Nearby landmark"
                           value={formData.landmark}
                           onChange={handleInputChange}
-                          className="flex-1"
+                          className={`flex-1 ${validationErrors.landmark ? 'border-red-500 focus:ring-red-500' : ''}`}
                         />
                         <Button
                           type="button"
