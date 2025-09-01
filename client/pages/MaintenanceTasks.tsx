@@ -168,6 +168,8 @@ const MaintenanceTasks: React.FC = () => {
     closed: tasks.filter((t) => t.status === "CLOSED").length,
   };
 
+  const showStatCards = false;
+
   const quickFilters = [
     { key: "all", label: "All", count: taskCounts.total, icon: <ListTodo className="h-3 w-3" /> },
     { key: "pending", label: "Pending", count: taskCounts.pending, icon: <Clock className="h-3 w-3" /> },
