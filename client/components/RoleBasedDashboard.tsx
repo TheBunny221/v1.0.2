@@ -4,6 +4,7 @@ import AdminDashboard from "../pages/AdminDashboard";
 import CitizenDashboard from "../pages/CitizenDashboard";
 import WardOfficerDashboard from "../pages/WardOfficerDashboard";
 import MaintenanceDashboard from "../pages/MaintenanceDashboard";
+import MaintenanceTasks from "../pages/MaintenanceTasks";
 import Unauthorized from "../pages/Unauthorized";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
