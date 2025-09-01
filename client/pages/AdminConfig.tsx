@@ -1553,7 +1553,7 @@ const AdminConfig: React.FC = () => {
                       .map((setting) => (
                         <div key={setting.key} className="border rounded-lg p-4">
                           <div className="mb-2">
-                            <h4 className="font-medium">{setting.key}</h4>
+                            <h4 className="font-medium">{({MAP_SEARCH_PLACE:"Search Place Context",MAP_DEFAULT_LAT:"Default Latitude",MAP_DEFAULT_LNG:"Default Longitude",MAP_COUNTRY_CODES:"Country Codes (ISO2, comma-separated)",MAP_BBOX_NORTH:"Bounding Box North",MAP_BBOX_SOUTH:"Bounding Box South",MAP_BBOX_EAST:"Bounding Box East",MAP_BBOX_WEST:"Bounding Box West"} as any)[setting.key] || setting.key}</h4>
                             <p className="text-sm text-gray-600">{setting.description}</p>
                           </div>
                           <Input
@@ -1587,8 +1587,8 @@ const AdminConfig: React.FC = () => {
                             .map((setting) => (
                               <div key={setting.key} className="border rounded-lg p-4">
                                 <div className="mb-2">
-                                  <h4 className="font-medium">{setting.key}</h4>
-                                  <p className="text-sm text-gray-600">{setting.description}</p>
+                                  <h4 className="font-medium">{({MAP_SEARCH_PLACE:"Search Place Context",MAP_DEFAULT_LAT:"Default Latitude",MAP_DEFAULT_LNG:"Default Longitude",MAP_COUNTRY_CODES:"Country Codes (ISO2, comma-separated)",MAP_BBOX_NORTH:"Bounding Box North",MAP_BBOX_SOUTH:"Bounding Box South",MAP_BBOX_EAST:"Bounding Box East",MAP_BBOX_WEST:"Bounding Box West"} as any)[setting.key] || setting.key}</h4>
+                            <p className="text-sm text-gray-600">{setting.description}</p>
                                 </div>
                                 <Input
                                   type={setting.type === "number" ? "number" : "text"}
