@@ -267,6 +267,8 @@ export const baseApi = createApi({
     "Report",
     "Notification",
     "SystemConfig",
+    "Material",
+    "Photo",
   ],
   endpoints: () => ({}),
 });

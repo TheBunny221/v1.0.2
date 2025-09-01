@@ -692,8 +692,11 @@ export const getComplaints = asyncHandler(async (req, res) => {
     filters.wardId = req.user.wardId;
     enforced.wardId = req.user.wardId;
   } else if (req.user.role === "MAINTENANCE_TEAM") {
-    filters.assignedToId = req.user.id;
-    enforced.assignedToId = req.user.id;
+    filters.OR = [
+      { assignedToId: req.user.id },
+      { maintenanceTeamId: req.user.id }
+    ];
+    enforced.maintenanceTeamFilter = req.user.id;
   }
   if (Object.keys(enforced).length) dbg("role enforcement applied", enforced);
 

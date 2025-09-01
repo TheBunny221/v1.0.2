@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
+import {
+  useGetComplaintsQuery,
+  useUpdateComplaintStatusMutation,
+  useGetComplaintPhotosQuery,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -15,9 +20,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "../components/ui/dropdown-menu";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
+import PhotoUploadModal from "../components/PhotoUploadModal";
 import {
   Wrench,
   Calendar,
@@ -33,6 +46,11 @@ import {
   ListTodo,
   AlertCircle,
   Upload,
+  ChevronDown,
+  ChevronUp,
+  Image,
+  FileText,
+  User,
 } from "lucide-react";
 
 const MaintenanceTasks: React.FC = () => {
@@ -44,82 +62,96 @@ const MaintenanceTasks: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [resolveComment, setResolveComment] = useState("");
   const [resolvePhoto, setResolvePhoto] = useState<File | null>(null);
+  const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false);
+  const [selectedTaskForPhotos, setSelectedTaskForPhotos] = useState<any>(null);
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
 
-  // Sample task data - in real app this would come from API
-  const [tasks, setTasks] = useState([
-    {
-      id: "1",
-      title: "Water Pipeline Repair",
-      location: "MG Road, Near Metro Station",
-      address: "MG Road, Near Metro Station, Kochi, Kerala 682001",
-      priority: "HIGH",
-      status: "ASSIGNED",
-      estimatedTime: "4 hours",
-      dueDate: "2024-01-15",
-      isOverdue: false,
-      description:
-        "Main water pipeline burst, affecting supply to 200+ households",
-      assignedAt: "2024-01-14T10:00:00Z",
-      photo: "/api/attachments/complaint-1-photo.jpg",
-    },
-    {
-      id: "2",
-      title: "Street Light Installation",
-      location: "Marine Drive, Walkway Section",
-      address: "Marine Drive, Walkway Section, Fort Kochi, Kerala 682001",
-      priority: "MEDIUM",
-      status: "IN_PROGRESS",
-      estimatedTime: "2 hours",
-      dueDate: "2024-01-16",
-      isOverdue: false,
-      description: "Install 5 new LED street lights along the walkway",
-      assignedAt: "2024-01-13T09:00:00Z",
-      photo: "/api/attachments/complaint-2-photo.jpg",
-    },
-    {
-      id: "3",
-      title: "Road Pothole Filling",
-      location: "Broadway Junction",
-      address: "Broadway Junction, Ernakulam, Kerala 682011",
-      priority: "LOW",
-      status: "RESOLVED",
-      estimatedTime: "3 hours",
-      dueDate: "2024-01-10",
-      isOverdue: false,
-      description: "Fill multiple potholes affecting traffic flow",
-      assignedAt: "2024-01-08T08:00:00Z",
-      resolvedAt: "2024-01-10T15:30:00Z",
-      photo: "/api/attachments/complaint-3-photo.jpg",
-    },
-    {
-      id: "4",
-      title: "Garbage Collection Issue",
-      location: "Kadavanthra Bus Stop",
-      address: "Kadavanthra Bus Stop, Kochi, Kerala 682020",
-      priority: "HIGH",
-      status: "ASSIGNED",
-      estimatedTime: "1 hour",
-      dueDate: "2024-01-12",
-      isOverdue: true,
-      description: "Garbage collection missed for 3 days",
-      assignedAt: "2024-01-10T07:00:00Z",
-      photo: "/api/attachments/complaint-4-photo.jpg",
-    },
-    {
-      id: "5",
-      title: "Sewer Blockage Clearance",
-      location: "Panampilly Nagar",
-      address: "Panampilly Nagar, Kochi, Kerala 682036",
-      priority: "CRITICAL",
-      status: "REOPENED",
-      estimatedTime: "6 hours",
-      dueDate: "2024-01-17",
-      isOverdue: false,
-      description: "Sewer blockage causing overflow in residential area",
-      assignedAt: "2024-01-15T11:00:00Z",
-      photo: "/api/attachments/complaint-5-photo.jpg",
-    },
-  ]);
+  // Fetch complaints assigned to this maintenance team member
+  const {
+    data: complaintsResponse,
+    isLoading,
+    error,
+    refetch: refetchComplaints,
+  } = useGetComplaintsQuery({
+    assignedToId: user?.id,
+    page: 1,
+    limit: 100,
+  });
+
+  const [updateComplaintStatus] = useUpdateComplaintStatusMutation();
+
+  // Helper function to get estimated time based on priority
+  function getPriorityEstimatedTime(priority: string) {
+    switch (priority) {
+      case "CRITICAL":
+        return "2-4 hours";
+      case "HIGH":
+        return "4-8 hours";
+      case "MEDIUM":
+        return "1-2 days";
+      case "LOW":
+        return "2-5 days";
+      default:
+        return "1-2 days";
+    }
+  }
+
+  // Extract tasks from API response
+  const tasks = useMemo(() => {
+    if (Array.isArray(complaintsResponse?.data?.complaints)) {
+      return complaintsResponse!.data!.complaints.map((complaint: any) => ({
+        id: complaint.id,
+        title: complaint.title || `${complaint.type} Issue`,
+        location: complaint.area,
+        address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
+        priority: complaint.priority || "MEDIUM",
+        status: complaint.status,
+        estimatedTime: getPriorityEstimatedTime(complaint.priority),
+        dueDate: complaint.deadline
+          ? new Date(complaint.deadline).toISOString().split("T")[0]
+          : null,
+        isOverdue: complaint.deadline
+          ? new Date(complaint.deadline) < new Date() &&
+            !["RESOLVED", "CLOSED"].includes(complaint.status)
+          : false,
+        description: complaint.description,
+        assignedAt: complaint.assignedOn || complaint.submittedOn,
+        resolvedAt: complaint.resolvedOn,
+        photo: complaint.attachments?.[0]?.url || null,
+        latitude: complaint.latitude,
+        longitude: complaint.longitude,
+        complaintId: complaint.complaintId,
+        statusLogs: complaint.statusLogs || [],
+      }));
+    }
+    if (Array.isArray((complaintsResponse as any)?.data)) {
+      return (complaintsResponse as any).data.map((complaint: any) => ({
+        id: complaint.id,
+        title: complaint.title || `${complaint.type} Issue`,
+        location: complaint.area,
+        address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
+        priority: complaint.priority || "MEDIUM",
+        status: complaint.status,
+        estimatedTime: getPriorityEstimatedTime(complaint.priority),
+        dueDate: complaint.deadline
+          ? new Date(complaint.deadline).toISOString().split("T")[0]
+          : null,
+        isOverdue: complaint.deadline
+          ? new Date(complaint.deadline) < new Date() &&
+            !["RESOLVED", "CLOSED"].includes(complaint.status)
+          : false,
+        description: complaint.description,
+        assignedAt: complaint.assignedOn || complaint.submittedOn,
+        resolvedAt: complaint.resolvedOn,
+        photo: complaint.attachments?.[0]?.url || null,
+        latitude: complaint.latitude,
+        longitude: complaint.longitude,
+        complaintId: complaint.complaintId,
+        statusLogs: complaint.statusLogs || [],
+      }));
+    }
+    return [];
+  }, [complaintsResponse]);
 
   // Calculate task counts
   const taskCounts = {
@@ -150,12 +182,17 @@ const MaintenanceTasks: React.FC = () => {
   });
 
   // Handle task status updates
-  const handleStartWork = (taskId: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: "IN_PROGRESS" } : task,
-      ),
-    );
+  const handleStartWork = async (taskId: string) => {
+    try {
+      await updateComplaintStatus({
+        id: taskId,
+        status: "IN_PROGRESS",
+      }).unwrap();
+      refetchComplaints();
+    } catch (error) {
+      console.error("Failed to start work:", error);
+      // You might want to show a toast notification here
+    }
   };
 
   const handleMarkResolved = (task: any) => {
@@ -163,37 +200,222 @@ const MaintenanceTasks: React.FC = () => {
     setIsMarkResolvedOpen(true);
   };
 
-  const submitMarkResolved = () => {
+  const submitMarkResolved = async () => {
     if (selectedTask) {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === selectedTask.id
-            ? {
-                ...task,
-                status: "RESOLVED",
-                resolvedAt: new Date().toISOString(),
-                resolveComment,
-                resolvePhoto: resolvePhoto?.name,
-              }
-            : task,
-        ),
-      );
-      setIsMarkResolvedOpen(false);
-      setResolveComment("");
-      setResolvePhoto(null);
-      setSelectedTask(null);
+      try {
+        await updateComplaintStatus({
+          id: selectedTask.id,
+          status: "RESOLVED",
+          remarks: resolveComment,
+        }).unwrap();
+
+        // TODO: Handle photo upload when the photo upload modal is implemented
+        if (resolvePhoto) {
+          console.log("Photo upload would happen here:", resolvePhoto.name);
+        }
+
+        setIsMarkResolvedOpen(false);
+        setResolveComment("");
+        setResolvePhoto(null);
+        setSelectedTask(null);
+        refetchComplaints();
+      } catch (error) {
+        console.error("Failed to mark as resolved:", error);
+        // You might want to show a toast notification here
+      }
     }
   };
 
   // Handle navigation
-  const handleNavigate = (address: string) => {
-    const encodedAddress = encodeURIComponent(address);
-    window.open(`https://maps.google.com/?q=${encodedAddress}`, "_blank");
+  const handleNavigate = (task: any) => {
+    if (task.latitude && task.longitude) {
+      // Use exact coordinates if available
+      window.open(
+        `https://maps.google.com/?q=${task.latitude},${task.longitude}`,
+        "_blank",
+      );
+    } else {
+      // Fallback to address search
+      const encodedAddress = encodeURIComponent(task.address);
+      window.open(`https://maps.google.com/?q=${encodedAddress}`, "_blank");
+    }
   };
 
   // Handle photo view
   const handleViewPhoto = (photoUrl: string) => {
     window.open(photoUrl, "_blank");
+  };
+
+  // Handle photo upload
+  const handlePhotoUpload = (task: any) => {
+    setSelectedTaskForPhotos(task);
+    setIsPhotoUploadOpen(true);
+  };
+
+  // Toggle task expansion
+  const toggleTaskExpansion = (taskId: string) => {
+    setExpandedTaskId(expandedTaskId === taskId ? null : taskId);
+  };
+
+  // Work Progress Component
+  const TaskProgressSection: React.FC<{ task: any }> = ({ task }) => {
+    const {
+      data: photosResponse,
+      isLoading: isLoadingPhotos,
+      error: photosError,
+    } = useGetComplaintPhotosQuery(task.id);
+
+    const photos = photosResponse?.data?.photos || [];
+    const statusLogs = task.statusLogs || [];
+
+    // Combine photos and status logs into a timeline
+    const timelineItems = useMemo(() => {
+      const items = [];
+
+      // Add status logs
+      statusLogs.forEach((log: any) => {
+        items.push({
+          type: "status",
+          timestamp: log.timestamp || log.createdAt,
+          content: log,
+        });
+      });
+
+      // Add photos
+      photos.forEach((photo: any) => {
+        items.push({
+          type: "photo",
+          timestamp: photo.uploadedAt,
+          content: photo,
+        });
+      });
+
+      // Sort by timestamp (newest first)
+      return items.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
+    }, [statusLogs, photos]);
+
+    if (isLoadingPhotos) {
+      return (
+        <div className="border-t bg-gray-50 p-4">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border-t bg-gray-50 p-4">
+        <div className="flex items-center mb-3">
+          <FileText className="h-4 w-4 mr-2 text-gray-600" />
+          <h4 className="font-medium text-gray-800">Work Progress & Updates</h4>
+        </div>
+
+        {timelineItems.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">
+            <Camera className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+            <p className="text-sm">No updates or photos yet</p>
+            <p className="text-xs">
+              Upload photos and add progress notes as you work
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {timelineItems.map((item, index) => (
+              <div key={index} className="border-l-2 border-blue-200 pl-4 pb-3">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-white rounded-full p-1 border shadow-sm">
+                    {item.type === "photo" ? (
+                      <Image className="h-3 w-3 text-blue-600" />
+                    ) : (
+                      <User className="h-3 w-3 text-green-600" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-gray-500">
+                        {new Date(item.timestamp).toLocaleString()}
+                      </p>
+                      {item.type === "photo" && (
+                        <Badge variant="outline" className="text-xs">
+                          Photo
+                        </Badge>
+                      )}
+                    </div>
+
+                    {item.type === "photo" ? (
+                      <div className="space-y-2">
+                        <div className="flex items-start space-x-3">
+                          <img
+                            src={item.content.photoUrl}
+                            alt="Work progress photo"
+                            className="w-16 h-16 object-cover rounded-lg border cursor-pointer hover:opacity-75 transition-opacity"
+                            onClick={() =>
+                              handleViewPhoto(item.content.photoUrl)
+                            }
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600 mb-1">
+                              Uploaded by{" "}
+                              {item.content.uploadedByTeam?.fullName ||
+                                "Team Member"}
+                            </p>
+                            {item.content.description && (
+                              <p className="text-sm text-gray-800 bg-white rounded p-2 border">
+                                {item.content.description}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                              {item.content.originalName} •{" "}
+                              {(item.content.size / 1024 / 1024).toFixed(1)}MB
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <Badge
+                            className={getStatusColor(item.content.toStatus)}
+                            variant="secondary"
+                          >
+                            {item.content.toStatus?.replace("_", " ")}
+                          </Badge>
+                          {item.content.fromStatus && (
+                            <span className="text-xs text-gray-500">
+                              from {item.content.fromStatus.replace("_", " ")}
+                            </span>
+                          )}
+                        </div>
+                        {item.content.comment && (
+                          <p className="text-sm text-gray-700 bg-white rounded p-2 border">
+                            {item.content.comment}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          by {item.content.user?.fullName || "System"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {photosError && (
+          <div className="text-center py-2 text-red-500 text-sm">
+            Failed to load photos
+          </div>
+        )}
+      </div>
+    );
   };
 
   const getPriorityColor = (priority: string) => {
@@ -238,6 +460,44 @@ const MaintenanceTasks: React.FC = () => {
         return <Clock className="h-4 w-4" />;
     }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-400 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Error Loading Tasks
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Failed to load your maintenance tasks. Please try again.
+          </p>
+          <Button onClick={() => refetchComplaints()}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -409,18 +669,54 @@ const MaintenanceTasks: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleNavigate(task.address)}
+                      onClick={() => handleNavigate(task)}
                     >
                       <Navigation className="h-3 w-3 mr-1" />
                       Navigate
                     </Button>
+                    {task.photo ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Camera className="h-3 w-3 mr-1" />
+                            Photos
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => handleViewPhoto(task.photo)}
+                          >
+                            View Existing Photo
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handlePhotoUpload(task)}
+                          >
+                            Upload New Photos
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePhotoUpload(task)}
+                      >
+                        <Camera className="h-3 w-3 mr-1" />
+                        Add Photos
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleViewPhoto(task.photo)}
+                      onClick={() => toggleTaskExpansion(task.id)}
                     >
-                      <Camera className="h-3 w-3 mr-1" />
-                      Photo
+                      {expandedTaskId === task.id ? (
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3 mr-1" />
+                      )}
+                      Progress
                     </Button>
                   </div>
                   <div className="flex space-x-2">
@@ -450,6 +746,10 @@ const MaintenanceTasks: React.FC = () => {
                     </Link>
                   </div>
                 </div>
+                {/* Work Progress Section */}
+                {expandedTaskId === task.id && (
+                  <TaskProgressSection task={task} />
+                )}
               </div>
             ))}
           </div>
@@ -519,6 +819,23 @@ const MaintenanceTasks: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Photo Upload Modal */}
+      {selectedTaskForPhotos && (
+        <PhotoUploadModal
+          isOpen={isPhotoUploadOpen}
+          onClose={() => {
+            setIsPhotoUploadOpen(false);
+            setSelectedTaskForPhotos(null);
+          }}
+          complaintId={selectedTaskForPhotos.id}
+          onSuccess={() => {
+            refetchComplaints();
+            // Keep the progress section expanded to show new photos
+            setExpandedTaskId(selectedTaskForPhotos.id);
+          }}
+        />
+      )}
     </div>
   );
 };

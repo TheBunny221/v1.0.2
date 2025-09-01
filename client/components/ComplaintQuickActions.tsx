@@ -80,6 +80,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
   const canManageComplaint =
     userRole === "WARD_OFFICER" || userRole === "ADMINISTRATOR";
   const canAssign = userRole === "WARD_OFFICER" || userRole === "ADMINISTRATOR";
+  const isMaintenanceTeam = userRole === "MAINTENANCE_TEAM";
 
   return (
     <>
@@ -152,8 +153,37 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
             </>
           )}
 
+          {/* Maintenance Team Actions */}
+          {isMaintenanceTeam && (
+            <>
+              {complaint.status === "ASSIGNED" && (
+                <Button
+                  size="sm"
+                  onClick={() => onShowUpdateModal?.(complaint)}
+                  title="Start Work"
+                  className="text-orange-600 hover:text-orange-700"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  Start
+                </Button>
+              )}
+
+              {complaint.status === "IN_PROGRESS" && (
+                <Button
+                  size="sm"
+                  onClick={() => onShowUpdateModal?.(complaint)}
+                  title="Mark Resolved"
+                  className="text-green-600 hover:text-green-700"
+                >
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Complete
+                </Button>
+              )}
+            </>
+          )}
+
           {/* More Actions Dropdown */}
-          {canManageComplaint && (
+          {(canManageComplaint || isMaintenanceTeam) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant="outline">
@@ -161,13 +191,25 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {onShowUpdateModal && (
+                {onShowUpdateModal && canManageComplaint && (
                   <>
                     <DropdownMenuItem
                       onClick={() => onShowUpdateModal(complaint)}
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Update Complaint
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
+                {onShowUpdateModal && isMaintenanceTeam && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => onShowUpdateModal(complaint)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Status
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>

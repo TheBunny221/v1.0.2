@@ -1091,9 +1091,10 @@ const ComplaintDetails: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {/* Status update button for Ward Officers and Administrators */}
+              {/* Status update button for Ward Officers, Administrators, and Maintenance Team */}
               {(user?.role === "WARD_OFFICER" ||
-                user?.role === "ADMINISTRATOR") && (
+                user?.role === "ADMINISTRATOR" ||
+                user?.role === "MAINTENANCE_TEAM") && (
                 <Button
                   className="w-full justify-start"
                   onClick={() => setIsUpdateModalOpen(true)}

@@ -40,6 +40,8 @@ model User {
   sentMessages      Message[]          @relation("SentBy")
   receivedMessages  Message[]          @relation("ReceivedBy")
   otpSessions       OTPSession[]
+  addedMaterials    Material[]
+  uploadedPhotos    ComplaintPhoto[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,6 +101,8 @@ model Complaint {
   landmark        String?
   address         String?
   coordinates     String?           // JSON string for lat/lng
+  latitude        Float?            // Explicit latitude field
+  longitude       Float?            // Explicit longitude field
   
   // Contact Information
   contactName     String?
@@ -138,6 +142,8 @@ model Complaint {
   attachments     Attachment[]
   notifications   Notification[]
   messages        Message[]
+  materials       Material[]
+  photos          ComplaintPhoto[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -338,4 +344,43 @@ model Report {
   generatedAt DateTime @default(now())
 
   @@map("reports")
+}
+
+model Material {
+  id          String    @id @default(cuid())
+  complaintId String
+  materialName String
+  quantity    Int
+  unit        String    // e.g., kg, meter, piece
+  usedAt      DateTime  @default(now())
+  addedById   String    // maintenance team member who added this
+  notes       String?
+
+  // Relations
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  addedBy     User      @relation(fields: [addedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("materials")
+}
+
+model ComplaintPhoto {
+  id              String   @id @default(cuid())
+  complaintId     String
+  uploadedByTeamId String  // maintenance team member who uploaded this
+  photoUrl        String
+  fileName        String
+  originalName    String
+  mimeType        String
+  size            Int
+  uploadedAt      DateTime @default(now())
+  description     String?  // optional description of what the photo shows
+
+  // Relations
+  complaint       Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  uploadedByTeam  User      @relation(fields: [uploadedByTeamId], references: [id])
+
+  @@map("complaint_photos")
 }

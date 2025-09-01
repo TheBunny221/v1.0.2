@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
 import {
   Card,
   CardContent,
@@ -28,8 +29,11 @@ import {
 
 const TaskDetails: React.FC = () => {
   const { id } = useParams();
+  const { user } = useAppSelector((state) => state.auth);
   const [workNote, setWorkNote] = useState("");
   const [completionNote, setCompletionNote] = useState("");
+
+  const isMaintenanceTeam = user?.role === "MAINTENANCE_TEAM";
 
   // Mock task data
   const task = {
@@ -119,16 +123,18 @@ const TaskDetails: React.FC = () => {
             <span className="text-sm text-gray-500">Due: {task.dueDate}</span>
           </div>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <Navigation className="h-4 w-4 mr-2" />
-            Navigate
-          </Button>
-          <Button variant="outline">
-            <Phone className="h-4 w-4 mr-2" />
-            Call Contact
-          </Button>
-        </div>
+        {!isMaintenanceTeam && (
+          <div className="flex space-x-2">
+            <Button variant="outline">
+              <Navigation className="h-4 w-4 mr-2" />
+              Navigate
+            </Button>
+            <Button variant="outline">
+              <Phone className="h-4 w-4 mr-2" />
+              Call Contact
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -303,66 +309,72 @@ const TaskDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Required Materials */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Required Materials</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {task.materials.map((material, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-sm">{material}</span>
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Required Materials - Hidden for Maintenance Team */}
+          {!isMaintenanceTeam && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Required Materials</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {task.materials.map((material, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm">{material}</span>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Required Tools */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Required Tools</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {task.tools.map((tool, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-sm">{tool}</span>
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Required Tools - Hidden for Maintenance Team */}
+          {!isMaintenanceTeam && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Required Tools</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {task.tools.map((tool, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm">{tool}</span>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
-                <Camera className="h-4 w-4 mr-2" />
-                Take Photo
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Document
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Report Issue
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Quick Actions - Hidden for Maintenance Team */}
+          {!isMaintenanceTeam && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" className="w-full justify-start">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Take Photo
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Document
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Report Issue
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

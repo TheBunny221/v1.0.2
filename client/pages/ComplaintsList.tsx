@@ -136,9 +136,9 @@ const ComplaintsList: React.FC = () => {
 
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
-    // For MAINTENANCE_TEAM users, show only their own complaints
+    // For MAINTENANCE_TEAM users, show only complaints assigned to them
     if (user?.role === "MAINTENANCE_TEAM") {
-      params.submittedById = user.id;
+      params.assignedToId = user.id;
     }
 
     return params;

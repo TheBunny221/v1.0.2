@@ -41,13 +41,13 @@ const MaintenanceDashboard: React.FC = () => {
   const { translations } = useAppSelector((state) => state.language);
 
   // Fetch complaints assigned to this maintenance team member
+  // Let the backend handle role-based filtering automatically for maintenance team
   const {
     data: complaintsResponse,
     isLoading,
     error,
     refetch: refetchComplaints,
   } = useGetComplaintsQuery({
-    assignedTo: user?.id,
     page: 1,
     limit: 100,
   });
@@ -67,17 +67,21 @@ const MaintenanceDashboard: React.FC = () => {
   const dashboardStats = useMemo(() => {
     const assignedTasks = complaints.filter((c: any) => {
       const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
-      return assigneeId === user?.id && c.status !== "REGISTERED";
+      const maintenanceTeamId = c.maintenanceTeamId || c.maintenanceTeam?.id;
+      return (
+        (assigneeId === user?.id || maintenanceTeamId === user?.id) &&
+        c.status !== "REGISTERED"
+      );
     });
 
-//   useEffect(() => {
-//     // Filter tasks assigned to this maintenance team member
-//     const assignedTasks = complaints.filter(
-//       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
-//     );
-//     const assignedTasks = complaints.filter(
-//       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
-//     );
+    //   useEffect(() => {
+    //     // Filter tasks assigned to this maintenance team member
+    //     const assignedTasks = complaints.filter(
+    //       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
+    //     );
+    //     const assignedTasks = complaints.filter(
+    //       (c) => c.assignedToId === user?.id && c.status !== "REGISTERED",
+    //     );
 
     const totalTasks = assignedTasks.length;
     const inProgress = assignedTasks.filter(
@@ -93,14 +97,45 @@ const MaintenanceDashboard: React.FC = () => {
       (c) => new Date(c.assignedOn || c.submittedOn).toDateString() === today,
     ).length;
 
+    // Calculate average completion time for resolved tasks
+    const resolvedTasks = assignedTasks.filter(
+      (c) => c.status === "RESOLVED" && c.resolvedOn && c.assignedOn,
+    );
+    const avgCompletionTime =
+      resolvedTasks.length > 0
+        ? resolvedTasks.reduce((acc, task) => {
+            const assignedDate = new Date(task.assignedOn);
+            const resolvedDate = new Date(task.resolvedOn);
+            const diffInDays =
+              (resolvedDate.getTime() - assignedDate.getTime()) /
+              (1000 * 60 * 60 * 24);
+            return acc + diffInDays;
+          }, 0) / resolvedTasks.length
+        : 0;
+
+    // Calculate efficiency as percentage of tasks completed on time
+    const tasksWithDeadlines = assignedTasks.filter((c) => c.deadline);
+    const onTimeTasks = tasksWithDeadlines.filter((c) => {
+      if (c.status === "RESOLVED" && c.resolvedOn) {
+        return new Date(c.resolvedOn) <= new Date(c.deadline);
+      }
+      return c.status !== "RESOLVED" && new Date() <= new Date(c.deadline);
+    });
+    const efficiency =
+      tasksWithDeadlines.length > 0
+        ? Math.round((onTimeTasks.length / tasksWithDeadlines.length) * 100)
+        : totalTasks === 0
+          ? 100
+          : Math.round((completed / totalTasks) * 100);
+
     return {
       totalTasks,
       inProgress,
       completed,
       pending,
       todayTasks,
-      avgCompletionTime: 1.5,
-      efficiency: 92,
+      avgCompletionTime: Math.round(avgCompletionTime * 10) / 10, // Round to 1 decimal
+      efficiency,
     };
   }, [complaints, user?.id]);
 
@@ -135,7 +170,11 @@ const MaintenanceDashboard: React.FC = () => {
   const myTasks = useMemo(() => {
     return complaints.filter((c: any) => {
       const assigneeId = c.assignedToId || c.assignedTo?.id || c.assignedTo;
-      return assigneeId === user?.id && c.status !== "REGISTERED";
+      const maintenanceTeamId = c.maintenanceTeamId || c.maintenanceTeam?.id;
+      return (
+        (assigneeId === user?.id || maintenanceTeamId === user?.id) &&
+        c.status !== "REGISTERED"
+      );
     });
   }, [complaints, user?.id]);
 
@@ -167,6 +206,57 @@ const MaintenanceDashboard: React.FC = () => {
     }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-lg p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">
+            🚧 Maintenance Dashboard 🛠️
+          </h1>
+          <p className="text-green-100">Loading your assigned tasks...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-gray-200 rounded w-12 animate-pulse mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-lg p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">⚠️ Dashboard Error</h1>
+          <p className="text-red-100">
+            Failed to load your tasks. Please try again.
+          </p>
+          <div className="mt-4">
+            <Button
+              className="bg-white text-red-600 hover:bg-gray-100"
+              onClick={() => refetchComplaints()}
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -175,13 +265,44 @@ const MaintenanceDashboard: React.FC = () => {
         <p className="text-green-100">
           Manage your assigned tasks and track field work progress.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex space-x-2">
           <Button className="bg-white text-green-600 hover:bg-gray-100">
             <Navigation className="h-4 w-4 mr-2" />
             Start Field Work
           </Button>
+          <Button
+            variant="outline"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            onClick={() => refetchComplaints()}
+          >
+            <Clock className="h-4 w-4 mr-2" />
+            Refresh Data
+          </Button>
         </div>
       </div>
+
+      {/* Debug Info - Development Only */}
+      {process.env.NODE_ENV === "development" && (
+        <Card className="bg-yellow-50 border-yellow-200">
+          <CardHeader>
+            <CardTitle className="text-sm text-yellow-800">
+              Debug Info (Dev Mode)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-yellow-700">
+            <div>Total Complaints Fetched: {complaints.length}</div>
+            <div>User ID: {user?.id}</div>
+            <div>User Role: {user?.role}</div>
+            <div>My Tasks Count: {myTasks.length}</div>
+            {complaints.length > 0 && (
+              <div>
+                Sample Task:{" "}
+                {JSON.stringify(complaints[0], null, 2).substring(0, 200)}...
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

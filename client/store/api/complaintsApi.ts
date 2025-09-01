@@ -401,6 +401,144 @@ export const complaintsApi = baseApi.injectEndpoints({
       },
       providesTags: ["User"],
     }),
+
+    // Get complaint materials
+    getComplaintMaterials: builder.query<
+      ApiResponse<{
+        materials: Array<{
+          id: string;
+          materialName: string;
+          quantity: number;
+          unit: string;
+          usedAt: string;
+          notes?: string;
+          addedBy: {
+            id: string;
+            fullName: string;
+            role: string;
+          };
+          createdAt: string;
+        }>;
+      }>,
+      string
+    >({
+      query: (complaintId) => `/complaints/${complaintId}/materials`,
+      providesTags: (result, error, complaintId) => [
+        { type: "Material", id: "LIST" },
+        { type: "Material", id: complaintId },
+      ],
+    }),
+
+    // Add material to complaint
+    addComplaintMaterial: builder.mutation<
+      ApiResponse<{
+        material: {
+          id: string;
+          materialName: string;
+          quantity: number;
+          unit: string;
+          usedAt: string;
+          notes?: string;
+          addedBy: {
+            id: string;
+            fullName: string;
+            role: string;
+          };
+          createdAt: string;
+        };
+      }>,
+      {
+        complaintId: string;
+        materialName: string;
+        quantity: number;
+        unit: string;
+        notes?: string;
+        usedAt?: string;
+      }
+    >({
+      query: ({ complaintId, ...body }) => ({
+        url: `/complaints/${complaintId}/materials`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { complaintId }) => [
+        { type: "Material", id: "LIST" },
+        { type: "Material", id: complaintId },
+      ],
+    }),
+
+    // Get complaint photos
+    getComplaintPhotos: builder.query<
+      ApiResponse<{
+        photos: Array<{
+          id: string;
+          photoUrl: string;
+          fileName: string;
+          originalName: string;
+          mimeType: string;
+          size: number;
+          uploadedAt: string;
+          description?: string;
+          uploadedByTeam: {
+            id: string;
+            fullName: string;
+            role: string;
+          };
+        }>;
+      }>,
+      string
+    >({
+      query: (complaintId) => `/complaints/${complaintId}/photos`,
+      providesTags: (result, error, complaintId) => [
+        { type: "Photo", id: "LIST" },
+        { type: "Photo", id: complaintId },
+      ],
+    }),
+
+    // Upload complaint photos
+    uploadComplaintPhotos: builder.mutation<
+      ApiResponse<{
+        photos: Array<{
+          id: string;
+          photoUrl: string;
+          fileName: string;
+          originalName: string;
+          mimeType: string;
+          size: number;
+          uploadedAt: string;
+          description?: string;
+          uploadedByTeam: {
+            id: string;
+            fullName: string;
+            role: string;
+          };
+        }>;
+      }>,
+      {
+        complaintId: string;
+        photos: File[];
+        description?: string;
+      }
+    >({
+      query: ({ complaintId, photos, description }) => {
+        const formData = new FormData();
+        photos.forEach((photo) => {
+          formData.append("photos", photo);
+        });
+        if (description) {
+          formData.append("description", description);
+        }
+        return {
+          url: `/complaints/${complaintId}/photos`,
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: (result, error, { complaintId }) => [
+        { type: "Photo", id: "LIST" },
+        { type: "Photo", id: complaintId },
+      ],
+    }),
   }),
 });
 
@@ -417,4 +555,8 @@ export const {
   useGetComplaintStatisticsQuery,
   useGetWardDashboardStatisticsQuery,
   useGetWardUsersQuery,
+  useGetComplaintMaterialsQuery,
+  useAddComplaintMaterialMutation,
+  useGetComplaintPhotosQuery,
+  useUploadComplaintPhotosMutation,
 } = complaintsApi;
