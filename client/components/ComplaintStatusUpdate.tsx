@@ -78,6 +78,12 @@ const COMPLAINT_STATUSES = [
     icon: CheckCircle,
     color: "bg-gray-100 text-gray-800",
   },
+  {
+    value: "REOPENED",
+    label: "Reopened",
+    icon: AlertCircle,
+    color: "bg-purple-100 text-purple-800",
+  },
 ];
 
 const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
@@ -252,7 +258,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {COMPLAINT_STATUSES.map((status) => (
+                  {COMPLAINT_STATUSES.filter(s => s.value !== "REOPENED").map((status) => (
                     <SelectItem key={status.value} value={status.value}>
                       <div className="flex items-center gap-2">
                         <status.icon className="h-4 w-4" />
