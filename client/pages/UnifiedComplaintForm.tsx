@@ -1137,6 +1137,9 @@ const UnifiedComplaintForm: React.FC = () => {
                     </div>
                   )}
                 </div>
+                {validationErrors.coordinates && (
+                  <p className="text-sm text-red-600" role="alert">{validationErrors.coordinates}</p>
+                )}
               </div>
             )}
 
