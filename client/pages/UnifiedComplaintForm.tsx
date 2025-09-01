@@ -1091,7 +1091,7 @@ const UnifiedComplaintForm: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="landmark">Landmark (Optional)</Label>
+                      <Label htmlFor="landmark">Landmark <span className='text-red-500'>*</span></Label>
                       <div className="flex space-x-2">
                         <Input
                           id="landmark"
