@@ -562,7 +562,7 @@ const MaintenanceTasks: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            className="h-7 rounded-full px-2.5 py-1 border-white/30 text-white/90 hover:bg-white/20"
+            className="h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
             onClick={() => refetchComplaints()}
           >
             Refresh
