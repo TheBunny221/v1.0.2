@@ -216,6 +216,8 @@ const ComplaintsList: React.FC = () => {
         return "bg-green-100 text-green-800";
       case "CLOSED":
         return "bg-gray-100 text-gray-800";
+      case "REOPENED":
+        return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
