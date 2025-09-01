@@ -554,6 +554,8 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
       "CONTACT_EMAIL",
       "CONTACT_OFFICE_HOURS",
       "CONTACT_OFFICE_ADDRESS",
+      "COMPLAINT_PRIORITIES",
+      "COMPLAINT_STATUSES",
     ];
 
     const settings = await prisma.systemConfig.findMany({
