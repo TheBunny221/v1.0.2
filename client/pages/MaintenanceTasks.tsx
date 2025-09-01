@@ -5,6 +5,7 @@ import {
   useGetComplaintsQuery,
   useUpdateComplaintStatusMutation,
   useGetComplaintPhotosQuery,
+  useLazyGetComplaintQuery,
 } from "../store/api/complaintsApi";
 import {
   Card,
@@ -65,6 +66,8 @@ const MaintenanceTasks: React.FC = () => {
   const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false);
   const [selectedTaskForPhotos, setSelectedTaskForPhotos] = useState<any>(null);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
+  const [triggerGetComplaint] = useLazyGetComplaintQuery();
 
   // Fetch complaints assigned to this maintenance team member
   const {
@@ -246,17 +249,37 @@ const MaintenanceTasks: React.FC = () => {
   };
 
   // Handle navigation
-  const handleNavigate = (task: any) => {
-    if (task.latitude && task.longitude) {
-      // Use exact coordinates if available
-      window.open(
-        `https://maps.google.com/?q=${task.latitude},${task.longitude}`,
-        "_blank",
-      );
-    } else {
-      // Fallback to address search
-      const encodedAddress = encodeURIComponent(task.address);
-      window.open(`https://maps.google.com/?q=${encodedAddress}`, "_blank");
+  const handleNavigate = async (task: any) => {
+    try {
+      setNavigatingId(task.id);
+      let lat = task.latitude;
+      let lng = task.longitude;
+
+      if ((!lat || !lng) && task.id) {
+        const res = await triggerGetComplaint(task.id).unwrap();
+        const c = res?.data || res; // support both shapes
+        lat = c?.latitude ?? c?.lat ?? lat;
+        lng = c?.longitude ?? c?.lng ?? lng;
+      }
+
+      if (lat && lng) {
+        const latNum = Number(lat);
+        const lngNum = Number(lng);
+        if (!Number.isNaN(latNum) && !Number.isNaN(lngNum)) {
+          const url = `https://www.google.com/maps/search/?api=1&query=${latNum},${lngNum}`;
+          window.open(url, "_blank", "noopener,noreferrer");
+          return;
+        }
+      }
+
+      const encoded = encodeURIComponent(task.address || task.location || "");
+      const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+      window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      const encoded = encodeURIComponent(task.address || task.location || "");
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank", "noopener,noreferrer");
+    } finally {
+      setNavigatingId(null);
     }
   };
 
@@ -806,9 +829,10 @@ const MaintenanceTasks: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleNavigate(task)}
+                      disabled={navigatingId === task.id}
                     >
-                      <Navigation className="h-3 w-3 mr-1" />
-                      Navigate
+                      <Navigation className={`h-3 w-3 mr-1 ${navigatingId === task.id ? "animate-pulse" : ""}`} />
+                      {navigatingId === task.id ? "Opening..." : "Navigate"}
                     </Button>
                     {task.photo ? (
                       <DropdownMenu>
