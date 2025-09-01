@@ -40,10 +40,10 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   const defaultLng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
   const mapPlace = getConfig("MAP_SEARCH_PLACE", "Kochi, Kerala, India");
   const countryCodes = getConfig("MAP_COUNTRY_CODES", "in").trim();
-  const bboxNorth = getConfig("MAP_BBOX_NORTH", "");
-  const bboxSouth = getConfig("MAP_BBOX_SOUTH", "");
-  const bboxEast = getConfig("MAP_BBOX_EAST", "");
-  const bboxWest = getConfig("MAP_BBOX_WEST", "");
+  const bboxNorth = getConfig("MAP_BBOX_NORTH", "10.05");
+  const bboxSouth = getConfig("MAP_BBOX_SOUTH", "9.85");
+  const bboxEast = getConfig("MAP_BBOX_EAST", "76.39");
+  const bboxWest = getConfig("MAP_BBOX_WEST", "76.20");
   const hasBbox = [bboxWest, bboxSouth, bboxEast, bboxNorth].every((v) => v && !Number.isNaN(parseFloat(v)));
   const defaultPosition = { lat: defaultLat, lng: defaultLng };
   const [position, setPosition] = useState(
