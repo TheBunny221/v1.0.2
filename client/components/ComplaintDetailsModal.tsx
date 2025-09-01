@@ -460,7 +460,7 @@ Phone: ${user.phone || "N/A"}
                         <FileText className="h-8 w-8 text-blue-600" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {attachment.filename || `Attachment ${index + 1}`}
+                            {attachment.originalName || attachment.fileName || `Attachment ${index + 1}`}
                           </p>
                           <p className="text-xs text-gray-500">
                             {attachment.size
