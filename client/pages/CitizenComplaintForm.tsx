@@ -787,7 +787,7 @@ const CitizenComplaintForm: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Sub-Zone (Optional)</Label>
+                      <Label>Sub-Zone *</Label>
                       <Select
                         value={formData.subZoneId}
                         onValueChange={(value) =>
@@ -795,7 +795,7 @@ const CitizenComplaintForm: React.FC = () => {
                         }
                         disabled={!formData.wardId}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className={validationErrors.subZoneId ? "border-red-500" : ""}>
                           <SelectValue placeholder="Select sub-zone" />
                         </SelectTrigger>
                         <SelectContent>
@@ -806,6 +806,9 @@ const CitizenComplaintForm: React.FC = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      {validationErrors.subZoneId && (
+                        <p className="text-sm text-red-600">{validationErrors.subZoneId}</p>
+                      )}
                     </div>
                   </div>
 
