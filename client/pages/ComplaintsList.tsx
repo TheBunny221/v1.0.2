@@ -42,6 +42,7 @@ import {
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
 import QuickComplaintModal from "../components/QuickComplaintModal";
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
+import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
