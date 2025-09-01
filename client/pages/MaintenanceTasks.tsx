@@ -580,8 +580,8 @@ const MaintenanceTasks: React.FC = () => {
         </Card>
 
         <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("resolved")}
+          className={`cursor-pointer transition-colors ${activeFilter === "inProgress" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("inProgress")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -616,8 +616,6 @@ const MaintenanceTasks: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "reopened" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
           onClick={() => setActiveFilter("reopened")}
@@ -653,6 +651,7 @@ const MaintenanceTasks: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
 
       {/* Filtered Tasks */}
       <Card>
