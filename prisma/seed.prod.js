@@ -156,55 +156,6 @@ async function main() {
         description: "Physical address of the main office",
       },
 
-      // System Configuration
-      {
-        key: "DEFAULT_LANGUAGE",
-        value: "en",
-        type: "system",
-        description: "Default language for the application",
-      },
-      {
-        key: "EMAIL_ENABLED",
-        value: "true",
-        type: "system",
-        description: "Whether email notifications are enabled",
-      },
-      {
-        key: "SMS_ENABLED",
-        value: "true",
-        type: "system",
-        description: "Whether SMS notifications are enabled",
-      },
-      {
-        key: "MAX_FILE_SIZE",
-        value: "10485760",
-        type: "system",
-        description: "Maximum file upload size in bytes (10MB)",
-      },
-      {
-        key: "NOTIFICATION_RETENTION_DAYS",
-        value: "90",
-        type: "system",
-        description: "Number of days to retain notifications before cleanup",
-      },
-      {
-        key: "SESSION_TIMEOUT_MINUTES",
-        value: "120",
-        type: "system",
-        description: "User session timeout in minutes",
-      },
-      {
-        key: "MAINTENANCE_MODE",
-        value: "false",
-        type: "system",
-        description: "Whether the application is in maintenance mode",
-      },
-      {
-        key: "ANALYTICS_ENABLED",
-        value: "true",
-        type: "system",
-        description: "Whether analytics tracking is enabled",
-      },
     ];
 
     await Promise.all(
