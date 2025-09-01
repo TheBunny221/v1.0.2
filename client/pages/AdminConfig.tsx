@@ -877,6 +877,11 @@ const AdminConfig: React.FC = () => {
     });
   };
 
+  const handleOpenBoundaryManager = (ward: Ward) => {
+    setSelectedWardForBoundary(ward);
+    setIsBoundaryManagerOpen(true);
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
