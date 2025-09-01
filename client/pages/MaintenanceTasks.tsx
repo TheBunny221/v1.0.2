@@ -572,7 +572,8 @@ const MaintenanceTasks: React.FC = () => {
         </div>
       </div>
 
-      {/* Task Count Cards */}
+      {/* Task Count Cards (hidden to avoid duplication) */}
+      {showStatCards && (
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
@@ -702,6 +703,8 @@ const MaintenanceTasks: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      )}
 
       {/* Filtered Tasks */}
       <Card>
