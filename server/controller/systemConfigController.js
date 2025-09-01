@@ -376,6 +376,16 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
       value: "true",
       description: "Allow citizen self-registration",
     },
+    {
+      key: "COMPLAINT_PRIORITIES",
+      value: "[\"LOW\",\"MEDIUM\",\"HIGH\",\"CRITICAL\"]",
+      description: "Available complaint priorities",
+    },
+    {
+      key: "COMPLAINT_STATUSES",
+      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\"]",
+      description: "Available complaint statuses",
+    },
   ];
 
   await prisma.systemConfig.createMany({
