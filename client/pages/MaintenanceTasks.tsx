@@ -522,6 +522,43 @@ const MaintenanceTasks: React.FC = () => {
         </div>
       </div>
 
+      {/* Welcome Hero */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-1">Maintenance Dashboard</h2>
+            <p className="text-blue-100">Welcome back! Here's your current workload.</p>
+          </div>
+          <div className="text-right">
+            <div className="text-4xl font-extrabold">{taskCounts.total}</div>
+            <div className="text-sm text-blue-100">Total Tasks</div>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            onClick={() => setActiveFilter("overdue")}
+          >
+            Overdue: {taskCounts.overdue}
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            onClick={() => setActiveFilter("inProgress")}
+          >
+            In Progress: {taskCounts.inProgress}
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            onClick={() => refetchComplaints()}
+          >
+            Refresh Data
+          </Button>
+        </div>
+      </div>
+
       {/* Task Count Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card
