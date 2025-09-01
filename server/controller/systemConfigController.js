@@ -383,7 +383,7 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
     },
     {
       key: "COMPLAINT_STATUSES",
-      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\"]",
+      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\",\"REOPENED\"]",
       description: "Available complaint statuses",
     },
   ];
@@ -478,7 +478,7 @@ const getDefaultPublicSettings = () => {
     },
     {
       key: "COMPLAINT_STATUSES",
-      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\"]",
+      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\",\"REOPENED\"]",
       description: "Available complaint statuses",
       type: "json",
     },
