@@ -177,17 +177,15 @@ const Navigation: React.FC = () => {
   const filteredNavItems = navigationItems.filter((item) => {
     if (!user) return false;
 
-    // Hide Home tab for logged-in users (should only show for guests/non-authenticated)
     if (item.path === "/" && user) {
       return false;
     }
 
-    // For MAINTENANCE_TEAM users, show only Maintenance and Complaints
+    // For MAINTENANCE_TEAM users, show only Dashboard and Complaints
     if (user.role === "MAINTENANCE_TEAM") {
-      return item.path === "/maintenance" || item.path === "/complaints";
+      return item.path === "/dashboard" || item.path === "/complaints";
     }
 
-    // For other roles, use the original filtering logic
     return item.roles.includes(user.role as UserRole);
   });
 
