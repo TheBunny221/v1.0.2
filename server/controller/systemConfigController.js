@@ -580,6 +580,15 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
       "CONTACT_OFFICE_ADDRESS",
       "COMPLAINT_PRIORITIES",
       "COMPLAINT_STATUSES",
+      // Map & Location settings
+      "MAP_SEARCH_PLACE",
+      "MAP_COUNTRY_CODES",
+      "MAP_DEFAULT_LAT",
+      "MAP_DEFAULT_LNG",
+      "MAP_BBOX_NORTH",
+      "MAP_BBOX_SOUTH",
+      "MAP_BBOX_EAST",
+      "MAP_BBOX_WEST",
     ];
 
     const settings = await prisma.systemConfig.findMany({
