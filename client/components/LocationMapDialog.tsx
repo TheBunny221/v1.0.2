@@ -3,6 +3,8 @@ import {
   MapContainer,
   TileLayer,
   Marker,
+  Circle,
+  CircleMarker,
   useMapEvents,
   useMap,
 } from "react-leaflet";
@@ -70,6 +72,7 @@ function LocationMarker({
   position: [number, number];
   onPositionChange: (position: [number, number]) => void;
 }) {
+  const map = useMap();
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
@@ -77,7 +80,21 @@ function LocationMarker({
     },
   });
 
-  return <Marker position={position} icon={DefaultIcon} />;
+  return (
+    <Marker
+      position={position}
+      icon={DefaultIcon}
+      draggable={true}
+      eventHandlers={{
+        dragend: (e) => {
+          const m = e.target as any;
+          const { lat, lng } = m.getLatLng();
+          onPositionChange([lat, lng]);
+          map.setView([lat, lng], map.getZoom());
+        },
+      }}
+    />
+  );
 }
 
 const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
@@ -107,6 +124,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   const [landmark, setLandmark] = useState(initialLocation?.landmark || "");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
   const mapRef = useRef<L.Map>(null);
 
   useEffect(() => {
@@ -132,6 +150,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
           ];
           setPosition(newPos);
           reverseGeocode(newPos);
+          setCurrentLoc({ lat: newPos[0], lng: newPos[1], accuracy: position.coords.accuracy });
           setIsLoadingLocation(false);
         },
         (error) => {
@@ -274,15 +293,30 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
-              <Button
-                onClick={getCurrentLocation}
-                variant="outline"
-                disabled={isLoadingLocation}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Navigation className="h-4 w-4" />
-                {isLoadingLocation ? "Getting..." : "Current Location"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={getCurrentLocation}
+                  variant="outline"
+                  disabled={isLoadingLocation}
+                  className="flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Navigation className="h-4 w-4" />
+                  {isLoadingLocation ? "Getting..." : "Current Location"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!mapRef.current) return;
+                    const center = mapRef.current.getCenter();
+                    const lat = center.lat;
+                    const lng = center.lng;
+                    handlePositionChange([lat, lng]);
+                  }}
+                  variant="outline"
+                  className="whitespace-nowrap"
+                >
+                  Drop Pin Here
+                </Button>
+              </div>
             </div>
 
             {/* Map */}
@@ -306,9 +340,16 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
                   position={position}
                   onPositionChange={handlePositionChange}
                 />
+                {currentLoc && (
+                  <>
+                    <CircleMarker center={[currentLoc.lat, currentLoc.lng]} pathOptions={{ color: "#2563eb" }} radius={6} />
+                    <Circle center={[currentLoc.lat, currentLoc.lng]} radius={Math.max(10, currentLoc.accuracy || 0)} pathOptions={{ color: "#60a5fa", fillColor: "#93c5fd", fillOpacity: 0.2 }} />
+                  </>
+                )}
               </MapContainer>
             </div>
 
+            <p className="text-xs text-gray-500">Tip: Click anywhere on the map or drag the pin to refine the exact spot.</p>
             {/* Location Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
