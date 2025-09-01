@@ -704,12 +704,49 @@ const MaintenanceTasks: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredTasks.map((task) => (
-              <div
-                key={task.id}
-                className="border rounded-lg p-4 hover:bg-gray-50"
-              >
+          {filteredTasks.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">
+              <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                {activeFilter === "overdue" ? (
+                  <AlertCircle className="h-6 w-6 text-red-500" />
+                ) : activeFilter === "pending" ? (
+                  <Clock className="h-6 w-6 text-blue-500" />
+                ) : activeFilter === "inProgress" ? (
+                  <Clock className="h-6 w-6 text-orange-500" />
+                ) : activeFilter === "resolved" ? (
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                ) : activeFilter === "reopened" ? (
+                  <RotateCcw className="h-6 w-6 text-purple-500" />
+                ) : activeFilter === "closed" ? (
+                  <CheckCircle className="h-6 w-6 text-gray-500" />
+                ) : (
+                  <ListTodo className="h-6 w-6 text-blue-500" />
+                )}
+              </div>
+              <p className="font-medium">
+                {activeFilter === "overdue"
+                  ? "No overdue tasks"
+                  : activeFilter === "pending"
+                  ? "No pending tasks"
+                  : activeFilter === "inProgress"
+                  ? "No in-progress tasks"
+                  : activeFilter === "resolved"
+                  ? "No resolved tasks"
+                  : activeFilter === "reopened"
+                  ? "No reopened tasks"
+                  : activeFilter === "closed"
+                  ? "No closed tasks"
+                  : "No tasks to show"}
+              </p>
+              <p className="text-sm mt-1">Try a different filter or refresh.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredTasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50"
+                >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <h3 className="font-medium text-lg">{task.title}</h3>
@@ -835,7 +872,8 @@ const MaintenanceTasks: React.FC = () => {
                 )}
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
