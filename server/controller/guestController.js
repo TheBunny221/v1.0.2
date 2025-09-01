@@ -179,12 +179,12 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
         wardId: wardId,
         isActive: true,
       },
-      orderBy: {
-        // Assign to ward officer with least assigned complaints for load balancing
-        _count: {
-          wardOfficerComplaints: "asc",
-        },
+    orderBy: {
+      // Assign to ward officer with least assigned complaints for load balancing
+      wardOfficerComplaints: {
+        _count: "asc",
       },
+    },
     });
 
     // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
@@ -208,7 +208,8 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
         isAnonymous: false,
         deadline,
         wardOfficerId: wardOfficer?.id || null,
-        isMaintenanceUnassigned: true,
+        // assignToTeam can be used to signal assignment workflow in dashboards
+        // assignToTeam: true,
         // Don't assign submittedById yet - will be set after OTP verification
       },
       include: {
@@ -424,8 +425,8 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     },
     orderBy: {
       // Assign to ward officer with least assigned complaints for load balancing
-      _count: {
-        wardOfficerComplaints: "asc",
+      wardOfficerComplaints: {
+        _count: "asc",
       },
     },
   });
@@ -451,7 +452,7 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       isAnonymous: false,
       deadline,
       wardOfficerId: wardOfficer?.id || null,
-      isMaintenanceUnassigned: true,
+      // isMaintenanceUnassigned: true,
       // Don't assign submittedById yet - will be set after OTP verification
     },
     include: {
