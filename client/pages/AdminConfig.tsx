@@ -1280,51 +1280,83 @@ const AdminConfig: React.FC = () => {
                     Application Settings
                   </h3>
                   <div className="space-y-4">
-                    {systemSettings
-                      .filter((s) =>
-                        ["APP_NAME", "APP_LOGO_URL", "APP_LOGO_SIZE"].includes(
-                          s.key,
-                        ),
-                      )
-                      .map((setting) => (
-                        <div
-                          key={setting.key}
-                          className="border rounded-lg p-4"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex-1">
-                              <h4 className="font-medium">{setting.key}</h4>
-                              <p className="text-sm text-gray-600">
-                                {setting.description}
-                              </p>
-                            </div>
-
+                    {(() => {
+                      const s = systemSettings.find((x) => x.key === "APP_NAME");
+                      if (!s) return null;
+                      return (
+                        <div className="border rounded-lg p-4" key={s.key}>
+                          <div className="mb-2">
+                            <h4 className="font-medium">Application Name</h4>
+                            <p className="text-sm text-gray-600">Shown in headers, emails and PDFs.</p>
                           </div>
-                          <div className="mt-3">
-                            <Input
-                              type="text"
-                              value={setting.value}
-                              onChange={(e) =>
-                                setSystemSettings((prev) =>
-                                  prev.map((s) =>
-                                    s.key === setting.key
-                                      ? { ...s, value: e.target.value }
-                                      : s,
-                                  ),
-                                )
-                              }
-                              onBlur={(e) =>
-                                handleUpdateSystemSetting(
-                                  setting.key,
-                                  e.target.value,
-                                )
-                              }
-                              placeholder={`Enter ${setting.type} value`}
-                              className="max-w-md"
-                            />
-                          </div>
+                          <Input
+                            type="text"
+                            value={s.value}
+                            onChange={(e) =>
+                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
+                            }
+                            onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
+                            placeholder="Enter application name"
+                            className="max-w-md"
+                          />
                         </div>
-                      ))}
+                      );
+                    })()}
+                    {(() => {
+                      const s = systemSettings.find((x) => x.key === "APP_LOGO_URL");
+                      if (!s) return null;
+                      return (
+                        <div className="border rounded-lg p-4" key={s.key}>
+                          <div className="mb-2 flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium">Application Logo URL</h4>
+                              <p className="text-sm text-gray-600">Public URL for the logo shown in the header and PDFs.</p>
+                            </div>
+                            {s.value && (
+                              <img src={s.value} alt="Logo" className="h-10 w-10 object-contain border rounded ml-4" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
+                            )}
+                          </div>
+                          <Input
+                            type="text"
+                            value={s.value}
+                            onChange={(e) =>
+                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
+                            }
+                            onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
+                            placeholder="https://.../logo.png"
+                            className="max-w-md"
+                          />
+                        </div>
+                      );
+                    })()}
+                    {(() => {
+                      const s = systemSettings.find((x) => x.key === "APP_LOGO_SIZE");
+                      if (!s) return null;
+                      return (
+                        <div className="border rounded-lg p-4" key={s.key}>
+                          <div className="mb-2">
+                            <h4 className="font-medium">Logo Size</h4>
+                            <p className="text-sm text-gray-600">Controls the displayed logo size (small/medium/large).</p>
+                          </div>
+                          <Select
+                            value={s.value}
+                            onValueChange={(value) => {
+                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value } : it)));
+                              handleUpdateSystemSetting(s.key, value);
+                            }}
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">Small</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="large">Large</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
