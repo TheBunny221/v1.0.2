@@ -157,42 +157,66 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     reverseGeocode(coords);
   }, [isOpen]);
 
+  const getGeoErrorMessage = (err: GeolocationPositionError | any) => {
+    const insecure = typeof window !== "undefined" && !window.isSecureContext;
+    if (insecure) return "Location requires HTTPS. Please use a secure connection.";
+    if (!err || typeof err !== "object") return "Unable to fetch your location.";
+    switch (err.code) {
+      case 1:
+        return "Location permission denied. Enable location access in your browser settings.";
+      case 2:
+        return "Location unavailable. Please check GPS or network and try again.";
+      case 3:
+        return "Location request timed out. Try again or move to an open area.";
+      default:
+        return err.message || "Unable to fetch your location.";
+    }
+  };
+
   // Get current location
-  const getCurrentLocation = useCallback(() => {
+  const getCurrentLocation = useCallback(async () => {
     setIsLoadingLocation(true);
-    if (navigator.geolocation) {
+    try {
+      if (!("geolocation" in navigator)) {
+        setMapError("Geolocation is not supported by this browser.");
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      try {
+        // Check permission state to avoid triggering prompt when denied
+        const perm: any = (navigator as any).permissions && (await (navigator as any).permissions.query({ name: "geolocation" } as any));
+        if (perm && perm.state === "denied") {
+          setMapError("Location permission denied. Enable it in browser settings.");
+          setIsLoadingLocation(false);
+          return;
+        }
+      } catch {}
+
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const newPos = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          };
+          const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setPosition(newPos);
-
-          // Run both area detection and reverse geocoding
           detectAdministrativeArea(newPos);
           reverseGeocode(newPos);
-
-          // Update map view
           if (leafletMapRef.current) {
             leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
             markerRef.current?.setLatLng([newPos.lat, newPos.lng]);
           }
-
           setIsLoadingLocation(false);
+          setMapError(null);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error("Error getting location:", { code: error?.code, message: error?.message });
           setIsLoadingLocation(false);
-          alert(
-            "Could not get your location. Please ensure location access is enabled.",
-          );
+          setMapError(getGeoErrorMessage(error));
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 600000 },
       );
-    } else {
+    } catch (e) {
+      console.error("Unexpected geolocation error:", e);
+      setMapError("Unable to fetch your location. Try again.");
       setIsLoadingLocation(false);
-      alert("Geolocation is not supported by this browser.");
     }
   }, []);
 
@@ -404,17 +428,25 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             {/* Map */}
             <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border relative">
               {mapError ? (
-                <div className="h-full flex items-center justify-center bg-gray-100">
+                <div className="h-full flex items-center justify-center bg-gray-50">
                   <div className="text-center p-4">
                     <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                    <p className="text-red-600 text-sm">{mapError}</p>
+                    <p className="text-red-600 text-sm mb-2">{mapError}</p>
+                    <Button onClick={getCurrentLocation} variant="outline" size="sm" className="mr-2">
+                      Try Again
+                    </Button>
                     <Button
-                      onClick={() => window.location.reload()}
+                      onClick={() => {
+                        setMapError(null);
+                        if (leafletMapRef.current) {
+                          leafletMapRef.current.setView([position.lat, position.lng], 13);
+                          markerRef.current?.setLatLng([position.lat, position.lng]);
+                        }
+                      }}
                       variant="outline"
                       size="sm"
-                      className="mt-2"
                     >
-                      Refresh Page
+                      Use Default
                     </Button>
                   </div>
                 </div>
