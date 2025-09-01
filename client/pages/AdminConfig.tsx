@@ -1626,7 +1626,7 @@ const AdminConfig: React.FC = () => {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex-1">
-                              <h4 className="font-medium">{setting.key}</h4>
+                              <h4 className="font-medium">{({CONTACT_HELPLINE:"Helpline Number",CONTACT_EMAIL:"Support Email",CONTACT_OFFICE_HOURS:"Office Hours",CONTACT_OFFICE_ADDRESS:"Office Address"} as any)[setting.key] || setting.key}</h4>
                               <p className="text-sm text-gray-600">
                                 {setting.description}
                               </p>
