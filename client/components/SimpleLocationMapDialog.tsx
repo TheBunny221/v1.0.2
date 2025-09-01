@@ -411,11 +411,24 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                   </div>
                 </div>
               ) : (
-                <div
-                  ref={mapRef}
-                  className="h-full w-full"
-                  style={{ minHeight: "256px" }}
-                />
+                <>
+                  <div
+                    ref={mapRef}
+                    className="h-full w-full"
+                    style={{ minHeight: "256px" }}
+                  />
+                  {/* Center crosshair indicator */}
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <svg width="28" height="28" viewBox="0 0 28 28" className="text-gray-600 opacity-70">
+                      <circle cx="14" cy="14" r="4" fill="white" fillOpacity="0.7" />
+                      <circle cx="14" cy="14" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                      <line x1="14" y1="0" x2="14" y2="6" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="14" y1="22" x2="14" y2="28" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="0" y1="14" x2="6" y2="14" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="22" y1="14" x2="28" y2="14" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                </>
               )}
             </div>
 
