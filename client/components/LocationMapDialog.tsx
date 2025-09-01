@@ -138,6 +138,12 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     }
   }, [isOpen]);
 
+  // On open, populate address/area for initial position (from system-config default or provided initialLocation)
+  useEffect(() => {
+    if (!isOpen) return;
+    reverseGeocode(position);
+  }, [isOpen]);
+
   // Get current location
   const getCurrentLocation = () => {
     setIsLoadingLocation(true);
