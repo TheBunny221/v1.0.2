@@ -364,15 +364,33 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
-              <Button
-                onClick={getCurrentLocation}
-                variant="outline"
-                disabled={isLoadingLocation}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Navigation className="h-4 w-4" />
-                {isLoadingLocation ? "Getting..." : "Current Location"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={getCurrentLocation}
+                  variant="outline"
+                  disabled={isLoadingLocation}
+                  className="flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Navigation className="h-4 w-4" />
+                  {isLoadingLocation ? "Getting..." : "Current Location"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!leafletMapRef.current) return;
+                    const center = leafletMapRef.current.getCenter();
+                    const lat = center.lat;
+                    const lng = center.lng;
+                    setPosition({ lat, lng });
+                    markerRef.current?.setLatLng([lat, lng]);
+                    detectAdministrativeArea({ lat, lng });
+                    reverseGeocode({ lat, lng });
+                  }}
+                  variant="outline"
+                  className="whitespace-nowrap"
+                >
+                  Drop Pin Here
+                </Button>
+              </div>
             </div>
 
             {/* Map */}
@@ -401,6 +419,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
               )}
             </div>
 
+            <p className="text-xs text-gray-500">Tip: Click anywhere on the map or drag the pin to refine the exact spot.</p>
             {/* Location Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
