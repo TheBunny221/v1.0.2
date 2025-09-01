@@ -484,6 +484,55 @@ const getDefaultPublicSettings = () => {
       description: "Available complaint statuses",
       type: "json",
     },
+    // Map & Location defaults
+    {
+      key: "MAP_SEARCH_PLACE",
+      value: "Kochi, Kerala, India",
+      description: "Place context appended to searches to bias results",
+      type: "string",
+    },
+    {
+      key: "MAP_COUNTRY_CODES",
+      value: "in",
+      description: "ISO2 country codes for Nominatim bias (comma-separated)",
+      type: "string",
+    },
+    {
+      key: "MAP_DEFAULT_LAT",
+      value: "9.9312",
+      description: "Default map center latitude",
+      type: "number",
+    },
+    {
+      key: "MAP_DEFAULT_LNG",
+      value: "76.2673",
+      description: "Default map center longitude",
+      type: "number",
+    },
+    {
+      key: "MAP_BBOX_NORTH",
+      value: "10.05",
+      description: "North latitude of bounding box (search constrained)",
+      type: "number",
+    },
+    {
+      key: "MAP_BBOX_SOUTH",
+      value: "9.85",
+      description: "South latitude of bounding box (search constrained)",
+      type: "number",
+    },
+    {
+      key: "MAP_BBOX_EAST",
+      value: "76.39",
+      description: "East longitude of bounding box (search constrained)",
+      type: "number",
+    },
+    {
+      key: "MAP_BBOX_WEST",
+      value: "76.20",
+      description: "West longitude of bounding box (search constrained)",
+      type: "number",
+    },
   ];
 };
 
