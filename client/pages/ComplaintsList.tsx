@@ -96,6 +96,35 @@ const ComplaintsList: React.FC = () => {
   const selectedWard = wards.find((ward) => ward.id === wardFilter);
   const availableSubZones = selectedWard?.subZones || [];
 
+  // Fetch public system config (for dynamic priorities/statuses)
+  const { data: publicConfig } = useGetPublicSystemConfigQuery();
+  const settings = publicConfig?.data || [];
+  const getSettingValue = (key: string) => settings.find((s: any) => s.key === key)?.value;
+
+  const configuredPriorities: string[] = useMemo(() => {
+    const raw = getSettingValue("COMPLAINT_PRIORITIES");
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Array.isArray(parsed) && parsed.length ? parsed : ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+    } catch {
+      return ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+    }
+  }, [settings]);
+
+  const configuredStatuses: string[] = useMemo(() => {
+    const raw = getSettingValue("COMPLAINT_STATUSES");
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Array.isArray(parsed) && parsed.length
+        ? parsed
+        : ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+    } catch {
+      return ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+    }
+  }, [settings]);
+
+  const prettyLabel = (v: string) => v.toLowerCase().split("_").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+
   // Debounce search term for better performance
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -262,8 +291,8 @@ const ComplaintsList: React.FC = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-            <div className="space-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 items-start">
+            <div className="space-y-1 col-span-1 sm:col-span-2 xl:col-span-3">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -300,11 +329,11 @@ const ComplaintsList: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="REGISTERED">Registered</SelectItem>
-                <SelectItem value="ASSIGNED">Assigned</SelectItem>
-                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                <SelectItem value="RESOLVED">Resolved</SelectItem>
-                <SelectItem value="CLOSED">Closed</SelectItem>
+                {configuredStatuses.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {prettyLabel(s)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -313,11 +342,14 @@ const ComplaintsList: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="LOW">Low</SelectItem>
-                <SelectItem value="MEDIUM">Medium</SelectItem>
-                <SelectItem value="HIGH">High</SelectItem>
-                <SelectItem value="CRITICAL">Critical</SelectItem>
-                <SelectItem value="high_critical">High & Critical</SelectItem>
+                {configuredPriorities.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {prettyLabel(p)}
+                  </SelectItem>
+                ))}
+                {configuredPriorities.includes("HIGH") && configuredPriorities.includes("CRITICAL") && (
+                  <SelectItem value="high_critical">High & Critical</SelectItem>
+                )}
               </SelectContent>
             </Select>
 
