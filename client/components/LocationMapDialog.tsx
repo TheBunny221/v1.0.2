@@ -109,6 +109,17 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const mapRef = useRef<L.Map>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(() => {
+        try {
+          mapRef.current?.invalidateSize?.();
+        } catch {}
+      }, 200);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen]);
+
   // Get current location
   const getCurrentLocation = () => {
     setIsLoadingLocation(true);
