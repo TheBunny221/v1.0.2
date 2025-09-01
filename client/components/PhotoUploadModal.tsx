@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -44,7 +45,10 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
+  const [cameraSupported, setCameraSupported] = useState<boolean>(true);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,26 +102,76 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
     setPhotos((prev) => [...prev, ...validFiles]);
   }, []);
 
-  // Start camera
+  // Discover cameras when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      setCameraSupported(false);
+      setCameraError("Camera not supported in this browser.");
+      return;
+    }
+    (async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videos = devices.filter((d) => d.kind === "videoinput");
+        setAvailableCameras(videos);
+        setSelectedCameraId(videos[0]?.deviceId || null);
+        setCameraSupported(videos.length > 0);
+        if (videos.length === 0) {
+          setCameraError("No camera device found. Please use file upload instead.");
+        } else {
+          setCameraError(null);
+        }
+      } catch (err) {
+        setCameraSupported(false);
+        setCameraError("Unable to list cameras. Check permissions.");
+      }
+    })();
+  }, [isOpen]);
+
+  // Start camera with fallbacks
   const startCamera = async () => {
     setCameraError(null);
+    if (!window.isSecureContext) {
+      setCameraError("Camera requires HTTPS or localhost.");
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError("Camera API not available.");
+      return;
+    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: 'environment', // Use back camera if available
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      });
-      
+      const constraints: MediaStreamConstraints = selectedCameraId
+        ? { video: { deviceId: { exact: selectedCameraId }, width: { ideal: 1280 }, height: { ideal: 720 } } }
+        : { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } } };
+
+      let stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setIsCameraActive(true);
       }
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      setCameraError('Unable to access camera. Please check permissions or use file upload instead.');
+    } catch (error: any) {
+      console.warn('Primary camera open failed:', error?.name || error);
+      // Fallback to user-facing camera
+      try {
+        const fallback = await navigator.mediaDevices.getUserMedia({ video: true });
+        streamRef.current = fallback;
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallback;
+          setIsCameraActive(true);
+        }
+      } catch (err2: any) {
+        console.error('Error accessing camera:', err2);
+        const name = err2?.name || '';
+        if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+          setCameraError('Requested device not found. Please select a different camera or use file upload.');
+        } else if (name === 'NotAllowedError' || name === 'SecurityError') {
+          setCameraError('Camera permission denied. Please allow access or use file upload.');
+        } else {
+          setCameraError('Unable to access camera. Please check permissions or use file upload instead.');
+        }
+      }
     }
   };
 
@@ -257,7 +311,7 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                   variant="outline"
                   className="w-full justify-start mt-1"
                   onClick={startCamera}
-                  disabled={isUploading}
+                  disabled={isUploading || !cameraSupported}
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Open Camera
@@ -275,6 +329,23 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
               )}
             </div>
           </div>
+
+          {/* Camera selection */}
+          {availableCameras.length > 1 && (
+            <div>
+              <Label>Select Camera</Label>
+              <select
+                className="mt-1 w-full border rounded-md p-2 text-sm"
+                value={selectedCameraId || ""}
+                onChange={(e) => setSelectedCameraId(e.target.value || null)}
+                disabled={isCameraActive}
+              >
+                {availableCameras.map((d) => (
+                  <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${d.deviceId.slice(-4)}`}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Camera Interface */}
           {isCameraActive && (
