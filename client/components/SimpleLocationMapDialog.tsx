@@ -62,6 +62,8 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   const [isDetectingArea, setIsDetectingArea] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
+  const leafletLibRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   // API hook for area detection
   const [detectAreaMutation] = useDetectLocationAreaMutation();
@@ -74,6 +76,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       try {
         // Dynamically import leaflet only when needed
         const L = await import("leaflet");
+        leafletLibRef.current = L;
 
         // Set up the default icon
         const DefaultIcon = L.icon({
@@ -104,7 +107,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           }).addTo(leafletMapRef.current);
 
           // Add marker
-          const marker = L.marker([position.lat, position.lng], {
+          markerRef.current = L.marker([position.lat, position.lng], {
             icon: DefaultIcon,
           }).addTo(leafletMapRef.current);
 
@@ -112,7 +115,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           leafletMapRef.current.on("click", (e: any) => {
             const { lat, lng } = e.latlng;
             setPosition({ lat, lng });
-            marker.setLatLng([lat, lng]);
+            markerRef.current?.setLatLng([lat, lng]);
 
             // Run both area detection and reverse geocoding
             detectAdministrativeArea({ lat, lng });
@@ -121,6 +124,13 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         }
 
         setMapError(null);
+
+        // Ensure proper sizing after open
+        setTimeout(() => {
+          try {
+            leafletMapRef.current?.invalidateSize?.();
+          } catch {}
+        }, 200);
       } catch (error) {
         console.error("Error initializing map:", error);
         setMapError("Failed to load map. Please refresh and try again.");
@@ -158,13 +168,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           // Update map view
           if (leafletMapRef.current) {
             leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
-            // Update marker if it exists
-            const markers = Object.values(leafletMapRef.current._layers).filter(
-              (layer: any) => layer instanceof L.Marker,
-            );
-            if (markers.length > 0) {
-              (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
-            }
+            markerRef.current?.setLatLng([newPos.lat, newPos.lng]);
           }
 
           setIsLoadingLocation(false);
@@ -301,13 +305,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         // Update map view
         if (leafletMapRef.current) {
           leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
-          // Update marker if it exists
-          const markers = Object.values(leafletMapRef.current._layers).filter(
-            (layer: any) => layer instanceof L.Marker,
-          );
-          if (markers.length > 0) {
-            (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
-          }
+          markerRef.current?.setLatLng([newPos.lat, newPos.lng]);
         }
       } else {
         alert("Location not found. Please try a different search term.");
