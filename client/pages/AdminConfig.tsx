@@ -2291,7 +2291,7 @@ const AdminConfig: React.FC = () => {
                           ),
                         );
                         // Refresh system settings
-                        await fetchSystemSettings();
+                        await loadAllData();
                       } catch (error: any) {
                         dispatch(
                           showErrorToast(
