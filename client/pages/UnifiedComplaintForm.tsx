@@ -90,6 +90,8 @@ import {
   Info,
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { prewarmMapAssets } from "../utils/mapTilePrefetch";
 
 const COMPLAINT_TYPES = [
   {
@@ -174,6 +176,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const { openOtpFlow } = useOtpFlow();
+  const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
@@ -228,6 +231,13 @@ const UnifiedComplaintForm: React.FC = () => {
       setSubmissionMode("guest");
     }
   }, [isAuthenticated, user, dispatch]);
+
+  // Prewarm map assets (tiles + leaflet) using system-config default center
+  useEffect(() => {
+    const lat = parseFloat(getConfig("MAP_DEFAULT_LAT", "9.9312")) || 9.9312;
+    const lng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
+    prewarmMapAssets(lat, lng, 13);
+  }, [getConfig]);
 
   // Get current location
   useEffect(() => {
