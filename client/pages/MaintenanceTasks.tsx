@@ -102,56 +102,78 @@ const MaintenanceTasks: React.FC = () => {
   // Extract tasks from API response
   const tasks = useMemo(() => {
     if (Array.isArray(complaintsResponse?.data?.complaints)) {
-      return complaintsResponse!.data!.complaints.map((complaint: any) => ({
-        id: complaint.id,
-        title: complaint.title || `${complaint.type} Issue`,
-        location: complaint.area,
-        address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
-        priority: complaint.priority || "MEDIUM",
-        status: complaint.status,
-        estimatedTime: getPriorityEstimatedTime(complaint.priority),
-        dueDate: complaint.deadline
-          ? new Date(complaint.deadline).toISOString().split("T")[0]
-          : null,
-        isOverdue: complaint.deadline
-          ? new Date(complaint.deadline) < new Date() &&
-            !["RESOLVED", "CLOSED"].includes(complaint.status)
-          : false,
-        description: complaint.description,
-        assignedAt: complaint.assignedOn || complaint.submittedOn,
-        resolvedAt: complaint.resolvedOn,
-        photo: complaint.attachments?.[0]?.url || null,
-        latitude: complaint.latitude,
-        longitude: complaint.longitude,
-        complaintId: complaint.complaintId,
-        statusLogs: complaint.statusLogs || [],
-      }));
+      return complaintsResponse!.data!.complaints.map((complaint: any) => {
+        let lat = complaint.latitude;
+        let lng = complaint.longitude;
+        if ((!lat || !lng) && complaint.coordinates) {
+          try {
+            const c = typeof complaint.coordinates === "string" ? JSON.parse(complaint.coordinates) : complaint.coordinates;
+            lat = c?.latitude ?? c?.lat ?? lat;
+            lng = c?.longitude ?? c?.lng ?? lng;
+          } catch {}
+        }
+        return {
+          id: complaint.id,
+          title: complaint.title || `${complaint.type} Issue`,
+          location: complaint.area,
+          address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
+          priority: complaint.priority || "MEDIUM",
+          status: complaint.status,
+          estimatedTime: getPriorityEstimatedTime(complaint.priority),
+          dueDate: complaint.deadline
+            ? new Date(complaint.deadline).toISOString().split("T")[0]
+            : null,
+          isOverdue: complaint.deadline
+            ? new Date(complaint.deadline) < new Date() &&
+              ["RESOLVED", "CLOSED"].includes(complaint.status) === false
+            : false,
+          description: complaint.description,
+          assignedAt: complaint.assignedOn || complaint.submittedOn,
+          resolvedAt: complaint.resolvedOn,
+          photo: complaint.attachments?.[0]?.url || null,
+          latitude: lat,
+          longitude: lng,
+          complaintId: complaint.complaintId,
+          statusLogs: complaint.statusLogs || [],
+        };
+      });
     }
     if (Array.isArray((complaintsResponse as any)?.data)) {
-      return (complaintsResponse as any).data.map((complaint: any) => ({
-        id: complaint.id,
-        title: complaint.title || `${complaint.type} Issue`,
-        location: complaint.area,
-        address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
-        priority: complaint.priority || "MEDIUM",
-        status: complaint.status,
-        estimatedTime: getPriorityEstimatedTime(complaint.priority),
-        dueDate: complaint.deadline
-          ? new Date(complaint.deadline).toISOString().split("T")[0]
-          : null,
-        isOverdue: complaint.deadline
-          ? new Date(complaint.deadline) < new Date() &&
-            !["RESOLVED", "CLOSED"].includes(complaint.status)
-          : false,
-        description: complaint.description,
-        assignedAt: complaint.assignedOn || complaint.submittedOn,
-        resolvedAt: complaint.resolvedOn,
-        photo: complaint.attachments?.[0]?.url || null,
-        latitude: complaint.latitude,
-        longitude: complaint.longitude,
-        complaintId: complaint.complaintId,
-        statusLogs: complaint.statusLogs || [],
-      }));
+      return (complaintsResponse as any).data.map((complaint: any) => {
+        let lat = complaint.latitude;
+        let lng = complaint.longitude;
+        if ((!lat || !lng) && complaint.coordinates) {
+          try {
+            const c = typeof complaint.coordinates === "string" ? JSON.parse(complaint.coordinates) : complaint.coordinates;
+            lat = c?.latitude ?? c?.lat ?? lat;
+            lng = c?.longitude ?? c?.lng ?? lng;
+          } catch {}
+        }
+        return {
+          id: complaint.id,
+          title: complaint.title || `${complaint.type} Issue`,
+          location: complaint.area,
+          address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
+          priority: complaint.priority || "MEDIUM",
+          status: complaint.status,
+          estimatedTime: getPriorityEstimatedTime(complaint.priority),
+          dueDate: complaint.deadline
+            ? new Date(complaint.deadline).toISOString().split("T")[0]
+            : null,
+          isOverdue: complaint.deadline
+            ? new Date(complaint.deadline) < new Date() &&
+              ["RESOLVED", "CLOSED"].includes(complaint.status) === false
+            : false,
+          description: complaint.description,
+          assignedAt: complaint.assignedOn || complaint.submittedOn,
+          resolvedAt: complaint.resolvedOn,
+          photo: complaint.attachments?.[0]?.url || null,
+          latitude: lat,
+          longitude: lng,
+          complaintId: complaint.complaintId,
+          statusLogs: complaint.statusLogs || [],
+        };
+      });
     }
     return [];
   }, [complaintsResponse]);
