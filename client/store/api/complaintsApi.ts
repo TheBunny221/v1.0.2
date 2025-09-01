@@ -546,6 +546,7 @@ export const complaintsApi = baseApi.injectEndpoints({
 export const {
   useGetComplaintsQuery,
   useGetComplaintQuery,
+  useLazyGetComplaintQuery,
   useCreateComplaintMutation,
   useUpdateComplaintMutation,
   useAssignComplaintMutation,
