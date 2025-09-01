@@ -168,6 +168,16 @@ const MaintenanceTasks: React.FC = () => {
     closed: tasks.filter((t) => t.status === "CLOSED").length,
   };
 
+  const quickFilters = [
+    { key: "all", label: "All", count: taskCounts.total, icon: <ListTodo className="h-3 w-3" /> },
+    { key: "pending", label: "Pending", count: taskCounts.pending, icon: <Clock className="h-3 w-3" /> },
+    { key: "overdue", label: "Overdue", count: taskCounts.overdue, icon: <AlertCircle className="h-3 w-3" /> },
+    { key: "inProgress", label: "In Progress", count: taskCounts.inProgress, icon: <Clock className="h-3 w-3" /> },
+    { key: "resolved", label: "Resolved", count: taskCounts.resolved, icon: <CheckCircle className="h-3 w-3" /> },
+    { key: "reopened", label: "Reopened", count: taskCounts.reopened, icon: <RotateCcw className="h-3 w-3" /> },
+    { key: "closed", label: "Closed", count: taskCounts.closed, icon: <CheckCircle className="h-3 w-3" /> },
+  ];
+
   // Filter tasks based on active filter
   const filteredTasks = tasks.filter((task) => {
     switch (activeFilter) {
@@ -534,27 +544,28 @@ const MaintenanceTasks: React.FC = () => {
             <div className="text-sm text-blue-100">Total Tasks</div>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {quickFilters.map((f) => (
+            <Button
+              key={f.key}
+              variant="outline"
+              size="sm"
+              className={`h-7 rounded-full px-2.5 py-1 border-white/30 text-white/90 hover:bg-white/20 ${activeFilter === f.key ? "bg-white/25 ring-2 ring-white/60 text-white" : ""}`}
+              onClick={() => setActiveFilter(f.key)}
+            >
+              <span className="flex items-center gap-1">
+                {f.icon}
+                <span className="text-xs">{f.label}: {f.count}</span>
+              </span>
+            </Button>
+          ))}
           <Button
             variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            onClick={() => setActiveFilter("overdue")}
-          >
-            Overdue: {taskCounts.overdue}
-          </Button>
-          <Button
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            onClick={() => setActiveFilter("inProgress")}
-          >
-            In Progress: {taskCounts.inProgress}
-          </Button>
-          <Button
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            size="sm"
+            className="h-7 rounded-full px-2.5 py-1 border-white/30 text-white/90 hover:bg-white/20"
             onClick={() => refetchComplaints()}
           >
-            Refresh Data
+            Refresh
           </Button>
         </div>
       </div>
