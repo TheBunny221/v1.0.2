@@ -129,9 +129,13 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
   const filteredNavItems = navigationItems.filter((item) => {
     if (!user) return false;
 
-    // Hide Home tab for logged-in users (should only show for guests/non-authenticated)
     if (item.path === "/" && user) {
       return false;
+    }
+
+    if (user.role === "MAINTENANCE_TEAM") {
+      // Only show Dashboard and Complaints for maintenance
+      return item.path === "/dashboard" || item.path === "/complaints";
     }
 
     return item.roles.includes(user.role as string);
