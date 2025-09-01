@@ -831,25 +831,33 @@ const CitizenComplaintForm: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="landmark">Landmark (Optional)</Label>
+                      <Label htmlFor="landmark">Landmark *</Label>
                       <Input
                         id="landmark"
                         name="landmark"
                         placeholder="Nearby landmark (e.g., Next to Bank, Opposite School)"
                         value={formData.landmark}
                         onChange={handleInputChange}
+                        className={validationErrors.landmark ? "border-red-500" : ""}
                       />
+                      {validationErrors.landmark && (
+                        <p className="text-sm text-red-600">{validationErrors.landmark}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address">Full Address (Optional)</Label>
+                      <Label htmlFor="address">Full Address *</Label>
                       <Input
                         id="address"
                         name="address"
-                        placeholder="Complete address if applicable"
+                        placeholder="Complete address"
                         value={formData.address}
                         onChange={handleInputChange}
+                        className={validationErrors.address ? "border-red-500" : ""}
                       />
+                      {validationErrors.address && (
+                        <p className="text-sm text-red-600">{validationErrors.address}</p>
+                      )}
                     </div>
                   </div>
 
@@ -867,6 +875,9 @@ const CitizenComplaintForm: React.FC = () => {
                         {currentLocation.lng.toFixed(6)}
                       </p>
                     </div>
+                  )}
+                  {validationErrors.coordinates && (
+                    <p className="text-sm text-red-600">{validationErrors.coordinates}</p>
                   )}
                 </div>
               </div>
