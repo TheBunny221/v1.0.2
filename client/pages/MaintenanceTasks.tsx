@@ -279,9 +279,10 @@ const MaintenanceTasks: React.FC = () => {
 
       if ((!lat || !lng) && task.id) {
         const res = await triggerGetComplaint(task.id).unwrap();
-        const c = res?.data || res; // support both shapes
-        lat = c?.latitude ?? c?.lat ?? lat;
-        lng = c?.longitude ?? c?.lng ?? lng;
+        const c = res?.data || res;
+        const comp = c?.complaint || c;
+        lat = comp?.latitude ?? comp?.lat ?? lat;
+        lng = comp?.longitude ?? comp?.lng ?? lng;
       }
 
       if (lat && lng) {
