@@ -378,12 +378,13 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
     },
     {
       key: "COMPLAINT_PRIORITIES",
-      value: "[\"LOW\",\"MEDIUM\",\"HIGH\",\"CRITICAL\"]",
+      value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
       description: "Available complaint priorities",
     },
     {
       key: "COMPLAINT_STATUSES",
-      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\",\"REOPENED\"]",
+      value:
+        '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
       description: "Available complaint statuses",
     },
   ];
@@ -472,13 +473,14 @@ const getDefaultPublicSettings = () => {
     },
     {
       key: "COMPLAINT_PRIORITIES",
-      value: "[\"LOW\",\"MEDIUM\",\"HIGH\",\"CRITICAL\"]",
+      value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
       description: "Available complaint priorities",
       type: "json",
     },
     {
       key: "COMPLAINT_STATUSES",
-      value: "[\"REGISTERED\",\"ASSIGNED\",\"IN_PROGRESS\",\"RESOLVED\",\"CLOSED\",\"REOPENED\"]",
+      value:
+        '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
       description: "Available complaint statuses",
       type: "json",
     },

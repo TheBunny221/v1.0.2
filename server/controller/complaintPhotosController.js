@@ -12,7 +12,8 @@ const prisma = getPrisma();
 // Configure multer for photo uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const baseUploadDir = process.env.UPLOAD_PATH || path.join(__dirname, "../../uploads");
+    const baseUploadDir =
+      process.env.UPLOAD_PATH || path.join(__dirname, "../../uploads");
     const uploadDir = path.join(baseUploadDir, "complaint-photos");
 
     // Create directory if it doesn't exist
@@ -24,19 +25,24 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     // Generate unique filename with timestamp and random string
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const fileExtension = path.extname(file.originalname);
     cb(null, `complaint-${req.params.id}-${uniqueSuffix}${fileExtension}`);
-  }
+  },
 });
 
 // File filter for images only
 const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/jpg",
+  ];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only JPEG, PNG, and WebP image files are allowed!'), false);
+    cb(new Error("Only JPEG, PNG, and WebP image files are allowed!"), false);
   }
 };
 
@@ -47,7 +53,7 @@ export const uploadPhoto = multer({
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
     files: 10, // Maximum 10 files at once
-  }
+  },
 });
 
 // @desc    Get photos for a complaint
@@ -85,9 +91,11 @@ export const getComplaintPhotos = asyncHandler(async (req, res) => {
   // Check authorization
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
-    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId) ||
-    (req.user.role === "MAINTENANCE_TEAM" && 
-     (complaint.assignedToId === req.user.id || complaint.maintenanceTeamId === req.user.id)) ||
+    (req.user.role === "WARD_OFFICER" &&
+      complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" &&
+      (complaint.assignedToId === req.user.id ||
+        complaint.maintenanceTeamId === req.user.id)) ||
     complaint.submittedById === req.user.id; // Allow complaint submitter to view
 
   if (!isAuthorized) {
@@ -128,7 +136,8 @@ export const uploadComplaintPhotos = asyncHandler(async (req, res) => {
   // Check authorization - only maintenance team assigned to this complaint
   const isAuthorized =
     req.user.role === "MAINTENANCE_TEAM" &&
-    (complaint.assignedToId === req.user.id || complaint.maintenanceTeamId === req.user.id);
+    (complaint.assignedToId === req.user.id ||
+      complaint.maintenanceTeamId === req.user.id);
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -149,7 +158,7 @@ export const uploadComplaintPhotos = asyncHandler(async (req, res) => {
     // Create photo records in database
     const photoPromises = req.files.map(async (file) => {
       const photoUrl = `/uploads/complaint-photos/${file.filename}`;
-      
+
       return prisma.complaintPhoto.create({
         data: {
           complaintId,
@@ -184,13 +193,13 @@ export const uploadComplaintPhotos = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     // Clean up uploaded files if database save fails
-    req.files.forEach(file => {
+    req.files.forEach((file) => {
       const filePath = file.path;
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     });
-    
+
     throw error;
   }
 });
@@ -290,11 +299,16 @@ export const deleteComplaintPhoto = asyncHandler(async (req, res) => {
     });
 
     // Delete physical file
-  const baseUploadDir = process.env.UPLOAD_PATH || path.join(__dirname, "../../uploads");
-  const filePath = path.join(baseUploadDir, "complaint-photos", photo.fileName);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
+    const baseUploadDir =
+      process.env.UPLOAD_PATH || path.join(__dirname, "../../uploads");
+    const filePath = path.join(
+      baseUploadDir,
+      "complaint-photos",
+      photo.fileName,
+    );
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
 
     res.status(200).json({
       success: true,
@@ -337,9 +351,11 @@ export const getComplaintPhoto = asyncHandler(async (req, res) => {
   // Check authorization
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
-    (req.user.role === "WARD_OFFICER" && photo.complaint.wardId === req.user.wardId) ||
-    (req.user.role === "MAINTENANCE_TEAM" && 
-     (photo.complaint.assignedToId === req.user.id || photo.complaint.maintenanceTeamId === req.user.id)) ||
+    (req.user.role === "WARD_OFFICER" &&
+      photo.complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" &&
+      (photo.complaint.assignedToId === req.user.id ||
+        photo.complaint.maintenanceTeamId === req.user.id)) ||
     photo.complaint.submittedById === req.user.id;
 
   if (!isAuthorized) {

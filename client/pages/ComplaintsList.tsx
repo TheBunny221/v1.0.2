@@ -99,13 +99,16 @@ const ComplaintsList: React.FC = () => {
   // Fetch public system config (for dynamic priorities/statuses)
   const { data: publicConfig } = useGetPublicSystemConfigQuery();
   const settings = publicConfig?.data || [];
-  const getSettingValue = (key: string) => settings.find((s: any) => s.key === key)?.value;
+  const getSettingValue = (key: string) =>
+    settings.find((s: any) => s.key === key)?.value;
 
   const configuredPriorities: string[] = useMemo(() => {
     const raw = getSettingValue("COMPLAINT_PRIORITIES");
     try {
       const parsed = raw ? JSON.parse(raw) : null;
-      return Array.isArray(parsed) && parsed.length ? parsed : ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+      return Array.isArray(parsed) && parsed.length
+        ? parsed
+        : ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     } catch {
       return ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     }
@@ -117,13 +120,32 @@ const ComplaintsList: React.FC = () => {
       const parsed = raw ? JSON.parse(raw) : null;
       return Array.isArray(parsed) && parsed.length
         ? parsed
-        : ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"];
+        : [
+            "REGISTERED",
+            "ASSIGNED",
+            "IN_PROGRESS",
+            "RESOLVED",
+            "CLOSED",
+            "REOPENED",
+          ];
     } catch {
-      return ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"];
+      return [
+        "REGISTERED",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "RESOLVED",
+        "CLOSED",
+        "REOPENED",
+      ];
     }
   }, [settings]);
 
-  const prettyLabel = (v: string) => v.toLowerCase().split("_").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+  const prettyLabel = (v: string) =>
+    v
+      .toLowerCase()
+      .split("_")
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(" ");
 
   // Debounce search term for better performance
   useEffect(() => {
@@ -349,9 +371,12 @@ const ComplaintsList: React.FC = () => {
                     {prettyLabel(p)}
                   </SelectItem>
                 ))}
-                {configuredPriorities.includes("HIGH") && configuredPriorities.includes("CRITICAL") && (
-                  <SelectItem value="high_critical">High & Critical</SelectItem>
-                )}
+                {configuredPriorities.includes("HIGH") &&
+                  configuredPriorities.includes("CRITICAL") && (
+                    <SelectItem value="high_critical">
+                      High & Critical
+                    </SelectItem>
+                  )}
               </SelectContent>
             </Select>
 

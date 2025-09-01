@@ -698,7 +698,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
   } else if (req.user.role === "MAINTENANCE_TEAM") {
     roleOr = [
       { assignedToId: req.user.id },
-      { maintenanceTeamId: req.user.id }
+      { maintenanceTeamId: req.user.id },
     ];
     enforced.maintenanceTeamFilter = req.user.id;
   }

@@ -107,7 +107,10 @@ const MaintenanceTasks: React.FC = () => {
         let lng = complaint.longitude;
         if ((!lat || !lng) && complaint.coordinates) {
           try {
-            const c = typeof complaint.coordinates === "string" ? JSON.parse(complaint.coordinates) : complaint.coordinates;
+            const c =
+              typeof complaint.coordinates === "string"
+                ? JSON.parse(complaint.coordinates)
+                : complaint.coordinates;
             lat = c?.latitude ?? c?.lat ?? lat;
             lng = c?.longitude ?? c?.lng ?? lng;
           } catch {}
@@ -144,7 +147,10 @@ const MaintenanceTasks: React.FC = () => {
         let lng = complaint.longitude;
         if ((!lat || !lng) && complaint.coordinates) {
           try {
-            const c = typeof complaint.coordinates === "string" ? JSON.parse(complaint.coordinates) : complaint.coordinates;
+            const c =
+              typeof complaint.coordinates === "string"
+                ? JSON.parse(complaint.coordinates)
+                : complaint.coordinates;
             lat = c?.latitude ?? c?.lat ?? lat;
             lng = c?.longitude ?? c?.lng ?? lng;
           } catch {}
@@ -182,12 +188,15 @@ const MaintenanceTasks: React.FC = () => {
   const taskCounts = {
     total: tasks.length,
     // Pending excludes overdue
-    pending: tasks.filter((t) => t.status === "ASSIGNED" && !t.isOverdue).length,
+    pending: tasks.filter((t) => t.status === "ASSIGNED" && !t.isOverdue)
+      .length,
     // Overdue includes any active task past deadline (not RESOLVED/CLOSED)
     overdue: tasks.filter((t) => t.isOverdue).length,
     // Active (non-overdue) categories
-    inProgress: tasks.filter((t) => t.status === "IN_PROGRESS" && !t.isOverdue).length,
-    reopened: tasks.filter((t) => t.status === "REOPENED" && !t.isOverdue).length,
+    inProgress: tasks.filter((t) => t.status === "IN_PROGRESS" && !t.isOverdue)
+      .length,
+    reopened: tasks.filter((t) => t.status === "REOPENED" && !t.isOverdue)
+      .length,
     // Completed categories
     resolved: tasks.filter((t) => t.status === "RESOLVED").length,
     closed: tasks.filter((t) => t.status === "CLOSED").length,
@@ -196,13 +205,48 @@ const MaintenanceTasks: React.FC = () => {
   const showStatCards = false;
 
   const quickFilters = [
-    { key: "all", label: "All", count: taskCounts.total, icon: <ListTodo className="h-3 w-3" /> },
-    { key: "pending", label: "Pending", count: taskCounts.pending, icon: <Clock className="h-3 w-3" /> },
-    { key: "overdue", label: "Overdue", count: taskCounts.overdue, icon: <AlertCircle className="h-3 w-3" /> },
-    { key: "inProgress", label: "In Progress", count: taskCounts.inProgress, icon: <Clock className="h-3 w-3" /> },
-    { key: "resolved", label: "Resolved", count: taskCounts.resolved, icon: <CheckCircle className="h-3 w-3" /> },
-    { key: "reopened", label: "Reopened", count: taskCounts.reopened, icon: <RotateCcw className="h-3 w-3" /> },
-    { key: "closed", label: "Closed", count: taskCounts.closed, icon: <CheckCircle className="h-3 w-3" /> },
+    {
+      key: "all",
+      label: "All",
+      count: taskCounts.total,
+      icon: <ListTodo className="h-3 w-3" />,
+    },
+    {
+      key: "pending",
+      label: "Pending",
+      count: taskCounts.pending,
+      icon: <Clock className="h-3 w-3" />,
+    },
+    {
+      key: "overdue",
+      label: "Overdue",
+      count: taskCounts.overdue,
+      icon: <AlertCircle className="h-3 w-3" />,
+    },
+    {
+      key: "inProgress",
+      label: "In Progress",
+      count: taskCounts.inProgress,
+      icon: <Clock className="h-3 w-3" />,
+    },
+    {
+      key: "resolved",
+      label: "Resolved",
+      count: taskCounts.resolved,
+      icon: <CheckCircle className="h-3 w-3" />,
+    },
+    {
+      key: "reopened",
+      label: "Reopened",
+      count: taskCounts.reopened,
+      icon: <RotateCcw className="h-3 w-3" />,
+    },
+    {
+      key: "closed",
+      label: "Closed",
+      count: taskCounts.closed,
+      icon: <CheckCircle className="h-3 w-3" />,
+    },
   ];
 
   // Filter tasks based on active filter
@@ -300,7 +344,11 @@ const MaintenanceTasks: React.FC = () => {
       window.open(fallbackUrl, "_blank", "noopener,noreferrer");
     } catch (e) {
       const encoded = encodeURIComponent(task.address || task.location || "");
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank", "noopener,noreferrer");
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
     } finally {
       setNavigatingId(null);
     }
@@ -585,7 +633,9 @@ const MaintenanceTasks: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold mb-1">Maintenance Dashboard</h2>
-            <p className="text-blue-100">Welcome back! Here's your current workload.</p>
+            <p className="text-blue-100">
+              Welcome back! Here's your current workload.
+            </p>
           </div>
           <div className="text-right">
             <div className="text-4xl font-extrabold">{taskCounts.total}</div>
@@ -603,7 +653,9 @@ const MaintenanceTasks: React.FC = () => {
             >
               <span className="flex items-center gap-1">
                 {f.icon}
-                <span className="text-xs">{f.label}: {f.count}</span>
+                <span className="text-xs">
+                  {f.label}: {f.count}
+                </span>
               </span>
             </Button>
           ))}
@@ -620,136 +672,137 @@ const MaintenanceTasks: React.FC = () => {
 
       {/* Task Count Cards (hidden to avoid duplication) */}
       {showStatCards && (
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("all")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {taskCounts.total}
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("all")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Tasks
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {taskCounts.total}
+                  </p>
+                </div>
+                <ListTodo className="h-8 w-8 text-blue-600" />
               </div>
-              <ListTodo className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "pending" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("pending")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Pending Tasks
-                </p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {taskCounts.pending}
-                </p>
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "pending" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("pending")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Pending Tasks
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {taskCounts.pending}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-blue-600" />
               </div>
-              <Clock className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "overdue" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("overdue")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Overdue Tasks
-                </p>
-                <p className="text-2xl font-bold text-red-600">
-                  {taskCounts.overdue}
-                </p>
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "overdue" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("overdue")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Overdue Tasks
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {taskCounts.overdue}
+                  </p>
+                </div>
+                <AlertCircle className="h-8 w-8 text-red-600" />
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "inProgress" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("inProgress")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  In Progress
-                </p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {taskCounts.inProgress}
-                </p>
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "inProgress" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("inProgress")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    In Progress
+                  </p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {taskCounts.inProgress}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-orange-600" />
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("resolved")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Resolved Tasks
-                </p>
-                <p className="text-2xl font-bold text-green-600">
-                  {taskCounts.resolved}
-                </p>
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("resolved")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Resolved Tasks
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {taskCounts.resolved}
+                  </p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "reopened" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("reopened")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Reopened Tasks
-                </p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {taskCounts.reopened}
-                </p>
+            </CardContent>
+          </Card>
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "reopened" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("reopened")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Reopened Tasks
+                  </p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {taskCounts.reopened}
+                  </p>
+                </div>
+                <RotateCcw className="h-8 w-8 text-purple-600" />
               </div>
-              <RotateCcw className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card
-          className={`cursor-pointer transition-colors ${activeFilter === "closed" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
-          onClick={() => setActiveFilter("closed")}
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Closed</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {taskCounts.closed}
-                </p>
+          <Card
+            className={`cursor-pointer transition-colors ${activeFilter === "closed" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+            onClick={() => setActiveFilter("closed")}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Closed</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {taskCounts.closed}
+                  </p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-gray-600" />
               </div>
-              <CheckCircle className="h-8 w-8 text-gray-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Filtered Tasks */}
@@ -789,16 +842,16 @@ const MaintenanceTasks: React.FC = () => {
                 {activeFilter === "overdue"
                   ? "No overdue tasks"
                   : activeFilter === "pending"
-                  ? "No pending tasks"
-                  : activeFilter === "inProgress"
-                  ? "No in-progress tasks"
-                  : activeFilter === "resolved"
-                  ? "No resolved tasks"
-                  : activeFilter === "reopened"
-                  ? "No reopened tasks"
-                  : activeFilter === "closed"
-                  ? "No closed tasks"
-                  : "No tasks to show"}
+                    ? "No pending tasks"
+                    : activeFilter === "inProgress"
+                      ? "No in-progress tasks"
+                      : activeFilter === "resolved"
+                        ? "No resolved tasks"
+                        : activeFilter === "reopened"
+                          ? "No reopened tasks"
+                          : activeFilter === "closed"
+                            ? "No closed tasks"
+                            : "No tasks to show"}
               </p>
               <p className="text-sm mt-1">Try a different filter or refresh.</p>
             </div>
@@ -809,132 +862,134 @@ const MaintenanceTasks: React.FC = () => {
                   key={task.id}
                   className="border rounded-lg p-4 hover:bg-gray-50"
                 >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-lg">{task.title}</h3>
-                    <p className="text-gray-600 text-sm mt-1">
-                      {task.description}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2 ml-4">
-                    <Badge className={getPriorityColor(task.priority)}>
-                      {task.priority}
-                    </Badge>
-                    <Badge className={getStatusColor(task.status)}>
-                      <span className="flex items-center">
-                        {getStatusIcon(task.status)}
-                        <span className="ml-1">
-                          {task.status.replace("_", " ")}
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-lg">{task.title}</h3>
+                      <p className="text-gray-600 text-sm mt-1">
+                        {task.description}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2 ml-4">
+                      <Badge className={getPriorityColor(task.priority)}>
+                        {task.priority}
+                      </Badge>
+                      <Badge className={getStatusColor(task.status)}>
+                        <span className="flex items-center">
+                          {getStatusIcon(task.status)}
+                          <span className="ml-1">
+                            {task.status.replace("_", " ")}
+                          </span>
                         </span>
-                      </span>
-                    </Badge>
+                      </Badge>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{task.location}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{task.location}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span>Est. {task.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>Due: {task.dueDate}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1" />
-                    <span>Est. {task.estimatedTime}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    <span>Due: {task.dueDate}</span>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleNavigate(task)}
-                      disabled={navigatingId === task.id}
-                    >
-                      <Navigation className={`h-3 w-3 mr-1 ${navigatingId === task.id ? "animate-pulse" : ""}`} />
-                      {navigatingId === task.id ? "Opening..." : "Navigate"}
-                    </Button>
-                    {task.photo ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Camera className="h-3 w-3 mr-1" />
-                            Photos
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            onClick={() => handleViewPhoto(task.photo)}
-                          >
-                            View Existing Photo
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handlePhotoUpload(task)}
-                          >
-                            Upload New Photos
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePhotoUpload(task)}
+                        onClick={() => handleNavigate(task)}
+                        disabled={navigatingId === task.id}
                       >
-                        <Camera className="h-3 w-3 mr-1" />
-                        Add Photos
+                        <Navigation
+                          className={`h-3 w-3 mr-1 ${navigatingId === task.id ? "animate-pulse" : ""}`}
+                        />
+                        {navigatingId === task.id ? "Opening..." : "Navigate"}
                       </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleTaskExpansion(task.id)}
-                    >
-                      {expandedTaskId === task.id ? (
-                        <ChevronUp className="h-3 w-3 mr-1" />
+                      {task.photo ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Camera className="h-3 w-3 mr-1" />
+                              Photos
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => handleViewPhoto(task.photo)}
+                            >
+                              View Existing Photo
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handlePhotoUpload(task)}
+                            >
+                              Upload New Photos
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       ) : (
-                        <ChevronDown className="h-3 w-3 mr-1" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePhotoUpload(task)}
+                        >
+                          <Camera className="h-3 w-3 mr-1" />
+                          Add Photos
+                        </Button>
                       )}
-                      Progress
-                    </Button>
-                  </div>
-                  <div className="flex space-x-2">
-                    {task.status === "ASSIGNED" && (
                       <Button
+                        variant="outline"
                         size="sm"
-                        onClick={() => handleStartWork(task.id)}
+                        onClick={() => toggleTaskExpansion(task.id)}
                       >
-                        <Play className="h-3 w-3 mr-1" />
-                        Start Work
+                        {expandedTaskId === task.id ? (
+                          <ChevronUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3 mr-1" />
+                        )}
+                        Progress
                       </Button>
-                    )}
-                    {(task.status === "IN_PROGRESS" ||
-                      task.status === "REOPENED") && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleMarkResolved(task)}
-                      >
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Mark as Resolved
-                      </Button>
-                    )}
-                    <Link to={`/tasks/${task.id}`}>
-                      <Button variant="outline" size="sm">
-                        Details
-                      </Button>
-                    </Link>
+                    </div>
+                    <div className="flex space-x-2">
+                      {task.status === "ASSIGNED" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStartWork(task.id)}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Start Work
+                        </Button>
+                      )}
+                      {(task.status === "IN_PROGRESS" ||
+                        task.status === "REOPENED") && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleMarkResolved(task)}
+                        >
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Mark as Resolved
+                        </Button>
+                      )}
+                      <Link to={`/tasks/${task.id}`}>
+                        <Button variant="outline" size="sm">
+                          Details
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
+                  {/* Work Progress Section */}
+                  {expandedTaskId === task.id && (
+                    <TaskProgressSection task={task} />
+                  )}
                 </div>
-                {/* Work Progress Section */}
-                {expandedTaskId === task.id && (
-                  <TaskProgressSection task={task} />
-                )}
-              </div>
-            ))}
+              ))}
             </div>
           )}
         </CardContent>

@@ -271,7 +271,11 @@ const CitizenComplaintForm: React.FC = () => {
       case 2:
         if (!formData.wardId) errors.wardId = "Ward selection is required";
         if (!formData.area.trim()) errors.area = "Area/locality is required";
-        if ((availableSubZones && availableSubZones.length > 0) && !formData.subZoneId) {
+        if (
+          availableSubZones &&
+          availableSubZones.length > 0 &&
+          !formData.subZoneId
+        ) {
           errors.subZoneId = "Sub-zone is required";
         }
         if (!formData.landmark || !formData.landmark.trim()) {
@@ -280,7 +284,11 @@ const CitizenComplaintForm: React.FC = () => {
         if (!formData.address || !formData.address.trim()) {
           errors.address = "Full address is required";
         }
-        if (!formData.coordinates || formData.coordinates.latitude == null || formData.coordinates.longitude == null) {
+        if (
+          !formData.coordinates ||
+          formData.coordinates.latitude == null ||
+          formData.coordinates.longitude == null
+        ) {
           errors.coordinates = "Location (GPS coordinates) is required";
         }
         break;
@@ -795,7 +803,11 @@ const CitizenComplaintForm: React.FC = () => {
                         }
                         disabled={!formData.wardId}
                       >
-                        <SelectTrigger className={validationErrors.subZoneId ? "border-red-500" : ""}>
+                        <SelectTrigger
+                          className={
+                            validationErrors.subZoneId ? "border-red-500" : ""
+                          }
+                        >
                           <SelectValue placeholder="Select sub-zone" />
                         </SelectTrigger>
                         <SelectContent>
@@ -807,7 +819,9 @@ const CitizenComplaintForm: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {validationErrors.subZoneId && (
-                        <p className="text-sm text-red-600">{validationErrors.subZoneId}</p>
+                        <p className="text-sm text-red-600">
+                          {validationErrors.subZoneId}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -838,10 +852,14 @@ const CitizenComplaintForm: React.FC = () => {
                         placeholder="Nearby landmark (e.g., Next to Bank, Opposite School)"
                         value={formData.landmark}
                         onChange={handleInputChange}
-                        className={validationErrors.landmark ? "border-red-500" : ""}
+                        className={
+                          validationErrors.landmark ? "border-red-500" : ""
+                        }
                       />
                       {validationErrors.landmark && (
-                        <p className="text-sm text-red-600">{validationErrors.landmark}</p>
+                        <p className="text-sm text-red-600">
+                          {validationErrors.landmark}
+                        </p>
                       )}
                     </div>
 
@@ -853,10 +871,14 @@ const CitizenComplaintForm: React.FC = () => {
                         placeholder="Complete address"
                         value={formData.address}
                         onChange={handleInputChange}
-                        className={validationErrors.address ? "border-red-500" : ""}
+                        className={
+                          validationErrors.address ? "border-red-500" : ""
+                        }
                       />
                       {validationErrors.address && (
-                        <p className="text-sm text-red-600">{validationErrors.address}</p>
+                        <p className="text-sm text-red-600">
+                          {validationErrors.address}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -877,7 +899,9 @@ const CitizenComplaintForm: React.FC = () => {
                     </div>
                   )}
                   {validationErrors.coordinates && (
-                    <p className="text-sm text-red-600">{validationErrors.coordinates}</p>
+                    <p className="text-sm text-red-600">
+                      {validationErrors.coordinates}
+                    </p>
                   )}
                 </div>
               </div>
