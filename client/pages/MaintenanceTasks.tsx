@@ -153,29 +153,36 @@ const MaintenanceTasks: React.FC = () => {
     return [];
   }, [complaintsResponse]);
 
-  // Calculate task counts
+  // Calculate task counts with mutually exclusive buckets
   const taskCounts = {
     total: tasks.length,
-    pending: tasks.filter((t) => t.status === "ASSIGNED").length,
+    // Pending excludes overdue
+    pending: tasks.filter((t) => t.status === "ASSIGNED" && !t.isOverdue).length,
+    // Overdue includes any active task past deadline (not RESOLVED/CLOSED)
     overdue: tasks.filter((t) => t.isOverdue).length,
+    // Active (non-overdue) categories
+    inProgress: tasks.filter((t) => t.status === "IN_PROGRESS" && !t.isOverdue).length,
+    reopened: tasks.filter((t) => t.status === "REOPENED" && !t.isOverdue).length,
+    // Completed categories
     resolved: tasks.filter((t) => t.status === "RESOLVED").length,
-    reopened: tasks.filter((t) => t.status === "REOPENED").length,
-    inProgress: tasks.filter((t) => t.status === "IN_PROGRESS").length,
+    closed: tasks.filter((t) => t.status === "CLOSED").length,
   };
 
   // Filter tasks based on active filter
   const filteredTasks = tasks.filter((task) => {
     switch (activeFilter) {
       case "pending":
-        return task.status === "ASSIGNED";
+        return task.status === "ASSIGNED" && !task.isOverdue;
       case "overdue":
         return task.isOverdue;
       case "resolved":
         return task.status === "RESOLVED";
+      case "closed":
+        return task.status === "CLOSED";
       case "reopened":
-        return task.status === "REOPENED";
+        return task.status === "REOPENED" && !task.isOverdue;
       case "inProgress":
-        return task.status === "IN_PROGRESS";
+        return task.status === "IN_PROGRESS" && !task.isOverdue;
       default:
         return true;
     }
@@ -441,6 +448,8 @@ const MaintenanceTasks: React.FC = () => {
         return "bg-green-100 text-green-800";
       case "REOPENED":
         return "bg-purple-100 text-purple-800";
+      case "CLOSED":
+        return "bg-gray-200 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -456,6 +465,8 @@ const MaintenanceTasks: React.FC = () => {
         return <CheckCircle className="h-4 w-4" />;
       case "REOPENED":
         return <RotateCcw className="h-4 w-4" />;
+      case "CLOSED":
+        return <CheckCircle className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
     }
@@ -512,7 +523,7 @@ const MaintenanceTasks: React.FC = () => {
       </div>
 
       {/* Task Count Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "all" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
           onClick={() => setActiveFilter("all")}
@@ -576,6 +587,25 @@ const MaintenanceTasks: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
+                  In Progress
+                </p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {taskCounts.inProgress}
+                </p>
+              </div>
+              <Clock className="h-8 w-8 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "resolved" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("resolved")}
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
                   Resolved Tasks
                 </p>
                 <p className="text-2xl font-bold text-green-600">
@@ -586,6 +616,7 @@ const MaintenanceTasks: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
 
         <Card
           className={`cursor-pointer transition-colors ${activeFilter === "reopened" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
@@ -605,7 +636,23 @@ const MaintenanceTasks: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+
+        <Card
+          className={`cursor-pointer transition-colors ${activeFilter === "closed" ? "ring-2 ring-primary" : "hover:bg-gray-50"}`}
+          onClick={() => setActiveFilter("closed")}
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Closed</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {taskCounts.closed}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-gray-600" />
+            </div>
+          </CardContent>
+        </Card>
 
       {/* Filtered Tasks */}
       <Card>
