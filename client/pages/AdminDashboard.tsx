@@ -260,7 +260,8 @@ const AdminDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-red-600">
               {systemStats.overdue}
             </div>
-            <p className="text-xs text-muted-foreground">Past deadline</p>
+            <p className="text-xs text-muted-foreground">Open past deadline</p>
+            <p className="text-[11px] text-gray-500 mt-1">SLA breaches (open + resolved late): {metrics?.slaBreaches || 0}</p>
           </CardContent>
         </Card>
 
