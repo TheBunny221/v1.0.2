@@ -145,6 +145,10 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  <TableHead>Rating</TableHead>
+                  <TableHead>SLA</TableHead>
+                  <TableHead>Closed</TableHead>
+                  <TableHead>Updated</TableHead>
                   <TableHead>Date</TableHead>
                   {showActions && <TableHead>Actions</TableHead>}
                 </TableRow>
