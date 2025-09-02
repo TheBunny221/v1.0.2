@@ -396,6 +396,7 @@ const AdminDashboard: React.FC = () => {
                           outerRadius={100}
                           paddingAngle={2}
                           dataKey="value"
+                          nameKey="name"
                         >
                           {complaintsByType.map((entry, index) => (
                             <Cell
@@ -405,8 +406,18 @@ const AdminDashboard: React.FC = () => {
                           ))}
                         </Pie>
                         <Tooltip
-                          labelFormatter={(label, payload) => payload?.[0]?.payload?.name || label}
-                          formatter={(value) => [String(value), "Complaints"]}
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            const entry = payload[0];
+                            const typeName = entry?.payload?.name || entry?.name || "Type";
+                            const count = entry?.value ?? entry?.payload?.value ?? 0;
+                            return (
+                              <div className="rounded-md border bg-white px-3 py-2 text-sm shadow">
+                                <div className="font-medium">{typeName}</div>
+                                <div className="text-gray-600">{count} complaints</div>
+                              </div>
+                            );
+                          }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
