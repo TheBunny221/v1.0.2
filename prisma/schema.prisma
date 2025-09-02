@@ -208,6 +208,8 @@ model Complaint {
   @@index([submittedOn])
   @@index([status, createdAt])
   @@index([type, createdAt])
+  @@index([wardId, createdAt])
+  @@index([wardId, status, type, createdAt])
   @@map("complaints")
 }
 
