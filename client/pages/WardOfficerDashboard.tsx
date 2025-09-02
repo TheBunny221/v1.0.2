@@ -265,7 +265,7 @@ const WardOfficerDashboard: React.FC = () => {
                 {stats?.summary.pendingWork || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                Registered + Assigned
+                Registered 
               </p>
             </CardContent>
           </Card>

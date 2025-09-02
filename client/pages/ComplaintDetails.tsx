@@ -731,7 +731,7 @@ const ComplaintDetails: React.FC = () => {
                         <strong>Complaint ID:</strong>{" "}
                         {complaint.complaintId || complaint.id}
                       </p>
-                      <p className="text-gray-600">
+                      {/* <p className="text-gray-600">
                         <strong>Internal ID:</strong> {complaint.id}
                       </p>
                       {complaint.isAnonymous !== undefined && (
@@ -739,7 +739,7 @@ const ComplaintDetails: React.FC = () => {
                           <strong>Anonymous:</strong>{" "}
                           {complaint.isAnonymous ? "Yes" : "No"}
                         </p>
-                      )}
+                      )} */}
                       {complaint.tags && (
                         <p className="text-gray-600">
                           <strong>Tags:</strong>{" "}
