@@ -667,6 +667,12 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
           totalComplaints > 0
             ? Math.round((resolvedComplaints / totalComplaints) * 100)
             : 0,
+        // Verification fields
+        overdueOpen: Number(overdueOpen) || 0,
+        resolvedLate: Number(resolvedLate) || 0,
+        slaBreaches: Number(slaBreaches) || 0,
+        withinSLA: Number(withinSLA) || 0,
+        totalComplaints: Number(totalComplaints) || 0,
       },
     },
   });
