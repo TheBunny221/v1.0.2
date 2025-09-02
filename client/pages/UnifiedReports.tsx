@@ -1197,9 +1197,9 @@ const UnifiedReports: React.FC = () => {
               <div className="flex items-center text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 {(
-                  (analyticsData.complaints.resolved /
-                    analyticsData.complaints.total) *
-                  100
+                  analyticsData.complaints.total > 0
+                    ? (analyticsData.complaints.resolved / analyticsData.complaints.total) * 100
+                    : 0
                 ).toFixed(1)}
                 % resolution rate
               </div>
