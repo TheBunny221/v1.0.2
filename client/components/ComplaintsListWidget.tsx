@@ -193,6 +193,32 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                       </div>
                     </TableCell>
                     <TableCell>
+                      {typeof complaint.rating === "number" && complaint.rating > 0 ? (
+                        <span className="text-sm font-medium">{complaint.rating}/5</span>
+                      ) : (
+                        <span className="text-xs text-gray-500">N/A</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={(complaint.slaStatus === "OVERDUE" && "bg-red-100 text-red-800") || (complaint.slaStatus === "WARNING" && "bg-yellow-100 text-yellow-800") || (complaint.slaStatus === "ON_TIME" && "bg-green-100 text-green-800") || "bg-gray-100 text-gray-800"}>
+                        {complaint.slaStatus?.replace("_", " ") || "N/A"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {complaint.closedOn ? (
+                        <span className="text-sm">{new Date(complaint.closedOn).toLocaleDateString()}</span>
+                      ) : (
+                        <span className="text-xs text-gray-500">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {complaint.updatedAt ? (
+                        <span className="text-sm">{new Date(complaint.updatedAt).toLocaleDateString()}</span>
+                      ) : (
+                        <span className="text-xs text-gray-500">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center text-sm">
                         <Calendar className="h-3 w-3 mr-1" />
                         {complaint.submittedOn
