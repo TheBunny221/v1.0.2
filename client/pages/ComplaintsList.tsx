@@ -581,6 +581,32 @@ const ComplaintsList: React.FC = () => {
                         )}
                       </div>
                     </TableCell>
+                    {user?.role !== "CITIZEN" && (
+                      <>
+                        <TableCell>
+                          {typeof complaint.rating === "number" && complaint.rating > 0 ? (
+                            <span className="text-sm font-medium">{complaint.rating}/5</span>
+                          ) : (
+                            <span className="text-xs text-gray-500">N/A</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getSLAColor(complaint.slaStatus)}>
+                            {complaint.slaStatus.replace("_", " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {complaint.closedOn ? (
+                            <span className="text-sm">{new Date(complaint.closedOn).toLocaleDateString()}</span>
+                          ) : (
+                            <span className="text-xs text-gray-500">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">{new Date(complaint.updatedAt).toLocaleDateString()}</span>
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell>
                       <div className="flex items-center text-sm">
                         <Calendar className="h-3 w-3 mr-1" />
