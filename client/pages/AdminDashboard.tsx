@@ -328,10 +328,7 @@ const AdminDashboard: React.FC = () => {
                         />
                         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                         <Tooltip
-                          formatter={(value, name) => [
-                            value,
-                            name === "complaints" ? "Complaints" : "Resolved",
-                          ]}
+                          formatter={(value, name) => [value, name]}
                           labelFormatter={(label) => `Month: ${label}`}
                         />
                         <Line
