@@ -260,6 +260,21 @@ const ComplaintsList: React.FC = () => {
     }
   };
 
+  const getSLAColor = (sla: string) => {
+    switch (sla) {
+      case "ON_TIME":
+        return "bg-green-100 text-green-800";
+      case "WARNING":
+        return "bg-yellow-100 text-yellow-800";
+      case "OVERDUE":
+        return "bg-red-100 text-red-800";
+      case "COMPLETED":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   // Use all complaints since filtering is done server-side
   const filteredComplaints = complaints;
 
@@ -502,6 +517,14 @@ const ComplaintsList: React.FC = () => {
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  {user?.role !== "CITIZEN" && (
+                    <>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>SLA</TableHead>
+                      <TableHead>Closed</TableHead>
+                      <TableHead>Updated</TableHead>
+                    </>
+                  )}
                   <TableHead>Date</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -558,6 +581,41 @@ const ComplaintsList: React.FC = () => {
                         )}
                       </div>
                     </TableCell>
+                    {user?.role !== "CITIZEN" && (
+                      <>
+                        <TableCell>
+                          {typeof complaint.rating === "number" &&
+                          complaint.rating > 0 ? (
+                            <span className="text-sm font-medium">
+                              {complaint.rating}/5
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-500">N/A</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getSLAColor(complaint.slaStatus)}>
+                            {complaint.slaStatus.replace("_", " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {complaint.closedOn ? (
+                            <span className="text-sm">
+                              {new Date(
+                                complaint.closedOn,
+                              ).toLocaleDateString()}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-500">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">
+                            {new Date(complaint.updatedAt).toLocaleDateString()}
+                          </span>
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell>
                       <div className="flex items-center text-sm">
                         <Calendar className="h-3 w-3 mr-1" />

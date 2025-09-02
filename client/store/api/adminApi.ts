@@ -193,6 +193,8 @@ export interface DashboardStatsResponse {
   overdue: number;
   wardOfficers: number;
   maintenanceTeam: number;
+  activeUsers?: number;
+  pendingTeamAssignments?: number;
 }
 
 export interface UserActivityResponse {

@@ -348,7 +348,11 @@ export const getSystemStats = asyncHandler(async (req, res) => {
     prisma.complaint.count(),
     prisma.ward.count(),
     prisma.complaint.count({
-      where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } },
+      where: {
+        status: {
+          in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"],
+        },
+      },
     }),
     prisma.complaint.count({ where: { status: "RESOLVED" } }),
   ]);
@@ -574,11 +578,24 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
         }, 0) / validResolutions.length
       : 0;
 
-  // Calculate SLA compliance percentage
+  // Calculate SLA compliance based on breaches (overdue open or resolved late)
+  const nowTs = new Date();
+  const [overdueOpen, resolvedLateRow] = await Promise.all([
+    prisma.complaint.count({
+      where: {
+        deadline: { lt: nowTs },
+        status: { notIn: ["RESOLVED", "CLOSED"] },
+      },
+    }),
+    prisma.$queryRaw`SELECT COUNT(*) as count FROM "complaints" WHERE (status = 'RESOLVED' OR status = 'CLOSED') AND "resolvedOn" IS NOT NULL AND "deadline" IS NOT NULL AND "resolvedOn" > "deadline"`,
+  ]);
+  const resolvedLate = Number(
+    resolvedLateRow?.[0]?.count ?? resolvedLateRow?.count ?? 0,
+  );
+  const slaBreaches = overdueOpen + resolvedLate;
+  const withinSLA = Math.max(totalComplaints - slaBreaches, 0);
   const slaCompliance =
-    totalComplaints > 0
-      ? Math.round((resolvedComplaints / totalComplaints) * 100)
-      : 0;
+    totalComplaints > 0 ? Math.round((withinSLA / totalComplaints) * 100) : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
@@ -657,6 +674,12 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
           totalComplaints > 0
             ? Math.round((resolvedComplaints / totalComplaints) * 100)
             : 0,
+        // Verification fields
+        overdueOpen: Number(overdueOpen) || 0,
+        resolvedLate: Number(resolvedLate) || 0,
+        slaBreaches: Number(slaBreaches) || 0,
+        withinSLA: Number(withinSLA) || 0,
+        totalComplaints: Number(totalComplaints) || 0,
       },
     },
   });
@@ -830,9 +853,9 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/dashboard/stats
 // @access  Private (Admin only)
 export const getDashboardStats = asyncHandler(async (req, res) => {
-  const [userStats, complaintStats, pendingTeamAssignments] = await Promise.all(
-    [
-      // User statistics by role
+  const [userStats, complaintStats, pendingTeamAssignments, activeUsers] =
+    await Promise.all([
+      // User statistics by role (active only)
       prisma.user.groupBy({
         by: ["role"],
         where: { isActive: true },
@@ -843,15 +866,16 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
         by: ["status"],
         _count: true,
       }),
-      // Pending maintenance team assignment across active complaints
+      // Pending maintenance team assignment (align with complaints list filter)
       prisma.complaint.count({
         where: {
           maintenanceTeamId: null,
-          status: { in: ["REGISTERED", "ASSIGNED", "REOPENED"] },
+          status: { notIn: ["RESOLVED", "CLOSED"] },
         },
       }),
-    ],
-  );
+      // Active user count
+      prisma.user.count({ where: { isActive: true } }),
+    ]);
 
   const wardOfficers =
     userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
@@ -864,7 +888,15 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     0,
   );
   const activeComplaints = complaintStats
-    .filter((s) => ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(s.status))
+    .filter((s) =>
+      [
+        "REGISTERED",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "RESOLVED",
+        "REOPENED",
+      ].includes(s.status),
+    )
     .reduce((sum, stat) => sum + stat._count, 0);
   const resolvedComplaints =
     complaintStats.find((s) => s.status === "RESOLVED")?._count || 0;
@@ -889,6 +921,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       wardOfficers,
       maintenanceTeam,
       pendingTeamAssignments,
+      activeUsers,
     },
   });
 });

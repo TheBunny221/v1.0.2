@@ -757,7 +757,34 @@ export const getComplaints = asyncHandler(async (req, res) => {
     }
   }
 
-  if (slaStatus) filters.slaStatus = slaStatus;
+  // Dynamic SLA filtering to avoid stale slaStatus values
+  if (slaStatus) {
+    const now = new Date();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const andBlocks = [];
+
+    if (slaStatus === "OVERDUE") {
+      andBlocks.push({ deadline: { lt: now } });
+      andBlocks.push({ status: { notIn: ["RESOLVED", "CLOSED"] } });
+    } else if (slaStatus === "WARNING") {
+      andBlocks.push({
+        deadline: { gte: now, lte: new Date(now.getTime() + oneDayMs) },
+      });
+      andBlocks.push({ status: { notIn: ["RESOLVED", "CLOSED"] } });
+    } else if (slaStatus === "ON_TIME") {
+      andBlocks.push({ deadline: { gt: new Date(now.getTime() + oneDayMs) } });
+      andBlocks.push({ status: { notIn: ["RESOLVED", "CLOSED"] } });
+    } else if (slaStatus === "COMPLETED") {
+      andBlocks.push({ status: { in: ["RESOLVED", "CLOSED"] } });
+    } else {
+      // Fallback to stored column filter for any unknown value
+      filters.slaStatus = slaStatus;
+    }
+
+    if (andBlocks.length) {
+      filters.AND = [...(filters.AND || []), ...andBlocks];
+    }
+  }
 
   // --- admin-only overrides ---
   if (req.user.role === "ADMINISTRATOR") {
@@ -889,10 +916,24 @@ export const getComplaints = asyncHandler(async (req, res) => {
       prisma.complaint.count({ where: finalWhere }),
     ]);
 
-    const complaints = rawComplaints.map((c) => ({
-      ...c,
-      needsTeamAssignment: !c.maintenanceTeamId,
-    }));
+    const now = new Date();
+    const complaints = rawComplaints.map((c) => {
+      let sla = c.slaStatus;
+      if (c.status === "RESOLVED" || c.status === "CLOSED") {
+        sla = "COMPLETED";
+      } else if (c.deadline instanceof Date) {
+        const daysRemaining = (c.deadline - now) / (1000 * 60 * 60 * 24);
+        if (daysRemaining < 0) sla = "OVERDUE";
+        else if (daysRemaining <= 1) sla = "WARNING";
+        else sla = "ON_TIME";
+      }
+
+      return {
+        ...c,
+        slaStatus: sla,
+        needsTeamAssignment: !c.maintenanceTeamId,
+      };
+    });
 
     const totalPages = Math.ceil(total / limitNum);
     const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;

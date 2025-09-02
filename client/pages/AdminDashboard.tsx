@@ -215,7 +215,7 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
             <div className="text-2xl font-bold">
-              {systemStats.wardOfficers + systemStats.maintenanceTeam}
+              {systemStats.activeUsers || 0}
             </div>
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
@@ -260,7 +260,10 @@ const AdminDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-red-600">
               {systemStats.overdue}
             </div>
-            <p className="text-xs text-muted-foreground">Past deadline</p>
+            <p className="text-xs text-muted-foreground">Open past deadline</p>
+            <p className="text-[11px] text-gray-500 mt-1">
+              SLA breaches (open + resolved late): {metrics?.slaBreaches || 0}
+            </p>
           </CardContent>
         </Card>
 
@@ -298,10 +301,10 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="overview" className="space-y-3">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
+          {/* <TabsTrigger value="performance">Performance</TabsTrigger> */}
           {/* <TabsTrigger value="users">Users</TabsTrigger> */}
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
@@ -328,10 +331,7 @@ const AdminDashboard: React.FC = () => {
                         />
                         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                         <Tooltip
-                          formatter={(value, name) => [
-                            value,
-                            name === "complaints" ? "Complaints" : "Resolved",
-                          ]}
+                          formatter={(value, name) => [value, name]}
                           labelFormatter={(label) => `Month: ${label}`}
                         />
                         <Line
@@ -399,6 +399,7 @@ const AdminDashboard: React.FC = () => {
                           outerRadius={100}
                           paddingAngle={2}
                           dataKey="value"
+                          nameKey="name"
                         >
                           {complaintsByType.map((entry, index) => (
                             <Cell
@@ -408,11 +409,23 @@ const AdminDashboard: React.FC = () => {
                           ))}
                         </Pie>
                         <Tooltip
-                          formatter={(value, name) => [
-                            `${value} complaints`,
-                            "Count",
-                          ]}
-                          labelFormatter={(label) => `Type: ${label}`}
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length)
+                              return null;
+                            const entry = payload[0];
+                            const typeName =
+                              entry?.payload?.name || entry?.name || "Type";
+                            const count =
+                              entry?.value ?? entry?.payload?.value ?? 0;
+                            return (
+                              <div className="rounded-md border bg-white px-3 py-2 text-sm shadow">
+                                <div className="font-medium">{typeName}</div>
+                                <div className="text-gray-600">
+                                  {count} complaints
+                                </div>
+                              </div>
+                            );
+                          }}
                         />
                       </PieChart>
                     </ResponsiveContainer>

@@ -59,6 +59,8 @@ import {
   X,
 } from "lucide-react";
 import { createComplaint } from "@/store/slices/complaintsSlice";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
+import { prewarmMapAssets } from "../utils/mapTilePrefetch";
 
 interface QuickComplaintFormProps {
   onSuccess?: (complaintId: string) => void;
@@ -121,6 +123,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const [showOtpInput, setShowOtpInput] = useState(false);
 
   const { toast } = useToast();
+  const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
   const [
     generateCaptcha,
@@ -148,6 +151,13 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   useEffect(() => {
     handleRefreshCaptcha();
   }, []);
+
+  // Prewarm map assets (tiles + leaflet) using system-config default center
+  useEffect(() => {
+    const lat = parseFloat(getConfig("MAP_DEFAULT_LAT", "9.9312")) || 9.9312;
+    const lng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
+    prewarmMapAssets(lat, lng, 13);
+  }, [getConfig]);
 
   // Update CAPTCHA ID when new CAPTCHA is generated
   useEffect(() => {

@@ -12,6 +12,7 @@ import { Label } from "./ui/label";
 import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
 import { useDetectLocationAreaMutation } from "../store/api/wardApi";
 import { detectLocationArea } from "../utils/geoUtils";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 
 interface LocationData {
   latitude: number;
@@ -34,8 +35,17 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   onLocationSelect,
   initialLocation,
 }) => {
-  // Default to Kochi, India coordinates
-  const defaultPosition = { lat: 9.9312, lng: 76.2673 };
+  const { getConfig } = useSystemConfig();
+  const defaultLat = parseFloat(getConfig("MAP_DEFAULT_LAT", "9.9312")) || 9.9312;
+  const defaultLng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
+  const mapPlace = getConfig("MAP_SEARCH_PLACE", "Kochi, Kerala, India");
+  const countryCodes = getConfig("MAP_COUNTRY_CODES", "in").trim();
+  const bboxNorth = getConfig("MAP_BBOX_NORTH", "10.05");
+  const bboxSouth = getConfig("MAP_BBOX_SOUTH", "9.85");
+  const bboxEast = getConfig("MAP_BBOX_EAST", "76.39");
+  const bboxWest = getConfig("MAP_BBOX_WEST", "76.20");
+  const hasBbox = [bboxWest, bboxSouth, bboxEast, bboxNorth].every((v) => v && !Number.isNaN(parseFloat(v)));
+  const defaultPosition = { lat: defaultLat, lng: defaultLng };
   const [position, setPosition] = useState(
     initialLocation
       ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
@@ -52,6 +62,8 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   const [isDetectingArea, setIsDetectingArea] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
+  const leafletLibRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   // API hook for area detection
   const [detectAreaMutation] = useDetectLocationAreaMutation();
@@ -64,6 +76,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       try {
         // Dynamically import leaflet only when needed
         const L = await import("leaflet");
+        leafletLibRef.current = L;
 
         // Set up the default icon
         const DefaultIcon = L.icon({
@@ -94,7 +107,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           }).addTo(leafletMapRef.current);
 
           // Add marker
-          const marker = L.marker([position.lat, position.lng], {
+          markerRef.current = L.marker([position.lat, position.lng], {
             icon: DefaultIcon,
           }).addTo(leafletMapRef.current);
 
@@ -102,7 +115,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           leafletMapRef.current.on("click", (e: any) => {
             const { lat, lng } = e.latlng;
             setPosition({ lat, lng });
-            marker.setLatLng([lat, lng]);
+            markerRef.current?.setLatLng([lat, lng]);
 
             // Run both area detection and reverse geocoding
             detectAdministrativeArea({ lat, lng });
@@ -111,6 +124,13 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         }
 
         setMapError(null);
+
+        // Ensure proper sizing after open
+        setTimeout(() => {
+          try {
+            leafletMapRef.current?.invalidateSize?.();
+          } catch {}
+        }, 200);
       } catch (error) {
         console.error("Error initializing map:", error);
         setMapError("Failed to load map. Please refresh and try again.");
@@ -129,48 +149,74 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     }
   }, [isOpen]);
 
+  // On open, populate address/area for initial position (from system-config default or provided initialLocation)
+  useEffect(() => {
+    if (!isOpen) return;
+    const coords = { lat: position.lat, lng: position.lng };
+    detectAdministrativeArea(coords);
+    reverseGeocode(coords);
+  }, [isOpen]);
+
+  const getGeoErrorMessage = (err: GeolocationPositionError | any) => {
+    const insecure = typeof window !== "undefined" && !window.isSecureContext;
+    if (insecure) return "Location requires HTTPS. Please use a secure connection.";
+    if (!err || typeof err !== "object") return "Unable to fetch your location.";
+    switch (err.code) {
+      case 1:
+        return "Location permission denied. Enable location access in your browser settings.";
+      case 2:
+        return "Location unavailable. Please check GPS or network and try again.";
+      case 3:
+        return "Location request timed out. Try again or move to an open area.";
+      default:
+        return err.message || "Unable to fetch your location.";
+    }
+  };
+
   // Get current location
-  const getCurrentLocation = useCallback(() => {
+  const getCurrentLocation = useCallback(async () => {
     setIsLoadingLocation(true);
-    if (navigator.geolocation) {
+    try {
+      if (!("geolocation" in navigator)) {
+        setMapError("Geolocation is not supported by this browser.");
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      try {
+        // Check permission state to avoid triggering prompt when denied
+        const perm: any = (navigator as any).permissions && (await (navigator as any).permissions.query({ name: "geolocation" } as any));
+        if (perm && perm.state === "denied") {
+          setMapError("Location permission denied. Enable it in browser settings.");
+          setIsLoadingLocation(false);
+          return;
+        }
+      } catch {}
+
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const newPos = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          };
+          const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setPosition(newPos);
-
-          // Run both area detection and reverse geocoding
           detectAdministrativeArea(newPos);
           reverseGeocode(newPos);
-
-          // Update map view
           if (leafletMapRef.current) {
             leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
-            // Update marker if it exists
-            const markers = Object.values(leafletMapRef.current._layers).filter(
-              (layer: any) => layer instanceof L.Marker,
-            );
-            if (markers.length > 0) {
-              (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
-            }
+            markerRef.current?.setLatLng([newPos.lat, newPos.lng]);
           }
-
           setIsLoadingLocation(false);
+          setMapError(null);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error("Error getting location:", { code: error?.code, message: error?.message });
           setIsLoadingLocation(false);
-          alert(
-            "Could not get your location. Please ensure location access is enabled.",
-          );
+          setMapError(getGeoErrorMessage(error));
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 600000 },
       );
-    } else {
+    } catch (e) {
+      console.error("Unexpected geolocation error:", e);
+      setMapError("Unable to fetch your location. Try again.");
       setIsLoadingLocation(false);
-      alert("Geolocation is not supported by this browser.");
     }
   }, []);
 
@@ -253,8 +299,13 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     if (!searchQuery.trim()) return;
 
     try {
+      const viewbox = hasBbox
+        ? `&viewbox=${encodeURIComponent(`${bboxWest},${bboxNorth},${bboxEast},${bboxSouth}`)}&bounded=1`
+        : "";
+      const cc = countryCodes ? `&countrycodes=${encodeURIComponent(countryCodes)}` : "";
+      const q = `${searchQuery}, ${mapPlace}`;
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", Kochi, Kerala, India")}&format=json&limit=1&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1${viewbox}${cc}`,
       );
       const data = await response.json();
 
@@ -286,13 +337,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         // Update map view
         if (leafletMapRef.current) {
           leafletMapRef.current.setView([newPos.lat, newPos.lng], 16);
-          // Update marker if it exists
-          const markers = Object.values(leafletMapRef.current._layers).filter(
-            (layer: any) => layer instanceof L.Marker,
-          );
-          if (markers.length > 0) {
-            (markers[0] as any).setLatLng([newPos.lat, newPos.lng]);
-          }
+          markerRef.current?.setLatLng([newPos.lat, newPos.lng]);
         }
       } else {
         alert("Location not found. Please try a different search term.");
@@ -336,7 +381,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 flex gap-2">
                 <Input
-                  placeholder="Search for a location in Kochi..."
+                  placeholder={`Search for a location in ${mapPlace}`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -351,43 +396,83 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
-              <Button
-                onClick={getCurrentLocation}
-                variant="outline"
-                disabled={isLoadingLocation}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Navigation className="h-4 w-4" />
-                {isLoadingLocation ? "Getting..." : "Current Location"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={getCurrentLocation}
+                  variant="outline"
+                  disabled={isLoadingLocation}
+                  className="flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Navigation className="h-4 w-4" />
+                  {isLoadingLocation ? "Getting..." : "Current Location"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!leafletMapRef.current) return;
+                    const center = leafletMapRef.current.getCenter();
+                    const lat = center.lat;
+                    const lng = center.lng;
+                    setPosition({ lat, lng });
+                    markerRef.current?.setLatLng([lat, lng]);
+                    detectAdministrativeArea({ lat, lng });
+                    reverseGeocode({ lat, lng });
+                  }}
+                  variant="outline"
+                  className="whitespace-nowrap"
+                >
+                  Drop Pin Here
+                </Button>
+              </div>
             </div>
 
             {/* Map */}
             <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border relative">
               {mapError ? (
-                <div className="h-full flex items-center justify-center bg-gray-100">
+                <div className="h-full flex items-center justify-center bg-gray-50">
                   <div className="text-center p-4">
                     <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                    <p className="text-red-600 text-sm">{mapError}</p>
+                    <p className="text-red-600 text-sm mb-2">{mapError}</p>
+                    <Button onClick={getCurrentLocation} variant="outline" size="sm" className="mr-2">
+                      Try Again
+                    </Button>
                     <Button
-                      onClick={() => window.location.reload()}
+                      onClick={() => {
+                        setMapError(null);
+                        if (leafletMapRef.current) {
+                          leafletMapRef.current.setView([position.lat, position.lng], 13);
+                          markerRef.current?.setLatLng([position.lat, position.lng]);
+                        }
+                      }}
                       variant="outline"
                       size="sm"
-                      className="mt-2"
                     >
-                      Refresh Page
+                      Use Default
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div
-                  ref={mapRef}
-                  className="h-full w-full"
-                  style={{ minHeight: "256px" }}
-                />
+                <>
+                  <div
+                    ref={mapRef}
+                    className="h-full w-full"
+                    style={{ minHeight: "256px" }}
+                  />
+                  {/* Center crosshair indicator */}
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <svg width="28" height="28" viewBox="0 0 28 28" className="text-gray-600 opacity-70">
+                      <circle cx="14" cy="14" r="4" fill="white" fillOpacity="0.7" />
+                      <circle cx="14" cy="14" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                      <line x1="14" y1="0" x2="14" y2="6" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="14" y1="22" x2="14" y2="28" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="0" y1="14" x2="6" y2="14" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="22" y1="14" x2="28" y2="14" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                </>
               )}
             </div>
 
+            <p className="text-xs text-gray-500">Tip: Click anywhere on the map or drag the pin to refine the exact spot.</p>
             {/* Location Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
