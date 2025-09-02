@@ -32,6 +32,7 @@ import {
   DialogFooter,
 } from "../components/ui/dialog";
 import { Progress } from "../components/ui/progress";
+import { Skeleton } from "../components/ui/skeleton";
 // Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
@@ -191,6 +192,8 @@ const UnifiedReports: React.FC = () => {
     null,
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [wards, setWards] = useState<Array<{ id: string; name: string }>>([]);
+  const [wardsLoading, setWardsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
@@ -211,6 +214,32 @@ const UnifiedReports: React.FC = () => {
       defaultWard: role === "WARD_OFFICER" ? user?.wardId : "all",
     };
   }, [user]);
+
+  // Load wards for admin selector
+  useEffect(() => {
+    const loadWards = async () => {
+      if (!permissions.canViewAllWards) return;
+      setWardsLoading(true);
+      try {
+        const baseUrl = window.location.origin;
+        const resp = await fetch(`${baseUrl}/api/users/wards`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          const list = (data?.data || data)?.wards || data?.wards || data;
+          if (Array.isArray(list)) {
+            setWards(list.map((w: any) => ({ id: w.id, name: w.name })));
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load wards for selector", e);
+      } finally {
+        setWardsLoading(false);
+      }
+    };
+    loadWards();
+  }, [permissions.canViewAllWards]);
 
   // Apply role-based filter restrictions
   useEffect(() => {
@@ -870,12 +899,44 @@ const UnifiedReports: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !analyticsData) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center space-x-2">
-          <RefreshCw className="h-6 w-6 animate-spin" />
-          <span>Loading analytics data...</span>
+      <div className="space-y-6 p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-80" />
+          </div>
+          <div className="flex space-x-2">
+            <Skeleton className="h-10 w-28" />
+            <Skeleton className="h-10 w-28" />
+            <Skeleton className="h-10 w-28" />
+          </div>
+        </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <Skeleton className="h-5 w-28" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-24 mb-2" />
+                <Skeleton className="h-3 w-full" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -979,14 +1040,14 @@ const UnifiedReports: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Filter className="h-5 w-5 mr-2" />
-            Filters & Settings
+      <Card className="sticky top-20 z-10 border-background/40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center text-base font-semibold">
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Date Range */}
             <div>
@@ -1001,6 +1062,7 @@ const UnifiedReports: React.FC = () => {
                     dateRange: { ...prev.dateRange, from: e.target.value },
                   }))
                 }
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -1015,6 +1077,7 @@ const UnifiedReports: React.FC = () => {
                     dateRange: { ...prev.dateRange, to: e.target.value },
                   }))
                 }
+                disabled={isLoading}
               />
             </div>
 
@@ -1028,16 +1091,14 @@ const UnifiedReports: React.FC = () => {
                     setFilters((prev) => ({ ...prev, ward: value }))
                   }
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select ward" />
+                  <SelectTrigger disabled={wardsLoading || isLoading}>
+                    <SelectValue placeholder={wardsLoading ? "Loading wards..." : "Select ward"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Wards</SelectItem>
-                    <SelectItem value="ward1">Ward 1</SelectItem>
-                    <SelectItem value="ward2">Ward 2</SelectItem>
-                    <SelectItem value="ward3">Ward 3</SelectItem>
-                    <SelectItem value="ward4">Ward 4</SelectItem>
-                    <SelectItem value="ward5">Ward 5</SelectItem>
+                    {wards.map((w) => (
+                      <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1052,7 +1113,7 @@ const UnifiedReports: React.FC = () => {
                   setFilters((prev) => ({ ...prev, complaintType: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger disabled={isLoading}>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1075,7 +1136,7 @@ const UnifiedReports: React.FC = () => {
                   setFilters((prev) => ({ ...prev, status: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger disabled={isLoading}>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1165,6 +1226,21 @@ const UnifiedReports: React.FC = () => {
           {getTimePeriodLabel()}
         </Badge>
       </div>
+      {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" aria-live="polite">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-24 mb-2" />
+                <Skeleton className="h-3 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
       {analyticsData && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
@@ -1217,7 +1293,8 @@ const UnifiedReports: React.FC = () => {
               <div className="text-2xl font-bold">
                 {analyticsData.sla.compliance}%
               </div>
-              <div className="flex items-center text-xs text-muted-foreground">
+              <Progress value={analyticsData.sla.compliance} className="mt-2" />
+              <div className="flex items-center text-xs text-muted-foreground mt-2">
                 <Clock className="h-3 w-3 mr-1" />
                 Avg: {analyticsData.sla.avgResolutionTime} days
               </div>
