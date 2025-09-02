@@ -299,10 +299,10 @@ const AdminDashboard: React.FC = () => {
 
       {/* Main Dashboard Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
+          {/* <TabsTrigger value="performance">Performance</TabsTrigger> */}
+          {/* <TabsTrigger value="users">Users</TabsTrigger> */}
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
 
