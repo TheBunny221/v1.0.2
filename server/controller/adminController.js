@@ -574,11 +574,21 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
         }, 0) / validResolutions.length
       : 0;
 
-  // Calculate SLA compliance percentage
-  const slaCompliance =
-    totalComplaints > 0
-      ? Math.round((resolvedComplaints / totalComplaints) * 100)
-      : 0;
+  // Calculate SLA compliance based on breaches (overdue open or resolved late)
+  const nowTs = new Date();
+  const [overdueOpen, resolvedLateRow] = await Promise.all([
+    prisma.complaint.count({
+      where: {
+        deadline: { lt: nowTs },
+        status: { notIn: ["RESOLVED", "CLOSED"] },
+      },
+    }),
+    prisma.$queryRaw`SELECT COUNT(*) as count FROM "complaints" WHERE (status = 'RESOLVED' OR status = 'CLOSED') AND "resolvedOn" IS NOT NULL AND "deadline" IS NOT NULL AND "resolvedOn" > "deadline"`,
+  ]);
+  const resolvedLate = Number((resolvedLateRow?.[0]?.count ?? resolvedLateRow?.count ?? 0));
+  const slaBreaches = overdueOpen + resolvedLate;
+  const withinSLA = Math.max(totalComplaints - slaBreaches, 0);
+  const slaCompliance = totalComplaints > 0 ? Math.round((withinSLA / totalComplaints) * 100) : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
