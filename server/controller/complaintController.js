@@ -914,10 +914,24 @@ export const getComplaints = asyncHandler(async (req, res) => {
       prisma.complaint.count({ where: finalWhere }),
     ]);
 
-    const complaints = rawComplaints.map((c) => ({
-      ...c,
-      needsTeamAssignment: !c.maintenanceTeamId,
-    }));
+    const now = new Date();
+    const complaints = rawComplaints.map((c) => {
+      let sla = c.slaStatus;
+      if (c.status === "RESOLVED" || c.status === "CLOSED") {
+        sla = "COMPLETED";
+      } else if (c.deadline instanceof Date) {
+        const daysRemaining = (c.deadline - now) / (1000 * 60 * 60 * 24);
+        if (daysRemaining < 0) sla = "OVERDUE";
+        else if (daysRemaining <= 1) sla = "WARNING";
+        else sla = "ON_TIME";
+      }
+
+      return {
+        ...c,
+        slaStatus: sla,
+        needsTeamAssignment: !c.maintenanceTeamId,
+      };
+    });
 
     const totalPages = Math.ceil(total / limitNum);
     const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
