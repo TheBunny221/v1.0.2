@@ -584,8 +584,11 @@ const ComplaintsList: React.FC = () => {
                     {user?.role !== "CITIZEN" && (
                       <>
                         <TableCell>
-                          {typeof complaint.rating === "number" && complaint.rating > 0 ? (
-                            <span className="text-sm font-medium">{complaint.rating}/5</span>
+                          {typeof complaint.rating === "number" &&
+                          complaint.rating > 0 ? (
+                            <span className="text-sm font-medium">
+                              {complaint.rating}/5
+                            </span>
                           ) : (
                             <span className="text-xs text-gray-500">N/A</span>
                           )}
@@ -597,13 +600,19 @@ const ComplaintsList: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           {complaint.closedOn ? (
-                            <span className="text-sm">{new Date(complaint.closedOn).toLocaleDateString()}</span>
+                            <span className="text-sm">
+                              {new Date(
+                                complaint.closedOn,
+                              ).toLocaleDateString()}
+                            </span>
                           ) : (
                             <span className="text-xs text-gray-500">-</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm">{new Date(complaint.updatedAt).toLocaleDateString()}</span>
+                          <span className="text-sm">
+                            {new Date(complaint.updatedAt).toLocaleDateString()}
+                          </span>
                         </TableCell>
                       </>
                     )}

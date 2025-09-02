@@ -40,7 +40,11 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
             "overflow-auto",
             "p-4 md:p-6",
             "min-h-[calc(100vh-4rem)]",
-            isAuthenticated ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "",
+            isAuthenticated
+              ? isSidebarCollapsed
+                ? "md:ml-16"
+                : "md:ml-64"
+              : "",
             className,
           )}
         >

@@ -348,7 +348,11 @@ export const getSystemStats = asyncHandler(async (req, res) => {
     prisma.complaint.count(),
     prisma.ward.count(),
     prisma.complaint.count({
-      where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"] } },
+      where: {
+        status: {
+          in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"],
+        },
+      },
     }),
     prisma.complaint.count({ where: { status: "RESOLVED" } }),
   ]);
@@ -585,10 +589,13 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     }),
     prisma.$queryRaw`SELECT COUNT(*) as count FROM "complaints" WHERE (status = 'RESOLVED' OR status = 'CLOSED') AND "resolvedOn" IS NOT NULL AND "deadline" IS NOT NULL AND "resolvedOn" > "deadline"`,
   ]);
-  const resolvedLate = Number((resolvedLateRow?.[0]?.count ?? resolvedLateRow?.count ?? 0));
+  const resolvedLate = Number(
+    resolvedLateRow?.[0]?.count ?? resolvedLateRow?.count ?? 0,
+  );
   const slaBreaches = overdueOpen + resolvedLate;
   const withinSLA = Math.max(totalComplaints - slaBreaches, 0);
-  const slaCompliance = totalComplaints > 0 ? Math.round((withinSLA / totalComplaints) * 100) : 0;
+  const slaCompliance =
+    totalComplaints > 0 ? Math.round((withinSLA / totalComplaints) * 100) : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
@@ -846,28 +853,29 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/dashboard/stats
 // @access  Private (Admin only)
 export const getDashboardStats = asyncHandler(async (req, res) => {
-  const [userStats, complaintStats, pendingTeamAssignments, activeUsers] = await Promise.all([
-    // User statistics by role (active only)
-    prisma.user.groupBy({
-      by: ["role"],
-      where: { isActive: true },
-      _count: true,
-    }),
-    // Complaint statistics
-    prisma.complaint.groupBy({
-      by: ["status"],
-      _count: true,
-    }),
-    // Pending maintenance team assignment (align with complaints list filter)
-    prisma.complaint.count({
-      where: {
-        maintenanceTeamId: null,
-        status: { notIn: ["RESOLVED", "CLOSED"] },
-      },
-    }),
-    // Active user count
-    prisma.user.count({ where: { isActive: true } }),
-  ]);
+  const [userStats, complaintStats, pendingTeamAssignments, activeUsers] =
+    await Promise.all([
+      // User statistics by role (active only)
+      prisma.user.groupBy({
+        by: ["role"],
+        where: { isActive: true },
+        _count: true,
+      }),
+      // Complaint statistics
+      prisma.complaint.groupBy({
+        by: ["status"],
+        _count: true,
+      }),
+      // Pending maintenance team assignment (align with complaints list filter)
+      prisma.complaint.count({
+        where: {
+          maintenanceTeamId: null,
+          status: { notIn: ["RESOLVED", "CLOSED"] },
+        },
+      }),
+      // Active user count
+      prisma.user.count({ where: { isActive: true } }),
+    ]);
 
   const wardOfficers =
     userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
@@ -880,7 +888,15 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     0,
   );
   const activeComplaints = complaintStats
-    .filter((s) => ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"].includes(s.status))
+    .filter((s) =>
+      [
+        "REGISTERED",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "RESOLVED",
+        "REOPENED",
+      ].includes(s.status),
+    )
     .reduce((sum, stat) => sum + stat._count, 0);
   const resolvedComplaints =
     complaintStats.find((s) => s.status === "RESOLVED")?._count || 0;
