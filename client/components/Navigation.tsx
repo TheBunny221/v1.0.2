@@ -118,12 +118,12 @@ const Navigation: React.FC = () => {
       icon: <FileText className="h-4 w-4" />,
       roles: ["CITIZEN", "WARD_OFFICER", "MAINTENANCE_TEAM", "ADMINISTRATOR"],
     },
-    {
-      label: translations?.dashboard?.pendingTasks || "My Tasks",
-      path: "/tasks",
-      icon: <Calendar className="h-4 w-4" />,
-      roles: ["WARD_OFFICER", "MAINTENANCE_TEAM"],
-    },
+    // {
+    //   label: translations?.dashboard?.pendingTasks || "My Tasks",
+    //   path: "/tasks",
+    //   icon: <Calendar className="h-4 w-4" />,
+    //   roles: ["WARD_OFFICER", "MAINTENANCE_TEAM"],
+    // },
     {
       label: translations?.nav?.ward || "Ward Management",
       path: "/ward",
@@ -136,12 +136,12 @@ const Navigation: React.FC = () => {
       icon: <Wrench className="h-4 w-4" />,
       roles: ["MAINTENANCE_TEAM"],
     },
-    {
-      label: translations?.messages?.complaintRegistered || "Communication",
-      path: "/messages",
-      icon: <MessageSquare className="h-4 w-4" />,
-      roles: ["WARD_OFFICER", "MAINTENANCE_TEAM"],
-    },
+    // {
+    //   label: translations?.messages?.complaintRegistered || "Communication",
+    //   path: "/messages",
+    //   icon: <MessageSquare className="h-4 w-4" />,
+    //   roles: ["WARD_OFFICER", "MAINTENANCE_TEAM"],
+    // },
     {
       label: translations.nav.reports,
       path: "/reports",
@@ -604,6 +604,7 @@ const Navigation: React.FC = () => {
                 <span>{translations?.nav?.profile || "Profile"}</span>
               </div>
             </Link>
+            {/*
             <Link
               to="/settings"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
@@ -614,6 +615,7 @@ const Navigation: React.FC = () => {
                 <span>{translations.nav.settings}</span>
               </div>
             </Link>
+            */}
             <button
               onClick={() => {
                 handleLogout();
