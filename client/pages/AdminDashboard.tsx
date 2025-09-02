@@ -292,17 +292,17 @@ const AdminDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-green-600">
               {(metrics?.avgResolutionTime || 0).toFixed(1)}d
             </div>
-            <p className="text-xs text-muted-foreground">Target: 3 days</p>
+            <p className="text-xs text-muted-foreground">Average Closure Time</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="overview" className="space-y-3">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
+          {/* <TabsTrigger value="users">Users</TabsTrigger> */}
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
 
@@ -531,7 +531,7 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-sm text-gray-600">Average resolution time</p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Target: 3d</span>
+                    {/* <span>Target: 3d</span> */}
                     <span>
                       {(metrics?.avgResolutionTime || 0) <= 3
                         ? "On target"
@@ -674,9 +674,9 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-sm text-gray-600">
                         Average Resolution Time
                       </p>
-                      <div className="text-xs text-gray-500 mt-1">
+                      {/* <div className="text-xs text-gray-500 mt-1">
                         Target: 3 days
-                      </div>
+                      </div> */}
                     </div>
 
                     <div className="text-center">
