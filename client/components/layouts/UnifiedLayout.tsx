@@ -21,20 +21,30 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
       {/* Top Navigation - Fixed */}
       <Navigation />
 
-      <div className="flex pt-16">
-        {/* Sidebar Navigation - Only visible when authenticated */}
+      <div className="pt-16">
+        {/* Sidebar Navigation - Fixed height on desktop */}
         {isAuthenticated && (
-          <div className="hidden md:block sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
-            <SimplifiedSidebarNav />
+          <div
+            className={cn(
+              "hidden md:block fixed top-16 bottom-0 left-0 z-40",
+              isSidebarCollapsed ? "w-16" : "w-64",
+            )}
+          >
+            <SimplifiedSidebarNav className="h-full" />
           </div>
         )}
 
-        {/* Main Content - Responsive margins */}
+        {/* Main Content - Offset for fixed sidebar on desktop */}
         <main
           className={cn(
-            "flex-1 overflow-auto",
-            "p-4 md:p-6", // Responsive padding
-            "min-h-[calc(100vh-4rem)]", // Ensure full height
+            "overflow-auto",
+            "p-4 md:p-6",
+            "min-h-[calc(100vh-4rem)]",
+            isAuthenticated
+              ? isSidebarCollapsed
+                ? "md:ml-16"
+                : "md:ml-64"
+              : "",
             className,
           )}
         >

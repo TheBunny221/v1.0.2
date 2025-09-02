@@ -49,6 +49,56 @@ async function main() {
         description: "Size of the application logo (small, medium, large)",
       },
 
+      // Map & Location Settings
+      {
+        key: "MAP_SEARCH_PLACE",
+        value: "Kochi, Kerala, India",
+        type: "map",
+        description: "Place context appended to searches to bias results",
+      },
+      {
+        key: "MAP_COUNTRY_CODES",
+        value: "in",
+        type: "map",
+        description: "ISO2 country codes for Nominatim bias (comma-separated)",
+      },
+      {
+        key: "MAP_DEFAULT_LAT",
+        value: "9.9312",
+        type: "map",
+        description: "Default map center latitude",
+      },
+      {
+        key: "MAP_DEFAULT_LNG",
+        value: "76.2673",
+        type: "map",
+        description: "Default map center longitude",
+      },
+      {
+        key: "MAP_BBOX_NORTH",
+        value: "10.05",
+        type: "map",
+        description: "North latitude of bounding box (search constrained)",
+      },
+      {
+        key: "MAP_BBOX_SOUTH",
+        value: "9.85",
+        type: "map",
+        description: "South latitude of bounding box (search constrained)",
+      },
+      {
+        key: "MAP_BBOX_EAST",
+        value: "76.39",
+        type: "map",
+        description: "East longitude of bounding box (search constrained)",
+      },
+      {
+        key: "MAP_BBOX_WEST",
+        value: "76.20",
+        type: "map",
+        description: "West longitude of bounding box (search constrained)",
+      },
+
       // Complaint ID Configuration
       {
         key: "COMPLAINT_ID_PREFIX",
@@ -106,55 +156,6 @@ async function main() {
         description: "Physical address of the main office",
       },
 
-      // System Configuration
-      {
-        key: "DEFAULT_LANGUAGE",
-        value: "en",
-        type: "system",
-        description: "Default language for the application",
-      },
-      {
-        key: "EMAIL_ENABLED",
-        value: "true",
-        type: "system",
-        description: "Whether email notifications are enabled",
-      },
-      {
-        key: "SMS_ENABLED",
-        value: "false",
-        type: "system",
-        description: "Whether SMS notifications are enabled",
-      },
-      {
-        key: "MAX_FILE_SIZE",
-        value: "10485760",
-        type: "system",
-        description: "Maximum file upload size in bytes (10MB)",
-      },
-      {
-        key: "NOTIFICATION_RETENTION_DAYS",
-        value: "30",
-        type: "system",
-        description: "Number of days to retain notifications before cleanup",
-      },
-      {
-        key: "SESSION_TIMEOUT_MINUTES",
-        value: "60",
-        type: "system",
-        description: "User session timeout in minutes",
-      },
-      {
-        key: "MAINTENANCE_MODE",
-        value: "false",
-        type: "system",
-        description: "Whether the application is in maintenance mode",
-      },
-      {
-        key: "ANALYTICS_ENABLED",
-        value: "true",
-        type: "system",
-        description: "Whether analytics tracking is enabled",
-      },
     ];
 
     await Promise.all(

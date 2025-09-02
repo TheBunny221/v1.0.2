@@ -3,6 +3,8 @@ import {
   MapContainer,
   TileLayer,
   Marker,
+  Circle,
+  CircleMarker,
   useMapEvents,
   useMap,
 } from "react-leaflet";
@@ -18,6 +20,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { MapPin, Navigation, Search } from "lucide-react";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 
 // Fix for default markers in react-leaflet
 const DefaultIcon = L.icon({
@@ -69,6 +72,7 @@ function LocationMarker({
   position: [number, number];
   onPositionChange: (position: [number, number]) => void;
 }) {
+  const map = useMap();
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
@@ -76,7 +80,21 @@ function LocationMarker({
     },
   });
 
-  return <Marker position={position} icon={DefaultIcon} />;
+  return (
+    <Marker
+      position={position}
+      icon={DefaultIcon}
+      draggable={true}
+      eventHandlers={{
+        dragend: (e) => {
+          const m = e.target as any;
+          const { lat, lng } = m.getLatLng();
+          onPositionChange([lat, lng]);
+          map.setView([lat, lng], map.getZoom());
+        },
+      }}
+    />
+  );
 }
 
 const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
@@ -85,8 +103,17 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   onLocationSelect,
   initialLocation,
 }) => {
-  // Default to Kochi, India coordinates
-  const defaultPosition: [number, number] = [9.9312, 76.2673];
+  const { getConfig } = useSystemConfig();
+  const defaultLat = parseFloat(getConfig("MAP_DEFAULT_LAT", "9.9312")) || 9.9312;
+  const defaultLng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
+  const mapPlace = getConfig("MAP_SEARCH_PLACE", "Kochi, Kerala, India");
+  const countryCodes = getConfig("MAP_COUNTRY_CODES", "in").trim();
+  const bboxNorth = getConfig("MAP_BBOX_NORTH", "10.05");
+  const bboxSouth = getConfig("MAP_BBOX_SOUTH", "9.85");
+  const bboxEast = getConfig("MAP_BBOX_EAST", "76.39");
+  const bboxWest = getConfig("MAP_BBOX_WEST", "76.20");
+  const hasBbox = [bboxWest, bboxSouth, bboxEast, bboxNorth].every((v) => v && !Number.isNaN(parseFloat(v)));
+  const defaultPosition: [number, number] = [defaultLat, defaultLng];
   const [position, setPosition] = useState<[number, number]>(
     initialLocation
       ? [initialLocation.latitude, initialLocation.longitude]
@@ -97,12 +124,61 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
   const [landmark, setLandmark] = useState(initialLocation?.landmark || "");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
   const mapRef = useRef<L.Map>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(() => {
+        try {
+          mapRef.current?.invalidateSize?.();
+        } catch {}
+      }, 200);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen]);
+
+  // On open, populate address/area for initial position (from system-config default or provided initialLocation)
+  useEffect(() => {
+    if (!isOpen) return;
+    reverseGeocode(position);
+  }, [isOpen]);
+
+  const getGeoErrorMessage = (err: GeolocationPositionError | any) => {
+    const insecure = typeof window !== "undefined" && !window.isSecureContext;
+    if (insecure) return "Location requires HTTPS. Please use a secure connection.";
+    if (!err || typeof err !== "object") return "Unable to fetch your location.";
+    switch (err.code) {
+      case 1:
+        return "Location permission denied. Enable location access in your browser settings.";
+      case 2:
+        return "Location unavailable. Please check GPS or network and try again.";
+      case 3:
+        return "Location request timed out. Try again or move to an open area.";
+      default:
+        return err.message || "Unable to fetch your location.";
+    }
+  };
+
   // Get current location
-  const getCurrentLocation = () => {
+  const getCurrentLocation = async () => {
     setIsLoadingLocation(true);
-    if (navigator.geolocation) {
+    try {
+      if (!("geolocation" in navigator)) {
+        setIsLoadingLocation(false);
+        alert("Geolocation is not supported by this browser.");
+        return;
+      }
+
+      try {
+        const perm: any = (navigator as any).permissions && (await (navigator as any).permissions.query({ name: "geolocation" } as any));
+        if (perm && perm.state === "denied") {
+          setIsLoadingLocation(false);
+          alert("Location permission denied. Enable it in browser settings.");
+          return;
+        }
+      } catch {}
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const newPos: [number, number] = [
@@ -111,17 +187,20 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
           ];
           setPosition(newPos);
           reverseGeocode(newPos);
+          setCurrentLoc({ lat: newPos[0], lng: newPos[1], accuracy: position.coords.accuracy });
           setIsLoadingLocation(false);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error("Error getting location:", { code: error?.code, message: error?.message });
           setIsLoadingLocation(false);
+          alert(getGeoErrorMessage(error));
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 600000 },
       );
-    } else {
+    } catch (e) {
+      console.error("Unexpected geolocation error:", e);
       setIsLoadingLocation(false);
-      alert("Geolocation is not supported by this browser.");
+      alert("Unable to fetch your location. Try again.");
     }
   };
 
@@ -160,8 +239,13 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     if (!searchQuery.trim()) return;
 
     try {
+      const viewbox = hasBbox
+        ? `&viewbox=${encodeURIComponent(`${bboxWest},${bboxNorth},${bboxEast},${bboxSouth}`)}&bounded=1`
+        : "";
+      const cc = countryCodes ? `&countrycodes=${encodeURIComponent(countryCodes)}` : "";
+      const q = `${searchQuery}, ${mapPlace}`;
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", Kochi, Kerala, India")}&format=json&limit=1&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1${viewbox}${cc}`,
       );
       const data = await response.json();
 
@@ -238,7 +322,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 flex gap-2">
                 <Input
-                  placeholder="Search for a location in Kochi..."
+                  placeholder={`Search for a location in ${mapPlace}`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -248,19 +332,34 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
-              <Button
-                onClick={getCurrentLocation}
-                variant="outline"
-                disabled={isLoadingLocation}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Navigation className="h-4 w-4" />
-                {isLoadingLocation ? "Getting..." : "Current Location"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={getCurrentLocation}
+                  variant="outline"
+                  disabled={isLoadingLocation}
+                  className="flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Navigation className="h-4 w-4" />
+                  {isLoadingLocation ? "Getting..." : "Current Location"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!mapRef.current) return;
+                    const center = mapRef.current.getCenter();
+                    const lat = center.lat;
+                    const lng = center.lng;
+                    handlePositionChange([lat, lng]);
+                  }}
+                  variant="outline"
+                  className="whitespace-nowrap"
+                >
+                  Drop Pin Here
+                </Button>
+              </div>
             </div>
 
             {/* Map */}
-            <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border">
+            <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border relative">
               <MapContainer
                 key={`map-${position[0]}-${position[1]}`}
                 center={position}
@@ -280,9 +379,27 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
                   position={position}
                   onPositionChange={handlePositionChange}
                 />
+                {currentLoc && (
+                  <>
+                    <CircleMarker center={[currentLoc.lat, currentLoc.lng]} pathOptions={{ color: "#2563eb" }} radius={6} />
+                    <Circle center={[currentLoc.lat, currentLoc.lng]} radius={Math.max(10, currentLoc.accuracy || 0)} pathOptions={{ color: "#60a5fa", fillColor: "#93c5fd", fillOpacity: 0.2 }} />
+                  </>
+                )}
               </MapContainer>
+              {/* Center crosshair indicator */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 28 28" className="text-gray-600 opacity-70">
+                  <circle cx="14" cy="14" r="4" fill="white" fillOpacity="0.7" />
+                  <circle cx="14" cy="14" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  <line x1="14" y1="0" x2="14" y2="6" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="14" y1="22" x2="14" y2="28" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="0" y1="14" x2="6" y2="14" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="22" y1="14" x2="28" y2="14" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </div>
             </div>
 
+            <p className="text-xs text-gray-500">Tip: Click anywhere on the map or drag the pin to refine the exact spot.</p>
             {/* Location Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
