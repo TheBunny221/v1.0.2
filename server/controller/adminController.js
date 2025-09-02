@@ -348,7 +348,7 @@ export const getSystemStats = asyncHandler(async (req, res) => {
     prisma.complaint.count(),
     prisma.ward.count(),
     prisma.complaint.count({
-      where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } },
+      where: { status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "REOPENED"] } },
     }),
     prisma.complaint.count({ where: { status: "RESOLVED" } }),
   ]);
