@@ -405,11 +405,8 @@ const AdminDashboard: React.FC = () => {
                           ))}
                         </Pie>
                         <Tooltip
-                          formatter={(value, name) => [
-                            `${value} complaints`,
-                            "Count",
-                          ]}
-                          labelFormatter={(label) => `Type: ${label}`}
+                          labelFormatter={(label, payload) => payload?.[0]?.payload?.name || label}
+                          formatter={(value) => [String(value), "Complaints"]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
