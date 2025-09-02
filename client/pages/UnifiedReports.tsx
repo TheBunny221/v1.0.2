@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAppSelector } from "../store/hooks";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { Button } from "../components/ui/button";
+import { Link } from "react-router-dom";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import {
@@ -988,55 +989,54 @@ const UnifiedReports: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">
-            {translations?.reports?.title || "Reports & Analytics"}
-          </h1>
-          <p className="text-muted-foreground">
-            {appName} -{" "}
-            {user?.role === "ADMINISTRATOR"
-              ? "Comprehensive system-wide insights and analytics"
-              : user?.role === "WARD_OFFICER"
-                ? `Analytics for ${user?.ward || "your ward"}`
-                : "Your assigned task analytics and performance metrics"}
-          </p>
-          <div className="mt-2">
-            <Badge variant="secondary" className="text-sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              Data Period: {getTimePeriodLabel()}
-            </Badge>
+      <div className="border-b pb-4">
+        <nav className="mb-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-1">
+            <li>
+              <Link to="/dashboard" className="hover:text-foreground">Dashboard</Link>
+            </li>
+            <li>/</li>
+            <li className="text-foreground font-medium">Reports</li>
+          </ol>
+        </nav>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
+              {translations?.reports?.title || "Reports & Analytics"}
+            </h1>
+            <p className="text-sm text-muted-foreground hidden md:block">
+              {appName} –{" "}
+              {user?.role === "ADMINISTRATOR"
+                ? "Comprehensive system-wide insights and analytics"
+                : user?.role === "WARD_OFFICER"
+                  ? `Analytics for ${user?.ward || "your ward"}`
+                  : "Your assigned task analytics and performance metrics"}
+            </p>
+            <div className="mt-1">
+              <Badge variant="secondary" className="text-xs">
+                <Calendar className="h-3 w-3 mr-2" />
+                Data Period: {getTimePeriodLabel()}
+              </Badge>
+            </div>
           </div>
-        </div>
 
-        {permissions.canExportData && (
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleExport("csv")}
-              disabled={isExporting}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleExport("excel")}
-              disabled={isExporting}
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Export Excel
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleExport("pdf")}
-              disabled={isExporting}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export PDF
-            </Button>
-          </div>
-        )}
+          {permissions.canExportData && (
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => handleExport("csv")} disabled={isExporting}>
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleExport("excel")} disabled={isExporting}>
+                <FileSpreadsheet className="h-4 w-4" />
+                <span className="hidden sm:inline">Export Excel</span>
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleExport("pdf")} disabled={isExporting}>
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Export PDF</span>
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
