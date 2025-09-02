@@ -215,7 +215,7 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
             <div className="text-2xl font-bold">
-              {systemStats.wardOfficers + systemStats.maintenanceTeam}
+              {systemStats.activeUsers || 0}
             </div>
             <div className="text-sm text-purple-200">Active Users</div>
           </div>
