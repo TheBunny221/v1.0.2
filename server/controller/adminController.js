@@ -817,7 +817,7 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
     activities.push({
       id: `complaint-${complaint.id}`,
       type: "complaint",
-      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
+      message: `New ${String(complaint.type).toLowerCase()} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
       time: formatTimeAgo(complaint.createdAt),
       user: complaint.submittedBy
         ? {
