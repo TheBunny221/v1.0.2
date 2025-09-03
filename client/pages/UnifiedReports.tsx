@@ -1478,45 +1478,56 @@ const UnifiedReports: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div id="detailed-trends-chart">
-                  {renderChart("composed", {
-                    data: processedChartData?.trendsData || [],
-                    height: 400,
-                    xAxis: {
-                      dataKey: "date",
-                      tick: { fontSize: 12 },
-                      angle: -45,
-                      textAnchor: "end",
-                      height: 60,
-                    },
-                    tooltip: {
-                      labelFormatter: (label: any, payload: any) => {
-                        if (payload && payload[0]) {
-                          return `Date: ${payload[0].payload.fullDate || label}`;
-                        }
-                        return `Date: ${label}`;
+                  {processedChartData?.trendsData?.length ? (
+                    renderChart("composed", {
+                      data: processedChartData.trendsData,
+                      height: 400,
+                      xAxis: {
+                        dataKey: "date",
+                        tick: { fontSize: 12 },
+                        angle: -45,
+                        textAnchor: "end",
+                        height: 60,
                       },
-                      formatter: (value: any, name: any) => [
-                        name === "slaCompliance" ? `${value}%` : value,
-                        name === "slaCompliance" ? "SLA Compliance" : name,
+                      tooltip: {
+                        labelFormatter: (label: any, payload: any) => {
+                          if (payload && payload[0]) {
+                            return `Date: ${payload[0].payload.fullDate || label}`;
+                          }
+                          return `Date: ${label}`;
+                        },
+                        formatter: (value: any, name: any) => [
+                          name === "slaCompliance" ? `${value}%` : value,
+                          name === "slaCompliance" ? "SLA Compliance" : name,
+                        ],
+                      },
+                      bars: [
+                        {
+                          yAxisId: "left",
+                          dataKey: "complaints",
+                          fill: "#8884d8",
+                        },
+                        { yAxisId: "left", dataKey: "resolved", fill: "#82ca9d" },
                       ],
-                    },
-                    bars: [
-                      {
-                        yAxisId: "left",
-                        dataKey: "complaints",
-                        fill: "#8884d8",
-                      },
-                      { yAxisId: "left", dataKey: "resolved", fill: "#82ca9d" },
-                    ],
-                    lines: [
-                      {
-                        yAxisId: "right",
-                        type: "monotone",
-                        dataKey: "slaCompliance",
-                        stroke: "#ff7300",
-                      },
-                    ],
-                  })}
+                      lines: [
+                        {
+                          yAxisId: "right",
+                          type: "monotone",
+                          dataKey: "slaCompliance",
+                          stroke: "#ff7300",
+                        },
+                      ],
+                    })
+                  ) : (
+                    <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        <p>No trend data available for selected filters</p>
+                        <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
+                        <p className="text-xs">Try adjusting your date range or filters</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1575,17 +1586,28 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="resolution-time-chart">
-                    {renderChart("bar", {
-                      data: processedChartData?.categoriesWithColors || [],
-                      xAxis: {
-                        dataKey: "name",
-                        tick: { fontSize: 11 },
-                        angle: -45,
-                        textAnchor: "end",
-                        height: 80,
-                      },
-                      bars: [{ dataKey: "avgTime", fill: "#8884d8" }],
-                    })}
+                    {(processedChartData?.categoriesWithColors?.length || 0) > 0 ? (
+                      renderChart("bar", {
+                        data: processedChartData?.categoriesWithColors || [],
+                        xAxis: {
+                          dataKey: "name",
+                          tick: { fontSize: 11 },
+                          angle: -45,
+                          textAnchor: "end",
+                          height: 80,
+                        },
+                        bars: [{ dataKey: "avgTime", fill: "#8884d8" }],
+                      })
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No category metrics to display for selected filters</p>
+                          <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
+                          <p className="text-xs">Refine filters to include more data</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1604,21 +1626,31 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="ward-performance-chart">
-                    {renderChart("bar", {
-                      data: processedChartData?.wardsData || [],
-                      height: 400,
-                      xAxis: {
-                        dataKey: "name",
-                        tick: { fontSize: 11 },
-                        angle: -45,
-                        textAnchor: "end",
-                        height: 80,
-                      },
-                      bars: [
-                        { dataKey: "complaints", fill: "#8884d8" },
-                        { dataKey: "resolved", fill: "#82ca9d" },
-                      ],
-                    })}
+                    {(processedChartData?.wardsData?.length || 0) > 0 ? (
+                      renderChart("bar", {
+                        data: processedChartData?.wardsData || [],
+                        height: 400,
+                        xAxis: {
+                          dataKey: "name",
+                          tick: { fontSize: 11 },
+                          angle: -45,
+                          textAnchor: "end",
+                          height: 80,
+                        },
+                        bars: [
+                          { dataKey: "complaints", fill: "#8884d8" },
+                          { dataKey: "resolved", fill: "#82ca9d" },
+                        ],
+                      })
+                    ) : (
+                      <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No ward comparison data for current filters</p>
+                          <p className="text-xs">Adjust filters or date range</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
