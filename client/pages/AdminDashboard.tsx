@@ -335,8 +335,14 @@ const AdminDashboard: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
               Avg Resolution
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent>Average time taken to close complaints (in days).</TooltipContent>
+              </Tooltip>
             </CardTitle>
             <Clock className="h-4 w-4 text-green-600" />
           </CardHeader>
