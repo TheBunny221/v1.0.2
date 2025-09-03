@@ -170,34 +170,26 @@ const UnifiedReports: React.FC = () => {
     loadDynamicLibraries();
   }, [loadDynamicLibraries]);
 
-  // Initialize date filters when date-fns is loaded
-  useEffect(() => {
-    if (dateFnsLoaded && dynamicLibraries.dateFns) {
-      const { format, startOfMonth, endOfMonth } = dynamicLibraries.dateFns;
-      try {
-        setFilters((prev) => ({
-          ...prev,
-          dateRange: {
-            from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-            to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-          },
-        }));
-      } catch (error) {
-        console.error("Error initializing date filters:", error);
-      }
-    }
-  }, [dateFnsLoaded, dynamicLibraries.dateFns]);
+  // Date filters are initialized to the current month using native Date APIs
+  // This avoids race conditions where the first fetch used only today's date
+  // and resulted in empty analytics when there was no data for that single day.
 
-  // State for filters - initialize with current date strings
-  const [filters, setFilters] = useState<FilterOptions>({
-    dateRange: {
-      from: new Date().toISOString().split("T")[0], // Will be updated when date-fns loads
-      to: new Date().toISOString().split("T")[0],
-    },
-    ward: "all",
-    complaintType: "all",
-    status: "all",
-    priority: "all",
+  // State for filters - initialize with current month (YYYY-MM-DD)
+  const [filters, setFilters] = useState<FilterOptions>(() => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split("T")[0];
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      .toISOString()
+      .split("T")[0];
+    return {
+      dateRange: { from: firstDay, to: lastDay },
+      ward: "all",
+      complaintType: "all",
+      status: "all",
+      priority: "all",
+    };
   });
 
   // State for data
@@ -275,23 +267,16 @@ const UnifiedReports: React.FC = () => {
     }
   }, [permissions.defaultWard]);
 
-  // First load: fetch analytics for the currently selected/default date range only once
+  // First load: fetch analytics for the initialized date range only once
   useEffect(() => {
     if (!user) return;
-    if (!dateFnsLoaded) return; // wait until default month is set
     if (didInitialFetch) return;
 
     if (filters.dateRange.from && filters.dateRange.to) {
       setDidInitialFetch(true);
       fetchAnalyticsData();
     }
-  }, [
-    user,
-    dateFnsLoaded,
-    didInitialFetch,
-    filters.dateRange.from,
-    filters.dateRange.to,
-  ]);
+  }, [user, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
 
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
