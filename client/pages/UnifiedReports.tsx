@@ -1665,24 +1665,18 @@ const UnifiedReports: React.FC = () => {
                 Processing {getTimePeriodLabel()} data
               </div>
 
-              {/* Circular Progress with Timer */}
+              {/* Circular Progress with Percentage */}
               <div className="relative inline-flex items-center justify-center mb-4">
-                <div className="w-20 h-20 rounded-full border-4 border-gray-200">
-                  <div
-                    className="w-20 h-20 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"
-                    style={{
-                      animation: "spin 2s linear infinite",
-                    }}
-                  ></div>
+                <div className="w-20 h-20 rounded-full border-4 border-muted">
+                  <div className="w-20 h-20 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-lg font-bold text-blue-600">
+                  <span className="text-lg font-bold text-primary">
                     {Math.floor(reportProgress)}%
                   </span>
                 </div>
               </div>
 
-              <Progress value={reportProgress} className="w-full mb-2" />
               <div className="text-sm text-muted-foreground">
                 {reportProgress < 100
                   ? `Estimated time remaining: ${Math.max(0, Math.ceil((100 - reportProgress) * 0.05))} seconds`
@@ -1690,12 +1684,12 @@ const UnifiedReports: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-muted border border-border rounded-lg p-4">
               <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 text-blue-600 mr-2" />
-                <span className="font-medium text-blue-900">Report Scope</span>
+                <Calendar className="h-4 w-4 text-primary mr-2" />
+                <span className="font-medium text-foreground">Report Scope</span>
               </div>
-              <div className="space-y-2 text-sm text-blue-800">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Period:</span>
                   <span className="font-medium">{getTimePeriodLabel()}</span>
