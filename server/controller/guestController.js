@@ -366,13 +366,97 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
   },
 );
 
-// @desc    Submit guest complaint with immediate registration
+// @desc    Initiate guest complaint by sending OTP (complaint will be created after OTP verification)
 // @route   POST /api/guest/complaint
 // @access  Public
 export const submitGuestComplaint = asyncHandler(async (req, res) => {
+  const { fullName, email, phoneNumber, captchaId, captchaText } = req.body;
+
+  try {
+    await verifyCaptchaForComplaint(captchaId, captchaText);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error?.message || "CAPTCHA verification failed",
+      data: null,
+    });
+  }
+
+  if (!fullName || fullName.trim().length < 2 || fullName.trim().length > 100) {
+    return res.status(400).json({
+      success: false,
+      message: "Full name must be between 2 and 100 characters",
+      data: null,
+    });
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid email",
+      data: null,
+    });
+  }
+  if (!phoneNumber || !/^\+?[\d\s-()]{10,}$/.test(phoneNumber)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid phone number",
+      data: null,
+    });
+  }
+
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  const otpSession = await prisma.oTPSession.create({
+    data: {
+      email,
+      phoneNumber,
+      otpCode,
+      purpose: "GUEST_VERIFICATION",
+      expiresAt,
+    },
+  });
+
+  const emailSent = await sendEmail({
+    to: email,
+    subject: "Verify Your Email to Submit Complaint - Cochin Smart City",
+    text: `Your OTP for complaint submission is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    html: `
+      <h2>Email Verification Required</h2>
+      <p>Use the following OTP to verify your email and submit your complaint:</p>
+      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <p>This OTP will expire in 10 minutes.</p>
+    `,
+  });
+
+  if (!emailSent) {
+    await prisma.oTPSession.delete({ where: { id: otpSession.id } });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send verification email. Please try again.",
+      data: null,
+    });
+  }
+
+  res.status(201).json({
+    success: true,
+    message: "OTP sent. Please verify to submit your complaint.",
+    data: {
+      email,
+      expiresAt,
+      sessionId: otpSession.id,
+    },
+  });
+});
+
+// @desc    Verify OTP, then create or link user, then create complaint (with attachments), finally log user in
+// @route   POST /api/guest/verify-otp
+// @access  Public
+export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
   const {
-    fullName,
     email,
+    otpCode,
+    fullName,
     phoneNumber,
     description,
     type,
@@ -383,44 +467,28 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     landmark,
     address,
     coordinates,
-    captchaId,
-    captchaText,
   } = req.body;
 
-  // Verify CAPTCHA for guest complaint submissions
-  try {
-    await verifyCaptchaForComplaint(captchaId, captchaText);
-  } catch (error) {
+  const otpSession = await prisma.oTPSession.findFirst({
+    where: {
+      email,
+      otpCode,
+      purpose: "GUEST_VERIFICATION",
+      isVerified: false,
+      expiresAt: { gt: new Date() },
+    },
+  });
+
+  if (!otpSession) {
     return res.status(400).json({
       success: false,
-      message: error.message || "CAPTCHA verification failed",
+      message: "Invalid or expired OTP",
+      data: null,
     });
   }
 
-  // Parse coordinates if it's a string
-  let parsedCoordinates = coordinates;
-  if (typeof coordinates === "string") {
-    try {
-      parsedCoordinates = JSON.parse(coordinates);
-    } catch (error) {
-      parsedCoordinates = null;
-    }
-  }
-
-  // Handle uploaded files
-  const attachments = req.files || [];
-
-  // Check if user already exists
-  let existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // Validate wardId exists
-  const ward = await prisma.ward.findUnique({
-    where: { id: wardId },
-    include: { subZones: true },
-  });
-
+  // Validate ward and optional sub-zone
+  const ward = await prisma.ward.findUnique({ where: { id: wardId } });
   if (!ward) {
     return res.status(400).json({
       success: false,
@@ -428,13 +496,8 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
       data: null,
     });
   }
-
-  // Validate subZoneId if provided
   if (subZoneId) {
-    const subZone = await prisma.subZone.findUnique({
-      where: { id: subZoneId },
-    });
-
+    const subZone = await prisma.subZone.findUnique({ where: { id: subZoneId } });
     if (!subZone) {
       return res.status(400).json({
         success: false,
@@ -442,8 +505,6 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
         data: null,
       });
     }
-
-    // Check if sub-zone belongs to the specified ward
     if (subZone.wardId !== wardId) {
       return res.status(400).json({
         success: false,
@@ -453,34 +514,46 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     }
   }
 
-  // Set deadline based on priority
-  const priorityHours = {
-    LOW: 72,
-    MEDIUM: 48,
-    HIGH: 24,
-    CRITICAL: 8,
-  };
+  // Parse coordinates if provided as string
+  let parsedCoordinates = coordinates;
+  if (typeof parsedCoordinates === "string") {
+    try {
+      parsedCoordinates = JSON.parse(parsedCoordinates);
+    } catch {
+      parsedCoordinates = null;
+    }
+  }
 
+  // Determine or create user
+  let user = await prisma.user.findUnique({ where: { email } });
+  let isNewUser = false;
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        fullName,
+        email,
+        phoneNumber,
+        role: "CITIZEN",
+        isActive: true,
+        joinedOn: new Date(),
+      },
+    });
+    isNewUser = true;
+  }
+
+  // SLA deadline
+  const priorityHours = { LOW: 72, MEDIUM: 48, HIGH: 24, CRITICAL: 8 };
   const deadline = new Date(
-    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
+    Date.now() + (priorityHours[priority || "MEDIUM"] || 48) * 60 * 60 * 1000,
   );
 
-  // Find and assign ward officer automatically
+  // Auto-assign ward officer
   const wardOfficer = await prisma.user.findFirst({
-    where: {
-      role: "WARD_OFFICER",
-      wardId: wardId,
-      isActive: true,
-    },
-    orderBy: {
-      // Assign to ward officer with least assigned complaints for load balancing
-      wardOfficerComplaints: {
-        _count: "asc",
-      },
-    },
+    where: { role: "WARD_OFFICER", wardId, isActive: true },
+    orderBy: { wardOfficerComplaints: { _count: "asc" } },
   });
 
-  // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
+  // Create complaint now (after verification)
   const complaint = await createComplaintWithUniqueId({
     title: `${type} complaint`,
     description,
@@ -500,176 +573,28 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     isAnonymous: false,
     deadline,
     wardOfficerId: wardOfficer?.id || null,
+    submittedById: user.id,
   });
 
-  // Create attachment records if files were uploaded
-  const attachmentRecords = [];
-  for (const file of attachments) {
-    const attachment = await prisma.attachment.create({
+  // Attach uploaded files, if any
+  const files = req.files || [];
+  for (const file of files) {
+    await prisma.attachment.create({
       data: {
         fileName: file.filename,
         originalName: file.originalname,
         mimeType: file.mimetype,
         size: file.size,
-        url: `/api/uploads/${file.filename}`, // URL to access the file
+        url: `/api/uploads/${file.filename}`,
         complaintId: complaint.id,
       },
     });
-    attachmentRecords.push(attachment);
   }
-
-  // Generate OTP
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-  // Create OTP session for guest
-  const otpSession = await prisma.oTPSession.create({
-    data: {
-      email,
-      phoneNumber,
-      otpCode,
-      purpose: "GUEST_VERIFICATION",
-      expiresAt,
-    },
-  });
-
-  // Send OTP email
-  const emailSent = await sendEmail({
-    to: email,
-    subject: "Verify Your Complaint - Cochin Smart City",
-    text: `Your complaint has been registered with ID: ${complaint.complaintId}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
-    html: `
-      <h2>Complaint Registered Successfully</h2>
-      <p>Your complaint has been registered with ID: <strong>${complaint.complaintId}</strong></p>
-      <p>To complete the verification process, please use the following OTP:</p>
-      <h3 style=\"color: #2563eb; font-size: 24px; letter-spacing: 2px;\">${otpCode}</h3>
-      <p>This OTP will expire in 10 minutes.</p>
-      <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
-    `,
-  });
-
-  if (!emailSent) {
-    // If email fails, delete the complaint and OTP session
-    await prisma.complaint.delete({ where: { id: complaint.id } });
-    await prisma.oTPSession.delete({ where: { id: otpSession.id } });
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send verification email. Please try again.",
-      data: null,
-    });
-  }
-
-  // Tracking number equals prefixed complaintId
-  const trackingNumber = complaint.complaintId;
-
-  res.status(201).json({
-    success: true,
-    message:
-      "Complaint registered successfully. Please check your email for OTP verification.",
-    data: {
-      complaintId: complaint.complaintId,
-      trackingNumber,
-      email,
-      expiresAt,
-      sessionId: otpSession.id,
-    },
-  });
-});
-
-// @desc    Verify OTP and auto-register as citizen
-// @route   POST /api/guest/verify-otp
-// @access  Public
-export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
-  const { email, otpCode, complaintId } = req.body;
-
-  // Find valid OTP session
-  const otpSession = await prisma.oTPSession.findFirst({
-    where: {
-      email,
-      otpCode,
-      purpose: "GUEST_VERIFICATION",
-      isVerified: false,
-      expiresAt: { gt: new Date() },
-    },
-  });
-
-  if (!otpSession) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid or expired OTP",
-      data: null,
-    });
-  }
-
-  // Find the complaint
-  const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId },
-    include: { ward: true },
-  });
-
-  if (!complaint) {
-    return res.status(404).json({
-      success: false,
-      message: "Complaint not found",
-      data: null,
-    });
-  }
-
-  let user;
-  let isNewUser = false;
-
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    user = existingUser;
-  } else {
-    // Create new citizen user (auto-registration)
-    user = await prisma.user.create({
-      data: {
-        fullName: complaint.contactName,
-        email: complaint.contactEmail,
-        phoneNumber: complaint.contactPhone,
-        role: "CITIZEN",
-        isActive: true,
-        joinedOn: new Date(),
-        // No password set initially - user can set it later
-      },
-      include: { ward: true },
-    });
-    isNewUser = true;
-  }
-
-  // Update complaint with user ID
-  const updatedComplaint = await prisma.complaint.update({
-    where: { id: complaintId },
-    data: {
-      submittedById: user.id,
-    },
-    include: {
-      ward: true,
-      submittedBy: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          phoneNumber: true,
-        },
-      },
-    },
-  });
 
   // Mark OTP as verified
   await prisma.oTPSession.update({
     where: { id: otpSession.id },
-    data: {
-      isVerified: true,
-      verifiedAt: new Date(),
-      userId: user.id,
-    },
+    data: { isVerified: true, verifiedAt: new Date(), userId: user.id },
   });
 
   // Create status log
@@ -682,21 +607,19 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     },
   });
 
-  // Generate JWT token for auto-login
   const token = generateJWTToken(user);
 
-  // Send password setup email if this is a new user
   if (isNewUser) {
-    const passwordSetupSent = await sendEmail({
+    await sendEmail({
       to: user.email,
       subject: "Welcome to Cochin Smart City - Set Your Password",
-      text: `Welcome! Your complaint has been verified and you have been registered as a citizen. To access your dashboard in the future, please set your password by clicking the link in this email.`,
+      text:
+        "Welcome! Your complaint has been verified and you have been registered as a citizen. You can set your password from your profile.",
       html: `
         <h2>Welcome to Cochin Smart City!</h2>
         <p>Your complaint has been successfully verified and you have been automatically registered as a citizen.</p>
         <p>Your complaint ID: <strong>${complaint.complaintId}</strong></p>
         <p>You are now logged in and can track your complaint progress.</p>
-        <p>To access your account in the future with a password, please set your password by logging in with OTP and using the "Set Password" option in your profile.</p>
         <p>You can always login using OTP sent to your email if you don't want to set a password.</p>
       `,
     });
@@ -704,13 +627,8 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
 
   // Notify ward officers
   const wardOfficers = await prisma.user.findMany({
-    where: {
-      role: "WARD_OFFICER",
-      wardId: complaint.wardId,
-      isActive: true,
-    },
+    where: { role: "WARD_OFFICER", wardId: complaint.wardId, isActive: true },
   });
-
   for (const officer of wardOfficers) {
     await prisma.notification.create({
       data: {
@@ -723,20 +641,14 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     });
   }
 
-  // Remove password from response
-  const { password: _, ...userResponse } = user;
+  const { password: _pw, ...userResponse } = user;
 
   res.status(200).json({
     success: true,
     message: isNewUser
       ? "OTP verified! You have been registered as a citizen and are now logged in."
       : "OTP verified! You are now logged in.",
-    data: {
-      user: userResponse,
-      token,
-      complaint: updatedComplaint,
-      isNewUser,
-    },
+    data: { user: userResponse, token, complaint, isNewUser },
   });
 });
 
@@ -744,73 +656,36 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
 // @route   POST /api/guest/resend-otp
 // @access  Public
 export const resendOTP = asyncHandler(async (req, res) => {
-  const { email, complaintId } = req.body;
+  const { email } = req.body;
 
-  // Find the complaint
-  const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId },
-  });
-
-  if (!complaint || complaint.contactEmail !== email) {
-    return res.status(404).json({
-      success: false,
-      message: "Complaint not found or email mismatch",
-      data: null,
-    });
-  }
-
-  // Check if already verified
-  const existingVerified = await prisma.oTPSession.findFirst({
-    where: {
-      email,
-      purpose: "GUEST_VERIFICATION",
-      isVerified: true,
-    },
-  });
-
-  if (existingVerified) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({
       success: false,
-      message: "Email already verified",
+      message: "Please provide a valid email",
       data: null,
     });
   }
 
-  // Invalidate existing OTP sessions
+  // Invalidate existing unverified OTP sessions for this email
   await prisma.oTPSession.updateMany({
-    where: {
-      email,
-      purpose: "GUEST_VERIFICATION",
-      isVerified: false,
-    },
-    data: {
-      expiresAt: new Date(), // Expire immediately
-    },
+    where: { email, purpose: "GUEST_VERIFICATION", isVerified: false },
+    data: { expiresAt: new Date() },
   });
 
-  // Generate new OTP
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-  // Create new OTP session
   const otpSession = await prisma.oTPSession.create({
-    data: {
-      email,
-      phoneNumber: complaint.contactPhone,
-      otpCode,
-      purpose: "GUEST_VERIFICATION",
-      expiresAt,
-    },
+    data: { email, otpCode, purpose: "GUEST_VERIFICATION", expiresAt },
   });
 
-  // Send OTP email
   const emailSent = await sendEmail({
     to: email,
-    subject: "Verify Your Complaint - Cochin Smart City (Resent)",
-    text: `Your new verification OTP for complaint ${complaintId} is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    subject: "Verify Your Email - Cochin Smart City (Resent)",
+    text: `Your new verification OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
       <h2>New Verification OTP</h2>
-      <p>Your new verification OTP for complaint <strong>${complaintId}</strong> is:</p>
+      <p>Your new verification OTP is:</p>
       <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
     `,
@@ -827,11 +702,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "New OTP sent to your email",
-    data: {
-      email,
-      expiresAt,
-      sessionId: otpSession.id,
-    },
+    data: { email, expiresAt, sessionId: otpSession.id },
   });
 });
 
