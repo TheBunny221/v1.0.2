@@ -263,7 +263,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (isLoading) return; // 👈
-      setIsSubmittingLocal(true); 
+      setIsSubmittingLocal(true);
       if (!captcha || !captchaId) {
         dispatch(
           showErrorToast(
@@ -329,7 +329,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           onSuccess?.(result.id);
         } else {
           // Guest flow: Submit complaint and send OTP
-          const guestFormData : GuestComplaintData = {
+          const guestFormData: GuestComplaintData = {
             fullName: formData.fullName,
             email: formData.email,
             phoneNumber: formData.mobile,
@@ -730,7 +730,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="address">
-                    {(translations as any)?.complaints?.address || "Full Address"}
+                    {(translations as any)?.complaints?.address ||
+                      "Full Address"}
                   </Label>
                   <Textarea
                     id="address"
@@ -755,7 +756,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               </h3>
               <div className="space-y-2">
                 <Label htmlFor="description">
-                  {(translations as any)?.complaints?.description || (translations as any)?.forms?.description || "Description"} *
+                  {(translations as any)?.complaints?.description ||
+                    (translations as any)?.forms?.description ||
+                    "Description"}{" "}
+                  *
                 </Label>
                 <Textarea
                   id="description"

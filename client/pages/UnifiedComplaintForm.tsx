@@ -183,7 +183,8 @@ const UnifiedComplaintForm: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
-  const [submitGuestComplaintMutation, { isLoading: isSendingOtp }] = useSubmitGuestComplaintMutation();
+  const [submitGuestComplaintMutation, { isLoading: isSendingOtp }] =
+    useSubmitGuestComplaintMutation();
   const [resendGuestOtp] = useResendGuestOtpMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
@@ -497,14 +498,23 @@ const UnifiedComplaintForm: React.FC = () => {
         submissionData.append("fullName", formData.fullName);
         submissionData.append("email", formData.email);
         submissionData.append("phoneNumber", formData.phoneNumber);
-        if (formData.captchaId) submissionData.append("captchaId", formData.captchaId);
-        if (formData.captchaText) submissionData.append("captchaText", formData.captchaText);
+        if (formData.captchaId)
+          submissionData.append("captchaId", formData.captchaId);
+        if (formData.captchaText)
+          submissionData.append("captchaText", formData.captchaText);
 
-        const response = await submitGuestComplaintMutation(submissionData).unwrap();
+        const response =
+          await submitGuestComplaintMutation(submissionData).unwrap();
         const result: any = response.data;
 
         if (result?.sessionId) {
-          dispatch(setOtpSession({ sessionId: result.sessionId, email: result.email, expiresAt: result.expiresAt }));
+          dispatch(
+            setOtpSession({
+              sessionId: result.sessionId,
+              email: result.email,
+              expiresAt: result.expiresAt,
+            }),
+          );
           setShowOtpDialog(true);
           toast({
             title: "Verification Code Sent",
@@ -1664,12 +1674,16 @@ const UnifiedComplaintForm: React.FC = () => {
                 fd.append("description", formData.description);
                 fd.append("priority", (formData.priority as any) || "MEDIUM");
                 fd.append("wardId", formData.wardId);
-                if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
+                if (formData.subZoneId)
+                  fd.append("subZoneId", formData.subZoneId);
                 fd.append("area", formData.area);
                 if (formData.landmark) fd.append("landmark", formData.landmark);
                 if (formData.address) fd.append("address", formData.address);
                 if (formData.coordinates)
-                  fd.append("coordinates", JSON.stringify(formData.coordinates));
+                  fd.append(
+                    "coordinates",
+                    JSON.stringify(formData.coordinates),
+                  );
                 const filesToSend: FileAttachment[] =
                   formData.attachments
                     ?.map((a) => {
@@ -1682,7 +1696,10 @@ const UnifiedComplaintForm: React.FC = () => {
                 const result = await verifyGuestOtp(fd).unwrap();
                 if (result.data?.token && result.data?.user) {
                   dispatch(
-                    setCredentials({ token: result.data.token, user: result.data.user }),
+                    setCredentials({
+                      token: result.data.token,
+                      user: result.data.user,
+                    }),
                   );
                   localStorage.setItem("token", result.data.token);
                 }
@@ -1699,7 +1716,9 @@ const UnifiedComplaintForm: React.FC = () => {
                 toast({
                   title: "Verification Failed",
                   description:
-                    error?.data?.message || error?.message || "Invalid verification code. Please try again.",
+                    error?.data?.message ||
+                    error?.message ||
+                    "Invalid verification code. Please try again.",
                   variant: "destructive",
                 });
               } finally {
@@ -1709,9 +1728,18 @@ const UnifiedComplaintForm: React.FC = () => {
             onResend={async () => {
               try {
                 await resendGuestOtp({ email: formData.email }).unwrap();
-                toast({ title: "Verification Code Resent", description: "A new verification code has been sent to your email." });
+                toast({
+                  title: "Verification Code Resent",
+                  description:
+                    "A new verification code has been sent to your email.",
+                });
               } catch (error: any) {
-                toast({ title: "Failed to Resend", description: error?.message || "Failed to resend verification code.", variant: "destructive" });
+                toast({
+                  title: "Failed to Resend",
+                  description:
+                    error?.message || "Failed to resend verification code.",
+                  variant: "destructive",
+                });
               }
             }}
             isVerifying={isVerifyingOtp}

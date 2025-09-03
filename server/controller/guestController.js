@@ -12,11 +12,13 @@ const generateSequentialComplaintId = async () => {
   return await prisma.$transaction(async (tx) => {
     const config = await tx.systemConfig.findMany({
       where: {
-        key: { in: [
-          "COMPLAINT_ID_PREFIX",
-          "COMPLAINT_ID_START_NUMBER",
-          "COMPLAINT_ID_LENGTH",
-        ] },
+        key: {
+          in: [
+            "COMPLAINT_ID_PREFIX",
+            "COMPLAINT_ID_START_NUMBER",
+            "COMPLAINT_ID_LENGTH",
+          ],
+        },
       },
     });
     const settings = config.reduce((acc, setting) => {
@@ -246,35 +248,35 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
         wardId: wardId,
         isActive: true,
       },
-    orderBy: {
-      // Assign to ward officer with least assigned complaints for load balancing
-      wardOfficerComplaints: {
-        _count: "asc",
+      orderBy: {
+        // Assign to ward officer with least assigned complaints for load balancing
+        wardOfficerComplaints: {
+          _count: "asc",
+        },
       },
-    },
     });
 
     // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
     const complaint = await createComplaintWithUniqueId({
-    title: `${type} complaint`,
-    description,
-    type,
-    priority: priority || "MEDIUM",
-    status: "REGISTERED",
-    slaStatus: "ON_TIME",
-    wardId,
-    subZoneId: subZoneId || null,
-    area,
-    landmark,
-    address,
-    coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
-    contactName: fullName,
-    contactEmail: email,
-    contactPhone: phoneNumber,
-    isAnonymous: false,
-    deadline,
-    wardOfficerId: wardOfficer?.id || null,
-  });
+      title: `${type} complaint`,
+      description,
+      type,
+      priority: priority || "MEDIUM",
+      status: "REGISTERED",
+      slaStatus: "ON_TIME",
+      wardId,
+      subZoneId: subZoneId || null,
+      area,
+      landmark,
+      address,
+      coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
+      contactName: fullName,
+      contactEmail: email,
+      contactPhone: phoneNumber,
+      isAnonymous: false,
+      deadline,
+      wardOfficerId: wardOfficer?.id || null,
+    });
 
     // Process attachments if any
     let attachmentRecords = [];
@@ -497,7 +499,9 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     });
   }
   if (subZoneId) {
-    const subZone = await prisma.subZone.findUnique({ where: { id: subZoneId } });
+    const subZone = await prisma.subZone.findUnique({
+      where: { id: subZoneId },
+    });
     if (!subZone) {
       return res.status(400).json({
         success: false,
@@ -613,8 +617,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     await sendEmail({
       to: user.email,
       subject: "Welcome to Cochin Smart City - Set Your Password",
-      text:
-        "Welcome! Your complaint has been verified and you have been registered as a citizen. You can set your password from your profile.",
+      text: "Welcome! Your complaint has been verified and you have been registered as a citizen. You can set your password from your profile.",
       html: `
         <h2>Welcome to Cochin Smart City!</h2>
         <p>Your complaint has been successfully verified and you have been automatically registered as a citizen.</p>

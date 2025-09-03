@@ -87,7 +87,11 @@ router.post(
   upload.array("attachments", 5),
   submitGuestComplaintWithAttachments,
 );
-router.post("/verify-otp", upload.array("attachments", 5), verifyOTPAndRegister);
+router.post(
+  "/verify-otp",
+  upload.array("attachments", 5),
+  verifyOTPAndRegister,
+);
 router.post("/resend-otp", resendOTP);
 router.get("/track/:complaintId", validateComplaintTracking, trackComplaint);
 router.get("/stats", getPublicStats);

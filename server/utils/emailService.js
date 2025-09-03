@@ -57,14 +57,19 @@ async function initializeTransporterIfNeeded() {
       if (isProd) {
         transporterInstance = buildProdTransport();
       } else {
-        const hasCustomDevSmtp =
-          !!(process.env.EMAIL_SERVICE || process.env.EMAIL_USER || process.env.EMAIL_PASS);
+        const hasCustomDevSmtp = !!(
+          process.env.EMAIL_SERVICE ||
+          process.env.EMAIL_USER ||
+          process.env.EMAIL_PASS
+        );
 
         if (hasCustomDevSmtp) {
           transporterInstance = buildDevTransportWithEnv();
         } else {
           transporterInstance = await buildDevTransportWithEthereal();
-          console.log("📨 Using Ethereal test account for emails in development (singleton)");
+          console.log(
+            "📨 Using Ethereal test account for emails in development (singleton)",
+          );
         }
       }
 
@@ -73,7 +78,10 @@ async function initializeTransporterIfNeeded() {
         await transporterInstance.verify();
         console.log("✅ Email transporter verified and ready");
       } catch (verifyErr) {
-        console.warn("⚠️ Email transporter verification failed:", verifyErr?.message || verifyErr);
+        console.warn(
+          "⚠️ Email transporter verification failed:",
+          verifyErr?.message || verifyErr,
+        );
       }
 
       return transporterInstance;
@@ -97,7 +105,9 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     const transporter = await getEmailTransporter();
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || "Cochin Smart City <no-reply@cochinsmartcity.local>",
+      from:
+        process.env.EMAIL_FROM ||
+        "Cochin Smart City <no-reply@cochinsmartcity.local>",
       to,
       subject,
       text,

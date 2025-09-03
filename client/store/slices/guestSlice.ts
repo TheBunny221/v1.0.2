@@ -741,7 +741,11 @@ const guestSlice = createSlice({
     },
     setOtpSession: (
       state,
-      action: PayloadAction<{ sessionId: string; email: string; expiresAt: string }>,
+      action: PayloadAction<{
+        sessionId: string;
+        email: string;
+        expiresAt: string;
+      }>,
     ) => {
       state.sessionId = action.payload.sessionId;
       state.userEmail = action.payload.email;

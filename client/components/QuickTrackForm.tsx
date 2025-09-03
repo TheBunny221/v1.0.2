@@ -35,25 +35,38 @@ const QuickTrackForm: React.FC<Props> = ({ onClose }) => {
     e.preventDefault();
     setError("");
     try {
-      const res = await requestOtp({ complaintId: complaintId.trim() }).unwrap();
+      const res = await requestOtp({
+        complaintId: complaintId.trim(),
+      }).unwrap();
       if (res?.success) {
         setMaskedEmail(res.data.email);
         setShowOtpModal(true);
       }
     } catch (err: any) {
       setError(
-        err?.data?.message || "Complaint not found. Please check your complaint ID.",
+        err?.data?.message ||
+          "Complaint not found. Please check your complaint ID.",
       );
     }
   };
 
-  const handleVerified = async ({ complaintId, otpCode }: { complaintId: string; otpCode: string }) => {
+  const handleVerified = async ({
+    complaintId,
+    otpCode,
+  }: {
+    complaintId: string;
+    otpCode: string;
+  }) => {
     try {
       const res = await verifyOtp({ complaintId, otpCode }).unwrap();
       if (res?.success && res.data?.token && res.data?.user) {
-        dispatch(setCredentials({ token: res.data.token, user: res.data.user }));
+        dispatch(
+          setCredentials({ token: res.data.token, user: res.data.user }),
+        );
         localStorage.setItem("token", res.data.token);
-        const redirect = res.data.redirectTo || `/complaints/${res.data.complaint?.id || complaintId}`;
+        const redirect =
+          res.data.redirectTo ||
+          `/complaints/${res.data.complaint?.id || complaintId}`;
         setShowOtpModal(false);
         onClose?.();
         navigate(redirect);
