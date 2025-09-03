@@ -2,7 +2,7 @@ import express from "express";
 import { protect, authorize } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { getPrisma } from "../db/connection.js";
-import { computeSlaComplianceClosed } from "../utils/sla.js";
+import { computeSlaComplianceClosed, getTypeSlaMap } from "../utils/sla.js";
 
 const router = express.Router();
 const prisma = getPrisma();
@@ -317,6 +317,9 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       prisma,
       closedWhere,
     );
+
+    // Build type SLA map for downstream calculations (trends, categories)
+    const typeSlaMap = await getTypeSlaMap(prisma);
 
     // Average resolution time in days (resolved only)
     const closedRows = await prisma.complaint.findMany({
