@@ -27,7 +27,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../components/ui/tooltip";
+// import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../components/ui/tooltip";
 import {
   BarChart,
   Bar,
@@ -215,12 +215,12 @@ const AdminDashboard: React.FC = () => {
               {systemStats.totalComplaints}
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">Total Complaints
-              <Tooltip>
+             {/*  <Tooltip>
                 <TooltipTrigger>
                   <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>All complaints in the system.</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
@@ -228,12 +228,12 @@ const AdminDashboard: React.FC = () => {
               {systemStats.activeUsers || 0}
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">Active Users
-              <Tooltip>
+              {/*<Tooltip>
                 <TooltipTrigger>
                   <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>Users who have logged in recently.</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
@@ -241,12 +241,12 @@ const AdminDashboard: React.FC = () => {
               {metrics?.slaCompliance || 0}%
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">SLA Compliance
-              <Tooltip>
+              {/*<Tooltip>
                 <TooltipTrigger>
                   <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>Average on‑time performance across complaint types, using each type’s configured SLA hours.</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
@@ -254,12 +254,12 @@ const AdminDashboard: React.FC = () => {
               {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">Satisfaction
-              <Tooltip>
+              {/*<Tooltip>
                 <TooltipTrigger>
                   <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>Average citizen feedback score.</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </div>
           </div>
         </div>
@@ -271,12 +271,12 @@ const AdminDashboard: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Active Complaints
-              <Tooltip>
+              {/*<Tooltip>
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Complaints currently open (not resolved or closed).</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </CardTitle>
             <FileText className="h-4 w-4 text-orange-600" />
           </CardHeader>
@@ -291,12 +291,12 @@ const AdminDashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">Overdue Tasks
-              <Tooltip>
+              {/*<Tooltip>
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Open complaints that have passed their SLA deadline.</TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
@@ -315,12 +315,12 @@ const AdminDashboard: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Pending Team Assignment
-              <Tooltip>
+             {/* <Tooltip>
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Complaints waiting to be assigned to a maintenance team.</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </CardTitle>
             <UserCheck className="h-4 w-4 text-blue-600" />
           </CardHeader>
@@ -338,12 +338,12 @@ const AdminDashboard: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Avg Resolution
-              <Tooltip>
+            {/*}  <Tooltip>
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Average time taken to close complaints (in days).</TooltipContent>
-              </Tooltip>
+              </Tooltip>*/}
             </CardTitle>
             <Clock className="h-4 w-4 text-green-600" />
           </CardHeader>
