@@ -860,7 +860,7 @@ const UnifiedReports: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis {...otherProps.xAxis} />
                 <YAxis />
-                <Tooltip />
+                <Tooltip {...otherProps.tooltip} />
                 <Legend />
                 {otherProps.bars?.map((bar: any, index: number) => (
                   <Bar key={index} {...bar} />
@@ -1602,7 +1602,11 @@ const UnifiedReports: React.FC = () => {
                           textAnchor: "end",
                           height: 80,
                         },
-                        bars: [{ dataKey: "avgTime", fill: "#8884d8" }],
+                        tooltip: {
+                          formatter: (value: any) => [`${value} days`, "Avg Resolution Time"],
+                          labelFormatter: (label: any) => `Category: ${label}`,
+                        },
+                        bars: [{ dataKey: "avgTime", fill: "#8884d8", name: "Avg Resolution Time (days)" }],
                       })
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
