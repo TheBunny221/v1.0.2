@@ -436,13 +436,7 @@ const UnifiedReports: React.FC = () => {
 
   // Disabled auto-fetch on filter changes; use Generate Report button instead
 
-  // Force re-fetch when filters change (only after initialization)
-  useEffect(() => {
-    if (!filtersInitialized) return;
-
-    console.log("Filter state updated:", filters);
-    setAnalyticsData(null); // Clear existing data to show loading
-  }, [filters, filtersInitialized]);
+  // Do not auto clear analytics when filters change; wait for Generate Report
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
