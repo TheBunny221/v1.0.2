@@ -252,7 +252,14 @@ const AdminDashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
             </div>
-            <div className="text-sm text-purple-200">Satisfaction</div>
+            <div className="text-sm text-purple-200 flex items-center gap-1">Satisfaction
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-purple-200/80 cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent>Average citizen feedback score.</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         </div>
       </div>
