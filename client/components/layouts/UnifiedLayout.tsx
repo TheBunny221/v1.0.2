@@ -26,7 +26,7 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
         {isAuthenticated && (
           <div
             className={cn(
-              "hidden md:block fixed top-16 bottom-0 left-0 z-40",
+              "hidden md:block fixed top-16 bottom-0 left-0 z-30",
               isSidebarCollapsed ? "w-16" : "w-64",
             )}
           >
