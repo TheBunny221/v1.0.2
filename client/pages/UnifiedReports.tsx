@@ -1667,7 +1667,7 @@ const UnifiedReports: React.FC = () => {
 
               {/* Circular Progress with Percentage */}
               <div className="relative inline-flex items-center justify-center mb-4">
-                <div className="w-20 h-20 rounded-full border-4 border-muted">
+                <div className="w-20 h-20 rounded-full border-4 border-border">
                   <div className="w-20 h-20 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
