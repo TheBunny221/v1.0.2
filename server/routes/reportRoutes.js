@@ -264,6 +264,16 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
   const normalizedPriority = normalizePriority(priority);
   if (normalizedPriority) where.priority = normalizedPriority;
 
+  // Build a separate filter for CLOSED metrics using closedOn within range
+  const closedWhere = { ...where };
+  if (closedWhere.submittedOn) delete closedWhere.submittedOn;
+  closedWhere.status = "CLOSED";
+  if (from || to) {
+    closedWhere.closedOn = {};
+    if (from) closedWhere.closedOn.gte = new Date(from);
+    if (to) closedWhere.closedOn.lte = new Date(to);
+  }
+
   try {
     const pageNumber = parseInt(page) || 1;
     const pageSize = Math.min(parseInt(limit) || 1000, 10000);
@@ -301,57 +311,57 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       },
     });
 
-    // SLA compliance: average of type-level compliance using SLA hours from system config
-    // 1) Load complaint types with SLA hours
-    const typeConfigs = await prisma.systemConfig.findMany({
-      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
-    });
-    const complaintTypes = typeConfigs
-      .map((cfg) => {
-        try {
-          const v = JSON.parse(cfg.value || "{}");
-          return { name: v.name, slaHours: Number(v.slaHours) || 48 };
-        } catch {
-          return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
-        }
-      })
-      .filter((t) => t.name);
+    // SLA compliance: compute over CLOSED complaints within selected window
+    const [typeConfigs, defaultSlaCfg] = await Promise.all([
+      prisma.systemConfig.findMany({
+        where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+      }),
+      prisma.systemConfig.findFirst({
+        where: { key: "DEFAULT_SLA_HOURS", isActive: true },
+      }),
+    ]);
 
-    // 2) Compute per-type SLA compliance based ONLY on CLOSED tickets
-    const nowTs = new Date();
-    let typePercentages = [];
-    for (const t of complaintTypes) {
-      const rows = await prisma.complaint.findMany({
-        where: { ...where, type: t.name, status: "CLOSED" },
-        select: { submittedOn: true, closedOn: true, deadline: true },
-      });
-      if (rows.length === 0) continue;
-      const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
-      let compliant = 0;
-      let considered = 0;
-      for (const r of rows) {
-        if (!r.submittedOn || !r.closedOn) continue;
-        considered += 1;
-        const startTs = new Date(r.submittedOn).getTime();
-        const deadlineTs = r.deadline
-          ? new Date(r.deadline).getTime()
-          : startTs + windowMs;
-        const closedTs = new Date(r.closedOn).getTime();
-        if (closedTs <= deadlineTs) compliant += 1;
-      }
-      typePercentages.push(considered ? (compliant / considered) * 100 : 0);
+    const defaultSlaHours = Number(defaultSlaCfg?.value) || 48;
+    const typeSlaMap = new Map(
+      typeConfigs
+        .map((cfg) => {
+          try {
+            const v = JSON.parse(cfg.value || "{}");
+            const name = v.name || cfg.key.replace("COMPLAINT_TYPE_", "");
+            const slaHours = Number(v.slaHours) || defaultSlaHours;
+            return [name, slaHours];
+          } catch {
+            const name = cfg.key.replace("COMPLAINT_TYPE_", "");
+            return [name, defaultSlaHours];
+          }
+        })
+        .filter((pair) => !!pair[0]),
+    );
+
+    const closedForSla = await prisma.complaint.findMany({
+      where: closedWhere,
+      select: { submittedOn: true, closedOn: true, deadline: true, type: true },
+    });
+
+    let slaCompliant = 0;
+    let slaTotal = 0;
+    for (const r of closedForSla) {
+      if (!r.submittedOn || !r.closedOn) continue;
+      slaTotal += 1;
+      const startTs = new Date(r.submittedOn).getTime();
+      const slaHours = typeSlaMap.get(r.type) || defaultSlaHours;
+      const deadlineTs = r.deadline
+        ? new Date(r.deadline).getTime()
+        : startTs + slaHours * 60 * 60 * 1000;
+      const closedTs = new Date(r.closedOn).getTime();
+      if (closedTs <= deadlineTs) slaCompliant += 1;
     }
-    const slaCompliance = typePercentages.length
-      ? typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length
-      : 0;
+
+    const slaCompliance = slaTotal ? (slaCompliant / slaTotal) * 100 : 0;
 
     // Average resolution time in days (resolved only)
     const closedRows = await prisma.complaint.findMany({
-      where: {
-        ...where,
-        status: "CLOSED",
-        closedOn: { not: null },
-      },
+      where: { ...closedWhere, closedOn: { not: null } },
       select: { submittedOn: true, closedOn: true },
     });
     let totalResolutionDays = 0;
@@ -435,11 +445,11 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       });
       const resolvedByWard = await prisma.complaint.groupBy({
         by: ["wardId"],
-        where: { ...where, status: "CLOSED" },
+        where: closedWhere,
         _count: { _all: true },
       });
       const resolvedTimes = await prisma.complaint.findMany({
-        where: { ...where, status: "CLOSED" },
+        where: closedWhere,
         select: { wardId: true, submittedOn: true, closedOn: true },
       });
       const avgByWard = new Map();
@@ -485,7 +495,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       _count: { _all: true },
     });
     const categoryResolvedTimes = await prisma.complaint.findMany({
-      where: { ...where, status: "CLOSED" },
+      where: closedWhere,
       select: { type: true, submittedOn: true, closedOn: true },
     });
     const timeByType = new Map();
