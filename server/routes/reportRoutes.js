@@ -312,30 +312,24 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     });
 
     // SLA compliance: compute over CLOSED complaints within selected window
-    const [typeConfigs, defaultSlaCfg] = await Promise.all([
-      prisma.systemConfig.findMany({
-        where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
-      }),
-      prisma.systemConfig.findFirst({
-        where: { key: "DEFAULT_SLA_HOURS", isActive: true },
-      }),
-    ]);
+    const typeConfigs = await prisma.systemConfig.findMany({
+      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+    });
 
-    const defaultSlaHours = Number(defaultSlaCfg?.value) || 48;
     const typeSlaMap = new Map(
       typeConfigs
         .map((cfg) => {
           try {
             const v = JSON.parse(cfg.value || "{}");
             const name = v.name || cfg.key.replace("COMPLAINT_TYPE_", "");
-            const slaHours = Number(v.slaHours) || defaultSlaHours;
+            const slaHours = Number(v.slaHours);
+            if (!name || !Number.isFinite(slaHours) || slaHours <= 0) return null;
             return [name, slaHours];
           } catch {
-            const name = cfg.key.replace("COMPLAINT_TYPE_", "");
-            return [name, defaultSlaHours];
+            return null;
           }
         })
-        .filter((pair) => !!pair[0]),
+        .filter((pair) => Array.isArray(pair)),
     );
 
     const closedForSla = await prisma.complaint.findMany({
@@ -349,7 +343,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       if (!r.submittedOn || !r.closedOn) continue;
       slaTotal += 1;
       const startTs = new Date(r.submittedOn).getTime();
-      const slaHours = typeSlaMap.get(r.type) || defaultSlaHours;
+      const slaHours = typeSlaMap.get(r.type);
+      if (!slaHours) continue;
       const targetTs = startTs + slaHours * 60 * 60 * 1000;
       const closedTs = new Date(r.closedOn).getTime();
       if (closedTs <= targetTs) slaCompliant += 1;
@@ -418,10 +413,12 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         if (trendsMap.has(rk)) {
           const t = trendsMap.get(rk);
           t.resolved += 1;
-          const slaHours = typeSlaMap.get(c.type) || defaultSlaHours;
-          const targetTs = new Date(c.submittedOn).getTime() + slaHours * 60 * 60 * 1000;
-          if (new Date(c.closedOn).getTime() <= targetTs) t.slaCompliance += 1;
-          t.slaResolved += 1;
+          const slaHours = typeSlaMap.get(c.type);
+          if (slaHours) {
+            const targetTs = new Date(c.submittedOn).getTime() + slaHours * 60 * 60 * 1000;
+            if (new Date(c.closedOn).getTime() <= targetTs) t.slaCompliance += 1;
+            t.slaResolved += 1;
+          }
         }
       }
     }
