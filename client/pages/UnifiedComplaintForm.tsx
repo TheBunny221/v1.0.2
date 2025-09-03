@@ -27,15 +27,18 @@ import {
   selectCanProceed,
   selectIsSubmitting,
   selectComplaintId,
+  selectSessionId,
   selectTrackingNumber,
   selectImagePreview,
   FileAttachment,
   GuestComplaintData,
+  setOtpSession,
 } from "../store/slices/guestSlice";
 import {
   useGetWardsQuery,
   useVerifyGuestOtpMutation,
   useSubmitGuestComplaintMutation,
+  useResendGuestOtpMutation,
 } from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
@@ -180,6 +183,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
   const [submitGuestComplaintMutation] = useSubmitGuestComplaintMutation();
+  const [resendGuestOtp] = useResendGuestOtpMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // Fetch wards from API
@@ -198,6 +202,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const canProceed = useAppSelector(selectCanProceed);
   const isSubmitting = useAppSelector(selectIsSubmitting);
   const complaintId = useAppSelector(selectComplaintId);
+  const sessionId = useAppSelector(selectSessionId);
   const trackingNumber = useAppSelector(selectTrackingNumber);
   const imagePreview = useAppSelector(selectImagePreview);
 
@@ -391,13 +396,10 @@ const UnifiedComplaintForm: React.FC = () => {
 
   // Handle OTP resend
   const handleResendOtp = useCallback(async () => {
-    if (!complaintId || !formData.email) return;
+    if (!formData.email) return;
 
     try {
-      // Call resend OTP API - this should be implemented in the guest slice
-      await dispatch(
-        resendOTP({ email: formData.email, complaintId }),
-      ).unwrap();
+      await resendGuestOtp({ email: formData.email }).unwrap();
 
       toast({
         title: "Verification Code Resent",
@@ -487,45 +489,19 @@ const UnifiedComplaintForm: React.FC = () => {
         dispatch(clearGuestData());
         navigate(getDashboardRouteForRole(user?.role || "CITIZEN"));
       } else {
-        // Guest flow: Submit complaint and send OTP
-        const files: FileAttachment[] =
-          formData.attachments
-            ?.map((attachment) => {
-              const file = fileMap.get(attachment.id);
-              return file ? { id: attachment.id, file } : null;
-            })
-            .filter((f): f is FileAttachment => f !== null) || [];
-
-        // Build FormData for RTK Query submission to avoid duplicate body reads
+        // Guest flow: Send OTP first (no attachments here)
         const submissionData = new FormData();
         submissionData.append("fullName", formData.fullName);
         submissionData.append("email", formData.email);
         submissionData.append("phoneNumber", formData.phoneNumber);
-        submissionData.append("type", formData.type as any);
-        submissionData.append("description", formData.description);
-        submissionData.append("priority", (formData.priority as any) || "MEDIUM");
-        submissionData.append("wardId", formData.wardId);
-        if (formData.subZoneId) submissionData.append("subZoneId", formData.subZoneId);
-        submissionData.append("area", formData.area);
-        if (formData.landmark) submissionData.append("landmark", formData.landmark);
-        if (formData.address) submissionData.append("address", formData.address);
-        if (formData.coordinates) {
-          submissionData.append("coordinates", JSON.stringify(formData.coordinates));
-        }
-        // Attach files
-        const files: FileAttachment[] =
-          formData.attachments
-            ?.map((a) => {
-              const f = fileMap.get(a.id);
-              return f ? { id: a.id, file: f } : null;
-            })
-            .filter((f): f is FileAttachment => f !== null) || [];
-        for (const fa of files) submissionData.append("attachments", fa.file);
+        if (formData.captchaId) submissionData.append("captchaId", formData.captchaId);
+        if (formData.captchaText) submissionData.append("captchaText", formData.captchaText);
 
         const response = await submitGuestComplaintMutation(submissionData).unwrap();
-        const result = response.data;
+        const result: any = response.data;
 
-        if (result?.complaintId && result?.trackingNumber) {
+        if (result?.sessionId) {
+          dispatch(setOtpSession({ sessionId: result.sessionId, email: result.email, expiresAt: result.expiresAt }));
           toast({
             title: "Verification Code Sent",
             description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
@@ -564,23 +540,43 @@ const UnifiedComplaintForm: React.FC = () => {
       return;
     }
 
-    if (!complaintId) {
+    if (!sessionId) {
       toast({
         title: "Error",
-        description: "Complaint ID not found. Please try submitting again.",
+        description: "Verification session not found. Please resend the code.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      // Use RTK Query mutation for OTP verification
-      const result = await verifyGuestOtp({
-        email: formData.email,
-        otpCode,
-        complaintId,
-        createAccount: true,
-      }).unwrap();
+      // Use RTK Query mutation for OTP verification (send full complaint data now)
+      const fd = new FormData();
+      fd.append("email", formData.email);
+      fd.append("otpCode", otpCode);
+      fd.append("fullName", formData.fullName);
+      fd.append("phoneNumber", formData.phoneNumber);
+      fd.append("type", formData.type);
+      fd.append("description", formData.description);
+      fd.append("priority", (formData.priority as any) || "MEDIUM");
+      fd.append("wardId", formData.wardId);
+      if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
+      fd.append("area", formData.area);
+      if (formData.landmark) fd.append("landmark", formData.landmark);
+      if (formData.address) fd.append("address", formData.address);
+      if (formData.coordinates)
+        fd.append("coordinates", JSON.stringify(formData.coordinates));
+      // Attach files
+      const filesToSend: FileAttachment[] =
+        formData.attachments
+          ?.map((a) => {
+            const f = fileMap.get(a.id);
+            return f ? { id: a.id, file: f } : null;
+          })
+          .filter((f): f is FileAttachment => f !== null) || [];
+      for (const fa of filesToSend) fd.append("attachments", fa.file);
+
+      const result = await verifyGuestOtp(fd).unwrap();
 
       // Store auth token and user data
       if (result.data?.token && result.data?.user) {
@@ -616,7 +612,7 @@ const UnifiedComplaintForm: React.FC = () => {
     }
   }, [
     otpCode,
-    complaintId,
+    sessionId,
     formData.email,
     verifyGuestOtp,
     dispatch,
@@ -629,7 +625,7 @@ const UnifiedComplaintForm: React.FC = () => {
     if (currentStep === 5) {
       if (submissionMode === "citizen") {
         return handleSendOtp();
-      } else if (!complaintId) {
+      } else if (!sessionId) {
         return handleSendOtp();
       } else {
         return handleVerifyAndSubmit();
@@ -639,7 +635,7 @@ const UnifiedComplaintForm: React.FC = () => {
   }, [
     currentStep,
     submissionMode,
-    complaintId,
+    sessionId,
     handleSendOtp,
     handleVerifyAndSubmit,
   ]);
@@ -1476,7 +1472,7 @@ const UnifiedComplaintForm: React.FC = () => {
                 ) : (
                   // Guest users: OTP verification required
                   <div className="space-y-4">
-                    {!complaintId ? (
+                    {!sessionId ? (
                       // Step 5a: Send OTP
                       <div className="space-y-4">
                         <Alert className="border-green-200 bg-green-50">
@@ -1609,7 +1605,7 @@ const UnifiedComplaintForm: React.FC = () => {
                         </>
                       )}
                     </Button>
-                  ) : !complaintId ? (
+                  ) : !sessionId ? (
                     // Guest: Send OTP first
                     <Button
                       type="button"
