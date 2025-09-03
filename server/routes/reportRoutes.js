@@ -340,7 +340,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     const closedForSla = await prisma.complaint.findMany({
       where: closedWhere,
-      select: { submittedOn: true, closedOn: true, deadline: true, type: true },
+      select: { submittedOn: true, closedOn: true, type: true },
     });
 
     let slaCompliant = 0;
@@ -350,11 +350,9 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       slaTotal += 1;
       const startTs = new Date(r.submittedOn).getTime();
       const slaHours = typeSlaMap.get(r.type) || defaultSlaHours;
-      const deadlineTs = r.deadline
-        ? new Date(r.deadline).getTime()
-        : startTs + slaHours * 60 * 60 * 1000;
+      const targetTs = startTs + slaHours * 60 * 60 * 1000;
       const closedTs = new Date(r.closedOn).getTime();
-      if (closedTs <= deadlineTs) slaCompliant += 1;
+      if (closedTs <= targetTs) slaCompliant += 1;
     }
 
     const slaCompliance = slaTotal ? (slaCompliant / slaTotal) * 100 : 0;
