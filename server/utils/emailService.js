@@ -6,38 +6,46 @@ dotenv.config();
 // Create transporter
 const createTransporter = () => {
   if (process.env.NODE_ENV === "production") {
-    // Production email configuration
     return nodemailer.createTransport({
       host: process.env.EMAIL_SERVICE,
-      port: process.env.EMAIL_PORT || 587,
-      secure: false, // true if using port 465
+      port: Number(process.env.EMAIL_PORT) || 587,
+      secure: Number(process.env.EMAIL_PORT) === 465,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
   } else {
-    // Development email configuration using Ethereal
-    console.log(
-      "Email transporter created for development:",
-      process.env.EMAIL_SERVICE,
-    );
+    // Prefer explicit dev SMTP creds if provided, otherwise fall back to Ethereal test account
+    const hasCustomDevSmtp =
+      process.env.EMAIL_SERVICE || process.env.EMAIL_USER || process.env.EMAIL_PASS;
 
-   
-  
-    
+    if (hasCustomDevSmtp) {
+      return nodemailer.createTransport({
+        host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
+        port: Number(process.env.EMAIL_PORT) || 587,
+        secure: Number(process.env.EMAIL_PORT) === 465,
+        auth: {
+          user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
+          pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
+        },
+        debug: true,
+        logger: true,
+      });
+    }
 
-    // return nodemailer.createTransport({
-    //   host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
-    //   port: parseInt(process.env.EMAIL_PORT) || 587,
-    //   secure: false, // true for 465, false for other ports
-    //   auth: {
-    //     user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
-    //     pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
-    //   },
-    //   debug: true, // Enable debug logs for development
-    //   logger: true, // Enable logs
-    // });
+    // Create an ethereal test account automatically
+    return nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.ETHEREAL_USER || "",
+        pass: process.env.ETHEREAL_PASS || "",
+      },
+      debug: true,
+      logger: true,
+    });
   }
 };
 
