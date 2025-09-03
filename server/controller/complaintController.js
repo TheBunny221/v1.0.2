@@ -381,9 +381,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // ✅ Create complaint with retry wrapper to avoid duplicate complaintId issue
   const complaint = await createComplaintWithUniqueId({
-    title: title || `${type} complaint`,
+    title: title || `${resolvedTypeName} complaint`,
     description,
-    type,
+    type: resolvedTypeName,
     priority: priority || "MEDIUM",
     status: initialStatus,
     slaStatus: "ON_TIME",
