@@ -595,6 +595,11 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
 
   const nowTs = new Date();
   let typePercentages = [];
+  let overdueOpen = 0;
+  let resolvedLate = 0;
+  let withinSLA = 0;
+  let totalProcessed = 0;
+
   for (const t of complaintTypes) {
     const rows = await prisma.complaint.findMany({
       where: { type: t.name },
@@ -606,16 +611,28 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     for (const r of rows) {
       const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
       if (!start) continue;
+      totalProcessed++;
       const deadlineTs = start + windowMs;
       if (r.status === "RESOLVED" || r.status === "CLOSED") {
-        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs)
+        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs) {
           compliant += 1;
+          withinSLA += 1;
+        } else {
+          resolvedLate += 1;
+        }
       } else {
-        if (nowTs.getTime() <= deadlineTs) compliant += 1;
+        if (nowTs.getTime() <= deadlineTs) {
+          compliant += 1;
+          withinSLA += 1;
+        } else {
+          overdueOpen += 1;
+        }
       }
     }
     typePercentages.push((compliant / rows.length) * 100);
   }
+
+  const slaBreaches = overdueOpen + resolvedLate;
   const slaCompliance = typePercentages.length
     ? Math.round(
         typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length,
