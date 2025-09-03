@@ -191,15 +191,19 @@ export const exportToPDF = async (
     // Calculate actual metrics from complaint data to ensure accuracy
     const actualTotal = data.complaints.length;
     const actualResolved = data.complaints.filter(
-      (c) => c.status === "resolved",
+      (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
-      ["registered", "assigned", "in_progress"].includes(c.status),
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+        String(c.status).toUpperCase(),
+      ),
     ).length;
     const actualOverdue = data.complaints.filter((c) => {
       if (
         c.deadline &&
-        ["registered", "assigned", "in_progress"].includes(c.status)
+        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+          String(c.status).toUpperCase(),
+        )
       ) {
         return new Date(c.deadline) < new Date();
       }
@@ -475,15 +479,19 @@ export const exportToExcel = async (
     // Calculate actual metrics from complaint data for consistency
     const actualTotal = data.complaints.length;
     const actualResolved = data.complaints.filter(
-      (c) => c.status === "resolved",
+      (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
-      ["registered", "assigned", "in_progress"].includes(c.status),
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+        String(c.status).toUpperCase(),
+      ),
     ).length;
     const actualOverdue = data.complaints.filter((c) => {
       if (
         c.deadline &&
-        ["registered", "assigned", "in_progress"].includes(c.status)
+        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+          String(c.status).toUpperCase(),
+        )
       ) {
         return new Date(c.deadline) < new Date();
       }
@@ -847,7 +855,7 @@ export const formatDataForChart = (
     }
     const dayData = groupedData.get(date);
     dayData.count++;
-    if (item.status === "resolved") {
+    if (String(item.status).toUpperCase() === "RESOLVED") {
       dayData.resolved++;
     }
   });
