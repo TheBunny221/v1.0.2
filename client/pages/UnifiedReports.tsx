@@ -211,8 +211,8 @@ const UnifiedReports: React.FC = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportAbortController, setReportAbortController] =
     useState<AbortController | null>(null);
-  const [filtersInitialized, setFiltersInitialized] = useState(false);
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  const [didInitialFetch, setDidInitialFetch] = useState(false);
 
   // Get role-based access permissions
   const permissions = useMemo(() => {
@@ -262,106 +262,17 @@ const UnifiedReports: React.FC = () => {
     }
   }, [permissions.defaultWard]);
 
-  // Initial data fetch to get actual date range
+  // First load: fetch analytics for the currently selected/default date range only once
   useEffect(() => {
-    const fetchInitialData = async () => {
-      if (filtersInitialized) return;
+    if (!user) return;
+    if (!dateFnsLoaded) return; // wait until default month is set
+    if (didInitialFetch) return;
 
-      try {
-        // Fetch data without date filters to get full range
-        const queryParams = new URLSearchParams();
-
-        // Only apply role-based filters for initial fetch
-        if (user?.role === "WARD_OFFICER" && user?.wardId) {
-          queryParams.set("ward", user.wardId);
-        } else if (user?.role === "MAINTENANCE_TEAM") {
-          queryParams.set("assignedTo", user.id);
-        }
-
-        let endpoint = "/api/reports/analytics";
-        if (user?.role === "MAINTENANCE_TEAM") {
-          endpoint = "/api/maintenance/analytics";
-        }
-
-        const baseUrl = window.location.origin;
-        const response = await fetch(`${baseUrl}${endpoint}?${queryParams}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Initial data fetch:", data);
-
-          // Initialize filters from this data
-          if (data.data?.trends && data.data.trends.length > 0) {
-            const dates = data.data.trends
-              .map((t) => new Date(t.date))
-              .sort((a, b) => a.getTime() - b.getTime());
-
-            // Use fallback date formatting since date-fns might not be loaded yet
-            const earliestDate = dates[0].toISOString().split("T")[0];
-            const latestDate = dates[dates.length - 1]
-              .toISOString()
-              .split("T")[0];
-
-            console.log("Setting initial date range:", {
-              earliestDate,
-              latestDate,
-            });
-
-            // Set filters without triggering a new fetch loop
-            setFilters((prev) => ({
-              ...prev,
-              dateRange: {
-                from: earliestDate,
-                to: latestDate,
-              },
-            }));
-
-            // Also set the initial analytics data
-            const transformedData = {
-              complaints: {
-                total: data.data?.complaints?.total || 0,
-                resolved: data.data?.complaints?.resolved || 0,
-                pending: data.data?.complaints?.pending || 0,
-                overdue: data.data?.complaints?.overdue || 0,
-              },
-              sla: {
-                compliance: data.data?.sla?.compliance || 0,
-                avgResolutionTime: data.data?.sla?.avgResolutionTime || 0,
-                target: data.data?.sla?.target || 3,
-              },
-              trends: data.data?.trends || [],
-              wards: data.data?.wards || [],
-              categories: data.data?.categories || [],
-              performance: {
-                userSatisfaction: data.data?.performance?.userSatisfaction || 0,
-                escalationRate: data.data?.performance?.escalationRate || 0,
-                firstCallResolution:
-                  data.data?.performance?.firstCallResolution || 0,
-                repeatComplaints: data.data?.performance?.repeatComplaints || 0,
-              },
-            };
-
-            setAnalyticsData(transformedData);
-            setIsLoading(false);
-          }
-          setFiltersInitialized(true);
-        }
-      } catch (error) {
-        console.error("Initial data fetch error:", error);
-        // Fallback to current month if initial fetch fails
-        setFiltersInitialized(true);
-      }
-    };
-
-    if (user && !filtersInitialized) {
-      fetchInitialData();
+    if (filters.dateRange.from && filters.dateRange.to) {
+      setDidInitialFetch(true);
+      fetchAnalyticsData();
     }
-  }, [user, filtersInitialized]);
+  }, [user, dateFnsLoaded, didInitialFetch, filters.dateRange.from, filters.dateRange.to, fetchAnalyticsData]);
 
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
@@ -446,7 +357,7 @@ const UnifiedReports: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, user?.role, filtersInitialized]);
+  }, [filters, user?.role]);
 
   // Disabled auto-fetch on filter changes; use Generate Report button instead
 
