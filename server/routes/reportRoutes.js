@@ -253,24 +253,54 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     const pendingComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] } } });
     const overdueComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] }, deadline: { lt: new Date() } } });
 
-    // SLA compliance (same logic as admin dashboard):
-    // compliance = (totalComplaints - (open overdue + resolved late)) / totalComplaints
+    // SLA compliance: average of type-level compliance using SLA hours from system config
+    // 1) Load complaint types with SLA hours
+    const typeConfigs = await prisma.systemConfig.findMany({
+      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+    });
+    const complaintTypes = typeConfigs.map((cfg) => {
+      try {
+        const v = JSON.parse(cfg.value || '{}');
+        return { name: v.name, slaHours: Number(v.slaHours) || Number(getConfigValue?.("DEFAULT_SLA_HOURS") || 48) };
+      } catch {
+        return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
+      }
+    }).filter((t) => t.name);
+
+    // 2) Compute per-type compliance within current filter scope (counts open-within-window and resolved-within-window as compliant)
     const nowTs = new Date();
-    const activeStatuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"];
-    const overdueOpen = await prisma.complaint.count({ where: { ...where, status: { in: activeStatuses }, deadline: { lt: nowTs } } });
-    const resolvedRows = await prisma.complaint.findMany({ where: { ...where, status: { in: ["RESOLVED", "CLOSED"] }, resolvedOn: { not: null }, deadline: { not: null } }, select: { submittedOn: true, resolvedOn: true, deadline: true } });
-    let resolvedLate = 0;
+    let typePercentages = [];
+    for (const t of complaintTypes) {
+      const rows = await prisma.complaint.findMany({
+        where: { ...where, type: t.name },
+        select: { submittedOn: true, resolvedOn: true, status: true },
+      });
+      if (rows.length === 0) continue;
+      const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
+      let compliant = 0;
+      for (const r of rows) {
+        const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
+        if (!start) continue;
+        const deadlineTs = start + windowMs;
+        if (r.status === "RESOLVED" || r.status === "CLOSED") {
+          if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs) compliant += 1;
+        } else {
+          if (nowTs.getTime() <= deadlineTs) compliant += 1;
+        }
+      }
+      typePercentages.push((compliant / rows.length) * 100);
+    }
+    const slaCompliance = typePercentages.length ? (typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length) : 0;
+
+    // Average resolution time in days (resolved only)
+    const resolvedRows = await prisma.complaint.findMany({ where: { ...where, status: { in: ["RESOLVED", "CLOSED"] }, resolvedOn: { not: null } }, select: { submittedOn: true, resolvedOn: true } });
     let totalResolutionDays = 0;
     for (const c of resolvedRows) {
-      if (c.resolvedOn && c.deadline && c.resolvedOn > c.deadline) resolvedLate += 1;
       if (c.resolvedOn && c.submittedOn) {
-        const days = Math.ceil((c.resolvedOn.getTime() - c.submittedOn.getTime()) / (1000 * 60 * 60 * 24));
+        const days = Math.ceil((new Date(c.resolvedOn).getTime() - new Date(c.submittedOn).getTime()) / (1000 * 60 * 60 * 24));
         totalResolutionDays += days;
       }
     }
-    const slaBreaches = overdueOpen + resolvedLate;
-    const withinSLA = Math.max(totalComplaints - slaBreaches, 0);
-    const slaCompliance = totalComplaints ? (withinSLA / totalComplaints) * 100 : 0;
     const avgResolutionTime = resolvedRows.length ? totalResolutionDays / resolvedRows.length : 0;
 
     // Trends last N days (or specified range)
