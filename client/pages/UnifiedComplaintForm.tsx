@@ -1644,6 +1644,80 @@ const UnifiedComplaintForm: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* OTP Dialog */}
+        {showOtpDialog && (
+          <OtpDialog
+            open={showOtpDialog}
+            onOpenChange={setShowOtpDialog}
+            context="guestComplaint"
+            email={formData.email}
+            onVerified={async ({ otpCode }) => {
+              if (!otpCode) return;
+              try {
+                setIsVerifyingOtp(true);
+                const fd = new FormData();
+                fd.append("email", formData.email);
+                fd.append("otpCode", otpCode);
+                fd.append("fullName", formData.fullName);
+                fd.append("phoneNumber", formData.phoneNumber);
+                fd.append("type", formData.type);
+                fd.append("description", formData.description);
+                fd.append("priority", (formData.priority as any) || "MEDIUM");
+                fd.append("wardId", formData.wardId);
+                if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
+                fd.append("area", formData.area);
+                if (formData.landmark) fd.append("landmark", formData.landmark);
+                if (formData.address) fd.append("address", formData.address);
+                if (formData.coordinates)
+                  fd.append("coordinates", JSON.stringify(formData.coordinates));
+                const filesToSend: FileAttachment[] =
+                  formData.attachments
+                    ?.map((a) => {
+                      const f = fileMap.get(a.id);
+                      return f ? { id: a.id, file: f } : null;
+                    })
+                    .filter((f): f is FileAttachment => f !== null) || [];
+                for (const fa of filesToSend) fd.append("attachments", fa.file);
+
+                const result = await verifyGuestOtp(fd).unwrap();
+                if (result.data?.token && result.data?.user) {
+                  dispatch(
+                    setCredentials({ token: result.data.token, user: result.data.user }),
+                  );
+                  localStorage.setItem("token", result.data.token);
+                }
+                toast({
+                  title: "Success!",
+                  description: result.data?.isNewUser
+                    ? "Your complaint has been verified and your citizen account has been created successfully!"
+                    : "Your complaint has been verified and you've been logged in successfully!",
+                });
+                dispatch(clearGuestData());
+                setShowOtpDialog(false);
+                navigate("/dashboard");
+              } catch (error: any) {
+                toast({
+                  title: "Verification Failed",
+                  description:
+                    error?.data?.message || error?.message || "Invalid verification code. Please try again.",
+                  variant: "destructive",
+                });
+              } finally {
+                setIsVerifyingOtp(false);
+              }
+            }}
+            onResend={async () => {
+              try {
+                await resendGuestOtp({ email: formData.email }).unwrap();
+                toast({ title: "Verification Code Resent", description: "A new verification code has been sent to your email." });
+              } catch (error: any) {
+                toast({ title: "Failed to Resend", description: error?.message || "Failed to resend verification code.", variant: "destructive" });
+              }
+            }}
+            isVerifying={isVerifyingOtp}
+          />
+        )}
+
         {/* Image Preview Dialog */}
         {imagePreview.show && (
           <Dialog
