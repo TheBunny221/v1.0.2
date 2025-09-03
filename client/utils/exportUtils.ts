@@ -194,12 +194,12 @@ export const exportToPDF = async (
       (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
-      ["registered", "assigned", "in_progress"].includes(c.status),
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase()),
     ).length;
     const actualOverdue = data.complaints.filter((c) => {
       if (
         c.deadline &&
-        ["registered", "assigned", "in_progress"].includes(c.status)
+        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase())
       ) {
         return new Date(c.deadline) < new Date();
       }
@@ -478,12 +478,12 @@ export const exportToExcel = async (
       (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
-      ["registered", "assigned", "in_progress"].includes(c.status),
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase()),
     ).length;
     const actualOverdue = data.complaints.filter((c) => {
       if (
         c.deadline &&
-        ["registered", "assigned", "in_progress"].includes(c.status)
+        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase())
       ) {
         return new Date(c.deadline) < new Date();
       }
@@ -847,7 +847,7 @@ export const formatDataForChart = (
     }
     const dayData = groupedData.get(date);
     dayData.count++;
-    if (item.status === "resolved") {
+    if (String(item.status).toUpperCase() === "RESOLVED") {
       dayData.resolved++;
     }
   });
