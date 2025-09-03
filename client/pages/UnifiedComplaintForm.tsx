@@ -35,6 +35,7 @@ import {
 import {
   useGetWardsQuery,
   useVerifyGuestOtpMutation,
+  useSubmitGuestComplaintMutation,
 } from "../store/api/guestApi";
 import { useOtpFlow } from "../contexts/OtpContext";
 import { Button } from "../components/ui/button";
@@ -178,6 +179,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
+  const [submitGuestComplaintMutation] = useSubmitGuestComplaintMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   // Fetch wards from API
@@ -494,11 +496,36 @@ const UnifiedComplaintForm: React.FC = () => {
             })
             .filter((f): f is FileAttachment => f !== null) || [];
 
-        const result = await dispatch(
-          submitGuestComplaint({ complaintData: formData, files }),
-        ).unwrap();
+        // Build FormData for RTK Query submission to avoid duplicate body reads
+        const submissionData = new FormData();
+        submissionData.append("fullName", formData.fullName);
+        submissionData.append("email", formData.email);
+        submissionData.append("phoneNumber", formData.phoneNumber);
+        submissionData.append("type", formData.type as any);
+        submissionData.append("description", formData.description);
+        submissionData.append("priority", (formData.priority as any) || "MEDIUM");
+        submissionData.append("wardId", formData.wardId);
+        if (formData.subZoneId) submissionData.append("subZoneId", formData.subZoneId);
+        submissionData.append("area", formData.area);
+        if (formData.landmark) submissionData.append("landmark", formData.landmark);
+        if (formData.address) submissionData.append("address", formData.address);
+        if (formData.coordinates) {
+          submissionData.append("coordinates", JSON.stringify(formData.coordinates));
+        }
+        // Attach files
+        const files: FileAttachment[] =
+          formData.attachments
+            ?.map((a) => {
+              const f = fileMap.get(a.id);
+              return f ? { id: a.id, file: f } : null;
+            })
+            .filter((f): f is FileAttachment => f !== null) || [];
+        for (const fa of files) submissionData.append("attachments", fa.file);
 
-        if (result.complaintId && result.trackingNumber) {
+        const response = await submitGuestComplaintMutation(submissionData).unwrap();
+        const result = response.data;
+
+        if (result?.complaintId && result?.trackingNumber) {
           toast({
             title: "Verification Code Sent",
             description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
