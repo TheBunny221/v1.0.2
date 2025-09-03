@@ -215,8 +215,8 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">Total Complaints
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80 cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>All complaints in the system.</TooltipContent>
               </Tooltip>
@@ -228,8 +228,8 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">Active Users
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80 cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>Users who have logged in recently.</TooltipContent>
               </Tooltip>
@@ -241,8 +241,8 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">SLA Compliance
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80 cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>Average on‑time performance across complaint types, using each type’s configured SLA hours.</TooltipContent>
               </Tooltip>
@@ -254,8 +254,8 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="text-sm text-purple-200 flex items-center gap-1">Satisfaction
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80 cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
                 </TooltipTrigger>
                 <TooltipContent>Average citizen feedback score.</TooltipContent>
               </Tooltip>
