@@ -482,7 +482,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
           complaintId: complaint.id,
           type: "IN_APP",
           title: "New Complaint - No Auto Assignment",
-          message: `A new ${type} complaint requires manual assignment in your ward.`,
+          message: `A new ${resolvedTypeName} complaint requires manual assignment in your ward.`,
         },
       });
     }
