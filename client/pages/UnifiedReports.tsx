@@ -1016,7 +1016,7 @@ const UnifiedReports: React.FC = () => {
               {user?.role === "ADMINISTRATOR"
                 ? "Comprehensive system-wide insights and analytics"
                 : user?.role === "WARD_OFFICER"
-                  ? `Analytics for ${user?.ward || "your ward"}`
+                  ? `Analytics for ${getWardNameById(user?.wardId)}`
                   : "Your assigned task analytics and performance metrics"}
             </p>
             <div className="mt-1 flex flex-wrap gap-2">
