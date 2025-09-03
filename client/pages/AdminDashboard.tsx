@@ -239,7 +239,14 @@ const AdminDashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {metrics?.slaCompliance || 0}%
             </div>
-            <div className="text-sm text-purple-200">SLA Compliance</div>
+            <div className="text-sm text-purple-200 flex items-center gap-1">SLA Compliance
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-purple-200/80 cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent>Average on‑time performance across complaint types, using each type’s configured SLA hours.</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
           <div className="bg-purple-700 rounded-lg p-3">
             <div className="text-2xl font-bold">
