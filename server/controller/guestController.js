@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 const prisma = getPrisma();
 
 // Transaction-safe complaint ID generator (aligned with authenticated flow)
-const generateComplaintId = async () => {
+const generateSequentialComplaintId = async () => {
   return await prisma.$transaction(async (tx) => {
     const config = await tx.systemConfig.findMany({
       where: {
@@ -50,7 +50,7 @@ const createComplaintWithUniqueId = async (data) => {
   let retries = 3;
   while (retries > 0) {
     try {
-      const complaintId = await generateComplaintId();
+      const complaintId = await generateSequentialComplaintId();
       return await prisma.complaint.create({
         data: { ...data, complaintId },
         include: {
