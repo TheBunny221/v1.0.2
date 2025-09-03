@@ -2,6 +2,7 @@ import express from "express";
 import { protect, authorize } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { getPrisma } from "../db/connection.js";
+import { computeSlaComplianceClosed } from "../utils/sla.js";
 
 const router = express.Router();
 const prisma = getPrisma();
@@ -311,46 +312,11 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       },
     });
 
-    // SLA compliance: compute over CLOSED complaints within selected window
-    const typeConfigs = await prisma.systemConfig.findMany({
-      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
-    });
-
-    const typeSlaMap = new Map(
-      typeConfigs
-        .map((cfg) => {
-          try {
-            const v = JSON.parse(cfg.value || "{}");
-            const name = v.name || cfg.key.replace("COMPLAINT_TYPE_", "");
-            const slaHours = Number(v.slaHours);
-            if (!name || !Number.isFinite(slaHours) || slaHours <= 0) return null;
-            return [name, slaHours];
-          } catch {
-            return null;
-          }
-        })
-        .filter((pair) => Array.isArray(pair)),
+    // SLA compliance over CLOSED/RESOLVED complaints within selected window (shared logic)
+    const { compliance: slaCompliance } = await computeSlaComplianceClosed(
+      prisma,
+      closedWhere,
     );
-
-    const closedForSla = await prisma.complaint.findMany({
-      where: closedWhere,
-      select: { submittedOn: true, closedOn: true, type: true },
-    });
-
-    let slaCompliant = 0;
-    let slaTotal = 0;
-    for (const r of closedForSla) {
-      if (!r.submittedOn || !r.closedOn) continue;
-      slaTotal += 1;
-      const startTs = new Date(r.submittedOn).getTime();
-      const slaHours = typeSlaMap.get(r.type);
-      if (!slaHours) continue;
-      const targetTs = startTs + slaHours * 60 * 60 * 1000;
-      const closedTs = new Date(r.closedOn).getTime();
-      if (closedTs <= targetTs) slaCompliant += 1;
-    }
-
-    const slaCompliance = slaTotal ? (slaCompliant / slaTotal) * 100 : 0;
 
     // Average resolution time in days (resolved only)
     const closedRows = await prisma.complaint.findMany({
