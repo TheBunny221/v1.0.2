@@ -820,7 +820,7 @@ const UnifiedReports: React.FC = () => {
         XAxis,
         YAxis,
         CartesianGrid,
-        Tooltip,
+        Tooltip: RechartsTooltip,
         Legend,
       } = dynamicLibraries.recharts;
 
@@ -834,7 +834,7 @@ const UnifiedReports: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis {...otherProps.xAxis} />
                 <YAxis />
-                <Tooltip {...otherProps.tooltip} />
+                <RechartsTooltip {...otherProps.tooltip} />
                 <Legend />
                 {otherProps.areas?.map((area: any, index: number) => (
                   <Area key={index} {...area} />
@@ -851,7 +851,7 @@ const UnifiedReports: React.FC = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip {...otherProps.tooltip} />
+                <RechartsTooltip {...otherProps.tooltip} />
               </PieChart>
             </ResponsiveContainer>
           );
@@ -862,7 +862,7 @@ const UnifiedReports: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis {...otherProps.xAxis} />
                 <YAxis />
-                <Tooltip {...otherProps.tooltip} />
+                <RechartsTooltip {...otherProps.tooltip} />
                 <Legend />
                 {otherProps.bars?.map((bar: any, index: number) => (
                   <Bar key={index} {...bar} />
@@ -878,7 +878,7 @@ const UnifiedReports: React.FC = () => {
                 <XAxis {...otherProps.xAxis} />
                 <YAxis yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
-                <Tooltip {...otherProps.tooltip} />
+                <RechartsTooltip {...otherProps.tooltip} />
                 <Legend />
                 {otherProps.bars?.map((bar: any, index: number) => (
                   <Bar key={index} {...bar} />
