@@ -222,7 +222,7 @@ const AdminDashboard: React.FC = () => {
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 isolate">
-            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+            <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
               <div className="text-2xl font-bold text-white">
                 {systemStats.totalComplaints}
               </div>
@@ -236,7 +236,7 @@ const AdminDashboard: React.FC = () => {
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+            <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
               <div className="text-2xl font-bold text-white">
                 {systemStats.activeUsers || 0}
               </div>
@@ -252,7 +252,7 @@ const AdminDashboard: React.FC = () => {
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+            <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
               <div className="text-2xl font-bold text-white">
                 {metrics?.slaCompliance || 0}%
               </div>
@@ -269,7 +269,7 @@ const AdminDashboard: React.FC = () => {
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+            <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
               <div className="text-2xl font-bold text-white">
                 {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
               </div>
