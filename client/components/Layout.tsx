@@ -234,17 +234,34 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
                   </div>
                 </div>
                 <div className="max-h-80 overflow-auto">
-                  {unreadNotifications === 0 && notifications.filter(n=>!n.isRead).length === 0 && notifications.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground">No notifications</div>
+                  {unreadNotifications === 0 &&
+                  notifications.filter((n) => !n.isRead).length === 0 &&
+                  notifications.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground">
+                      No notifications
+                    </div>
                   ) : (
                     notifications.slice(0, 10).map((n) => (
-                      <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-1">
+                      <DropdownMenuItem
+                        key={n.id}
+                        className="flex flex-col items-start gap-1"
+                      >
                         <div className="flex items-center justify-between w-full">
-                          <span className={`text-sm ${n.isRead ? "text-muted-foreground" : "font-medium"}`}>{n.title}</span>
-                          {!n.isRead && <Badge className="ml-2" variant="outline">New</Badge>}
+                          <span
+                            className={`text-sm ${n.isRead ? "text-muted-foreground" : "font-medium"}`}
+                          >
+                            {n.title}
+                          </span>
+                          {!n.isRead && (
+                            <Badge className="ml-2" variant="outline">
+                              New
+                            </Badge>
+                          )}
                         </div>
                         {n.message && (
-                          <span className="text-xs text-muted-foreground line-clamp-2">{n.message}</span>
+                          <span className="text-xs text-muted-foreground line-clamp-2">
+                            {n.message}
+                          </span>
                         )}
                         <div className="flex gap-2 mt-1">
                           {!n.isRead && (

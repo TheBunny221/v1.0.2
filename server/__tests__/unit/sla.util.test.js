@@ -19,7 +19,9 @@ describe("SLA utility - computeSlaComplianceClosed", () => {
   };
 
   beforeAll(async () => {
-    await prisma.ward.create({ data: { id: wardId, name: wardId, isActive: true } });
+    await prisma.ward.create({
+      data: { id: wardId, name: wardId, isActive: true },
+    });
     for (const t of types) {
       await prisma.systemConfig.create({
         data: {
@@ -32,9 +34,18 @@ describe("SLA utility - computeSlaComplianceClosed", () => {
 
     const now = new Date();
 
-    const mk = async (type, submittedAgoHours, closedAfterHours, status = "CLOSED") => {
-      const submittedOn = new Date(now.getTime() - submittedAgoHours * 60 * 60 * 1000);
-      const closedOn = new Date(submittedOn.getTime() + closedAfterHours * 60 * 60 * 1000);
+    const mk = async (
+      type,
+      submittedAgoHours,
+      closedAfterHours,
+      status = "CLOSED",
+    ) => {
+      const submittedOn = new Date(
+        now.getTime() - submittedAgoHours * 60 * 60 * 1000,
+      );
+      const closedOn = new Date(
+        submittedOn.getTime() + closedAfterHours * 60 * 60 * 1000,
+      );
       return prisma.complaint.create({
         data: {
           description: `Test ${type}`,
@@ -64,7 +75,8 @@ describe("SLA utility - computeSlaComplianceClosed", () => {
   });
 
   it("calculates 50% compliance across closed complaints for ward", async () => {
-    const { compliance, totalClosed, compliantClosed } = await computeSlaComplianceClosed(prisma, { wardId });
+    const { compliance, totalClosed, compliantClosed } =
+      await computeSlaComplianceClosed(prisma, { wardId });
     expect(totalClosed).toBe(4);
     expect(compliantClosed).toBe(2);
     expect(Math.round(compliance)).toBe(50);

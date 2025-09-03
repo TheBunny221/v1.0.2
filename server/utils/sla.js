@@ -61,7 +61,10 @@ export async function computeAvgResolutionDays(prisma, where = {}) {
   if (rows.length === 0) return 0;
   let totalDays = 0;
   for (const r of rows) {
-    const days = Math.ceil((new Date(r.closedOn).getTime() - new Date(r.submittedOn).getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil(
+      (new Date(r.closedOn).getTime() - new Date(r.submittedOn).getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
     totalDays += days;
   }
   return totalDays / rows.length;

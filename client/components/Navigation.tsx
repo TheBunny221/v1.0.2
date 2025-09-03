@@ -416,7 +416,12 @@ const Navigation: React.FC = () => {
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative" aria-label="Notifications">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative"
+                  aria-label="Notifications"
+                >
                   <Bell className="h-5 w-5" />
                   {getUnreadNotificationCount() > 0 && (
                     <Badge

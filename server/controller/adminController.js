@@ -2,7 +2,10 @@ import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "../utils/emailService.js";
-import { computeSlaComplianceClosed, computeAvgResolutionDays } from "../utils/sla.js";
+import {
+  computeSlaComplianceClosed,
+  computeAvgResolutionDays,
+} from "../utils/sla.js";
 
 const prisma = getPrisma();
 
@@ -567,7 +570,8 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
       for (const r of closedRows) {
         if (r.submittedOn && r.closedOn) {
           const days = Math.ceil(
-            (new Date(r.closedOn).getTime() - new Date(r.submittedOn).getTime()) /
+            (new Date(r.closedOn).getTime() -
+              new Date(r.submittedOn).getTime()) /
               (1000 * 60 * 60 * 24),
           );
           totalDays += days;
@@ -579,8 +583,11 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   }
 
   // SLA compliance over CLOSED/RESOLVED complaints, aligned with reports
-  const { compliance: slaComplianceRaw, totalClosed, compliantClosed } =
-    await computeSlaComplianceClosed(prisma);
+  const {
+    compliance: slaComplianceRaw,
+    totalClosed,
+    compliantClosed,
+  } = await computeSlaComplianceClosed(prisma);
   const slaCompliance = Math.round(slaComplianceRaw * 10) / 10;
 
   // Additional metrics for verification

@@ -384,8 +384,10 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
           t.resolved += 1;
           const slaHours = typeSlaMap.get(c.type);
           if (slaHours) {
-            const targetTs = new Date(c.submittedOn).getTime() + slaHours * 60 * 60 * 1000;
-            if (new Date(c.closedOn).getTime() <= targetTs) t.slaCompliance += 1;
+            const targetTs =
+              new Date(c.submittedOn).getTime() + slaHours * 60 * 60 * 1000;
+            if (new Date(c.closedOn).getTime() <= targetTs)
+              t.slaCompliance += 1;
             t.slaResolved += 1;
           }
         }
@@ -519,22 +521,18 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     };
 
     res.set({ "Cache-Control": "public, max-age=300" });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Analytics data retrieved successfully",
-        data: analyticsData,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Analytics data retrieved successfully",
+      data: analyticsData,
+    });
   } catch (error) {
     console.error("Analytics error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to retrieve analytics data",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve analytics data",
+      error: error.message,
+    });
   }
 });
 
@@ -660,13 +658,11 @@ const exportReports = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Export error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to export reports",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to export reports",
+      error: error.message,
+    });
   }
 });
 

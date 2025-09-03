@@ -26,7 +26,9 @@ describe("SLA alignment between Admin Dashboard and Reports", () => {
 
   const cleanup = async () => {
     await prisma.complaint.deleteMany({ where: { wardId } });
-    await prisma.systemConfig.deleteMany({ where: { key: { in: types.map((t) => t.key) } } });
+    await prisma.systemConfig.deleteMany({
+      where: { key: { in: types.map((t) => t.key) } },
+    });
     await prisma.user.deleteMany({ where: { email: admin.email } });
     await prisma.ward.deleteMany({ where: { id: wardId } });
   };
@@ -34,7 +36,9 @@ describe("SLA alignment between Admin Dashboard and Reports", () => {
   beforeAll(async () => {
     app = createApp();
 
-    await prisma.ward.create({ data: { id: wardId, name: wardId, isActive: true } });
+    await prisma.ward.create({
+      data: { id: wardId, name: wardId, isActive: true },
+    });
     await prisma.user.create({ data: admin });
     adminToken = jwt.sign(
       { id: admin.id, email: admin.email, role: admin.role },
@@ -97,7 +101,9 @@ describe("SLA alignment between Admin Dashboard and Reports", () => {
     const to = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString();
 
     const reportsRes = await request(app)
-      .get(`/api/reports/analytics?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&ward=${wardId}`)
+      .get(
+        `/api/reports/analytics?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&ward=${wardId}`,
+      )
       .set("Authorization", `Bearer ${adminToken}`)
       .expect(200);
 
@@ -112,10 +118,16 @@ describe("SLA alignment between Admin Dashboard and Reports", () => {
     expect(reportsCompliance).toBeTypeOf("number");
 
     // Sanity: dashboard equals util-all rounded
-    expect(dashCompliance).toBeCloseTo(Math.round(utilAll.compliance * 10) / 10, 5);
+    expect(dashCompliance).toBeCloseTo(
+      Math.round(utilAll.compliance * 10) / 10,
+      5,
+    );
 
     // Reports equals ward-filtered util rounded
     const utilWard = await computeSlaComplianceClosed(prisma, { wardId });
-    expect(reportsCompliance).toBeCloseTo(Math.round(utilWard.compliance * 10) / 10, 5);
+    expect(reportsCompliance).toBeCloseTo(
+      Math.round(utilWard.compliance * 10) / 10,
+      5,
+    );
   });
 });

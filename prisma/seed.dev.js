@@ -155,7 +155,6 @@ async function main() {
         type: "contact",
         description: "Physical address of the main office",
       },
-
     ];
 
     await Promise.all(
@@ -633,16 +632,15 @@ async function main() {
         ? Math.random() < 0.8
         : Math.random() < 0.3;
       const closedWithinSla = Math.random() < 0.6;
-      const resolvedOn =
-        ["RESOLVED", "CLOSED"].includes(status)
-          ? new Date(
-              complaintDate.getTime() +
-                (closedWithinSla ? meta.slaHours * 0.6 : meta.slaHours * 1.2) *
-                  60 *
-                  60 *
-                  1000,
-            )
-          : null;
+      const resolvedOn = ["RESOLVED", "CLOSED"].includes(status)
+        ? new Date(
+            complaintDate.getTime() +
+              (closedWithinSla ? meta.slaHours * 0.6 : meta.slaHours * 1.2) *
+                60 *
+                60 *
+                1000,
+          )
+        : null;
       const closedOn =
         status === "CLOSED" || (status === "RESOLVED" && willClose)
           ? new Date(
@@ -662,8 +660,11 @@ async function main() {
           type: typeName,
           status: status,
           priority: priority,
-          slaStatus:
-            closedOn ? (closedOn.getTime() <= deadline.getTime() ? "COMPLETED" : "OVERDUE") : "ON_TIME",
+          slaStatus: closedOn
+            ? closedOn.getTime() <= deadline.getTime()
+              ? "COMPLETED"
+              : "OVERDUE"
+            : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
           landmark: `Near ${
