@@ -261,7 +261,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     const complaintTypes = typeConfigs.map((cfg) => {
       try {
         const v = JSON.parse(cfg.value || '{}');
-        return { name: v.name, slaHours: Number(v.slaHours) || Number(getConfigValue?.("DEFAULT_SLA_HOURS") || 48) };
+        return { name: v.name, slaHours: Number(v.slaHours) || 48 };
       } catch {
         return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
       }
