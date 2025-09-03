@@ -27,8 +27,6 @@ export async function computeSlaComplianceClosed(prisma, where = {}) {
   const closedWhere = {
     ...where,
     status: { in: ["RESOLVED", "CLOSED"] },
-    submittedOn: { not: null },
-    closedOn: { not: null },
   };
 
   const rows = await client.complaint.findMany({
@@ -57,7 +55,7 @@ export async function computeSlaComplianceClosed(prisma, where = {}) {
 export async function computeAvgResolutionDays(prisma, where = {}) {
   const client = prisma || getPrisma();
   const rows = await client.complaint.findMany({
-    where: { ...where, status: { in: ["RESOLVED", "CLOSED"] }, closedOn: { not: null }, submittedOn: { not: null } },
+    where: { ...where, status: { in: ["RESOLVED", "CLOSED"] } },
     select: { submittedOn: true, closedOn: true },
   });
   if (rows.length === 0) return 0;
