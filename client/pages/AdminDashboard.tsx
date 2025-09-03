@@ -59,6 +59,7 @@ import {
   MessageSquare,
   Activity,
   Target,
+  Info,
 } from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
