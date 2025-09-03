@@ -77,7 +77,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     }
 
     const mailOptions = {
-      from: "Cochin Smart City ",
+      from: process.env.EMAIL_FROM || "Cochin Smart City <no-reply@cochinsmartcity.local>",
       to,
       subject,
       text,
@@ -90,7 +90,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
       console.log("✅ Email sent successfully!");
       console.log("📧 Message ID:", info.messageId);
       console.log("📬 To:", to);
-      console.log("📝 Subject:", subject);
+      console.log("��� Subject:", subject);
 
       const previewUrl = nodemailer.getTestMessageUrl(info);
       if (previewUrl) {
