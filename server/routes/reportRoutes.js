@@ -253,18 +253,24 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     const pendingComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } } });
     const overdueComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] }, deadline: { lt: new Date() } } });
 
-    // SLA compliance and avg resolution (resolved only)
-    const resolvedRows = await prisma.complaint.findMany({ where: { ...where, status: "RESOLVED" }, select: { submittedOn: true, resolvedOn: true, deadline: true } });
-    let onTimeResolved = 0;
+    // SLA compliance (same logic as admin dashboard):
+    // compliance = (totalComplaints - (open overdue + resolved late)) / totalComplaints
+    const nowTs = new Date();
+    const activeStatuses = ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"];
+    const overdueOpen = await prisma.complaint.count({ where: { ...where, status: { in: activeStatuses }, deadline: { lt: nowTs } } });
+    const resolvedRows = await prisma.complaint.findMany({ where: { ...where, status: { in: ["RESOLVED", "CLOSED"] }, resolvedOn: { not: null }, deadline: { not: null } }, select: { submittedOn: true, resolvedOn: true, deadline: true } });
+    let resolvedLate = 0;
     let totalResolutionDays = 0;
     for (const c of resolvedRows) {
-      if (c.resolvedOn && c.deadline && c.resolvedOn <= c.deadline) onTimeResolved += 1;
+      if (c.resolvedOn && c.deadline && c.resolvedOn > c.deadline) resolvedLate += 1;
       if (c.resolvedOn && c.submittedOn) {
         const days = Math.ceil((c.resolvedOn.getTime() - c.submittedOn.getTime()) / (1000 * 60 * 60 * 24));
         totalResolutionDays += days;
       }
     }
-    const slaCompliance = resolvedRows.length ? (onTimeResolved / resolvedRows.length) * 100 : 0;
+    const slaBreaches = overdueOpen + resolvedLate;
+    const withinSLA = Math.max(totalComplaints - slaBreaches, 0);
+    const slaCompliance = totalComplaints ? (withinSLA / totalComplaints) * 100 : 0;
     const avgResolutionTime = resolvedRows.length ? totalResolutionDays / resolvedRows.length : 0;
 
     // Trends last N days (or specified range)
