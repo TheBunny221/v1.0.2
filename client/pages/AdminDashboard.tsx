@@ -289,7 +289,14 @@ const AdminDashboard: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">Overdue Tasks
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent>Open complaints that have passed their SLA deadline.</TooltipContent>
+              </Tooltip>
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
