@@ -195,6 +195,12 @@ const UnifiedReports: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [wards, setWards] = useState<Array<{ id: string; name: string }>>([]);
+  const getWardNameById = useCallback((wardId?: string | null) => {
+    if (!wardId || wardId === "all") return "All Wards";
+    if (user?.wardId && wardId === user.wardId) return user?.ward?.name || wardId;
+    const found = wards.find((w) => w.id === wardId);
+    return found?.name || wardId;
+  }, [user?.wardId, user?.ward?.name, wards]);
   const [wardsLoading, setWardsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1019,7 +1025,7 @@ const UnifiedReports: React.FC = () => {
                 Data Period: {getTimePeriodLabel()}
               </Badge>
               {user?.role === "WARD_OFFICER" && user?.wardId && (
-                <Badge variant="outline" className="text-xs">Ward: {user.ward?.name || user.wardId}</Badge>
+                <Badge variant="outline" className="text-xs">Ward: {getWardNameById(user.wardId)}</Badge>
               )}
             </div>
           </div>
@@ -1747,7 +1753,7 @@ const UnifiedReports: React.FC = () => {
                 {filters.ward !== "all" && (
                   <div className="flex justify-between">
                     <span>Ward:</span>
-                    <span className="font-medium">{filters.ward}</span>
+                    <span className="font-medium">{getWardNameById(filters.ward)}</span>
                   </div>
                 )}
                 {filters.complaintType !== "all" && (
