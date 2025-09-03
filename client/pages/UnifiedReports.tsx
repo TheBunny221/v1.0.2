@@ -204,6 +204,7 @@ const UnifiedReports: React.FC = () => {
   const [reportAbortController, setReportAbortController] =
     useState<AbortController | null>(null);
   const [filtersInitialized, setFiltersInitialized] = useState(false);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
   // Get role-based access permissions
   const permissions = useMemo(() => {
@@ -1037,7 +1038,7 @@ const UnifiedReports: React.FC = () => {
             {/* Date Range */}
             <div className="col-span-1 lg:col-span-2">
               <Label>Date Range</Label>
-              <Popover>
+              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-between" size="sm">
                     <span>
@@ -1059,11 +1060,12 @@ const UnifiedReports: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm">Cancel</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDatePopoverOpen(false)}>Cancel</Button>
                       <Button size="sm" onClick={() => {
                         const fromInput = (document.getElementById("from-date-picker") as HTMLInputElement)?.value || filters.dateRange.from;
                         const toInput = (document.getElementById("to-date-picker") as HTMLInputElement)?.value || filters.dateRange.to;
                         setFilters((prev) => ({ ...prev, dateRange: { from: fromInput, to: toInput } }));
+                        setDatePopoverOpen(false);
                       }}>Apply</Button>
                     </div>
                   </div>
