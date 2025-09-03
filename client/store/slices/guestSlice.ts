@@ -309,27 +309,25 @@ export const submitGuestComplaint = createAsyncThunk(
         body: formData,
       });
 
-      const contentType = response.headers.get("content-type");
-      const isJson = contentType && contentType.includes("application/json");
+      // Always read body once via text(), then JSON.parse
+      const raw = await response.text();
+      let data: any = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        data = null;
+      }
 
-      let data = null;
-      if (isJson) {
-        data = await response.json();
+      if (!response.ok) {
+        const message = data?.message || `HTTP ${response.status}`;
+        throw new Error(message);
+      }
 
-        if (!response.ok) {
-          throw new Error(data?.message || `HTTP ${response.status}`);
-        }
-
-        return data.data as GuestComplaintResponse;
-      } else {
-        // Non-JSON response handling
-        if (!response.ok) {
-          throw new Error(
-            `HTTP ${response.status}: Server returned unexpected response format`,
-          );
-        }
+      if (!data || typeof data !== "object") {
         throw new Error("Server returned unexpected response format");
       }
+
+      return data.data as GuestComplaintResponse;
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to submit complaint",
