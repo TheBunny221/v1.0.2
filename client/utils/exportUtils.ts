@@ -191,7 +191,7 @@ export const exportToPDF = async (
     // Calculate actual metrics from complaint data to ensure accuracy
     const actualTotal = data.complaints.length;
     const actualResolved = data.complaints.filter(
-      (c) => c.status === "resolved",
+      (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
       ["registered", "assigned", "in_progress"].includes(c.status),
@@ -475,7 +475,7 @@ export const exportToExcel = async (
     // Calculate actual metrics from complaint data for consistency
     const actualTotal = data.complaints.length;
     const actualResolved = data.complaints.filter(
-      (c) => c.status === "resolved",
+      (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
       ["registered", "assigned", "in_progress"].includes(c.status),
