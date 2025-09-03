@@ -271,8 +271,8 @@ const AdminDashboard: React.FC = () => {
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Active Complaints
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Complaints currently open (not resolved or closed).</TooltipContent>
               </Tooltip>
@@ -291,8 +291,8 @@ const AdminDashboard: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">Overdue Tasks
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Open complaints that have passed their SLA deadline.</TooltipContent>
               </Tooltip>
@@ -315,8 +315,8 @@ const AdminDashboard: React.FC = () => {
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Pending Team Assignment
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Complaints waiting to be assigned to a maintenance team.</TooltipContent>
               </Tooltip>
@@ -338,8 +338,8 @@ const AdminDashboard: React.FC = () => {
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Avg Resolution
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>Average time taken to close complaints (in days).</TooltipContent>
               </Tooltip>
