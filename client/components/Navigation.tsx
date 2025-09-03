@@ -415,8 +415,8 @@ const Navigation: React.FC = () => {
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
             <DropdownMenu>
-              {/* <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative" aria-label="Notifications">
                   <Bell className="h-5 w-5" />
                   {getUnreadNotificationCount() > 0 && (
                     <Badge
@@ -427,7 +427,7 @@ const Navigation: React.FC = () => {
                     </Badge>
                   )}
                 </Button>
-              </DropdownMenuTrigger> */}
+              </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <div className="p-2">
                   <h3 className="font-semibold text-sm mb-2">
