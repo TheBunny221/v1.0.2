@@ -198,7 +198,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <TooltipProvider>
       <div className="space-y-6">
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
@@ -1076,7 +1075,6 @@ const AdminDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </TooltipProvider>
   );
 };
 
