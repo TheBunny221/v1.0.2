@@ -213,11 +213,11 @@ const AdminDashboard: React.FC = () => {
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+              <div className="text-2xl font-bold text-white">
                 {systemStats.totalComplaints}
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
                 Total Complaints
                 <Tooltip>
                   <TooltipTrigger>
@@ -227,11 +227,11 @@ const AdminDashboard: React.FC = () => {
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+              <div className="text-2xl font-bold text-white">
                 {systemStats.activeUsers || 0}
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
                 Active Users
                 <Tooltip>
                   <TooltipTrigger>
@@ -243,11 +243,11 @@ const AdminDashboard: React.FC = () => {
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+              <div className="text-2xl font-bold text-white">
                 {metrics?.slaCompliance || 0}%
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
                 SLA Compliance
                 <Tooltip>
                   <TooltipTrigger>
@@ -260,11 +260,11 @@ const AdminDashboard: React.FC = () => {
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
+              <div className="text-2xl font-bold text-white">
                 {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
                 Satisfaction
                 <Tooltip>
                   <TooltipTrigger>
