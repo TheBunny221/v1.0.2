@@ -446,7 +446,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       // Reset form and call success callback
       resetForm();
       setShowOtpInput(false);
-      setComplaintId(null);
+      setSessionId(null);
       setOtpCode("");
       onSuccess?.(complaintId);
     } catch (error: any) {
@@ -488,7 +488,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     setCaptcha("");
     setCaptchaId(null);
     setOtpCode("");
-    setComplaintId(null);
+    setSessionId(null);
     setShowOtpInput(false);
     handleRefreshCaptcha();
   }, [isAuthenticated, user, handleRefreshCaptcha]);
@@ -929,7 +929,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                         onClick={() => {
                           setShowOtpInput(false);
                           setOtpCode("");
-                          setComplaintId(null);
+                          setSessionId(null);
                         }}
                       >
                         Back
