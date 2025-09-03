@@ -87,7 +87,10 @@ const Index: React.FC = () => {
               </Button>**/}
 
               <Button
-                onClick={() => setIsFormExpanded(!isFormExpanded)}
+                onClick={() => {
+                  setIsFormExpanded((v) => !v);
+                  setIsTrackExpanded(false);
+                }}
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
                 variant="outline"
@@ -268,7 +271,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम सम��� में मुद्दे ल��ग करें"
+                        ? "प्रकार, फोटो और स्थान के साथ एक मिनट से भी कम समय में मुद्दे ल��ग करें"
                         : currentLanguage === "ml"
                           ? "ടൈപ്പ്, ഫോട്ടോ, ലൊക്കേഷൻ എന്നിവ ഉപയോഗിച്ച് ഒരു മിനിറ���റിനുള്ളിൽ പ്രശ്നങ്ങൾ ��േഖപ്പെടുത്തുക"
                           : "Log issues in under a minute with type, photo, and location"}
@@ -289,7 +292,7 @@ const Index: React.FC = () => {
                       {currentLanguage === "hi"
                         ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
                         : currentLanguage === "ml"
-                          ? "രജി��്��്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
+                          ? "രജി��്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
                           : "Get notified at each stage — from registration to resolution"}
                     </div>
                   </div>
