@@ -250,8 +250,8 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
 
     // Metrics
     const resolvedComplaints = await prisma.complaint.count({ where: { ...where, status: "RESOLVED" } });
-    const pendingComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] } } });
-    const overdueComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS"] }, deadline: { lt: new Date() } } });
+    const pendingComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] } } });
+    const overdueComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] }, deadline: { lt: new Date() } } });
 
     // SLA compliance (same logic as admin dashboard):
     // compliance = (totalComplaints - (open overdue + resolved late)) / totalComplaints
