@@ -7,6 +7,73 @@ import bcrypt from "bcryptjs";
 
 const prisma = getPrisma();
 
+// Transaction-safe complaint ID generator (aligned with authenticated flow)
+const generateComplaintId = async () => {
+  return await prisma.$transaction(async (tx) => {
+    const config = await tx.systemConfig.findMany({
+      where: {
+        key: { in: [
+          "COMPLAINT_ID_PREFIX",
+          "COMPLAINT_ID_START_NUMBER",
+          "COMPLAINT_ID_LENGTH",
+        ] },
+      },
+    });
+    const settings = config.reduce((acc, setting) => {
+      acc[setting.key] = setting.value;
+      return acc;
+    }, {});
+    const prefix = settings.COMPLAINT_ID_PREFIX || "KSC";
+    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
+    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
+
+    const existing = await tx.complaint.findMany({
+      where: { complaintId: { startsWith: prefix, not: null } },
+      select: { complaintId: true },
+      orderBy: { complaintId: "desc" },
+    });
+    let maxNumber = startNumber - 1;
+    for (const c of existing) {
+      if (c.complaintId) {
+        const n = parseInt(c.complaintId.replace(prefix, ""));
+        if (!isNaN(n) && n > maxNumber) maxNumber = n;
+      }
+    }
+    const nextNumber = maxNumber + 1;
+    const formatted = nextNumber.toString().padStart(idLength, "0");
+    return `${prefix}${formatted}`;
+  });
+};
+
+// Retry wrapper to avoid unique constraint failure
+const createComplaintWithUniqueId = async (data) => {
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      const complaintId = await generateComplaintId();
+      return await prisma.complaint.create({
+        data: { ...data, complaintId },
+        include: {
+          ward: true,
+          subZone: true,
+          wardOfficer: data.wardOfficerId
+            ? { select: { id: true, fullName: true, email: true, role: true } }
+            : false,
+        },
+      });
+    } catch (err) {
+      if (err.code === "P2002" && err.meta?.target?.includes("complaintId")) {
+        retries--;
+        await new Promise((r) => setTimeout(r, 10 + Math.random() * 20));
+        if (retries === 0) throw err;
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error("Failed to create complaint with unique ID after retries");
+};
+
 // Helper function to generate JWT token
 const generateJWTToken = (user) => {
   return jwt.sign(
@@ -188,44 +255,26 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
     });
 
     // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
-    const complaint = await prisma.complaint.create({
-      data: {
-        title: `${type} complaint`,
-        description,
-        type,
-        priority: priority || "MEDIUM",
-        status: "REGISTERED",
-        slaStatus: "ON_TIME",
-        wardId,
-        subZoneId: subZoneId || null,
-        area,
-        landmark,
-        address,
-        coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
-        contactName: fullName,
-        contactEmail: email,
-        contactPhone: phoneNumber,
-        isAnonymous: false,
-        deadline,
-        wardOfficerId: wardOfficer?.id || null,
-        // assignToTeam can be used to signal assignment workflow in dashboards
-        // assignToTeam: true,
-        // Don't assign submittedById yet - will be set after OTP verification
-      },
-      include: {
-        ward: true,
-        wardOfficer: wardOfficer
-          ? {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                role: true,
-              },
-            }
-          : false,
-      },
-    });
+    const complaint = await createComplaintWithUniqueId({
+    title: `${type} complaint`,
+    description,
+    type,
+    priority: priority || "MEDIUM",
+    status: "REGISTERED",
+    slaStatus: "ON_TIME",
+    wardId,
+    subZoneId: subZoneId || null,
+    area,
+    landmark,
+    address,
+    coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
+    contactName: fullName,
+    contactEmail: email,
+    contactPhone: phoneNumber,
+    isAnonymous: false,
+    deadline,
+    wardOfficerId: wardOfficer?.id || null,
+  });
 
     // Process attachments if any
     let attachmentRecords = [];
@@ -269,12 +318,12 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
     const emailSent = await sendEmail({
       to: email,
       subject: "Verify Your Complaint - Cochin Smart City",
-      text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
+      text: `Your complaint has been registered with ID: ${complaint.complaintId}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
       html: `
       <h2>Complaint Registered Successfully</h2>
-      <p>Your complaint has been registered with ID: <strong>${complaint.id}</strong></p>
+      <p>Your complaint has been registered with ID: <strong>${complaint.complaintId}</strong></p>
       <p>To complete the verification process, please use the following OTP:</p>
-      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <h3 style=\"color: #2563eb; font-size: 24px; letter-spacing: 2px;\">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
       <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
       ${attachmentRecords.length > 0 ? `<p>Your complaint includes ${attachmentRecords.length} attachment(s).</p>` : ""}
@@ -307,7 +356,7 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       message:
         "Complaint registered successfully. Please check your email for OTP verification.",
       data: {
-        complaintId: complaint.id,
+        complaintId: complaint.complaintId,
         email,
         expiresAt,
         sessionId: otpSession.id,
@@ -432,42 +481,25 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
   });
 
   // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
-  const complaint = await prisma.complaint.create({
-    data: {
-      title: `${type} complaint`,
-      description,
-      type,
-      priority: priority || "MEDIUM",
-      status: "REGISTERED",
-      slaStatus: "ON_TIME",
-      wardId,
-      subZoneId: subZoneId || null,
-      area,
-      landmark,
-      address,
-      coordinates: parsedCoordinates ? JSON.stringify(parsedCoordinates) : null,
-      contactName: fullName,
-      contactEmail: email,
-      contactPhone: phoneNumber,
-      isAnonymous: false,
-      deadline,
-      wardOfficerId: wardOfficer?.id || null,
-      // isMaintenanceUnassigned: true,
-      // Don't assign submittedById yet - will be set after OTP verification
-    },
-    include: {
-      ward: true,
-      wardOfficer: wardOfficer
-        ? {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              role: true,
-            },
-          }
-        : false,
-    },
+  const complaint = await createComplaintWithUniqueId({
+    title: `${type} complaint`,
+    description,
+    type,
+    priority: priority || "MEDIUM",
+    status: "REGISTERED",
+    slaStatus: "ON_TIME",
+    wardId,
+    subZoneId: subZoneId || null,
+    area,
+    landmark,
+    address,
+    coordinates: parsedCoordinates ? JSON.stringify(parsedCoordinates) : null,
+    contactName: fullName,
+    contactEmail: email,
+    contactPhone: phoneNumber,
+    isAnonymous: false,
+    deadline,
+    wardOfficerId: wardOfficer?.id || null,
   });
 
   // Create attachment records if files were uploaded
@@ -505,12 +537,12 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
   const emailSent = await sendEmail({
     to: email,
     subject: "Verify Your Complaint - Cochin Smart City",
-    text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
+    text: `Your complaint has been registered with ID: ${complaint.complaintId}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
       <h2>Complaint Registered Successfully</h2>
-      <p>Your complaint has been registered with ID: <strong>${complaint.id}</strong></p>
+      <p>Your complaint has been registered with ID: <strong>${complaint.complaintId}</strong></p>
       <p>To complete the verification process, please use the following OTP:</p>
-      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <h3 style=\"color: #2563eb; font-size: 24px; letter-spacing: 2px;\">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
       <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
     `,
@@ -528,15 +560,15 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Generate tracking number
-  const trackingNumber = `CSC${complaint.id.slice(-6).toUpperCase()}`;
+  // Tracking number equals prefixed complaintId
+  const trackingNumber = complaint.complaintId;
 
   res.status(201).json({
     success: true,
     message:
       "Complaint registered successfully. Please check your email for OTP verification.",
     data: {
-      complaintId: complaint.id,
+      complaintId: complaint.complaintId,
       trackingNumber,
       email,
       expiresAt,
@@ -662,7 +694,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
       html: `
         <h2>Welcome to Cochin Smart City!</h2>
         <p>Your complaint has been successfully verified and you have been automatically registered as a citizen.</p>
-        <p>Your complaint ID: <strong>${complaint.id}</strong></p>
+        <p>Your complaint ID: <strong>${complaint.complaintId}</strong></p>
         <p>You are now logged in and can track your complaint progress.</p>
         <p>To access your account in the future with a password, please set your password by logging in with OTP and using the "Set Password" option in your profile.</p>
         <p>You can always login using OTP sent to your email if you don't want to set a password.</p>
