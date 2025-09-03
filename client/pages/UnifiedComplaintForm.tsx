@@ -220,6 +220,8 @@ const UnifiedComplaintForm: React.FC = () => {
 
   // OTP state
   const [otpCode, setOtpCode] = useState("");
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   // Prefill form data for authenticated users
   useEffect(() => {
