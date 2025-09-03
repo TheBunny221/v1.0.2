@@ -212,7 +212,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 isolate">
             <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-lg hover:bg-white/25 transition-all duration-200">
               <div className="text-2xl font-bold text-white">
                 {systemStats.totalComplaints}
