@@ -198,6 +198,15 @@ const AdminDashboard: React.FC = () => {
 
   return (
       <div className="space-y-6">
+        <style>{`
+          [data-radix-popper-content-wrapper] {
+            z-index: 99999 !important;
+            position: relative;
+          }
+          [data-radix-tooltip-content] {
+            z-index: 99999 !important;
+          }
+        `}</style>
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
