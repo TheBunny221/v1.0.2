@@ -272,7 +272,7 @@ const UnifiedReports: React.FC = () => {
       setDidInitialFetch(true);
       fetchAnalyticsData();
     }
-  }, [user, dateFnsLoaded, didInitialFetch, filters.dateRange.from, filters.dateRange.to, fetchAnalyticsData]);
+  }, [user, dateFnsLoaded, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
 
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
