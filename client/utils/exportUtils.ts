@@ -194,12 +194,16 @@ export const exportToPDF = async (
       (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
-      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase()),
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+        String(c.status).toUpperCase(),
+      ),
     ).length;
     const actualOverdue = data.complaints.filter((c) => {
       if (
         c.deadline &&
-        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase())
+        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+          String(c.status).toUpperCase(),
+        )
       ) {
         return new Date(c.deadline) < new Date();
       }
@@ -478,12 +482,16 @@ export const exportToExcel = async (
       (c) => String(c.status).toUpperCase() === "RESOLVED",
     ).length;
     const actualPending = data.complaints.filter((c) =>
-      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase()),
+      ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+        String(c.status).toUpperCase(),
+      ),
     ).length;
     const actualOverdue = data.complaints.filter((c) => {
       if (
         c.deadline &&
-        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(String(c.status).toUpperCase())
+        ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(
+          String(c.status).toUpperCase(),
+        )
       ) {
         return new Date(c.deadline) < new Date();
       }

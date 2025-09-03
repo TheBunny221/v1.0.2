@@ -582,14 +582,16 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const typeConfigs = await prisma.systemConfig.findMany({
     where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
   });
-  const complaintTypes = typeConfigs.map((cfg) => {
-    try {
-      const v = JSON.parse(cfg.value || '{}');
-      return { name: v.name, slaHours: Number(v.slaHours) || 48 };
-    } catch {
-      return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
-    }
-  }).filter((t) => t.name);
+  const complaintTypes = typeConfigs
+    .map((cfg) => {
+      try {
+        const v = JSON.parse(cfg.value || "{}");
+        return { name: v.name, slaHours: Number(v.slaHours) || 48 };
+      } catch {
+        return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
+      }
+    })
+    .filter((t) => t.name);
 
   const nowTs = new Date();
   let typePercentages = [];
@@ -606,14 +608,19 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
       if (!start) continue;
       const deadlineTs = start + windowMs;
       if (r.status === "RESOLVED" || r.status === "CLOSED") {
-        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs) compliant += 1;
+        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs)
+          compliant += 1;
       } else {
         if (nowTs.getTime() <= deadlineTs) compliant += 1;
       }
     }
     typePercentages.push((compliant / rows.length) * 100);
   }
-  const slaCompliance = typePercentages.length ? Math.round((typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length)) : 0;
+  const slaCompliance = typePercentages.length
+    ? Math.round(
+        typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length,
+      )
+    : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({

@@ -5,7 +5,11 @@ import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Popover, PopoverTrigger, PopoverContent } from "../components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "../components/ui/popover";
 import {
   Card,
   CardContent,
@@ -35,7 +39,12 @@ import {
 } from "../components/ui/dialog";
 import { Progress } from "../components/ui/progress";
 import { Skeleton } from "../components/ui/skeleton";
-import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../components/ui/tooltip";
+import {
+  Tooltip as UITooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "../components/ui/tooltip";
 // Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
@@ -197,12 +206,16 @@ const UnifiedReports: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [wards, setWards] = useState<Array<{ id: string; name: string }>>([]);
-  const getWardNameById = useCallback((wardId?: string | null) => {
-    if (!wardId || wardId === "all") return "All Wards";
-    if (user?.wardId && wardId === user.wardId) return user?.ward?.name || wardId;
-    const found = wards.find((w) => w.id === wardId);
-    return found?.name || wardId;
-  }, [user?.wardId, user?.ward?.name, wards]);
+  const getWardNameById = useCallback(
+    (wardId?: string | null) => {
+      if (!wardId || wardId === "all") return "All Wards";
+      if (user?.wardId && wardId === user.wardId)
+        return user?.ward?.name || wardId;
+      const found = wards.find((w) => w.id === wardId);
+      return found?.name || wardId;
+    },
+    [user?.wardId, user?.ward?.name, wards],
+  );
   const [wardsLoading, setWardsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -272,7 +285,13 @@ const UnifiedReports: React.FC = () => {
       setDidInitialFetch(true);
       fetchAnalyticsData();
     }
-  }, [user, dateFnsLoaded, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
+  }, [
+    user,
+    dateFnsLoaded,
+    didInitialFetch,
+    filters.dateRange.from,
+    filters.dateRange.to,
+  ]);
 
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
@@ -910,10 +929,15 @@ const UnifiedReports: React.FC = () => {
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="border-b pb-4">
-        <nav className="mb-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
+        <nav
+          className="mb-2 text-xs text-muted-foreground"
+          aria-label="Breadcrumb"
+        >
           <ol className="flex items-center gap-1">
             <li>
-              <Link to="/dashboard" className="hover:text-foreground">Dashboard</Link>
+              <Link to="/dashboard" className="hover:text-foreground">
+                Dashboard
+              </Link>
             </li>
             <li>/</li>
             <li className="text-foreground font-medium">Reports</li>
@@ -938,22 +962,39 @@ const UnifiedReports: React.FC = () => {
                 Data Period: {getTimePeriodLabel()}
               </Badge>
               {user?.role === "WARD_OFFICER" && user?.wardId && (
-                <Badge variant="outline" className="text-xs">Ward: {getWardNameById(user.wardId)}</Badge>
+                <Badge variant="outline" className="text-xs">
+                  Ward: {getWardNameById(user.wardId)}
+                </Badge>
               )}
             </div>
           </div>
 
           {permissions.canExportData && (
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleExport("csv")} disabled={isExporting}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleExport("csv")}
+                disabled={isExporting}
+              >
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Export CSV</span>
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleExport("excel")} disabled={isExporting}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleExport("excel")}
+                disabled={isExporting}
+              >
                 <FileSpreadsheet className="h-4 w-4" />
                 <span className="hidden sm:inline">Export Excel</span>
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleExport("pdf")} disabled={isExporting}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleExport("pdf")}
+                disabled={isExporting}
+              >
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">Export PDF</span>
               </Button>
@@ -977,7 +1018,11 @@ const UnifiedReports: React.FC = () => {
               <Label>Date Range</Label>
               <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between" size="sm">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between"
+                    size="sm"
+                  >
                     <span>
                       {filters.dateRange.from} → {filters.dateRange.to}
                     </span>
@@ -989,21 +1034,53 @@ const UnifiedReports: React.FC = () => {
                     <div className="grid grid-cols-1 gap-3">
                       <div>
                         <Label htmlFor="from-date-picker">From</Label>
-                        <Input id="from-date-picker" type="date" defaultValue={filters.dateRange.from} />
+                        <Input
+                          id="from-date-picker"
+                          type="date"
+                          defaultValue={filters.dateRange.from}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="to-date-picker">To</Label>
-                        <Input id="to-date-picker" type="date" defaultValue={filters.dateRange.to} />
+                        <Input
+                          id="to-date-picker"
+                          type="date"
+                          defaultValue={filters.dateRange.to}
+                        />
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => setDatePopoverOpen(false)}>Cancel</Button>
-                      <Button size="sm" onClick={() => {
-                        const fromInput = (document.getElementById("from-date-picker") as HTMLInputElement)?.value || filters.dateRange.from;
-                        const toInput = (document.getElementById("to-date-picker") as HTMLInputElement)?.value || filters.dateRange.to;
-                        setFilters((prev) => ({ ...prev, dateRange: { from: fromInput, to: toInput } }));
-                        setDatePopoverOpen(false);
-                      }}>Apply</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDatePopoverOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          const fromInput =
+                            (
+                              document.getElementById(
+                                "from-date-picker",
+                              ) as HTMLInputElement
+                            )?.value || filters.dateRange.from;
+                          const toInput =
+                            (
+                              document.getElementById(
+                                "to-date-picker",
+                              ) as HTMLInputElement
+                            )?.value || filters.dateRange.to;
+                          setFilters((prev) => ({
+                            ...prev,
+                            dateRange: { from: fromInput, to: toInput },
+                          }));
+                          setDatePopoverOpen(false);
+                        }}
+                      >
+                        Apply
+                      </Button>
                     </div>
                   </div>
                 </PopoverContent>
@@ -1021,12 +1098,18 @@ const UnifiedReports: React.FC = () => {
                   }
                 >
                   <SelectTrigger disabled={wardsLoading || isLoading}>
-                    <SelectValue placeholder={wardsLoading ? "Loading wards..." : "Select ward"} />
+                    <SelectValue
+                      placeholder={
+                        wardsLoading ? "Loading wards..." : "Select ward"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Wards</SelectItem>
                     {wards.map((w) => (
-                      <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                      <SelectItem key={w.id} value={w.id}>
+                        {w.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1156,7 +1239,10 @@ const UnifiedReports: React.FC = () => {
         </Badge>
       </div>
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" aria-live="polite">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          aria-live="polite"
+        >
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
               <CardHeader className="pb-2">
@@ -1172,108 +1258,125 @@ const UnifiedReports: React.FC = () => {
       )}
       {analyticsData && (
         <TooltipProvider>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                Total Complaints
-                <UITooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>All complaints matching your selected filters and date range.</TooltipContent>
-                </UITooltip>
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsData.complaints.total}
-              </div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +12% from last month
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  Total Complaints
+                  <UITooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      All complaints matching your selected filters and date
+                      range.
+                    </TooltipContent>
+                  </UITooltip>
+                </CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {analyticsData.complaints.total}
+                </div>
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +12% from last month
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">Resolved
-                <UITooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>Number of complaints marked resolved in the selected period. The rate shows Resolved ÷ Total.</TooltipContent>
-                </UITooltip>
-              </CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsData.complaints.resolved}
-              </div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                {(
-                  analyticsData.complaints.total > 0
-                    ? (analyticsData.complaints.resolved / analyticsData.complaints.total) * 100
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  Resolved
+                  <UITooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Number of complaints marked resolved in the selected
+                      period. The rate shows Resolved ÷ Total.
+                    </TooltipContent>
+                  </UITooltip>
+                </CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {analyticsData.complaints.resolved}
+                </div>
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  {(analyticsData.complaints.total > 0
+                    ? (analyticsData.complaints.resolved /
+                        analyticsData.complaints.total) *
+                      100
                     : 0
-                ).toFixed(1)}
-                % resolution rate
-              </div>
-            </CardContent>
-          </Card>
+                  ).toFixed(1)}
+                  % resolution rate
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                SLA Compliance
-                <UITooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>Average on‑time performance across complaint types, using each type’s configured SLA hours.</TooltipContent>
-                </UITooltip>
-              </CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsData.sla.compliance}%
-              </div>
-              <Progress value={analyticsData.sla.compliance} className="mt-2" />
-              <div className="flex items-center text-xs text-muted-foreground mt-2">
-                <Clock className="h-3 w-3 mr-1" />
-                Avg: {analyticsData.sla.avgResolutionTime} days
-              </div>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  SLA Compliance
+                  <UITooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Average on‑time performance across complaint types, using
+                      each type’s configured SLA hours.
+                    </TooltipContent>
+                  </UITooltip>
+                </CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {analyticsData.sla.compliance}%
+                </div>
+                <Progress
+                  value={analyticsData.sla.compliance}
+                  className="mt-2"
+                />
+                <div className="flex items-center text-xs text-muted-foreground mt-2">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Avg: {analyticsData.sla.avgResolutionTime} days
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                Satisfaction
-                <UITooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>Average citizen feedback rating during the selected period.</TooltipContent>
-                </UITooltip>
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsData.performance.userSatisfaction.toFixed(2)}/5
-              </div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +0.2 from last month
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  Satisfaction
+                  <UITooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Average citizen feedback rating during the selected
+                      period.
+                    </TooltipContent>
+                  </UITooltip>
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {analyticsData.performance.userSatisfaction.toFixed(2)}/5
+                </div>
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +0.2 from last month
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TooltipProvider>
       )}
 
@@ -1453,7 +1556,11 @@ const UnifiedReports: React.FC = () => {
                           dataKey: "complaints",
                           fill: "#8884d8",
                         },
-                        { yAxisId: "left", dataKey: "resolved", fill: "#82ca9d" },
+                        {
+                          yAxisId: "left",
+                          dataKey: "resolved",
+                          fill: "#82ca9d",
+                        },
                       ],
                       lines: [
                         {
@@ -1469,8 +1576,12 @@ const UnifiedReports: React.FC = () => {
                       <div className="text-center">
                         <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
                         <p>No trend data available for selected filters</p>
-                        <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
-                        <p className="text-xs">Try adjusting your date range or filters</p>
+                        <p className="text-sm font-medium">
+                          {getTimePeriodLabel()}
+                        </p>
+                        <p className="text-xs">
+                          Try adjusting your date range or filters
+                        </p>
                       </div>
                     </div>
                   )}
@@ -1532,7 +1643,8 @@ const UnifiedReports: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div id="resolution-time-chart">
-                    {(processedChartData?.categoriesWithColors?.length || 0) > 0 ? (
+                    {(processedChartData?.categoriesWithColors?.length || 0) >
+                    0 ? (
                       renderChart("bar", {
                         data: processedChartData?.categoriesWithColors || [],
                         xAxis: {
@@ -1543,18 +1655,33 @@ const UnifiedReports: React.FC = () => {
                           height: 80,
                         },
                         tooltip: {
-                          formatter: (value: any) => [`${value} days`, "Avg Resolution Time"],
+                          formatter: (value: any) => [
+                            `${value} days`,
+                            "Avg Resolution Time",
+                          ],
                           labelFormatter: (label: any) => `Category: ${label}`,
                         },
-                        bars: [{ dataKey: "avgTime", fill: "#8884d8", name: "Avg Resolution Time (days)" }],
+                        bars: [
+                          {
+                            dataKey: "avgTime",
+                            fill: "#8884d8",
+                            name: "Avg Resolution Time (days)",
+                          },
+                        ],
                       })
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                         <div className="text-center">
                           <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p>No category metrics to display for selected filters</p>
-                          <p className="text-sm font-medium">{getTimePeriodLabel()}</p>
-                          <p className="text-xs">Refine filters to include more data</p>
+                          <p>
+                            No category metrics to display for selected filters
+                          </p>
+                          <p className="text-sm font-medium">
+                            {getTimePeriodLabel()}
+                          </p>
+                          <p className="text-xs">
+                            Refine filters to include more data
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1597,7 +1724,9 @@ const UnifiedReports: React.FC = () => {
                         <div className="text-center">
                           <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
                           <p>No ward comparison data for current filters</p>
-                          <p className="text-xs">Adjust filters or date range</p>
+                          <p className="text-xs">
+                            Adjust filters or date range
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1687,7 +1816,9 @@ const UnifiedReports: React.FC = () => {
             <div className="bg-muted border border-border rounded-lg p-4">
               <div className="flex items-center mb-2">
                 <Calendar className="h-4 w-4 text-primary mr-2" />
-                <span className="font-medium text-foreground">Report Scope</span>
+                <span className="font-medium text-foreground">
+                  Report Scope
+                </span>
               </div>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex justify-between">
@@ -1697,7 +1828,9 @@ const UnifiedReports: React.FC = () => {
                 {filters.ward !== "all" && (
                   <div className="flex justify-between">
                     <span>Ward:</span>
-                    <span className="font-medium">{getWardNameById(filters.ward)}</span>
+                    <span className="font-medium">
+                      {getWardNameById(filters.ward)}
+                    </span>
                   </div>
                 )}
                 {filters.complaintType !== "all" && (

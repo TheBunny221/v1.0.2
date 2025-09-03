@@ -22,7 +22,14 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
   }
 
   // Compute complaint counts by status via Prisma
-  const [totalCount, registeredCount, assignedCount, inProgressCount, resolvedCount, closedCount] = await Promise.all([
+  const [
+    totalCount,
+    registeredCount,
+    assignedCount,
+    inProgressCount,
+    resolvedCount,
+    closedCount,
+  ] = await Promise.all([
     prisma.complaint.count({ where }),
     prisma.complaint.count({ where: { ...where, status: "REGISTERED" } }),
     prisma.complaint.count({ where: { ...where, status: "ASSIGNED" } }),
@@ -35,8 +42,16 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const [todayTotal, todayResolved] = await Promise.all([
-    prisma.complaint.count({ where: { ...where, submittedOn: { gte: startOfToday } } }),
-    prisma.complaint.count({ where: { ...where, status: "RESOLVED", resolvedOn: { gte: startOfToday } } }),
+    prisma.complaint.count({
+      where: { ...where, submittedOn: { gte: startOfToday } },
+    }),
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: "RESOLVED",
+        resolvedOn: { gte: startOfToday },
+      },
+    }),
   ]);
 
   // User statistics (admin only)
@@ -82,12 +97,17 @@ const getComplaintTrends = asyncHandler(async (req, res) => {
   }
 
   // Date range
-  const start = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const start = from
+    ? new Date(from)
+    : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const end = to ? new Date(to) : new Date();
   where.submittedOn = { gte: start, lte: end };
 
   // Prefill continuous dates based on period granularity (daily)
-  const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+  const days = Math.max(
+    1,
+    Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1,
+  );
   const trendsMap = new Map();
   for (let i = 0; i < days; i++) {
     const d = new Date(start.getTime());
@@ -153,7 +173,8 @@ const getSLAReport = asyncHandler(async (req, res) => {
   const byPriority = new Map();
   for (const r of rows) {
     const key = r.priority || "MEDIUM";
-    if (!byPriority.has(key)) byPriority.set(key, { total: 0, onTime: 0, warning: 0, overdue: 0 });
+    if (!byPriority.has(key))
+      byPriority.set(key, { total: 0, onTime: 0, warning: 0, overdue: 0 });
     const stat = byPriority.get(key);
     stat.total += 1;
     if (!r.deadline) {
@@ -184,7 +205,16 @@ const getSLAReport = asyncHandler(async (req, res) => {
 // @route   GET /api/reports/analytics
 // @access  Private (Admin, Ward Officer, Maintenance)
 const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
-  const { from, to, ward, type, status, priority, page = 1, limit = 1000 } = req.query;
+  const {
+    from,
+    to,
+    ward,
+    type,
+    status,
+    priority,
+    page = 1,
+    limit = 1000,
+  } = req.query;
 
   // Helper: normalize enums
   const normalizeStatus = (s) => {
@@ -202,7 +232,12 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
   };
   const normalizePriority = (p) => {
     if (!p) return undefined;
-    const map = { low: "LOW", medium: "MEDIUM", high: "HIGH", critical: "CRITICAL" };
+    const map = {
+      low: "LOW",
+      medium: "MEDIUM",
+      high: "HIGH",
+      critical: "CRITICAL",
+    };
     return map[String(p).toLowerCase()] || undefined;
   };
 
@@ -249,23 +284,38 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     ]);
 
     // Metrics
-    const resolvedComplaints = await prisma.complaint.count({ where: { ...where, status: "RESOLVED" } });
-    const pendingComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] } } });
-    const overdueComplaints = await prisma.complaint.count({ where: { ...where, status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] }, deadline: { lt: new Date() } } });
+    const resolvedComplaints = await prisma.complaint.count({
+      where: { ...where, status: "RESOLVED" },
+    });
+    const pendingComplaints = await prisma.complaint.count({
+      where: {
+        ...where,
+        status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] },
+      },
+    });
+    const overdueComplaints = await prisma.complaint.count({
+      where: {
+        ...where,
+        status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] },
+        deadline: { lt: new Date() },
+      },
+    });
 
     // SLA compliance: average of type-level compliance using SLA hours from system config
     // 1) Load complaint types with SLA hours
     const typeConfigs = await prisma.systemConfig.findMany({
       where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
     });
-    const complaintTypes = typeConfigs.map((cfg) => {
-      try {
-        const v = JSON.parse(cfg.value || '{}');
-        return { name: v.name, slaHours: Number(v.slaHours) || 48 };
-      } catch {
-        return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
-      }
-    }).filter((t) => t.name);
+    const complaintTypes = typeConfigs
+      .map((cfg) => {
+        try {
+          const v = JSON.parse(cfg.value || "{}");
+          return { name: v.name, slaHours: Number(v.slaHours) || 48 };
+        } catch {
+          return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
+        }
+      })
+      .filter((t) => t.name);
 
     // 2) Compute per-type compliance within current filter scope (counts open-within-window and resolved-within-window as compliant)
     const nowTs = new Date();
@@ -283,41 +333,74 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         if (!start) continue;
         const deadlineTs = start + windowMs;
         if (r.status === "RESOLVED" || r.status === "CLOSED") {
-          if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs) compliant += 1;
+          if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs)
+            compliant += 1;
         } else {
           if (nowTs.getTime() <= deadlineTs) compliant += 1;
         }
       }
       typePercentages.push((compliant / rows.length) * 100);
     }
-    const slaCompliance = typePercentages.length ? (typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length) : 0;
+    const slaCompliance = typePercentages.length
+      ? typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length
+      : 0;
 
     // Average resolution time in days (resolved only)
-    const resolvedRows = await prisma.complaint.findMany({ where: { ...where, status: { in: ["RESOLVED", "CLOSED"] }, resolvedOn: { not: null } }, select: { submittedOn: true, resolvedOn: true } });
+    const resolvedRows = await prisma.complaint.findMany({
+      where: {
+        ...where,
+        status: { in: ["RESOLVED", "CLOSED"] },
+        resolvedOn: { not: null },
+      },
+      select: { submittedOn: true, resolvedOn: true },
+    });
     let totalResolutionDays = 0;
     for (const c of resolvedRows) {
       if (c.resolvedOn && c.submittedOn) {
-        const days = Math.ceil((new Date(c.resolvedOn).getTime() - new Date(c.submittedOn).getTime()) / (1000 * 60 * 60 * 24));
+        const days = Math.ceil(
+          (new Date(c.resolvedOn).getTime() -
+            new Date(c.submittedOn).getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
         totalResolutionDays += days;
       }
     }
-    const avgResolutionTime = resolvedRows.length ? totalResolutionDays / resolvedRows.length : 0;
+    const avgResolutionTime = resolvedRows.length
+      ? totalResolutionDays / resolvedRows.length
+      : 0;
 
     // Trends last N days (or specified range)
-    const rangeStart = from ? new Date(from) : new Date(Date.now() - 29 * 24 * 60 * 60 * 1000);
+    const rangeStart = from
+      ? new Date(from)
+      : new Date(Date.now() - 29 * 24 * 60 * 60 * 1000);
     const rangeEnd = to ? new Date(to) : new Date();
-    const dayCount = Math.max(1, Math.ceil((rangeEnd.getTime() - rangeStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    const dayCount = Math.max(
+      1,
+      Math.ceil(
+        (rangeEnd.getTime() - rangeStart.getTime()) / (1000 * 60 * 60 * 24),
+      ) + 1,
+    );
     const trendsMap = new Map();
     for (let i = 0; i < dayCount; i++) {
       const d = new Date(rangeStart.getTime());
       d.setDate(rangeStart.getDate() + i);
       const key = d.toISOString().split("T")[0];
-      trendsMap.set(key, { complaints: 0, resolved: 0, slaCompliance: 0, slaResolved: 0 });
+      trendsMap.set(key, {
+        complaints: 0,
+        resolved: 0,
+        slaCompliance: 0,
+        slaResolved: 0,
+      });
     }
 
     const trendsRows = await prisma.complaint.findMany({
       where: { ...where, submittedOn: { gte: rangeStart, lte: rangeEnd } },
-      select: { submittedOn: true, status: true, resolvedOn: true, deadline: true },
+      select: {
+        submittedOn: true,
+        status: true,
+        resolvedOn: true,
+        deadline: true,
+      },
     });
 
     for (const c of trendsRows) {
@@ -338,25 +421,47 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       date,
       complaints: v.complaints,
       resolved: v.resolved,
-      slaCompliance: v.slaResolved ? Math.round((v.slaCompliance / v.slaResolved) * 1000) / 10 : 0,
+      slaCompliance: v.slaResolved
+        ? Math.round((v.slaCompliance / v.slaResolved) * 1000) / 10
+        : 0,
     }));
 
     // Ward performance (admin only) using groupBy for counts
     let wards = [];
     if (req.user.role === "ADMINISTRATOR") {
-      const totals = await prisma.complaint.groupBy({ by: ["wardId"], where, _count: { _all: true } });
-      const resolvedByWard = await prisma.complaint.groupBy({ by: ["wardId"], where: { ...where, status: "RESOLVED" }, _count: { _all: true } });
-      const resolvedTimes = await prisma.complaint.findMany({ where: { ...where, status: "RESOLVED" }, select: { wardId: true, submittedOn: true, resolvedOn: true } });
+      const totals = await prisma.complaint.groupBy({
+        by: ["wardId"],
+        where,
+        _count: { _all: true },
+      });
+      const resolvedByWard = await prisma.complaint.groupBy({
+        by: ["wardId"],
+        where: { ...where, status: "RESOLVED" },
+        _count: { _all: true },
+      });
+      const resolvedTimes = await prisma.complaint.findMany({
+        where: { ...where, status: "RESOLVED" },
+        select: { wardId: true, submittedOn: true, resolvedOn: true },
+      });
       const avgByWard = new Map();
       for (const r of resolvedTimes) {
         if (r.submittedOn && r.resolvedOn) {
-          const days = Math.ceil((r.resolvedOn.getTime() - r.submittedOn.getTime()) / (1000 * 60 * 60 * 24));
+          const days = Math.ceil(
+            (r.resolvedOn.getTime() - r.submittedOn.getTime()) /
+              (1000 * 60 * 60 * 24),
+          );
           const acc = avgByWard.get(r.wardId) || { sum: 0, count: 0 };
-          acc.sum += days; acc.count += 1; avgByWard.set(r.wardId, acc);
+          acc.sum += days;
+          acc.count += 1;
+          avgByWard.set(r.wardId, acc);
         }
       }
-      const wardsMeta = await prisma.ward.findMany({ select: { id: true, name: true } });
-      const resMap = new Map(resolvedByWard.map((x) => [x.wardId, x._count._all]));
+      const wardsMeta = await prisma.ward.findMany({
+        select: { id: true, name: true },
+      });
+      const resMap = new Map(
+        resolvedByWard.map((x) => [x.wardId, x._count._all]),
+      );
       const wardName = new Map(wardsMeta.map((w) => [w.id, w.name]));
       wards = totals.map((t) => {
         const resolved = resMap.get(t.wardId) || 0;
@@ -367,7 +472,9 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
           complaints: t._count._all,
           resolved,
           avgTime: avg ? Math.round((avg.sum / avg.count) * 10) / 10 : 0,
-          slaScore: t._count._all ? Math.round((resolved / t._count._all) * 1000) / 10 : 0,
+          slaScore: t._count._all
+            ? Math.round((resolved / t._count._all) * 1000) / 10
+            : 0,
         };
       });
     }
@@ -378,19 +485,31 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       where,
       _count: { _all: true },
     });
-    const categoryResolvedTimes = await prisma.complaint.findMany({ where: { ...where, status: "RESOLVED" }, select: { type: true, submittedOn: true, resolvedOn: true } });
+    const categoryResolvedTimes = await prisma.complaint.findMany({
+      where: { ...where, status: "RESOLVED" },
+      select: { type: true, submittedOn: true, resolvedOn: true },
+    });
     const timeByType = new Map();
     for (const r of categoryResolvedTimes) {
       if (r.submittedOn && r.resolvedOn) {
-        const days = Math.ceil((r.resolvedOn.getTime() - r.submittedOn.getTime()) / (1000 * 60 * 60 * 24));
+        const days = Math.ceil(
+          (r.resolvedOn.getTime() - r.submittedOn.getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
         const acc = timeByType.get(r.type) || { sum: 0, count: 0 };
-        acc.sum += days; acc.count += 1; timeByType.set(r.type, acc);
+        acc.sum += days;
+        acc.count += 1;
+        timeByType.set(r.type, acc);
       }
     }
     const categories = categoriesGroup.map((g) => ({
       name: g.type || "Others",
       count: g._count._all,
-      avgTime: timeByType.get(g.type) ? Math.round((timeByType.get(g.type).sum / timeByType.get(g.type).count) * 10) / 10 : 0,
+      avgTime: timeByType.get(g.type)
+        ? Math.round(
+            (timeByType.get(g.type).sum / timeByType.get(g.type).count) * 10,
+          ) / 10
+        : 0,
       color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
     }));
 
@@ -425,10 +544,22 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     };
 
     res.set({ "Cache-Control": "public, max-age=300" });
-    res.status(200).json({ success: true, message: "Analytics data retrieved successfully", data: analyticsData });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Analytics data retrieved successfully",
+        data: analyticsData,
+      });
   } catch (error) {
     console.error("Analytics error:", error);
-    res.status(500).json({ success: false, message: "Failed to retrieve analytics data", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to retrieve analytics data",
+        error: error.message,
+      });
   }
 });
 
@@ -440,12 +571,25 @@ const exportReports = asyncHandler(async (req, res) => {
 
   const normalizeStatus = (s) => {
     if (!s) return undefined;
-    const map = { registered: "REGISTERED", assigned: "ASSIGNED", in_progress: "IN_PROGRESS", inprogress: "IN_PROGRESS", resolved: "RESOLVED", closed: "CLOSED", reopened: "REOPENED" };
+    const map = {
+      registered: "REGISTERED",
+      assigned: "ASSIGNED",
+      in_progress: "IN_PROGRESS",
+      inprogress: "IN_PROGRESS",
+      resolved: "RESOLVED",
+      closed: "CLOSED",
+      reopened: "REOPENED",
+    };
     return map[String(s).toLowerCase()] || undefined;
   };
   const normalizePriority = (p) => {
     if (!p) return undefined;
-    const map = { low: "LOW", medium: "MEDIUM", high: "HIGH", critical: "CRITICAL" };
+    const map = {
+      low: "LOW",
+      medium: "MEDIUM",
+      high: "HIGH",
+      critical: "CRITICAL",
+    };
     return map[String(p).toLowerCase()] || undefined;
   };
 
@@ -496,7 +640,9 @@ const exportReports = asyncHandler(async (req, res) => {
         complaint.priority || "N/A",
         complaint.ward?.name || "N/A",
         complaint.submittedOn?.toISOString().split("T")[0] || "N/A",
-        complaint.resolvedOn ? complaint.resolvedOn.toISOString().split("T")[0] : "N/A",
+        complaint.resolvedOn
+          ? complaint.resolvedOn.toISOString().split("T")[0]
+          : "N/A",
         complaint.assignedTo?.fullName || "Unassigned",
         complaint.submittedBy?.fullName || "Guest",
         complaint.contactPhone || "N/A",
@@ -507,7 +653,10 @@ const exportReports = asyncHandler(async (req, res) => {
         .join("\n");
 
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", "attachment; filename=complaints-report.csv");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=complaints-report.csv",
+      );
       return res.send(csvContent);
     }
 
@@ -519,15 +668,30 @@ const exportReports = asyncHandler(async (req, res) => {
         summary: {
           total: complaints.length,
           resolved: complaints.filter((c) => c.status === "RESOLVED").length,
-          pending: complaints.filter((c) => ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(c.status)).length,
+          pending: complaints.filter((c) =>
+            ["REGISTERED", "ASSIGNED", "IN_PROGRESS"].includes(c.status),
+          ).length,
         },
-        filters: { from, to, ward: req.user.role === "WARD_OFFICER" ? req.user.wardId : ward, type, status: normalizeStatus(status) || "all", priority: normalizePriority(priority) || "all" },
+        filters: {
+          from,
+          to,
+          ward: req.user.role === "WARD_OFFICER" ? req.user.wardId : ward,
+          type,
+          status: normalizeStatus(status) || "all",
+          priority: normalizePriority(priority) || "all",
+        },
         exportedAt: new Date().toISOString(),
       },
     });
   } catch (error) {
     console.error("Export error:", error);
-    res.status(500).json({ success: false, message: "Failed to export reports", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to export reports",
+        error: error.message,
+      });
   }
 });
 
