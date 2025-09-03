@@ -1629,25 +1629,13 @@ const UnifiedComplaintForm: React.FC = () => {
                       )}
                     </Button>
                   ) : (
-                    // Guest: Verify OTP and submit
+                    // Guest: Verify OTP via popup
                     <Button
                       type="button"
-                      onClick={handleVerifyAndSubmit}
-                      disabled={
-                        isSubmitting || !otpCode || otpCode.length !== 6
-                      }
+                      onClick={() => setShowOtpDialog(true)}
                     >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          Verify & Submit
-                          <CheckCircle className="h-4 w-4 ml-2" />
-                        </>
-                      )}
+                      Verify & Submit
+                      <CheckCircle className="h-4 w-4 ml-2" />
                     </Button>
                   )}
                 </div>
