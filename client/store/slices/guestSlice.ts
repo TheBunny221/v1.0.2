@@ -741,6 +741,16 @@ const guestSlice = createSlice({
       state.otpExpiry = null;
       state.submissionStep = "form";
     },
+    setOtpSession: (
+      state,
+      action: PayloadAction<{ sessionId: string; email: string; expiresAt: string }>,
+    ) => {
+      state.sessionId = action.payload.sessionId;
+      state.userEmail = action.payload.email;
+      state.otpExpiry = action.payload.expiresAt;
+      state.otpSent = true;
+      state.submissionStep = "otp";
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -835,6 +845,7 @@ export const {
   resetOTPState,
   updateServiceRequestData,
   setServiceRequestStep,
+  setOtpSession,
 } = guestSlice.actions;
 
 export default guestSlice.reducer;
@@ -868,6 +879,8 @@ export const selectGuestError = (state: { guest: GuestState }) =>
   state.guest.error;
 export const selectComplaintId = (state: { guest: GuestState }) =>
   state.guest.complaintId;
+export const selectSessionId = (state: { guest: GuestState }) =>
+  state.guest.sessionId;
 export const selectTrackingNumber = (state: { guest: GuestState }) =>
   state.guest.trackingNumber;
 export const selectUserEmail = (state: { guest: GuestState }) =>
