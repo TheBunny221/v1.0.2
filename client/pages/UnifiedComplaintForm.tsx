@@ -505,6 +505,7 @@ const UnifiedComplaintForm: React.FC = () => {
 
         if (result?.sessionId) {
           dispatch(setOtpSession({ sessionId: result.sessionId, email: result.email, expiresAt: result.expiresAt }));
+          setShowOtpDialog(true);
           toast({
             title: "Verification Code Sent",
             description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
