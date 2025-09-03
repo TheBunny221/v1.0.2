@@ -1025,7 +1025,7 @@ const UnifiedReports: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <Card className="sticky top-20 z-10 border-background/40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <Card className="sticky top-20 z-10 bg-card shadow-sm ring-1 ring-border">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center text-base font-semibold">
             <Filter className="h-4 w-4 mr-2" />
