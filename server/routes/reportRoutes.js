@@ -317,56 +317,55 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       })
       .filter((t) => t.name);
 
-    // 2) Compute per-type compliance within current filter scope (counts open-within-window and resolved-within-window as compliant)
+    // 2) Compute per-type SLA compliance based ONLY on CLOSED tickets
     const nowTs = new Date();
     let typePercentages = [];
     for (const t of complaintTypes) {
       const rows = await prisma.complaint.findMany({
-        where: { ...where, type: t.name },
-        select: { submittedOn: true, resolvedOn: true, status: true },
+        where: { ...where, type: t.name, status: "CLOSED" },
+        select: { submittedOn: true, closedOn: true, deadline: true },
       });
       if (rows.length === 0) continue;
       const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
       let compliant = 0;
+      let considered = 0;
       for (const r of rows) {
-        const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
-        if (!start) continue;
-        const deadlineTs = start + windowMs;
-        if (r.status === "RESOLVED" || r.status === "CLOSED") {
-          if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs)
-            compliant += 1;
-        } else {
-          if (nowTs.getTime() <= deadlineTs) compliant += 1;
-        }
+        if (!r.submittedOn || !r.closedOn) continue;
+        considered += 1;
+        const startTs = new Date(r.submittedOn).getTime();
+        const deadlineTs = r.deadline
+          ? new Date(r.deadline).getTime()
+          : startTs + windowMs;
+        const closedTs = new Date(r.closedOn).getTime();
+        if (closedTs <= deadlineTs) compliant += 1;
       }
-      typePercentages.push((compliant / rows.length) * 100);
+      typePercentages.push(considered ? (compliant / considered) * 100 : 0);
     }
     const slaCompliance = typePercentages.length
       ? typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length
       : 0;
 
     // Average resolution time in days (resolved only)
-    const resolvedRows = await prisma.complaint.findMany({
+    const closedRows = await prisma.complaint.findMany({
       where: {
         ...where,
-        status: { in: ["RESOLVED", "CLOSED"] },
-        resolvedOn: { not: null },
+        status: "CLOSED",
+        closedOn: { not: null },
       },
-      select: { submittedOn: true, resolvedOn: true },
+      select: { submittedOn: true, closedOn: true },
     });
     let totalResolutionDays = 0;
-    for (const c of resolvedRows) {
-      if (c.resolvedOn && c.submittedOn) {
+    for (const c of closedRows) {
+      if (c.closedOn && c.submittedOn) {
         const days = Math.ceil(
-          (new Date(c.resolvedOn).getTime() -
-            new Date(c.submittedOn).getTime()) /
+          (new Date(c.closedOn).getTime() - new Date(c.submittedOn).getTime()) /
             (1000 * 60 * 60 * 24),
         );
         totalResolutionDays += days;
       }
     }
-    const avgResolutionTime = resolvedRows.length
-      ? totalResolutionDays / resolvedRows.length
+    const avgResolutionTime = closedRows.length
+      ? totalResolutionDays / closedRows.length
       : 0;
 
     // Trends last N days (or specified range)
@@ -398,7 +397,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       select: {
         submittedOn: true,
         status: true,
-        resolvedOn: true,
+        closedOn: true,
         deadline: true,
       },
     });
@@ -406,12 +405,12 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     for (const c of trendsRows) {
       const k = c.submittedOn.toISOString().split("T")[0];
       if (trendsMap.has(k)) trendsMap.get(k).complaints += 1;
-      if (c.status === "RESOLVED" && c.resolvedOn) {
-        const rk = c.resolvedOn.toISOString().split("T")[0];
+      if (c.status === "CLOSED" && c.closedOn) {
+        const rk = c.closedOn.toISOString().split("T")[0];
         if (trendsMap.has(rk)) {
           const t = trendsMap.get(rk);
           t.resolved += 1;
-          if (c.deadline && c.resolvedOn <= c.deadline) t.slaCompliance += 1;
+          if (c.deadline && c.closedOn <= c.deadline) t.slaCompliance += 1;
           t.slaResolved += 1;
         }
       }
@@ -436,18 +435,18 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       });
       const resolvedByWard = await prisma.complaint.groupBy({
         by: ["wardId"],
-        where: { ...where, status: "RESOLVED" },
+        where: { ...where, status: "CLOSED" },
         _count: { _all: true },
       });
       const resolvedTimes = await prisma.complaint.findMany({
-        where: { ...where, status: "RESOLVED" },
-        select: { wardId: true, submittedOn: true, resolvedOn: true },
+        where: { ...where, status: "CLOSED" },
+        select: { wardId: true, submittedOn: true, closedOn: true },
       });
       const avgByWard = new Map();
       for (const r of resolvedTimes) {
-        if (r.submittedOn && r.resolvedOn) {
+        if (r.submittedOn && r.closedOn) {
           const days = Math.ceil(
-            (r.resolvedOn.getTime() - r.submittedOn.getTime()) /
+            (r.closedOn.getTime() - r.submittedOn.getTime()) /
               (1000 * 60 * 60 * 24),
           );
           const acc = avgByWard.get(r.wardId) || { sum: 0, count: 0 };
@@ -486,14 +485,14 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       _count: { _all: true },
     });
     const categoryResolvedTimes = await prisma.complaint.findMany({
-      where: { ...where, status: "RESOLVED" },
-      select: { type: true, submittedOn: true, resolvedOn: true },
+      where: { ...where, status: "CLOSED" },
+      select: { type: true, submittedOn: true, closedOn: true },
     });
     const timeByType = new Map();
     for (const r of categoryResolvedTimes) {
-      if (r.submittedOn && r.resolvedOn) {
+      if (r.submittedOn && r.closedOn) {
         const days = Math.ceil(
-          (r.resolvedOn.getTime() - r.submittedOn.getTime()) /
+          (r.closedOn.getTime() - r.submittedOn.getTime()) /
             (1000 * 60 * 60 * 24),
         );
         const acc = timeByType.get(r.type) || { sum: 0, count: 0 };
