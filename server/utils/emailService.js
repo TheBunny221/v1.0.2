@@ -3,78 +3,98 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Create transporter
-const createTransporter = () => {
-  if (process.env.NODE_ENV === "production") {
-    return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE,
-      port: Number(process.env.EMAIL_PORT) || 587,
-      secure: Number(process.env.EMAIL_PORT) === 465,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  } else {
-    // Prefer explicit dev SMTP creds if provided, otherwise fall back to Ethereal test account
-    const hasCustomDevSmtp =
-      process.env.EMAIL_SERVICE || process.env.EMAIL_USER || process.env.EMAIL_PASS;
+// Global singleton transporter instance
+let transporterInstance = null;
+let isInitializing = false;
+let initPromise = null;
 
-    if (hasCustomDevSmtp) {
-      return nodemailer.createTransport({
-        host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
-        port: Number(process.env.EMAIL_PORT) || 587,
-        secure: Number(process.env.EMAIL_PORT) === 465,
-        auth: {
-          user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
-          pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
-        },
-        debug: true,
-        logger: true,
-      });
+const buildProdTransport = () =>
+  nodemailer.createTransport({
+    host: process.env.EMAIL_SERVICE,
+    port: Number(process.env.EMAIL_PORT) || 587,
+    secure: Number(process.env.EMAIL_PORT) === 465,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+const buildDevTransportWithEnv = () =>
+  nodemailer.createTransport({
+    host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
+    port: Number(process.env.EMAIL_PORT) || 587,
+    secure: Number(process.env.EMAIL_PORT) === 465,
+    auth: {
+      user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
+      pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
+    },
+    debug: true,
+    logger: true,
+  });
+
+async function buildDevTransportWithEthereal() {
+  const testAccount = await nodemailer.createTestAccount();
+  return nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+    debug: true,
+    logger: true,
+  });
+}
+
+async function initializeTransporterIfNeeded() {
+  if (transporterInstance || isInitializing) return initPromise;
+
+  isInitializing = true;
+  initPromise = (async () => {
+    try {
+      const isProd = process.env.NODE_ENV === "production";
+      if (isProd) {
+        transporterInstance = buildProdTransport();
+      } else {
+        const hasCustomDevSmtp =
+          !!(process.env.EMAIL_SERVICE || process.env.EMAIL_USER || process.env.EMAIL_PASS);
+
+        if (hasCustomDevSmtp) {
+          transporterInstance = buildDevTransportWithEnv();
+        } else {
+          transporterInstance = await buildDevTransportWithEthereal();
+          console.log("📨 Using Ethereal test account for emails in development (singleton)");
+        }
+      }
+
+      // Verify transporter once on init to surface configuration issues early
+      try {
+        await transporterInstance.verify();
+        console.log("✅ Email transporter verified and ready");
+      } catch (verifyErr) {
+        console.warn("⚠️ Email transporter verification failed:", verifyErr?.message || verifyErr);
+      }
+
+      return transporterInstance;
+    } finally {
+      isInitializing = false;
     }
+  })();
 
-    // Create an ethereal test account automatically
-    return nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.ETHEREAL_USER || "",
-        pass: process.env.ETHEREAL_PASS || "",
-      },
-      debug: true,
-      logger: true,
-    });
-  }
-};
+  return initPromise;
+}
 
-// Send email function
+export async function getEmailTransporter() {
+  if (transporterInstance) return transporterInstance;
+  await initializeTransporterIfNeeded();
+  return transporterInstance;
+}
+
+// Send email function (uses global transporter)
 export const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    let transporter = createTransporter();
-
-    // In development, if no credentials are provided, create an Ethereal test account automatically
-    const devNoCreds =
-      process.env.NODE_ENV !== "production" &&
-      !process.env.EMAIL_USER &&
-      !process.env.ETHEREAL_USER;
-
-    if (!transporter || devNoCreds) {
-      const testAccount = await nodemailer.createTestAccount();
-      transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-        debug: true,
-        logger: true,
-      });
-      console.log("📨 Using Ethereal test account for emails in development");
-    }
+    const transporter = await getEmailTransporter();
 
     const mailOptions = {
       from: process.env.EMAIL_FROM || "Cochin Smart City <no-reply@cochinsmartcity.local>",
@@ -90,7 +110,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
       console.log("✅ Email sent successfully!");
       console.log("📧 Message ID:", info.messageId);
       console.log("📬 To:", to);
-      console.log("��� Subject:", subject);
+      console.log("📝 Subject:", subject);
 
       const previewUrl = nodemailer.getTestMessageUrl(info);
       if (previewUrl) {
@@ -362,7 +382,11 @@ export const sendWelcomeEmail = async (email, fullName, complaintId) => {
   });
 };
 
+// Kick off initialization on module load (non-blocking)
+void initializeTransporterIfNeeded();
+
 export default {
+  getEmailTransporter,
   sendEmail,
   sendOTPEmail,
   sendPasswordSetupEmail,
