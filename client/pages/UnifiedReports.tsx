@@ -370,6 +370,11 @@ const UnifiedReports: React.FC = () => {
         ...(filters.priority !== "all" && { priority: filters.priority }),
       });
 
+      // Enforce ward scope for Ward Officers
+      if (user?.role === "WARD_OFFICER" && user?.wardId) {
+        queryParams.set("ward", user.wardId);
+      }
+
       console.log("Fetching analytics with params:", {
         filters,
         queryString: queryParams.toString(),
@@ -475,6 +480,11 @@ const UnifiedReports: React.FC = () => {
         ...(filters.status !== "all" && { status: filters.status }),
         ...(filters.priority !== "all" && { priority: filters.priority }),
       });
+
+      // Enforce ward scope for Ward Officers
+      if (user?.role === "WARD_OFFICER" && user?.wardId) {
+        queryParams.set("ward", user.wardId);
+      }
 
       // Validate export permissions based on role
       const requestedData = {
@@ -589,6 +599,11 @@ const UnifiedReports: React.FC = () => {
         ...(filters.priority !== "all" && { priority: filters.priority }),
         detailed: "true",
       });
+
+      // Enforce ward scope for Ward Officers
+      if (user?.role === "WARD_OFFICER" && user?.wardId) {
+        queryParams.set("ward", user.wardId);
+      }
 
       // Make API call with abort signal
       const baseUrl = window.location.origin;
@@ -998,11 +1013,14 @@ const UnifiedReports: React.FC = () => {
                   ? `Analytics for ${user?.ward || "your ward"}`
                   : "Your assigned task analytics and performance metrics"}
             </p>
-            <div className="mt-1">
+            <div className="mt-1 flex flex-wrap gap-2">
               <Badge variant="secondary" className="text-xs">
                 <Calendar className="h-3 w-3 mr-2" />
                 Data Period: {getTimePeriodLabel()}
               </Badge>
+              {user?.role === "WARD_OFFICER" && user?.wardId && (
+                <Badge variant="outline" className="text-xs">Ward: {user.ward?.name || user.wardId}</Badge>
+              )}
             </div>
           </div>
 
