@@ -361,9 +361,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             }),
           ).unwrap();
 
-          if (result.complaintId && result.trackingNumber) {
-            setComplaintId(result.complaintId);
-            setShowOtpInput(true);
+          if ((result as any).sessionId) {
+            setSessionId((result as any).sessionId);
+            setShowOtpInput(false);
+            setShowOtpDialog(true);
             toast({
               title: "Verification Code Sent",
               description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
