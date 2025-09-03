@@ -31,7 +31,6 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-  TooltipProvider,
 } from "../components/ui/tooltip";
 import {
   BarChart,
