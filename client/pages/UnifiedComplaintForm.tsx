@@ -1614,9 +1614,9 @@ const UnifiedComplaintForm: React.FC = () => {
                     <Button
                       type="button"
                       onClick={handleSendOtp}
-                      disabled={isSubmitting}
+                      disabled={isSendingOtp}
                     >
-                      {isSubmitting ? (
+                      {isSendingOtp ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Sending Code...
