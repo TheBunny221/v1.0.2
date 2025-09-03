@@ -41,6 +41,7 @@ import {
   Cell,
   LineChart,
   Line,
+  Tooltip as RechartsTooltip,
 } from "recharts";
 import {
   Shield,
@@ -385,7 +386,7 @@ const AdminDashboard: React.FC = () => {
                           height={60}
                         />
                         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                        <Tooltip
+                        <RechartsTooltip
                           formatter={(value, name) => [value, name]}
                           labelFormatter={(label) => `Month: ${label}`}
                         />
@@ -463,7 +464,7 @@ const AdminDashboard: React.FC = () => {
                             />
                           ))}
                         </Pie>
-                        <Tooltip
+                        <RechartsTooltip
                           content={({ active, payload }) => {
                             if (!active || !payload || !payload.length)
                               return null;
