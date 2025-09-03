@@ -330,19 +330,60 @@ export const createComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Use provided slaHours or fallback to priority-based hours
-  let deadlineHours = slaHours;
-  if (!deadlineHours) {
-    const priorityHours = {
-      LOW: 72,
-      MEDIUM: 48,
-      HIGH: 24,
-      CRITICAL: 8,
-    };
-    deadlineHours = priorityHours[priority || "MEDIUM"];
+  // Resolve complaint type from SystemConfig and derive SLA hours strictly from type
+  const typeInput = String(type || "").trim();
+  if (!typeInput) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Complaint type is required" });
   }
 
-  const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
+  // Try lookup by key (ID form like WATER_SUPPLY) then by name match
+  const byKey = await prisma.systemConfig.findFirst({
+    where: { key: `COMPLAINT_TYPE_${typeInput.toUpperCase()}`, isActive: true },
+  });
+
+  let resolvedTypeName = null;
+  let resolvedSlaHours = null;
+
+  if (byKey) {
+    try {
+      const v = JSON.parse(byKey.value || "{}");
+      resolvedTypeName = v.name;
+      resolvedSlaHours = Number(v.slaHours);
+    } catch {}
+  }
+
+  if (!resolvedTypeName) {
+    const allTypes = await prisma.systemConfig.findMany({
+      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+    });
+    for (const cfg of allTypes) {
+      try {
+        const v = JSON.parse(cfg.value || "{}");
+        if (v.name && v.name.toLowerCase() === typeInput.toLowerCase()) {
+          resolvedTypeName = v.name;
+          resolvedSlaHours = Number(v.slaHours);
+          break;
+        }
+      } catch {}
+    }
+  }
+
+  if (
+    !resolvedTypeName ||
+    !Number.isFinite(resolvedSlaHours) ||
+    resolvedSlaHours <= 0
+  ) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Invalid complaint type or missing SLA configuration",
+      });
+  }
+
+  const deadline = new Date(Date.now() + resolvedSlaHours * 60 * 60 * 1000);
 
   // Check auto-assignment setting
   const autoAssignSetting = await prisma.systemConfig.findUnique({
@@ -381,9 +422,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   // ✅ Create complaint with retry wrapper to avoid duplicate complaintId issue
   const complaint = await createComplaintWithUniqueId({
-    title: title || `${type} complaint`,
+    title: title || `${resolvedTypeName} complaint`,
     description,
-    type,
+    type: resolvedTypeName,
     priority: priority || "MEDIUM",
     status: initialStatus,
     slaStatus: "ON_TIME",
@@ -432,7 +473,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
         complaintId: complaint.id,
         type: "IN_APP",
         title: "New Complaint Assigned",
-        message: `A new ${type} complaint has been assigned to you in ${complaint.ward?.name || "your ward"}. Please review and assign to maintenance team.`,
+        message: `A new ${resolvedTypeName} complaint has been assigned to you in ${complaint.ward?.name || "your ward"}. Please review and assign to maintenance team.`,
       },
     });
   } else {
@@ -452,7 +493,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
           complaintId: complaint.id,
           type: "IN_APP",
           title: "New Complaint - No Auto Assignment",
-          message: `A new ${type} complaint requires manual assignment in your ward.`,
+          message: `A new ${resolvedTypeName} complaint requires manual assignment in your ward.`,
         },
       });
     }

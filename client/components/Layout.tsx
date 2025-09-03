@@ -213,14 +213,102 @@ const Layout: React.FC<LayoutProps> = ({ userRole }) => {
             </DropdownMenu>
 
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5" />
-              {unreadNotifications > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
-                  {unreadNotifications}
-                </Badge>
-              )}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {unreadNotifications > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                      {unreadNotifications}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="px-3 py-2 border-b">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Notifications</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {unreadNotifications} unread
+                    </Badge>
+                  </div>
+                </div>
+                <div className="max-h-80 overflow-auto">
+                  {unreadNotifications === 0 &&
+                  notifications.filter((n) => !n.isRead).length === 0 &&
+                  notifications.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground">
+                      No notifications
+                    </div>
+                  ) : (
+                    notifications.slice(0, 10).map((n) => (
+                      <DropdownMenuItem
+                        key={n.id}
+                        className="flex flex-col items-start gap-1"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span
+                            className={`text-sm ${n.isRead ? "text-muted-foreground" : "font-medium"}`}
+                          >
+                            {n.title}
+                          </span>
+                          {!n.isRead && (
+                            <Badge className="ml-2" variant="outline">
+                              New
+                            </Badge>
+                          )}
+                        </div>
+                        {n.message && (
+                          <span className="text-xs text-muted-foreground line-clamp-2">
+                            {n.message}
+                          </span>
+                        )}
+                        <div className="flex gap-2 mt-1">
+                          {!n.isRead && (
+                            <button
+                              className="text-xs text-primary hover:underline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                dispatch(markNotificationAsRead(n.id));
+                              }}
+                            >
+                              Mark as read
+                            </button>
+                          )}
+                          <button
+                            className="text-xs text-destructive hover:underline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              dispatch(removeNotification(n.id));
+                            }}
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
+                <div className="px-3 py-2 border-t flex items-center justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => dispatch(markAllNotificationsAsRead())}
+                  >
+                    Mark all as read
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => dispatch(clearNotifications())}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* UserIcon Menu */}
             <DropdownMenu>

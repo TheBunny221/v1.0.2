@@ -2,6 +2,10 @@ import { getPrisma } from "../db/connection.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "../utils/emailService.js";
+import {
+  computeSlaComplianceClosed,
+  computeAvgResolutionDays,
+} from "../utils/sla.js";
 
 const prisma = getPrisma();
 
@@ -553,91 +557,49 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     where: { status: "RESOLVED" },
   });
 
-  // Calculate average resolution time (in days)
-  const resolvedWithDates = await prisma.complaint.findMany({
-    where: {
-      status: "RESOLVED",
-      resolvedOn: { not: null },
-    },
-    select: {
-      createdAt: true,
-      resolvedOn: true,
-    },
-  });
-
-  const validResolutions = resolvedWithDates.filter(
-    (c) => c.resolvedOn && c.createdAt,
-  );
-  const avgResolutionTime =
-    validResolutions.length > 0
-      ? validResolutions.reduce((acc, complaint) => {
-          const resolutionTime =
-            (new Date(complaint.resolvedOn) - new Date(complaint.createdAt)) /
-            (1000 * 60 * 60 * 24);
-          return acc + resolutionTime;
-        }, 0) / validResolutions.length
-      : 0;
-
-  // Calculate SLA compliance as average of type-level compliance using SLA hours from system config
-  const typeConfigs = await prisma.systemConfig.findMany({
-    where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
-  });
-  const complaintTypes = typeConfigs
-    .map((cfg) => {
-      try {
-        const v = JSON.parse(cfg.value || "{}");
-        return { name: v.name, slaHours: Number(v.slaHours) || 48 };
-      } catch {
-        return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
-      }
-    })
-    .filter((t) => t.name);
-
-  const nowTs = new Date();
-  let typePercentages = [];
-  let overdueOpen = 0;
-  let resolvedLate = 0;
-  let withinSLA = 0;
-  let totalProcessed = 0;
-
-  for (const t of complaintTypes) {
-    const rows = await prisma.complaint.findMany({
-      where: { type: t.name },
-      select: { submittedOn: true, resolvedOn: true, status: true },
+  // Average resolution time in days (closed/resolved), aligned with reports
+  let avgResolutionTime = 0;
+  {
+    const closedRows = await prisma.complaint.findMany({
+      where: { status: { in: ["RESOLVED", "CLOSED"] } },
+      select: { submittedOn: true, closedOn: true },
     });
-    if (rows.length === 0) continue;
-    const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
-    let compliant = 0;
-    for (const r of rows) {
-      const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
-      if (!start) continue;
-      totalProcessed++;
-      const deadlineTs = start + windowMs;
-      if (r.status === "RESOLVED" || r.status === "CLOSED") {
-        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs) {
-          compliant += 1;
-          withinSLA += 1;
-        } else {
-          resolvedLate += 1;
-        }
-      } else {
-        if (nowTs.getTime() <= deadlineTs) {
-          compliant += 1;
-          withinSLA += 1;
-        } else {
-          overdueOpen += 1;
+    if (closedRows.length > 0) {
+      let totalDays = 0;
+      let counted = 0;
+      for (const r of closedRows) {
+        if (r.submittedOn && r.closedOn) {
+          const days = Math.ceil(
+            (new Date(r.closedOn).getTime() -
+              new Date(r.submittedOn).getTime()) /
+              (1000 * 60 * 60 * 24),
+          );
+          totalDays += days;
+          counted += 1;
         }
       }
+      avgResolutionTime = counted ? totalDays / counted : 0;
     }
-    typePercentages.push((compliant / rows.length) * 100);
   }
 
+  // SLA compliance over CLOSED/RESOLVED complaints, aligned with reports
+  const {
+    compliance: slaComplianceRaw,
+    totalClosed,
+    compliantClosed,
+  } = await computeSlaComplianceClosed(prisma);
+  const slaCompliance = Math.round(slaComplianceRaw * 10) / 10;
+
+  // Additional metrics for verification
+  const overdueOpen = await prisma.complaint.count({
+    where: {
+      status: { in: ["REGISTERED", "ASSIGNED", "IN_PROGRESS", "REOPENED"] },
+      deadline: { lt: new Date() },
+    },
+  });
+  const resolvedLate = Math.max(0, totalClosed - compliantClosed);
+  const withinSLA = compliantClosed;
   const slaBreaches = overdueOpen + resolvedLate;
-  const slaCompliance = typePercentages.length
-    ? Math.round(
-        typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length,
-      )
-    : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
@@ -716,7 +678,6 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
           totalComplaints > 0
             ? Math.round((resolvedComplaints / totalComplaints) * 100)
             : 0,
-        // Verification fields
         overdueOpen: Number(overdueOpen) || 0,
         resolvedLate: Number(resolvedLate) || 0,
         slaBreaches: Number(slaBreaches) || 0,
@@ -817,7 +778,7 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
     activities.push({
       id: `complaint-${complaint.id}`,
       type: "complaint",
-      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
+      message: `New ${String(complaint.type).toLowerCase()} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
       time: formatTimeAgo(complaint.createdAt),
       user: complaint.submittedBy
         ? {
@@ -1031,7 +992,7 @@ function getActivityType(status) {
 }
 
 function getStatusMessage(status, complaint, user) {
-  const type = complaint.type.toLowerCase().replace("_", " ");
+  const type = String(complaint.type || "").toLowerCase();
   const ward = complaint.ward?.name || "Unknown Ward";
 
   switch (status) {

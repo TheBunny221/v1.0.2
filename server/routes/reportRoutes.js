@@ -2,6 +2,7 @@ import express from "express";
 import { protect, authorize } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { getPrisma } from "../db/connection.js";
+import { computeSlaComplianceClosed, getTypeSlaMap } from "../utils/sla.js";
 
 const router = express.Router();
 const prisma = getPrisma();
@@ -264,6 +265,16 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
   const normalizedPriority = normalizePriority(priority);
   if (normalizedPriority) where.priority = normalizedPriority;
 
+  // Build a separate filter for CLOSED metrics using closedOn within range
+  const closedWhere = { ...where };
+  if (closedWhere.submittedOn) delete closedWhere.submittedOn;
+  closedWhere.status = "CLOSED";
+  if (from || to) {
+    closedWhere.closedOn = {};
+    if (from) closedWhere.closedOn.gte = new Date(from);
+    if (to) closedWhere.closedOn.lte = new Date(to);
+  }
+
   try {
     const pageNumber = parseInt(page) || 1;
     const pageSize = Math.min(parseInt(limit) || 1000, 10000);
@@ -301,72 +312,32 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       },
     });
 
-    // SLA compliance: average of type-level compliance using SLA hours from system config
-    // 1) Load complaint types with SLA hours
-    const typeConfigs = await prisma.systemConfig.findMany({
-      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
-    });
-    const complaintTypes = typeConfigs
-      .map((cfg) => {
-        try {
-          const v = JSON.parse(cfg.value || "{}");
-          return { name: v.name, slaHours: Number(v.slaHours) || 48 };
-        } catch {
-          return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
-        }
-      })
-      .filter((t) => t.name);
+    // SLA compliance over CLOSED/RESOLVED complaints within selected window (shared logic)
+    const { compliance: slaCompliance } = await computeSlaComplianceClosed(
+      prisma,
+      closedWhere,
+    );
 
-    // 2) Compute per-type compliance within current filter scope (counts open-within-window and resolved-within-window as compliant)
-    const nowTs = new Date();
-    let typePercentages = [];
-    for (const t of complaintTypes) {
-      const rows = await prisma.complaint.findMany({
-        where: { ...where, type: t.name },
-        select: { submittedOn: true, resolvedOn: true, status: true },
-      });
-      if (rows.length === 0) continue;
-      const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
-      let compliant = 0;
-      for (const r of rows) {
-        const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
-        if (!start) continue;
-        const deadlineTs = start + windowMs;
-        if (r.status === "RESOLVED" || r.status === "CLOSED") {
-          if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs)
-            compliant += 1;
-        } else {
-          if (nowTs.getTime() <= deadlineTs) compliant += 1;
-        }
-      }
-      typePercentages.push((compliant / rows.length) * 100);
-    }
-    const slaCompliance = typePercentages.length
-      ? typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length
-      : 0;
+    // Build type SLA map for downstream calculations (trends, categories)
+    const typeSlaMap = await getTypeSlaMap(prisma);
 
     // Average resolution time in days (resolved only)
-    const resolvedRows = await prisma.complaint.findMany({
-      where: {
-        ...where,
-        status: { in: ["RESOLVED", "CLOSED"] },
-        resolvedOn: { not: null },
-      },
-      select: { submittedOn: true, resolvedOn: true },
+    const closedRows = await prisma.complaint.findMany({
+      where: { ...closedWhere, closedOn: { not: null } },
+      select: { submittedOn: true, closedOn: true },
     });
     let totalResolutionDays = 0;
-    for (const c of resolvedRows) {
-      if (c.resolvedOn && c.submittedOn) {
+    for (const c of closedRows) {
+      if (c.closedOn && c.submittedOn) {
         const days = Math.ceil(
-          (new Date(c.resolvedOn).getTime() -
-            new Date(c.submittedOn).getTime()) /
+          (new Date(c.closedOn).getTime() - new Date(c.submittedOn).getTime()) /
             (1000 * 60 * 60 * 24),
         );
         totalResolutionDays += days;
       }
     }
-    const avgResolutionTime = resolvedRows.length
-      ? totalResolutionDays / resolvedRows.length
+    const avgResolutionTime = closedRows.length
+      ? totalResolutionDays / closedRows.length
       : 0;
 
     // Trends last N days (or specified range)
@@ -398,21 +369,27 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       select: {
         submittedOn: true,
         status: true,
-        resolvedOn: true,
-        deadline: true,
+        closedOn: true,
+        type: true,
       },
     });
 
     for (const c of trendsRows) {
       const k = c.submittedOn.toISOString().split("T")[0];
       if (trendsMap.has(k)) trendsMap.get(k).complaints += 1;
-      if (c.status === "RESOLVED" && c.resolvedOn) {
-        const rk = c.resolvedOn.toISOString().split("T")[0];
+      if (c.status === "CLOSED" && c.closedOn) {
+        const rk = c.closedOn.toISOString().split("T")[0];
         if (trendsMap.has(rk)) {
           const t = trendsMap.get(rk);
           t.resolved += 1;
-          if (c.deadline && c.resolvedOn <= c.deadline) t.slaCompliance += 1;
-          t.slaResolved += 1;
+          const slaHours = typeSlaMap.get(c.type);
+          if (slaHours) {
+            const targetTs =
+              new Date(c.submittedOn).getTime() + slaHours * 60 * 60 * 1000;
+            if (new Date(c.closedOn).getTime() <= targetTs)
+              t.slaCompliance += 1;
+            t.slaResolved += 1;
+          }
         }
       }
     }
@@ -436,18 +413,18 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       });
       const resolvedByWard = await prisma.complaint.groupBy({
         by: ["wardId"],
-        where: { ...where, status: "RESOLVED" },
+        where: closedWhere,
         _count: { _all: true },
       });
       const resolvedTimes = await prisma.complaint.findMany({
-        where: { ...where, status: "RESOLVED" },
-        select: { wardId: true, submittedOn: true, resolvedOn: true },
+        where: closedWhere,
+        select: { wardId: true, submittedOn: true, closedOn: true },
       });
       const avgByWard = new Map();
       for (const r of resolvedTimes) {
-        if (r.submittedOn && r.resolvedOn) {
+        if (r.submittedOn && r.closedOn) {
           const days = Math.ceil(
-            (r.resolvedOn.getTime() - r.submittedOn.getTime()) /
+            (r.closedOn.getTime() - r.submittedOn.getTime()) /
               (1000 * 60 * 60 * 24),
           );
           const acc = avgByWard.get(r.wardId) || { sum: 0, count: 0 };
@@ -486,14 +463,14 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
       _count: { _all: true },
     });
     const categoryResolvedTimes = await prisma.complaint.findMany({
-      where: { ...where, status: "RESOLVED" },
-      select: { type: true, submittedOn: true, resolvedOn: true },
+      where: closedWhere,
+      select: { type: true, submittedOn: true, closedOn: true },
     });
     const timeByType = new Map();
     for (const r of categoryResolvedTimes) {
-      if (r.submittedOn && r.resolvedOn) {
+      if (r.submittedOn && r.closedOn) {
         const days = Math.ceil(
-          (r.resolvedOn.getTime() - r.submittedOn.getTime()) /
+          (r.closedOn.getTime() - r.submittedOn.getTime()) /
             (1000 * 60 * 60 * 24),
         );
         const acc = timeByType.get(r.type) || { sum: 0, count: 0 };
@@ -544,22 +521,18 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
     };
 
     res.set({ "Cache-Control": "public, max-age=300" });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Analytics data retrieved successfully",
-        data: analyticsData,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Analytics data retrieved successfully",
+      data: analyticsData,
+    });
   } catch (error) {
     console.error("Analytics error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to retrieve analytics data",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve analytics data",
+      error: error.message,
+    });
   }
 });
 
@@ -685,13 +658,11 @@ const exportReports = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Export error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to export reports",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to export reports",
+      error: error.message,
+    });
   }
 });
 

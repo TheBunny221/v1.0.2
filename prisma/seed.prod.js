@@ -155,7 +155,6 @@ async function main() {
         type: "contact",
         description: "Physical address of the main office",
       },
-
     ];
 
     await Promise.all(
@@ -562,7 +561,7 @@ async function main() {
 
     // 7. Create Sample Complaints
     console.log("📝 Creating sample complaints...");
-    const complaintTypes = [
+    const complaintTypeIds = [
       "WATER_SUPPLY",
       "ELECTRICITY",
       "ROAD_REPAIR",
@@ -570,6 +569,11 @@ async function main() {
       "STREET_LIGHTING",
       "DRAINAGE",
     ];
+    const typeMeta = complaintTypesData.reduce((acc, t) => {
+      const id = t.key.replace("COMPLAINT_TYPE_", "");
+      acc[id] = { name: t.name, slaHours: t.slaHours, priority: t.priority };
+      return acc;
+    }, {});
 
     const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     const statuses = [
@@ -593,10 +597,11 @@ async function main() {
       const randomOfficer = wardOfficers.find(
         (o) => o.wardId === randomWard.id,
       );
-      const complaintType =
-        complaintTypes[Math.floor(Math.random() * complaintTypes.length)];
-      const priority =
-        priorities[Math.floor(Math.random() * priorities.length)];
+      const complaintTypeId =
+        complaintTypeIds[Math.floor(Math.random() * complaintTypeIds.length)];
+      const meta = typeMeta[complaintTypeId];
+      const typeName = meta.name;
+      const priority = meta.priority;
       const status = statuses[Math.floor(Math.random() * statuses.length)];
 
       const complaintNumber = (i + 1).toString().padStart(4, "0");
@@ -608,7 +613,7 @@ async function main() {
         sixMonthsAgo.getTime() + Math.random() * timeRange,
       );
       const deadline = new Date(
-        complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
+        complaintDate.getTime() + meta.slaHours * 60 * 60 * 1000,
       );
 
       // Decide if this complaint should be assigned to a maintenance team member
@@ -619,25 +624,48 @@ async function main() {
       const randomTeamMember =
         shouldAssignTeam && wardMaintenanceTeam.length > 0
           ? wardMaintenanceTeam[
-          Math.floor(Math.random() * wardMaintenanceTeam.length)
-          ]
+              Math.floor(Math.random() * wardMaintenanceTeam.length)
+            ]
+          : null;
+
+      // Build SLA-aware resolution/closure times
+      const willClose = ["CLOSED", "RESOLVED"].includes(status)
+        ? Math.random() < 0.8
+        : Math.random() < 0.3;
+      const closedWithinSla = Math.random() < 0.6;
+      const resolvedOn = ["RESOLVED", "CLOSED"].includes(status)
+        ? new Date(
+            complaintDate.getTime() +
+              (closedWithinSla ? meta.slaHours * 0.6 : meta.slaHours * 1.2) *
+                60 *
+                60 *
+                1000,
+          )
+        : null;
+      const closedOn =
+        status === "CLOSED" || (status === "RESOLVED" && willClose)
+          ? new Date(
+              complaintDate.getTime() +
+                (closedWithinSla ? meta.slaHours * 0.8 : meta.slaHours * 1.5) *
+                  60 *
+                  60 *
+                  1000,
+            )
           : null;
 
       const complaint = await prisma.complaint.create({
         data: {
           complaintId: complaintId,
-          title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
-          description: `Production complaint regarding ${complaintType
-            .toLowerCase()
-            .replace("_", " ")} issue that requires attention. Submitted by ${randomCitizen.fullName
-            }.`,
-          type: complaintType,
+          title: `${typeName} Issue in ${randomWard.name}`,
+          description: `Production complaint regarding ${typeName.toLowerCase()} issue that requires attention. Submitted by ${randomCitizen.fullName}.`,
+          type: typeName,
           status: status,
           priority: priority,
-          slaStatus:
-            status === "RESOLVED" || status === "CLOSED"
+          slaStatus: closedOn
+            ? closedOn.getTime() <= deadline.getTime()
               ? "COMPLETED"
-              : "ON_TIME",
+              : "OVERDUE"
+            : "ON_TIME",
           wardId: randomWard.id,
           area: randomWard.name.split(" - ")[1] || randomWard.name,
           landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
@@ -654,23 +682,16 @@ async function main() {
             status !== "REGISTERED"
               ? new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000)
               : null,
-          resolvedOn:
-            status === "RESOLVED" || status === "CLOSED"
-              ? new Date(complaintDate.getTime() + 5 * 24 * 60 * 60 * 1000)
-              : null,
-          closedOn:
-            status === "CLOSED"
-              ? new Date(complaintDate.getTime() + 6 * 24 * 60 * 60 * 1000)
-              : null,
+          resolvedOn: resolvedOn,
+          closedOn: closedOn,
           deadline: deadline,
           rating:
             (status === "RESOLVED" || status === "CLOSED") &&
-              Math.random() > 0.4
+            Math.random() > 0.4
               ? Math.floor(Math.random() * 5) + 1
               : null,
         },
       });
-
 
       // Create status log
       await prisma.statusLog.create({
