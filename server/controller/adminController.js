@@ -1031,7 +1031,7 @@ function getActivityType(status) {
 }
 
 function getStatusMessage(status, complaint, user) {
-  const type = complaint.type.toLowerCase().replace("_", " ");
+  const type = String(complaint.type || "").toLowerCase();
   const ward = complaint.ward?.name || "Unknown Ward";
 
   switch (status) {
