@@ -35,6 +35,7 @@ import {
 } from "../components/ui/dialog";
 import { Progress } from "../components/ui/progress";
 import { Skeleton } from "../components/ui/skeleton";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../components/ui/tooltip";
 // Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
@@ -57,6 +58,7 @@ import {
   Share2,
   FileSpreadsheet,
   Calendar,
+  Info,
 } from "lucide-react";
 // date-fns and export utilities will be loaded dynamically
 
@@ -1261,8 +1263,14 @@ const UnifiedReports: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
                 Total Complaints
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>All complaints matching your selected filters and date range.</TooltipContent>
+                </Tooltip>
               </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -1279,7 +1287,14 @@ const UnifiedReports: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">Resolved
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>Number of complaints marked resolved in the selected period. The rate shows Resolved ÷ Total.</TooltipContent>
+                </Tooltip>
+              </CardTitle>
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -1300,8 +1315,14 @@ const UnifiedReports: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
                 SLA Compliance
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>Average on‑time performance across complaint types, using each type’s configured SLA hours.</TooltipContent>
+                </Tooltip>
               </CardTitle>
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -1319,8 +1340,14 @@ const UnifiedReports: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
                 Satisfaction
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>Average citizen feedback rating during the selected period.</TooltipContent>
+                </Tooltip>
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
