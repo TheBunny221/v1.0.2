@@ -115,7 +115,7 @@ const Index: React.FC = () => {
                     size="lg"
                     onClick={() => {
                       setIsTrackExpanded((v) => !v);
-                      if (!isFormExpanded && !isTrackExpanded) return;
+                      setIsFormExpanded(false);
                     }}
                   >
                     <Clock className="mr-2 h-5 w-5" />
@@ -290,7 +290,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
+                        ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप���त करें"
                         : currentLanguage === "ml"
                           ? "രജി��്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
                           : "Get notified at each stage — from registration to resolution"}
