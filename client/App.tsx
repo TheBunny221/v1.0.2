@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
