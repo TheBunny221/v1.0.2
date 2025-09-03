@@ -1141,7 +1141,7 @@ const UnifiedReports: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end mt-4 space-x-2">
+          <div className="flex justify-end mt-4 space-x-2 border-t pt-3">
             <Button
               variant="outline"
               onClick={() => {
