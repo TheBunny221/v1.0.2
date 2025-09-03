@@ -761,8 +761,8 @@ const guestSlice = createSlice({
       })
       .addCase(submitGuestComplaint.fulfilled, (state, action) => {
         state.isSubmitting = false;
-        state.complaintId = action.payload.complaintId;
-        state.trackingNumber = action.payload.trackingNumber;
+        state.complaintId = null;
+        state.trackingNumber = null;
         state.sessionId = action.payload.sessionId;
         state.userEmail = action.payload.email;
         state.otpSent = true;
