@@ -462,7 +462,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
         complaintId: complaint.id,
         type: "IN_APP",
         title: "New Complaint Assigned",
-        message: `A new ${type} complaint has been assigned to you in ${complaint.ward?.name || "your ward"}. Please review and assign to maintenance team.`,
+        message: `A new ${resolvedTypeName} complaint has been assigned to you in ${complaint.ward?.name || "your ward"}. Please review and assign to maintenance team.`,
       },
     });
   } else {
