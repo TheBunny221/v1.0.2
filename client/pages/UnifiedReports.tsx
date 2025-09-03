@@ -1266,8 +1266,8 @@ const UnifiedReports: React.FC = () => {
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 Total Complaints
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>All complaints matching your selected filters and date range.</TooltipContent>
                 </Tooltip>
@@ -1289,8 +1289,8 @@ const UnifiedReports: React.FC = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">Resolved
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>Number of complaints marked resolved in the selected period. The rate shows Resolved ÷ Total.</TooltipContent>
                 </Tooltip>
@@ -1318,8 +1318,8 @@ const UnifiedReports: React.FC = () => {
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 SLA Compliance
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>Average on‑time performance across complaint types, using each type’s configured SLA hours.</TooltipContent>
                 </Tooltip>
@@ -1343,8 +1343,8 @@ const UnifiedReports: React.FC = () => {
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 Satisfaction
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>Average citizen feedback rating during the selected period.</TooltipContent>
                 </Tooltip>
