@@ -330,19 +330,49 @@ export const createComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Use provided slaHours or fallback to priority-based hours
-  let deadlineHours = slaHours;
-  if (!deadlineHours) {
-    const priorityHours = {
-      LOW: 72,
-      MEDIUM: 48,
-      HIGH: 24,
-      CRITICAL: 8,
-    };
-    deadlineHours = priorityHours[priority || "MEDIUM"];
+  // Resolve complaint type from SystemConfig and derive SLA hours strictly from type
+  const typeInput = String(type || "").trim();
+  if (!typeInput) {
+    return res.status(400).json({ success: false, message: "Complaint type is required" });
   }
 
-  const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
+  // Try lookup by key (ID form like WATER_SUPPLY) then by name match
+  const byKey = await prisma.systemConfig.findFirst({
+    where: { key: `COMPLAINT_TYPE_${typeInput.toUpperCase()}`, isActive: true },
+  });
+
+  let resolvedTypeName = null;
+  let resolvedSlaHours = null;
+
+  if (byKey) {
+    try {
+      const v = JSON.parse(byKey.value || "{}");
+      resolvedTypeName = v.name;
+      resolvedSlaHours = Number(v.slaHours);
+    } catch {}
+  }
+
+  if (!resolvedTypeName) {
+    const allTypes = await prisma.systemConfig.findMany({
+      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+    });
+    for (const cfg of allTypes) {
+      try {
+        const v = JSON.parse(cfg.value || "{}");
+        if (v.name && v.name.toLowerCase() === typeInput.toLowerCase()) {
+          resolvedTypeName = v.name;
+          resolvedSlaHours = Number(v.slaHours);
+          break;
+        }
+      } catch {}
+    }
+  }
+
+  if (!resolvedTypeName || !Number.isFinite(resolvedSlaHours) || resolvedSlaHours <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid complaint type or missing SLA configuration" });
+  }
+
+  const deadline = new Date(Date.now() + resolvedSlaHours * 60 * 60 * 1000);
 
   // Check auto-assignment setting
   const autoAssignSetting = await prisma.systemConfig.findUnique({
