@@ -555,7 +555,28 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   });
 
   // Average resolution time in days (closed/resolved), aligned with reports
-  const avgResolutionTime = await computeAvgResolutionDays(prisma);
+  let avgResolutionTime = 0;
+  {
+    const closedRows = await prisma.complaint.findMany({
+      where: { status: { in: ["RESOLVED", "CLOSED"] } },
+      select: { submittedOn: true, closedOn: true },
+    });
+    if (closedRows.length > 0) {
+      let totalDays = 0;
+      let counted = 0;
+      for (const r of closedRows) {
+        if (r.submittedOn && r.closedOn) {
+          const days = Math.ceil(
+            (new Date(r.closedOn).getTime() - new Date(r.submittedOn).getTime()) /
+              (1000 * 60 * 60 * 24),
+          );
+          totalDays += days;
+          counted += 1;
+        }
+      }
+      avgResolutionTime = counted ? totalDays / counted : 0;
+    }
+  }
 
   // SLA compliance over CLOSED/RESOLVED complaints, aligned with reports
   const { compliance: slaComplianceRaw, totalClosed, compliantClosed } =
