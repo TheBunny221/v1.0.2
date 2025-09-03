@@ -578,24 +578,42 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
         }, 0) / validResolutions.length
       : 0;
 
-  // Calculate SLA compliance based on breaches (overdue open or resolved late)
+  // Calculate SLA compliance as average of type-level compliance using SLA hours from system config
+  const typeConfigs = await prisma.systemConfig.findMany({
+    where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+  });
+  const complaintTypes = typeConfigs.map((cfg) => {
+    try {
+      const v = JSON.parse(cfg.value || '{}');
+      return { name: v.name, slaHours: Number(v.slaHours) || 48 };
+    } catch {
+      return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
+    }
+  }).filter((t) => t.name);
+
   const nowTs = new Date();
-  const [overdueOpen, resolvedLateRow] = await Promise.all([
-    prisma.complaint.count({
-      where: {
-        deadline: { lt: nowTs },
-        status: { notIn: ["RESOLVED", "CLOSED"] },
-      },
-    }),
-    prisma.$queryRaw`SELECT COUNT(*) as count FROM "complaints" WHERE (status = 'RESOLVED' OR status = 'CLOSED') AND "resolvedOn" IS NOT NULL AND "deadline" IS NOT NULL AND "resolvedOn" > "deadline"`,
-  ]);
-  const resolvedLate = Number(
-    resolvedLateRow?.[0]?.count ?? resolvedLateRow?.count ?? 0,
-  );
-  const slaBreaches = overdueOpen + resolvedLate;
-  const withinSLA = Math.max(totalComplaints - slaBreaches, 0);
-  const slaCompliance =
-    totalComplaints > 0 ? Math.round((withinSLA / totalComplaints) * 100) : 0;
+  let typePercentages = [];
+  for (const t of complaintTypes) {
+    const rows = await prisma.complaint.findMany({
+      where: { type: t.name },
+      select: { submittedOn: true, resolvedOn: true, status: true },
+    });
+    if (rows.length === 0) continue;
+    const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
+    let compliant = 0;
+    for (const r of rows) {
+      const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
+      if (!start) continue;
+      const deadlineTs = start + windowMs;
+      if (r.status === "RESOLVED" || r.status === "CLOSED") {
+        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs) compliant += 1;
+      } else {
+        if (nowTs.getTime() <= deadlineTs) compliant += 1;
+      }
+    }
+    typePercentages.push((compliant / rows.length) * 100);
+  }
+  const slaCompliance = typePercentages.length ? Math.round((typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length)) : 0;
 
   // Get citizen satisfaction (average rating)
   const satisfactionResult = await prisma.complaint.aggregate({
