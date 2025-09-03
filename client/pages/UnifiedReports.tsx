@@ -434,17 +434,7 @@ const UnifiedReports: React.FC = () => {
     }
   }, [filters, user?.role, filtersInitialized]);
 
-  // Debounced effect for filter changes to improve performance
-  useEffect(() => {
-    if (!filtersInitialized) return;
-
-    const timeoutId = setTimeout(() => {
-      console.log("Filters changed, fetching new data:", filters);
-      fetchAnalyticsData();
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(timeoutId);
-  }, [fetchAnalyticsData, filtersInitialized]);
+  // Disabled auto-fetch on filter changes; use Generate Report button instead
 
   // Force re-fetch when filters change (only after initialization)
   useEffect(() => {
