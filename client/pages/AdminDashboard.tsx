@@ -198,15 +198,6 @@ const AdminDashboard: React.FC = () => {
 
   return (
       <div className="space-y-6">
-        <style>{`
-          [data-radix-popper-content-wrapper] {
-            z-index: 99999 !important;
-            position: relative;
-          }
-          [data-radix-tooltip-content] {
-            z-index: 99999 !important;
-          }
-        `}</style>
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
@@ -221,7 +212,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 isolate">
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
               <div className="text-2xl font-bold text-white">
                 {systemStats.totalComplaints}
