@@ -183,7 +183,7 @@ const UnifiedComplaintForm: React.FC = () => {
   const { openOtpFlow } = useOtpFlow();
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
-  const [submitGuestComplaintMutation] = useSubmitGuestComplaintMutation();
+  const [submitGuestComplaintMutation, { isLoading: isSendingOtp }] = useSubmitGuestComplaintMutation();
   const [resendGuestOtp] = useResendGuestOtpMutation();
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
