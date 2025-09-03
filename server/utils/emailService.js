@@ -52,11 +52,32 @@ const createTransporter = () => {
 // Send email function
 export const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    const transporter = createTransporter();
+    let transporter = createTransporter();
+
+    // In development, if no credentials are provided, create an Ethereal test account automatically
+    const devNoCreds =
+      process.env.NODE_ENV !== "production" &&
+      !process.env.EMAIL_USER &&
+      !process.env.ETHEREAL_USER;
+
+    if (!transporter || devNoCreds) {
+      const testAccount = await nodemailer.createTestAccount();
+      transporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+        debug: true,
+        logger: true,
+      });
+      console.log("📨 Using Ethereal test account for emails in development");
+    }
 
     const mailOptions = {
-      from:
-        "Cochin Smart City ",
+      from: "Cochin Smart City ",
       to,
       subject,
       text,
@@ -65,13 +86,12 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 
     const info = await transporter.sendMail(mailOptions);
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV !== "production") {
       console.log("✅ Email sent successfully!");
       console.log("📧 Message ID:", info.messageId);
       console.log("📬 To:", to);
       console.log("📝 Subject:", subject);
 
-      // For Ethereal emails, show the preview URL
       const previewUrl = nodemailer.getTestMessageUrl(info);
       if (previewUrl) {
         console.log("🔗 Preview URL (Ethereal):", previewUrl);
