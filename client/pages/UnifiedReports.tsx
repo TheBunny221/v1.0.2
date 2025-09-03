@@ -1033,37 +1033,42 @@ const UnifiedReports: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 pt-3">
             {/* Date Range */}
-            <div>
-              <Label htmlFor="from-date">From Date</Label>
-              <Input
-                id="from-date"
-                type="date"
-                value={filters.dateRange.from}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    dateRange: { ...prev.dateRange, from: e.target.value },
-                  }))
-                }
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <Label htmlFor="to-date">To Date</Label>
-              <Input
-                id="to-date"
-                type="date"
-                value={filters.dateRange.to}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    dateRange: { ...prev.dateRange, to: e.target.value },
-                  }))
-                }
-                disabled={isLoading}
-              />
+            <div className="col-span-1 lg:col-span-2">
+              <Label>Date Range</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between" size="sm">
+                    <span>
+                      {filters.dateRange.from} → {filters.dateRange.to}
+                    </span>
+                    <Calendar className="h-4 w-4 opacity-70" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[320px]" align="start">
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <Label htmlFor="from-date-picker">From</Label>
+                        <Input id="from-date-picker" type="date" defaultValue={filters.dateRange.from} />
+                      </div>
+                      <div>
+                        <Label htmlFor="to-date-picker">To</Label>
+                        <Input id="to-date-picker" type="date" defaultValue={filters.dateRange.to} />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="sm">Cancel</Button>
+                      <Button size="sm" onClick={() => {
+                        const fromInput = (document.getElementById("from-date-picker") as HTMLInputElement)?.value || filters.dateRange.from;
+                        const toInput = (document.getElementById("to-date-picker") as HTMLInputElement)?.value || filters.dateRange.to;
+                        setFilters((prev) => ({ ...prev, dateRange: { from: fromInput, to: toInput } }));
+                      }}>Apply</Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Ward Filter (only for admins) */}
