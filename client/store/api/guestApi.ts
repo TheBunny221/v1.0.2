@@ -96,6 +96,9 @@ export const guestApi = baseApi.injectEndpoints({
       ApiResponse<{
         complaint: any;
         user: any;
+        token: string;
+        isNewUser: boolean;
+        redirectTo?: string;
       }>,
       { complaintId: string; otpCode: string }
     >({
