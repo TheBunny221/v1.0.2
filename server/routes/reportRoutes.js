@@ -406,7 +406,7 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         submittedOn: true,
         status: true,
         closedOn: true,
-        deadline: true,
+        type: true,
       },
     });
 
@@ -418,7 +418,9 @@ const getComprehensiveAnalytics = asyncHandler(async (req, res) => {
         if (trendsMap.has(rk)) {
           const t = trendsMap.get(rk);
           t.resolved += 1;
-          if (c.deadline && c.closedOn <= c.deadline) t.slaCompliance += 1;
+          const slaHours = typeSlaMap.get(c.type) || defaultSlaHours;
+          const targetTs = new Date(c.submittedOn).getTime() + slaHours * 60 * 60 * 1000;
+          if (new Date(c.closedOn).getTime() <= targetTs) t.slaCompliance += 1;
           t.slaResolved += 1;
         }
       }
