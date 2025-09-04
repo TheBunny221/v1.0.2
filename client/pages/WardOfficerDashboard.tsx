@@ -79,7 +79,7 @@ const WardOfficerDashboard: React.FC = () => {
     // Main filter logic
     switch (filters.mainFilter) {
       case "pending":
-        statusFilters.push("REGISTERED", "ASSIGNED"); //, "REOPEN"
+        statusFilters.push("REGISTERED"); // Only REGISTERED status for pending work
         break;
       case "inProgress":
         statusFilters.push("IN_PROGRESS");
@@ -217,11 +217,16 @@ const WardOfficerDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-2">🏢 Ward Officer Dashboard</h1>
         <p className="text-blue-100">
           Manage complaints for {user?.ward?.name || "your assigned ward"} and
           monitor team performance.
         </p>
+        <div className="mt-3 text-blue-100">
+          <span className="text-lg font-semibold text-white">
+            Total Complaints: {stats?.summary.totalComplaints || 0}
+          </span>
+        </div>
       </div>
 
       {/* Statistics Cards with Filters */}
