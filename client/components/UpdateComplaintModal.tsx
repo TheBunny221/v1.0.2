@@ -759,7 +759,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                         maintenanceTeamId: value,
                       }));
                     } else {
-                      setFormData((prev) => ({ ...prev, assignedToId: value }));
+                      setFormData((prev) => ({ ...prev, wardOfficerId: value }));
                     }
                     // Clear validation errors when user makes a selection
                     setValidationErrors([]);
