@@ -750,7 +750,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   value={
                     user?.role === "WARD_OFFICER"
                       ? formData.maintenanceTeamId
-                      : formData.assignedToId
+                      : formData.wardOfficerId
                   }
                   onValueChange={(value) => {
                     if (user?.role === "WARD_OFFICER") {
