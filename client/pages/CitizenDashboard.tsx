@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 import FeedbackDialog from "../components/FeedbackDialog";
 import QuickComplaintModal from "../components/QuickComplaintModal";
+import ContactInfoCard from "../components/ContactInfoCard";
 
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
