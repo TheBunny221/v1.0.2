@@ -269,12 +269,12 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-6">
               <div className="text-2xl font-bold text-yellow-600">
                 {stats?.summary.pendingWork || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                Registered 
+                Complaints awaiting team assignment
               </p>
             </CardContent>
           </Card>
@@ -304,11 +304,11 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <Settings className="h-4 w-4 text-orange-600" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-6">
               <div className="text-2xl font-bold text-orange-600">
                 {stats?.summary.activeWork || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Active complaints</p>
+              <p className="text-xs text-muted-foreground">Work currently in progress</p>
             </CardContent>
           </Card>
 
@@ -337,11 +337,11 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-6">
               <div className="text-2xl font-bold text-green-600">
                 {stats?.summary.completedWork || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Resolved + Closed</p>
+              <p className="text-xs text-muted-foreground">Successfully resolved complaints</p>
             </CardContent>
           </Card>
 
@@ -370,11 +370,11 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <XCircle className="h-4 w-4 text-gray-600" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-6">
               <div className="text-2xl font-bold text-gray-600">
                 {stats?.statusBreakdown?.closed || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Only closed statuses</p>
+              <p className="text-xs text-muted-foreground">Fully completed and closed</p>
             </CardContent>
           </Card>
 
@@ -403,11 +403,11 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <RefreshCcw className="h-4 w-4 text-red-600" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-6">
               <div className="text-2xl font-bold text-red-600">
                 {stats?.statusBreakdown?.reopened || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Reopened complaints</p>
+              <p className="text-xs text-muted-foreground">Require renewed attention</p>
             </CardContent>
           </Card>
 
@@ -438,12 +438,12 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <Briefcase className="h-4 w-4 text-purple-600" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-6">
               <div className="text-2xl font-bold text-purple-600">
                 {stats?.summary.needsTeamAssignment || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                To assign to maintenance
+                Ready for team assignment
               </p>
             </CardContent>
           </Card>
