@@ -993,6 +993,36 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         </CardContent>
       </Card>
 
+      {/* OTP Dialog */}
+      {showOtpDialog && (
+        <OtpDialog
+          open={showOtpDialog}
+          onOpenChange={setShowOtpDialog}
+          context="guestComplaint"
+          email={formData.email}
+          onVerified={async ({ otpCode }) => {
+            if (!otpCode) return;
+            await handleVerifyOtp();
+          }}
+          onResend={async () => {
+            try {
+              await resendGuestOtp({ email: formData.email }).unwrap();
+              toast({
+                title: "Verification Code Resent",
+                description: "A new verification code has been sent to your email.",
+              });
+            } catch (error: any) {
+              toast({
+                title: "Failed to Resend",
+                description: error?.message || "Failed to resend verification code.",
+                variant: "destructive",
+              });
+            }
+          }}
+          isVerifying={isVerifyingOtp}
+        />
+      )}
+
       {/* Location Map Dialog */}
       <SimpleLocationMapDialog
         isOpen={isMapDialogOpen}
