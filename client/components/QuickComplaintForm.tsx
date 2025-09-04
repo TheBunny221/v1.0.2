@@ -420,25 +420,27 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       return;
     }
 
-    if (!complaintId) {
-      toast({
-        title: "Error",
-        description: "Complaint ID not found. Please try submitting again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      // Use RTK Query mutation for OTP verification
-      const result = await verifyGuestOtp({
-        email: formData.email,
-        otpCode,
-        complaintId,
-        createAccount: true,
-      }).unwrap();
+      setIsVerifyingOtp(true);
+      const fd = new FormData();
+      fd.append("email", formData.email);
+      fd.append("otpCode", otpCode);
+      fd.append("fullName", formData.fullName);
+      fd.append("phoneNumber", formData.mobile);
+      fd.append("type", formData.problemType);
+      fd.append("description", formData.description);
+      fd.append("priority", "MEDIUM");
+      fd.append("wardId", formData.ward);
+      if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
+      fd.append("area", formData.area);
+      if (formData.location) fd.append("landmark", formData.location);
+      if (formData.address) fd.append("address", formData.address);
+      if (formData.coordinates)
+        fd.append("coordinates", JSON.stringify(formData.coordinates));
+      for (const file of files) fd.append("attachments", file);
 
-      // Store auth token and user data if provided
+      const result = await verifyGuestOtp(fd).unwrap();
+
       if (result.data?.token && result.data?.user) {
         dispatch(
           setCredentials({
@@ -456,12 +458,12 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           : "Your complaint has been verified and you've been logged in successfully!",
       });
 
-      // Reset form and call success callback
       resetForm();
       setShowOtpInput(false);
       setSessionId(null);
       setOtpCode("");
-      onSuccess?.(complaintId);
+      setShowOtpDialog(false);
+      onSuccess?.(result.data?.complaint?.id || "");
     } catch (error: any) {
       console.error("OTP verification error:", error);
       toast({
@@ -472,11 +474,13 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           "Invalid verification code. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsVerifyingOtp(false);
     }
   }, [
     otpCode,
-    complaintId,
-    formData.email,
+    formData,
+    files,
     verifyGuestOtp,
     dispatch,
     toast,
