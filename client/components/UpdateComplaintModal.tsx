@@ -70,7 +70,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   const [formData, setFormData] = useState({
     status: "",
     priority: "",
-    assignedToId: "",
+    wardOfficerId: "",
     maintenanceTeamId: "",
     remarks: "",
   });
