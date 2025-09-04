@@ -410,8 +410,9 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   );
 
   // Handle OTP verification and final submission
-  const handleVerifyOtp = useCallback(async () => {
-    if (!otpCode || otpCode.length !== 6) {
+  const handleVerifyOtp = useCallback(async (code?: string) => {
+    const inputCode = code ?? otpCode;
+    if (!inputCode || inputCode.length !== 6) {
       toast({
         title: "Invalid Code",
         description: "Please enter a valid 6-digit verification code.",
