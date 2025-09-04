@@ -848,27 +848,8 @@ const CitizenDashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Help & Support */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Help & Support</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="text-sm text-gray-600">
-              <p className="mb-2">Need help with your complaints?</p>
-              <ul className="space-y-1 text-xs">
-                <li>• Check complaint status regularly</li>
-                <li>• Provide feedback when resolved</li>
-                <li>• Include photos for faster resolution</li>
-                <li>• Contact support if urgentissues</li>
-              </ul>
-            </div>
-            <Button variant="outline" className="w-full">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Contact Support
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Help & Support (reused from Home page contact section) */}
+        <ContactInfoCard title="Help & Support" />
       </div>
 
       {/* Quick Complaint Modal */}
