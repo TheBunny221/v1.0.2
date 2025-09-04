@@ -4,6 +4,7 @@ import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import { useCreateComplaintMutation } from "../store/api/complaintsApi";
 import OtpDialog from "./OtpDialog";
 import { useSubmitGuestComplaintMutation } from "../store/api/guestApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 
 // Define types locally instead of importing from deprecated slice
 type ComplaintType =
