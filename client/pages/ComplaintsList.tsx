@@ -402,7 +402,11 @@ const ComplaintsList: React.FC = () => {
 
             {/* Ward Filter - Only for administrators */}
             {user?.role === "ADMINISTRATOR" && (
-              <Select value={wardFilter} onValueChange={handleWardChange} disabled>
+              <Select
+                value={wardFilter}
+                onValueChange={handleWardChange}
+                disabled
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by ward" />
                 </SelectTrigger>
@@ -568,7 +572,8 @@ const ComplaintsList: React.FC = () => {
                           // Ward Officer view: show assignment status based on maintenanceTeamId
                           complaint.maintenanceTeamId ? (
                             <Badge className="bg-green-100 text-green-800 text-xs">
-                              Assigned: {complaint.maintenanceTeam?.fullName || "Unknown"}
+                              Assigned:{" "}
+                              {complaint.maintenanceTeam?.fullName || "Unknown"}
                             </Badge>
                           ) : (
                             <Badge className="bg-orange-100 text-orange-800 text-xs">
@@ -589,12 +594,17 @@ const ComplaintsList: React.FC = () => {
                             {complaint.maintenanceTeam && (
                               <Badge className="bg-green-100 text-green-800 text-xs">
                                 Team:{" "}
-                                {complaint.maintenanceTeam.fullName.split(" ")[0]}
+                                {
+                                  complaint.maintenanceTeam.fullName.split(
+                                    " ",
+                                  )[0]
+                                }
                               </Badge>
                             )}
                             {complaint.wardOfficer && (
                               <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                WO: {complaint.wardOfficer.fullName.split(" ")[0]}
+                                WO:{" "}
+                                {complaint.wardOfficer.fullName.split(" ")[0]}
                               </Badge>
                             )}
                           </>

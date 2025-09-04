@@ -1276,26 +1276,22 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       where: { id: assignedToId },
     });
     if (!assignee || !assignee.isActive) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Selected assignee not found or inactive",
-          data: null,
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Selected assignee not found or inactive",
+        data: null,
+      });
     }
     if (
       req.user.role === "WARD_OFFICER" &&
       assignee.role !== "MAINTENANCE_TEAM"
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "Ward Officers can only assign complaints to Maintenance Team members",
-          data: null,
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          "Ward Officers can only assign complaints to Maintenance Team members",
+        data: null,
+      });
     }
   }
 
@@ -1931,8 +1927,8 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter((c) =>
-      !c.maintenanceTeamId && !["RESOLVED", "CLOSED"].includes(c.status)
+    needsAssignmentToTeam: wardComplaints.filter(
+      (c) => !c.maintenanceTeamId && !["RESOLVED", "CLOSED"].includes(c.status),
     ).length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
     assigned: wardComplaints.filter((c) => !!c.assignedToId).length,

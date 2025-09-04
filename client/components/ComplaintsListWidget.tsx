@@ -13,7 +13,15 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { FileText, Calendar, MapPin, Eye, RefreshCw, Users, UserCheck } from "lucide-react";
+import {
+  FileText,
+  Calendar,
+  MapPin,
+  Eye,
+  RefreshCw,
+  Users,
+  UserCheck,
+} from "lucide-react";
 
 import ComplaintQuickActions from "./ComplaintQuickActions";
 import UpdateComplaintModal from "./UpdateComplaintModal";
@@ -113,13 +121,14 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
       return {
         status: "Assigned",
         color: "bg-green-100 text-green-800",
-        teamMember: complaint.maintenanceTeam?.fullName || "Unknown Team Member"
+        teamMember:
+          complaint.maintenanceTeam?.fullName || "Unknown Team Member",
       };
     } else {
       return {
         status: "Needs Assignment",
         color: "bg-orange-100 text-orange-800",
-        teamMember: null
+        teamMember: null,
       };
     }
   };
@@ -184,11 +193,21 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
-                  {effectiveUserRole === "WARD_OFFICER" && <TableHead>Team Assignment</TableHead>}
-                  {effectiveUserRole === "WARD_OFFICER" && <TableHead>Team Member</TableHead>}
-                  {effectiveUserRole !== "WARD_OFFICER" && <TableHead>Rating</TableHead>}
-                  {effectiveUserRole !== "WARD_OFFICER" && <TableHead>SLA</TableHead>}
-                  {effectiveUserRole !== "WARD_OFFICER" && <TableHead>Closed</TableHead>}
+                  {effectiveUserRole === "WARD_OFFICER" && (
+                    <TableHead>Team Assignment</TableHead>
+                  )}
+                  {effectiveUserRole === "WARD_OFFICER" && (
+                    <TableHead>Team Member</TableHead>
+                  )}
+                  {effectiveUserRole !== "WARD_OFFICER" && (
+                    <TableHead>Rating</TableHead>
+                  )}
+                  {effectiveUserRole !== "WARD_OFFICER" && (
+                    <TableHead>SLA</TableHead>
+                  )}
+                  {effectiveUserRole !== "WARD_OFFICER" && (
+                    <TableHead>Closed</TableHead>
+                  )}
                   <TableHead>Updated</TableHead>
                   <TableHead>Date</TableHead>
                   {showActions && <TableHead>Actions</TableHead>}
@@ -230,7 +249,8 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                       <>
                         <TableCell>
                           {(() => {
-                            const assignment = getTeamAssignmentStatus(complaint);
+                            const assignment =
+                              getTeamAssignmentStatus(complaint);
                             return (
                               <Badge className={assignment.color}>
                                 {assignment.status}
@@ -240,7 +260,8 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                         </TableCell>
                         <TableCell>
                           {(() => {
-                            const assignment = getTeamAssignmentStatus(complaint);
+                            const assignment =
+                              getTeamAssignmentStatus(complaint);
                             return assignment.teamMember ? (
                               <div className="flex items-center text-sm">
                                 <UserCheck className="h-3 w-3 mr-1" />
@@ -286,7 +307,9 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                         <TableCell>
                           {complaint.closedOn ? (
                             <span className="text-sm">
-                              {new Date(complaint.closedOn).toLocaleDateString()}
+                              {new Date(
+                                complaint.closedOn,
+                              ).toLocaleDateString()}
                             </span>
                           ) : (
                             <span className="text-xs text-gray-500">-</span>

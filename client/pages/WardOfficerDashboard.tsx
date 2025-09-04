@@ -322,7 +322,9 @@ const WardOfficerDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-orange-600">
                 {stats?.summary.activeWork || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Work currently in progress</p>
+              <p className="text-xs text-muted-foreground">
+                Work currently in progress
+              </p>
             </CardContent>
           </Card>
 
@@ -355,7 +357,9 @@ const WardOfficerDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-green-600">
                 {stats?.summary.completedWork || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Successfully resolved complaints</p>
+              <p className="text-xs text-muted-foreground">
+                Successfully resolved complaints
+              </p>
             </CardContent>
           </Card>
 
@@ -388,7 +392,9 @@ const WardOfficerDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-gray-600">
                 {stats?.statusBreakdown?.closed || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Fully completed and closed</p>
+              <p className="text-xs text-muted-foreground">
+                Fully completed and closed
+              </p>
             </CardContent>
           </Card>
 
@@ -421,7 +427,9 @@ const WardOfficerDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-red-600">
                 {stats?.statusBreakdown?.reopened || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Require renewed attention</p>
+              <p className="text-xs text-muted-foreground">
+                Require renewed attention
+              </p>
             </CardContent>
           </Card>
 
