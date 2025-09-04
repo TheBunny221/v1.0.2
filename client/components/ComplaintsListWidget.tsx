@@ -193,11 +193,11 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
-                  {effectiveUserRole === "WARD_OFFICER" && (
+                  {/* {effectiveUserRole === "WARD_OFFICER" && (
                     <TableHead>Team Assignment</TableHead>
-                  )}
+                  )} */}
                   {effectiveUserRole === "WARD_OFFICER" && (
-                    <TableHead>Team Member</TableHead>
+                    <TableHead >Team </TableHead>
                   )}
                   {effectiveUserRole !== "WARD_OFFICER" && (
                     <TableHead>Rating</TableHead>
@@ -247,7 +247,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                     </TableCell>
                     {effectiveUserRole === "WARD_OFFICER" && (
                       <>
-                        <TableCell>
+                        {/* <TableCell>
                           {(() => {
                             const assignment =
                               getTeamAssignmentStatus(complaint);
@@ -257,13 +257,13 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                               </Badge>
                             );
                           })()}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           {(() => {
                             const assignment =
                               getTeamAssignmentStatus(complaint);
                             return assignment.teamMember ? (
-                              <div className="flex items-center text-sm">
+                              <div className="flex items-center text-sm width-fit-content">
                                 <UserCheck className="h-3 w-3 mr-1" />
                                 {assignment.teamMember}
                               </div>
