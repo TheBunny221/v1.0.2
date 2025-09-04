@@ -629,8 +629,9 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     await prisma.statusLog.create({
       data: {
         complaintId: complaint.id,
-        userId: wardOfficerId,
-        toStatus: "REGISTERED",
+        userId: user.id,
+        fromStatus: "REGISTERED",
+        toStatus: "ASSIGNED",
         comment: "Complaint auto-assigned to ward officer",
       },
     });

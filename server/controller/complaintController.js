@@ -443,8 +443,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
     await prisma.statusLog.create({
       data: {
         complaintId: complaint.id,
-        userId: wardOfficerId,
-        toStatus: "REGISTERED",
+        userId: req.user.id,
+        fromStatus: "REGISTERED",
+        toStatus: "ASSIGNED",
         comment: "Complaint auto-assigned to ward officer",
       },
     });
