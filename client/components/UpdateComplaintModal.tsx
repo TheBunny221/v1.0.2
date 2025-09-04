@@ -708,7 +708,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             user?.role === "ADMINISTRATOR") && (
             <div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
+                <Label htmlFor="wardOfficer">{getDropdownLabel()}</Label>
                 {user?.role === "WARD_OFFICER" &&
                   (complaint as any)?.needsTeamAssignment &&
                   !["RESOLVED", "CLOSED"].includes(complaint.status) && (
