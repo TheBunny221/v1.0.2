@@ -367,10 +367,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         }
       } catch (error: any) {
         console.error("Complaint submission error:", error);
+        const message = typeof error === "string" ? error : getApiErrorMessage(error);
         toast({
           title: "Submission Failed",
-          description:
-            error.message || "Failed to submit complaint. Please try again.",
+          description: message || "Failed to submit complaint. Please try again.",
           variant: "destructive",
         });
       } finally {
