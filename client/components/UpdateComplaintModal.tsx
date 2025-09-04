@@ -222,7 +222,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     if (user?.role === "ADMINISTRATOR" && !isComplaintFinalized) {
       if (
         formData.status === "ASSIGNED" &&
-        (!formData.assignedToId || formData.assignedToId === "none")
+        (!formData.wardOfficerId || formData.wardOfficerId === "none")
       ) {
         errors.push(
           "Please select a Ward Officer before assigning the complaint.",
