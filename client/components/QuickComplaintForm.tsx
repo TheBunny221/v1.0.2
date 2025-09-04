@@ -132,10 +132,13 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const { toast } = useToast();
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
+  const [resendGuestOtp] = useResendGuestOtpMutation();
   const [
     generateCaptcha,
     { data: captchaData, isLoading: captchaLoading, error: captchaError },
   ] = useLazyGenerateCaptchaQuery();
+
+  const guestIsSubmitting = useAppSelector((state) => state.guest.isSubmitting);
 
   // Pre-fill user data if authenticated and set submission mode
   useEffect(() => {
