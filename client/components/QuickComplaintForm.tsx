@@ -967,14 +967,22 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                 <Button
                   type="submit"
                   className="flex-1 md:flex-none"
-                  disabled={isLoading}
+                  disabled={submissionMode === "guest" ? guestIsSubmitting || isSubmittingLocal : isLoading}
                 >
-                  {isLoading
-                    ? translations?.common?.loading || "Submitting..."
-                    : submissionMode === "citizen"
-                      ? translations?.forms?.submitComplaint ||
-                        "Submit Complaint"
-                      : "Submit & Send Verification"}
+                  {submissionMode === "guest" ? (
+                    guestIsSubmitting || isSubmittingLocal ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Sending Code...
+                      </>
+                    ) : (
+                      "Submit & Send Verification"
+                    )
+                  ) : isLoading ? (
+                    translations?.common?.loading || "Submitting..."
+                  ) : (
+                    translations?.forms?.submitComplaint || "Submit Complaint"
+                  )}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   {translations?.forms?.resetForm || "Reset Form"}
