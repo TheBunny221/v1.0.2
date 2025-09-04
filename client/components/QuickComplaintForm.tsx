@@ -3,6 +3,7 @@ import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import { useCreateComplaintMutation } from "../store/api/complaintsApi";
 import OtpDialog from "./OtpDialog";
+import { useSubmitGuestComplaintMutation } from "../store/api/guestApi";
 
 // Define types locally instead of importing from deprecated slice
 type ComplaintType =
