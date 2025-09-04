@@ -1003,7 +1003,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           email={formData.email}
           onVerified={async ({ otpCode }) => {
             if (!otpCode) return;
-            await handleVerifyOtp();
+            await handleVerifyOtp(otpCode);
           }}
           onResend={async () => {
             try {
