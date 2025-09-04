@@ -389,6 +389,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
             error.message || "Failed to submit complaint. Please try again.",
           variant: "destructive",
         });
+      } finally {
+        setIsSubmittingLocal(false);
       }
     },
     [
