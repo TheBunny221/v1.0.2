@@ -42,6 +42,7 @@ interface FilterState {
     | "inProgress"
     | "completed"
     | "closed"
+    | "reopened"
     | "needsTeamAssignment";
   overdue: boolean;
   urgent: boolean;
@@ -87,6 +88,9 @@ const WardOfficerDashboard: React.FC = () => {
         break;
       case "closed":
         statusFilters.push("CLOSED");
+        break;
+      case "reopened":
+        statusFilters.push("REOPENED");
         break;
       case "needsTeamAssignment":
         filterParams.needsTeamAssignment = true;
