@@ -519,6 +519,8 @@ const WardOfficerDashboard: React.FC = () => {
             title="Filtered Results"
             maxHeight="500px"
             showActions={true}
+            userRole={user?.role}
+            user={user}
           />
         </div>
       )}
