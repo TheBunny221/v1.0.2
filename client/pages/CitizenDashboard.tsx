@@ -844,14 +844,7 @@ const CitizenDashboard: React.FC = () => {
               <FileText className="mr-2 h-4 w-4" />
               View All Complaints
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/guest/track")}
-              className="w-full justify-start"
-            >
-              <Search className="mr-2 h-4 w-4" />
-              Track Complaint Status
-            </Button>
+            {/* Track Complaint Status removed as requested */}
           </CardContent>
         </Card>
 
