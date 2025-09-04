@@ -181,6 +181,11 @@ const ComplaintsList: React.FC = () => {
     if (wardFilter !== "all") params.wardId = wardFilter;
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
+    // Strictly enforce ward-based filtering for Ward Officers
+    if (user?.role === "WARD_OFFICER" && user?.wardId) {
+      params.wardId = user.wardId;
+    }
+
     // Add new filters
     if (needsMaintenanceAssignment) params.needsTeamAssignment = true;
     if (slaStatusFilter !== "all")
@@ -395,10 +400,13 @@ const ComplaintsList: React.FC = () => {
               </SelectContent>
             </Select>
 
-            {/* Ward Filter - Only for admin and ward officers */}
-            {(user?.role === "ADMINISTRATOR" ||
-              user?.role === "WARD_OFFICER") && (
-              <Select value={wardFilter} onValueChange={handleWardChange}>
+            {/* Ward Filter - Only for administrators */}
+            {user?.role === "ADMINISTRATOR" && (
+              <Select
+                value={wardFilter}
+                onValueChange={handleWardChange}
+                disabled
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by ward" />
                 </SelectTrigger>
@@ -559,25 +567,47 @@ const ComplaintsList: React.FC = () => {
                         <Badge className={getPriorityColor(complaint.priority)}>
                           {complaint.priority}
                         </Badge>
-                        {/* Show maintenance assignment status - only for active complaints */}
-                        {(complaint as any).needsTeamAssignment &&
-                          !["RESOLVED", "CLOSED"].includes(
-                            complaint.status,
-                          ) && (
-                            <Badge className="bg-orange-100 text-orange-800 text-xs">
-                              Needs Team Assignment
+                        {/* Show team assignment status based on maintenanceTeamId */}
+                        {user?.role === "WARD_OFFICER" ? (
+                          // Ward Officer view: show assignment status based on maintenanceTeamId
+                          complaint.maintenanceTeamId ? (
+                            <Badge className="bg-green-100 text-green-800 text-xs">
+                              Assigned:{" "}
+                              {complaint.maintenanceTeam?.fullName || "Unknown"}
                             </Badge>
-                          )}
-                        {complaint.maintenanceTeam && (
-                          <Badge className="bg-green-100 text-green-800 text-xs">
-                            Team:{" "}
-                            {complaint.maintenanceTeam.fullName.split(" ")[0]}
-                          </Badge>
-                        )}
-                        {complaint.wardOfficer && (
-                          <Badge className="bg-blue-100 text-blue-800 text-xs">
-                            WO: {complaint.wardOfficer.fullName.split(" ")[0]}
-                          </Badge>
+                          ) : (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs">
+                              Needs Assignment
+                            </Badge>
+                          )
+                        ) : (
+                          // Other user roles: show original logic
+                          <>
+                            {(complaint as any).needsTeamAssignment &&
+                              !["RESOLVED", "CLOSED"].includes(
+                                complaint.status,
+                              ) && (
+                                <Badge className="bg-orange-100 text-orange-800 text-xs">
+                                  Needs Team Assignment
+                                </Badge>
+                              )}
+                            {complaint.maintenanceTeam && (
+                              <Badge className="bg-green-100 text-green-800 text-xs">
+                                Team:{" "}
+                                {
+                                  complaint.maintenanceTeam.fullName.split(
+                                    " ",
+                                  )[0]
+                                }
+                              </Badge>
+                            )}
+                            {complaint.wardOfficer && (
+                              <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                WO:{" "}
+                                {complaint.wardOfficer.fullName.split(" ")[0]}
+                              </Badge>
+                            )}
+                          </>
                         )}
                       </div>
                     </TableCell>

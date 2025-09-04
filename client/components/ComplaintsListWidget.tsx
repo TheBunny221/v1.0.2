@@ -1,5 +1,6 @@
-import { React, useState } from "react";
+import { React, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -12,7 +13,15 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { FileText, Calendar, MapPin, Eye, RefreshCw } from "lucide-react";
+import {
+  FileText,
+  Calendar,
+  MapPin,
+  Eye,
+  RefreshCw,
+  Users,
+  UserCheck,
+} from "lucide-react";
 
 import ComplaintQuickActions from "./ComplaintQuickActions";
 import UpdateComplaintModal from "./UpdateComplaintModal";
@@ -23,6 +32,8 @@ interface ComplaintsListWidgetProps {
   maxHeight?: string;
   showActions?: boolean;
   onComplaintUpdate?: () => void;
+  userRole?: string;
+  user?: any;
 }
 
 const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
@@ -31,20 +42,39 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
   maxHeight = "400px",
   showActions = true,
   onComplaintUpdate,
+  userRole,
+  user,
 }) => {
+  const { user: currentUser } = useAppSelector((state) => state.auth);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
+
+  // Use provided user or fall back to current user from store
+  const effectiveUser = user || currentUser;
+  const effectiveUserRole = userRole || effectiveUser?.role;
+
+  // Build query params with ward filtering for Ward Officers
+  const queryParams = useMemo(() => {
+    const params = {
+      ...filters,
+      page: 1,
+      limit: 50,
+    };
+
+    // Strictly enforce ward-based filtering for Ward Officers
+    if (effectiveUserRole === "WARD_OFFICER" && effectiveUser?.wardId) {
+      params.wardId = effectiveUser.wardId;
+    }
+
+    return params;
+  }, [filters, effectiveUserRole, effectiveUser?.wardId]);
 
   const {
     data: complaintsResponse,
     isLoading,
     error,
     refetch,
-  } = useGetComplaintsQuery({
-    ...filters,
-    page: 1,
-    limit: 50,
-  });
+  } = useGetComplaintsQuery(queryParams);
 
   // Handle different response structures
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
@@ -82,6 +112,24 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Get team assignment status based on maintenanceTeamId
+  const getTeamAssignmentStatus = (complaint: any) => {
+    if (complaint.maintenanceTeamId) {
+      return {
+        status: "Assigned",
+        color: "bg-green-100 text-green-800",
+        teamMember:
+          complaint.maintenanceTeam?.fullName || "Unknown Team Member",
+      };
+    } else {
+      return {
+        status: "Needs Assignment",
+        color: "bg-orange-100 text-orange-800",
+        teamMember: null,
+      };
     }
   };
 
@@ -145,9 +193,21 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>SLA</TableHead>
-                  <TableHead>Closed</TableHead>
+                  {effectiveUserRole === "WARD_OFFICER" && (
+                    <TableHead>Team Assignment</TableHead>
+                  )}
+                  {effectiveUserRole === "WARD_OFFICER" && (
+                    <TableHead>Team Member</TableHead>
+                  )}
+                  {effectiveUserRole !== "WARD_OFFICER" && (
+                    <TableHead>Rating</TableHead>
+                  )}
+                  {effectiveUserRole !== "WARD_OFFICER" && (
+                    <TableHead>SLA</TableHead>
+                  )}
+                  {effectiveUserRole !== "WARD_OFFICER" && (
+                    <TableHead>Closed</TableHead>
+                  )}
                   <TableHead>Updated</TableHead>
                   <TableHead>Date</TableHead>
                   {showActions && <TableHead>Actions</TableHead>}
@@ -181,51 +241,82 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <Badge className={getPriorityColor(complaint.priority)}>
-                          {complaint.priority || "N/A"}
-                        </Badge>
-                        {(complaint as any).needsTeamAssignment && (
-                          <Badge className="bg-purple-100 text-purple-800 text-xs">
-                            Needs Team Assignment
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {typeof complaint.rating === "number" &&
-                      complaint.rating > 0 ? (
-                        <span className="text-sm font-medium">
-                          {complaint.rating}/5
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-500">N/A</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          (complaint.slaStatus === "OVERDUE" &&
-                            "bg-red-100 text-red-800") ||
-                          (complaint.slaStatus === "WARNING" &&
-                            "bg-yellow-100 text-yellow-800") ||
-                          (complaint.slaStatus === "ON_TIME" &&
-                            "bg-green-100 text-green-800") ||
-                          "bg-gray-100 text-gray-800"
-                        }
-                      >
-                        {complaint.slaStatus?.replace("_", " ") || "N/A"}
+                      <Badge className={getPriorityColor(complaint.priority)}>
+                        {complaint.priority || "N/A"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {complaint.closedOn ? (
-                        <span className="text-sm">
-                          {new Date(complaint.closedOn).toLocaleDateString()}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-500">-</span>
-                      )}
-                    </TableCell>
+                    {effectiveUserRole === "WARD_OFFICER" && (
+                      <>
+                        <TableCell>
+                          {(() => {
+                            const assignment =
+                              getTeamAssignmentStatus(complaint);
+                            return (
+                              <Badge className={assignment.color}>
+                                {assignment.status}
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const assignment =
+                              getTeamAssignmentStatus(complaint);
+                            return assignment.teamMember ? (
+                              <div className="flex items-center text-sm">
+                                <UserCheck className="h-3 w-3 mr-1" />
+                                {assignment.teamMember}
+                              </div>
+                            ) : (
+                              <div className="flex items-center text-sm text-gray-500">
+                                <Users className="h-3 w-3 mr-1" />
+                                Not assigned
+                              </div>
+                            );
+                          })()}
+                        </TableCell>
+                      </>
+                    )}
+                    {effectiveUserRole !== "WARD_OFFICER" && (
+                      <>
+                        <TableCell>
+                          {typeof complaint.rating === "number" &&
+                          complaint.rating > 0 ? (
+                            <span className="text-sm font-medium">
+                              {complaint.rating}/5
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-500">N/A</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              (complaint.slaStatus === "OVERDUE" &&
+                                "bg-red-100 text-red-800") ||
+                              (complaint.slaStatus === "WARNING" &&
+                                "bg-yellow-100 text-yellow-800") ||
+                              (complaint.slaStatus === "ON_TIME" &&
+                                "bg-green-100 text-green-800") ||
+                              "bg-gray-100 text-gray-800"
+                            }
+                          >
+                            {complaint.slaStatus?.replace("_", " ") || "N/A"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {complaint.closedOn ? (
+                            <span className="text-sm">
+                              {new Date(
+                                complaint.closedOn,
+                              ).toLocaleDateString()}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-500">-</span>
+                          )}
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell>
                       {complaint.updatedAt ? (
                         <span className="text-sm">
@@ -257,7 +348,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                               area: complaint.area,
                               assignedTo: complaint.assignedTo,
                             }}
-                            userRole={"WARD_OFFICER"}
+                            userRole={effectiveUserRole || "WARD_OFFICER"}
                             showDetails={false}
                             onUpdate={() => {
                               refetch();

@@ -443,8 +443,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
     await prisma.statusLog.create({
       data: {
         complaintId: complaint.id,
-        userId: wardOfficerId,
-        toStatus: "REGISTERED",
+        userId: req.user.id,
+        fromStatus: "REGISTERED",
+        toStatus: "ASSIGNED",
         comment: "Complaint auto-assigned to ward officer",
       },
     });
@@ -1275,26 +1276,22 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       where: { id: assignedToId },
     });
     if (!assignee || !assignee.isActive) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Selected assignee not found or inactive",
-          data: null,
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Selected assignee not found or inactive",
+        data: null,
+      });
     }
     if (
       req.user.role === "WARD_OFFICER" &&
       assignee.role !== "MAINTENANCE_TEAM"
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "Ward Officers can only assign complaints to Maintenance Team members",
-          data: null,
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          "Ward Officers can only assign complaints to Maintenance Team members",
+        data: null,
+      });
     }
   }
 
@@ -1930,14 +1927,15 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId)
-      .length,
+    needsAssignmentToTeam: wardComplaints.filter(
+      (c) => !c.maintenanceTeamId && !["RESOLVED", "CLOSED"].includes(c.status),
+    ).length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
     assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
   };
 
-  // Calculate pending work (registered + assigned statuses)
-  const pendingWork = statusCounts.registered + statusCounts.assigned;
+  // Calculate pending work (only registered status)
+  const pendingWork = statusCounts.registered;
 
   // Calculate active work (in progress)
   const activeWork = statusCounts.in_progress;
