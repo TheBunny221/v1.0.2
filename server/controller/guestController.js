@@ -241,22 +241,25 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       }
     }
 
-    // Find and assign ward officer automatically
-    const wardOfficer = await prisma.user.findFirst({
-      where: {
-        role: "WARD_OFFICER",
-        wardId: wardId,
-        isActive: true,
-      },
-      orderBy: {
-        // Assign to ward officer with least assigned complaints for load balancing
-        wardOfficerComplaints: {
-          _count: "asc",
-        },
-      },
+    // Check auto-assignment setting
+    const autoAssignSetting = await prisma.systemConfig.findUnique({
+      where: { key: "AUTO_ASSIGN_COMPLAINTS" },
     });
+    const isAutoAssignEnabled = autoAssignSetting?.value === "true";
 
-    // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
+    // Resolve ward officer when auto-assign is enabled
+    let wardOfficerId = null;
+    if (isAutoAssignEnabled) {
+      const wardOfficer = await prisma.user.findFirst({
+        where: { role: "WARD_OFFICER", wardId, isActive: true },
+        orderBy: { wardOfficerComplaints: { _count: "asc" } },
+      });
+      if (wardOfficer) {
+        wardOfficerId = wardOfficer.id;
+      }
+    }
+
+    // Create complaint immediately with status "REGISTERED" and optional ward officer assignment
     const complaint = await createComplaintWithUniqueId({
       title: `${type} complaint`,
       description,
@@ -275,7 +278,7 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       contactPhone: phoneNumber,
       isAnonymous: false,
       deadline,
-      wardOfficerId: wardOfficer?.id || null,
+      wardOfficerId,
     });
 
     // Process attachments if any
@@ -551,11 +554,21 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     Date.now() + (priorityHours[priority || "MEDIUM"] || 48) * 60 * 60 * 1000,
   );
 
-  // Auto-assign ward officer
-  const wardOfficer = await prisma.user.findFirst({
-    where: { role: "WARD_OFFICER", wardId, isActive: true },
-    orderBy: { wardOfficerComplaints: { _count: "asc" } },
+  // Check auto-assignment setting and optionally pick a ward officer
+  const autoAssignSetting = await prisma.systemConfig.findUnique({
+    where: { key: "AUTO_ASSIGN_COMPLAINTS" },
   });
+  const isAutoAssignEnabled = autoAssignSetting?.value === "true";
+  let wardOfficerId = null;
+  if (isAutoAssignEnabled) {
+    const wardOfficer = await prisma.user.findFirst({
+      where: { role: "WARD_OFFICER", wardId, isActive: true },
+      orderBy: { wardOfficerComplaints: { _count: "asc" } },
+    });
+    if (wardOfficer) {
+      wardOfficerId = wardOfficer.id;
+    }
+  }
 
   // Create complaint now (after verification)
   const complaint = await createComplaintWithUniqueId({
@@ -576,7 +589,7 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     contactPhone: phoneNumber,
     isAnonymous: false,
     deadline,
-    wardOfficerId: wardOfficer?.id || null,
+    wardOfficerId,
     submittedById: user.id,
   });
 
@@ -611,6 +624,18 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     },
   });
 
+  // Log ward officer assignment when applicable
+  if (wardOfficerId) {
+    await prisma.statusLog.create({
+      data: {
+        complaintId: complaint.id,
+        userId: wardOfficerId,
+        toStatus: "REGISTERED",
+        comment: "Complaint auto-assigned to ward officer",
+      },
+    });
+  }
+
   const token = generateJWTToken(user);
 
   if (isNewUser) {
@@ -629,19 +654,31 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
   }
 
   // Notify ward officers
-  const wardOfficers = await prisma.user.findMany({
-    where: { role: "WARD_OFFICER", wardId: complaint.wardId, isActive: true },
-  });
-  for (const officer of wardOfficers) {
+  if (wardOfficerId) {
     await prisma.notification.create({
       data: {
-        userId: officer.id,
+        userId: wardOfficerId,
         complaintId: complaint.id,
         type: "IN_APP",
-        title: "New Verified Complaint",
-        message: `A new ${complaint.type} complaint has been verified and registered in your ward.`,
+        title: "New Complaint Assigned",
+        message: `A new ${complaint.type} complaint has been assigned to you in ${complaint.ward?.name || "your ward"}. Please review and assign to maintenance team.`,
       },
     });
+  } else {
+    const wardOfficers = await prisma.user.findMany({
+      where: { role: "WARD_OFFICER", wardId: complaint.wardId, isActive: true },
+    });
+    for (const officer of wardOfficers) {
+      await prisma.notification.create({
+        data: {
+          userId: officer.id,
+          complaintId: complaint.id,
+          type: "IN_APP",
+          title: "New Verified Complaint",
+          message: `A new ${complaint.type} complaint has been verified and registered in your ward.`,
+        },
+      });
+    }
   }
 
   const { password: _pw, ...userResponse } = user;
