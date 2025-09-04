@@ -1938,8 +1938,8 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
     assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
   };
 
-  // Calculate pending work (registered + assigned statuses)
-  const pendingWork = statusCounts.registered + statusCounts.assigned;
+  // Calculate pending work (only registered status)
+  const pendingWork = statusCounts.registered;
 
   // Calculate active work (in progress)
   const activeWork = statusCounts.in_progress;
