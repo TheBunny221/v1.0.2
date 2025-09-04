@@ -173,8 +173,8 @@ const WardOfficerDashboard: React.FC = () => {
           <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
           <p className="text-blue-100">Loading ward statistics...</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {Array(5)
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {Array(6)
             .fill(0)
             .map((_, i) => (
               <Card key={i} className="animate-pulse">
