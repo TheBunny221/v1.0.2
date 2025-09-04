@@ -5,39 +5,36 @@ dotenv.config();
 
 // Create transporter
 const createTransporter = () => {
+  const host = process.env.EMAIL_SERVICE;
+  const port = parseInt(process.env.EMAIL_PORT || "587", 10);
+  const secure = port === 465; // 465 = SSL
+
   if (process.env.NODE_ENV === "production") {
-    // Production email configuration
     return nodemailer.createTransport({
-      host: process.env.EMAIL_SERVICE,
-      port: process.env.EMAIL_PORT || 587,
-      secure: false, // true if using port 465
+      host,
+      port,
+      secure,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
   } else {
-    // Development email configuration using Ethereal
-    console.log(
-      "Email transporter created for development:",
-      process.env.EMAIL_SERVICE,
-    );
-
-   
-  
-    
-
-    // return nodemailer.createTransport({
-    //   host: process.env.EMAIL_SERVICE || "smtp.ethereal.email",
-    //   port: parseInt(process.env.EMAIL_PORT) || 587,
-    //   secure: false, // true for 465, false for other ports
-    //   auth: {
-    //     user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
-    //     pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
-    //   },
-    //   debug: true, // Enable debug logs for development
-    //   logger: true, // Enable logs
-    // });
+    // Development: use provided creds if set, otherwise Ethereal
+    const devHost = host || "smtp.ethereal.email";
+    const devPort = port || 587;
+    const devSecure = devPort === 465;
+    return nodemailer.createTransport({
+      host: devHost,
+      port: devPort,
+      secure: devSecure,
+      auth: {
+        user: process.env.EMAIL_USER || process.env.ETHEREAL_USER,
+        pass: process.env.EMAIL_PASS || process.env.ETHEREAL_PASS,
+      },
+      debug: true,
+      logger: true,
+    });
   }
 };
 
@@ -47,8 +44,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from:
-        "Cochin Smart City ",
+      from: `${process.env.EMAIL_FROM || "Cochin Smart City"} <${process.env.EMAIL_USER || "no-reply@example.com"}>`,
       to,
       subject,
       text,
