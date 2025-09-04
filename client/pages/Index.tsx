@@ -172,71 +172,7 @@ const Index: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Phone className="h-5 w-5 text-green-500" />
-                <span>
-                  {translations?.guest?.supportContact ||
-                    "Need Help? Contact Us"}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.guest?.supportContact || "Helpline"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig("CONTACT_HELPLINE", "1800-XXX-XXXX")}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.auth?.email || "Email Support"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig("CONTACT_EMAIL", "support@cochinsmartcity.in")}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-orange-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.common?.time || "Office Hours"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig(
-                        "CONTACT_OFFICE_HOURS",
-                        "Monday - Friday: 9 AM - 6 PM",
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-purple-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.complaints?.location || "Office Location"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig(
-                        "CONTACT_OFFICE_ADDRESS",
-                        "Cochin Corporation Office",
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ContactInfoCard />
 
           {/* Service Features */}
           <Card>
