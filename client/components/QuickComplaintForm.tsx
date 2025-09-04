@@ -124,6 +124,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const [otpCode, setOtpCode] = useState("");
   const [complaintId, setComplaintId] = useState<string | null>(null);
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false);
 
   const { toast } = useToast();
   const { getConfig } = useSystemConfig();
