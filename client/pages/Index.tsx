@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import QuickComplaintForm from "../components/QuickComplaintForm";
 import QuickTrackForm from "../components/QuickTrackForm";
+import ContactInfoCard from "../components/ContactInfoCard";
 
 const Index: React.FC = () => {
   const { translations, currentLanguage } = useAppSelector(
@@ -241,7 +242,7 @@ const Index: React.FC = () => {
                   <div>
                     <div className="font-medium">
                       {currentLanguage === "hi"
-                        ? "बहुभाषी सहायता"
+                        ? "बहुभाषी ���हायता"
                         : currentLanguage === "ml"
                           ? "ബഹുഭ��ഷാ പിന്തുണ"
                           : "Multilingual Support"}
