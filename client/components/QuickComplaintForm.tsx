@@ -272,7 +272,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      if (isLoading) return; // 👈
+      if ((submissionMode === "guest" ? guestIsSubmitting : isLoading) || isSubmittingLocal) return;
       setIsSubmittingLocal(true);
       if (!captcha || !captchaId) {
         dispatch(
