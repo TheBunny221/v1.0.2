@@ -216,17 +216,26 @@ const WardOfficerDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">🏢 Ward Officer Dashboard</h1>
-        <p className="text-blue-100">
-          Manage complaints for {user?.ward?.name || "your assigned ward"} and
-          monitor team performance.
-        </p>
-        <div className="mt-3 text-blue-100">
-          <span className="text-lg font-semibold text-white">
-            Total Complaints: {stats?.summary.totalComplaints || 0}
-          </span>
+      <div className="flex gap-4">
+        <div className="flex-1 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">🏢 Ward Officer Dashboard</h1>
+          <p className="text-blue-100">
+            Manage complaints for {user?.ward?.name || "your assigned ward"} and
+            monitor team performance.
+          </p>
         </div>
+
+        {/* Total Complaints Card */}
+        <Card className="min-w-[200px] bg-white shadow-lg">
+          <CardContent className="p-6 text-center">
+            <div className="text-4xl font-bold text-blue-600 mb-2">
+              {stats?.summary.totalComplaints || 0}
+            </div>
+            <p className="text-sm text-gray-600 font-medium">
+              Total Complaints
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Statistics Cards with Filters */}
