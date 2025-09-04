@@ -1931,8 +1931,9 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
 
   // Assignment tracking
   const assignmentCounts = {
-    needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId)
-      .length,
+    needsAssignmentToTeam: wardComplaints.filter((c) =>
+      !c.maintenanceTeamId && !["RESOLVED", "CLOSED"].includes(c.status)
+    ).length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
     assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
   };
