@@ -119,6 +119,38 @@ export const initializeDatabase = async () => {
       console.warn("   npx prisma db push");
     }
 
+    // Data migration: copy assignedToId -> wardOfficerId when assignee is a Ward Officer
+    try {
+      const candidates = await prisma.complaint.findMany({
+        where: {
+          wardOfficerId: null,
+          NOT: { assignedToId: null },
+        },
+        select: { id: true, assignedToId: true },
+      });
+
+      let migrated = 0;
+      for (const c of candidates) {
+        if (!c.assignedToId) continue;
+        const assignee = await prisma.user.findUnique({
+          where: { id: c.assignedToId },
+          select: { id: true, role: true, isActive: true },
+        });
+        if (assignee && assignee.role === "WARD_OFFICER" && assignee.isActive) {
+          await prisma.complaint.update({
+            where: { id: c.id },
+            data: { wardOfficerId: assignee.id },
+          });
+          migrated++;
+        }
+      }
+      if (migrated > 0) {
+        console.log(`🔁 Migrated ${migrated} complaints to wardOfficerId`);
+      }
+    } catch (migErr) {
+      console.warn("⚠️ Ward officer migration skipped:", migErr.message);
+    }
+
     console.log("🎉 Database initialization completed successfully");
     return true;
   } catch (error) {
