@@ -451,12 +451,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       onSuccess?.(result.data?.complaint?.id || "");
     } catch (error: any) {
       console.error("OTP verification error:", error);
+      const message = typeof error === "string" ? error : getApiErrorMessage(error);
       toast({
         title: "Verification Failed",
-        description:
-          error?.data?.message ||
-          error?.message ||
-          "Invalid verification code. Please try again.",
+        description: message || "Invalid verification code. Please try again.",
         variant: "destructive",
       });
     } finally {
