@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting DEVELOPMENT database seeding...");
+  console.log("�� Starting DEVELOPMENT database seeding...");
 
   try {
     // Clear ALL existing data regardless of environment
@@ -675,7 +675,7 @@ async function main() {
           contactEmail: randomCitizen.email,
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
-          assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
+          wardOfficerId: status !== "REGISTERED" ? randomOfficer?.id : null,
           maintenanceTeamId: randomTeamMember?.id || null,
           createdAt: complaintDate,
           submittedOn: complaintDate,
