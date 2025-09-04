@@ -22,17 +22,14 @@ export interface GuestComplaintRequest {
 }
 
 export interface GuestComplaintResponse {
-  complaintId: string;
-  trackingNumber: string;
+  sessionId: string;
   email: string;
   expiresAt: string;
 }
 
 export interface GuestOtpVerifyRequest {
-  email: string;
-  otpCode: string;
-  complaintId: string;
-  createAccount: boolean;
+  // Deprecated interface - verification now accepts full complaint data via FormData
+  [key: string]: any;
 }
 
 export interface GuestOtpVerifyResponse {
@@ -44,7 +41,6 @@ export interface GuestOtpVerifyResponse {
 
 export interface GuestOtpResendRequest {
   email: string;
-  complaintId: string;
 }
 
 export interface TrackComplaintRequest {
@@ -96,6 +92,9 @@ export const guestApi = baseApi.injectEndpoints({
       ApiResponse<{
         complaint: any;
         user: any;
+        token: string;
+        isNewUser: boolean;
+        redirectTo?: string;
       }>,
       { complaintId: string; otpCode: string }
     >({
@@ -121,20 +120,19 @@ export const guestApi = baseApi.injectEndpoints({
     // Verify guest OTP and create account
     verifyGuestOtp: builder.mutation<
       ApiResponse<GuestOtpVerifyResponse>,
-      GuestOtpVerifyRequest
+      FormData | Record<string, any>
     >({
       query: (data) => ({
         url: "/guest/verify-otp",
         method: "POST",
         body: data,
       }),
-      // Removed transformResponse to prevent response body conflicts
       invalidatesTags: ["Auth"],
     }),
 
     // Resend guest OTP
     resendGuestOtp: builder.mutation<
-      ApiResponse<{ message: string; expiresAt: string }>,
+      ApiResponse<{ message: string; expiresAt: string; sessionId: string }>,
       GuestOtpResendRequest
     >({
       query: (data) => ({
@@ -142,7 +140,6 @@ export const guestApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      // Removed transformResponse to prevent response body conflicts
     }),
 
     // Track complaint (public endpoint)

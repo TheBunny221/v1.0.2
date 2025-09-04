@@ -21,6 +21,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import QuickComplaintForm from "../components/QuickComplaintForm";
+import QuickTrackForm from "../components/QuickTrackForm";
+import ContactInfoCard from "../components/ContactInfoCard";
 
 const Index: React.FC = () => {
   const { translations, currentLanguage } = useAppSelector(
@@ -32,6 +34,7 @@ const Index: React.FC = () => {
 
   // Form state
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+  const [isTrackExpanded, setIsTrackExpanded] = useState(false);
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
@@ -85,12 +88,18 @@ const Index: React.FC = () => {
               </Button>**/}
 
               <Button
-                onClick={() => setIsFormExpanded(!isFormExpanded)}
+                onClick={() => {
+                  setIsFormExpanded((v) => !v);
+                  setIsTrackExpanded(false);
+                }}
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
                 variant="outline"
               >
-                <FileText className="mr-2 h-5 w-5" style={{color:"#ffffff"}} />
+                <FileText
+                  className="mr-2 h-5 w-5"
+                  style={{ color: "#ffffff" }}
+                />
                 {translations?.complaints?.registerComplaint ||
                   "Register Complaint"}
               </Button>
@@ -105,11 +114,16 @@ const Index: React.FC = () => {
                         "Login"}
                     </Link>
                   </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link to="/guest/track">
-                      <Clock className="mr-2 h-5 w-5" />
-                      {translations?.nav?.trackStatus || "Track Complaint"}
-                    </Link>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      setIsTrackExpanded((v) => !v);
+                      setIsFormExpanded(false);
+                    }}
+                  >
+                    <Clock className="mr-2 h-5 w-5" />
+                    {translations?.nav?.trackStatus || "Track Complaint"}
                   </Button>
                 </>
               ) : (
@@ -139,9 +153,19 @@ const Index: React.FC = () => {
           <QuickComplaintForm
             onSuccess={(complaintId) => {
               setIsFormExpanded(false);
+              setIsTrackExpanded(false);
             }}
-            onClose={() => setIsFormExpanded(false)}
+            onClose={() => {
+              setIsFormExpanded(false);
+            }}
           />
+        </div>
+      )}
+
+      {/* Quick Track Form */}
+      {isTrackExpanded && !isFormExpanded && (
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <QuickTrackForm onClose={() => setIsTrackExpanded(false)} />
         </div>
       )}
 
@@ -149,71 +173,7 @@ const Index: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Phone className="h-5 w-5 text-green-500" />
-                <span>
-                  {translations?.guest?.supportContact ||
-                    "Need Help? Contact Us"}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.guest?.supportContact || "Helpline"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig("CONTACT_HELPLINE", "1800-XXX-XXXX")}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.auth?.email || "Email Support"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig("CONTACT_EMAIL", "support@cochinsmartcity.in")}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-orange-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.common?.time || "Office Hours"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig(
-                        "CONTACT_OFFICE_HOURS",
-                        "Monday - Friday: 9 AM - 6 PM",
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-purple-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">
-                      {translations?.complaints?.location || "Office Location"}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {getConfig(
-                        "CONTACT_OFFICE_ADDRESS",
-                        "Cochin Corporation Office",
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ContactInfoCard />
 
           {/* Service Features */}
           <Card>
@@ -270,7 +230,7 @@ const Index: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">
                       {currentLanguage === "hi"
-                        ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप्त करें"
+                        ? "पंजीकरण से समाधान तक प्रत्येक चरण में सूचना प्राप���त करें"
                         : currentLanguage === "ml"
                           ? "രജി��്ട്രേഷൻ മുതൽ പരിഹാരം വരെ ഓരോ ഘട്ടത്തിലും അറിയിപ്പ് ലഭിക്കുക"
                           : "Get notified at each stage — from registration to resolution"}
@@ -282,7 +242,7 @@ const Index: React.FC = () => {
                   <div>
                     <div className="font-medium">
                       {currentLanguage === "hi"
-                        ? "बहुभाषी सहायता"
+                        ? "बहुभाषी ���हायता"
                         : currentLanguage === "ml"
                           ? "ബഹുഭ��ഷാ പിന്തുണ"
                           : "Multilingual Support"}

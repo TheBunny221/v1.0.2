@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import { useCreateComplaintMutation } from "../store/api/complaintsApi";
+import OtpDialog from "./OtpDialog";
+import { useSubmitGuestComplaintMutation } from "../store/api/guestApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 
 // Define types locally instead of importing from deprecated slice
 type ComplaintType =
@@ -28,6 +31,7 @@ import {
   useGenerateCaptchaQuery,
   useLazyGenerateCaptchaQuery,
 } from "../store/api/guestApi";
+import { useResendGuestOtpMutation } from "../store/api/guestApi";
 import { selectAuth, setCredentials } from "../store/slices/authSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { useToast } from "../hooks/use-toast";
@@ -57,6 +61,7 @@ import {
   CheckCircle,
   AlertCircle,
   X,
+  Loader2,
 } from "lucide-react";
 import { createComplaint } from "@/store/slices/complaintsSlice";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
@@ -121,14 +126,23 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const [otpCode, setOtpCode] = useState("");
   const [complaintId, setComplaintId] = useState<string | null>(null);
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false);
 
   const { toast } = useToast();
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
+  const [resendGuestOtp] = useResendGuestOtpMutation();
+  const [submitGuestComplaintMutation, { isLoading: isSendingOtp }] =
+    useSubmitGuestComplaintMutation();
   const [
     generateCaptcha,
     { data: captchaData, isLoading: captchaLoading, error: captchaError },
   ] = useLazyGenerateCaptchaQuery();
+
+  const guestIsSubmitting = useAppSelector((state) => state.guest.isSubmitting);
 
   // Pre-fill user data if authenticated and set submission mode
   useEffect(() => {
@@ -262,8 +276,12 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-     
-      if (isLoading) return; // 👈 
+      if (
+        (submissionMode === "guest" ? guestIsSubmitting : isLoading) ||
+        isSubmittingLocal
+      )
+        return;
+      setIsSubmittingLocal(true);
       if (!captcha || !captchaId) {
         dispatch(
           showErrorToast(
@@ -328,42 +346,22 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           resetForm();
           onSuccess?.(result.id);
         } else {
-          // Guest flow: Submit complaint and send OTP
-          const guestFormData : GuestComplaintData = {
-            fullName: formData.fullName,
-            email: formData.email,
-            phoneNumber: formData.mobile,
-            type: formData.problemType,
-            priority: "MEDIUM",
-            wardId: formData.ward,
-            subZoneId: formData.subZoneId || undefined,
-            area: formData.area,
-            landmark: formData.location,
-            address: formData.address,
-            description: formData.description,
-            coordinates: formData.coordinates,
-            captchaId: captchaId,
-            captchaText: captcha,
-          };
+          // Guest flow: Send OTP initiation (no attachments here)
+          const submissionData = new FormData();
+          submissionData.append("fullName", formData.fullName);
+          submissionData.append("email", formData.email);
+          submissionData.append("phoneNumber", formData.mobile);
+          if (captchaId) submissionData.append("captchaId", String(captchaId));
+          if (captcha) submissionData.append("captchaText", captcha);
 
-          // Convert files to FileAttachment format
-          const fileAttachments: FileAttachment[] = files.map(
-            (file, index) => ({
-              id: `file-${index}-${Date.now()}`,
-              file,
-            }),
-          );
+          const response =
+            await submitGuestComplaintMutation(submissionData).unwrap();
+          const result: any = response?.data || response;
 
-          const result = await dispatch(
-            submitGuestComplaint({
-              complaintData: guestFormData,
-              files: fileAttachments,
-            }),
-          ).unwrap();
-
-          if (result.complaintId && result.trackingNumber) {
-            setComplaintId(result.complaintId);
-            setShowOtpInput(true);
+          if (result?.sessionId) {
+            setSessionId(result.sessionId);
+            setShowOtpInput(false);
+            setShowOtpDialog(true);
             toast({
               title: "Verification Code Sent",
               description: `A verification code has been sent to ${formData.email}. Please check your email and enter the code below.`,
@@ -372,12 +370,16 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         }
       } catch (error: any) {
         console.error("Complaint submission error:", error);
+        const message =
+          typeof error === "string" ? error : getApiErrorMessage(error);
         toast({
           title: "Submission Failed",
           description:
-            error.message || "Failed to submit complaint. Please try again.",
+            message || "Failed to submit complaint. Please try again.",
           variant: "destructive",
         });
+      } finally {
+        setIsSubmittingLocal(false);
       }
     },
     [
@@ -397,78 +399,78 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   );
 
   // Handle OTP verification and final submission
-  const handleVerifyOtp = useCallback(async () => {
-    if (!otpCode || otpCode.length !== 6) {
-      toast({
-        title: "Invalid Code",
-        description: "Please enter a valid 6-digit verification code.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!complaintId) {
-      toast({
-        title: "Error",
-        description: "Complaint ID not found. Please try submitting again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Use RTK Query mutation for OTP verification
-      const result = await verifyGuestOtp({
-        email: formData.email,
-        otpCode,
-        complaintId,
-        createAccount: true,
-      }).unwrap();
-
-      // Store auth token and user data if provided
-      if (result.data?.token && result.data?.user) {
-        dispatch(
-          setCredentials({
-            token: result.data.token,
-            user: result.data.user,
-          }),
-        );
-        localStorage.setItem("token", result.data.token);
+  const handleVerifyOtp = useCallback(
+    async (code?: string) => {
+      const inputCode = code ?? otpCode;
+      if (!inputCode || inputCode.length !== 6) {
+        toast({
+          title: "Invalid Code",
+          description: "Please enter a valid 6-digit verification code.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      toast({
-        title: "Success!",
-        description: result.data?.isNewUser
-          ? "Your complaint has been verified and your citizen account has been created successfully!"
-          : "Your complaint has been verified and you've been logged in successfully!",
-      });
+      try {
+        setIsVerifyingOtp(true);
+        const fd = new FormData();
+        fd.append("email", formData.email);
+        fd.append("otpCode", inputCode);
+        fd.append("fullName", formData.fullName);
+        fd.append("phoneNumber", formData.mobile);
+        fd.append("type", formData.problemType);
+        fd.append("description", formData.description);
+        fd.append("priority", "MEDIUM");
+        fd.append("wardId", formData.ward);
+        if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
+        fd.append("area", formData.area);
+        if (formData.location) fd.append("landmark", formData.location);
+        if (formData.address) fd.append("address", formData.address);
+        if (formData.coordinates)
+          fd.append("coordinates", JSON.stringify(formData.coordinates));
+        for (const file of files) fd.append("attachments", file);
 
-      // Reset form and call success callback
-      resetForm();
-      setShowOtpInput(false);
-      setComplaintId(null);
-      setOtpCode("");
-      onSuccess?.(complaintId);
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      toast({
-        title: "Verification Failed",
-        description:
-          error?.data?.message ||
-          error?.message ||
-          "Invalid verification code. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [
-    otpCode,
-    complaintId,
-    formData.email,
-    verifyGuestOtp,
-    dispatch,
-    toast,
-    onSuccess,
-  ]);
+        const result = await verifyGuestOtp(fd).unwrap();
+
+        if (result.data?.token && result.data?.user) {
+          dispatch(
+            setCredentials({
+              token: result.data.token,
+              user: result.data.user,
+            }),
+          );
+          localStorage.setItem("token", result.data.token);
+        }
+
+        toast({
+          title: "Success!",
+          description: result.data?.isNewUser
+            ? "Your complaint has been verified and your citizen account has been created successfully!"
+            : "Your complaint has been verified and you've been logged in successfully!",
+        });
+
+        resetForm();
+        setShowOtpInput(false);
+        setSessionId(null);
+        setOtpCode("");
+        setShowOtpDialog(false);
+        onSuccess?.(result.data?.complaint?.id || "");
+      } catch (error: any) {
+        console.error("OTP verification error:", error);
+        const message =
+          typeof error === "string" ? error : getApiErrorMessage(error);
+        toast({
+          title: "Verification Failed",
+          description:
+            message || "Invalid verification code. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsVerifyingOtp(false);
+      }
+    },
+    [otpCode, formData, files, verifyGuestOtp, dispatch, toast, onSuccess],
+  );
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -488,7 +490,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     setCaptcha("");
     setCaptchaId(null);
     setOtpCode("");
-    setComplaintId(null);
+    setSessionId(null);
     setShowOtpInput(false);
     handleRefreshCaptcha();
   }, [isAuthenticated, user, handleRefreshCaptcha]);
@@ -729,7 +731,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="address">
-                    {(translations as any)?.complaints?.address || "Full Address"}
+                    {(translations as any)?.complaints?.address ||
+                      "Full Address"}
                   </Label>
                   <Textarea
                     id="address"
@@ -754,7 +757,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               </h3>
               <div className="space-y-2">
                 <Label htmlFor="description">
-                  {(translations as any)?.complaints?.description || (translations as any)?.forms?.description || "Description"} *
+                  {(translations as any)?.complaints?.description ||
+                    (translations as any)?.forms?.description ||
+                    "Description"}{" "}
+                  *
                 </Label>
                 <Textarea
                   id="description"
@@ -929,7 +935,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                         onClick={() => {
                           setShowOtpInput(false);
                           setOtpCode("");
-                          setComplaintId(null);
+                          setSessionId(null);
                         }}
                       >
                         Back
@@ -946,14 +952,26 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                 <Button
                   type="submit"
                   className="flex-1 md:flex-none"
-                  disabled={isLoading}
+                  disabled={
+                    submissionMode === "guest"
+                      ? isSendingOtp || isSubmittingLocal
+                      : isLoading
+                  }
                 >
-                  {isLoading
-                    ? translations?.common?.loading || "Submitting..."
-                    : submissionMode === "citizen"
-                      ? translations?.forms?.submitComplaint ||
-                        "Submit Complaint"
-                      : "Submit & Send Verification"}
+                  {submissionMode === "guest" ? (
+                    isSendingOtp || isSubmittingLocal ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Sending Code...
+                      </>
+                    ) : (
+                      "Submit & Send Verification"
+                    )
+                  ) : isLoading ? (
+                    translations?.common?.loading || "Submitting..."
+                  ) : (
+                    translations?.forms?.submitComplaint || "Submit Complaint"
+                  )}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   {translations?.forms?.resetForm || "Reset Form"}
@@ -963,6 +981,38 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           </form>
         </CardContent>
       </Card>
+
+      {/* OTP Dialog */}
+      {showOtpDialog && (
+        <OtpDialog
+          open={showOtpDialog}
+          onOpenChange={setShowOtpDialog}
+          context="guestComplaint"
+          email={formData.email}
+          onVerified={async ({ otpCode }) => {
+            if (!otpCode) return;
+            await handleVerifyOtp(otpCode);
+          }}
+          onResend={async () => {
+            try {
+              await resendGuestOtp({ email: formData.email }).unwrap();
+              toast({
+                title: "Verification Code Resent",
+                description:
+                  "A new verification code has been sent to your email.",
+              });
+            } catch (error: any) {
+              toast({
+                title: "Failed to Resend",
+                description:
+                  error?.message || "Failed to resend verification code.",
+                variant: "destructive",
+              });
+            }
+          }}
+          isVerifying={isVerifyingOtp}
+        />
+      )}
 
       {/* Location Map Dialog */}
       <SimpleLocationMapDialog

@@ -7,6 +7,75 @@ import bcrypt from "bcryptjs";
 
 const prisma = getPrisma();
 
+// Transaction-safe complaint ID generator (aligned with authenticated flow)
+const generateSequentialComplaintId = async () => {
+  return await prisma.$transaction(async (tx) => {
+    const config = await tx.systemConfig.findMany({
+      where: {
+        key: {
+          in: [
+            "COMPLAINT_ID_PREFIX",
+            "COMPLAINT_ID_START_NUMBER",
+            "COMPLAINT_ID_LENGTH",
+          ],
+        },
+      },
+    });
+    const settings = config.reduce((acc, setting) => {
+      acc[setting.key] = setting.value;
+      return acc;
+    }, {});
+    const prefix = settings.COMPLAINT_ID_PREFIX || "KSC";
+    const startNumber = parseInt(settings.COMPLAINT_ID_START_NUMBER || "1");
+    const idLength = parseInt(settings.COMPLAINT_ID_LENGTH || "4");
+
+    const existing = await tx.complaint.findMany({
+      where: { complaintId: { startsWith: prefix, not: null } },
+      select: { complaintId: true },
+      orderBy: { complaintId: "desc" },
+    });
+    let maxNumber = startNumber - 1;
+    for (const c of existing) {
+      if (c.complaintId) {
+        const n = parseInt(c.complaintId.replace(prefix, ""));
+        if (!isNaN(n) && n > maxNumber) maxNumber = n;
+      }
+    }
+    const nextNumber = maxNumber + 1;
+    const formatted = nextNumber.toString().padStart(idLength, "0");
+    return `${prefix}${formatted}`;
+  });
+};
+
+// Retry wrapper to avoid unique constraint failure
+const createComplaintWithUniqueId = async (data) => {
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      const complaintId = await generateSequentialComplaintId();
+      return await prisma.complaint.create({
+        data: { ...data, complaintId },
+        include: {
+          ward: true,
+          subZone: true,
+          wardOfficer: data.wardOfficerId
+            ? { select: { id: true, fullName: true, email: true, role: true } }
+            : false,
+        },
+      });
+    } catch (err) {
+      if (err.code === "P2002" && err.meta?.target?.includes("complaintId")) {
+        retries--;
+        await new Promise((r) => setTimeout(r, 10 + Math.random() * 20));
+        if (retries === 0) throw err;
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error("Failed to create complaint with unique ID after retries");
+};
+
 // Helper function to generate JWT token
 const generateJWTToken = (user) => {
   return jwt.sign(
@@ -172,59 +241,44 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       }
     }
 
-    // Find and assign ward officer automatically
-    const wardOfficer = await prisma.user.findFirst({
-      where: {
-        role: "WARD_OFFICER",
-        wardId: wardId,
-        isActive: true,
-      },
-    orderBy: {
-      // Assign to ward officer with least assigned complaints for load balancing
-      wardOfficerComplaints: {
-        _count: "asc",
-      },
-    },
+    // Check auto-assignment setting
+    const autoAssignSetting = await prisma.systemConfig.findUnique({
+      where: { key: "AUTO_ASSIGN_COMPLAINTS" },
     });
+    const isAutoAssignEnabled = autoAssignSetting?.value === "true";
 
-    // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
-    const complaint = await prisma.complaint.create({
-      data: {
-        title: `${type} complaint`,
-        description,
-        type,
-        priority: priority || "MEDIUM",
-        status: "REGISTERED",
-        slaStatus: "ON_TIME",
-        wardId,
-        subZoneId: subZoneId || null,
-        area,
-        landmark,
-        address,
-        coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
-        contactName: fullName,
-        contactEmail: email,
-        contactPhone: phoneNumber,
-        isAnonymous: false,
-        deadline,
-        wardOfficerId: wardOfficer?.id || null,
-        // assignToTeam can be used to signal assignment workflow in dashboards
-        // assignToTeam: true,
-        // Don't assign submittedById yet - will be set after OTP verification
-      },
-      include: {
-        ward: true,
-        wardOfficer: wardOfficer
-          ? {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                role: true,
-              },
-            }
-          : false,
-      },
+    // Resolve ward officer when auto-assign is enabled
+    let wardOfficerId = null;
+    if (isAutoAssignEnabled) {
+      const wardOfficer = await prisma.user.findFirst({
+        where: { role: "WARD_OFFICER", wardId, isActive: true },
+        orderBy: { wardOfficerComplaints: { _count: "asc" } },
+      });
+      if (wardOfficer) {
+        wardOfficerId = wardOfficer.id;
+      }
+    }
+
+    // Create complaint immediately with status "REGISTERED" and optional ward officer assignment
+    const complaint = await createComplaintWithUniqueId({
+      title: `${type} complaint`,
+      description,
+      type,
+      priority: priority || "MEDIUM",
+      status: "REGISTERED",
+      slaStatus: "ON_TIME",
+      wardId,
+      subZoneId: subZoneId || null,
+      area,
+      landmark,
+      address,
+      coordinates: coordinatesObj ? JSON.stringify(coordinatesObj) : null,
+      contactName: fullName,
+      contactEmail: email,
+      contactPhone: phoneNumber,
+      isAnonymous: false,
+      deadline,
+      wardOfficerId,
     });
 
     // Process attachments if any
@@ -269,12 +323,12 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
     const emailSent = await sendEmail({
       to: email,
       subject: "Verify Your Complaint - Cochin Smart City",
-      text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
+      text: `Your complaint has been registered with ID: ${complaint.complaintId}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
       html: `
       <h2>Complaint Registered Successfully</h2>
-      <p>Your complaint has been registered with ID: <strong>${complaint.id}</strong></p>
+      <p>Your complaint has been registered with ID: <strong>${complaint.complaintId}</strong></p>
       <p>To complete the verification process, please use the following OTP:</p>
-      <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
+      <h3 style=\"color: #2563eb; font-size: 24px; letter-spacing: 2px;\">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
       <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
       ${attachmentRecords.length > 0 ? `<p>Your complaint includes ${attachmentRecords.length} attachment(s).</p>` : ""}
@@ -307,7 +361,7 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
       message:
         "Complaint registered successfully. Please check your email for OTP verification.",
       data: {
-        complaintId: complaint.id,
+        complaintId: complaint.complaintId,
         email,
         expiresAt,
         sessionId: otpSession.id,
@@ -317,180 +371,47 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
   },
 );
 
-// @desc    Submit guest complaint with immediate registration
+// @desc    Initiate guest complaint by sending OTP (complaint will be created after OTP verification)
 // @route   POST /api/guest/complaint
 // @access  Public
 export const submitGuestComplaint = asyncHandler(async (req, res) => {
-  const {
-    fullName,
-    email,
-    phoneNumber,
-    description,
-    type,
-    priority,
-    wardId,
-    subZoneId,
-    area,
-    landmark,
-    address,
-    coordinates,
-    captchaId,
-    captchaText,
-  } = req.body;
+  const { fullName, email, phoneNumber, captchaId, captchaText } = req.body;
 
-  // Verify CAPTCHA for guest complaint submissions
   try {
     await verifyCaptchaForComplaint(captchaId, captchaText);
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: error.message || "CAPTCHA verification failed",
-    });
-  }
-
-  // Parse coordinates if it's a string
-  let parsedCoordinates = coordinates;
-  if (typeof coordinates === "string") {
-    try {
-      parsedCoordinates = JSON.parse(coordinates);
-    } catch (error) {
-      parsedCoordinates = null;
-    }
-  }
-
-  // Handle uploaded files
-  const attachments = req.files || [];
-
-  // Check if user already exists
-  let existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // Validate wardId exists
-  const ward = await prisma.ward.findUnique({
-    where: { id: wardId },
-    include: { subZones: true },
-  });
-
-  if (!ward) {
-    return res.status(400).json({
-      success: false,
-      message: `Ward with ID ${wardId} does not exist`,
+      message: error?.message || "CAPTCHA verification failed",
       data: null,
     });
   }
 
-  // Validate subZoneId if provided
-  if (subZoneId) {
-    const subZone = await prisma.subZone.findUnique({
-      where: { id: subZoneId },
+  if (!fullName || fullName.trim().length < 2 || fullName.trim().length > 100) {
+    return res.status(400).json({
+      success: false,
+      message: "Full name must be between 2 and 100 characters",
+      data: null,
     });
-
-    if (!subZone) {
-      return res.status(400).json({
-        success: false,
-        message: `Sub-zone with ID ${subZoneId} does not exist`,
-        data: null,
-      });
-    }
-
-    // Check if sub-zone belongs to the specified ward
-    if (subZone.wardId !== wardId) {
-      return res.status(400).json({
-        success: false,
-        message: `Sub-zone ${subZoneId} does not belong to ward ${wardId}`,
-        data: null,
-      });
-    }
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid email",
+      data: null,
+    });
+  }
+  if (!phoneNumber || !/^\+?[\d\s-()]{10,}$/.test(phoneNumber)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid phone number",
+      data: null,
+    });
   }
 
-  // Set deadline based on priority
-  const priorityHours = {
-    LOW: 72,
-    MEDIUM: 48,
-    HIGH: 24,
-    CRITICAL: 8,
-  };
-
-  const deadline = new Date(
-    Date.now() + priorityHours[priority || "MEDIUM"] * 60 * 60 * 1000,
-  );
-
-  // Find and assign ward officer automatically
-  const wardOfficer = await prisma.user.findFirst({
-    where: {
-      role: "WARD_OFFICER",
-      wardId: wardId,
-      isActive: true,
-    },
-    orderBy: {
-      // Assign to ward officer with least assigned complaints for load balancing
-      wardOfficerComplaints: {
-        _count: "asc",
-      },
-    },
-  });
-
-  // Create complaint immediately with status "REGISTERED" and auto-assigned ward officer
-  const complaint = await prisma.complaint.create({
-    data: {
-      title: `${type} complaint`,
-      description,
-      type,
-      priority: priority || "MEDIUM",
-      status: "REGISTERED",
-      slaStatus: "ON_TIME",
-      wardId,
-      subZoneId: subZoneId || null,
-      area,
-      landmark,
-      address,
-      coordinates: parsedCoordinates ? JSON.stringify(parsedCoordinates) : null,
-      contactName: fullName,
-      contactEmail: email,
-      contactPhone: phoneNumber,
-      isAnonymous: false,
-      deadline,
-      wardOfficerId: wardOfficer?.id || null,
-      // isMaintenanceUnassigned: true,
-      // Don't assign submittedById yet - will be set after OTP verification
-    },
-    include: {
-      ward: true,
-      wardOfficer: wardOfficer
-        ? {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              role: true,
-            },
-          }
-        : false,
-    },
-  });
-
-  // Create attachment records if files were uploaded
-  const attachmentRecords = [];
-  for (const file of attachments) {
-    const attachment = await prisma.attachment.create({
-      data: {
-        fileName: file.filename,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        size: file.size,
-        url: `/api/uploads/${file.filename}`, // URL to access the file
-        complaintId: complaint.id,
-      },
-    });
-    attachmentRecords.push(attachment);
-  }
-
-  // Generate OTP
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-  // Create OTP session for guest
   const otpSession = await prisma.oTPSession.create({
     data: {
       email,
@@ -501,26 +422,20 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     },
   });
 
-  // Send OTP email
   const emailSent = await sendEmail({
     to: email,
-    subject: "Verify Your Complaint - Cochin Smart City",
-    text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
+    subject: "Verify Your Email to Submit Complaint - Cochin Smart City",
+    text: `Your OTP for complaint submission is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
-      <h2>Complaint Registered Successfully</h2>
-      <p>Your complaint has been registered with ID: <strong>${complaint.id}</strong></p>
-      <p>To complete the verification process, please use the following OTP:</p>
+      <h2>Email Verification Required</h2>
+      <p>Use the following OTP to verify your email and submit your complaint:</p>
       <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
-      <p>After verification, you will be automatically registered as a citizen and can track your complaint.</p>
     `,
   });
 
   if (!emailSent) {
-    // If email fails, delete the complaint and OTP session
-    await prisma.complaint.delete({ where: { id: complaint.id } });
     await prisma.oTPSession.delete({ where: { id: otpSession.id } });
-
     return res.status(500).json({
       success: false,
       message: "Failed to send verification email. Please try again.",
@@ -528,16 +443,10 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Generate tracking number
-  const trackingNumber = `CSC${complaint.id.slice(-6).toUpperCase()}`;
-
   res.status(201).json({
     success: true,
-    message:
-      "Complaint registered successfully. Please check your email for OTP verification.",
+    message: "OTP sent. Please verify to submit your complaint.",
     data: {
-      complaintId: complaint.id,
-      trackingNumber,
       email,
       expiresAt,
       sessionId: otpSession.id,
@@ -545,13 +454,26 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Verify OTP and auto-register as citizen
+// @desc    Verify OTP, then create or link user, then create complaint (with attachments), finally log user in
 // @route   POST /api/guest/verify-otp
 // @access  Public
 export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
-  const { email, otpCode, complaintId } = req.body;
+  const {
+    email,
+    otpCode,
+    fullName,
+    phoneNumber,
+    description,
+    type,
+    priority,
+    wardId,
+    subZoneId,
+    area,
+    landmark,
+    address,
+    coordinates,
+  } = req.body;
 
-  // Find valid OTP session
   const otpSession = await prisma.oTPSession.findFirst({
     where: {
       email,
@@ -570,74 +492,126 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     });
   }
 
-  // Find the complaint
-  const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId },
-    include: { ward: true },
-  });
-
-  if (!complaint) {
-    return res.status(404).json({
+  // Validate ward and optional sub-zone
+  const ward = await prisma.ward.findUnique({ where: { id: wardId } });
+  if (!ward) {
+    return res.status(400).json({
       success: false,
-      message: "Complaint not found",
+      message: `Ward with ID ${wardId} does not exist`,
       data: null,
     });
   }
+  if (subZoneId) {
+    const subZone = await prisma.subZone.findUnique({
+      where: { id: subZoneId },
+    });
+    if (!subZone) {
+      return res.status(400).json({
+        success: false,
+        message: `Sub-zone with ID ${subZoneId} does not exist`,
+        data: null,
+      });
+    }
+    if (subZone.wardId !== wardId) {
+      return res.status(400).json({
+        success: false,
+        message: `Sub-zone ${subZoneId} does not belong to ward ${wardId}`,
+        data: null,
+      });
+    }
+  }
 
-  let user;
+  // Parse coordinates if provided as string
+  let parsedCoordinates = coordinates;
+  if (typeof parsedCoordinates === "string") {
+    try {
+      parsedCoordinates = JSON.parse(parsedCoordinates);
+    } catch {
+      parsedCoordinates = null;
+    }
+  }
+
+  // Determine or create user
+  let user = await prisma.user.findUnique({ where: { email } });
   let isNewUser = false;
-
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    user = existingUser;
-  } else {
-    // Create new citizen user (auto-registration)
+  if (!user) {
     user = await prisma.user.create({
       data: {
-        fullName: complaint.contactName,
-        email: complaint.contactEmail,
-        phoneNumber: complaint.contactPhone,
+        fullName,
+        email,
+        phoneNumber,
         role: "CITIZEN",
         isActive: true,
         joinedOn: new Date(),
-        // No password set initially - user can set it later
       },
-      include: { ward: true },
     });
     isNewUser = true;
   }
 
-  // Update complaint with user ID
-  const updatedComplaint = await prisma.complaint.update({
-    where: { id: complaintId },
-    data: {
-      submittedById: user.id,
-    },
-    include: {
-      ward: true,
-      submittedBy: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          phoneNumber: true,
-        },
-      },
-    },
+  // SLA deadline
+  const priorityHours = { LOW: 72, MEDIUM: 48, HIGH: 24, CRITICAL: 8 };
+  const deadline = new Date(
+    Date.now() + (priorityHours[priority || "MEDIUM"] || 48) * 60 * 60 * 1000,
+  );
+
+  // Check auto-assignment setting and optionally pick a ward officer
+  const autoAssignSetting = await prisma.systemConfig.findUnique({
+    where: { key: "AUTO_ASSIGN_COMPLAINTS" },
   });
+  const isAutoAssignEnabled = autoAssignSetting?.value === "true";
+  let wardOfficerId = null;
+  if (isAutoAssignEnabled) {
+    const wardOfficer = await prisma.user.findFirst({
+      where: { role: "WARD_OFFICER", wardId, isActive: true },
+      orderBy: { wardOfficerComplaints: { _count: "asc" } },
+    });
+    if (wardOfficer) {
+      wardOfficerId = wardOfficer.id;
+    }
+  }
+
+  // Create complaint now (after verification)
+  const complaint = await createComplaintWithUniqueId({
+    title: `${type} complaint`,
+    description,
+    type,
+    priority: priority || "MEDIUM",
+    status: "REGISTERED",
+    slaStatus: "ON_TIME",
+    wardId,
+    subZoneId: subZoneId || null,
+    area,
+    landmark,
+    address,
+    coordinates: parsedCoordinates ? JSON.stringify(parsedCoordinates) : null,
+    contactName: fullName,
+    contactEmail: email,
+    contactPhone: phoneNumber,
+    isAnonymous: false,
+    deadline,
+    wardOfficerId,
+    submittedById: user.id,
+  });
+
+  // Attach uploaded files, if any
+  const files = req.files || [];
+  for (const file of files) {
+    await prisma.attachment.create({
+      data: {
+        fileName: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url: `/api/uploads/${file.filename}`,
+        complaintId: complaint.id,
+      },
+    });
+  }
 
   // Mark OTP as verified
   await prisma.oTPSession.update({
     where: { id: otpSession.id },
-    data: {
-      isVerified: true,
-      verifiedAt: new Date(),
-      userId: user.id,
-    },
+    data: { isVerified: true, verifiedAt: new Date(), userId: user.id },
   });
 
   // Create status log
@@ -650,61 +624,71 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
     },
   });
 
-  // Generate JWT token for auto-login
+  // Log ward officer assignment when applicable
+  if (wardOfficerId) {
+    await prisma.statusLog.create({
+      data: {
+        complaintId: complaint.id,
+        userId: wardOfficerId,
+        toStatus: "REGISTERED",
+        comment: "Complaint auto-assigned to ward officer",
+      },
+    });
+  }
+
   const token = generateJWTToken(user);
 
-  // Send password setup email if this is a new user
   if (isNewUser) {
-    const passwordSetupSent = await sendEmail({
+    await sendEmail({
       to: user.email,
       subject: "Welcome to Cochin Smart City - Set Your Password",
-      text: `Welcome! Your complaint has been verified and you have been registered as a citizen. To access your dashboard in the future, please set your password by clicking the link in this email.`,
+      text: "Welcome! Your complaint has been verified and you have been registered as a citizen. You can set your password from your profile.",
       html: `
         <h2>Welcome to Cochin Smart City!</h2>
         <p>Your complaint has been successfully verified and you have been automatically registered as a citizen.</p>
-        <p>Your complaint ID: <strong>${complaint.id}</strong></p>
+        <p>Your complaint ID: <strong>${complaint.complaintId}</strong></p>
         <p>You are now logged in and can track your complaint progress.</p>
-        <p>To access your account in the future with a password, please set your password by logging in with OTP and using the "Set Password" option in your profile.</p>
         <p>You can always login using OTP sent to your email if you don't want to set a password.</p>
       `,
     });
   }
 
   // Notify ward officers
-  const wardOfficers = await prisma.user.findMany({
-    where: {
-      role: "WARD_OFFICER",
-      wardId: complaint.wardId,
-      isActive: true,
-    },
-  });
-
-  for (const officer of wardOfficers) {
+  if (wardOfficerId) {
     await prisma.notification.create({
       data: {
-        userId: officer.id,
+        userId: wardOfficerId,
         complaintId: complaint.id,
         type: "IN_APP",
-        title: "New Verified Complaint",
-        message: `A new ${complaint.type} complaint has been verified and registered in your ward.`,
+        title: "New Complaint Assigned",
+        message: `A new ${complaint.type} complaint has been assigned to you in ${complaint.ward?.name || "your ward"}. Please review and assign to maintenance team.`,
       },
     });
+  } else {
+    const wardOfficers = await prisma.user.findMany({
+      where: { role: "WARD_OFFICER", wardId: complaint.wardId, isActive: true },
+    });
+    for (const officer of wardOfficers) {
+      await prisma.notification.create({
+        data: {
+          userId: officer.id,
+          complaintId: complaint.id,
+          type: "IN_APP",
+          title: "New Verified Complaint",
+          message: `A new ${complaint.type} complaint has been verified and registered in your ward.`,
+        },
+      });
+    }
   }
 
-  // Remove password from response
-  const { password: _, ...userResponse } = user;
+  const { password: _pw, ...userResponse } = user;
 
   res.status(200).json({
     success: true,
     message: isNewUser
       ? "OTP verified! You have been registered as a citizen and are now logged in."
       : "OTP verified! You are now logged in.",
-    data: {
-      user: userResponse,
-      token,
-      complaint: updatedComplaint,
-      isNewUser,
-    },
+    data: { user: userResponse, token, complaint, isNewUser },
   });
 });
 
@@ -712,73 +696,36 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
 // @route   POST /api/guest/resend-otp
 // @access  Public
 export const resendOTP = asyncHandler(async (req, res) => {
-  const { email, complaintId } = req.body;
+  const { email } = req.body;
 
-  // Find the complaint
-  const complaint = await prisma.complaint.findUnique({
-    where: { id: complaintId },
-  });
-
-  if (!complaint || complaint.contactEmail !== email) {
-    return res.status(404).json({
-      success: false,
-      message: "Complaint not found or email mismatch",
-      data: null,
-    });
-  }
-
-  // Check if already verified
-  const existingVerified = await prisma.oTPSession.findFirst({
-    where: {
-      email,
-      purpose: "GUEST_VERIFICATION",
-      isVerified: true,
-    },
-  });
-
-  if (existingVerified) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({
       success: false,
-      message: "Email already verified",
+      message: "Please provide a valid email",
       data: null,
     });
   }
 
-  // Invalidate existing OTP sessions
+  // Invalidate existing unverified OTP sessions for this email
   await prisma.oTPSession.updateMany({
-    where: {
-      email,
-      purpose: "GUEST_VERIFICATION",
-      isVerified: false,
-    },
-    data: {
-      expiresAt: new Date(), // Expire immediately
-    },
+    where: { email, purpose: "GUEST_VERIFICATION", isVerified: false },
+    data: { expiresAt: new Date() },
   });
 
-  // Generate new OTP
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-  // Create new OTP session
   const otpSession = await prisma.oTPSession.create({
-    data: {
-      email,
-      phoneNumber: complaint.contactPhone,
-      otpCode,
-      purpose: "GUEST_VERIFICATION",
-      expiresAt,
-    },
+    data: { email, otpCode, purpose: "GUEST_VERIFICATION", expiresAt },
   });
 
-  // Send OTP email
   const emailSent = await sendEmail({
     to: email,
-    subject: "Verify Your Complaint - Cochin Smart City (Resent)",
-    text: `Your new verification OTP for complaint ${complaintId} is: ${otpCode}. This OTP will expire in 10 minutes.`,
+    subject: "Verify Your Email - Cochin Smart City (Resent)",
+    text: `Your new verification OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
       <h2>New Verification OTP</h2>
-      <p>Your new verification OTP for complaint <strong>${complaintId}</strong> is:</p>
+      <p>Your new verification OTP is:</p>
       <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
     `,
@@ -795,11 +742,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "New OTP sent to your email",
-    data: {
-      email,
-      expiresAt,
-      sessionId: otpSession.id,
-    },
+    data: { email, expiresAt, sessionId: otpSession.id },
   });
 });
 

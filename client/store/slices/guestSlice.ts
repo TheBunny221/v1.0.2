@@ -309,27 +309,25 @@ export const submitGuestComplaint = createAsyncThunk(
         body: formData,
       });
 
-      const contentType = response.headers.get("content-type");
-      const isJson = contentType && contentType.includes("application/json");
+      // Always read body once via text(), then JSON.parse
+      const raw = await response.text();
+      let data: any = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        data = null;
+      }
 
-      let data = null;
-      if (isJson) {
-        data = await response.json();
+      if (!response.ok) {
+        const message = data?.message || `HTTP ${response.status}`;
+        throw new Error(message);
+      }
 
-        if (!response.ok) {
-          throw new Error(data?.message || `HTTP ${response.status}`);
-        }
-
-        return data.data as GuestComplaintResponse;
-      } else {
-        // Non-JSON response handling
-        if (!response.ok) {
-          throw new Error(
-            `HTTP ${response.status}: Server returned unexpected response format`,
-          );
-        }
+      if (!data || typeof data !== "object") {
         throw new Error("Server returned unexpected response format");
       }
+
+      return data.data as GuestComplaintResponse;
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to submit complaint",
@@ -741,6 +739,20 @@ const guestSlice = createSlice({
       state.otpExpiry = null;
       state.submissionStep = "form";
     },
+    setOtpSession: (
+      state,
+      action: PayloadAction<{
+        sessionId: string;
+        email: string;
+        expiresAt: string;
+      }>,
+    ) => {
+      state.sessionId = action.payload.sessionId;
+      state.userEmail = action.payload.email;
+      state.otpExpiry = action.payload.expiresAt;
+      state.otpSent = true;
+      state.submissionStep = "otp";
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -751,8 +763,8 @@ const guestSlice = createSlice({
       })
       .addCase(submitGuestComplaint.fulfilled, (state, action) => {
         state.isSubmitting = false;
-        state.complaintId = action.payload.complaintId;
-        state.trackingNumber = action.payload.trackingNumber;
+        state.complaintId = null;
+        state.trackingNumber = null;
         state.sessionId = action.payload.sessionId;
         state.userEmail = action.payload.email;
         state.otpSent = true;
@@ -835,6 +847,7 @@ export const {
   resetOTPState,
   updateServiceRequestData,
   setServiceRequestStep,
+  setOtpSession,
 } = guestSlice.actions;
 
 export default guestSlice.reducer;
@@ -868,6 +881,8 @@ export const selectGuestError = (state: { guest: GuestState }) =>
   state.guest.error;
 export const selectComplaintId = (state: { guest: GuestState }) =>
   state.guest.complaintId;
+export const selectSessionId = (state: { guest: GuestState }) =>
+  state.guest.sessionId;
 export const selectTrackingNumber = (state: { guest: GuestState }) =>
   state.guest.trackingNumber;
 export const selectUserEmail = (state: { guest: GuestState }) =>

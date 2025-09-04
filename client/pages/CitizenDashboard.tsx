@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 import FeedbackDialog from "../components/FeedbackDialog";
 import QuickComplaintModal from "../components/QuickComplaintModal";
+import ContactInfoCard from "../components/ContactInfoCard";
 
 const CitizenDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -332,7 +333,7 @@ const CitizenDashboard: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">
-             🚀 Welcome back, {user?.fullName || "Citizen"}! 👋
+              🚀 Welcome back, {user?.fullName || "Citizen"}! 👋
             </h1>
             <p className="text-blue-100">
               Track your complaints and stay updated with the latest progress.
@@ -844,38 +845,12 @@ const CitizenDashboard: React.FC = () => {
               <FileText className="mr-2 h-4 w-4" />
               View All Complaints
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/guest/track")}
-              className="w-full justify-start"
-            >
-              <Search className="mr-2 h-4 w-4" />
-              Track Complaint Status
-            </Button>
+            {/* Track Complaint Status removed as requested */}
           </CardContent>
         </Card>
 
-        {/* Help & Support */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Help & Support</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="text-sm text-gray-600">
-              <p className="mb-2">Need help with your complaints?</p>
-              <ul className="space-y-1 text-xs">
-                <li>• Check complaint status regularly</li>
-                <li>• Provide feedback when resolved</li>
-                <li>• Include photos for faster resolution</li>
-                <li>• Contact support if urgentissues</li>
-              </ul>
-            </div>
-            <Button variant="outline" className="w-full">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Contact Support
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Help & Support (reused from Home page contact section) */}
+        <ContactInfoCard title="Help & Support" />
       </div>
 
       {/* Quick Complaint Modal */}

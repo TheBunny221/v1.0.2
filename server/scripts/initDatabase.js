@@ -103,7 +103,8 @@ export const initializeDatabase = async () => {
       const isPostgres = process.env.DATABASE_URL?.includes("postgresql");
       if (isPostgres) {
         // Check that the users table exists in PostgreSQL and cast regclass to text
-        const result = await prisma.$queryRaw`SELECT to_regclass('public.users')::text AS exists;`;
+        const result =
+          await prisma.$queryRaw`SELECT to_regclass('public.users')::text AS exists;`;
         if (!result || !result[0] || result[0].exists === null) {
           throw new Error("users table not found");
         }
@@ -117,6 +118,38 @@ export const initializeDatabase = async () => {
         "⚠️ Could not verify database schema. You may need to run migrations:",
       );
       console.warn("   npx prisma db push");
+    }
+
+    // Data migration: copy assignedToId -> wardOfficerId when assignee is a Ward Officer
+    try {
+      const candidates = await prisma.complaint.findMany({
+        where: {
+          wardOfficerId: null,
+          NOT: { assignedToId: null },
+        },
+        select: { id: true, assignedToId: true },
+      });
+
+      let migrated = 0;
+      for (const c of candidates) {
+        if (!c.assignedToId) continue;
+        const assignee = await prisma.user.findUnique({
+          where: { id: c.assignedToId },
+          select: { id: true, role: true, isActive: true },
+        });
+        if (assignee && assignee.role === "WARD_OFFICER" && assignee.isActive) {
+          await prisma.complaint.update({
+            where: { id: c.id },
+            data: { wardOfficerId: assignee.id },
+          });
+          migrated++;
+        }
+      }
+      if (migrated > 0) {
+        console.log(`🔁 Migrated ${migrated} complaints to wardOfficerId`);
+      }
+    } catch (migErr) {
+      console.warn("⚠️ Ward officer migration skipped:", migErr.message);
     }
 
     console.log("🎉 Database initialization completed successfully");

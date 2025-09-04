@@ -19,7 +19,7 @@ export interface OtpDialogProps {
   context: "login" | "register" | "guestComplaint" | "complaintAuth";
   email: string;
   complaintId?: string;
-  onVerified: (data: { token: string; user: any }) => void;
+  onVerified: (data: { token: string; user: any; otpCode?: string }) => void;
   onResend?: () => void;
   isVerifying?: boolean;
   isResending?: boolean;

@@ -70,7 +70,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   const [formData, setFormData] = useState({
     status: "",
     priority: "",
-    assignedToId: "",
+    wardOfficerId: "",
     maintenanceTeamId: "",
     remarks: "",
   });
@@ -121,11 +121,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         assignedTo: complaint.assignedTo,
       });
 
-      // Handle both legacy assignedTo and new maintenanceTeam fields
-      const assignedToId =
-        typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
-          ? complaint.assignedTo.id
-          : complaint.assignedTo || "none";
+      // Handle ward officer and maintenance team fields
+      const wardOfficerId =
+        typeof complaint.wardOfficer === "object" && complaint.wardOfficer?.id
+          ? complaint.wardOfficer.id
+          : (complaint as any).wardOfficerId || "none";
 
       const maintenanceTeamId =
         typeof complaint.maintenanceTeam === "object" &&
@@ -134,14 +134,14 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
           : complaint.maintenanceTeam || "none";
 
       console.log("🔍 UpdateComplaintModal - Extracted IDs:", {
-        assignedToId,
+        wardOfficerId,
         maintenanceTeamId,
       });
 
       setFormData({
         status: complaint.status,
         priority: complaint.priority,
-        assignedToId,
+        wardOfficerId,
         maintenanceTeamId,
         remarks: "",
       });
@@ -222,7 +222,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     if (user?.role === "ADMINISTRATOR" && !isComplaintFinalized) {
       if (
         formData.status === "ASSIGNED" &&
-        (!formData.assignedToId || formData.assignedToId === "none")
+        (!formData.wardOfficerId || formData.wardOfficerId === "none")
       ) {
         errors.push(
           "Please select a Ward Officer before assigning the complaint.",
@@ -262,9 +262,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
           updateData.maintenanceTeamId = formData.maintenanceTeamId;
         }
       } else {
-        // For administrators and others, use legacy assignedToId
-        if (formData.assignedToId && formData.assignedToId !== "none") {
-          updateData.assignedToId = formData.assignedToId;
+        // For administrators, set wardOfficerId
+        if (formData.wardOfficerId && formData.wardOfficerId !== "none") {
+          updateData.wardOfficerId = formData.wardOfficerId;
         }
       }
 
@@ -289,11 +289,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         // Update the form data to reflect the new state
         const updatedComplaint = updatedComplaintResponse.data.complaint;
 
-        const assignedToId =
-          typeof updatedComplaint.assignedTo === "object" &&
-          updatedComplaint.assignedTo?.id
-            ? updatedComplaint.assignedTo.id
-            : updatedComplaint.assignedTo || "none";
+        const wardOfficerId =
+          typeof updatedComplaint.wardOfficer === "object" &&
+          updatedComplaint.wardOfficer?.id
+            ? updatedComplaint.wardOfficer.id
+            : (updatedComplaint as any).wardOfficerId || "none";
 
         const maintenanceTeamId =
           typeof updatedComplaint.maintenanceTeam === "object" &&
@@ -304,7 +304,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         setFormData({
           status: updatedComplaint.status,
           priority: updatedComplaint.priority,
-          assignedToId,
+          wardOfficerId,
           maintenanceTeamId,
           remarks: "",
         });
@@ -328,7 +328,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     setFormData({
       status: "",
       priority: "",
-      assignedToId: "none",
+      wardOfficerId: "none",
       maintenanceTeamId: "none",
       remarks: "",
     });
@@ -513,7 +513,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     <strong>Debug:</strong>
                     <br />
                     wardOfficer:{" "}
-                    {JSON.stringify(complaint.assignedTo) || "null"}
+                    {JSON.stringify(complaint.wardOfficer) || "null"}
                     <br />
                     maintenanceTeam:{" "}
                     {JSON.stringify(complaint.maintenanceTeam) || "null"}
@@ -528,9 +528,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   <span className="text-gray-600">Ward Officer:</span>
                   <div className="flex items-center">
                     <User className="h-4 w-4 mr-1" />
-                    {complaint.assignedTo ? (
+                    {complaint.wardOfficer ? (
                       <span className="text-blue-600">
-                        {complaint.assignedTo.fullName}
+                        {complaint.wardOfficer.fullName}
                       </span>
                     ) : (
                       <span className="text-gray-400">Not assigned</span>
@@ -708,7 +708,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             user?.role === "ADMINISTRATOR") && (
             <div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="assignedTo">{getDropdownLabel()}</Label>
+                <Label htmlFor="wardOfficer">{getDropdownLabel()}</Label>
                 {user?.role === "WARD_OFFICER" &&
                   (complaint as any)?.needsTeamAssignment &&
                   !["RESOLVED", "CLOSED"].includes(complaint.status) && (
@@ -750,7 +750,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   value={
                     user?.role === "WARD_OFFICER"
                       ? formData.maintenanceTeamId
-                      : formData.assignedToId
+                      : formData.wardOfficerId
                   }
                   onValueChange={(value) => {
                     if (user?.role === "WARD_OFFICER") {
@@ -759,7 +759,10 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                         maintenanceTeamId: value,
                       }));
                     } else {
-                      setFormData((prev) => ({ ...prev, assignedToId: value }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        wardOfficerId: value,
+                      }));
                     }
                     // Clear validation errors when user makes a selection
                     setValidationErrors([]);
