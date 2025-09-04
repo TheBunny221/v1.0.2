@@ -341,41 +341,21 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           resetForm();
           onSuccess?.(result.id);
         } else {
-          // Guest flow: Submit complaint and send OTP
-          const guestFormData: GuestComplaintData = {
-            fullName: formData.fullName,
-            email: formData.email,
-            phoneNumber: formData.mobile,
-            type: formData.problemType,
-            priority: "MEDIUM",
-            wardId: formData.ward,
-            subZoneId: formData.subZoneId || undefined,
-            area: formData.area,
-            landmark: formData.location,
-            address: formData.address,
-            description: formData.description,
-            coordinates: formData.coordinates,
-            captchaId: captchaId,
-            captchaText: captcha,
-          };
+          // Guest flow: Send OTP initiation (no attachments here)
+          const submissionData = new FormData();
+          submissionData.append("fullName", formData.fullName);
+          submissionData.append("email", formData.email);
+          submissionData.append("phoneNumber", formData.mobile);
+          if (captchaId) submissionData.append("captchaId", String(captchaId));
+          if (captcha) submissionData.append("captchaText", captcha);
 
-          // Convert files to FileAttachment format
-          const fileAttachments: FileAttachment[] = files.map(
-            (file, index) => ({
-              id: `file-${index}-${Date.now()}`,
-              file,
-            }),
-          );
-
-          const result = await dispatch(
-            submitGuestComplaint({
-              complaintData: guestFormData,
-              files: fileAttachments,
-            }),
+          const response = await submitGuestComplaintMutation(
+            submissionData,
           ).unwrap();
+          const result: any = response?.data || response;
 
-          if ((result as any).sessionId) {
-            setSessionId((result as any).sessionId);
+          if (result?.sessionId) {
+            setSessionId(result.sessionId);
             setShowOtpInput(false);
             setShowOtpDialog(true);
             toast({
@@ -971,10 +951,10 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                 <Button
                   type="submit"
                   className="flex-1 md:flex-none"
-                  disabled={submissionMode === "guest" ? guestIsSubmitting || isSubmittingLocal : isLoading}
+                  disabled={submissionMode === "guest" ? isSendingOtp || isSubmittingLocal : isLoading}
                 >
                   {submissionMode === "guest" ? (
-                    guestIsSubmitting || isSubmittingLocal ? (
+                    isSendingOtp || isSubmittingLocal ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Sending Code...
