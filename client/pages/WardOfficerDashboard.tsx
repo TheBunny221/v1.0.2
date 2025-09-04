@@ -380,6 +380,39 @@ const WardOfficerDashboard: React.FC = () => {
 
           <Card
             className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "reopened"
+                ? "ring-2 ring-red-500 bg-red-50"
+                : ""
+            }`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "reopened" ? "none" : "reopened",
+              )
+            }
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="reopened-filter"
+                    value="reopened"
+                    className="sr-only"
+                  />
+                  <span className="cursor-pointer">Reopened</span>
+                </div>
+              </CardTitle>
+              <RefreshCcw className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {stats?.statusBreakdown?.reopened || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Reopened complaints</p>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
               filters.mainFilter === "needsTeamAssignment"
                 ? "ring-2 ring-purple-500 bg-purple-50"
                 : ""
