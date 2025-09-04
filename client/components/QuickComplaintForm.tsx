@@ -425,7 +425,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
       setIsVerifyingOtp(true);
       const fd = new FormData();
       fd.append("email", formData.email);
-      fd.append("otpCode", otpCode);
+      fd.append("otpCode", inputCode);
       fd.append("fullName", formData.fullName);
       fd.append("phoneNumber", formData.mobile);
       fd.append("type", formData.problemType);
