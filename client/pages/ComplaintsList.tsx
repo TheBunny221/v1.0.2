@@ -181,6 +181,11 @@ const ComplaintsList: React.FC = () => {
     if (wardFilter !== "all") params.wardId = wardFilter;
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
+    // Strictly enforce ward-based filtering for Ward Officers
+    if (user?.role === "WARD_OFFICER" && user?.wardId) {
+      params.wardId = user.wardId;
+    }
+
     // Add new filters
     if (needsMaintenanceAssignment) params.needsTeamAssignment = true;
     if (slaStatusFilter !== "all")
