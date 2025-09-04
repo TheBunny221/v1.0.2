@@ -528,9 +528,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   <span className="text-gray-600">Ward Officer:</span>
                   <div className="flex items-center">
                     <User className="h-4 w-4 mr-1" />
-                    {complaint.assignedTo ? (
+                    {complaint.wardOfficer ? (
                       <span className="text-blue-600">
-                        {complaint.assignedTo.fullName}
+                        {complaint.wardOfficer.fullName}
                       </span>
                     ) : (
                       <span className="text-gray-400">Not assigned</span>
