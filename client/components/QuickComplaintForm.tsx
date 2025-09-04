@@ -29,6 +29,7 @@ import {
   useGenerateCaptchaQuery,
   useLazyGenerateCaptchaQuery,
 } from "../store/api/guestApi";
+import { useResendGuestOtpMutation } from "../store/api/guestApi";
 import { selectAuth, setCredentials } from "../store/slices/authSlice";
 import { showSuccessToast, showErrorToast } from "../store/slices/uiSlice";
 import { useToast } from "../hooks/use-toast";
