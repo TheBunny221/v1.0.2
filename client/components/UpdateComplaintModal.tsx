@@ -289,11 +289,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         // Update the form data to reflect the new state
         const updatedComplaint = updatedComplaintResponse.data.complaint;
 
-        const assignedToId =
-          typeof updatedComplaint.assignedTo === "object" &&
-          updatedComplaint.assignedTo?.id
-            ? updatedComplaint.assignedTo.id
-            : updatedComplaint.assignedTo || "none";
+        const wardOfficerId =
+          typeof updatedComplaint.wardOfficer === "object" &&
+          updatedComplaint.wardOfficer?.id
+            ? updatedComplaint.wardOfficer.id
+            : (updatedComplaint as any).wardOfficerId || "none";
 
         const maintenanceTeamId =
           typeof updatedComplaint.maintenanceTeam === "object" &&
@@ -304,7 +304,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         setFormData({
           status: updatedComplaint.status,
           priority: updatedComplaint.priority,
-          assignedToId,
+          wardOfficerId,
           maintenanceTeamId,
           remarks: "",
         });
