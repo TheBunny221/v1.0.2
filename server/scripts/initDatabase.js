@@ -103,7 +103,8 @@ export const initializeDatabase = async () => {
       const isPostgres = process.env.DATABASE_URL?.includes("postgresql");
       if (isPostgres) {
         // Check that the users table exists in PostgreSQL and cast regclass to text
-        const result = await prisma.$queryRaw`SELECT to_regclass('public.users')::text AS exists;`;
+        const result =
+          await prisma.$queryRaw`SELECT to_regclass('public.users')::text AS exists;`;
         if (!result || !result[0] || result[0].exists === null) {
           throw new Error("users table not found");
         }

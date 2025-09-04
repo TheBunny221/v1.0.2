@@ -276,7 +276,11 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      if ((submissionMode === "guest" ? guestIsSubmitting : isLoading) || isSubmittingLocal) return;
+      if (
+        (submissionMode === "guest" ? guestIsSubmitting : isLoading) ||
+        isSubmittingLocal
+      )
+        return;
       setIsSubmittingLocal(true);
       if (!captcha || !captchaId) {
         dispatch(
@@ -350,9 +354,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
           if (captchaId) submissionData.append("captchaId", String(captchaId));
           if (captcha) submissionData.append("captchaText", captcha);
 
-          const response = await submitGuestComplaintMutation(
-            submissionData,
-          ).unwrap();
+          const response =
+            await submitGuestComplaintMutation(submissionData).unwrap();
           const result: any = response?.data || response;
 
           if (result?.sessionId) {
@@ -367,10 +370,12 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
         }
       } catch (error: any) {
         console.error("Complaint submission error:", error);
-        const message = typeof error === "string" ? error : getApiErrorMessage(error);
+        const message =
+          typeof error === "string" ? error : getApiErrorMessage(error);
         toast({
           title: "Submission Failed",
-          description: message || "Failed to submit complaint. Please try again.",
+          description:
+            message || "Failed to submit complaint. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -394,81 +399,78 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   );
 
   // Handle OTP verification and final submission
-  const handleVerifyOtp = useCallback(async (code?: string) => {
-    const inputCode = code ?? otpCode;
-    if (!inputCode || inputCode.length !== 6) {
-      toast({
-        title: "Invalid Code",
-        description: "Please enter a valid 6-digit verification code.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsVerifyingOtp(true);
-      const fd = new FormData();
-      fd.append("email", formData.email);
-      fd.append("otpCode", inputCode);
-      fd.append("fullName", formData.fullName);
-      fd.append("phoneNumber", formData.mobile);
-      fd.append("type", formData.problemType);
-      fd.append("description", formData.description);
-      fd.append("priority", "MEDIUM");
-      fd.append("wardId", formData.ward);
-      if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
-      fd.append("area", formData.area);
-      if (formData.location) fd.append("landmark", formData.location);
-      if (formData.address) fd.append("address", formData.address);
-      if (formData.coordinates)
-        fd.append("coordinates", JSON.stringify(formData.coordinates));
-      for (const file of files) fd.append("attachments", file);
-
-      const result = await verifyGuestOtp(fd).unwrap();
-
-      if (result.data?.token && result.data?.user) {
-        dispatch(
-          setCredentials({
-            token: result.data.token,
-            user: result.data.user,
-          }),
-        );
-        localStorage.setItem("token", result.data.token);
+  const handleVerifyOtp = useCallback(
+    async (code?: string) => {
+      const inputCode = code ?? otpCode;
+      if (!inputCode || inputCode.length !== 6) {
+        toast({
+          title: "Invalid Code",
+          description: "Please enter a valid 6-digit verification code.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      toast({
-        title: "Success!",
-        description: result.data?.isNewUser
-          ? "Your complaint has been verified and your citizen account has been created successfully!"
-          : "Your complaint has been verified and you've been logged in successfully!",
-      });
+      try {
+        setIsVerifyingOtp(true);
+        const fd = new FormData();
+        fd.append("email", formData.email);
+        fd.append("otpCode", inputCode);
+        fd.append("fullName", formData.fullName);
+        fd.append("phoneNumber", formData.mobile);
+        fd.append("type", formData.problemType);
+        fd.append("description", formData.description);
+        fd.append("priority", "MEDIUM");
+        fd.append("wardId", formData.ward);
+        if (formData.subZoneId) fd.append("subZoneId", formData.subZoneId);
+        fd.append("area", formData.area);
+        if (formData.location) fd.append("landmark", formData.location);
+        if (formData.address) fd.append("address", formData.address);
+        if (formData.coordinates)
+          fd.append("coordinates", JSON.stringify(formData.coordinates));
+        for (const file of files) fd.append("attachments", file);
 
-      resetForm();
-      setShowOtpInput(false);
-      setSessionId(null);
-      setOtpCode("");
-      setShowOtpDialog(false);
-      onSuccess?.(result.data?.complaint?.id || "");
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      const message = typeof error === "string" ? error : getApiErrorMessage(error);
-      toast({
-        title: "Verification Failed",
-        description: message || "Invalid verification code. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  }, [
-    otpCode,
-    formData,
-    files,
-    verifyGuestOtp,
-    dispatch,
-    toast,
-    onSuccess,
-  ]);
+        const result = await verifyGuestOtp(fd).unwrap();
+
+        if (result.data?.token && result.data?.user) {
+          dispatch(
+            setCredentials({
+              token: result.data.token,
+              user: result.data.user,
+            }),
+          );
+          localStorage.setItem("token", result.data.token);
+        }
+
+        toast({
+          title: "Success!",
+          description: result.data?.isNewUser
+            ? "Your complaint has been verified and your citizen account has been created successfully!"
+            : "Your complaint has been verified and you've been logged in successfully!",
+        });
+
+        resetForm();
+        setShowOtpInput(false);
+        setSessionId(null);
+        setOtpCode("");
+        setShowOtpDialog(false);
+        onSuccess?.(result.data?.complaint?.id || "");
+      } catch (error: any) {
+        console.error("OTP verification error:", error);
+        const message =
+          typeof error === "string" ? error : getApiErrorMessage(error);
+        toast({
+          title: "Verification Failed",
+          description:
+            message || "Invalid verification code. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsVerifyingOtp(false);
+      }
+    },
+    [otpCode, formData, files, verifyGuestOtp, dispatch, toast, onSuccess],
+  );
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -950,7 +952,11 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
                 <Button
                   type="submit"
                   className="flex-1 md:flex-none"
-                  disabled={submissionMode === "guest" ? isSendingOtp || isSubmittingLocal : isLoading}
+                  disabled={
+                    submissionMode === "guest"
+                      ? isSendingOtp || isSubmittingLocal
+                      : isLoading
+                  }
                 >
                   {submissionMode === "guest" ? (
                     isSendingOtp || isSubmittingLocal ? (
@@ -992,12 +998,14 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
               await resendGuestOtp({ email: formData.email }).unwrap();
               toast({
                 title: "Verification Code Resent",
-                description: "A new verification code has been sent to your email.",
+                description:
+                  "A new verification code has been sent to your email.",
               });
             } catch (error: any) {
               toast({
                 title: "Failed to Resend",
-                description: error?.message || "Failed to resend verification code.",
+                description:
+                  error?.message || "Failed to resend verification code.",
                 variant: "destructive",
               });
             }

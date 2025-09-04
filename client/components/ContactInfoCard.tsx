@@ -68,7 +68,10 @@ const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ title }) => {
                 {translations?.complaints?.location || "Office Location"}
               </div>
               <div className="text-sm text-gray-600">
-                {getConfig("CONTACT_OFFICE_ADDRESS", "Cochin Corporation Office")}
+                {getConfig(
+                  "CONTACT_OFFICE_ADDRESS",
+                  "Cochin Corporation Office",
+                )}
               </div>
             </div>
           </div>

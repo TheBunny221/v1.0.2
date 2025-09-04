@@ -38,9 +38,11 @@ export const getComplaintMaterials = asyncHandler(async (req, res) => {
   // Check authorization
   const isAuthorized =
     req.user.role === "ADMINISTRATOR" ||
-    (req.user.role === "WARD_OFFICER" && complaint.wardId === req.user.wardId) ||
-    (req.user.role === "MAINTENANCE_TEAM" && 
-     (complaint.assignedToId === req.user.id || complaint.maintenanceTeamId === req.user.id));
+    (req.user.role === "WARD_OFFICER" &&
+      complaint.wardId === req.user.wardId) ||
+    (req.user.role === "MAINTENANCE_TEAM" &&
+      (complaint.assignedToId === req.user.id ||
+        complaint.maintenanceTeamId === req.user.id));
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -88,7 +90,8 @@ export const addComplaintMaterial = asyncHandler(async (req, res) => {
   // Check authorization - only maintenance team assigned to this complaint
   const isAuthorized =
     req.user.role === "MAINTENANCE_TEAM" &&
-    (complaint.assignedToId === req.user.id || complaint.maintenanceTeamId === req.user.id);
+    (complaint.assignedToId === req.user.id ||
+      complaint.maintenanceTeamId === req.user.id);
 
   if (!isAuthorized) {
     return res.status(403).json({

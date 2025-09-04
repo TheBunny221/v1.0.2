@@ -375,12 +375,10 @@ export const createComplaint = asyncHandler(async (req, res) => {
     !Number.isFinite(resolvedSlaHours) ||
     resolvedSlaHours <= 0
   ) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Invalid complaint type or missing SLA configuration",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Invalid complaint type or missing SLA configuration",
+    });
   }
 
   const deadline = new Date(Date.now() + resolvedSlaHours * 60 * 60 * 1000);
@@ -1106,8 +1104,14 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, priority, remarks, assignedToId, maintenanceTeamId, wardOfficerId } =
-    req.body;
+  const {
+    status,
+    priority,
+    remarks,
+    assignedToId,
+    maintenanceTeamId,
+    wardOfficerId,
+  } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -1267,12 +1271,30 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
 
   // Legacy assignedToId validation (kept for backward compatibility for maintenance/team flows)
   if (assignedToId) {
-    const assignee = await prisma.user.findUnique({ where: { id: assignedToId } });
+    const assignee = await prisma.user.findUnique({
+      where: { id: assignedToId },
+    });
     if (!assignee || !assignee.isActive) {
-      return res.status(400).json({ success: false, message: "Selected assignee not found or inactive", data: null });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Selected assignee not found or inactive",
+          data: null,
+        });
     }
-    if (req.user.role === "WARD_OFFICER" && assignee.role !== "MAINTENANCE_TEAM") {
-      return res.status(400).json({ success: false, message: "Ward Officers can only assign complaints to Maintenance Team members", data: null });
+    if (
+      req.user.role === "WARD_OFFICER" &&
+      assignee.role !== "MAINTENANCE_TEAM"
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "Ward Officers can only assign complaints to Maintenance Team members",
+          data: null,
+        });
     }
   }
 

@@ -333,7 +333,7 @@ const CitizenDashboard: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">
-             🚀 Welcome back, {user?.fullName || "Citizen"}! 👋
+              🚀 Welcome back, {user?.fullName || "Citizen"}! 👋
             </h1>
             <p className="text-blue-100">
               Track your complaints and stay updated with the latest progress.
