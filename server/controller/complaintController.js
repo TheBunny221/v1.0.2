@@ -1085,7 +1085,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
     (req.user.role === "WARD_OFFICER" &&
       complaint.wardId === req.user.wardId) ||
     (req.user.role === "MAINTENANCE_TEAM" &&
-      complaint.assignedToId === req.user.id);
+      complaint.maintenanceTeamId === req.user.id);
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -1106,7 +1106,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, priority, remarks, assignedToId, maintenanceTeamId } =
+  const { status, priority, remarks, assignedToId, maintenanceTeamId, wardOfficerId } =
     req.body;
   const complaintId = req.params.id;
 
@@ -1136,8 +1136,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       (complaint.wardId === req.user.wardId ||
         complaint.wardOfficerId === req.user.id)) ||
     (req.user.role === "MAINTENANCE_TEAM" &&
-      (complaint.assignedToId === req.user.id ||
-        complaint.maintenanceTeamId === req.user.id));
+      complaint.maintenanceTeamId === req.user.id);
 
   if (!isAuthorized) {
     return res.status(403).json({
@@ -1254,39 +1253,26 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
   }
 
-  // Legacy assignedToId validation (kept for backward compatibility)
+  // Validate ward officer assignment when provided (admin use case)
+  if (wardOfficerId) {
+    const wo = await prisma.user.findUnique({ where: { id: wardOfficerId } });
+    if (!wo || !wo.isActive || wo.role !== "WARD_OFFICER") {
+      return res.status(400).json({
+        success: false,
+        message: "Selected Ward Officer not found, inactive, or invalid role",
+        data: null,
+      });
+    }
+  }
+
+  // Legacy assignedToId validation (kept for backward compatibility for maintenance/team flows)
   if (assignedToId) {
-    const assignee = await prisma.user.findUnique({
-      where: { id: assignedToId },
-    });
-
+    const assignee = await prisma.user.findUnique({ where: { id: assignedToId } });
     if (!assignee || !assignee.isActive) {
-      return res.status(400).json({
-        success: false,
-        message: "Selected assignee not found or inactive",
-        data: null,
-      });
+      return res.status(400).json({ success: false, message: "Selected assignee not found or inactive", data: null });
     }
-
-    // Role-based validation for assignment
-    if (req.user.role === "ADMINISTRATOR" && assignee.role !== "WARD_OFFICER") {
-      return res.status(400).json({
-        success: false,
-        message: "Administrators can only assign complaints to Ward Officers",
-        data: null,
-      });
-    }
-
-    if (
-      req.user.role === "WARD_OFFICER" &&
-      assignee.role !== "MAINTENANCE_TEAM"
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Ward Officers can only assign complaints to Maintenance Team members",
-        data: null,
-      });
+    if (req.user.role === "WARD_OFFICER" && assignee.role !== "MAINTENANCE_TEAM") {
+      return res.status(400).json({ success: false, message: "Ward Officers can only assign complaints to Maintenance Team members", data: null });
     }
   }
 
@@ -1316,6 +1302,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       updateData.status = "ASSIGNED";
       updateData.assignedOn = new Date();
     }
+  }
+
+  // Admin ward officer assignment
+  if (wardOfficerId) {
+    updateData.wardOfficerId = wardOfficerId;
   }
 
   // Legacy assignedToId handling (backward compatibility)
@@ -1429,6 +1420,17 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       type: "IN_APP",
       title: `New Maintenance Assignment`,
       message: `A complaint has been assigned to you for maintenance.`,
+    });
+  }
+
+  // Notify ward officer if set via this update
+  if (wardOfficerId && wardOfficerId !== req.user.id) {
+    notifications.push({
+      userId: wardOfficerId,
+      complaintId,
+      type: "IN_APP",
+      title: `New Complaint Assigned`,
+      message: `A complaint in your ward has been assigned to you.`,
     });
   }
 
