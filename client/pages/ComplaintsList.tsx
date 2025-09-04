@@ -398,7 +398,7 @@ const ComplaintsList: React.FC = () => {
             {/* Ward Filter - Only for admin and ward officers */}
             {(user?.role === "ADMINISTRATOR" ||
               user?.role === "WARD_OFFICER") && (
-              <Select value={wardFilter} onValueChange={handleWardChange}>
+              <Select value={wardFilter} onValueChange={handleWardChange} disabled>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by ward" />
                 </SelectTrigger>
