@@ -134,6 +134,8 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
   const { getConfig } = useSystemConfig();
   const [verifyGuestOtp] = useVerifyGuestOtpMutation();
   const [resendGuestOtp] = useResendGuestOtpMutation();
+  const [submitGuestComplaintMutation, { isLoading: isSendingOtp }] =
+    useSubmitGuestComplaintMutation();
   const [
     generateCaptcha,
     { data: captchaData, isLoading: captchaLoading, error: captchaError },
