@@ -262,9 +262,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
           updateData.maintenanceTeamId = formData.maintenanceTeamId;
         }
       } else {
-        // For administrators and others, use legacy assignedToId
-        if (formData.assignedToId && formData.assignedToId !== "none") {
-          updateData.assignedToId = formData.assignedToId;
+        // For administrators, set wardOfficerId
+        if (formData.wardOfficerId && formData.wardOfficerId !== "none") {
+          updateData.wardOfficerId = formData.wardOfficerId;
         }
       }
 
