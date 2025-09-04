@@ -563,25 +563,41 @@ const ComplaintsList: React.FC = () => {
                         <Badge className={getPriorityColor(complaint.priority)}>
                           {complaint.priority}
                         </Badge>
-                        {/* Show maintenance assignment status - only for active complaints */}
-                        {(complaint as any).needsTeamAssignment &&
-                          !["RESOLVED", "CLOSED"].includes(
-                            complaint.status,
-                          ) && (
-                            <Badge className="bg-orange-100 text-orange-800 text-xs">
-                              Needs Team Assignment
+                        {/* Show team assignment status based on maintenanceTeamId */}
+                        {user?.role === "WARD_OFFICER" ? (
+                          // Ward Officer view: show assignment status based on maintenanceTeamId
+                          complaint.maintenanceTeamId ? (
+                            <Badge className="bg-green-100 text-green-800 text-xs">
+                              Assigned: {complaint.maintenanceTeam?.fullName || "Unknown"}
                             </Badge>
-                          )}
-                        {complaint.maintenanceTeam && (
-                          <Badge className="bg-green-100 text-green-800 text-xs">
-                            Team:{" "}
-                            {complaint.maintenanceTeam.fullName.split(" ")[0]}
-                          </Badge>
-                        )}
-                        {complaint.wardOfficer && (
-                          <Badge className="bg-blue-100 text-blue-800 text-xs">
-                            WO: {complaint.wardOfficer.fullName.split(" ")[0]}
-                          </Badge>
+                          ) : (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs">
+                              Needs Assignment
+                            </Badge>
+                          )
+                        ) : (
+                          // Other user roles: show original logic
+                          <>
+                            {(complaint as any).needsTeamAssignment &&
+                              !["RESOLVED", "CLOSED"].includes(
+                                complaint.status,
+                              ) && (
+                                <Badge className="bg-orange-100 text-orange-800 text-xs">
+                                  Needs Team Assignment
+                                </Badge>
+                              )}
+                            {complaint.maintenanceTeam && (
+                              <Badge className="bg-green-100 text-green-800 text-xs">
+                                Team:{" "}
+                                {complaint.maintenanceTeam.fullName.split(" ")[0]}
+                              </Badge>
+                            )}
+                            {complaint.wardOfficer && (
+                              <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                WO: {complaint.wardOfficer.fullName.split(" ")[0]}
+                              </Badge>
+                            )}
+                          </>
                         )}
                       </div>
                     </TableCell>
