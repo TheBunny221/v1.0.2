@@ -83,22 +83,30 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     data: wardOfficerResponse,
     isLoading: isLoadingWardOfficers,
     error: wardOfficersError,
-  } = useGetWardUsersQuery({ page: 1, limit: 200, role: "WARD_OFFICER" }, { skip: user?.role !== "ADMINISTRATOR" && user?.role !== "WARD_OFFICER" });
+  } = useGetWardUsersQuery(
+    { page: 1, limit: 200, role: "WARD_OFFICER" },
+    { skip: user?.role !== "ADMINISTRATOR" && user?.role !== "WARD_OFFICER" },
+  );
 
   const {
     data: maintenanceResponse,
     isLoading: isLoadingMaintenance,
     error: maintenanceError,
-  } = useGetWardUsersQuery({ page: 1, limit: 200, role: "MAINTENANCE_TEAM" }, { skip: user?.role !== "ADMINISTRATOR" && user?.role !== "WARD_OFFICER" });
+  } = useGetWardUsersQuery(
+    { page: 1, limit: 200, role: "MAINTENANCE_TEAM" },
+    { skip: user?.role !== "ADMINISTRATOR" && user?.role !== "WARD_OFFICER" },
+  );
 
   // For Ward Officers, maintenanceResponse will be used; for Admins both lists are available
-  const [updateComplaint, { isLoading: isUpdating }] = useUpdateComplaintMutation();
+  const [updateComplaint, { isLoading: isUpdating }] =
+    useUpdateComplaintMutation();
 
   const wardOfficerUsers = wardOfficerResponse?.data?.users || [];
   const maintenanceUsers = maintenanceResponse?.data?.users || [];
 
   // Default availableUsers for previous single-select logic
-  const availableUsers = user?.role === "WARD_OFFICER" ? maintenanceUsers : wardOfficerUsers;
+  const availableUsers =
+    user?.role === "WARD_OFFICER" ? maintenanceUsers : wardOfficerUsers;
 
   // Filter users based on search term
   const filteredUsers = availableUsers.filter(
@@ -761,10 +769,15 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                       <Select
                         value={formData.assignedToId}
                         onValueChange={(value) => {
-                          setFormData((prev) => ({ ...prev, assignedToId: value }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            assignedToId: value,
+                          }));
                           setValidationErrors([]);
                         }}
-                        disabled={isLoadingWardOfficers || wardOfficerUsers.length === 0}
+                        disabled={
+                          isLoadingWardOfficers || wardOfficerUsers.length === 0
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select Ward Officer" />
@@ -777,8 +790,12 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                                 <div className="flex items-center">
                                   {getUserRoleIcon(u.role)}
                                   <div className="ml-2 text-left">
-                                    <div className="font-medium">{u.fullName}</div>
-                                    <div className="text-xs text-gray-500">{u.email}</div>
+                                    <div className="font-medium">
+                                      {u.fullName}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {u.email}
+                                    </div>
                                   </div>
                                 </div>
                                 <Badge variant="outline" className="text-xs">
@@ -796,10 +813,15 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                       <Select
                         value={formData.maintenanceTeamId}
                         onValueChange={(value) => {
-                          setFormData((prev) => ({ ...prev, maintenanceTeamId: value }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            maintenanceTeamId: value,
+                          }));
                           setValidationErrors([]);
                         }}
-                        disabled={isLoadingMaintenance || maintenanceUsers.length === 0}
+                        disabled={
+                          isLoadingMaintenance || maintenanceUsers.length === 0
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select Maintenance Team" />
@@ -812,8 +834,12 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                                 <div className="flex items-center">
                                   {getUserRoleIcon(u.role)}
                                   <div className="ml-2 text-left">
-                                    <div className="font-medium">{u.fullName}</div>
-                                    <div className="text-xs text-gray-500">{u.email}</div>
+                                    <div className="font-medium">
+                                      {u.fullName}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {u.email}
+                                    </div>
                                   </div>
                                 </div>
                                 <Badge variant="outline" className="text-xs">
@@ -840,7 +866,10 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                           maintenanceTeamId: value,
                         }));
                       } else {
-                        setFormData((prev) => ({ ...prev, assignedToId: value }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          assignedToId: value,
+                        }));
                       }
                       // Clear validation errors when user makes a selection
                       setValidationErrors([]);
@@ -863,7 +892,9 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                             <div className="flex items-center">
                               {getUserRoleIcon(user.role)}
                               <div className="ml-2 text-left">
-                                <div className="font-medium">{user.fullName}</div>
+                                <div className="font-medium">
+                                  {user.fullName}
+                                </div>
                                 <div className="text-xs text-gray-500">
                                   {user.email}
                                 </div>

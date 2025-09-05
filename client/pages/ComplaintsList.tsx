@@ -624,14 +624,14 @@ const ComplaintsList: React.FC = () => {
                         {user?.role === "ADMINISTRATOR" && (
                           <>
                             <TableCell>
-                              {complaint.maintenanceTeam?.id || (
-                                complaint.maintenanceTeam || "-"
-                              )}
+                              {complaint.maintenanceTeam?.id ||
+                                complaint.maintenanceTeam ||
+                                "-"}
                             </TableCell>
                             <TableCell>
-                              {complaint.wardOfficer?.id || (
-                                complaint.wardOfficer || "-"
-                              )}
+                              {complaint.wardOfficer?.id ||
+                                complaint.wardOfficer ||
+                                "-"}
                             </TableCell>
                           </>
                         )}

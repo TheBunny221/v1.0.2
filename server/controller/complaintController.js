@@ -1078,8 +1078,14 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, priority, remarks, assignedToId, maintenanceTeamId, wardOfficerId } =
-    req.body;
+  const {
+    status,
+    priority,
+    remarks,
+    assignedToId,
+    maintenanceTeamId,
+    wardOfficerId,
+  } = req.body;
   const complaintId = req.params.id;
 
   const complaint = await prisma.complaint.findUnique({
@@ -1265,9 +1271,17 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
 
     // Optional: ensure ward officer belongs to the same ward as complaint
-    if (complaint.wardId && wardOfficerUser.wardId && complaint.wardId !== wardOfficerUser.wardId) {
+    if (
+      complaint.wardId &&
+      wardOfficerUser.wardId &&
+      complaint.wardId !== wardOfficerUser.wardId
+    ) {
       // Allow assignment but warn or block based on policy. We'll allow but log.
-      console.warn("Assigning ward officer from different ward:", complaint.id, wardOfficerId);
+      console.warn(
+        "Assigning ward officer from different ward:",
+        complaint.id,
+        wardOfficerId,
+      );
     }
   }
 
