@@ -218,11 +218,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
       }
     }
 
-    // For administrators, validate ward officer assignment (legacy) - only for active complaints
+    // For administrators, validate ward officer assignment - only for active complaints
     if (user?.role === "ADMINISTRATOR" && !isComplaintFinalized) {
       if (
         formData.status === "ASSIGNED" &&
-        (!formData.assignedToId || formData.assignedToId === "none")
+        (!formData.wardOfficerId || formData.wardOfficerId === "none")
       ) {
         errors.push(
           "Please select a Ward Officer before assigning the complaint.",
