@@ -1078,7 +1078,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
 // @route   PUT /api/complaints/:id/status
 // @access  Private (Ward Officer, Maintenance Team, Admin)
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
-  const { status, priority, remarks, assignedToId, maintenanceTeamId } =
+  const { status, priority, remarks, assignedToId, maintenanceTeamId, wardOfficerId } =
     req.body;
   const complaintId = req.params.id;
 
