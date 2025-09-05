@@ -523,6 +523,12 @@ const ComplaintsList: React.FC = () => {
                       <TableHead>SLA</TableHead>
                       <TableHead>Closed</TableHead>
                       <TableHead>Updated</TableHead>
+                      {user?.role === "ADMINISTRATOR" && (
+                        <>
+                          <TableHead>Maintenance Team ID</TableHead>
+                          <TableHead>Ward Officer ID</TableHead>
+                        </>
+                      )}
                     </>
                   )}
                   <TableHead>Date</TableHead>
