@@ -740,11 +740,11 @@ const ComplaintsList: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-0.5">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-2 py-1 text-sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
                   >
@@ -753,7 +753,7 @@ const ComplaintsList: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-2 py-1 text-sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                   >
@@ -765,7 +765,7 @@ const ComplaintsList: React.FC = () => {
                       key={p}
                       variant={p === currentPage ? "default" : "outline"}
                       size="sm"
-                      className="h-8 px-2 py-1 text-sm"
+                      className="h-7 px-1 py-0.5 text-xs rounded-sm min-w-[28px]"
                       onClick={() => setCurrentPage(p)}
                     >
                       {p}
@@ -775,7 +775,7 @@ const ComplaintsList: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-2 py-1 text-sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                   >
@@ -784,7 +784,7 @@ const ComplaintsList: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-2 py-1 text-sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
                     onClick={() => setCurrentPage(totalPages)}
                     disabled={currentPage === totalPages}
                   >
