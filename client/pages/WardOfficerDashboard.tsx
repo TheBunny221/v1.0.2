@@ -116,7 +116,7 @@ const WardOfficerDashboard: React.FC = () => {
 
     // Ensure ward-based filtering so Ward Officer only sees complaints for their ward
     if (user?.ward?.id) {
-      filterParams.ward = user.ward.id;
+      filterParams.wardId = user.ward.id;
     }
 
     // Only add arrays if they have content
