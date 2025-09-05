@@ -239,7 +239,7 @@ const WardOfficerDashboard: React.FC = () => {
         >
           <CardHeader className="flex items-center justify-between pb-1">
             <CardTitle className="text-sm font-medium text-white/90">Total</CardTitle>
-            <BarChart3 className="h-4 w-4 text-white/90" />
+            <BarChart3 className="h-5 w-5 text-white/90" />
           </CardHeader>
           <CardContent className="p-2 pt-0">
             <div className="text-xl font-bold text-white">{stats?.summary?.totalComplaints ?? 0}</div>
@@ -292,7 +292,7 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">Registered</span>
                 </div>
               </CardTitle>
-              <Clock className="h-4 w-4 text-yellow-600" />
+              <Clock className="h-5 w-5 text-yellow-600" />
             </CardHeader>
             <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-yellow-600">
@@ -326,7 +326,7 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">Assigned</span>
                 </div>
               </CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
+              <Users className="h-5 w-5 text-blue-600" />
             </CardHeader>
             <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-blue-600">
@@ -360,7 +360,7 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">In Progress</span>
                 </div>
               </CardTitle>
-              <Settings className="h-4 w-4 text-orange-600" />
+              <Settings className="h-5 w-5 text-orange-600" />
             </CardHeader>
             <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-orange-600">
@@ -394,7 +394,7 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">Resolved</span>
                 </div>
               </CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-600" />
             </CardHeader>
             <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-green-600">
@@ -430,7 +430,7 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">Reopened</span>
                 </div>
               </CardTitle>
-              <XCircle className="h-4 w-4 text-purple-600" />
+              <XCircle className="h-5 w-5 text-purple-600" />
             </CardHeader>
             <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-purple-600">
@@ -466,7 +466,7 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">Closed</span>
                 </div>
               </CardTitle>
-              <FileText className="h-4 w-4 text-gray-600" />
+              <FileText className="h-5 w-5 text-gray-600" />
             </CardHeader>
             <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-gray-600">
@@ -500,7 +500,7 @@ const WardOfficerDashboard: React.FC = () => {
                 htmlFor="overdue-filter"
                 className="cursor-pointer flex items-center"
               >
-                <AlertTriangle className="h-4 w-4 mr-1 text-red-600" />
+                <AlertTriangle className="h-5 w-5 mr-1 text-red-600" />
                 Overdue ({stats?.summary.overdueComplaints || 0})
               </label>
             </div>
@@ -516,7 +516,7 @@ const WardOfficerDashboard: React.FC = () => {
                 htmlFor="urgent-filter"
                 className="cursor-pointer flex items-center"
               >
-                <AlertTriangle className="h-4 w-4 mr-1 text-orange-600" />
+                <AlertTriangle className="h-5 w-5 mr-1 text-orange-600" />
                 Urgent Priority ({stats?.summary.urgentComplaints || 0})
               </label>
             </div>
@@ -562,7 +562,7 @@ const WardOfficerDashboard: React.FC = () => {
               className="w-full justify-start"
               onClick={() => navigateToComplaints({ status: ["REGISTERED"] })}
             >
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-5 w-5 mr-2" />
               Assign New Complaints ({stats?.statusBreakdown.registered || 0})
             </Button>
             <Button
@@ -572,7 +572,7 @@ const WardOfficerDashboard: React.FC = () => {
                 navigateToComplaints({ priority: ["CRITICAL", "HIGH"] })
               }
             >
-              <AlertTriangle className="h-4 w-4 mr-2" />
+              <AlertTriangle className="h-5 w-5 mr-2" />
               Handle Urgent ({stats?.summary.urgentComplaints || 0})
             </Button>
             <Button
@@ -580,12 +580,12 @@ const WardOfficerDashboard: React.FC = () => {
               className="w-full justify-start"
               onClick={() => navigateToComplaints({ needsTeamAssignment: true })}
             >
-              <Briefcase className="h-4 w-4 mr-2" />
+              <Briefcase className="h-5 w-5 mr-2" />
               Assign to Team ({stats?.summary.needsTeamAssignment || 0})
             </Button>
             <Link to="/reports" className="block">
               <Button variant="outline" className="w-full justify-start">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <BarChart3 className="h-5 w-5 mr-2" />
                 Generate Reports
               </Button>
             </Link>
