@@ -308,10 +308,10 @@ const ComplaintsList: React.FC = () => {
   };
 
   // Pagination helpers
-  const totalItems = complaintsResponse?.meta?.total ?? 0;
+  const totalItems = complaintsResponse?.data?.pagination?.totalItems ?? 0;
   const totalPages = Math.max(
     1,
-    complaintsResponse?.meta?.pages ?? Math.ceil((totalItems || 0) / recordsPerPage || 1),
+    complaintsResponse?.data?.pagination?.totalPages ?? Math.ceil((totalItems || 0) / recordsPerPage || 1),
   );
 
   // Ensure currentPage stays within bounds when totalPages or totalItems change
