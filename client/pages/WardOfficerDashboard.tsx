@@ -224,6 +224,20 @@ const WardOfficerDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Total summary displayed above welcome */}
+      <div className="flex justify-end">
+        <Card className="w-40 p-2">
+          <CardHeader className="flex items-center justify-between pb-1">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <BarChart3 className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent className="p-2 pt-0">
+            <div className="text-xl font-bold text-primary">{stats?.summary?.totalComplaints ?? 0}</div>
+            <p className="text-xs text-muted-foreground">All complaints</p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
         <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
