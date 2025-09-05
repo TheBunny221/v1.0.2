@@ -156,7 +156,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       if (
         mode === "assign" ||
         (mode === "both" &&
-          formData.assignedTo !== (complaint.assignedTo?.id || "unassigned"))
+          formData.assignedTo !== ((complaint as any).wardOfficer?.id || complaint.assignedTo?.id || "unassigned"))
       ) {
         if (user?.role === "WARD_OFFICER") {
           await assignComplaint({
@@ -168,7 +168,8 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
         } else if (user?.role === "ADMINISTRATOR") {
           const updateData: any = {};
           if (formData.assignedTo !== "unassigned") {
-            updateData.assignedToId = formData.assignedTo;
+            // Use wardOfficerId when admins assign a ward officer
+            updateData.wardOfficerId = formData.assignedTo;
           }
           if (formData.remarks) updateData.remarks = formData.remarks;
           await updateComplaint({ id: complaint.id, ...updateData }).unwrap();
