@@ -110,12 +110,14 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
 
   // Update form data when complaint changes
   useEffect(() => {
+    // Prefer wardOfficer if present (new field), otherwise fall back to assignedTo
+    const currentAssigneeId = (complaint as any).wardOfficer?.id || complaint.assignedTo?.id || "unassigned";
     setFormData({
       status: complaint.status,
-      assignedTo: complaint.assignedTo?.id || "unassigned",
+      assignedTo: currentAssigneeId,
       remarks: "",
     });
-  }, [complaint.status, complaint.assignedTo?.id]);
+  }, [complaint.status, (complaint as any).wardOfficer?.id, complaint.assignedTo?.id]);
 
   const isLoading = isUpdatingStatus || isAssigning;
 
