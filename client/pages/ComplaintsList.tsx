@@ -515,7 +515,7 @@ const ComplaintsList: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileText className="h-5 w-5 mr-2" />
-            Complaints ({complaintsResponse?.meta?.total ?? filteredComplaints.length})
+            Complaints ({complaintsResponse?.data?.pagination?.totalItems ?? filteredComplaints.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
