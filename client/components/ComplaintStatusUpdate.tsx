@@ -237,10 +237,10 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                 <Badge className={currentStatusInfo.color}>
                   {currentStatusInfo.label}
                 </Badge>
-                {complaint.assignedTo && (
+                {((complaint as any).wardOfficer || complaint.assignedTo) && (
                   <Badge variant="outline" className="flex items-center gap-1">
                     <UserCheck className="h-3 w-3" />
-                    {complaint.assignedTo.fullName}
+                    {((complaint as any).wardOfficer || complaint.assignedTo).fullName}
                   </Badge>
                 )}
               </div>
