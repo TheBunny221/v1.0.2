@@ -743,66 +743,140 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                 </div>*/}
 
                 {/* User Selection */}
-                <Select
-                  value={
-                    user?.role === "WARD_OFFICER"
-                      ? formData.maintenanceTeamId
-                      : formData.assignedToId
-                  }
-                  onValueChange={(value) => {
-                    if (user?.role === "WARD_OFFICER") {
-                      setFormData((prev) => ({
-                        ...prev,
-                        maintenanceTeamId: value,
-                      }));
-                    } else {
-                      setFormData((prev) => ({ ...prev, assignedToId: value }));
-                    }
-                    // Clear validation errors when user makes a selection
-                    setValidationErrors([]);
-                  }}
-                  disabled={isLoadingUsers || availableUsers.length === 0}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={getDropdownLabel()} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-2" />
-                        No Assignment
-                      </div>
-                    </SelectItem>
-                    {filteredUsers.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        <div className="flex items-center justify-between w-full gap-2">
-                          <div className="flex items-center">
-                            {getUserRoleIcon(user.role)}
-                            <div className="ml-2 text-left">
-                              <div className="font-medium">{user.fullName}</div>
-                              <div className="text-xs text-gray-500">
-                                {user.email}
+                {user?.role === "ADMINISTRATOR" ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Ward Officer</Label>
+                      <Select
+                        value={formData.assignedToId}
+                        onValueChange={(value) => {
+                          setFormData((prev) => ({ ...prev, assignedToId: value }));
+                          setValidationErrors([]);
+                        }}
+                        disabled={isLoadingWardOfficers || wardOfficerUsers.length === 0}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Ward Officer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No Assignment</SelectItem>
+                          {wardOfficerUsers.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              <div className="flex items-center justify-between w-full gap-2">
+                                <div className="flex items-center">
+                                  {getUserRoleIcon(u.role)}
+                                  <div className="ml-2 text-left">
+                                    <div className="font-medium">{u.fullName}</div>
+                                    <div className="text-xs text-gray-500">{u.email}</div>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                  {u.role.replace("_", " ")}
+                                </Badge>
                               </div>
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {user.role.replace("_", " ")}
-                          </Badge>
-                          {user.ward && (
-                            <div className="text-xs text-blue-600">
-                              {user.ward.name}
-                            </div>
-                          )}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Maintenance Team</Label>
+                      <Select
+                        value={formData.maintenanceTeamId}
+                        onValueChange={(value) => {
+                          setFormData((prev) => ({ ...prev, maintenanceTeamId: value }));
+                          setValidationErrors([]);
+                        }}
+                        disabled={isLoadingMaintenance || maintenanceUsers.length === 0}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Maintenance Team" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No Assignment</SelectItem>
+                          {maintenanceUsers.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              <div className="flex items-center justify-between w-full gap-2">
+                                <div className="flex items-center">
+                                  {getUserRoleIcon(u.role)}
+                                  <div className="ml-2 text-left">
+                                    <div className="font-medium">{u.fullName}</div>
+                                    <div className="text-xs text-gray-500">{u.email}</div>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                  {u.role.replace("_", " ")}
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ) : (
+                  <Select
+                    value={
+                      user?.role === "WARD_OFFICER"
+                        ? formData.maintenanceTeamId
+                        : formData.assignedToId
+                    }
+                    onValueChange={(value) => {
+                      if (user?.role === "WARD_OFFICER") {
+                        setFormData((prev) => ({
+                          ...prev,
+                          maintenanceTeamId: value,
+                        }));
+                      } else {
+                        setFormData((prev) => ({ ...prev, assignedToId: value }));
+                      }
+                      // Clear validation errors when user makes a selection
+                      setValidationErrors([]);
+                    }}
+                    disabled={isLoadingUsers || availableUsers.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={getDropdownLabel()} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 mr-2" />
+                          No Assignment
                         </div>
                       </SelectItem>
-                    ))}
-                    {filteredUsers.length === 0 && searchTerm && (
-                      <SelectItem value="no-results" disabled>
-                        No users found matching "{searchTerm}"
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+                      {filteredUsers.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center">
+                              {getUserRoleIcon(user.role)}
+                              <div className="ml-2 text-left">
+                                <div className="font-medium">{user.fullName}</div>
+                                <div className="text-xs text-gray-500">
+                                  {user.email}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {user.role.replace("_", " ")}
+                            </Badge>
+                            {user.ward && (
+                              <div className="text-xs text-blue-600">
+                                {user.ward.name}
+                              </div>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                      {filteredUsers.length === 0 && searchTerm && (
+                        <SelectItem value="no-results" disabled>
+                          No users found matching "{searchTerm}"
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
 
                 {isLoadingUsers && (
                   <div className="text-sm text-gray-500">Loading users...</div>
