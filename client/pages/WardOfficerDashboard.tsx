@@ -70,7 +70,8 @@ const WardOfficerDashboard: React.FC = () => {
 
   const stats = statsResponse?.data?.stats;
 
-  const smallCardClass = "cursor-pointer transform transition-all hover:shadow-lg hover:scale-[1.02] p-3 bg-white rounded-lg border border-gray-100 flex flex-col justify-between min-h-[96px]";
+  const smallCardClass =
+    "cursor-pointer transform transition-all hover:shadow-lg hover:scale-[1.02] p-3 bg-white rounded-lg border border-gray-100 flex flex-col justify-between min-h-[96px]";
 
   // Build filter params for complaints query based on active filters
   const buildComplaintsFilter = () => {
@@ -226,23 +227,33 @@ const WardOfficerDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
-          <p className="text-blue-100">Manage complaints for {user?.ward?.name || "your assigned ward"} and monitor team performance.</p>
+          <p className="text-blue-100">
+            Manage complaints for {user?.ward?.name || "your assigned ward"} and
+            monitor team performance.
+          </p>
         </div>
         <Card
           className={`w-40 p-2 cursor-pointer transition-all ${filters.mainFilter === "total" ? "ring-2 ring-primary bg-primary/10" : "bg-white/10"}`}
-          onClick={() => handleMainFilterChange(filters.mainFilter === "total" ? "none" : "total")}
+          onClick={() =>
+            handleMainFilterChange(
+              filters.mainFilter === "total" ? "none" : "total",
+            )
+          }
         >
           <CardHeader className="flex items-center justify-between pb-1">
-            <CardTitle className="text-sm font-medium text-white/90">Total</CardTitle>
+            <CardTitle className="text-sm font-medium text-white/90">
+              Total
+            </CardTitle>
             <BarChart3 className="h-5 w-5 text-white/90" />
           </CardHeader>
           <CardContent className="p-2 pt-0">
-            <div className="text-xl font-bold text-white">{stats?.summary?.totalComplaints ?? 0}</div>
+            <div className="text-xl font-bold text-white">
+              {stats?.summary?.totalComplaints ?? 0}
+            </div>
             <p className="text-xs text-white/80">All complaints</p>
           </CardContent>
         </Card>
