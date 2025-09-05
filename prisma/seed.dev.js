@@ -486,7 +486,7 @@ async function main() {
     }
 
     // 6. Create Complaint Types
-    console.log("🏷️ Creating complaint types...");
+    console.log("��️ Creating complaint types...");
     const complaintTypesData = [
       {
         key: "COMPLAINT_TYPE_WATER_SUPPLY",
@@ -651,6 +651,7 @@ async function main() {
           contactPhone: randomCitizen.phoneNumber,
           submittedById: randomCitizen.id,
           assignedToId: status !== "REGISTERED" ? randomOfficer?.id : null,
+          wardOfficerId: status !== "REGISTERED" ? randomOfficer?.id : null,
           maintenanceTeamId: randomTeamMember?.id || null,
           createdAt: complaintDate,
           submittedOn: complaintDate,
