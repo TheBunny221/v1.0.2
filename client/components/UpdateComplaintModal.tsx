@@ -258,8 +258,19 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         ) {
           updateData.maintenanceTeamId = formData.maintenanceTeamId;
         }
+      } else if (user?.role === "ADMINISTRATOR") {
+        // Admin can set both ward officer (assignedToId) and maintenance team
+        if (formData.assignedToId && formData.assignedToId !== "none") {
+          updateData.assignedToId = formData.assignedToId;
+        }
+        if (
+          formData.maintenanceTeamId &&
+          formData.maintenanceTeamId !== "none"
+        ) {
+          updateData.maintenanceTeamId = formData.maintenanceTeamId;
+        }
       } else {
-        // For administrators and others, use legacy assignedToId
+        // For other roles, use legacy assignedToId
         if (formData.assignedToId && formData.assignedToId !== "none") {
           updateData.assignedToId = formData.assignedToId;
         }
