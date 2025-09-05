@@ -736,7 +736,7 @@ const ComplaintsList: React.FC = () => {
                     </SelectContent>
                   </Select>
                   <span className="text-sm text-gray-500">
-                    Showing {(currentPage - 1) * recordsPerPage + 1} - {Math.min(currentPage * recordsPerPage, totalItems)} of {totalItems}
+                    {totalItems === 0 ? `Showing 0 of 0` : `Showing ${(currentPage - 1) * recordsPerPage + 1} - ${Math.min(currentPage * recordsPerPage, totalItems)} of ${totalItems}`}
                   </span>
                 </div>
 
