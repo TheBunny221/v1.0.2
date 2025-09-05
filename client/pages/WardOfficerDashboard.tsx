@@ -255,7 +255,7 @@ const WardOfficerDashboard: React.FC = () => {
         <div className="grid grid-cols-3 md:grid-cols-7 lg:grid-cols-7 gap-3">
           {/* Registered */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "registered" ? "ring-2 ring-blue-500 bg-blue-50" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "registered" ? "none" : "registered")}
@@ -279,7 +279,7 @@ const WardOfficerDashboard: React.FC = () => {
 
           {/* Assigned */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "assigned" ? "ring-2 ring-indigo-500 bg-indigo-50" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "assigned" ? "none" : "assigned")}
@@ -301,7 +301,7 @@ const WardOfficerDashboard: React.FC = () => {
 
           {/* In Progress */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "inProgress" ? "ring-2 ring-orange-500 bg-orange-50" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "inProgress" ? "none" : "inProgress")}
@@ -323,7 +323,7 @@ const WardOfficerDashboard: React.FC = () => {
 
           {/* Resolved */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "resolved" ? "ring-2 ring-green-500 bg-green-50" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "resolved" ? "none" : "resolved")}
@@ -345,7 +345,7 @@ const WardOfficerDashboard: React.FC = () => {
 
           {/* Reopened */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "reopened" ? "ring-2 ring-purple-500 bg-purple-50" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "reopened" ? "none" : "reopened")}
@@ -367,7 +367,7 @@ const WardOfficerDashboard: React.FC = () => {
 
           {/* Closed */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "closed" ? "ring-2 ring-gray-500 bg-gray-50" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "closed" ? "none" : "closed")}
@@ -389,7 +389,7 @@ const WardOfficerDashboard: React.FC = () => {
 
           {/* Total */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md p-2 text-xs ${
               filters.mainFilter === "total" ? "ring-2 ring-primary bg-primary/10" : ""
             }`}
             onClick={() => handleMainFilterChange(filters.mainFilter === "total" ? "none" : "total")}
