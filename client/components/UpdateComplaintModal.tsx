@@ -121,11 +121,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
         assignedTo: complaint.assignedTo,
       });
 
-      // Handle both legacy assignedTo and new maintenanceTeam fields
-      const assignedToId =
-        typeof complaint.assignedTo === "object" && complaint.assignedTo?.id
-          ? complaint.assignedTo.id
-          : complaint.assignedTo || "none";
+      // Handle both legacy assignedTo and new wardOfficer fields
+      const wardOfficerId =
+        typeof complaint.wardOfficer === "object" && complaint.wardOfficer?.id
+          ? complaint.wardOfficer.id
+          : complaint.wardOfficer || "none";
 
       const maintenanceTeamId =
         typeof complaint.maintenanceTeam === "object" &&
@@ -134,14 +134,14 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
           : complaint.maintenanceTeam || "none";
 
       console.log("🔍 UpdateComplaintModal - Extracted IDs:", {
-        assignedToId,
+        wardOfficerId,
         maintenanceTeamId,
       });
 
       setFormData({
         status: complaint.status,
         priority: complaint.priority,
-        assignedToId,
+        wardOfficerId,
         maintenanceTeamId,
         remarks: "",
       });
