@@ -1941,8 +1941,8 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
   const assignmentCounts = {
     needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId)
       .length,
-    unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
-    assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
+    unassigned: wardComplaints.filter((c) => !c.wardOfficerId).length,
+    assigned: wardComplaints.filter((c) => !!c.wardOfficerId).length,
   };
 
   // Calculate pending work (registered + assigned statuses)
