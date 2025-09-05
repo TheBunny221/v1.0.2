@@ -31,6 +31,7 @@ import {
   Tooltip as UITooltip,
   TooltipTrigger,
   TooltipContent,
+  TooltipProvider,
 } from "../components/ui/tooltip";
 import {
   BarChart,
@@ -1063,7 +1064,8 @@ const AdminDashboard: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 
