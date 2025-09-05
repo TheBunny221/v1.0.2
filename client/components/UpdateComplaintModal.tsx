@@ -750,7 +750,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                   value={
                     user?.role === "WARD_OFFICER"
                       ? formData.maintenanceTeamId
-                      : formData.assignedToId
+                      : formData.wardOfficerId
                   }
                   onValueChange={(value) => {
                     if (user?.role === "WARD_OFFICER") {
@@ -759,7 +759,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                         maintenanceTeamId: value,
                       }));
                     } else {
-                      setFormData((prev) => ({ ...prev, assignedToId: value }));
+                      setFormData((prev) => ({ ...prev, wardOfficerId: value }));
                     }
                     // Clear validation errors when user makes a selection
                     setValidationErrors([]);
