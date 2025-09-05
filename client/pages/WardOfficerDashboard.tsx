@@ -226,7 +226,10 @@ const WardOfficerDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Total summary displayed above welcome */}
       <div className="flex justify-end">
-        <Card className="w-40 p-2">
+        <Card
+          className={`w-40 p-2 cursor-pointer transition-all ${filters.mainFilter === "total" ? "ring-2 ring-primary bg-primary/10" : ""}`}
+          onClick={() => handleMainFilterChange(filters.mainFilter === "total" ? "none" : "total")}
+        >
           <CardHeader className="flex items-center justify-between pb-1">
             <CardTitle className="text-sm font-medium">Total</CardTitle>
             <BarChart3 className="h-4 w-4 text-primary" />
