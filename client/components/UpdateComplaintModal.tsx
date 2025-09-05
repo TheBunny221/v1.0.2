@@ -78,30 +78,27 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Get users based on current user role
-  const getUsersFilter = () => {
-    if (user?.role === "ADMINISTRATOR") {
-      return { role: "WARD_OFFICER" };
-    } else if (user?.role === "WARD_OFFICER") {
-      return { role: "MAINTENANCE_TEAM" };
-    }
-    return {};
-  };
+  // Admins need both ward officers and maintenance team lists
+  const {
+    data: wardOfficerResponse,
+    isLoading: isLoadingWardOfficers,
+    error: wardOfficersError,
+  } = useGetWardUsersQuery({ page: 1, limit: 200, role: "WARD_OFFICER" }, { skip: user?.role !== "ADMINISTRATOR" && user?.role !== "WARD_OFFICER" });
 
   const {
-    data: usersResponse,
-    isLoading: isLoadingUsers,
-    error: usersError,
-  } = useGetWardUsersQuery({
-    page: 1,
-    limit: 100,
-    ...getUsersFilter(),
-  });
+    data: maintenanceResponse,
+    isLoading: isLoadingMaintenance,
+    error: maintenanceError,
+  } = useGetWardUsersQuery({ page: 1, limit: 200, role: "MAINTENANCE_TEAM" }, { skip: user?.role !== "ADMINISTRATOR" && user?.role !== "WARD_OFFICER" });
 
-  const [updateComplaint, { isLoading: isUpdating }] =
-    useUpdateComplaintMutation();
+  // For Ward Officers, maintenanceResponse will be used; for Admins both lists are available
+  const [updateComplaint, { isLoading: isUpdating }] = useUpdateComplaintMutation();
 
-  const availableUsers = usersResponse?.data?.users || [];
+  const wardOfficerUsers = wardOfficerResponse?.data?.users || [];
+  const maintenanceUsers = maintenanceResponse?.data?.users || [];
+
+  // Default availableUsers for previous single-select logic
+  const availableUsers = user?.role === "WARD_OFFICER" ? maintenanceUsers : wardOfficerUsers;
 
   // Filter users based on search term
   const filteredUsers = availableUsers.filter(
