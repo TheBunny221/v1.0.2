@@ -267,7 +267,7 @@ const WardOfficerDashboard: React.FC = () => {
         value={filters.mainFilter}
         onValueChange={handleMainFilterChange}
       >
-        <div className="grid grid-cols-3 md:grid-cols-7 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-6 gap-3">
           {/* Registered */}
           <Card
             className={`${smallCardClass} ${
