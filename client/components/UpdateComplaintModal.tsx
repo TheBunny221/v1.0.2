@@ -328,7 +328,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
     setFormData({
       status: "",
       priority: "",
-      assignedToId: "none",
+      wardOfficerId: "none",
       maintenanceTeamId: "none",
       remarks: "",
     });
