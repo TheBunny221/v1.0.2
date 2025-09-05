@@ -902,51 +902,56 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/dashboard/stats
 // @access  Private (Admin only)
 export const getDashboardStats = asyncHandler(async (req, res) => {
-  const [userStats, complaintStats, pendingTeamAssignments, activeUsers] =
-    await Promise.all([
-      // User statistics by role (active only)
-      prisma.user.groupBy({
-        by: ["role"],
-        where: { isActive: true },
-        _count: true,
-      }),
-      // Complaint statistics
-      prisma.complaint.groupBy({
-        by: ["status"],
-        _count: true,
-      }),
-      // Pending maintenance team assignment (align with complaints list filter)
-      prisma.complaint.count({
-        where: {
-          maintenanceTeamId: null,
-          status: { notIn: ["RESOLVED", "CLOSED"] },
-        },
-      }),
-      // Active user count
-      prisma.user.count({ where: { isActive: true } }),
-    ]);
+  const [
+    userStats,
+    complaintStats,
+    pendingTeamAssignments,
+    pendingWardOfficerAssignments,
+    activeUsers,
+  ] = await Promise.all([
+    // User statistics by role (active only)
+    prisma.user.groupBy({
+      by: ["role"],
+      where: { isActive: true },
+      _count: true,
+    }),
+    // Complaint statistics
+    prisma.complaint.groupBy({
+      by: ["status"],
+      _count: true,
+    }),
+    // Pending maintenance team assignment (align with complaints list filter)
+    prisma.complaint.count({
+      where: {
+        maintenanceTeamId: null,
+        status: { notIn: ["RESOLVED", "CLOSED"] },
+      },
+    }),
+    // Pending ward officer assignment
+    prisma.complaint.count({
+      where: {
+        wardOfficerId: null,
+        status: { notIn: ["RESOLVED", "CLOSED"] },
+      },
+    }),
+    // Active user count
+    prisma.user.count({ where: { isActive: true } }),
+  ]);
 
   const wardOfficers =
     userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
   const maintenanceTeam =
     userStats.find((s) => s.role === "MAINTENANCE_TEAM")?._count || 0;
-  const totalUsers = userStats.reduce((sum, stat) => sum + stat._count, 0);
+  const totalUsers = userStats.reduce((sum, stat) => sum + (stat._count._all || stat._count || 0), 0);
 
   const totalComplaints = complaintStats.reduce(
-    (sum, stat) => sum + stat._count,
+    (sum, stat) => sum + (stat._count || 0),
     0,
   );
+  // Active complaints are those not resolved or closed
   const activeComplaints = complaintStats
-    .filter((s) =>
-      [
-        "REGISTERED",
-        "ASSIGNED",
-        "IN_PROGRESS",
-        "RESOLVED",
-        "REOPENED",
-      ].includes(s.status),
-    )
-    .reduce((sum, stat) => sum + stat._count, 0);
+    .filter((s) => !["RESOLVED", "CLOSED"].includes(s.status))
+    .reduce((sum, stat) => sum + (stat._count || 0), 0);
   const resolvedComplaints =
     complaintStats.find((s) => s.status === "RESOLVED")?._count || 0;
 
@@ -970,6 +975,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       wardOfficers,
       maintenanceTeam,
       pendingTeamAssignments,
+      pendingWardOfficerAssignments,
       activeUsers,
     },
   });
