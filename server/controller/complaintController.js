@@ -1454,6 +1454,17 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     });
   }
 
+  // Notify ward officer if assigned
+  if (wardOfficerId && wardOfficerId !== req.user.id) {
+    notifications.push({
+      userId: wardOfficerId,
+      complaintId,
+      type: "IN_APP",
+      title: `Ward Officer Assigned`,
+      message: `You have been assigned as the ward officer for this complaint.`,
+    });
+  }
+
   // Legacy notification for assignedToId (backward compatibility)
   if (assignedToId && assignedToId !== req.user.id) {
     notifications.push({
