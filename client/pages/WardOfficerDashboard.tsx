@@ -226,12 +226,24 @@ const WardOfficerDashboard: React.FC = () => {
     <div className="space-y-6">
 
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
-        <p className="text-blue-100">
-          Manage complaints for {user?.ward?.name || "your assigned ward"} and
-          monitor team performance.
-        </p>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <p className="text-blue-100">Manage complaints for {user?.ward?.name || "your assigned ward"} and monitor team performance.</p>
+        </div>
+        <Card
+          className={`w-40 p-2 cursor-pointer transition-all ${filters.mainFilter === "total" ? "ring-2 ring-primary bg-primary/10" : "bg-white/10"}`}
+          onClick={() => handleMainFilterChange(filters.mainFilter === "total" ? "none" : "total")}
+        >
+          <CardHeader className="flex items-center justify-between pb-1">
+            <CardTitle className="text-sm font-medium text-white/90">Total</CardTitle>
+            <BarChart3 className="h-4 w-4 text-white/90" />
+          </CardHeader>
+          <CardContent className="p-2 pt-0">
+            <div className="text-xl font-bold text-white">{stats?.summary?.totalComplaints ?? 0}</div>
+            <p className="text-xs text-white/80">All complaints</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Statistics Cards with Filters */}
