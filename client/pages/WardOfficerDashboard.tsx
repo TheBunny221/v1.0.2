@@ -38,10 +38,13 @@ import {
 interface FilterState {
   mainFilter:
     | "none"
-    | "pending"
+    | "registered"
+    | "assigned"
     | "inProgress"
-    | "completed"
-    | "needsTeamAssignment";
+    | "resolved"
+    | "reopened"
+    | "closed"
+    | "total";
   overdue: boolean;
   urgent: boolean;
 }
@@ -52,7 +55,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   // State for filters
   const [filters, setFilters] = useState<FilterState>({
-    mainFilter: "pending",
+    mainFilter: "registered",
     overdue: false,
     urgent: false,
   });
@@ -75,18 +78,28 @@ const WardOfficerDashboard: React.FC = () => {
 
     // Main filter logic
     switch (filters.mainFilter) {
-      case "pending":
-        statusFilters.push("REGISTERED", "ASSIGNED"); //, "REOPEN"
+      case "registered":
+        statusFilters.push("REGISTERED");
+        break;
+      case "assigned":
+        statusFilters.push("ASSIGNED");
         break;
       case "inProgress":
         statusFilters.push("IN_PROGRESS");
         break;
-      case "completed":
-        statusFilters.push("RESOLVED", "CLOSED");
+      case "resolved":
+        statusFilters.push("RESOLVED");
         break;
-      case "needsTeamAssignment":
-        filterParams.needsTeamAssignment = true;
+      case "reopened":
+        statusFilters.push("REOPENED");
         break;
+      case "closed":
+        statusFilters.push("CLOSED");
+        break;
+      case "total":
+        // No status filter, show all
+        break;
+      case "none":
       default:
         // No main filter applied
         break;
@@ -99,6 +112,11 @@ const WardOfficerDashboard: React.FC = () => {
 
     if (filters.overdue) {
       filterParams.slaStatus = "OVERDUE";
+    }
+
+    // Ensure ward-based filtering so Ward Officer only sees complaints for their ward
+    if (user?.ward?.id) {
+      filterParams.ward = user.ward.id;
     }
 
     // Only add arrays if they have content
@@ -235,141 +253,159 @@ const WardOfficerDashboard: React.FC = () => {
         onValueChange={handleMainFilterChange}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Registered */}
           <Card
             className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "pending"
-                ? "ring-2 ring-blue-500 bg-blue-50"
-                : ""
+              filters.mainFilter === "registered" ? "ring-2 ring-blue-500 bg-blue-50" : ""
             }`}
-            onClick={() =>
-              handleMainFilterChange(
-                filters.mainFilter === "pending" ? "none" : "pending",
-              )
-            }
+            onClick={() => handleMainFilterChange(filters.mainFilter === "registered" ? "none" : "registered")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    id="pending-filter"
-                    value="pending"
-                    className="sr-only"
-                  />
-                  <span className="cursor-pointer">Pending Work</span>
+                  <RadioGroupItem id="registered-filter" value="registered" className="sr-only" />
+                  <span className="cursor-pointer">Registered</span>
                 </div>
               </CardTitle>
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {stats?.summary.pendingWork || 0}
+                {stats?.statusBreakdown?.registered ?? 0}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Registered 
-              </p>
+              <p className="text-xs text-muted-foreground">Newly registered</p>
             </CardContent>
           </Card>
 
+          {/* Assigned */}
           <Card
             className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "inProgress"
-                ? "ring-2 ring-orange-500 bg-orange-50"
-                : ""
+              filters.mainFilter === "assigned" ? "ring-2 ring-indigo-500 bg-indigo-50" : ""
             }`}
-            onClick={() =>
-              handleMainFilterChange(
-                filters.mainFilter === "inProgress" ? "none" : "inProgress",
-              )
-            }
+            onClick={() => handleMainFilterChange(filters.mainFilter === "assigned" ? "none" : "assigned")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    id="progress-filter"
-                    value="inProgress"
-                    className="sr-only"
-                  />
+                  <RadioGroupItem id="assigned-filter" value="assigned" className="sr-only" />
+                  <span className="cursor-pointer">Assigned</span>
+                </div>
+              </CardTitle>
+              <Users className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{stats?.statusBreakdown?.assigned ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Assigned to teams</p>
+            </CardContent>
+          </Card>
+
+          {/* In Progress */}
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "inProgress" ? "ring-2 ring-orange-500 bg-orange-50" : ""
+            }`}
+            onClick={() => handleMainFilterChange(filters.mainFilter === "inProgress" ? "none" : "inProgress")}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem id="progress-filter" value="inProgress" className="sr-only" />
                   <span className="cursor-pointer">In Progress</span>
                 </div>
               </CardTitle>
               <Settings className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {stats?.summary.activeWork || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">Active complaints</p>
+              <div className="text-2xl font-bold text-orange-600">{stats?.statusBreakdown?.in_progress ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Active work</p>
             </CardContent>
           </Card>
 
+          {/* Resolved */}
           <Card
             className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "completed"
-                ? "ring-2 ring-green-500 bg-green-50"
-                : ""
+              filters.mainFilter === "resolved" ? "ring-2 ring-green-500 bg-green-50" : ""
             }`}
-            onClick={() =>
-              handleMainFilterChange(
-                filters.mainFilter === "completed" ? "none" : "completed",
-              )
-            }
+            onClick={() => handleMainFilterChange(filters.mainFilter === "resolved" ? "none" : "resolved")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    id="completed-filter"
-                    value="completed"
-                    className="sr-only"
-                  />
-                  <span className="cursor-pointer">Completed</span>
+                  <RadioGroupItem id="resolved-filter" value="resolved" className="sr-only" />
+                  <span className="cursor-pointer">Resolved</span>
                 </div>
               </CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {stats?.summary.completedWork || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">Resolved + Closed</p>
+              <div className="text-2xl font-bold text-green-600">{stats?.statusBreakdown?.resolved ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Resolved complaints</p>
             </CardContent>
           </Card>
 
+          {/* Reopened */}
           <Card
             className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "needsTeamAssignment"
-                ? "ring-2 ring-purple-500 bg-purple-50"
-                : ""
+              filters.mainFilter === "reopened" ? "ring-2 ring-purple-500 bg-purple-50" : ""
             }`}
-            onClick={() =>
-              handleMainFilterChange(
-                filters.mainFilter === "needsTeamAssignment"
-                  ? "none"
-                  : "needsTeamAssignment",
-              )
-            }
+            onClick={() => handleMainFilterChange(filters.mainFilter === "reopened" ? "none" : "reopened")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    id="team-assignment-filter"
-                    value="needsTeamAssignment"
-                    className="sr-only"
-                  />
-                  <span className="cursor-pointer">Needs Team Assignment</span>
+                  <RadioGroupItem id="reopened-filter" value="reopened" className="sr-only" />
+                  <span className="cursor-pointer">Reopened</span>
                 </div>
               </CardTitle>
-              <Briefcase className="h-4 w-4 text-purple-600" />
+              <XCircle className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {stats?.summary.needsTeamAssignment || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                To assign to maintenance
-              </p>
+              <div className="text-2xl font-bold text-purple-600">{stats?.statusBreakdown?.reopened ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Reopened after closure</p>
+            </CardContent>
+          </Card>
+
+          {/* Closed */}
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "closed" ? "ring-2 ring-gray-500 bg-gray-50" : ""
+            }`}
+            onClick={() => handleMainFilterChange(filters.mainFilter === "closed" ? "none" : "closed")}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem id="closed-filter" value="closed" className="sr-only" />
+                  <span className="cursor-pointer">Closed</span>
+                </div>
+              </CardTitle>
+              <FileText className="h-4 w-4 text-gray-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-600">{stats?.statusBreakdown?.closed ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Closed complaints</p>
+            </CardContent>
+          </Card>
+
+          {/* Total */}
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filters.mainFilter === "total" ? "ring-2 ring-primary bg-primary/10" : ""
+            }`}
+            onClick={() => handleMainFilterChange(filters.mainFilter === "total" ? "none" : "total")}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem id="total-filter" value="total" className="sr-only" />
+                  <span className="cursor-pointer">Total</span>
+                </div>
+              </CardTitle>
+              <BarChart3 className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats?.summary?.totalComplaints ?? 0}</div>
+              <p className="text-xs text-muted-foreground">All complaints</p>
             </CardContent>
           </Card>
         </div>
