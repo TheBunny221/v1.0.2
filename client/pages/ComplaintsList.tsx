@@ -314,6 +314,16 @@ const ComplaintsList: React.FC = () => {
     complaintsResponse?.meta?.pages ?? Math.ceil((totalItems || 0) / recordsPerPage || 1),
   );
 
+  // Ensure currentPage stays within bounds when totalPages or totalItems change
+  useEffect(() => {
+    if (totalPages && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+    if (totalItems === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, totalItems]);
+
   const getPageNumbers = () => {
     const pages: number[] = [];
     const maxButtons = 5;
@@ -332,7 +342,7 @@ const ComplaintsList: React.FC = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {user?.role === "MAINTENANCE_TEAM" ? `My Complaints (${totalItems})` : `Complaints (${totalItems})`}
+            {user?.role === "MAINTENANCE_TEAM" ? "My Complaints" : "Complaints"}
           </h1>
           <p className="text-gray-600">
             {user?.role === "MAINTENANCE_TEAM"
