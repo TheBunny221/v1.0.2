@@ -1335,6 +1335,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
   }
 
+  // Admin can assign or change ward officer
+  if (wardOfficerId) {
+    updateData.wardOfficerId = wardOfficerId;
+  }
+
   // Legacy assignedToId handling (backward compatibility)
   if (assignedToId) {
     updateData.assignedToId = assignedToId;
