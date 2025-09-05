@@ -179,7 +179,7 @@ const WardOfficerDashboard: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-          <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
           <p className="text-blue-100">Loading ward statistics...</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -205,7 +205,7 @@ const WardOfficerDashboard: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-lg p-6 text-white">
-          <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
           <p className="text-red-100">Error loading ward statistics</p>
         </div>
         <Card>
@@ -243,7 +243,7 @@ const WardOfficerDashboard: React.FC = () => {
 
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
         <p className="text-blue-100">
           Manage complaints for {user?.ward?.name || "your assigned ward"} and
           monitor team performance.
