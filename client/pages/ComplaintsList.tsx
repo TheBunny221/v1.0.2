@@ -656,6 +656,17 @@ const ComplaintsList: React.FC = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
+                            <div className="flex items-center text-sm">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {new Date(complaint.submittedOn).toLocaleDateString()}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">
+                              {new Date(complaint.updatedAt).toLocaleDateString()}
+                            </span>
+                          </TableCell>
+                          <TableCell>
                             {complaint.closedOn ? (
                               <span className="text-sm">
                                 {new Date(
@@ -665,11 +676,6 @@ const ComplaintsList: React.FC = () => {
                             ) : (
                               <span className="text-xs text-gray-500">-</span>
                             )}
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm">
-                              {new Date(complaint.updatedAt).toLocaleDateString()}
-                            </span>
                           </TableCell>
 
                           {user?.role === "ADMINISTRATOR" && (
@@ -688,12 +694,6 @@ const ComplaintsList: React.FC = () => {
                           )}
                         </>
                       )}
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {new Date(complaint.submittedOn).toLocaleDateString()}
-                        </div>
-                      </TableCell>
                       <TableCell>
                         <ComplaintQuickActions
                           complaint={{
