@@ -513,7 +513,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
                     <strong>Debug:</strong>
                     <br />
                     wardOfficer:{" "}
-                    {JSON.stringify(complaint.assignedTo) || "null"}
+                    {JSON.stringify(complaint.wardOfficer) || "null"}
                     <br />
                     maintenanceTeam:{" "}
                     {JSON.stringify(complaint.maintenanceTeam) || "null"}
