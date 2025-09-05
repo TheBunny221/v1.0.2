@@ -725,7 +725,7 @@ const ComplaintsList: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600">Rows per page:</span>
                   <Select value={String(recordsPerPage)} onValueChange={(v) => { setRecordsPerPage(Number(v)); setCurrentPage(1); }}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-8 w-24 px-2 py-1 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
