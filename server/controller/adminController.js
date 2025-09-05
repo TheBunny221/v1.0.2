@@ -560,8 +560,10 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
       resolvedOn: { not: null },
     },
     select: {
+      id: true,
       createdAt: true,
       resolvedOn: true,
+      deadline: true,
     },
   });
 
@@ -577,6 +579,28 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
           return acc + resolutionTime;
         }, 0) / validResolutions.length
       : 0;
+
+  // Overdue open complaints (deadline passed but not resolved/closed)
+  const overdueOpen = await prisma.complaint.count({
+    where: {
+      deadline: { lt: new Date() },
+      status: { notIn: ["RESOLVED", "CLOSED"] },
+    },
+  });
+
+  // Resolved complaints that exceeded deadline (resolved late)
+  const resolvedLate = resolvedWithDates.reduce((count, c) => {
+    try {
+      if (!c.deadline) return count;
+      if (new Date(c.resolvedOn) > new Date(c.deadline)) return count + 1;
+      return count;
+    } catch (e) {
+      return count;
+    }
+  }, 0);
+
+  const slaBreaches = Number(resolvedLate) + Number(overdueOpen);
+  const withinSLA = Math.max(0, Number(totalComplaints) - Number(slaBreaches));
 
   // Calculate SLA compliance as average of type-level compliance using SLA hours from system config
   const typeConfigs = await prisma.systemConfig.findMany({
