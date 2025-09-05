@@ -155,7 +155,6 @@ async function main() {
         type: "contact",
         description: "Physical address of the main office",
       },
-
     ];
 
     await Promise.all(
@@ -611,11 +610,21 @@ async function main() {
         sixMonthsAgo.getTime() + Math.random() * timeRange,
       );
 
-      const assignedDate = new Date(complaintDate.getTime() + 2 * 60 * 60 * 1000);
-      const inProgressDate = new Date(assignedDate.getTime() + 3 * 60 * 60 * 1000);
-      const resolvedDate = new Date(complaintDate.getTime() + 5 * 24 * 60 * 60 * 1000);
-      const closedDate = new Date(complaintDate.getTime() + 6 * 24 * 60 * 60 * 1000);
-      const deadline = new Date(complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const assignedDate = new Date(
+        complaintDate.getTime() + 2 * 60 * 60 * 1000,
+      );
+      const inProgressDate = new Date(
+        assignedDate.getTime() + 3 * 60 * 60 * 1000,
+      );
+      const resolvedDate = new Date(
+        complaintDate.getTime() + 5 * 24 * 60 * 60 * 1000,
+      );
+      const closedDate = new Date(
+        complaintDate.getTime() + 6 * 24 * 60 * 60 * 1000,
+      );
+      const deadline = new Date(
+        complaintDate.getTime() + 7 * 24 * 60 * 60 * 1000,
+      );
 
       const wardMaintenanceTeam = maintenanceTeam.filter(
         (member) => member.wardId === randomWard.id,
@@ -623,9 +632,13 @@ async function main() {
 
       let assignedTeamMember = null;
       if (wardMaintenanceTeam.length > 0) {
-        assignedTeamMember = wardMaintenanceTeam[Math.floor(Math.random() * wardMaintenanceTeam.length)];
+        assignedTeamMember =
+          wardMaintenanceTeam[
+            Math.floor(Math.random() * wardMaintenanceTeam.length)
+          ];
       } else if (maintenanceTeam.length > 0) {
-        assignedTeamMember = maintenanceTeam[Math.floor(Math.random() * maintenanceTeam.length)];
+        assignedTeamMember =
+          maintenanceTeam[Math.floor(Math.random() * maintenanceTeam.length)];
       }
 
       let complaintData = {
@@ -633,11 +646,17 @@ async function main() {
         title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
         description: `Production complaint regarding ${complaintType
           .toLowerCase()
-          .replace("_", " ")} issue that requires attention. Submitted by ${randomCitizen.fullName}.`,
+          .replace(
+            "_",
+            " ",
+          )} issue that requires attention. Submitted by ${randomCitizen.fullName}.`,
         type: complaintType,
         status: status,
         priority: priority,
-        slaStatus: (status === "RESOLVED" || status === "CLOSED") ? "COMPLETED" : "ON_TIME",
+        slaStatus:
+          status === "RESOLVED" || status === "CLOSED"
+            ? "COMPLETED"
+            : "ON_TIME",
         wardId: randomWard.id,
         area: randomWard.name.split(" - ")[1] || randomWard.name,
         landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
@@ -649,7 +668,10 @@ async function main() {
         createdAt: complaintDate,
         submittedOn: complaintDate,
         deadline: deadline,
-        rating: (status === "RESOLVED" || status === "CLOSED") && Math.random() > 0.4 ? Math.floor(Math.random() * 5) + 1 : null,
+        rating:
+          (status === "RESOLVED" || status === "CLOSED") && Math.random() > 0.4
+            ? Math.floor(Math.random() * 5) + 1
+            : null,
       };
 
       if (status === "REGISTERED") {
@@ -663,8 +685,12 @@ async function main() {
           closedOn: null,
         };
       } else if (status === "REOPENED") {
-        const previousOfficer = randomOfficer || wardOfficers[Math.floor(Math.random() * wardOfficers.length)];
-        const previousTeam = assignedTeamMember || maintenanceTeam[Math.floor(Math.random() * maintenanceTeam.length)];
+        const previousOfficer =
+          randomOfficer ||
+          wardOfficers[Math.floor(Math.random() * wardOfficers.length)];
+        const previousTeam =
+          assignedTeamMember ||
+          maintenanceTeam[Math.floor(Math.random() * maintenanceTeam.length)];
 
         complaintData = {
           ...complaintData,
@@ -682,7 +708,8 @@ async function main() {
           maintenanceTeamId: assignedTeamMember?.id || null,
           assignedToId: assignedTeamMember?.id || randomOfficer?.id || null,
           assignedOn: assignedDate,
-          resolvedOn: status === "RESOLVED" || status === "CLOSED" ? resolvedDate : null,
+          resolvedOn:
+            status === "RESOLVED" || status === "CLOSED" ? resolvedDate : null,
           closedOn: status === "CLOSED" ? closedDate : null,
         };
       }
@@ -717,11 +744,19 @@ async function main() {
         });
       }
 
-      if (status === "IN_PROGRESS" || status === "RESOLVED" || status === "CLOSED" || status === "REOPENED") {
+      if (
+        status === "IN_PROGRESS" ||
+        status === "RESOLVED" ||
+        status === "CLOSED" ||
+        status === "REOPENED"
+      ) {
         await prisma.statusLog.create({
           data: {
             complaintId: complaint.id,
-            userId: complaintData.assignedToId || complaintData.wardOfficerId || adminUser.id,
+            userId:
+              complaintData.assignedToId ||
+              complaintData.wardOfficerId ||
+              adminUser.id,
             fromStatus: "ASSIGNED",
             toStatus: "IN_PROGRESS",
             comment: "Work started",
@@ -734,7 +769,10 @@ async function main() {
         await prisma.statusLog.create({
           data: {
             complaintId: complaint.id,
-            userId: complaintData.assignedToId || complaintData.wardOfficerId || adminUser.id,
+            userId:
+              complaintData.assignedToId ||
+              complaintData.wardOfficerId ||
+              adminUser.id,
             fromStatus: "IN_PROGRESS",
             toStatus: "RESOLVED",
             comment: "Work resolved",
@@ -757,7 +795,9 @@ async function main() {
       }
 
       if (status === "REOPENED") {
-        const reopenedTimestamp = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+        const reopenedTimestamp = new Date(
+          now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        );
         await prisma.statusLog.create({
           data: {
             complaintId: complaint.id,
@@ -769,11 +809,16 @@ async function main() {
           },
         });
 
-        const reopenAssigned = new Date(reopenedTimestamp.getTime() + 2 * 60 * 60 * 1000);
+        const reopenAssigned = new Date(
+          reopenedTimestamp.getTime() + 2 * 60 * 60 * 1000,
+        );
         await prisma.statusLog.create({
           data: {
             complaintId: complaint.id,
-            userId: complaintData.assignedToId || complaintData.wardOfficerId || adminUser.id,
+            userId:
+              complaintData.assignedToId ||
+              complaintData.wardOfficerId ||
+              adminUser.id,
             fromStatus: "REOPENED",
             toStatus: "ASSIGNED",
             comment: "Reassigned after reopen",
@@ -781,11 +826,16 @@ async function main() {
           },
         });
 
-        const reopenInProgress = new Date(reopenAssigned.getTime() + 3 * 60 * 60 * 1000);
+        const reopenInProgress = new Date(
+          reopenAssigned.getTime() + 3 * 60 * 60 * 1000,
+        );
         await prisma.statusLog.create({
           data: {
             complaintId: complaint.id,
-            userId: complaintData.assignedToId || complaintData.wardOfficerId || adminUser.id,
+            userId:
+              complaintData.assignedToId ||
+              complaintData.wardOfficerId ||
+              adminUser.id,
             fromStatus: "ASSIGNED",
             toStatus: "IN_PROGRESS",
             comment: "Work started after reopen",

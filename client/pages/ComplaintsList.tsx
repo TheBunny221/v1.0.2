@@ -163,7 +163,15 @@ const ComplaintsList: React.FC = () => {
   // Reset to first page when filters or search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, priorityFilter, wardFilter, subZoneFilter, debouncedSearchTerm, needsMaintenanceAssignment, slaStatusFilter]);
+  }, [
+    statusFilter,
+    priorityFilter,
+    wardFilter,
+    subZoneFilter,
+    debouncedSearchTerm,
+    needsMaintenanceAssignment,
+    slaStatusFilter,
+  ]);
 
   // Build query parameters for server-side filtering and pagination
   const queryParams = useMemo(() => {
@@ -311,7 +319,8 @@ const ComplaintsList: React.FC = () => {
   const totalItems = complaintsResponse?.data?.pagination?.totalItems ?? 0;
   const totalPages = Math.max(
     1,
-    complaintsResponse?.data?.pagination?.totalPages ?? Math.ceil((totalItems || 0) / recordsPerPage || 1),
+    complaintsResponse?.data?.pagination?.totalPages ??
+      Math.ceil((totalItems || 0) / recordsPerPage || 1),
   );
 
   // Ensure currentPage stays within bounds when totalPages or totalItems change
@@ -515,7 +524,10 @@ const ComplaintsList: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileText className="h-5 w-5 mr-2" />
-            Complaints ({complaintsResponse?.data?.pagination?.totalItems ?? filteredComplaints.length})
+            Complaints (
+            {complaintsResponse?.data?.pagination?.totalItems ??
+              filteredComplaints.length}
+            )
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -558,7 +570,8 @@ const ComplaintsList: React.FC = () => {
                     <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Priority</TableHead>
-                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") && (
                       <TableHead>Team</TableHead>
                     )}
                     {user?.role === "ADMINISTRATOR" && (
@@ -609,7 +622,9 @@ const ComplaintsList: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <Badge className={getPriorityColor(complaint.priority)}>
+                          <Badge
+                            className={getPriorityColor(complaint.priority)}
+                          >
                             {complaint.priority}
                           </Badge>
                           {(complaint as any).needsTeamAssignment &&
@@ -622,10 +637,13 @@ const ComplaintsList: React.FC = () => {
                             )}
                         </div>
                       </TableCell>
-                      {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                      {(user?.role === "ADMINISTRATOR" ||
+                        user?.role === "WARD_OFFICER") && (
                         <TableCell>
                           {complaint.maintenanceTeam?.fullName ? (
-                            <span className="text-sm">{complaint.maintenanceTeam.fullName}</span>
+                            <span className="text-sm">
+                              {complaint.maintenanceTeam.fullName}
+                            </span>
                           ) : (
                             <span className="text-xs text-gray-500">-</span>
                           )}
@@ -634,7 +652,9 @@ const ComplaintsList: React.FC = () => {
                       {user?.role === "ADMINISTRATOR" && (
                         <TableCell>
                           {complaint.wardOfficer?.fullName ? (
-                            <span className="text-sm">{complaint.wardOfficer.fullName}</span>
+                            <span className="text-sm">
+                              {complaint.wardOfficer.fullName}
+                            </span>
                           ) : (
                             <span className="text-xs text-gray-500">-</span>
                           )}
@@ -645,7 +665,9 @@ const ComplaintsList: React.FC = () => {
                           <TableCell>
                             {typeof complaint.rating === "number" &&
                             complaint.rating > 0 ? (
-                              <span className="text-sm font-medium">{complaint.rating}/5</span>
+                              <span className="text-sm font-medium">
+                                {complaint.rating}/5
+                              </span>
                             ) : (
                               <span className="text-xs text-gray-500">N/A</span>
                             )}
@@ -658,12 +680,16 @@ const ComplaintsList: React.FC = () => {
                           <TableCell>
                             <div className="flex items-center text-sm">
                               <Calendar className="h-3 w-3 mr-1" />
-                              {new Date(complaint.submittedOn).toLocaleDateString()}
+                              {new Date(
+                                complaint.submittedOn,
+                              ).toLocaleDateString()}
                             </div>
                           </TableCell>
                           <TableCell>
                             <span className="text-sm">
-                              {new Date(complaint.updatedAt).toLocaleDateString()}
+                              {new Date(
+                                complaint.updatedAt,
+                              ).toLocaleDateString()}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -724,7 +750,13 @@ const ComplaintsList: React.FC = () => {
               <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600">Rows per page:</span>
-                  <Select value={String(recordsPerPage)} onValueChange={(v) => { setRecordsPerPage(Number(v)); setCurrentPage(1); }}>
+                  <Select
+                    value={String(recordsPerPage)}
+                    onValueChange={(v) => {
+                      setRecordsPerPage(Number(v));
+                      setCurrentPage(1);
+                    }}
+                  >
                     <SelectTrigger className="h-8 w-24 px-2 py-1 text-sm">
                       <SelectValue />
                     </SelectTrigger>
@@ -736,7 +768,9 @@ const ComplaintsList: React.FC = () => {
                     </SelectContent>
                   </Select>
                   <span className="text-sm text-gray-500">
-                    {totalItems === 0 ? `Showing 0 of 0` : `Showing ${(currentPage - 1) * recordsPerPage + 1} - ${Math.min(currentPage * recordsPerPage, totalItems)} of ${totalItems}`}
+                    {totalItems === 0
+                      ? `Showing 0 of 0`
+                      : `Showing ${(currentPage - 1) * recordsPerPage + 1} - ${Math.min(currentPage * recordsPerPage, totalItems)} of ${totalItems}`}
                   </span>
                 </div>
 
@@ -776,7 +810,9 @@ const ComplaintsList: React.FC = () => {
                     variant="outline"
                     size="sm"
                     className="h-7 px-1 py-0.5 text-xs rounded-sm"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
                     disabled={currentPage === totalPages}
                   >
                     Next
