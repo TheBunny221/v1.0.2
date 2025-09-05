@@ -892,20 +892,20 @@ const ComplaintDetails: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {complaint.assignedTo ? (
+                {(complaint.wardOfficer || complaint.assignedTo) ? (
                   <div>
                     <p className="text-sm font-medium mb-1">Assigned To</p>
                     <div className="bg-blue-50 rounded-lg p-3">
                       <p className="text-blue-800 font-medium">
-                        {typeof complaint.assignedTo === "object" &&
-                        complaint.assignedTo
-                          ? complaint.assignedTo.fullName
-                          : complaint.assignedTo}
+                        {typeof (complaint.wardOfficer || complaint.assignedTo) === "object" &&
+                        (complaint.wardOfficer || complaint.assignedTo)
+                          ? (complaint.wardOfficer || complaint.assignedTo).fullName
+                          : (complaint.wardOfficer || complaint.assignedTo)}
                       </p>
-                      {typeof complaint.assignedTo === "object" &&
-                        complaint.assignedTo?.email && (
+                      {typeof (complaint.wardOfficer || complaint.assignedTo) === "object" &&
+                        (complaint.wardOfficer || complaint.assignedTo)?.email && (
                           <p className="text-blue-600 text-sm">
-                            {complaint.assignedTo.email}
+                            {(complaint.wardOfficer || complaint.assignedTo).email}
                           </p>
                         )}
                       {complaint.assignedOn && (
