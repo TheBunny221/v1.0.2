@@ -281,7 +281,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -315,7 +315,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -349,7 +349,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -383,7 +383,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -419,7 +419,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -455,7 +455,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
