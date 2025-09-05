@@ -263,8 +263,11 @@ export interface Translation {
 // Translations
 const translations: Record<Language, Translation> = {
   en: {
+    settings: {},
     nav: {
-      home: "Home",
+        ward: "Ward",
+        profile: "Profile",
+        home: "Home",
       complaints: "Complaints",
       myComplaints: "My Complaints",
       trackStatus: "Track Status",
@@ -518,8 +521,11 @@ const translations: Record<Language, Translation> = {
     },
   },
   hi: {
+    settings: {},
     nav: {
-      home: "होम",
+        ward: "वार्ड",
+        profile: "प्रोफ़ाइल",
+        home: "होम",
       complaints: "शिकायतें",
       myComplaints: "मेरी शिकायतें",
       trackStatus: "स्थिति ट्रैक करें",
@@ -773,8 +779,11 @@ const translations: Record<Language, Translation> = {
     },
   },
   ml: {
+    settings: {},
     nav: {
-      home: "ഹോം",
+        ward: "വാര്‍ഡ്",
+        profile: "പ്രൊഫൈൽ",
+        home: "ഹോം",
       complaints: "പരാതികൾ",
       myComplaints: "എന്റെ പരാതികൾ",
       trackStatus: "സ്ഥിതി ട്രാക്ക് ചെയ്യുക",

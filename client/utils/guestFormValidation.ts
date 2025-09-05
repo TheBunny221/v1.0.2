@@ -137,21 +137,22 @@ export const validateStep3 = (files: File[]): ValidationResult => {
   }
 
   // Individual file validation
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file) continue;
 
-    // File size validation (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      errors.attachments = `File "${file.name}" exceeds 10MB limit`;
-      return { isValid: false, errors };
-    }
+      // File size validation (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        errors.attachments = `File "${file.name}" exceeds 10MB limit`;
+        return { isValid: false, errors };
+      }
 
-    // File type validation
-    if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
-      errors.attachments = `File "${file.name}" must be JPG or PNG format`;
-      return { isValid: false, errors };
+      // File type validation
+      if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+        errors.attachments = `File "${file.name}" must be JPG or PNG format`;
+        return { isValid: false, errors };
+      }
     }
-  }
 
   return {
     isValid: Object.keys(errors).length === 0,

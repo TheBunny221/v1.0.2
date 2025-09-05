@@ -13,6 +13,8 @@ export interface AnalyticsEvent {
   timestamp?: number;
 }
 
+type LayoutShift = PerformanceEntry & { value: number; hadRecentInput: boolean };
+
 export interface ErrorEvent {
   error: Error | string;
   context?: string;
@@ -76,11 +78,11 @@ class AnalyticsManager {
   track(event: Omit<AnalyticsEvent, "timestamp" | "userId">) {
     if (!this.isEnabled) return;
 
-    const enhancedEvent: AnalyticsEvent = {
-      ...event,
-      userId: this.userId || undefined,
-      timestamp: Date.now(),
-    };
+      const enhancedEvent: AnalyticsEvent = {
+        ...event,
+        ...(this.userId ? { userId: this.userId } : {}),
+        timestamp: Date.now(),
+      };
 
     this.eventQueue.push(enhancedEvent);
     this.scheduleFlush();
@@ -100,13 +102,13 @@ class AnalyticsManager {
 
     const errorEvent: ErrorEvent = {
       error,
-      context,
-      userId: this.userId || undefined,
       userAgent: navigator.userAgent,
       url: window.location.href,
-      metadata,
       timestamp: Date.now(),
       severity,
+      ...(context ? { context } : {}),
+      ...(this.userId ? { userId: this.userId } : {}),
+      ...(metadata ? { metadata } : {}),
     };
 
     this.errorQueue.push(errorEvent);
@@ -134,8 +136,8 @@ class AnalyticsManager {
       duration,
       startTime: performance.now() - duration,
       endTime: performance.now(),
-      metadata,
       timestamp: Date.now(),
+      ...(metadata ? { metadata } : {}),
     };
 
     this.performanceQueue.push(performanceEvent);
@@ -154,10 +156,10 @@ class AnalyticsManager {
     const userEvent: UserEvent = {
       userId: this.userId,
       action,
-      entity,
-      entityId,
-      metadata,
       timestamp: Date.now(),
+      ...(entity ? { entity } : {}),
+      ...(entityId ? { entityId } : {}),
+      ...(metadata ? { metadata } : {}),
     };
 
     this.userEventQueue.push(userEvent);
@@ -165,18 +167,19 @@ class AnalyticsManager {
   }
 
   // Page View Tracking
-  trackPageView(page: string, title?: string, metadata?: Record<string, any>) {
-    this.track({
-      event: "page_view",
-      category: "navigation",
-      action: "view",
-      label: page,
-      metadata: {
-        title,
-        ...metadata,
-      },
-    });
-  }
+    trackPageView(page: string, title?: string, metadata?: Record<string, any>) {
+      const payload: Omit<AnalyticsEvent, "timestamp" | "userId"> = {
+        event: "page_view",
+        category: "navigation",
+        action: "view",
+        label: page,
+      };
+      const combinedMeta = { ...(title ? { title } : {}), ...metadata };
+      if (Object.keys(combinedMeta).length > 0) {
+        payload.metadata = combinedMeta;
+      }
+      this.track(payload);
+    }
 
   // Complaint System Specific Events
   trackComplaintEvent(
@@ -184,13 +187,14 @@ class AnalyticsManager {
     complaintId?: string,
     metadata?: Record<string, any>,
   ) {
-    this.track({
-      event: "complaint_action",
-      category: "complaints",
-      action,
-      label: complaintId,
-      metadata,
-    });
+      const payload: Omit<AnalyticsEvent, "timestamp" | "userId"> = {
+        event: "complaint_action",
+        category: "complaints",
+        action,
+        ...(complaintId ? { label: complaintId } : {}),
+      };
+      if (metadata) payload.metadata = metadata;
+      this.track(payload);
 
     this.trackUserAction(action, "complaint", complaintId, metadata);
   }
@@ -200,13 +204,14 @@ class AnalyticsManager {
     method?: string,
     metadata?: Record<string, any>,
   ) {
-    this.track({
-      event: "auth_action",
-      category: "authentication",
-      action,
-      label: method,
-      metadata,
-    });
+      const payload: Omit<AnalyticsEvent, "timestamp" | "userId"> = {
+        event: "auth_action",
+        category: "authentication",
+        action,
+        ...(method ? { label: method } : {}),
+      };
+      if (metadata) payload.metadata = metadata;
+      this.track(payload);
   }
 
   trackFormEvent(
@@ -214,13 +219,14 @@ class AnalyticsManager {
     formName: string,
     metadata?: Record<string, any>,
   ) {
-    this.track({
-      event: "form_action",
-      category: "forms",
-      action,
-      label: formName,
-      metadata,
-    });
+      const payload: Omit<AnalyticsEvent, "timestamp" | "userId"> = {
+        event: "form_action",
+        category: "forms",
+        action,
+        label: formName,
+      };
+      if (metadata) payload.metadata = metadata;
+      this.track(payload);
   }
 
   trackSearchEvent(
@@ -228,14 +234,15 @@ class AnalyticsManager {
     results: number,
     metadata?: Record<string, any>,
   ) {
-    this.track({
-      event: "search",
-      category: "search",
-      action: "query",
-      label: query,
-      value: results,
-      metadata,
-    });
+      const payload: Omit<AnalyticsEvent, "timestamp" | "userId"> = {
+        event: "search",
+        category: "search",
+        action: "query",
+        label: query,
+        value: results,
+      };
+      if (metadata) payload.metadata = metadata;
+      this.track(payload);
   }
 
   // Private methods
@@ -383,8 +390,8 @@ class AnalyticsManager {
     if ("PerformanceObserver" in window) {
       // Track Largest Contentful Paint
       const lcpObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
+        const entries = list.getEntries() as PerformanceEntry[];
+        const lastEntry = entries[entries.length - 1] as LargestContentfulPaint;
 
         this.trackPerformance("lcp", lastEntry.startTime, {
           element: lastEntry.element?.tagName,
@@ -396,15 +403,11 @@ class AnalyticsManager {
 
       // Track First Input Delay
       const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
+        const entries = list.getEntries() as PerformanceEventTiming[];
         entries.forEach((entry) => {
-          this.trackPerformance(
-            "fid",
-            entry.processingStart - entry.startTime,
-            {
-              eventType: entry.name,
-            },
-          );
+          this.trackPerformance("fid", entry.processingStart - entry.startTime, {
+            eventType: entry.name,
+          });
         });
       });
 
@@ -413,7 +416,7 @@ class AnalyticsManager {
       // Track Cumulative Layout Shift
       let clsValue = 0;
       const clsObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
+        for (const entry of list.getEntries() as LayoutShift[]) {
           if (!entry.hadRecentInput) {
             clsValue += entry.value;
           }
@@ -483,7 +486,12 @@ export class AnalyticsErrorBoundary extends React.Component<
   },
   { hasError: boolean; error: Error | null }
 > {
-  constructor(props: any) {
+  constructor(
+    props: {
+      children: React.ReactNode;
+      fallback?: React.ComponentType<{ error: Error }>;
+    },
+  ) {
     super(props);
     this.state = { hasError: false, error: null };
   }
@@ -492,7 +500,7 @@ export class AnalyticsErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     analytics.trackError(
       error,
       "react_error_boundary",
@@ -504,7 +512,7 @@ export class AnalyticsErrorBoundary extends React.Component<
     );
   }
 
-  render() {
+  override render() {
     if (this.state.hasError && this.state.error) {
       const Fallback = this.props.fallback;
       return Fallback

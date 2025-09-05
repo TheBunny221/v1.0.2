@@ -2,10 +2,16 @@
 // This addresses the "ResizeObserver loop completed with undelivered notifications" error
 // which is a known issue with modern browsers and UI libraries
 
-export const fixResizeObserverError = () => {
+export const fixResizeObserverError = (): void => {
   // Method 1: Patch the global error handler
   const originalErrorHandler = window.onerror;
-  window.onerror = (message, source, lineno, colno, error) => {
+  window.onerror = (
+    message: string | Event,
+    source?: string,
+    lineno?: number,
+    colno?: number,
+    error?: Error,
+  ): boolean => {
     // Suppress ResizeObserver loop errors
     if (
       typeof message === "string" &&
@@ -25,27 +31,33 @@ export const fixResizeObserverError = () => {
 
   // Method 2: Patch addEventListener for error events
   const originalAddEventListener = EventTarget.prototype.addEventListener;
-  EventTarget.prototype.addEventListener = function (type, listener, options) {
+  EventTarget.prototype.addEventListener = function (
+    this: unknown,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ) {
     if (type === "error" && this === window) {
-      const wrappedListener = function (event: ErrorEvent) {
+      const wrappedListener = function (this: unknown, event: Event) {
+        const errEvent = event as ErrorEvent;
         if (
-          event.message?.includes(
+          errEvent.message?.includes(
             "ResizeObserver loop completed with undelivered notifications",
           )
         ) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
+          errEvent.preventDefault();
+          errEvent.stopImmediatePropagation();
           return;
         }
 
         if (typeof listener === "function") {
-          listener.call(this, event);
+          (listener as EventListener).call(this, event);
         } else if (
           listener &&
           typeof listener === "object" &&
           "handleEvent" in listener
         ) {
-          listener.handleEvent(event);
+          (listener as EventListenerObject).handleEvent(event);
         }
       };
 
@@ -92,7 +104,7 @@ export const fixResizeObserverError = () => {
 
   // Method 4: Suppress specific console errors
   const originalConsoleError = console.error;
-  console.error = (...args) => {
+  console.error = (...args: unknown[]) => {
     const message = args[0];
     if (
       typeof message === "string" &&

@@ -220,31 +220,36 @@ const dataSlice = createSlice({
     },
     
     // Cache management
-    markDataAsStale: (state, action: PayloadAction<string>) => {
-      const path = action.payload.split('.');
-      let current: any = state;
-      
-      for (let i = 0; i < path.length - 1; i++) {
-        current = current[path[i]];
-        if (!current) return;
-      }
-      
-      const final = current[path[path.length - 1]];
-      if (final && typeof final === 'object' && 'isStale' in final) {
-        final.isStale = true;
-      }
-    },
+      markDataAsStale: (state, action: PayloadAction<string>) => {
+        const path = action.payload.split('.');
+        let current: any = state;
+
+        for (let i = 0; i < path.length - 1; i++) {
+          const key = path[i];
+          if (!key || !(key in current)) return;
+          current = current[key];
+          if (!current) return;
+        }
+
+        const lastKey = path[path.length - 1];
+        if (!lastKey) return;
+        const final = current[lastKey];
+        if (final && typeof final === 'object' && 'isStale' in final) {
+          (final as { isStale: boolean }).isStale = true;
+        }
+      },
     
     clearStaleData: (state) => {
       const now = Date.now();
       
       // Helper function to check and clear stale data
-      const clearIfStale = (cached: CachedData<any> | null) => {
-        if (cached && (now - cached.timestamp > CACHE_TTL || cached.isStale)) {
-          return null;
-        }
-        return cached;
-      };
+        const clearIfStale = (cached: CachedData<any> | null | undefined) => {
+          if (!cached) return null;
+          if (now - cached.timestamp > CACHE_TTL || cached.isStale) {
+            return null;
+          }
+          return cached;
+        };
       
       // Clear stale data across all sections
       state.complaints.list = clearIfStale(state.complaints.list);
@@ -258,20 +263,20 @@ const dataSlice = createSlice({
       state.analytics.userStats = clearIfStale(state.analytics.userStats);
       
       // Clear stale details
-      Object.keys(state.complaints.details).forEach(id => {
-        const cached = state.complaints.details[id];
-        if (now - cached.timestamp > CACHE_TTL || cached.isStale) {
-          delete state.complaints.details[id];
-        }
-      });
+        Object.keys(state.complaints.details).forEach(id => {
+          const cached = state.complaints.details[id];
+          if (!cached || now - cached.timestamp > CACHE_TTL || cached.isStale) {
+            delete state.complaints.details[id];
+          }
+        });
       
-      Object.keys(state.serviceRequests.details).forEach(id => {
-        const cached = state.serviceRequests.details[id];
-        if (now - cached.timestamp > CACHE_TTL || cached.isStale) {
-          delete state.serviceRequests.details[id];
-        }
-      });
-    },
+        Object.keys(state.serviceRequests.details).forEach(id => {
+          const cached = state.serviceRequests.details[id];
+          if (!cached || now - cached.timestamp > CACHE_TTL || cached.isStale) {
+            delete state.serviceRequests.details[id];
+          }
+        });
+      },
     
     clearAllData: (state) => {
       return initialState;

@@ -78,9 +78,9 @@ export const exportToPDF = async (
     const contentWidth = pageWidth - marginLeft - marginRight;
 
     // Primary colors for professional look
-    const primaryColor = [41, 128, 185]; // Blue
-    const secondaryColor = [52, 73, 94]; // Dark gray
-    const accentColor = [231, 76, 60]; // Red for highlights
+      const primaryColor: [number, number, number] = [41, 128, 185]; // Blue
+      const secondaryColor: [number, number, number] = [52, 73, 94]; // Dark gray
+      const accentColor: [number, number, number] = [231, 76, 60]; // Red for highlights
 
     // Helper function to add header to each page
     const addHeader = () => {
@@ -211,7 +211,11 @@ export const exportToPDF = async (
     }).length;
 
     // Summary metrics in a grid
-    const metrics = [
+    const metrics: {
+      label: string;
+      value: string;
+      color: [number, number, number];
+    }[] = [
       {
         label: "Total Complaints",
         value: actualTotal.toLocaleString(),
@@ -331,19 +335,20 @@ export const exportToPDF = async (
       "Ward",
       "Assigned",
     ];
-    const columnWidths = [20, 24, 20, 16, 20, 32, 38];
-    let tableXPos = marginLeft;
+      const columnWidths: number[] = [20, 24, 20, 16, 20, 32, 38];
+      let tableXPos = marginLeft;
 
-    headers.forEach((header, index) => {
-      // Draw column separators
-      if (index > 0) {
-        doc.setDrawColor(200, 200, 200);
-        doc.line(tableXPos, yPosition - 2, tableXPos, yPosition + 10);
-      }
+      headers.forEach((header, index) => {
+        // Draw column separators
+        if (index > 0) {
+          doc.setDrawColor(200, 200, 200);
+          doc.line(tableXPos, yPosition - 2, tableXPos, yPosition + 10);
+        }
 
-      doc.text(header, tableXPos + 2, yPosition + 5);
-      tableXPos += columnWidths[index];
-    });
+        doc.text(header, tableXPos + 2, yPosition + 5);
+        const width = columnWidths[index] ?? 0;
+        tableXPos += width;
+      });
 
     yPosition += 14;
     doc.setFont("helvetica", "normal");
@@ -374,14 +379,15 @@ export const exportToPDF = async (
         doc.setFont("helvetica", "bold");
 
         let headerXPos = marginLeft;
-        headers.forEach((header, headerIndex) => {
-          if (headerIndex > 0) {
-            doc.setDrawColor(200, 200, 200);
-            doc.line(headerXPos, yPosition - 2, headerXPos, yPosition + 10);
-          }
-          doc.text(header, headerXPos + 2, yPosition + 5);
-          headerXPos += columnWidths[headerIndex];
-        });
+          headers.forEach((header, headerIndex) => {
+            if (headerIndex > 0) {
+              doc.setDrawColor(200, 200, 200);
+              doc.line(headerXPos, yPosition - 2, headerXPos, yPosition + 10);
+            }
+            doc.text(header, headerXPos + 2, yPosition + 5);
+            const width = columnWidths[headerIndex] ?? 0;
+            headerXPos += width;
+          });
 
         yPosition += 14;
         doc.setFont("helvetica", "normal");
@@ -412,19 +418,19 @@ export const exportToPDF = async (
           : text;
       };
 
-      const rowData = [
-        formatText(complaintId, 14),
-        formatText(complaint.type, 16),
-        formatText(complaint.status, 14),
-        formatText(complaint.priority, 12),
-        complaint.createdAt
-          ? new Date(complaint.createdAt)
-              .toLocaleDateString("en-GB")
-              .replace(/\//g, "/")
-          : "N/A",
-        formatText(complaint.ward?.name, 22),
-        formatText(complaint.assignedTo?.fullName || "Unassigned", 26),
-      ];
+        const rowData = [
+          formatText(complaintId, 14),
+          formatText(complaint.type, 16),
+          formatText(complaint.status, 14),
+          formatText(complaint.priority, 12),
+          complaint.createdAt
+            ? new Date(complaint.createdAt)
+                .toLocaleDateString("en-GB")
+                .replace(/\//g, "/")
+            : "N/A",
+          formatText(complaint.ward?.name ?? "", 22),
+          formatText(complaint.assignedTo?.fullName || "Unassigned", 26),
+        ];
 
       rowData.forEach((cellData, colIndex) => {
         // Draw column separators
@@ -433,21 +439,20 @@ export const exportToPDF = async (
           doc.line(tableXPos, yPosition - 1, tableXPos, yPosition + 9);
         }
 
-        doc.setFontSize(6);
-        doc.setTextColor(
-          secondaryColor[0],
-          secondaryColor[1],
-          secondaryColor[2],
-        );
-        doc.text(cellData, tableXPos + 1, yPosition + 5);
-        tableXPos += columnWidths[colIndex];
-      });
+          doc.setFontSize(6);
+          const [r = 0, g = 0, b = 0] = secondaryColor;
+          doc.setTextColor(r, g, b);
+          doc.text(cellData, tableXPos + 1, yPosition + 5);
+          const width = columnWidths[colIndex] ?? 0;
+          tableXPos += width;
+        });
 
       yPosition += 10;
     });
 
     // Add footers to all pages
-    const totalPages = doc.internal.getNumberOfPages();
+    // jsPDF exposes a public API for page count
+    const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       addFooter(i, totalPages);
