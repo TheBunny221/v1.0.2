@@ -99,7 +99,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center">
             <FileText className="h-5 w-5 mr-2" />
-            {title} ({complaints.length})
+            {title} ({complaintsResponse?.meta?.total ?? complaints.length})
           </span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-1" />
