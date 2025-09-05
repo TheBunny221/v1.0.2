@@ -529,6 +529,12 @@ const ComplaintsList: React.FC = () => {
                       <TableHead>SLA</TableHead>
                       <TableHead>Closed</TableHead>
                       <TableHead>Updated</TableHead>
+                      {user?.role === "ADMINISTRATOR" && (
+                        <>
+                          <TableHead>Maintenance Team ID</TableHead>
+                          <TableHead>Ward Officer ID</TableHead>
+                        </>
+                      )}
                     </>
                   )}
                   <TableHead>Date</TableHead>
@@ -627,6 +633,21 @@ const ComplaintsList: React.FC = () => {
                             {new Date(complaint.updatedAt).toLocaleDateString()}
                           </span>
                         </TableCell>
+
+                        {user?.role === "ADMINISTRATOR" && (
+                          <>
+                            <TableCell>
+                              {complaint.maintenanceTeam?.id ||
+                                complaint.maintenanceTeam ||
+                                "-"}
+                            </TableCell>
+                            <TableCell>
+                              {complaint.wardOfficer?.id ||
+                                complaint.wardOfficer ||
+                                "-"}
+                            </TableCell>
+                          </>
+                        )}
                       </>
                     )}
                     <TableCell>

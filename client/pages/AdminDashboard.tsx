@@ -269,7 +269,9 @@ const AdminDashboard: React.FC = () => {
         {hasError && (
           <div className="mt-4">
             <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
-              <div className="font-medium">Some dashboard data failed to load</div>
+              <div className="font-medium">
+                Some dashboard data failed to load
+              </div>
               {process.env.NODE_ENV === "development" && (
                 <div className="mt-1 text-xs text-red-600/80">
                   {JSON.stringify({

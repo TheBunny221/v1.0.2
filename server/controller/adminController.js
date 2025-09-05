@@ -942,7 +942,10 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
   const maintenanceTeam =
     userStats.find((s) => s.role === "MAINTENANCE_TEAM")?._count || 0;
-  const totalUsers = userStats.reduce((sum, stat) => sum + (stat._count._all || stat._count || 0), 0);
+  const totalUsers = userStats.reduce(
+    (sum, stat) => sum + (stat._count._all || stat._count || 0),
+    0,
+  );
 
   const totalComplaints = complaintStats.reduce(
     (sum, stat) => sum + (stat._count || 0),
