@@ -179,7 +179,7 @@ const WardOfficerDashboard: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
           <p className="text-blue-100">Loading ward statistics...</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -205,7 +205,7 @@ const WardOfficerDashboard: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+          <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
           <p className="text-red-100">Error loading ward statistics</p>
         </div>
         <Card>
@@ -226,7 +226,7 @@ const WardOfficerDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
+        <h1 className="text-xl font-bold mb-2">Ward Officer Dashboard</h1>
         <p className="text-blue-100">
           Manage complaints for {user?.ward?.name || "your assigned ward"} and
           monitor team performance.
@@ -270,7 +270,7 @@ const WardOfficerDashboard: React.FC = () => {
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
+              <div className="text-xl font-bold text-yellow-600">
                 {stats?.statusBreakdown?.registered ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">Newly registered</p>
@@ -294,7 +294,7 @@ const WardOfficerDashboard: React.FC = () => {
               <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats?.statusBreakdown?.assigned ?? 0}</div>
+              <div className="text-xl font-bold text-blue-600">{stats?.statusBreakdown?.assigned ?? 0}</div>
               <p className="text-xs text-muted-foreground">Assigned to teams</p>
             </CardContent>
           </Card>
@@ -316,7 +316,7 @@ const WardOfficerDashboard: React.FC = () => {
               <Settings className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats?.statusBreakdown?.in_progress ?? 0}</div>
+              <div className="text-xl font-bold text-orange-600">{stats?.statusBreakdown?.in_progress ?? 0}</div>
               <p className="text-xs text-muted-foreground">Active work</p>
             </CardContent>
           </Card>
@@ -338,7 +338,7 @@ const WardOfficerDashboard: React.FC = () => {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats?.statusBreakdown?.resolved ?? 0}</div>
+              <div className="text-xl font-bold text-green-600">{stats?.statusBreakdown?.resolved ?? 0}</div>
               <p className="text-xs text-muted-foreground">Resolved complaints</p>
             </CardContent>
           </Card>
@@ -360,7 +360,7 @@ const WardOfficerDashboard: React.FC = () => {
               <XCircle className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{stats?.statusBreakdown?.reopened ?? 0}</div>
+              <div className="text-xl font-bold text-purple-600">{stats?.statusBreakdown?.reopened ?? 0}</div>
               <p className="text-xs text-muted-foreground">Reopened after closure</p>
             </CardContent>
           </Card>
@@ -382,7 +382,7 @@ const WardOfficerDashboard: React.FC = () => {
               <FileText className="h-4 w-4 text-gray-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-600">{stats?.statusBreakdown?.closed ?? 0}</div>
+              <div className="text-xl font-bold text-gray-600">{stats?.statusBreakdown?.closed ?? 0}</div>
               <p className="text-xs text-muted-foreground">Closed complaints</p>
             </CardContent>
           </Card>
@@ -404,7 +404,7 @@ const WardOfficerDashboard: React.FC = () => {
               <BarChart3 className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats?.summary?.totalComplaints ?? 0}</div>
+              <div className="text-xl font-bold text-primary">{stats?.summary?.totalComplaints ?? 0}</div>
               <p className="text-xs text-muted-foreground">All complaints</p>
             </CardContent>
           </Card>
@@ -552,13 +552,13 @@ const WardOfficerDashboard: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-xl font-bold text-blue-600">
                 {stats?.statusBreakdown.in_progress || 0}
               </div>
               <p className="text-xs text-gray-500">Active</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-xl font-bold text-red-600">
                 {stats?.summary.overdueComplaints || 0}
               </div>
               <p className="text-xs text-gray-500">Overdue</p>
