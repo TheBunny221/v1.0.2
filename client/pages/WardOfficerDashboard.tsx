@@ -294,8 +294,8 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-yellow-600">
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-yellow-600">
                 {stats?.statusBreakdown?.registered ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">Newly registered</p>
@@ -328,8 +328,8 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-blue-600">
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-blue-600">
                 {stats?.statusBreakdown?.assigned ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">Assigned to teams</p>
@@ -362,8 +362,8 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <Settings className="h-4 w-4 text-orange-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-orange-600">
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-orange-600">
                 {stats?.statusBreakdown?.in_progress ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">Active work</p>
@@ -396,8 +396,8 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-green-600">
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-green-600">
                 {stats?.statusBreakdown?.resolved ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -432,8 +432,8 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <XCircle className="h-4 w-4 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-purple-600">
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-purple-600">
                 {stats?.statusBreakdown?.reopened ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -468,8 +468,8 @@ const WardOfficerDashboard: React.FC = () => {
               </CardTitle>
               <FileText className="h-4 w-4 text-gray-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-gray-600">
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-gray-600">
                 {stats?.statusBreakdown?.closed ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">Closed complaints</p>
