@@ -1226,6 +1226,51 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
   }
 
+  // Admin-only validation for ward officer assignment
+  if (wardOfficerId) {
+    if (req.user.role !== "ADMINISTRATOR") {
+      return res.status(403).json({
+        success: false,
+        message: "Only administrators can assign ward officers",
+        data: null,
+      });
+    }
+
+    const wardOfficerUser = await prisma.user.findUnique({
+      where: { id: wardOfficerId },
+    });
+
+    if (!wardOfficerUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected ward officer not found",
+        data: null,
+      });
+    }
+
+    if (wardOfficerUser.role !== "WARD_OFFICER") {
+      return res.status(400).json({
+        success: false,
+        message: "Selected user is not a ward officer",
+        data: null,
+      });
+    }
+
+    if (!wardOfficerUser.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign an inactive ward officer",
+        data: null,
+      });
+    }
+
+    // Optional: ensure ward officer belongs to the same ward as complaint
+    if (complaint.wardId && wardOfficerUser.wardId && complaint.wardId !== wardOfficerUser.wardId) {
+      // Allow assignment but warn or block based on policy. We'll allow but log.
+      console.warn("Assigning ward officer from different ward:", complaint.id, wardOfficerId);
+    }
+  }
+
   // Legacy assignedToId validation (kept for backward compatibility)
   if (assignedToId) {
     const assignee = await prisma.user.findUnique({
