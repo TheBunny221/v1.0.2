@@ -881,7 +881,7 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Assignment Information */}
-          {(complaint.assignedTo ||
+          {(complaint.wardOfficer || complaint.assignedTo ||
             user?.role === "ADMINISTRATOR" ||
             user?.role === "WARD_OFFICER") && (
             <Card>
