@@ -98,10 +98,9 @@ export interface UIState {
 }
 
 // Initial state
-const initialState: UIState = {
-  isLoading: false,
-  loadingText: undefined,
-  isOnline: navigator.onLine,
+  const initialState: UIState = {
+    isLoading: false,
+    isOnline: navigator.onLine,
   isSidebarOpen: true,
   isSidebarCollapsed:
     localStorage.getItem("sidebarCollapsed") === "true" || false,
@@ -120,9 +119,8 @@ const initialState: UIState = {
   globalSearchQuery: "",
   isSearchOpen: false,
   layout: "default",
-  hasError: false,
-  errorMessage: undefined,
-};
+    hasError: false,
+  };
 
 // Helper functions
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -137,8 +135,12 @@ const uiSlice = createSlice({
       state,
       action: PayloadAction<{ isLoading: boolean; text?: string }>,
     ) => {
-      state.isLoading = action.payload.isLoading;
-      state.loadingText = action.payload.text;
+        state.isLoading = action.payload.isLoading;
+        if (action.payload.text !== undefined) {
+          state.loadingText = action.payload.text;
+        } else {
+          delete state.loadingText;
+        }
     },
 
     // Sidebar
@@ -346,11 +348,15 @@ const uiSlice = createSlice({
       action: PayloadAction<{ hasError: boolean; message?: string }>,
     ) => {
       state.hasError = action.payload.hasError;
-      state.errorMessage = action.payload.message;
+        if (action.payload.message !== undefined) {
+          state.errorMessage = action.payload.message;
+        } else {
+          delete state.errorMessage;
+        }
     },
     clearError: (state) => {
-      state.hasError = false;
-      state.errorMessage = undefined;
+        state.hasError = false;
+        delete state.errorMessage;
     },
 
     // Reset
@@ -459,7 +465,7 @@ export const showConfirmModal = (
     title,
     content,
     onConfirm,
-    onCancel,
+    ...(onCancel ? { onCancel } : {}),
   });
 
 export const showAlertModal = (title: string, content: string) =>

@@ -72,10 +72,13 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   useEffect(() => {
     if (!isOpen || !mapRef.current) return;
 
+    let cancelled = false;
+
     const initializeMap = async () => {
       try {
         // Dynamically import leaflet only when needed
         const L = await import("leaflet");
+        if (cancelled) return;
         leafletLibRef.current = L;
 
         // Set up the default icon
@@ -132,21 +135,22 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           } catch {}
         }, 200);
       } catch (error) {
-        console.error("Error initializing map:", error);
-        setMapError("Failed to load map. Please refresh and try again.");
+        if (!cancelled) {
+          console.error("Error initializing map:", error);
+          setMapError("Failed to load map. Please refresh and try again.");
+        }
       }
     };
 
     const timer = setTimeout(initializeMap, 100);
-    return () => clearTimeout(timer);
-  }, [isOpen, position.lat, position.lng]);
-
-  // Cleanup map when dialog closes
-  useEffect(() => {
-    if (!isOpen && leafletMapRef.current) {
-      leafletMapRef.current.remove();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      leafletMapRef.current?.off();
+      leafletMapRef.current?.remove();
       leafletMapRef.current = null;
-    }
+      markerRef.current = null;
+    };
   }, [isOpen]);
 
   // On open, populate address/area for initial position (from system-config default or provided initialLocation)
