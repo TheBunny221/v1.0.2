@@ -557,6 +557,98 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     where: { status: "RESOLVED" },
   });
 
+  // Calculate average resolution time (in days)
+  const resolvedWithDates = await prisma.complaint.findMany({
+    where: {
+      status: "RESOLVED",
+      resolvedOn: { not: null },
+    },
+    select: {
+      id: true,
+      createdAt: true,
+      resolvedOn: true,
+      deadline: true,
+    },
+  });
+
+  const validResolutions = resolvedWithDates.filter(
+    (c) => c.resolvedOn && c.createdAt,
+  );
+  const avgResolutionTime =
+    validResolutions.length > 0
+      ? validResolutions.reduce((acc, complaint) => {
+          const resolutionTime =
+            (new Date(complaint.resolvedOn) - new Date(complaint.createdAt)) /
+            (1000 * 60 * 60 * 24);
+          return acc + resolutionTime;
+        }, 0) / validResolutions.length
+      : 0;
+
+  // Overdue open complaints (deadline passed but not resolved/closed)
+  const overdueOpen = await prisma.complaint.count({
+    where: {
+      deadline: { lt: new Date() },
+      status: { notIn: ["RESOLVED", "CLOSED"] },
+    },
+  });
+
+  // Resolved complaints that exceeded deadline (resolved late)
+  const resolvedLate = resolvedWithDates.reduce((count, c) => {
+    try {
+      if (!c.deadline) return count;
+      if (new Date(c.resolvedOn) > new Date(c.deadline)) return count + 1;
+      return count;
+    } catch (e) {
+      return count;
+    }
+  }, 0);
+
+  const slaBreaches = Number(resolvedLate) + Number(overdueOpen);
+  const withinSLA = Math.max(0, Number(totalComplaints) - Number(slaBreaches));
+
+  // Calculate SLA compliance as average of type-level compliance using SLA hours from system config
+  const typeConfigs = await prisma.systemConfig.findMany({
+    where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+  });
+  const complaintTypes = typeConfigs
+    .map((cfg) => {
+      try {
+        const v = JSON.parse(cfg.value || "{}");
+        return { name: v.name, slaHours: Number(v.slaHours) || 48 };
+      } catch {
+        return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
+      }
+    })
+    .filter((t) => t.name);
+
+  const nowTs = new Date();
+  let typePercentages = [];
+  for (const t of complaintTypes) {
+    const rows = await prisma.complaint.findMany({
+      where: { type: t.name },
+      select: { submittedOn: true, resolvedOn: true, status: true },
+    });
+    if (rows.length === 0) continue;
+    const windowMs = (t.slaHours || 48) * 60 * 60 * 1000;
+    let compliant = 0;
+    for (const r of rows) {
+      const start = r.submittedOn ? new Date(r.submittedOn).getTime() : null;
+      if (!start) continue;
+      const deadlineTs = start + windowMs;
+      if (r.status === "RESOLVED" || r.status === "CLOSED") {
+        if (r.resolvedOn && new Date(r.resolvedOn).getTime() <= deadlineTs)
+          compliant += 1;
+      } else {
+        if (nowTs.getTime() <= deadlineTs) compliant += 1;
+      }
+    }
+    typePercentages.push((compliant / rows.length) * 100);
+  }
+  const slaCompliance = typePercentages.length
+    ? Math.round(
+        typePercentages.reduce((a, b) => a + b, 0) / typePercentages.length,
+      )
+    : 0;
   // Average resolution time in days (closed/resolved), aligned with reports
   let avgResolutionTime = 0;
   {
@@ -856,51 +948,59 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/dashboard/stats
 // @access  Private (Admin only)
 export const getDashboardStats = asyncHandler(async (req, res) => {
-  const [userStats, complaintStats, pendingTeamAssignments, activeUsers] =
-    await Promise.all([
-      // User statistics by role (active only)
-      prisma.user.groupBy({
-        by: ["role"],
-        where: { isActive: true },
-        _count: true,
-      }),
-      // Complaint statistics
-      prisma.complaint.groupBy({
-        by: ["status"],
-        _count: true,
-      }),
-      // Pending maintenance team assignment (align with complaints list filter)
-      prisma.complaint.count({
-        where: {
-          maintenanceTeamId: null,
-          status: { notIn: ["RESOLVED", "CLOSED"] },
-        },
-      }),
-      // Active user count
-      prisma.user.count({ where: { isActive: true } }),
-    ]);
+  const [
+    userStats,
+    complaintStats,
+    pendingTeamAssignments,
+    pendingWardOfficerAssignments,
+    activeUsers,
+  ] = await Promise.all([
+    // User statistics by role (active only)
+    prisma.user.groupBy({
+      by: ["role"],
+      where: { isActive: true },
+      _count: true,
+    }),
+    // Complaint statistics
+    prisma.complaint.groupBy({
+      by: ["status"],
+      _count: true,
+    }),
+    // Pending maintenance team assignment (align with complaints list filter)
+    prisma.complaint.count({
+      where: {
+        maintenanceTeamId: null,
+        status: { notIn: ["RESOLVED", "CLOSED"] },
+      },
+    }),
+    // Pending ward officer assignment
+    prisma.complaint.count({
+      where: {
+        wardOfficerId: null,
+        status: { notIn: ["RESOLVED", "CLOSED"] },
+      },
+    }),
+    // Active user count
+    prisma.user.count({ where: { isActive: true } }),
+  ]);
 
   const wardOfficers =
     userStats.find((s) => s.role === "WARD_OFFICER")?._count || 0;
   const maintenanceTeam =
     userStats.find((s) => s.role === "MAINTENANCE_TEAM")?._count || 0;
-  const totalUsers = userStats.reduce((sum, stat) => sum + stat._count, 0);
-
-  const totalComplaints = complaintStats.reduce(
-    (sum, stat) => sum + stat._count,
+  const totalUsers = userStats.reduce(
+    (sum, stat) => sum + (stat._count._all || stat._count || 0),
     0,
   );
+
+  const totalComplaints = complaintStats.reduce(
+    (sum, stat) => sum + (stat._count || 0),
+    0,
+  );
+  // Active complaints are those not resolved or closed
   const activeComplaints = complaintStats
-    .filter((s) =>
-      [
-        "REGISTERED",
-        "ASSIGNED",
-        "IN_PROGRESS",
-        "RESOLVED",
-        "REOPENED",
-      ].includes(s.status),
-    )
-    .reduce((sum, stat) => sum + stat._count, 0);
+    .filter((s) => !["RESOLVED", "CLOSED"].includes(s.status))
+    .reduce((sum, stat) => sum + (stat._count || 0), 0);
   const resolvedComplaints =
     complaintStats.find((s) => s.status === "RESOLVED")?._count || 0;
 
@@ -924,6 +1024,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       wardOfficers,
       maintenanceTeam,
       pendingTeamAssignments,
+      pendingWardOfficerAssignments,
       activeUsers,
     },
   });

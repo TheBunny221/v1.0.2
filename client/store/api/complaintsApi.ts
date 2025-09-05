@@ -70,7 +70,10 @@ export interface CreateComplaintRequest {
 export interface UpdateComplaintRequest {
   id: string;
   status?: Complaint["status"];
+  // New field for assigning a ward officer
   wardOfficerId?: string;
+  // Legacy field kept for backward compatibility
+  assignedToId?: string;
   maintenanceTeamId?: string;
   remarks?: string;
   priority?: Complaint["priority"];

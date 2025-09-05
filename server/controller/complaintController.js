@@ -1258,6 +1258,59 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     }
   }
 
+  // Admin-only validation for ward officer assignment
+  if (wardOfficerId) {
+    if (req.user.role !== "ADMINISTRATOR") {
+      return res.status(403).json({
+        success: false,
+        message: "Only administrators can assign ward officers",
+        data: null,
+      });
+    }
+
+    const wardOfficerUser = await prisma.user.findUnique({
+      where: { id: wardOfficerId },
+    });
+
+    if (!wardOfficerUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected ward officer not found",
+        data: null,
+      });
+    }
+
+    if (wardOfficerUser.role !== "WARD_OFFICER") {
+      return res.status(400).json({
+        success: false,
+        message: "Selected user is not a ward officer",
+        data: null,
+      });
+    }
+
+    if (!wardOfficerUser.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign an inactive ward officer",
+        data: null,
+      });
+    }
+
+    // Optional: ensure ward officer belongs to the same ward as complaint
+    if (
+      complaint.wardId &&
+      wardOfficerUser.wardId &&
+      complaint.wardId !== wardOfficerUser.wardId
+    ) {
+      // Allow assignment but warn or block based on policy. We'll allow but log.
+      console.warn(
+        "Assigning ward officer from different ward:",
+        complaint.id,
+        wardOfficerId,
+      );
+    }
+  }
+
   // Validate ward officer assignment when provided (admin use case)
   if (wardOfficerId) {
     const wo = await prisma.user.findUnique({ where: { id: wardOfficerId } });
@@ -1278,7 +1331,7 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     if (!assignee || !assignee.isActive) {
       return res.status(400).json({
         success: false,
-        message: "Selected assignee not found or inactive",
+        message: "Selected ward officer not found",
         data: null,
       });
     }
@@ -1324,6 +1377,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   }
 
   // Admin ward officer assignment
+  if (wardOfficerId) {
+    updateData.wardOfficerId = wardOfficerId;
+  }
+
+  // Admin can assign or change ward officer
   if (wardOfficerId) {
     updateData.wardOfficerId = wardOfficerId;
   }
@@ -1450,6 +1508,17 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
       type: "IN_APP",
       title: `New Complaint Assigned`,
       message: `A complaint in your ward has been assigned to you.`,
+    });
+  }
+
+  // Notify ward officer if assigned
+  if (wardOfficerId && wardOfficerId !== req.user.id) {
+    notifications.push({
+      userId: wardOfficerId,
+      complaintId,
+      type: "IN_APP",
+      title: `Ward Officer Assigned`,
+      message: `You have been assigned as the ward officer for this complaint.`,
     });
   }
 
@@ -1932,6 +2001,10 @@ export const getWardDashboardStats = asyncHandler(async (req, res) => {
     ).length,
     unassigned: wardComplaints.filter((c) => !c.assignedToId).length,
     assigned: wardComplaints.filter((c) => !!c.assignedToId).length,
+    needsAssignmentToTeam: wardComplaints.filter((c) => !c.maintenanceTeamId)
+      .length,
+    unassigned: wardComplaints.filter((c) => !c.wardOfficerId).length,
+    assigned: wardComplaints.filter((c) => !!c.wardOfficerId).length,
   };
 
   // Calculate pending work (only registered status)

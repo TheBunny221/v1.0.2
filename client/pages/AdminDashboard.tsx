@@ -28,7 +28,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import {
-  Tooltip,
+  Tooltip as UITooltip,
   TooltipTrigger,
   TooltipContent,
 } from "../components/ui/tooltip";
@@ -152,28 +152,13 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // Show error state
-  if (
+  const hasError = Boolean(
     statsError ||
-    analyticsError ||
-    activityError ||
-    userActivityError ||
-    systemHealthError
-  ) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-lg text-red-600">
-          Error loading dashboard data. Please try refreshing the page.
-          {process.env.NODE_ENV === "development" && (
-            <div className="text-sm mt-2">
-              Errors:{" "}
-              {JSON.stringify({ statsError, analyticsError, activityError })}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+      analyticsError ||
+      activityError ||
+      userActivityError ||
+      systemHealthError,
+  );
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -197,187 +182,215 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              🛡️ Administrator Dashboard 🛠️
-            </h1>
-            <p className="text-purple-100">
-              Complete system overview and management controls for Cochin Smart
-              City
-            </p>
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* Welcome Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                🛡️ Administrator Dashboard 🛠️
+              </h1>
+              <p className="text-purple-100">
+                Complete system overview and management controls for Cochin
+                Smart City
+              </p>
+            </div>
+            <Shield className="h-16 w-16 text-purple-200" />
           </div>
-          <Shield className="h-16 w-16 text-purple-200" />
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-purple-700 rounded-lg p-3">
+              <div className="text-2xl font-bold">
+                {systemStats.totalComplaints}
+              </div>
+              <div className="text-sm text-purple-200 flex items-center gap-1">
+                Total Complaints
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                  </TooltipTrigger>
+                  <TooltipContent>All complaints in the system.</TooltipContent>
+                </UITooltip>
+              </div>
+            </div>
+            <div className="bg-purple-700 rounded-lg p-3">
+              <div className="text-2xl font-bold">
+                {systemStats.activeUsers || 0}
+              </div>
+              <div className="text-sm text-purple-200 flex items-center gap-1">
+                Active Users
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Users who have logged in recently.
+                  </TooltipContent>
+                </UITooltip>
+              </div>
+            </div>
+            <div className="bg-purple-700 rounded-lg p-3">
+              <div className="text-2xl font-bold">
+                {metrics?.slaCompliance || 0}%
+              </div>
+              <div className="text-sm text-purple-200 flex items-center gap-1">
+                SLA Compliance
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Average on‑time performance across complaint types, using
+                    each type’s configured SLA hours.
+                  </TooltipContent>
+                </UITooltip>
+              </div>
+            </div>
+            <div className="bg-purple-700 rounded-lg p-3">
+              <div className="text-2xl font-bold">
+                {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
+              </div>
+              <div className="text-sm text-purple-200 flex items-center gap-1">
+                Satisfaction
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Average citizen feedback score.
+                  </TooltipContent>
+                </UITooltip>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
-            <div className="text-2xl font-bold text-white">
-              {systemStats.totalComplaints}
-            </div>
-            <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
-              Total Complaints
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
-                </TooltipTrigger>
-                <TooltipContent>All complaints in the system.</TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
-            <div className="text-2xl font-bold text-white">
-              {systemStats.activeUsers || 0}
-            </div>
-            <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
-              Active Users
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Users who have logged in recently.
-                </TooltipContent>
-              </Tooltip>
+
+        {hasError && (
+          <div className="mt-4">
+            <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
+              <div className="font-medium">
+                Some dashboard data failed to load
+              </div>
+              {process.env.NODE_ENV === "development" && (
+                <div className="mt-1 text-xs text-red-600/80">
+                  {JSON.stringify({
+                    statsError: Boolean(statsError),
+                    analyticsError: Boolean(analyticsError),
+                    activityError: Boolean(activityError),
+                    userActivityError: Boolean(userActivityError),
+                    systemHealthError: Boolean(systemHealthError),
+                  })}
+                </div>
+              )}
             </div>
           </div>
-          <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
-            <div className="text-2xl font-bold text-white">
-              {metrics?.slaCompliance || 0}%
-            </div>
-            <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
-              SLA Compliance
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Average on‑time performance across complaint types, using each
-                  type’s configured SLA hours.
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-white/25 to-white/15 border-2 border-white/40 rounded-xl p-4 shadow-xl hover:shadow-2xl hover:from-white/30 hover:to-white/20 transition-all duration-300 hover:scale-105">
-            <div className="text-2xl font-bold text-white">
-              {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
-            </div>
-            <div className="text-sm text-purple-100 flex items-center gap-1 font-medium">
-              Satisfaction
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-3.5 w-3.5 text-purple-200/80" />
-                </TooltipTrigger>
-                <TooltipContent>Average citizen feedback score.</TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
+        )}
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Active Complaints
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Complaints currently open (not resolved or closed).
+                  </TooltipContent>
+                </UITooltip>
+              </CardTitle>
+              <FileText className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">
+                {systemStats.activeComplaints}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Pending resolution
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Overdue Tasks
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Open complaints that have passed their SLA deadline.
+                  </TooltipContent>
+                </UITooltip>
+              </CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {systemStats.overdue}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Open past deadline
+              </p>
+              <p className="text-[11px] text-gray-500 mt-1">
+                SLA breaches (open + resolved late): {metrics?.slaBreaches || 0}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Pending Team Assignment
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Complaints waiting to be assigned to a maintenance team.
+                  </TooltipContent>
+                </UITooltip>
+              </CardTitle>
+              <UserCheck className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {systemStats.pendingTeamAssignments || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Needs maintenance assignment
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Avg Resolution
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Average time taken to close complaints (in days).
+                  </TooltipContent>
+                </UITooltip>
+              </CardTitle>
+              <Clock className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {(metrics?.avgResolutionTime || 0).toFixed(1)}d
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Average Closure Time
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Active Complaints
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Complaints currently open (not resolved or closed).
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <FileText className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {systemStats.activeComplaints}
-            </div>
-            <p className="text-xs text-muted-foreground">Pending resolution</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Overdue Tasks
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Open complaints that have passed their SLA deadline.
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {systemStats.overdue}
-            </div>
-            <p className="text-xs text-muted-foreground">Open past deadline</p>
-            <p className="text-[11px] text-gray-500 mt-1">
-              SLA breaches (open + resolved late): {metrics?.slaBreaches || 0}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Pending Team Assignment
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Complaints waiting to be assigned to a maintenance team.
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <UserCheck className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {systemStats.pendingTeamAssignments || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Needs maintenance assignment
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Avg Resolution
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Average time taken to close complaints (in days).
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <Clock className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {(metrics?.avgResolutionTime || 0).toFixed(1)}d
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Average Closure Time
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Main Dashboard Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">

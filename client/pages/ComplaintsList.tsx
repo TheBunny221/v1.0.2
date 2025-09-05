@@ -81,6 +81,10 @@ const ComplaintsList: React.FC = () => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [recordsPerPage, setRecordsPerPage] = useState<number>(25);
+
   // Data management
   const { cacheComplaintsList } = useDataManager();
 
@@ -156,9 +160,22 @@ const ComplaintsList: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Build query parameters for server-side filtering
+  // Reset to first page when filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    statusFilter,
+    priorityFilter,
+    wardFilter,
+    subZoneFilter,
+    debouncedSearchTerm,
+    needsMaintenanceAssignment,
+    slaStatusFilter,
+  ]);
+
+  // Build query parameters for server-side filtering and pagination
   const queryParams = useMemo(() => {
-    const params: any = { page: 1, limit: 100 };
+    const params: any = { page: currentPage, limit: recordsPerPage };
     if (statusFilter !== "all") params.status = statusFilter.toUpperCase();
 
     // Handle priority filter including URL-based comma-separated values
@@ -200,6 +217,8 @@ const ComplaintsList: React.FC = () => {
 
     return params;
   }, [
+    currentPage,
+    recordsPerPage,
     statusFilter,
     priorityFilter,
     wardFilter,
@@ -221,7 +240,7 @@ const ComplaintsList: React.FC = () => {
   } = useGetComplaintsQuery(queryParams, { skip: !isAuthenticated || !user });
 
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
-    ? complaintsResponse.data.complaints
+    ? complaintsResponse!.data!.complaints
     : [];
 
   // Cache complaints data when loaded
@@ -299,6 +318,36 @@ const ComplaintsList: React.FC = () => {
   const handleWardChange = (value: string) => {
     setWardFilter(value);
     setSubZoneFilter("all");
+  };
+
+  // Pagination helpers
+  const totalItems = complaintsResponse?.data?.pagination?.totalItems ?? 0;
+  const totalPages = Math.max(
+    1,
+    complaintsResponse?.data?.pagination?.totalPages ??
+      Math.ceil((totalItems || 0) / recordsPerPage || 1),
+  );
+
+  // Ensure currentPage stays within bounds when totalPages or totalItems change
+  useEffect(() => {
+    if (totalPages && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+    if (totalItems === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, totalItems]);
+
+  const getPageNumbers = () => {
+    const pages: number[] = [];
+    const maxButtons = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + maxButtons - 1);
+    if (end - start < maxButtons - 1) {
+      start = Math.max(1, end - maxButtons + 1);
+    }
+    for (let p = start; p <= end; p++) pages.push(p);
+    return pages;
   };
 
   return (
@@ -483,7 +532,10 @@ const ComplaintsList: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileText className="h-5 w-5 mr-2" />
-            Complaints ({filteredComplaints.length})
+            Complaints (
+            {complaintsResponse?.data?.pagination?.totalItems ??
+              filteredComplaints.length}
+            )
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -517,166 +569,274 @@ const ComplaintsList: React.FC = () => {
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Complaint ID</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
-                  {user?.role !== "CITIZEN" && (
-                    <>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>SLA</TableHead>
-                      <TableHead>Closed</TableHead>
-                      <TableHead>Updated</TableHead>
-                    </>
-                  )}
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredComplaints.map((complaint) => (
-                  <TableRow key={complaint.id}>
-                    <TableCell className="font-medium">
-                      #{complaint.complaintId || complaint.id.slice(-6)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs">
-                        <p className="truncate">{complaint.description}</p>
-                        <p className="text-sm text-gray-500">
-                          {complaint.type.replace("_", " ")}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center text-sm">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {complaint.area}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(complaint.status)}>
-                        {complaint.status.replace("_", " ")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <Badge className={getPriorityColor(complaint.priority)}>
-                          {complaint.priority}
-                        </Badge>
-                        {/* Show team assignment status based on maintenanceTeamId */}
-                        {user?.role === "WARD_OFFICER" ? (
-                          // Ward Officer view: show assignment status based on maintenanceTeamId
-                          complaint.maintenanceTeamId ? (
-                            <Badge className="bg-green-100 text-green-800 text-xs">
-                              Assigned:{" "}
-                              {complaint.maintenanceTeam?.fullName || "Unknown"}
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-orange-100 text-orange-800 text-xs">
-                              Needs Assignment
-                            </Badge>
-                          )
-                        ) : (
-                          // Other user roles: show original logic
-                          <>
-                            {(complaint as any).needsTeamAssignment &&
-                              !["RESOLVED", "CLOSED"].includes(
-                                complaint.status,
-                              ) && (
-                                <Badge className="bg-orange-100 text-orange-800 text-xs">
-                                  Needs Team Assignment
-                                </Badge>
-                              )}
-                            {complaint.maintenanceTeam && (
-                              <Badge className="bg-green-100 text-green-800 text-xs">
-                                Team:{" "}
-                                {
-                                  complaint.maintenanceTeam.fullName.split(
-                                    " ",
-                                  )[0]
-                                }
-                              </Badge>
-                            )}
-                            {complaint.wardOfficer && (
-                              <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                WO:{" "}
-                                {complaint.wardOfficer.fullName.split(" ")[0]}
-                              </Badge>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Complaint ID</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Priority</TableHead>
+                    {(user?.role === "ADMINISTRATOR" ||
+                      user?.role === "WARD_OFFICER") && (
+                      <TableHead>Team</TableHead>
+                    )}
+                    {user?.role === "ADMINISTRATOR" && (
+                      <TableHead>Officer</TableHead>
+                    )}
                     {user?.role !== "CITIZEN" && (
                       <>
-                        <TableCell>
-                          {typeof complaint.rating === "number" &&
-                          complaint.rating > 0 ? (
-                            <span className="text-sm font-medium">
-                              {complaint.rating}/5
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-500">N/A</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getSLAColor(complaint.slaStatus)}>
-                            {complaint.slaStatus.replace("_", " ")}
+                        <TableHead>Rating</TableHead>
+                        <TableHead>SLA</TableHead>
+                        <TableHead>Registered On</TableHead>
+                        <TableHead>Updated</TableHead>
+                        <TableHead>Closed</TableHead>
+                        {user?.role === "ADMINISTRATOR" && (
+                          <>
+                            <TableHead>Maintenance Team ID</TableHead>
+                            <TableHead>Ward Officer ID</TableHead>
+                          </>
+                        )}
+                      </>
+                    )}
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredComplaints.map((complaint) => (
+                    <TableRow key={complaint.id}>
+                      <TableCell className="font-medium">
+                        #{complaint.complaintId || complaint.id.slice(-6)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-xs">
+                          <p className="truncate">{complaint.description}</p>
+                          <p className="text-sm text-gray-500">
+                            {complaint.type.replace("_", " ")}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-sm">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {complaint.area}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(complaint.status)}>
+                          {complaint.status.replace("_", " ")}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Badge
+                            className={getPriorityColor(complaint.priority)}
+                          >
+                            {complaint.priority}
                           </Badge>
-                        </TableCell>
+                          {(complaint as any).needsTeamAssignment &&
+                            !["RESOLVED", "CLOSED"].includes(
+                              complaint.status,
+                            ) && (
+                              <Badge className="bg-orange-100 text-orange-800 text-xs">
+                                Needs Team Assignment
+                              </Badge>
+                            )}
+                        </div>
+                      </TableCell>
+                      {(user?.role === "ADMINISTRATOR" ||
+                        user?.role === "WARD_OFFICER") && (
                         <TableCell>
-                          {complaint.closedOn ? (
+                          {complaint.maintenanceTeam?.fullName ? (
                             <span className="text-sm">
-                              {new Date(
-                                complaint.closedOn,
-                              ).toLocaleDateString()}
+                              {complaint.maintenanceTeam.fullName}
                             </span>
                           ) : (
                             <span className="text-xs text-gray-500">-</span>
                           )}
                         </TableCell>
+                      )}
+                      {user?.role === "ADMINISTRATOR" && (
                         <TableCell>
-                          <span className="text-sm">
-                            {new Date(complaint.updatedAt).toLocaleDateString()}
-                          </span>
+                          {complaint.wardOfficer?.fullName ? (
+                            <span className="text-sm">
+                              {complaint.wardOfficer.fullName}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-500">-</span>
+                          )}
                         </TableCell>
-                      </>
-                    )}
-                    <TableCell>
-                      <div className="flex items-center text-sm">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {new Date(complaint.submittedOn).toLocaleDateString()}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <ComplaintQuickActions
-                        complaint={{
-                          id: complaint.id,
-                          complaintId: complaint.complaintId,
-                          status: complaint.status,
-                          priority: complaint.priority,
-                          type: complaint.type,
-                          description: complaint.description,
-                          area: complaint.area,
-                          assignedTo: complaint.assignedTo,
-                        }}
-                        userRole={user?.role || ""}
-                        showDetails={false}
-                        onUpdate={() => refetch()}
-                        onShowUpdateModal={(c) => {
-                          setSelectedComplaint(complaint);
-                          setIsUpdateModalOpen(true);
-                        }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      )}
+                      {user?.role !== "CITIZEN" && (
+                        <>
+                          <TableCell>
+                            {typeof complaint.rating === "number" &&
+                            complaint.rating > 0 ? (
+                              <span className="text-sm font-medium">
+                                {complaint.rating}/5
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-500">N/A</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getSLAColor(complaint.slaStatus)}>
+                              {complaint.slaStatus.replace("_", " ")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center text-sm">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {new Date(
+                                complaint.submittedOn,
+                              ).toLocaleDateString()}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">
+                              {new Date(
+                                complaint.updatedAt,
+                              ).toLocaleDateString()}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {complaint.closedOn ? (
+                              <span className="text-sm">
+                                {new Date(
+                                  complaint.closedOn,
+                                ).toLocaleDateString()}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-500">-</span>
+                            )}
+                          </TableCell>
+
+                          {user?.role === "ADMINISTRATOR" && (
+                            <>
+                              <TableCell>
+                                {complaint.maintenanceTeam?.id ||
+                                  complaint.maintenanceTeam ||
+                                  "-"}
+                              </TableCell>
+                              <TableCell>
+                                {complaint.wardOfficer?.id ||
+                                  complaint.wardOfficer ||
+                                  "-"}
+                              </TableCell>
+                            </>
+                          )}
+                        </>
+                      )}
+                      <TableCell>
+                        <ComplaintQuickActions
+                          complaint={{
+                            id: complaint.id,
+                            complaintId: complaint.complaintId,
+                            status: complaint.status,
+                            priority: complaint.priority,
+                            type: complaint.type,
+                            description: complaint.description,
+                            area: complaint.area,
+                            assignedTo: complaint.assignedTo,
+                          }}
+                          userRole={user?.role || ""}
+                          showDetails={false}
+                          onUpdate={() => refetch()}
+                          onShowUpdateModal={(c) => {
+                            setSelectedComplaint(complaint);
+                            setIsUpdateModalOpen(true);
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination and records-per-page controls */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Rows per page:</span>
+                  <Select
+                    value={String(recordsPerPage)}
+                    onValueChange={(v) => {
+                      setRecordsPerPage(Number(v));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-24 px-2 py-1 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm text-gray-500">
+                    {totalItems === 0
+                      ? `Showing 0 of 0`
+                      : `Showing ${(currentPage - 1) * recordsPerPage + 1} - ${Math.min(currentPage * recordsPerPage, totalItems)} of ${totalItems}`}
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-0.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                  >
+                    First
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Prev
+                  </Button>
+
+                  {getPageNumbers().map((p) => (
+                    <Button
+                      key={p}
+                      variant={p === currentPage ? "default" : "outline"}
+                      size="sm"
+                      className="h-7 px-1 py-0.5 text-xs rounded-sm min-w-[28px]"
+                      onClick={() => setCurrentPage(p)}
+                    >
+                      {p}
+                    </Button>
+                  ))}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-1 py-0.5 text-xs rounded-sm"
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Last
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

@@ -270,16 +270,16 @@ Phone: ${user.phone || "N/A"}
                       <p className="text-gray-900">{user.phone}</p>
                     </div>
                   )}
-                  {complaint.assignedTo && (
+                  {(complaint.wardOfficer || complaint.assignedTo) && (
                     <div className="pt-4 border-t">
                       <label className="text-sm font-medium text-gray-500">
                         Assigned To
                       </label>
                       <p className="text-gray-900">
-                        {complaint.assignedTo.name}
+                        {(complaint.wardOfficer || complaint.assignedTo).name}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {complaint.assignedTo.role}
+                        {(complaint.wardOfficer || complaint.assignedTo).role}
                       </p>
                     </div>
                   )}

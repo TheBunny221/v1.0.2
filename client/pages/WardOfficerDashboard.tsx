@@ -39,12 +39,13 @@ import {
 interface FilterState {
   mainFilter:
     | "none"
-    | "pending"
+    | "registered"
+    | "assigned"
     | "inProgress"
-    | "completed"
-    | "closed"
+    | "resolved"
     | "reopened"
-    | "needsTeamAssignment";
+    | "closed"
+    | "total";
   overdue: boolean;
   urgent: boolean;
 }
@@ -55,7 +56,7 @@ const WardOfficerDashboard: React.FC = () => {
 
   // State for filters
   const [filters, setFilters] = useState<FilterState>({
-    mainFilter: "pending",
+    mainFilter: "registered",
     overdue: false,
     urgent: false,
   });
@@ -70,6 +71,9 @@ const WardOfficerDashboard: React.FC = () => {
 
   const stats = statsResponse?.data?.stats;
 
+  const smallCardClass =
+    "cursor-pointer transform transition-all hover:shadow-lg hover:scale-[1.02] p-3 bg-white rounded-lg border border-gray-100 flex flex-col justify-between min-h-[96px]";
+
   // Build filter params for complaints query based on active filters
   const buildComplaintsFilter = () => {
     const filterParams: any = {};
@@ -78,24 +82,28 @@ const WardOfficerDashboard: React.FC = () => {
 
     // Main filter logic
     switch (filters.mainFilter) {
-      case "pending":
-        statusFilters.push("REGISTERED"); // Only REGISTERED status for pending work
+      case "registered":
+        statusFilters.push("REGISTERED");
+        break;
+      case "assigned":
+        statusFilters.push("ASSIGNED");
         break;
       case "inProgress":
         statusFilters.push("IN_PROGRESS");
         break;
-      case "completed":
-        statusFilters.push("RESOLVED", "CLOSED");
-        break;
-      case "closed":
-        statusFilters.push("CLOSED");
+      case "resolved":
+        statusFilters.push("RESOLVED");
         break;
       case "reopened":
         statusFilters.push("REOPENED");
         break;
-      case "needsTeamAssignment":
-        filterParams.needsTeamAssignment = true;
+      case "closed":
+        statusFilters.push("CLOSED");
         break;
+      case "total":
+        // No status filter, show all
+        break;
+      case "none":
       default:
         // No main filter applied
         break;
@@ -108,6 +116,11 @@ const WardOfficerDashboard: React.FC = () => {
 
     if (filters.overdue) {
       filterParams.slaStatus = "OVERDUE";
+    }
+
+    // Ensure ward-based filtering so Ward Officer only sees complaints for their ward
+    if (user?.ward?.id) {
+      filterParams.wardId = user.ward.id;
     }
 
     // Only add arrays if they have content
@@ -216,24 +229,33 @@ const WardOfficerDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="flex gap-4">
-        <div className="flex-1 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">🏢 Ward Officer Dashboard</h1>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Ward Officer Dashboard</h1>
           <p className="text-blue-100">
             Manage complaints for {user?.ward?.name || "your assigned ward"} and
             monitor team performance.
           </p>
         </div>
-
-        {/* Total Complaints Card */}
-        <Card className="min-w-[200px] bg-white shadow-lg">
-          <CardContent className="p-6 text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">
-              {stats?.summary.totalComplaints || 0}
+        <Card
+          className={`w-40 p-2 cursor-pointer transition-all ${filters.mainFilter === "total" ? "ring-2 ring-primary bg-primary/10" : "bg-white/10"}`}
+          onClick={() =>
+            handleMainFilterChange(
+              filters.mainFilter === "total" ? "none" : "total",
+            )
+          }
+        >
+          <CardHeader className="flex items-center justify-between pb-1">
+            <CardTitle className="text-sm font-medium text-white/90">
+              Total
+            </CardTitle>
+            <BarChart3 className="h-5 w-5 text-white/90" />
+          </CardHeader>
+          <CardContent className="p-2 pt-0">
+            <div className="text-xl font-bold text-white">
+              {stats?.summary?.totalComplaints ?? 0}
             </div>
-            <p className="text-sm text-gray-600 font-medium">
-              Total Complaints
-            </p>
+            <p className="text-xs text-white/80">All complaints</p>
           </CardContent>
         </Card>
       </div>
@@ -257,44 +279,78 @@ const WardOfficerDashboard: React.FC = () => {
         value={filters.mainFilter}
         onValueChange={handleMainFilterChange}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-6 gap-3">
+          {/* Registered */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "pending"
+            className={`${smallCardClass} ${
+              filters.mainFilter === "registered"
                 ? "ring-2 ring-blue-500 bg-blue-50"
                 : ""
             }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "pending" ? "none" : "pending",
+                filters.mainFilter === "registered" ? "none" : "registered",
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
-                    id="pending-filter"
-                    value="pending"
+                    id="registered-filter"
+                    value="registered"
                     className="sr-only"
                   />
-                  <span className="cursor-pointer">Pending Work</span>
+                  <span className="cursor-pointer">Registered</span>
                 </div>
               </CardTitle>
-              <Clock className="h-4 w-4 text-yellow-600" />
+              <Clock className="h-5 w-5 text-yellow-600" />
             </CardHeader>
-            <CardContent className="pl-8">
+            <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-yellow-600">
-                {stats?.summary.pendingWork || 0}
+                {stats?.statusBreakdown?.registered ?? 0}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Complaints awaiting team assignment
-              </p>
+              <p className="text-xs text-muted-foreground">Newly registered</p>
             </CardContent>
           </Card>
 
+          {/* Assigned */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`${smallCardClass} ${
+              filters.mainFilter === "assigned"
+                ? "ring-2 ring-indigo-500 bg-indigo-50"
+                : ""
+            }`}
+            onClick={() =>
+              handleMainFilterChange(
+                filters.mainFilter === "assigned" ? "none" : "assigned",
+              )
+            }
+          >
+            <CardHeader className="flex items-center justify-between pb-1">
+              <CardTitle className="text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    id="assigned-filter"
+                    value="assigned"
+                    className="sr-only"
+                  />
+                  <span className="cursor-pointer">Assigned</span>
+                </div>
+              </CardTitle>
+              <Users className="h-5 w-5 text-blue-600" />
+            </CardHeader>
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-blue-600">
+                {stats?.statusBreakdown?.assigned ?? 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Assigned to teams</p>
+            </CardContent>
+          </Card>
+
+          {/* In Progress */}
+          <Card
+            className={`${smallCardClass} ${
               filters.mainFilter === "inProgress"
                 ? "ring-2 ring-orange-500 bg-orange-50"
                 : ""
@@ -305,7 +361,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -316,92 +372,57 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">In Progress</span>
                 </div>
               </CardTitle>
-              <Settings className="h-4 w-4 text-orange-600" />
+              <Settings className="h-5 w-5 text-orange-600" />
             </CardHeader>
-            <CardContent className="pl-8">
+            <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-orange-600">
-                {stats?.summary.activeWork || 0}
+                {stats?.statusBreakdown?.in_progress ?? 0}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Work currently in progress
-              </p>
+              <p className="text-xs text-muted-foreground">Active work</p>
             </CardContent>
           </Card>
 
+          {/* Resolved */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "completed"
+            className={`${smallCardClass} ${
+              filters.mainFilter === "resolved"
                 ? "ring-2 ring-green-500 bg-green-50"
                 : ""
             }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "completed" ? "none" : "completed",
+                filters.mainFilter === "resolved" ? "none" : "resolved",
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
-                    id="completed-filter"
-                    value="completed"
+                    id="resolved-filter"
+                    value="resolved"
                     className="sr-only"
                   />
-                  <span className="cursor-pointer">Completed</span>
+                  <span className="cursor-pointer">Resolved</span>
                 </div>
               </CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-600" />
             </CardHeader>
-            <CardContent className="pl-8">
+            <CardContent className="p-0 pt-0">
               <div className="text-2xl font-bold text-green-600">
-                {stats?.summary.completedWork || 0}
+                {stats?.statusBreakdown?.resolved ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                Successfully resolved complaints
+                Resolved complaints
               </p>
             </CardContent>
           </Card>
 
+          {/* Reopened */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "closed"
-                ? "ring-2 ring-gray-500 bg-gray-50"
-                : ""
-            }`}
-            onClick={() =>
-              handleMainFilterChange(
-                filters.mainFilter === "closed" ? "none" : "closed",
-              )
-            }
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    id="closed-filter"
-                    value="closed"
-                    className="sr-only"
-                  />
-                  <span className="cursor-pointer">Closed Tickets</span>
-                </div>
-              </CardTitle>
-              <XCircle className="h-4 w-4 text-gray-600" />
-            </CardHeader>
-            <CardContent className="pl-8">
-              <div className="text-2xl font-bold text-gray-600">
-                {stats?.statusBreakdown?.closed || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Fully completed and closed
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`${smallCardClass} ${
               filters.mainFilter === "reopened"
-                ? "ring-2 ring-red-500 bg-red-50"
+                ? "ring-2 ring-purple-500 bg-purple-50"
                 : ""
             }`}
             onClick={() =>
@@ -410,7 +431,7 @@ const WardOfficerDashboard: React.FC = () => {
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
@@ -421,52 +442,49 @@ const WardOfficerDashboard: React.FC = () => {
                   <span className="cursor-pointer">Reopened</span>
                 </div>
               </CardTitle>
-              <RefreshCcw className="h-4 w-4 text-red-600" />
+              <XCircle className="h-5 w-5 text-purple-600" />
             </CardHeader>
-            <CardContent className="pl-8">
-              <div className="text-2xl font-bold text-red-600">
-                {stats?.statusBreakdown?.reopened || 0}
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-purple-600">
+                {stats?.statusBreakdown?.reopened ?? 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                Require renewed attention
+                Reopened after closure
               </p>
             </CardContent>
           </Card>
 
+          {/* Closed */}
           <Card
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              filters.mainFilter === "needsTeamAssignment"
-                ? "ring-2 ring-purple-500 bg-purple-50"
+            className={`${smallCardClass} ${
+              filters.mainFilter === "closed"
+                ? "ring-2 ring-gray-500 bg-gray-50"
                 : ""
             }`}
             onClick={() =>
               handleMainFilterChange(
-                filters.mainFilter === "needsTeamAssignment"
-                  ? "none"
-                  : "needsTeamAssignment",
+                filters.mainFilter === "closed" ? "none" : "closed",
               )
             }
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
-                    id="team-assignment-filter"
-                    value="needsTeamAssignment"
+                    id="closed-filter"
+                    value="closed"
                     className="sr-only"
                   />
-                  <span className="cursor-pointer">Needs Team Assignment</span>
+                  <span className="cursor-pointer">Closed</span>
                 </div>
               </CardTitle>
-              <Briefcase className="h-4 w-4 text-purple-600" />
+              <FileText className="h-5 w-5 text-gray-600" />
             </CardHeader>
-            <CardContent className="pl-8">
-              <div className="text-2xl font-bold text-purple-600">
-                {stats?.summary.needsTeamAssignment || 0}
+            <CardContent className="p-0 pt-0">
+              <div className="text-2xl font-bold text-gray-600">
+                {stats?.statusBreakdown?.closed ?? 0}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Ready for team assignment
-              </p>
+              <p className="text-xs text-muted-foreground">Closed complaints</p>
             </CardContent>
           </Card>
         </div>
@@ -494,7 +512,7 @@ const WardOfficerDashboard: React.FC = () => {
                 htmlFor="overdue-filter"
                 className="cursor-pointer flex items-center"
               >
-                <AlertTriangle className="h-4 w-4 mr-1 text-red-600" />
+                <AlertTriangle className="h-5 w-5 mr-1 text-red-600" />
                 Overdue ({stats?.summary.overdueComplaints || 0})
               </label>
             </div>
@@ -510,7 +528,7 @@ const WardOfficerDashboard: React.FC = () => {
                 htmlFor="urgent-filter"
                 className="cursor-pointer flex items-center"
               >
-                <AlertTriangle className="h-4 w-4 mr-1 text-orange-600" />
+                <AlertTriangle className="h-5 w-5 mr-1 text-orange-600" />
                 Urgent Priority ({stats?.summary.urgentComplaints || 0})
               </label>
             </div>
@@ -558,7 +576,7 @@ const WardOfficerDashboard: React.FC = () => {
               className="w-full justify-start"
               onClick={() => navigateToComplaints({ status: ["REGISTERED"] })}
             >
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-5 w-5 mr-2" />
               Assign New Complaints ({stats?.statusBreakdown.registered || 0})
             </Button>
             <Button
@@ -568,7 +586,7 @@ const WardOfficerDashboard: React.FC = () => {
                 navigateToComplaints({ priority: ["CRITICAL", "HIGH"] })
               }
             >
-              <AlertTriangle className="h-4 w-4 mr-2" />
+              <AlertTriangle className="h-5 w-5 mr-2" />
               Handle Urgent ({stats?.summary.urgentComplaints || 0})
             </Button>
             <Button
@@ -576,12 +594,12 @@ const WardOfficerDashboard: React.FC = () => {
               className="w-full justify-start"
               onClick={() => navigateToComplaints({ needsTeamAssignment: true })}
             >
-              <Briefcase className="h-4 w-4 mr-2" />
+              <Briefcase className="h-5 w-5 mr-2" />
               Assign to Team ({stats?.summary.needsTeamAssignment || 0})
             </Button>
             <Link to="/reports" className="block">
               <Button variant="outline" className="w-full justify-start">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <BarChart3 className="h-5 w-5 mr-2" />
                 Generate Reports
               </Button>
             </Link>
@@ -615,13 +633,13 @@ const WardOfficerDashboard: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-xl font-bold text-blue-600">
                 {stats?.statusBreakdown.in_progress || 0}
               </div>
               <p className="text-xs text-gray-500">Active</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-xl font-bold text-red-600">
                 {stats?.summary.overdueComplaints || 0}
               </div>
               <p className="text-xs text-gray-500">Overdue</p>
