@@ -332,7 +332,7 @@ const ComplaintsList: React.FC = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {user?.role === "MAINTENANCE_TEAM" ? "My Complaints" : "Complaints"}
+            {user?.role === "MAINTENANCE_TEAM" ? `My Complaints (${totalItems})` : `Complaints (${totalItems})`}
           </h1>
           <p className="text-gray-600">
             {user?.role === "MAINTENANCE_TEAM"
