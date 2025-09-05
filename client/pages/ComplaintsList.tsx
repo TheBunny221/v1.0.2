@@ -517,6 +517,12 @@ const ComplaintsList: React.FC = () => {
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                    <TableHead>Team</TableHead>
+                  )}
+                  {user?.role === "ADMINISTRATOR" && (
+                    <TableHead>Officer</TableHead>
+                  )}
                   {user?.role !== "CITIZEN" && (
                     <>
                       <TableHead>Rating</TableHead>
@@ -568,19 +574,26 @@ const ComplaintsList: React.FC = () => {
                               Needs Team Assignment
                             </Badge>
                           )}
-                        {complaint.maintenanceTeam && (
-                          <Badge className="bg-green-100 text-green-800 text-xs">
-                            Team:{" "}
-                            {complaint.maintenanceTeam.fullName.split(" ")[0]}
-                          </Badge>
-                        )}
-                        {complaint.wardOfficer && (
-                          <Badge className="bg-blue-100 text-blue-800 text-xs">
-                            WO: {complaint.wardOfficer.fullName.split(" ")[0]}
-                          </Badge>
-                        )}
                       </div>
                     </TableCell>
+                    {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                      <TableCell>
+                        {complaint.maintenanceTeam?.fullName ? (
+                          <span className="text-sm">{complaint.maintenanceTeam.fullName}</span>
+                        ) : (
+                          <span className="text-xs text-gray-500">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {user?.role === "ADMINISTRATOR" && (
+                      <TableCell>
+                        {complaint.wardOfficer?.fullName ? (
+                          <span className="text-sm">{complaint.wardOfficer.fullName}</span>
+                        ) : (
+                          <span className="text-xs text-gray-500">-</span>
+                        )}
+                      </TableCell>
+                    )}
                     {user?.role !== "CITIZEN" && (
                       <>
                         <TableCell>
