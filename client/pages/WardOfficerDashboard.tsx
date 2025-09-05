@@ -70,6 +70,8 @@ const WardOfficerDashboard: React.FC = () => {
 
   const stats = statsResponse?.data?.stats;
 
+  const smallCardClass = "cursor-pointer transform transition-all hover:shadow-lg hover:scale-[1.02] p-3 bg-white rounded-lg border border-gray-100 flex flex-col justify-between min-h-[96px]";
+
   // Build filter params for complaints query based on active filters
   const buildComplaintsFilter = () => {
     const filterParams: any = {};
