@@ -252,7 +252,7 @@ const WardOfficerDashboard: React.FC = () => {
         value={filters.mainFilter}
         onValueChange={handleMainFilterChange}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-7 lg:grid-cols-7 gap-3">
           {/* Registered */}
           <Card
             className={`cursor-pointer transition-all hover:shadow-md ${
