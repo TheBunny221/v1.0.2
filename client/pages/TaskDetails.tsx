@@ -100,6 +100,8 @@ const TaskDetails: React.FC = () => {
           mimeType: p.mimeType,
           uploadedAt: p.uploadedAt,
           url: p.photoUrl || p.photoUrl || p.url,
+          description: p.description || null,
+          uploadedBy: p.uploadedByTeam?.fullName || null,
         })) || []),
       ],
     } as any;
