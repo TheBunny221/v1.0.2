@@ -54,7 +54,7 @@
     "db:stats": "node prisma/migration-utils.js stats",
     "db:cleanup": "node prisma/migration-utils.js cleanup",
     "db:check": "node prisma/migration-utils.js check",
-    "postinstall": "npm run db:generate:dev"
+    "postinstall": "npm run db:generate"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
