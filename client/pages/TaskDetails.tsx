@@ -72,6 +72,22 @@ const TaskDetails: React.FC = () => {
         photo: true,
       },
     ],
+    attachments: [
+      {
+        id: "a1",
+        fileName: "site-photo-1.jpg",
+        mimeType: "image/jpeg",
+        uploadedAt: "2024-01-14T09:35:00Z",
+        url: "/uploads/site-photo-1.jpg",
+      },
+      {
+        id: "a2",
+        fileName: "repair-report.pdf",
+        mimeType: "application/pdf",
+        uploadedAt: "2024-01-14T12:00:00Z",
+        url: "/uploads/repair-report.pdf",
+      },
+    ],
   };
 
   const getPriorityColor = (priority: string) => {
