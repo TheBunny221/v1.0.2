@@ -66,6 +66,7 @@ export default defineConfig(({ mode }) => {
           "./client",
           "./shared",
           path.resolve(__dirname, "./node_modules/leaflet/dist"),
+          path.resolve(__dirname, "./uploads"),
         ],
         deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
       },
