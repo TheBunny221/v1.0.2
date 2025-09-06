@@ -235,12 +235,12 @@ const TaskDetails: React.FC = () => {
                 <div className="space-y-4">
                   {task.workLog.map((log, index) => (
                     <div
-                      key={index}
+                      key={`log-${index}`}
                       className="border-l-4 border-blue-500 pl-4 py-2"
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-medium">{log.time}</p>
+                          <p className="font-medium">{new Date(log.time).toLocaleString ? new Date(log.time).toLocaleString() : log.time}</p>
                           <p className="text-sm text-gray-600">{log.note}</p>
                           {log.photo && (
                             <Badge variant="secondary" className="mt-1">
@@ -253,6 +253,27 @@ const TaskDetails: React.FC = () => {
                       </div>
                     </div>
                   ))}
+
+                  {/* Render image attachments as part of the work log so uploads appear immediately */}
+                  {task.attachments && task.attachments.filter((a: any) => a.mimeType?.startsWith("image/")).length > 0 && (
+                    <div className="pt-2">
+                      <h4 className="text-sm font-medium mb-2">Photos</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {task.attachments.filter((a: any) => a.mimeType?.startsWith("image/")).map((att: any) => (
+                          <div key={att.id} className="border rounded p-2">
+                            <img src={att.url} alt={att.fileName || att.originalName} className="w-full h-28 object-cover rounded mb-2" />
+                            <div className="text-xs text-gray-600">{att.fileName || att.originalName}</div>
+                            <div className="text-xs text-gray-500">{new Date(att.uploadedAt).toLocaleString()}</div>
+                            <div className="mt-2">
+                              <a href={att.url} download className="inline-flex items-center">
+                                <Button size="xs">Download</Button>
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Add New Log Entry */}
