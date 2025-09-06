@@ -328,8 +328,8 @@ const TaskDetails: React.FC = () => {
                       <Camera className="h-4 w-4 mr-1" />
                       Photo
                     </Button>
-                      <Button size="sm" variant="outline">
-                        Add Log
+                      <Button size="sm" variant="outline" onClick={addWorkUpdate} disabled={isAddingLog || !workNote.trim()}>
+                        {isAddingLog ? "Adding..." : "Add Log"}
                       </Button>
                     </div>
                   </div>
