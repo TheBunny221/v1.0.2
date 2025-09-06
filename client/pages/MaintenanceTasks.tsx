@@ -52,7 +52,9 @@ import {
   Image,
   FileText,
   User,
+  BarChart3,
 } from "lucide-react";
+import StatusOverviewGrid from "@/components/StatusOverviewGrid";
 
 const MaintenanceTasks: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
