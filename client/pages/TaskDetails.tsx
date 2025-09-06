@@ -49,8 +49,26 @@ const TaskDetails: React.FC = () => {
   } = useGetComplaintQuery(id ?? "");
 
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isAddingLog, setIsAddingLog] = useState(false);
+  const [updateComplaintStatus] = useUpdateComplaintStatusMutation();
 
   const raw = complaintResponse?.data?.complaint;
+
+  const addWorkUpdate = async () => {
+    if (!task) return;
+    if (!workNote || workNote.trim().length === 0) return;
+    try {
+      setIsAddingLog(true);
+      await updateComplaintStatus({ id: task.id, status: "IN_PROGRESS", remarks: workNote.trim() }).unwrap();
+      setWorkNote("");
+      // refresh complaint to show new status log
+      refetchComplaint?.();
+    } catch (err) {
+      console.error("Failed to add work log:", err);
+    } finally {
+      setIsAddingLog(false);
+    }
+  };
 
   const task = useMemo(() => {
     if (!raw) return null;
