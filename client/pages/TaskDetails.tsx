@@ -325,6 +325,16 @@ const TaskDetails: React.FC = () => {
           )}
 
           {/* Completion Form */}
+
+          <PhotoUploadModal
+            isOpen={isPhotoModalOpen}
+            onClose={() => setIsPhotoModalOpen(false)}
+            complaintId={task?.id}
+            onSuccess={() => {
+              // refresh complaint data to show new photos
+              refetchComplaint?.();
+            }}
+          />
           {task.status === "IN_PROGRESS" && (
             <Card>
               <CardHeader>
