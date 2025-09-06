@@ -87,6 +87,13 @@ const TaskDetails: React.FC = () => {
         uploadedAt: "2024-01-14T12:00:00Z",
         url: "/uploads/repair-report.pdf",
       },
+      {
+        id: "a3",
+        fileName: "builder-asset.webp",
+        mimeType: "image/webp",
+        uploadedAt: new Date().toISOString(),
+        url: "https://cdn.builder.io/api/v1/image/assets%2F23c7b73513e54f73815a079b7a5d8d1c%2Fe53417a742264e5ea6e5cb3ac47219d7?format=webp&width=800",
+      },
     ],
   };
 
