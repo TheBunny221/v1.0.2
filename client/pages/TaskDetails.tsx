@@ -349,7 +349,7 @@ const TaskDetails: React.FC = () => {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Complete Task
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setIsPhotoModalOpen(true)}>
                     <Camera className="h-4 w-4 mr-2" />
                     Add Completion Photo
                   </Button>
