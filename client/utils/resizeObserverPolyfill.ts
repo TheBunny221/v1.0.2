@@ -15,7 +15,10 @@ export const installResizeObserverPolyfill = () => {
 
     constructor(callback: ResizeObserverCallback) {
       // Wrap the callback to prevent loop errors
-      const safeCallback: ResizeObserverCallback = (entries, observer) => {
+      const safeCallback: ResizeObserverCallback = (
+        entries,
+        observer,
+      ) => {
         // Prevent recursive calls
         if (this.pendingCallback) {
           return;
@@ -27,12 +30,12 @@ export const installResizeObserverPolyfill = () => {
         requestAnimationFrame(() => {
           try {
             callback(entries, observer);
-          } catch (error) {
+          } catch (error: unknown) {
             // Silently catch ResizeObserver loop errors
-            if (
-              !(error.message && error.message.includes("ResizeObserver loop"))
-            ) {
-              console.error("ResizeObserver callback error:", error);
+            if (error instanceof Error) {
+              if (!error.message.includes("ResizeObserver loop")) {
+                console.error("ResizeObserver callback error:", error);
+              }
             }
           } finally {
             this.pendingCallback = false;
@@ -44,18 +47,18 @@ export const installResizeObserverPolyfill = () => {
       this.callback = callback;
     }
 
-    observe(target: Element, options?: ResizeObserverOptions) {
+    override observe(target: Element, options?: ResizeObserverOptions) {
       if (!this.isObserving) {
         this.isObserving = true;
       }
       super.observe(target, options);
     }
 
-    unobserve(target: Element) {
+    override unobserve(target: Element) {
       super.unobserve(target);
     }
 
-    disconnect() {
+    override disconnect() {
       this.isObserving = false;
       this.pendingCallback = false;
       super.disconnect();

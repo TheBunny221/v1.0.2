@@ -45,9 +45,12 @@ export function isPointInPolygon(point: Coordinates, polygon: [number, number][]
   const { lat, lng } = point;
   let inside = false;
 
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [lat_i, lng_i] = polygon[i];
-    const [lat_j, lng_j] = polygon[j];
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const coordI = polygon[i];
+      const coordJ = polygon[j];
+      if (!coordI || !coordJ) continue;
+      const [lat_i, lng_i] = coordI;
+      const [lat_j, lng_j] = coordJ;
 
     if (
       lng_i > lng !== lng_j > lng &&
@@ -259,8 +262,13 @@ export function validatePolygon(coordinates: [number, number][]): {
   }
 
   if (coordinates.length > 0) {
-    for (let i = 0; i < coordinates.length; i++) {
-      const [lat, lng] = coordinates[i];
+      for (let i = 0; i < coordinates.length; i++) {
+        const coord = coordinates[i];
+        if (!coord) {
+          errors.push(`Invalid coordinate at index ${i}: missing value`);
+          continue;
+        }
+        const [lat, lng] = coord;
       
       if (typeof lat !== 'number' || typeof lng !== 'number') {
         errors.push(`Invalid coordinate at index ${i}: must be numbers`);
@@ -295,11 +303,13 @@ export function simplifyPolygon(
   // Find the point with the maximum distance from line between start and end
   let maxDistance = 0;
   let maxIndex = 0;
-  const start = coordinates[0];
-  const end = coordinates[coordinates.length - 1];
+    const start = coordinates[0]!;
+    const end = coordinates[coordinates.length - 1]!;
 
   for (let i = 1; i < coordinates.length - 1; i++) {
-    const distance = pointToLineDistance(coordinates[i], start, end);
+      const point = coordinates[i];
+      if (!point) continue;
+      const distance = pointToLineDistance(point, start, end);
     if (distance > maxDistance) {
       maxDistance = distance;
       maxIndex = i;

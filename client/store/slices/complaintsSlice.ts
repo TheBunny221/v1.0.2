@@ -135,6 +135,7 @@ export interface ComplaintsState {
   filters: any;
   isLoading: boolean;
   pagination: any;
+  statistics: any | null;
 }
 
 // Thunk for fetching ward dashboard stats

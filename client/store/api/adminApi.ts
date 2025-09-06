@@ -195,6 +195,7 @@ export interface DashboardStatsResponse {
   maintenanceTeam: number;
   activeUsers?: number;
   pendingTeamAssignments?: number;
+  pendingWardOfficerAssignments?: number;
 }
 
 export interface UserActivityResponse {

@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import type { IncomingMessage, ServerResponse, ClientRequest } from "http";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -71,7 +72,7 @@ export default defineConfig(({ mode }) => {
           headers: {
             Connection: "keep-alive",
           },
-          onError: (err, req, res) => {
+            onError: (err: Error, _req: IncomingMessage, res: ServerResponse) => {
             console.error("Proxy error:", err.message);
             if (res.writeHead) {
               res.writeHead(500, {
@@ -86,14 +87,18 @@ export default defineConfig(({ mode }) => {
               );
             }
           },
-          onProxyReq: (proxyReq, req, res) => {
-            console.log(
-              "Proxying request:",
-              req.method,
-              req.url,
-              "-> " + proxyTarget + req.url,
-            );
-          },
+            onProxyReq: (
+              proxyReq: ClientRequest,
+              req: IncomingMessage,
+              _res: ServerResponse,
+            ) => {
+              console.log(
+                "Proxying request:",
+                req.method,
+                req.url,
+                "-> " + proxyTarget + req.url,
+              );
+            },
         },
       },
       hmr: isProduction
@@ -112,13 +117,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist/spa",
     },
-    plugins: [
-      react({
-        // Configure React fast refresh
-        fastRefresh: !isProduction,
-        jsxRuntime: "automatic",
-      }),
-    ],
+    plugins: [react()],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./client"),

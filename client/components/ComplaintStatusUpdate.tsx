@@ -110,12 +110,14 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
 
   // Update form data when complaint changes
   useEffect(() => {
+    // Prefer wardOfficer if present (new field), otherwise fall back to assignedTo
+    const currentAssigneeId = (complaint as any).wardOfficer?.id || complaint.assignedTo?.id || "unassigned";
     setFormData({
       status: complaint.status,
-      assignedTo: complaint.assignedTo?.id || "unassigned",
+      assignedTo: currentAssigneeId,
       remarks: "",
     });
-  }, [complaint.status, complaint.assignedTo?.id]);
+  }, [complaint.status, (complaint as any).wardOfficer?.id, complaint.assignedTo?.id]);
 
   const isLoading = isUpdatingStatus || isAssigning;
 
@@ -154,7 +156,7 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
       if (
         mode === "assign" ||
         (mode === "both" &&
-          formData.assignedTo !== (complaint.assignedTo?.id || "unassigned"))
+          formData.assignedTo !== ((complaint as any).wardOfficer?.id || complaint.assignedTo?.id || "unassigned"))
       ) {
         if (user?.role === "WARD_OFFICER") {
           await assignComplaint({
@@ -166,7 +168,8 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
         } else if (user?.role === "ADMINISTRATOR") {
           const updateData: any = {};
           if (formData.assignedTo !== "unassigned") {
-            updateData.assignedToId = formData.assignedTo;
+            // Use wardOfficerId when admins assign a ward officer
+            updateData.wardOfficerId = formData.assignedTo;
           }
           if (formData.remarks) updateData.remarks = formData.remarks;
           await updateComplaint({ id: complaint.id, ...updateData }).unwrap();
@@ -234,10 +237,10 @@ const ComplaintStatusUpdate: React.FC<ComplaintStatusUpdateProps> = ({
                 <Badge className={currentStatusInfo.color}>
                   {currentStatusInfo.label}
                 </Badge>
-                {complaint.assignedTo && (
+                {((complaint as any).wardOfficer || complaint.assignedTo) && (
                   <Badge variant="outline" className="flex items-center gap-1">
                     <UserCheck className="h-3 w-3" />
-                    {complaint.assignedTo.fullName}
+                    {((complaint as any).wardOfficer || complaint.assignedTo).fullName}
                   </Badge>
                 )}
               </div>

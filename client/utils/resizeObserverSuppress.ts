@@ -7,7 +7,7 @@ export const suppressResizeObserverErrors = () => {
   const originalWarn = window.console.warn;
 
   // Override console.error
-  window.console.error = (...args) => {
+  window.console.error = (...args: unknown[]) => {
     const message = String(args[0] || "");
 
     // Filter out ResizeObserver errors
@@ -28,7 +28,7 @@ export const suppressResizeObserverErrors = () => {
   };
 
   // Override console.warn as well (sometimes ResizeObserver issues show as warnings)
-  window.console.warn = (...args) => {
+  window.console.warn = (...args: unknown[]) => {
     const message = String(args[0] || "");
 
     // Filter out ResizeObserver warnings
@@ -48,8 +48,9 @@ export const suppressResizeObserverErrors = () => {
   };
 
   // Handle global error events
-  const handleGlobalError = (event) => {
-    const message = event.message || event.error?.message || "";
+  const handleGlobalError = (event: Event) => {
+    const errorEvent = event as ErrorEvent;
+    const message = errorEvent.message || errorEvent.error?.message || "";
     if (
       message.includes("ResizeObserver loop completed") ||
       message.includes("ResizeObserver loop limit exceeded") ||
@@ -62,8 +63,10 @@ export const suppressResizeObserverErrors = () => {
   };
 
   // Handle unhandled promise rejections that might contain ResizeObserver errors
-  const handleUnhandledRejection = (event) => {
-    const message = String(event.reason?.message || event.reason || "");
+  const handleUnhandledRejection = (event: Event) => {
+    const rejection = event as PromiseRejectionEvent;
+    const reason = rejection.reason as any;
+    const message = String(reason?.message || reason || "");
     if (
       message.includes("ResizeObserver loop completed") ||
       message.includes("ResizeObserver loop limit exceeded") ||
@@ -83,13 +86,16 @@ export const suppressResizeObserverErrors = () => {
     const OriginalResizeObserver = ResizeObserver;
 
     window.ResizeObserver = class extends OriginalResizeObserver {
-      constructor(callback) {
-        const wrappedCallback = (entries, observer) => {
+      constructor(callback: ResizeObserverCallback) {
+        const wrappedCallback = (
+          entries: ResizeObserverEntry[],
+          observer: ResizeObserver,
+        ) => {
           try {
             callback(entries, observer);
-          } catch (error) {
+          } catch (error: unknown) {
             // Suppress ResizeObserver callback errors
-            if (error.message?.includes("ResizeObserver loop")) {
+            if (error instanceof Error && error.message.includes("ResizeObserver loop")) {
               return;
             }
             throw error;
