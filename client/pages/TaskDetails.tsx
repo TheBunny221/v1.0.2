@@ -30,6 +30,7 @@ import {
   Download,
   File,
 } from "lucide-react";
+import PhotoUploadModal from "../components/PhotoUploadModal";
 
 const TaskDetails: React.FC = () => {
   const { id } = useParams();
