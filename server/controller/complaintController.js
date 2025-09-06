@@ -1029,6 +1029,18 @@ export const getComplaint = asyncHandler(async (req, res) => {
         },
       },
       attachments: true,
+      photos: {
+        orderBy: { uploadedAt: "desc" },
+        include: {
+          uploadedByTeam: {
+            select: {
+              id: true,
+              fullName: true,
+              role: true,
+            },
+          },
+        },
+      },
       statusLogs: {
         orderBy: { timestamp: "desc" },
         include: {
