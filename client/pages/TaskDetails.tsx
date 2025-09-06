@@ -38,64 +38,70 @@ const TaskDetails: React.FC = () => {
 
   const isMaintenanceTeam = user?.role === "MAINTENANCE_TEAM";
 
-  // Mock task data
-  const task = {
-    id: id || "1",
-    title: "Water Pipeline Repair",
-    description:
-      "Main water pipeline burst at MG Road junction affecting water supply to 200+ households in the area. Requires immediate attention and repair.",
-    location: "MG Road, Near Metro Station",
-    coordinates: "9.9312, 76.2673",
-    priority: "HIGH",
-    status: "IN_PROGRESS",
-    estimatedTime: "4 hours",
-    dueDate: "2024-01-15",
-    assignedDate: "2024-01-14",
-    submittedBy: "Ward Officer - Central Zone",
-    contactPhone: "+91 9876543210",
-    materials: ["PVC Pipes (6 inch)", "Pipe Joints", "Sealant", "Sand"],
-    tools: ["Excavator", "Welding Equipment", "Safety Gear"],
-    workLog: [
-      {
-        time: "09:00 AM",
-        note: "Arrived at site, assessed damage",
+  // Fetch complaint dynamically
+  const {
+    data: complaintResponse,
+    isLoading: complaintLoading,
+    error: complaintError,
+  } = useGetComplaintQuery(id ?? "");
+
+  const raw = complaintResponse?.data?.complaint;
+
+  const task = useMemo(() => {
+    if (!raw) return null;
+
+    const latLng = (() => {
+      let lat = raw.latitude;
+      let lng = raw.longitude;
+      if ((!lat || !lng) && raw.coordinates) {
+        try {
+          const c = typeof raw.coordinates === "string" ? JSON.parse(raw.coordinates) : raw.coordinates;
+          lat = c?.latitude ?? c?.lat ?? lat;
+          lng = c?.longitude ?? c?.lng ?? lng;
+        } catch {
+          // ignore
+        }
+      }
+      return { lat, lng };
+    })();
+
+    return {
+      id: raw.id,
+      complaintId: raw.complaintId,
+      title: raw.title || (raw.type ? `${raw.type} Issue` : "Task"),
+      description: raw.description,
+      location: raw.area || raw.address || raw.location || "",
+      coordinates: `${latLng.lat || ""}, ${latLng.lng || ""}`,
+      priority: raw.priority || "MEDIUM",
+      status: raw.status,
+      estimatedTime: raw.estimatedTime || null,
+      dueDate: raw.deadline ? new Date(raw.deadline).toISOString().split("T")[0] : null,
+      assignedDate: raw.assignedOn || raw.submittedOn,
+      submittedBy: raw.submittedBy?.fullName || raw.submittedBy || "",
+      contactPhone: raw.contactPhone || raw.mobile || "",
+      materials: raw.materials || [],
+      tools: raw.tools || [],
+      workLog: (raw.statusLogs || []).map((s: any) => ({
+        time: s.timestamp,
+        note: s.comment || `${s.toStatus}`,
         photo: false,
-      },
-      {
-        time: "09:30 AM",
-        note: "Started excavation work",
-        photo: true,
-      },
-      {
-        time: "11:00 AM",
-        note: "Identified leak source, preparing for repair",
-        photo: true,
-      },
-    ],
-    attachments: [
-      {
-        id: "a1",
-        fileName: "site-photo-1.jpg",
-        mimeType: "image/jpeg",
-        uploadedAt: "2024-01-14T09:35:00Z",
-        url: "/uploads/site-photo-1.jpg",
-      },
-      {
-        id: "a2",
-        fileName: "repair-report.pdf",
-        mimeType: "application/pdf",
-        uploadedAt: "2024-01-14T12:00:00Z",
-        url: "/uploads/repair-report.pdf",
-      },
-      {
-        id: "a3",
-        fileName: "builder-asset.webp",
-        mimeType: "image/webp",
-        uploadedAt: new Date().toISOString(),
-        url: "https://cdn.builder.io/api/v1/image/assets%2F23c7b73513e54f73815a079b7a5d8d1c%2Fe53417a742264e5ea6e5cb3ac47219d7?format=webp&width=800",
-      },
-    ],
-  };
+        user: s.user,
+      })),
+      attachments: raw.attachments || [],
+    } as any;
+  }, [raw]);
+
+  if (complaintLoading) {
+    return <div>Loading task...</div>;
+  }
+
+  if (complaintError || !task) {
+    return (
+      <div className="space-y-6">
+        <p className="text-red-600">Failed to load task details.</p>
+      </div>
+    );
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
