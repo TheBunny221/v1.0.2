@@ -1,3 +1,7 @@
+const path = require('path');
+
+const logDir = path.join(__dirname, 'logs', 'prod');
+
 module.exports = {
   apps: [
     {
@@ -11,6 +15,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
       },
+      out_file: path.join(logDir, 'api-out.log'),
+      error_file: path.join(logDir, 'api-error.log'),
       merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
     },
