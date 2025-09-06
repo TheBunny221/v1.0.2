@@ -200,6 +200,9 @@ const MaintenanceTasks: React.FC = () => {
     // Completed categories
     resolved: tasks.filter((t) => t.status === "RESOLVED").length,
     closed: tasks.filter((t) => t.status === "CLOSED").length,
+    // Additional counts for Ward-style filters
+    registered: tasks.filter((t) => t.status === "REGISTERED").length,
+    assigned: tasks.filter((t) => t.status === "ASSIGNED").length,
   };
 
   const showStatCards = false;
@@ -264,6 +267,13 @@ const MaintenanceTasks: React.FC = () => {
         return task.status === "REOPENED" && !task.isOverdue;
       case "inProgress":
         return task.status === "IN_PROGRESS" && !task.isOverdue;
+      case "registered":
+        return task.status === "REGISTERED";
+      case "assigned":
+        return task.status === "ASSIGNED";
+      case "total":
+      case "all":
+        return true;
       default:
         return true;
     }
@@ -670,7 +680,122 @@ const MaintenanceTasks: React.FC = () => {
         </div>
       </div>
 
-      {/* Task Count Cards (hidden to avoid duplication) */}
+      {/* Status Filter Cards (same style as Ward Officer Dashboard) */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-white">Quick Status Filters</h2>
+          {activeFilter && activeFilter !== "all" && (
+            <Button variant="ghost" size="sm" onClick={() => setActiveFilter("all")}>Clear</Button>
+          )}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "registered" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("registered")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Registered</p>
+                  <p className="text-xl font-bold text-blue-600">{taskCounts.registered}</p>
+                </div>
+                <FileText className="h-6 w-6 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "assigned" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("assigned")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Assigned</p>
+                  <p className="text-xl font-bold text-blue-600">{taskCounts.assigned}</p>
+                </div>
+                <Clock className="h-6 w-6 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "inProgress" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("inProgress")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">In Progress</p>
+                  <p className="text-xl font-bold text-orange-600">{taskCounts.inProgress}</p>
+                </div>
+                <Clock className="h-6 w-6 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "resolved" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("resolved")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Resolved</p>
+                  <p className="text-xl font-bold text-green-600">{taskCounts.resolved}</p>
+                </div>
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "reopened" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("reopened")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Reopened</p>
+                  <p className="text-xl font-bold text-purple-600">{taskCounts.reopened}</p>
+                </div>
+                <RotateCcw className="h-6 w-6 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "closed" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("closed")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Closed</p>
+                  <p className="text-xl font-bold text-gray-800">{taskCounts.closed}</p>
+                </div>
+                <CheckCircle className="h-6 w-6 text-gray-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`p-3 cursor-pointer transition-all ${activeFilter === "all" || activeFilter === "total" ? "ring-2 ring-primary scale-105" : "hover:shadow-sm"}`}
+            onClick={() => setActiveFilter("all")}
+          >
+            <CardContent className="p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total</p>
+                  <p className="text-xl font-bold text-blue-600">{taskCounts.total}</p>
+                </div>
+                <ListTodo className="h-6 w-6 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       {showStatCards && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <Card
