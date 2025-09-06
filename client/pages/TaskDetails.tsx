@@ -335,6 +335,8 @@ const TaskDetails: React.FC = () => {
                             </div>
                             <div>
                               <div className="font-medium">{att.fileName}</div>
+                              {att.description && <div className="text-sm text-gray-700">{att.description}</div>}
+                              {att.uploadedBy && <div className="text-xs text-gray-500">Uploaded by: {att.uploadedBy}</div>}
                               <div className="text-xs text-gray-500">{att.mimeType} • {new Date(att.uploadedAt).toLocaleString()}</div>
                             </div>
                           </div>
