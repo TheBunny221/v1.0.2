@@ -25,6 +25,9 @@ import {
   Wrench,
   FileText,
   Upload,
+  Image,
+  Download,
+  File,
 } from "lucide-react";
 
 const TaskDetails: React.FC = () => {
