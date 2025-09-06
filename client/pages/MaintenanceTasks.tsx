@@ -696,24 +696,6 @@ const MaintenanceTasks: React.FC = () => {
           )}
         </div>
 
-        {/* Total card (same style as WardOfficer) */}
-        <Card
-          className={`w-40 p-1.5 cursor-pointer rounded-xl transition-all ${activeFilter === "total" ? "ring-2 ring-primary bg-primary/10 scale-105" : "bg-white/10 hover:bg-white/20"}`}
-          onClick={() => setActiveFilter(activeFilter === "total" ? "all" : "total")}
-        >
-          <CardHeader className="flex items-center p-0 justify-between pb-0.5">
-            <CardTitle className="flex gap-2 text-sm font-medium">
-              <BarChart3 className="h-4 w-4" />
-              Total
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="p-1 pt-0">
-            <div className="text-xl font-bold text-center">{taskCounts.total}</div>
-            <p className="text-xs text-center">All tasks</p>
-          </CardContent>
-        </Card>
-
         {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
         <div className="mt-3">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 sm:gap-4">
