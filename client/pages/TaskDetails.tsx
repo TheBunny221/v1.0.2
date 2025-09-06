@@ -268,10 +268,10 @@ const TaskDetails: React.FC = () => {
                       rows={2}
                     />
                     <div className="flex flex-col space-y-2">
-                      <Button size="sm">
-                        <Camera className="h-4 w-4 mr-1" />
-                        Photo
-                      </Button>
+                      <Button size="sm" onClick={() => setIsPhotoModalOpen(true)}>
+                      <Camera className="h-4 w-4 mr-1" />
+                      Photo
+                    </Button>
                       <Button size="sm" variant="outline">
                         Add Log
                       </Button>
