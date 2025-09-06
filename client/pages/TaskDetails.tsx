@@ -45,7 +45,10 @@ const TaskDetails: React.FC = () => {
     data: complaintResponse,
     isLoading: complaintLoading,
     error: complaintError,
+    refetch: refetchComplaint,
   } = useGetComplaintQuery(id ?? "");
+
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
   const raw = complaintResponse?.data?.complaint;
 
