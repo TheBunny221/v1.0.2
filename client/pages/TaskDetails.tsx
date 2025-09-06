@@ -204,61 +204,107 @@ const TaskDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Work Log */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="h-5 w-5 mr-2" />
-                Work Progress Log
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {task.workLog.map((log, index) => (
-                  <div
-                    key={index}
-                    className="border-l-4 border-blue-500 pl-4 py-2"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{log.time}</p>
-                        <p className="text-sm text-gray-600">{log.note}</p>
-                        {log.photo && (
-                          <Badge variant="secondary" className="mt-1">
-                            📷 Photo Attached
-                          </Badge>
-                        )}
+          {/* Work Log - visible only to Admin, Ward Officer, Maintenance Team */}
+          {(["ADMINISTRATOR","WARD_OFFICER","MAINTENANCE_TEAM"].includes(user?.role)) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Work Progress Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {task.workLog.map((log, index) => (
+                    <div
+                      key={index}
+                      className="border-l-4 border-blue-500 pl-4 py-2"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">{log.time}</p>
+                          <p className="text-sm text-gray-600">{log.note}</p>
+                          {log.photo && (
+                            <Badge variant="secondary" className="mt-1">
+                              📷 Photo Attached
+                            </Badge>
+                          )}
+
+                          {/* Attachments inline for log entries if any reference (mock not linking here) */}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* Add New Log Entry */}
-              <div className="mt-6 pt-4 border-t">
-                <Label htmlFor="workNote">Add Work Update</Label>
-                <div className="flex space-x-2 mt-2">
-                  <Textarea
-                    id="workNote"
-                    value={workNote}
-                    onChange={(e) => setWorkNote(e.target.value)}
-                    placeholder="Describe current work status..."
-                    className="flex-1"
-                    rows={2}
-                  />
-                  <div className="flex flex-col space-y-2">
-                    <Button size="sm">
-                      <Camera className="h-4 w-4 mr-1" />
-                      Photo
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      Add Log
-                    </Button>
+                {/* Add New Log Entry */}
+                <div className="mt-6 pt-4 border-t">
+                  <Label htmlFor="workNote">Add Work Update</Label>
+                  <div className="flex space-x-2 mt-2">
+                    <Textarea
+                      id="workNote"
+                      value={workNote}
+                      onChange={(e) => setWorkNote(e.target.value)}
+                      placeholder="Describe current work status..."
+                      className="flex-1"
+                      rows={2}
+                    />
+                    <div className="flex flex-col space-y-2">
+                      <Button size="sm">
+                        <Camera className="h-4 w-4 mr-1" />
+                        Photo
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        Add Log
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                {/* Attachments listed here as well (visible to same roles) */}
+                <div className="mt-6 pt-4 border-t">
+                  <h3 className="font-medium mb-3 flex items-center">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Attachments
+                  </h3>
+                  <div className="space-y-3">
+                    {task.attachments.map((att) => {
+                      const isImage = att.mimeType.startsWith("image/");
+                      const canDownload = ["ADMINISTRATOR","WARD_OFFICER","MAINTENANCE_TEAM"].includes(user?.role);
+                      return (
+                        <div key={att.id} className="flex items-center justify-between border rounded p-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 grid place-items-center rounded bg-gray-100">
+                              {isImage ? <Image className="h-5 w-5" /> : <File className="h-5 w-5" />}
+                            </div>
+                            <div>
+                              <div className="font-medium">{att.fileName}</div>
+                              <div className="text-xs text-gray-500">{att.mimeType} • {new Date(att.uploadedAt).toLocaleString()}</div>
+                            </div>
+                          </div>
+                          <div>
+                            {canDownload ? (
+                              <a href={att.url} download className="inline-flex items-center">
+                                <Button size="sm">
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button size="sm" disabled>
+                                <Download className="h-4 w-4 mr-2" />
+                                Restricted
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Completion Form */}
           {task.status === "IN_PROGRESS" && (
