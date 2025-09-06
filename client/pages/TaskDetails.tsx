@@ -274,7 +274,13 @@ const TaskDetails: React.FC = () => {
                           <div key={att.id} className="border rounded p-2">
                             <img src={att.url} alt={att.fileName || att.originalName} className="w-full h-28 object-cover rounded mb-2" />
                             <div className="text-xs text-gray-600">{att.fileName || att.originalName}</div>
-                            <div className="text-xs text-gray-500">{new Date(att.uploadedAt).toLocaleString()}</div>
+                            {att.description && (
+                              <div className="text-sm text-gray-700 mt-1">{att.description}</div>
+                            )}
+                            {att.uploadedBy && (
+                              <div className="text-xs text-gray-500 mt-1">Uploaded by: {att.uploadedBy}</div>
+                            )}
+                            <div className="text-xs text-gray-500 mt-1">{new Date(att.uploadedAt).toLocaleString()}</div>
                             <div className="mt-2">
                               <a href={att.url} download className="inline-flex items-center">
                                 <Button size="xs">Download</Button>
