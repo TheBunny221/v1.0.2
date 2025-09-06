@@ -92,7 +92,16 @@ const TaskDetails: React.FC = () => {
         photo: false,
         user: s.user,
       })),
-      attachments: raw.attachments || [],
+      attachments: [
+        ...(raw.attachments || []),
+        ...((raw.photos || []).map((p: any) => ({
+          id: p.id,
+          fileName: p.fileName || p.originalName || p.photoUrl?.split('/').pop(),
+          mimeType: p.mimeType,
+          uploadedAt: p.uploadedAt,
+          url: p.photoUrl || p.photoUrl || p.url,
+        })) || []),
+      ],
     } as any;
   }, [raw]);
 
