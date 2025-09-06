@@ -78,6 +78,7 @@ const MaintenanceTasks: React.FC = () => {
     refetch: refetchComplaints,
   } = useGetComplaintsQuery({
     assignedToId: user?.id,
+    maintenanceTeamId: user?.id,
     page: 1,
     limit: 100,
   });
