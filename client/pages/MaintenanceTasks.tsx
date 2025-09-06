@@ -714,24 +714,154 @@ const MaintenanceTasks: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Status grid (registered/assigned/inProgress/resolved/reopened/closed) */}
+        {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
         <div className="mt-3">
-          <StatusOverviewGrid
-            stats={{
-              statusBreakdown: {
-                registered: taskCounts.registered,
-                assigned: taskCounts.assigned,
-                in_progress: taskCounts.inProgress,
-                resolved: taskCounts.resolved,
-                reopened: taskCounts.reopened,
-                closed: taskCounts.closed,
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 sm:gap-4">
+            {[
+              {
+                id: "all",
+                label: "All",
+                subtitle: "All tasks",
+                icon: ListTodo,
+                value: taskCounts.total,
+                style: {
+                  ring: "ring-blue-500",
+                  text: "text-blue-700",
+                  textSoft: "text-blue-600",
+                  bgSoft: "bg-blue-50",
+                  chipRing: "ring-blue-200",
+                },
               },
-            }}
-            filters={{
-              mainFilter: ["registered","assigned","inProgress","resolved","reopened","closed"].includes(activeFilter) ? (activeFilter as any) : "none",
-            }}
-            onMainFilterChange={(next) => setActiveFilter(next === "none" ? "all" : next)}
-          />
+              {
+                id: "pending",
+                label: "Pending",
+                subtitle: "Assigned tasks",
+                icon: Clock,
+                value: taskCounts.pending,
+                style: {
+                  ring: "ring-indigo-500",
+                  text: "text-indigo-700",
+                  textSoft: "text-indigo-600",
+                  bgSoft: "bg-indigo-50",
+                  chipRing: "ring-indigo-200",
+                },
+              },
+              {
+                id: "overdue",
+                label: "Overdue",
+                subtitle: "Past deadline",
+                icon: AlertCircle,
+                value: taskCounts.overdue,
+                style: {
+                  ring: "ring-red-500",
+                  text: "text-red-700",
+                  textSoft: "text-red-600",
+                  bgSoft: "bg-red-50",
+                  chipRing: "ring-red-200",
+                },
+              },
+              {
+                id: "inProgress",
+                label: "In Progress",
+                subtitle: "Active work",
+                icon: Play,
+                value: taskCounts.inProgress,
+                style: {
+                  ring: "ring-orange-500",
+                  text: "text-orange-700",
+                  textSoft: "text-orange-600",
+                  bgSoft: "bg-orange-50",
+                  chipRing: "ring-orange-200",
+                },
+              },
+              {
+                id: "resolved",
+                label: "Resolved",
+                subtitle: "Resolved tasks",
+                icon: CheckCircle,
+                value: taskCounts.resolved,
+                style: {
+                  ring: "ring-emerald-500",
+                  text: "text-emerald-700",
+                  textSoft: "text-emerald-600",
+                  bgSoft: "bg-emerald-50",
+                  chipRing: "ring-emerald-200",
+                },
+              },
+              {
+                id: "reopened",
+                label: "Reopened",
+                subtitle: "Reopened tasks",
+                icon: RotateCcw,
+                value: taskCounts.reopened,
+                style: {
+                  ring: "ring-violet-500",
+                  text: "text-violet-700",
+                  textSoft: "text-violet-600",
+                  bgSoft: "bg-violet-50",
+                  chipRing: "ring-violet-200",
+                },
+              },
+              {
+                id: "closed",
+                label: "Closed",
+                subtitle: "Closed tasks",
+                icon: FileText,
+                value: taskCounts.closed,
+                style: {
+                  ring: "ring-slate-500",
+                  text: "text-slate-700",
+                  textSoft: "text-slate-600",
+                  bgSoft: "bg-slate-50",
+                  chipRing: "ring-slate-200",
+                },
+              },
+            ].map((m) => {
+              const active = activeFilter === m.id || (m.id === "all" && activeFilter === "total");
+              const Icon = m.icon as any;
+              return (
+                <Card
+                  key={m.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={active}
+                  aria-label={`${m.label}, ${m.value}`}
+                  onClick={() => setActiveFilter(active ? "all" : m.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveFilter(active ? "all" : m.id);
+                    }
+                  }}
+                  className={[
+                    "group relative cursor-pointer select-none rounded-2xl border bg-white shadow-sm transition-all",
+                    "hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                    active ? `ring-2 ${m.style.ring} ${m.style.bgSoft} border-transparent` : "hover:border-neutral-200",
+                  ].join(" ")}
+                >
+                  <CardHeader className="flex flex-col items-center justify-center p-3 pb-1">
+                    <div className={[
+                      "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
+                      active ? `${m.style.bgSoft} ${m.style.textSoft} ${m.style.chipRing}` : "bg-neutral-50 text-neutral-600 ring-neutral-200",
+                    ].join(" ")}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-neutral-800">
+                      {m.label}
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="flex flex-col items-center p-2 pt-0">
+                    <div className={["text-2xl font-bold leading-none tracking-tight", active ? m.style.text : "text-neutral-900"].join(" ")}>
+                      {m.value}
+                    </div>
+                    <p className="mt-1 text-xs text-neutral-500">{m.subtitle}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </div>
 
