@@ -649,8 +649,23 @@ const MaintenanceTasks: React.FC = () => {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-extrabold">{taskCounts.total}</div>
-            <div className="text-sm text-blue-100">Total Tasks</div>
+            <Card
+              className={`inline-flex items-center p-1 rounded-xl cursor-pointer transition-all ${activeFilter === "all" ? "ring-2 ring-primary bg-primary/10 scale-105" : "bg-white/10 hover:bg-white/20"}`}
+              onClick={() => setActiveFilter("all")}
+            >
+              <CardHeader className="flex items-center p-2 py-1 justify-between space-x-3">
+                <div>
+                  <CardTitle className="text-sm font-medium text-white/90 flex items-center gap-2">
+                    <ListTodo className="h-4 w-4 text-white/90" />
+                    All
+                  </CardTitle>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-extrabold text-white">{taskCounts.total}</div>
+                  <div className="text-xs text-white/80">Total Tasks</div>
+                </div>
+              </CardHeader>
+            </Card>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
