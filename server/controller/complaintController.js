@@ -1029,6 +1029,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
         },
       },
       attachments: true,
+      materials: true,
       photos: {
         orderBy: { uploadedAt: "desc" },
         include: {
