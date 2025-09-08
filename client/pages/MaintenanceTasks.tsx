@@ -669,16 +669,16 @@ const MaintenanceTasks: React.FC = () => {
             </Card>
           </div>
         </div>
-        // <div className="mt-4 flex items-center justify-end">
-        //   <Button
-        //     variant="outline"
-        //     size="sm"
-        //     className="h-7 rounded-full px-3 py-1 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
-        //     onClick={() => refetchComplaints()}
-        //   >
-        //     Refresh
-        //   </Button>
-        // </div>
+       {/* <div className="mt-4 flex items-center justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 rounded-full px-3 py-1 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
+            onClick={() => refetchComplaints()}
+          >
+            Refresh
+          </Button>
+        </div>*/}
       </div>
 
       {/* Total card + StatusOverviewGrid (reuse WardOfficer components for consistent UI) */}
