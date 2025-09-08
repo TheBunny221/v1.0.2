@@ -281,9 +281,35 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
       onClose();
     } catch (error: any) {
       console.error("Upload error:", error);
-      setUploadError(
-        error.data?.message || "Failed to upload photos. Please try again.",
-      );
+      // Normalize various error shapes returned by RTK Query / fetch
+      const extractMessage = (err: any): string => {
+        if (!err) return "Failed to upload photos. Please try again.";
+        // fetch base query error with data.message or data
+        if (typeof err === "string") return err;
+        if (err.data) {
+          if (typeof err.data === "string") return err.data;
+          if (typeof err.data.message === "string") return err.data.message;
+          if (err.data.message) return String(err.data.message);
+          // Some APIs return { success:false, message: { ... } }
+          if (typeof err.data === "object") {
+            try {
+              return JSON.stringify(err.data);
+            } catch {
+              return "Failed to upload photos. Please try again.";
+            }
+          }
+        }
+        if (err.message) return String(err.message);
+        if (err.error) return String(err.error);
+        try {
+          return JSON.stringify(err);
+        } catch {
+          return "Failed to upload photos. Please try again.";
+        }
+      };
+
+      const msg = extractMessage(error);
+      setUploadError(msg);
     }
   };
 
