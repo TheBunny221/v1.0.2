@@ -1005,8 +1005,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
 // @route   GET /api/complaints/:id
 // @access  Private
 export const getComplaint = asyncHandler(async (req, res) => {
-  const baseComplaint = await prisma.complaint.findUnique({
-    where: { id: req.params.id },
+  const baseComplaint = await prisma.complaint.findFirst({
+    where: { OR: [{ id: req.params.id }, { complaintId: req.params.id }] },
     include: {
       ward: true,
       subZone: true,
@@ -1029,6 +1029,18 @@ export const getComplaint = asyncHandler(async (req, res) => {
         },
       },
       attachments: true,
+      photos: {
+        orderBy: { uploadedAt: "desc" },
+        include: {
+          uploadedByTeam: {
+            select: {
+              id: true,
+              fullName: true,
+              role: true,
+            },
+          },
+        },
+      },
       statusLogs: {
         orderBy: { timestamp: "desc" },
         include: {

@@ -52,6 +52,7 @@ import {
   Image,
   FileText,
   User,
+  BarChart3,
 } from "lucide-react";
 
 const MaintenanceTasks: React.FC = () => {
@@ -77,6 +78,7 @@ const MaintenanceTasks: React.FC = () => {
     refetch: refetchComplaints,
   } = useGetComplaintsQuery({
     assignedToId: user?.id,
+    maintenanceTeamId: user?.id,
     page: 1,
     limit: 100,
   });
@@ -200,6 +202,9 @@ const MaintenanceTasks: React.FC = () => {
     // Completed categories
     resolved: tasks.filter((t) => t.status === "RESOLVED").length,
     closed: tasks.filter((t) => t.status === "CLOSED").length,
+    // Additional counts for Ward-style filters
+    registered: tasks.filter((t) => t.status === "REGISTERED").length,
+    assigned: tasks.filter((t) => t.status === "ASSIGNED").length,
   };
 
   const showStatCards = false;
@@ -264,6 +269,13 @@ const MaintenanceTasks: React.FC = () => {
         return task.status === "REOPENED" && !task.isOverdue;
       case "inProgress":
         return task.status === "IN_PROGRESS" && !task.isOverdue;
+      case "registered":
+        return task.status === "REGISTERED";
+      case "assigned":
+        return task.status === "ASSIGNED";
+      case "total":
+      case "all":
+        return true;
       default:
         return true;
     }
@@ -638,8 +650,23 @@ const MaintenanceTasks: React.FC = () => {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-extrabold">{taskCounts.total}</div>
-            <div className="text-sm text-blue-100">Total Tasks</div>
+            <Card
+              className={`inline-flex items-center p-1 rounded-xl cursor-pointer transition-all ${activeFilter === "all" ? "ring-2 ring-primary bg-primary/10 scale-105" : "bg-white/10 hover:bg-white/20"}`}
+              onClick={() => setActiveFilter("all")}
+            >
+              <CardHeader className="flex items-center p-2 py-1 justify-between space-x-3">
+                <div>
+                  <CardTitle className="text-sm font-medium text-white/90 flex items-center gap-2">
+                    <ListTodo className="h-4 w-4 text-white/90" />
+                    All
+                  </CardTitle>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-extrabold text-white">{taskCounts.total}</div>
+                  <div className="text-xs text-white/80">Total Tasks</div>
+                </div>
+              </CardHeader>
+            </Card>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -670,7 +697,172 @@ const MaintenanceTasks: React.FC = () => {
         </div>
       </div>
 
-      {/* Task Count Cards (hidden to avoid duplication) */}
+      {/* Total card + StatusOverviewGrid (reuse WardOfficer components for consistent UI) */}
+      <div className="mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Filter by Status</h2>
+          {activeFilter !== "all" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setActiveFilter("all")}
+            >
+              Clear Filter
+            </Button>
+          )}
+        </div>
+
+        {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
+        <div className="mt-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 sm:gap-4">
+            {[
+              {
+                id: "all",
+                label: "All",
+                subtitle: "All tasks",
+                icon: ListTodo,
+                value: taskCounts.total,
+                style: {
+                  ring: "ring-blue-500",
+                  text: "text-blue-700",
+                  textSoft: "text-blue-600",
+                  bgSoft: "bg-blue-50",
+                  chipRing: "ring-blue-200",
+                },
+              },
+              {
+                id: "pending",
+                label: "Pending",
+                subtitle: "Assigned tasks",
+                icon: Clock,
+                value: taskCounts.pending,
+                style: {
+                  ring: "ring-indigo-500",
+                  text: "text-indigo-700",
+                  textSoft: "text-indigo-600",
+                  bgSoft: "bg-indigo-50",
+                  chipRing: "ring-indigo-200",
+                },
+              },
+              {
+                id: "overdue",
+                label: "Overdue",
+                subtitle: "Past deadline",
+                icon: AlertCircle,
+                value: taskCounts.overdue,
+                style: {
+                  ring: "ring-red-500",
+                  text: "text-red-700",
+                  textSoft: "text-red-600",
+                  bgSoft: "bg-red-50",
+                  chipRing: "ring-red-200",
+                },
+              },
+              {
+                id: "inProgress",
+                label: "In Progress",
+                subtitle: "Active work",
+                icon: Play,
+                value: taskCounts.inProgress,
+                style: {
+                  ring: "ring-orange-500",
+                  text: "text-orange-700",
+                  textSoft: "text-orange-600",
+                  bgSoft: "bg-orange-50",
+                  chipRing: "ring-orange-200",
+                },
+              },
+              {
+                id: "resolved",
+                label: "Resolved",
+                subtitle: "Resolved tasks",
+                icon: CheckCircle,
+                value: taskCounts.resolved,
+                style: {
+                  ring: "ring-emerald-500",
+                  text: "text-emerald-700",
+                  textSoft: "text-emerald-600",
+                  bgSoft: "bg-emerald-50",
+                  chipRing: "ring-emerald-200",
+                },
+              },
+              {
+                id: "reopened",
+                label: "Reopened",
+                subtitle: "Reopened tasks",
+                icon: RotateCcw,
+                value: taskCounts.reopened,
+                style: {
+                  ring: "ring-violet-500",
+                  text: "text-violet-700",
+                  textSoft: "text-violet-600",
+                  bgSoft: "bg-violet-50",
+                  chipRing: "ring-violet-200",
+                },
+              },
+              {
+                id: "closed",
+                label: "Closed",
+                subtitle: "Closed tasks",
+                icon: FileText,
+                value: taskCounts.closed,
+                style: {
+                  ring: "ring-slate-500",
+                  text: "text-slate-700",
+                  textSoft: "text-slate-600",
+                  bgSoft: "bg-slate-50",
+                  chipRing: "ring-slate-200",
+                },
+              },
+            ].map((m) => {
+              const active = activeFilter === m.id || (m.id === "all" && activeFilter === "total");
+              const Icon = m.icon as any;
+              return (
+                <Card
+                  key={m.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={active}
+                  aria-label={`${m.label}, ${m.value}`}
+                  onClick={() => setActiveFilter(active ? "all" : m.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveFilter(active ? "all" : m.id);
+                    }
+                  }}
+                  className={[
+                    "group relative cursor-pointer select-none rounded-2xl border bg-white shadow-sm transition-all",
+                    "hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                    active ? `ring-2 ${m.style.ring} ${m.style.bgSoft} border-transparent` : "hover:border-neutral-200",
+                  ].join(" ")}
+                >
+                  <CardHeader className="flex flex-col items-center justify-center p-3 pb-1">
+                    <div className={[
+                      "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
+                      active ? `${m.style.bgSoft} ${m.style.textSoft} ${m.style.chipRing}` : "bg-neutral-50 text-neutral-600 ring-neutral-200",
+                    ].join(" ")}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-neutral-800">
+                      {m.label}
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="flex flex-col items-center p-2 pt-0">
+                    <div className={["text-2xl font-bold leading-none tracking-tight", active ? m.style.text : "text-neutral-900"].join(" ")}>
+                      {m.value}
+                    </div>
+                    <p className="mt-1 text-xs text-neutral-500">{m.subtitle}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {showStatCards && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <Card

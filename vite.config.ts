@@ -31,7 +31,10 @@ export default defineConfig(({ mode }) => {
       3000,
   );
   const hmrPort = Number(
-    envVars.VITE_HMR_PORT || envVars.HMR_PORT || envVars.WS_PORT || clientPort + 1,
+    envVars.VITE_HMR_PORT ||
+      envVars.HMR_PORT ||
+      envVars.WS_PORT ||
+      clientPort + 1,
   );
 
   // Resolve API backend target
@@ -59,7 +62,12 @@ export default defineConfig(({ mode }) => {
       host: clientHost,
       port: clientPort,
       fs: {
-        allow: ["./client", "./shared"],
+        allow: [
+          "./client",
+          "./shared",
+          path.resolve(__dirname, "./node_modules/leaflet/dist"),
+          path.resolve(__dirname, "./uploads"),
+        ],
         deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
       },
       proxy: {
@@ -72,7 +80,7 @@ export default defineConfig(({ mode }) => {
           headers: {
             Connection: "keep-alive",
           },
-            onError: (err: Error, _req: IncomingMessage, res: ServerResponse) => {
+          onError: (err: Error, _req: IncomingMessage, res: ServerResponse) => {
             console.error("Proxy error:", err.message);
             if (res.writeHead) {
               res.writeHead(500, {
@@ -87,18 +95,18 @@ export default defineConfig(({ mode }) => {
               );
             }
           },
-            onProxyReq: (
-              proxyReq: ClientRequest,
-              req: IncomingMessage,
-              _res: ServerResponse,
-            ) => {
-              console.log(
-                "Proxying request:",
-                req.method,
-                req.url,
-                "-> " + proxyTarget + req.url,
-              );
-            },
+          onProxyReq: (
+            proxyReq: ClientRequest,
+            req: IncomingMessage,
+            _res: ServerResponse,
+          ) => {
+            console.log(
+              "Proxying request:",
+              req.method,
+              req.url,
+              "-> " + proxyTarget + req.url,
+            );
+          },
         },
       },
       hmr: isProduction
