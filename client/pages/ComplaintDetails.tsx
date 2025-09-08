@@ -686,6 +686,41 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Work Progress Log (Admin & Ward Officer) */}
+          {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Work Progress Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {complaint.statusLogs && complaint.statusLogs.length > 0 ? (
+                  <div className="space-y-3">
+                    {complaint.statusLogs.map((log, idx) => (
+                      <div key={log.id || idx} className="border-l-4 border-blue-300 pl-4 py-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500">{new Date(log.timestamp).toLocaleString()}</p>
+                            <p className="text-sm text-gray-800">
+                              {log.comment || `Status: ${log.toStatus}`}
+                            </p>
+                          </div>
+                          {log.user && (
+                            <Badge variant="outline" className="text-xs">{log.user.fullName}</Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">No progress logs available.</div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Administrative Information - Only for admin/ward managers */}
           {(user?.role === "ADMINISTRATOR" ||
             user?.role === "WARD_OFFICER") && (
