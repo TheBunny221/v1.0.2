@@ -471,29 +471,29 @@ export default async function seedCommon(prisma, options = {}) {
   try {
     const m1 = await prisma.user.findUnique({ where: { email: "maintenance1@cochinsmartcity.gov.in" } });
     if (m1) {
-      const m1Existing = await prisma.complaint.count({ where: { maintenanceTeamId: m1.id } });
-      const targetM1 = 10;
-      const toCreate = Math.max(0, targetM1 - m1Existing);
-      if (toCreate > 0) {
-        console.log(`🧩 Creating ${toCreate} focused complaints for ${m1.email}...`);
+      const targetPerStatus = { ASSIGNED: 2, IN_PROGRESS: 2, RESOLVED: 2, CLOSED: 2, REOPENED: 2 };
+      const grouped = await prisma.complaint.groupBy({ by: ["status"], where: { maintenanceTeamId: m1.id }, _count: { status: true } });
+      const m1ByStatus = {};
+      for (const g of grouped) m1ByStatus[g.status] = g._count.status;
+      const createPlan = [];
+      for (const status in targetPerStatus) {
+        const min = targetPerStatus[status];
+        const have = m1ByStatus[status] || 0;
+        const missing = Math.max(0, min - have);
+        for (let i = 0; i < missing; i++) createPlan.push(status);
+      }
+      if (createPlan.length > 0) {
+        console.log(`🧩 Creating ${createPlan.length} focused complaints for ${m1.email}...`);
         const m1Ward = await prisma.ward.findUnique({ where: { id: m1.wardId } });
         const m1Officer = await prisma.user.findFirst({ where: { role: "WARD_OFFICER", wardId: m1.wardId } });
         const demoCitizen = await prisma.user.findFirst({ where: { role: "CITIZEN" } });
         const baseNow = new Date();
-        const statusesPlan = [
-          "ASSIGNED","ASSIGNED",
-          "IN_PROGRESS","IN_PROGRESS",
-          "RESOLVED","RESOLVED",
-          "CLOSED","CLOSED",
-          "REOPENED","REOPENED",
-        ];
         const types = ["WATER_SUPPLY","ELECTRICITY","ROAD_REPAIR","WASTE_MANAGEMENT","STREET_LIGHTING","DRAINAGE"];
         const areaName = (m1Ward?.name?.split(" - ")[1]) || m1Ward?.name || "Fort Kochi";
         const center = wardCenters[areaName] || { lat: 9.9312, lng: 76.2673 };
         const existingCount = await prisma.complaint.count();
-        for (let i = 0; i < toCreate; i++) {
-          const idx = i % statusesPlan.length;
-          const status = statusesPlan[idx];
+        for (let i = 0; i < createPlan.length; i++) {
+          const status = createPlan[i];
           const type = types[i % types.length];
           const lat = jitter(center.lat, 0.01);
           const lng = jitter(center.lng, 0.01);
@@ -503,7 +503,7 @@ export default async function seedCommon(prisma, options = {}) {
           const resolvedOn = new Date(submittedOn.getTime() + 2 * 24 * 60 * 60 * 1000);
           const closedOn = new Date(submittedOn.getTime() + 3 * 24 * 60 * 60 * 1000);
           const deadline = new Date(submittedOn.getTime() + 7 * 24 * 60 * 60 * 1000);
-          const complaintId = `KSC${String(existingCount + i + 1000).padStart(4, "0")}`;
+          const complaintId = `KSC${String(existingCount + i + 2000).padStart(4, "0")}`;
 
           const data = {
             complaintId,
@@ -536,11 +536,8 @@ export default async function seedCommon(prisma, options = {}) {
 
           const c = await prisma.complaint.create({ data });
 
-          // Logs
           await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: null, toStatus: "REGISTERED", comment: "Complaint registered in the system", timestamp: submittedOn } });
-          if (["ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"].includes(status)) {
-            await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: "REGISTERED", toStatus: "ASSIGNED", comment: `Assigned to ${m1.fullName}`, timestamp: assignedOn } });
-          }
+          await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: "REGISTERED", toStatus: "ASSIGNED", comment: `Assigned to ${m1.fullName}`, timestamp: assignedOn } });
           if (["IN_PROGRESS","RESOLVED","CLOSED","REOPENED"].includes(status)) {
             await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1.id, fromStatus: "ASSIGNED", toStatus: "IN_PROGRESS", comment: "Work started by maintenance team", timestamp: inProgressOn } });
           }
@@ -556,7 +553,7 @@ export default async function seedCommon(prisma, options = {}) {
           }
         }
       } else {
-        console.log(`ℹ️ ${m1.email} already has ${m1Existing} complaints (>= ${targetM1}).`);
+        console.log(`ℹ️ ${m1.email} already meets per-status targets.`);
       }
     } else {
       console.log("ℹ️ maintenance1 user not found; skipping focused seeding.");
