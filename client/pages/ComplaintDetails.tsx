@@ -758,9 +758,8 @@ const ComplaintDetails: React.FC = () => {
             </Card>
           )}
 
-          {/* Administrative Information - Only for admin/ward managers */}
-          {(user?.role === "ADMINISTRATOR" ||
-            user?.role === "WARD_OFFICER") && (
+          {/* Administrative Information - Only for system admin */}
+          {user?.role === "ADMINISTRATOR" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -779,6 +778,22 @@ const ComplaintDetails: React.FC = () => {
                           {complaint.submittedBy.fullName}
                           {complaint.submittedBy.email &&
                             ` (${complaint.submittedBy.email})`}
+                        </p>
+                      )}
+                      {complaint.wardOfficer && (
+                        <p className="text-gray-600">
+                          <strong>Ward Officer:</strong>{" "}
+                          {complaint.wardOfficer.fullName}
+                          {complaint.wardOfficer.email &&
+                            ` (${complaint.wardOfficer.email})`}
+                        </p>
+                      )}
+                      {complaint.maintenanceTeam && (
+                        <p className="text-gray-600">
+                          <strong>Maintenance Team:</strong>{" "}
+                          {complaint.maintenanceTeam.fullName}
+                          {complaint.maintenanceTeam.email &&
+                            ` (${complaint.maintenanceTeam.email})`}
                         </p>
                       )}
                       {complaint.assignedTo && (
@@ -803,15 +818,6 @@ const ComplaintDetails: React.FC = () => {
                         <strong>Complaint ID:</strong>{" "}
                         {complaint.complaintId || complaint.id}
                       </p>
-                      {/* <p className="text-gray-600">
-                        <strong>Internal ID:</strong> {complaint.id}
-                      </p>
-                      {complaint.isAnonymous !== undefined && (
-                        <p className="text-gray-600">
-                          <strong>Anonymous:</strong>{" "}
-                          {complaint.isAnonymous ? "Yes" : "No"}
-                        </p>
-                      )} */}
                       {complaint.tags && (
                         <p className="text-gray-600">
                           <strong>Tags:</strong>{" "}
