@@ -698,7 +698,7 @@ const MaintenanceTasks: React.FC = () => {
 
         {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
         <div className="mt-3">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
             {[
               // {
               //   id: "all",
