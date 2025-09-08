@@ -662,14 +662,16 @@ const MaintenanceTasks: React.FC = () => {
                   </CardTitle>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-extrabold text-white">{taskCounts.total}</div>
+                  <div className="text-3xl font-extrabold text-white">
+                    {taskCounts.total}
+                  </div>
                   <div className="text-xs text-white/80">Total Tasks</div>
                 </div>
               </CardHeader>
             </Card>
           </div>
         </div>
-       {/* <div className="mt-4 flex items-center justify-end">
+        {/* <div className="mt-4 flex items-center justify-end">
           <Button
             variant="outline"
             size="sm"
@@ -799,7 +801,9 @@ const MaintenanceTasks: React.FC = () => {
                 },
               },
             ].map((m) => {
-              const active = activeFilter === m.id || (m.id === "all" && activeFilter === "total");
+              const active =
+                activeFilter === m.id ||
+                (m.id === "all" && activeFilter === "total");
               const Icon = m.icon as any;
               return (
                 <Card
@@ -818,14 +822,19 @@ const MaintenanceTasks: React.FC = () => {
                   className={[
                     "group relative cursor-pointer select-none rounded-2xl border bg-white shadow-sm transition-all",
                     "hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-                    active ? `ring-2 ${m.style.ring} ${m.style.bgSoft} border-transparent` : "hover:border-neutral-200",
+                    active
+                      ? `ring-2 ${m.style.ring} ${m.style.bgSoft} border-transparent`
+                      : "hover:border-neutral-200",
                   ].join(" ")}
                 >
                   <CardHeader className="flex flex-col items-center justify-center p-3 pb-1">
-                    <div className={[
-                      "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
-                      active ? `${m.style.bgSoft} ${m.style.textSoft} ${m.style.chipRing}` : "bg-neutral-50 text-neutral-600 ring-neutral-200",
-                    ].join(" ")}
+                    <div
+                      className={[
+                        "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
+                        active
+                          ? `${m.style.bgSoft} ${m.style.textSoft} ${m.style.chipRing}`
+                          : "bg-neutral-50 text-neutral-600 ring-neutral-200",
+                      ].join(" ")}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
@@ -835,10 +844,17 @@ const MaintenanceTasks: React.FC = () => {
                   </CardHeader>
 
                   <CardContent className="flex flex-col items-center p-2 pt-0">
-                    <div className={["text-2xl font-bold leading-none tracking-tight", active ? m.style.text : "text-neutral-900"].join(" ")}>
+                    <div
+                      className={[
+                        "text-2xl font-bold leading-none tracking-tight",
+                        active ? m.style.text : "text-neutral-900",
+                      ].join(" ")}
+                    >
                       {m.value}
                     </div>
-                    <p className="mt-1 text-xs text-neutral-500">{m.subtitle}</p>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {m.subtitle}
+                    </p>
                   </CardContent>
                 </Card>
               );

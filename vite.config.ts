@@ -31,10 +31,7 @@ export default defineConfig(({ mode }) => {
       3000,
   );
   const hmrPort = Number(
-    envVars.VITE_HMR_PORT ||
-      envVars.HMR_PORT ||
-      envVars.WS_PORT ||
-      clientPort,
+    envVars.VITE_HMR_PORT || envVars.HMR_PORT || envVars.WS_PORT || clientPort,
   );
 
   // Resolve API backend target

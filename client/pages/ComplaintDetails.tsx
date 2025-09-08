@@ -688,7 +688,8 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Attachment Logs (Admin & Ward Officer) */}
-          {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+          {(user?.role === "ADMINISTRATOR" ||
+            user?.role === "WARD_OFFICER") && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -703,12 +704,21 @@ const ComplaintDetails: React.FC = () => {
                   {complaint.attachments && complaint.attachments.length > 0 ? (
                     <div className="space-y-2">
                       {complaint.attachments.map((att: any) => (
-                        <div key={att.id} className="border-l-4 border-blue-300 pl-4 py-2 flex items-start justify-between">
+                        <div
+                          key={att.id}
+                          className="border-l-4 border-blue-300 pl-4 py-2 flex items-start justify-between"
+                        >
                           <div>
-                            <p className="text-xs text-gray-500">{new Date(att.uploadedAt).toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(att.uploadedAt).toLocaleString()}
+                            </p>
                             <p className="text-sm text-gray-800">
-                              {(att.originalName || att.fileName)}
-                              <span className="text-xs text-gray-500"> • {att.mimeType} • {(att.size / 1024).toFixed(1)} KB</span>
+                              {att.originalName || att.fileName}
+                              <span className="text-xs text-gray-500">
+                                {" "}
+                                • {att.mimeType} •{" "}
+                                {(att.size / 1024).toFixed(1)} KB
+                              </span>
                             </p>
                           </div>
                           <a href={att.url} target="_blank" rel="noreferrer">
@@ -721,7 +731,9 @@ const ComplaintDetails: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-500">No file attachments.</div>
+                    <div className="text-xs text-gray-500">
+                      No file attachments.
+                    </div>
                   )}
                 </div>
 
@@ -731,13 +743,20 @@ const ComplaintDetails: React.FC = () => {
                   {complaint.photos && complaint.photos.length > 0 ? (
                     <div className="space-y-2">
                       {complaint.photos.map((p: any) => (
-                        <div key={p.id} className="border-l-4 border-emerald-300 pl-4 py-2 flex items-start justify-between">
+                        <div
+                          key={p.id}
+                          className="border-l-4 border-emerald-300 pl-4 py-2 flex items-start justify-between"
+                        >
                           <div>
-                            <p className="text-xs text-gray-500">{new Date(p.uploadedAt).toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(p.uploadedAt).toLocaleString()}
+                            </p>
                             <p className="text-sm text-gray-800">
                               {p.originalName || p.fileName}
                               {p.uploadedByTeam?.fullName && (
-                                <span className="ml-2 text-xs text-gray-500">by {p.uploadedByTeam.fullName}</span>
+                                <span className="ml-2 text-xs text-gray-500">
+                                  by {p.uploadedByTeam.fullName}
+                                </span>
                               )}
                             </p>
                           </div>
@@ -959,7 +978,8 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Assignment Information */}
-          {(complaint.wardOfficer || complaint.assignedTo ||
+          {(complaint.wardOfficer ||
+            complaint.assignedTo ||
             user?.role === "ADMINISTRATOR" ||
             user?.role === "WARD_OFFICER") && (
             <Card>
@@ -970,20 +990,29 @@ const ComplaintDetails: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(complaint.wardOfficer || complaint.assignedTo) ? (
+                {complaint.wardOfficer || complaint.assignedTo ? (
                   <div>
                     <p className="text-sm font-medium mb-1">Assigned To</p>
                     <div className="bg-blue-50 rounded-lg p-3">
                       <p className="text-blue-800 font-medium">
-                        {typeof (complaint.wardOfficer || complaint.assignedTo) === "object" &&
+                        {typeof (
+                          complaint.wardOfficer || complaint.assignedTo
+                        ) === "object" &&
                         (complaint.wardOfficer || complaint.assignedTo)
-                          ? (complaint.wardOfficer || complaint.assignedTo).fullName
-                          : (complaint.wardOfficer || complaint.assignedTo)}
+                          ? (complaint.wardOfficer || complaint.assignedTo)
+                              .fullName
+                          : complaint.wardOfficer || complaint.assignedTo}
                       </p>
-                      {typeof (complaint.wardOfficer || complaint.assignedTo) === "object" &&
-                        (complaint.wardOfficer || complaint.assignedTo)?.email && (
+                      {typeof (
+                        complaint.wardOfficer || complaint.assignedTo
+                      ) === "object" &&
+                        (complaint.wardOfficer || complaint.assignedTo)
+                          ?.email && (
                           <p className="text-blue-600 text-sm">
-                            {(complaint.wardOfficer || complaint.assignedTo).email}
+                            {
+                              (complaint.wardOfficer || complaint.assignedTo)
+                                .email
+                            }
                           </p>
                         )}
                       {complaint.assignedOn && (
