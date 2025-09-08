@@ -269,6 +269,19 @@ export default async function seedCommon(prisma, options = {}) {
 
   // 7. Complaints: ensure at least targets.complaints
   console.log(`📝 Ensuring sample complaints (target ${targets.complaints})...`);
+  const wardCenters = {
+    "Fort Kochi": { lat: 9.9667, lng: 76.2425 },
+    "Mattancherry": { lat: 9.9611, lng: 76.259 },
+    "Ernakulam South": { lat: 9.9816, lng: 76.2822 },
+    "Kadavanthra": { lat: 9.9719, lng: 76.2999 },
+    "Panampilly Nagar": { lat: 9.9681, lng: 76.2993 },
+    "Marine Drive": { lat: 9.9815, lng: 76.2808 },
+    "Willingdon Island": { lat: 9.9447, lng: 76.264 },
+    "Thevara": { lat: 9.9494, lng: 76.2992 },
+  };
+  function jitter(v, amt = 0.01) {
+    return v + (Math.random() - 0.5) * amt;
+  }
   const existingComplaintsCount = await prisma.complaint.count();
   const needed = Math.max(0, targets.complaints - existingComplaintsCount);
   if (needed === 0) {
@@ -306,6 +319,11 @@ export default async function seedCommon(prisma, options = {}) {
       const wardMaintenanceTeam = await prisma.user.findMany({ where: { role: "MAINTENANCE_TEAM", wardId: randomWard.id } });
       let assignedTeamMember = wardMaintenanceTeam.length > 0 ? randomFrom(wardMaintenanceTeam) : randomFrom(maintenance);
 
+      const areaName = randomWard.name.split(" - ")[1] || randomWard.name;
+      const center = wardCenters[areaName] || { lat: 9.9312, lng: 76.2673 };
+      const lat = jitter(center.lat, 0.02);
+      const lng = jitter(center.lng, 0.02);
+
       let complaintData = {
         complaintId,
         title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
@@ -315,9 +333,12 @@ export default async function seedCommon(prisma, options = {}) {
         priority,
         slaStatus: status === "RESOLVED" || status === "CLOSED" ? "COMPLETED" : "ON_TIME",
         wardId: randomWard.id,
-        area: randomWard.name.split(" - ")[1] || randomWard.name,
-        landmark: `Near ${randomWard.name.split(" - ")[1] || "main"} junction`,
+        area: areaName,
+        landmark: `Near ${areaName} junction`,
         address: `Sample address in ${randomWard.name}`,
+        coordinates: JSON.stringify({ latitude: lat, longitude: lng }),
+        latitude: lat,
+        longitude: lng,
         contactName: randomCitizen.fullName,
         contactEmail: randomCitizen.email,
         contactPhone: randomCitizen.phoneNumber,
@@ -340,8 +361,9 @@ export default async function seedCommon(prisma, options = {}) {
 
       const complaint = await prisma.complaint.create({ data: complaintData });
 
-      // Status logs
-      await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: adminEmail ? (await prisma.user.findUnique({ where: { email: adminEmail } })).id : null, fromStatus: null, toStatus: "REGISTERED", comment: "Complaint registered", timestamp: complaintDate } }).catch(() => {});
+      // Status logs - detailed realistic workflow notes
+      const adminUser = adminEmail ? await prisma.user.findUnique({ where: { email: adminEmail } }) : null;
+      await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: adminUser?.id || randomOfficer?.id || assignedTeamMember?.id, fromStatus: null, toStatus: "REGISTERED", comment: "Complaint registered in the system", timestamp: complaintDate } }).catch(() => {});
 
       if (status === "REGISTERED") continue;
 
@@ -350,14 +372,60 @@ export default async function seedCommon(prisma, options = {}) {
       }
 
       if (["IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"].includes(status)) {
-        await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.assignedToId || complaintData.wardOfficerId, fromStatus: "ASSIGNED", toStatus: "IN_PROGRESS", comment: "Work started", timestamp: inProgressDate } }).catch(() => {});
+        await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.assignedToId || complaintData.wardOfficerId, fromStatus: "ASSIGNED", toStatus: "IN_PROGRESS", comment: "Team dispatched and work started at site", timestamp: inProgressDate } }).catch(() => {});
+        // Add extra progress notes
+        const reached = new Date(inProgressDate.getTime() + 45 * 60 * 1000);
+        await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.assignedToId || complaintData.wardOfficerId, fromStatus: "IN_PROGRESS", toStatus: "IN_PROGRESS", comment: "Reached site and assessed issue", timestamp: reached } }).catch(() => {});
+        const materialsProcured = new Date(reached.getTime() + 60 * 60 * 1000);
+        await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.assignedToId || complaintData.wardOfficerId, fromStatus: "IN_PROGRESS", toStatus: "IN_PROGRESS", comment: "Procured necessary materials from store", timestamp: materialsProcured } }).catch(() => {});
       }
 
       if (status === "RESOLVED" || status === "CLOSED") {
-        await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.assignedToId || complaintData.wardOfficerId, fromStatus: "IN_PROGRESS", toStatus: "RESOLVED", comment: "Work resolved", timestamp: resolvedDate } }).catch(() => {});
+        await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.assignedToId || complaintData.wardOfficerId, fromStatus: "IN_PROGRESS", toStatus: "RESOLVED", comment: "Issue fixed and verified with citizen", timestamp: resolvedDate } }).catch(() => {});
         if (status === "CLOSED") {
           await prisma.statusLog.create({ data: { complaintId: complaint.id, userId: complaintData.wardOfficerId || null, fromStatus: "RESOLVED", toStatus: "CLOSED", comment: "Complaint closed", timestamp: closedDate } }).catch(() => {});
         }
+      }
+
+      // Attachments and photos for realism
+      try {
+        const addImage = Math.random() > 0.4;
+        const addPdf = Math.random() > 0.6;
+        if (addImage) {
+          const imgUrl = `https://images.unsplash.com/photo-1509395176047-4a66953fd231?w=800&q=80&sig=${complaintIndex}`;
+          await prisma.attachment.create({ data: { complaintId: complaint.id, fileName: `photo_${complaintIndex}.jpg`, originalName: `site-photo-${complaintIndex}.jpg`, mimeType: "image/jpeg", size: Math.floor(120000 + Math.random() * 800000), url: imgUrl } });
+        }
+        if (addPdf) {
+          await prisma.attachment.create({ data: { complaintId: complaint.id, fileName: `report_${complaintIndex}.pdf`, originalName: `inspection-report-${complaintIndex}.pdf`, mimeType: "application/pdf", size: Math.floor(50000 + Math.random() * 200000), url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" } });
+        }
+
+        // Complaint photos captured by maintenance
+        if (["IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"].includes(status) && assignedTeamMember?.id) {
+          const photosCount = 1 + Math.floor(Math.random() * 2);
+          for (let p = 0; p < photosCount; p++) {
+            const photoUrl = `https://images.unsplash.com/photo-1541726260-e6b6a87b8026?w=1200&q=80&sig=${complaintIndex}-${p}`;
+            await prisma.complaintPhoto.create({ data: { complaintId: complaint.id, uploadedByTeamId: assignedTeamMember.id, photoUrl, fileName: `progress_${complaintIndex}_${p}.jpg`, originalName: `progress_${complaintIndex}_${p}.jpg`, mimeType: "image/jpeg", size: Math.floor(100000 + Math.random() * 600000), description: p === 0 ? "Initial condition" : "Work in progress" } });
+          }
+        }
+
+        // Materials used sample
+        const materialCatalog = [
+          { name: "PVC Pipe", unit: "meter" },
+          { name: "LED Bulb", unit: "piece" },
+          { name: "Copper Wire", unit: "meter" },
+          { name: "Cement", unit: "kg" },
+          { name: "Drain Cleaner", unit: "liter" },
+          { name: "Fuse", unit: "piece" },
+        ];
+        if (["IN_PROGRESS", "RESOLVED", "CLOSED"].includes(status) && assignedTeamMember?.id && Math.random() > 0.3) {
+          const usedCount = 1 + Math.floor(Math.random() * 3);
+          for (let m = 0; m < usedCount; m++) {
+            const mat = randomFrom(materialCatalog);
+            await prisma.material.create({ data: { complaintId: complaint.id, materialName: mat.name, quantity: 1 + Math.floor(Math.random() * 5), unit: mat.unit, notes: Math.random() > 0.5 ? `Used during fix step ${m + 1}` : null, addedById: assignedTeamMember.id } });
+          }
+        }
+      } catch (e) {
+        console.warn("Seed attachment/photo/material error:", e?.message);
       }
 
       if (status === "REOPENED") {
