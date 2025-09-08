@@ -467,5 +467,103 @@ export default async function seedCommon(prisma, options = {}) {
     }
   }
 
+  // 10. Dedicated demo complaints for maintenance1 (for dashboard validation)
+  try {
+    const m1 = await prisma.user.findUnique({ where: { email: "maintenance1@cochinsmartcity.gov.in" } });
+    if (m1) {
+      const m1Existing = await prisma.complaint.count({ where: { maintenanceTeamId: m1.id } });
+      const targetM1 = 10;
+      const toCreate = Math.max(0, targetM1 - m1Existing);
+      if (toCreate > 0) {
+        console.log(`🧩 Creating ${toCreate} focused complaints for ${m1.email}...`);
+        const m1Ward = await prisma.ward.findUnique({ where: { id: m1.wardId } });
+        const m1Officer = await prisma.user.findFirst({ where: { role: "WARD_OFFICER", wardId: m1.wardId } });
+        const demoCitizen = await prisma.user.findFirst({ where: { role: "CITIZEN" } });
+        const baseNow = new Date();
+        const statusesPlan = [
+          "ASSIGNED","ASSIGNED",
+          "IN_PROGRESS","IN_PROGRESS",
+          "RESOLVED","RESOLVED",
+          "CLOSED","CLOSED",
+          "REOPENED","REOPENED",
+        ];
+        const types = ["WATER_SUPPLY","ELECTRICITY","ROAD_REPAIR","WASTE_MANAGEMENT","STREET_LIGHTING","DRAINAGE"];
+        const areaName = (m1Ward?.name?.split(" - ")[1]) || m1Ward?.name || "Fort Kochi";
+        const center = wardCenters[areaName] || { lat: 9.9312, lng: 76.2673 };
+        const existingCount = await prisma.complaint.count();
+        for (let i = 0; i < toCreate; i++) {
+          const idx = i % statusesPlan.length;
+          const status = statusesPlan[idx];
+          const type = types[i % types.length];
+          const lat = jitter(center.lat, 0.01);
+          const lng = jitter(center.lng, 0.01);
+          const submittedOn = new Date(baseNow.getTime() - (i + 1) * 24 * 60 * 60 * 1000);
+          const assignedOn = new Date(submittedOn.getTime() + 2 * 60 * 60 * 1000);
+          const inProgressOn = new Date(assignedOn.getTime() + 3 * 60 * 60 * 1000);
+          const resolvedOn = new Date(submittedOn.getTime() + 2 * 24 * 60 * 60 * 1000);
+          const closedOn = new Date(submittedOn.getTime() + 3 * 24 * 60 * 60 * 1000);
+          const deadline = new Date(submittedOn.getTime() + 7 * 24 * 60 * 60 * 1000);
+          const complaintId = `KSC${String(existingCount + i + 1000).padStart(4, "0")}`;
+
+          const data = {
+            complaintId,
+            title: `${type.replace(/_/g, " ")} Issue for Maintenance1`,
+            description: `Demo complaint seeded for dashboard validation assigned to ${m1.fullName}.`,
+            type,
+            status,
+            priority: randomFrom(["LOW","MEDIUM","HIGH"]),
+            slaStatus: status === "RESOLVED" || status === "CLOSED" ? "COMPLETED" : "ON_TIME",
+            wardId: m1.wardId,
+            area: areaName,
+            landmark: `Near ${areaName} junction`,
+            address: `Sample address in ${m1Ward?.name || areaName}`,
+            coordinates: JSON.stringify({ latitude: lat, longitude: lng }),
+            latitude: lat,
+            longitude: lng,
+            contactName: demoCitizen?.fullName || "Demo Citizen",
+            contactEmail: demoCitizen?.email || "demo@citizen.test",
+            contactPhone: demoCitizen?.phoneNumber || "+91-9876500000",
+            submittedById: demoCitizen?.id || null,
+            wardOfficerId: m1Officer?.id || null,
+            maintenanceTeamId: m1.id,
+            assignedToId: m1.id,
+            submittedOn,
+            assignedOn: ["ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"].includes(status) ? assignedOn : null,
+            resolvedOn: ["RESOLVED","CLOSED"].includes(status) ? resolvedOn : null,
+            closedOn: ["CLOSED"].includes(status) ? closedOn : null,
+            deadline,
+          };
+
+          const c = await prisma.complaint.create({ data });
+
+          // Logs
+          await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: null, toStatus: "REGISTERED", comment: "Complaint registered in the system", timestamp: submittedOn } });
+          if (["ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"].includes(status)) {
+            await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: "REGISTERED", toStatus: "ASSIGNED", comment: `Assigned to ${m1.fullName}`, timestamp: assignedOn } });
+          }
+          if (["IN_PROGRESS","RESOLVED","CLOSED","REOPENED"].includes(status)) {
+            await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1.id, fromStatus: "ASSIGNED", toStatus: "IN_PROGRESS", comment: "Work started by maintenance team", timestamp: inProgressOn } });
+          }
+          if (["RESOLVED","CLOSED"].includes(status)) {
+            await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1.id, fromStatus: "IN_PROGRESS", toStatus: "RESOLVED", comment: "Issue fixed and verified", timestamp: resolvedOn } });
+          }
+          if (["CLOSED"].includes(status)) {
+            await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: "RESOLVED", toStatus: "CLOSED", comment: "Complaint closed", timestamp: closedOn } });
+          }
+          if (["REOPENED"].includes(status)) {
+            const reopenTime = new Date(closedOn.getTime() + 24 * 60 * 60 * 1000);
+            await prisma.statusLog.create({ data: { complaintId: c.id, userId: m1Officer?.id || m1.id, fromStatus: "CLOSED", toStatus: "REOPENED", comment: "Complaint reopened by admin for verification", timestamp: reopenTime } });
+          }
+        }
+      } else {
+        console.log(`ℹ️ ${m1.email} already has ${m1Existing} complaints (>= ${targetM1}).`);
+      }
+    } else {
+      console.log("ℹ️ maintenance1 user not found; skipping focused seeding.");
+    }
+  } catch (e) {
+    console.warn("Failed to seed focused maintenance1 complaints:", e?.message);
+  }
+
   console.log("✅ Seeding complete.");
 }
