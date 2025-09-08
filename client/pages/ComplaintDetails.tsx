@@ -686,37 +686,73 @@ const ComplaintDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Work Progress Log (Admin & Ward Officer) */}
+          {/* Attachment Logs (Admin & Ward Officer) */}
           {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Work Progress Log
+                  <Upload className="h-5 w-5 mr-2" />
+                  Attachment Logs
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {complaint.statusLogs && complaint.statusLogs.length > 0 ? (
-                  <div className="space-y-3">
-                    {complaint.statusLogs.map((log, idx) => (
-                      <div key={log.id || idx} className="border-l-4 border-blue-300 pl-4 py-2">
-                        <div className="flex items-start justify-between">
+              <CardContent className="space-y-4">
+                {/* File Attachments */}
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Files</h4>
+                  {complaint.attachments && complaint.attachments.length > 0 ? (
+                    <div className="space-y-2">
+                      {complaint.attachments.map((att: any) => (
+                        <div key={att.id} className="border-l-4 border-blue-300 pl-4 py-2 flex items-start justify-between">
                           <div>
-                            <p className="text-xs text-gray-500">{new Date(log.timestamp).toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">{new Date(att.uploadedAt).toLocaleString()}</p>
                             <p className="text-sm text-gray-800">
-                              {log.comment || `Status: ${log.toStatus}`}
+                              {(att.originalName || att.fileName)}
+                              <span className="text-xs text-gray-500"> • {att.mimeType} • {(att.size / 1024).toFixed(1)} KB</span>
                             </p>
                           </div>
-                          {log.user && (
-                            <Badge variant="outline" className="text-xs">{log.user.fullName}</Badge>
-                          )}
+                          <a href={att.url} target="_blank" rel="noreferrer">
+                            <Button size="sm" variant="outline">
+                              <Download className="h-4 w-4 mr-1" />
+                              Open
+                            </Button>
+                          </a>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-500">No progress logs available.</div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500">No file attachments.</div>
+                  )}
+                </div>
+
+                {/* Photo Attachments */}
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Photos</h4>
+                  {complaint.photos && complaint.photos.length > 0 ? (
+                    <div className="space-y-2">
+                      {complaint.photos.map((p: any) => (
+                        <div key={p.id} className="border-l-4 border-emerald-300 pl-4 py-2 flex items-start justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500">{new Date(p.uploadedAt).toLocaleString()}</p>
+                            <p className="text-sm text-gray-800">
+                              {p.originalName || p.fileName}
+                              {p.uploadedByTeam?.fullName && (
+                                <span className="ml-2 text-xs text-gray-500">by {p.uploadedByTeam.fullName}</span>
+                              )}
+                            </p>
+                          </div>
+                          <a href={p.photoUrl} target="_blank" rel="noreferrer">
+                            <Button size="sm" variant="outline">
+                              <Download className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500">No photos.</div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
