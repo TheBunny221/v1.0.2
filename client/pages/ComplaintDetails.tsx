@@ -26,6 +26,7 @@ import {
   MessageSquare,
   Image,
   Download,
+  Upload,
 } from "lucide-react";
 // Dynamic import for jsPDF to avoid build issues
 
