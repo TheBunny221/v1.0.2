@@ -669,27 +669,11 @@ const MaintenanceTasks: React.FC = () => {
             </Card>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {quickFilters.map((f) => (
-            <Button
-              key={f.key}
-              variant="outline"
-              size="sm"
-              className={`h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-blue-700/30 text-white hover:bg-blue-600/40 hover:border-blue-100/50 ${activeFilter === f.key ? "bg-white text-blue-700 border-transparent shadow-sm" : ""}`}
-              onClick={() => setActiveFilter(f.key)}
-            >
-              <span className="flex items-center gap-1">
-                {f.icon}
-                <span className="text-xs">
-                  {f.label}: {f.count}
-                </span>
-              </span>
-            </Button>
-          ))}
+        <div className="mt-4 flex items-center justify-end">
           <Button
             variant="outline"
             size="sm"
-            className="h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
+            className="h-7 rounded-full px-3 py-1 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
             onClick={() => refetchComplaints()}
           >
             Refresh
