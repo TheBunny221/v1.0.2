@@ -1212,7 +1212,7 @@ const ComplaintDetails: React.FC = () => {
                             setIsPreviewOpen(true);
                           }}>Preview</Button>
                           <a href={p.photoUrl} target="_blank" rel="noreferrer">
-                            <Button size="xs" variant="outline"><Download className="h-3 w-3 mr-1" />Download</Button>
+                            <Button size="sm" variant="outline"><Download className="h-3 w-3 mr-1" />Download</Button>
                           </a>
                         </div>
                       </div>
