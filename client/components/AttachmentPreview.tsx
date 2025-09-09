@@ -55,6 +55,119 @@ function isDoc(mime?: string | null, url?: string) {
   return false;
 }
 
+function PdfViewer({ url }: { url: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
+    const container = containerRef.current;
+    if (container) container.innerHTML = "";
+
+    (async () => {
+      try {
+        const pdf = await getDocument({ url }).promise;
+        if (cancelled) return;
+        const c = containerRef.current;
+        if (!c) return;
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          if (cancelled) return;
+          const viewport = page.getViewport({ scale: 1 });
+          const width = c.clientWidth || 800;
+          const scale = Math.max(0.75, Math.min(2, width / viewport.width));
+          const vp = page.getViewport({ scale });
+
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) continue;
+          canvas.width = Math.floor(vp.width);
+          canvas.height = Math.floor(vp.height);
+          canvas.style.width = vp.width + "px";
+          canvas.style.height = vp.height + "px";
+          canvas.className = "mb-4 bg-white shadow rounded";
+          c.appendChild(canvas);
+          await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        }
+        if (!cancelled) setLoading(false);
+      } catch (e) {
+        if (!cancelled) {
+          setError("Failed to load PDF");
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (containerRef.current) containerRef.current.innerHTML = "";
+    };
+  }, [url]);
+
+  return (
+    <div className="w-full h-full overflow-auto p-4">
+      {loading && <div className="text-sm text-muted-foreground px-2 py-1">Loading PDF…</div>}
+      {error && <div className="text-sm text-red-600 px-2 py-1">{error}</div>}
+      <div ref={containerRef} />
+    </div>
+  );
+}
+
+function DocxViewer({ url }: { url: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    const load = async () => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch document");
+        const buf = await res.arrayBuffer();
+        if (cancelled) return;
+        if (ref.current) {
+          ref.current.innerHTML = "";
+          await renderDocx(buf, ref.current, undefined, {
+            className: "docx-preview",
+            inWrapper: true,
+            ignoreWidth: false,
+            ignoreHeight: false,
+            useMathMLPolyfill: true,
+          });
+        }
+        if (!cancelled) setLoading(false);
+      } catch (e) {
+        if (!cancelled) {
+          setError("Failed to load document");
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+      if (ref.current) ref.current.innerHTML = "";
+    };
+  }, [url]);
+
+  return (
+    <div className="w-full h-full overflow-auto p-4">
+      {loading && <div className="text-sm text-muted-foreground px-2 py-1">Loading document…</div>}
+      {error && <div className="text-sm text-red-600 px-2 py-1">{error}</div>}
+      <div ref={ref} className="prose max-w-none" />
+    </div>
+  );
+}
+
 export default function AttachmentPreview({ open, onOpenChange, item, canDownload = true }: AttachmentPreviewProps) {
   const name = item?.name || (item?.url ? item.url.split("/").pop() || "Attachment" : "Attachment");
   const [scale, setScale] = useState(1);
