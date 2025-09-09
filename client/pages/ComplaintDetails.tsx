@@ -6,6 +6,7 @@ import { useDataManager } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
 import AttachmentPreview from "../components/AttachmentPreview";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import {
   Card,
   CardContent,
@@ -57,6 +58,7 @@ const ComplaintDetails: React.FC = () => {
   } = useGetComplaintQuery(id!, { skip: !id || !isAuthenticated });
 
   const complaint = complaintResponse?.data?.complaint;
+  const { appName, appLogoUrl } = useSystemConfig();
 
   // Cache complaint details when loaded
   useEffect(() => {
@@ -1354,10 +1356,10 @@ const ComplaintDetails: React.FC = () => {
                 variant="outline"
                 className="w-full justify-start"
                 onClick={async () => {
-                if (!complaint) return;
-                const { exportComplaintReport } = await import("../utils/exportReport");
-                await exportComplaintReport(complaint, user?.role || "CITIZEN", { orientation: "p", title: "Complaint Report" });
-              }}
+                  if (!complaint) return;
+                  const { exportComplaintReport } = await import("../utils/exportReport");
+                  await exportComplaintReport(complaint, user?.role || "CITIZEN", { orientation: "p", title: "Complaint Report", appName, appLogoUrl });
+                }}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export Details
