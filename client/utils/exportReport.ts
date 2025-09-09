@@ -1,19 +1,28 @@
 import { jsPDF as _jsPDF } from "jspdf";
 
-// Helper: convert image URL to data URL
+// Helper: convert image URL to data URL (robust against fetch instrumentation)
 async function fetchImageDataURL(url: string): Promise<string | null> {
-  try {
-    const res = await fetch(url, { credentials: "include" });
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
+  return await new Promise((resolve) => {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.responseType = "blob";
+      xhr.withCredentials = true;
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(xhr.response as Blob);
+        } else {
+          resolve(null);
+        }
+      };
+      xhr.onerror = () => resolve(null);
+      xhr.send();
+    } catch {
+      resolve(null);
+    }
+  });
 }
 
 function isImage(mime?: string | null, url?: string) {
