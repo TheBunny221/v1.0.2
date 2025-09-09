@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,10 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Download, ZoomIn, ZoomOut, RotateCcw, FileText, ExternalLink, Printer, X } from "lucide-react";
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
+// Vite will bundle the worker and give us an internal URL
+import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { renderAsync as renderDocx } from "docx-preview";
 
 type PreviewItem = {
   url: string;
@@ -39,20 +43,15 @@ function isPdf(mime?: string | null, url?: string) {
   return false;
 }
 
-function isOfficeDoc(mime?: string | null, url?: string) {
-  const officeMimes = [
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-powerpoint",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  ];
-  if (mime && officeMimes.includes(mime)) return true;
-  if (!mime && url) {
-    const lower = url.toLowerCase();
-    return [".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"].some((ext) => lower.endsWith(ext));
-  }
+function isDocx(mime?: string | null, url?: string) {
+  if (mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") return true;
+  if (!mime && url) return url.toLowerCase().endsWith(".docx");
+  return false;
+}
+
+function isDoc(mime?: string | null, url?: string) {
+  if (mime === "application/msword") return true;
+  if (!mime && url) return url.toLowerCase().endsWith(".doc");
   return false;
 }
 
@@ -64,7 +63,8 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
     if (!item) return "none" as const;
     if (isImage(item.mimeType, item.url)) return "image" as const;
     if (isPdf(item.mimeType, item.url)) return "pdf" as const;
-    if (isOfficeDoc(item.mimeType, item.url)) return "office" as const;
+    if (isDocx(item.mimeType, item.url)) return "docx" as const;
+    if (isDoc(item.mimeType, item.url)) return "doc" as const;
     return "other" as const;
   }, [item]);
 
@@ -72,14 +72,6 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
   const zoomIn = () => setScale((s) => Math.min(4, s + 0.25));
   const zoomOut = () => setScale((s) => Math.max(0.25, s - 0.25));
 
-  const officeViewerUrl = useMemo(() => {
-    if (item?.url && contentType === "office") {
-      const encoded = encodeURIComponent(item.url);
-      // Use Office web viewer for common office docs. May not work for private or auth-protected URLs.
-      return `https://view.officeapps.live.com/op/embed.aspx?src=${encoded}`;
-    }
-    return null;
-  }, [item?.url, contentType]);
 
   const printAttachment = () => {
     if (!item?.url) return;
@@ -160,27 +152,25 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
           )}
 
           {contentType === "pdf" && item?.url && (
-            <object data={item.url} type="application/pdf" className="w-full h-full">
-              <iframe title={name || "PDF preview"} src={item.url} className="w-full h-full" />
-            </object>
+            <PdfViewer url={item.url} />
           )}
 
-          {contentType === "office" && (
-            officeViewerUrl ? (
-              <iframe title={name || "Document preview"} src={officeViewerUrl} className="w-full h-full" />
-            ) : (
-              <div className="text-center p-8">
-                <FileText className="h-10 w-10 mx-auto text-gray-400 mb-3" />
-                <p className="text-sm text-gray-600 mb-3">Preview not supported for this document type.</p>
-                {item?.url && (
-                  <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex">
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="h-4 w-4 mr-1" /> Open in new tab
-                    </Button>
-                  </a>
-                )}
-              </div>
-            )
+          {contentType === "docx" && item?.url && (
+            <DocxViewer url={item.url} />
+          )}
+
+          {contentType === "doc" && (
+            <div className="text-center p-8">
+              <FileText className="h-10 w-10 mx-auto text-gray-400 mb-3" />
+              <p className="text-sm text-gray-600 mb-3">DOC preview is not supported. Please download to view.</p>
+              {item?.url && (
+                <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex">
+                  <Button variant="outline" size="sm">
+                    <ExternalLink className="h-4 w-4 mr-1" /> Open / Download
+                  </Button>
+                </a>
+              )}
+            </div>
           )}
 
           {contentType === "other" && (
