@@ -39,7 +39,12 @@ const ComplaintDetails: React.FC = () => {
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewItem, setPreviewItem] = useState<{ url: string; mimeType?: string | null; name?: string | null; size?: number | null } | null>(null);
+  const [previewItem, setPreviewItem] = useState<{
+    url: string;
+    mimeType?: string | null;
+    name?: string | null;
+    size?: number | null;
+  } | null>(null);
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
@@ -697,13 +702,16 @@ const ComplaintDetails: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Upload className="h-5 w-5 mr-2" />
-                  Attachment Logs ({complaint?.attachments?.length || 0} files + {complaint?.photos?.length || 0} photos)
+                  Attachment Logs ({complaint?.attachments?.length || 0} files +{" "}
+                  {complaint?.photos?.length || 0} photos)
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* File Attachments */}
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Files ({complaint?.attachments?.length || 0})</h4>
+                  <h4 className="text-sm font-medium mb-2">
+                    Files ({complaint?.attachments?.length || 0})
+                  </h4>
                   {complaint.attachments && complaint.attachments.length > 0 ? (
                     <div className="space-y-2">
                       {complaint.attachments.map((att: any) => (
@@ -759,7 +767,9 @@ const ComplaintDetails: React.FC = () => {
 
                 {/* Photo Attachments */}
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Photos ({complaint?.photos?.length || 0})</h4>
+                  <h4 className="text-sm font-medium mb-2">
+                    Photos ({complaint?.photos?.length || 0})
+                  </h4>
                   {complaint.photos && complaint.photos.length > 0 ? (
                     <div className="space-y-2">
                       {complaint.photos.map((p: any) => (
@@ -796,7 +806,11 @@ const ComplaintDetails: React.FC = () => {
                             >
                               Preview
                             </Button>
-                            <a href={p.photoUrl} target="_blank" rel="noreferrer">
+                            <a
+                              href={p.photoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
                               <Button size="sm" variant="outline">
                                 <Download className="h-4 w-4 mr-1" />
                                 Download
@@ -1038,9 +1052,13 @@ const ComplaintDetails: React.FC = () => {
                     <p className="text-sm font-medium mb-1">Ward Officer</p>
                     {complaint.wardOfficer ? (
                       <>
-                        <p className="text-blue-800 font-medium">{complaint.wardOfficer.fullName}</p>
+                        <p className="text-blue-800 font-medium">
+                          {complaint.wardOfficer.fullName}
+                        </p>
                         {complaint.wardOfficer.email && (
-                          <p className="text-blue-600 text-sm">{complaint.wardOfficer.email}</p>
+                          <p className="text-blue-600 text-sm">
+                            {complaint.wardOfficer.email}
+                          </p>
                         )}
                       </>
                     ) : (
@@ -1051,12 +1069,19 @@ const ComplaintDetails: React.FC = () => {
                     <p className="text-sm font-medium mb-1">Maintenance Team</p>
                     {complaint.maintenanceTeam ? (
                       <>
-                        <p className="text-green-800 font-medium">{complaint.maintenanceTeam.fullName}</p>
+                        <p className="text-green-800 font-medium">
+                          {complaint.maintenanceTeam.fullName}
+                        </p>
                         {complaint.maintenanceTeam.email && (
-                          <p className="text-green-700 text-sm">{complaint.maintenanceTeam.email}</p>
+                          <p className="text-green-700 text-sm">
+                            {complaint.maintenanceTeam.email}
+                          </p>
                         )}
                         {complaint.assignedOn && (
-                          <p className="text-green-700 text-xs mt-1">Assigned on: {new Date(complaint.assignedOn).toLocaleString()}</p>
+                          <p className="text-green-700 text-xs mt-1">
+                            Assigned on:{" "}
+                            {new Date(complaint.assignedOn).toLocaleString()}
+                          </p>
                         )}
                       </>
                     ) : (
@@ -1139,11 +1164,16 @@ const ComplaintDetails: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="font-medium mb-2">Complaint Attachments ({complaint?.attachments?.length || 0})</h4>
+                <h4 className="font-medium mb-2">
+                  Complaint Attachments ({complaint?.attachments?.length || 0})
+                </h4>
                 {complaint?.attachments && complaint.attachments.length > 0 ? (
                   <div className="space-y-3">
                     {complaint.attachments.map((attachment: any) => (
-                      <div key={attachment.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                      >
                         <div className="flex items-center space-x-3">
                           {attachment.mimeType?.startsWith("image/") ? (
                             <Image className="h-5 w-5 text-blue-500" />
@@ -1151,14 +1181,30 @@ const ComplaintDetails: React.FC = () => {
                             <FileText className="h-5 w-5 text-gray-500" />
                           )}
                           <div>
-                            <p className="font-medium text-sm">{attachment.originalName || attachment.fileName}</p>
+                            <p className="font-medium text-sm">
+                              {attachment.originalName || attachment.fileName}
+                            </p>
                             <div className="text-xs text-gray-500 space-y-1">
-                              <p>{(attachment.size / 1024).toFixed(1)} KB • {new Date(attachment.uploadedAt).toLocaleDateString()}</p>
-                              {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+                              <p>
+                                {(attachment.size / 1024).toFixed(1)} KB •{" "}
+                                {new Date(
+                                  attachment.uploadedAt,
+                                ).toLocaleDateString()}
+                              </p>
+                              {(user?.role === "ADMINISTRATOR" ||
+                                user?.role === "WARD_OFFICER") && (
                                 <>
                                   <p>Type: {attachment.mimeType}</p>
-                                  {attachment.fileName !== attachment.originalName && (<p>Stored as: {attachment.fileName}</p>)}
-                                  <p>Uploaded: {new Date(attachment.uploadedAt).toLocaleString()}</p>
+                                  {attachment.fileName !==
+                                    attachment.originalName && (
+                                    <p>Stored as: {attachment.fileName}</p>
+                                  )}
+                                  <p>
+                                    Uploaded:{" "}
+                                    {new Date(
+                                      attachment.uploadedAt,
+                                    ).toLocaleString()}
+                                  </p>
                                 </>
                               )}
                             </div>
@@ -1172,7 +1218,9 @@ const ComplaintDetails: React.FC = () => {
                               setPreviewItem({
                                 url: attachment.url,
                                 mimeType: attachment.mimeType,
-                                name: attachment.originalName || attachment.fileName,
+                                name:
+                                  attachment.originalName ||
+                                  attachment.fileName,
                                 size: attachment.size,
                               });
                               setIsPreviewOpen(true);
@@ -1180,7 +1228,11 @@ const ComplaintDetails: React.FC = () => {
                           >
                             Preview
                           </Button>
-                          <a href={attachment.url} target="_blank" rel="noreferrer">
+                          <a
+                            href={attachment.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
                             <Button variant="outline" size="sm">
                               <Download className="h-4 w-4" />
                             </Button>
@@ -1190,36 +1242,76 @@ const ComplaintDetails: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">No complaint attachments</div>
+                  <div className="text-sm text-gray-500">
+                    No complaint attachments
+                  </div>
                 )}
               </div>
 
               <div>
-                <h4 className="font-medium mb-2">Maintenance Team Attachments ({complaint?.photos?.length || 0})</h4>
+                <h4 className="font-medium mb-2">
+                  Maintenance Team Attachments ({complaint?.photos?.length || 0}
+                  )
+                </h4>
                 {complaint?.photos && complaint.photos.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {complaint.photos.map((p: any) => (
                       <div key={p.id} className="border rounded-lg p-2">
-                        <img src={p.photoUrl} alt={p.originalName || p.fileName} className="w-full h-28 object-cover rounded mb-2 cursor-pointer" onClick={() => { setPreviewItem({ url: p.photoUrl, mimeType: "image/*", name: p.originalName || p.fileName, size: null }); setIsPreviewOpen(true); }} />
-                        <div className="text-xs text-gray-700 truncate">{p.originalName || p.fileName}</div>
-                        {p.uploadedByTeam?.fullName && (
-                          <div className="text-[11px] text-gray-500">by {p.uploadedByTeam.fullName}</div>
-                        )}
-                        <div className="text-[11px] text-gray-500">{new Date(p.uploadedAt).toLocaleString()}</div>
-                        <div className="mt-2 flex items-center gap-2">
-                          <Button size="sm" variant="outline" onClick={() => {
-                            setPreviewItem({ url: p.photoUrl, mimeType: "image/*", name: p.originalName || p.fileName, size: null });
+                        <img
+                          src={p.photoUrl}
+                          alt={p.originalName || p.fileName}
+                          className="w-full h-28 object-cover rounded mb-2 cursor-pointer"
+                          onClick={() => {
+                            setPreviewItem({
+                              url: p.photoUrl,
+                              mimeType: "image/*",
+                              name: p.originalName || p.fileName,
+                              size: null,
+                            });
                             setIsPreviewOpen(true);
-                          }}>Preview</Button>
+                          }}
+                        />
+                        <div className="text-xs text-gray-700 truncate">
+                          {p.originalName || p.fileName}
+                        </div>
+                        {p.uploadedByTeam?.fullName && (
+                          <div className="text-[11px] text-gray-500">
+                            by {p.uploadedByTeam.fullName}
+                          </div>
+                        )}
+                        <div className="text-[11px] text-gray-500">
+                          {new Date(p.uploadedAt).toLocaleString()}
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setPreviewItem({
+                                url: p.photoUrl,
+                                mimeType: "image/*",
+                                name: p.originalName || p.fileName,
+                                size: null,
+                              });
+                              setIsPreviewOpen(true);
+                            }}
+                          >
+                            Preview
+                          </Button>
                           <a href={p.photoUrl} target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="outline"><Download className="h-3 w-3 mr-1" />Download</Button>
+                            <Button size="sm" variant="outline">
+                              <Download className="h-3 w-3 mr-1" />
+                              Download
+                            </Button>
                           </a>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">No maintenance attachments</div>
+                  <div className="text-sm text-gray-500">
+                    No maintenance attachments
+                  </div>
                 )}
               </div>
             </CardContent>
