@@ -1200,7 +1200,7 @@ const ComplaintDetails: React.FC = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {complaint.photos.map((p: any) => (
                       <div key={p.id} className="border rounded-lg p-2">
-                        <img src={p.photoUrl} alt={p.originalName || p.fileName} className="w-full h-28 object-cover rounded mb-2" />
+                        <img src={p.photoUrl} alt={p.originalName || p.fileName} className="w-full h-28 object-cover rounded mb-2 cursor-pointer" onClick={() => { setPreviewItem({ url: p.photoUrl, mimeType: "image/*", name: p.originalName || p.fileName, size: null }); setIsPreviewOpen(true); }} />
                         <div className="text-xs text-gray-700 truncate">{p.originalName || p.fileName}</div>
                         {p.uploadedByTeam?.fullName && (
                           <div className="text-[11px] text-gray-500">by {p.uploadedByTeam.fullName}</div>
