@@ -5,9 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogClose,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Download, ZoomIn, ZoomOut, RotateCcw, FileText, ExternalLink } from "lucide-react";
+import { Download, ZoomIn, ZoomOut, RotateCcw, FileText, ExternalLink, Printer, X } from "lucide-react";
 
 type PreviewItem = {
   url: string;
@@ -80,12 +81,27 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
     return null;
   }, [item?.url, contentType]);
 
+  const printAttachment = () => {
+    if (!item?.url) return;
+    if (contentType === "image") {
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+      const html = `<!doctype html><html><head><title>${name}</title><style>html,body{margin:0;padding:0}img{max-width:100%;width:100%}</style></head><body><img src="${item.url}" onload="window.focus();window.print();"/></body></html>`;
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+    } else {
+      const w = window.open(item.url, "_blank");
+      if (w) w.focus();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={(o) => {
       if (!o) setScale(1);
       onOpenChange(o);
     }}>
-      <DialogContent className="max-w-[92vw] w-[92vw] h-[86vh] p-0">
+      <DialogContent hideClose className="max-w-[92vw] w-[92vw] h-[86vh] p-0">
         <DialogHeader className="px-4 pt-4 pb-2 border-b bg-background/60">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
@@ -109,6 +125,11 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
                   </Button>
                 </div>
               )}
+              {item?.url && (
+                <Button size="sm" variant="outline" onClick={printAttachment} aria-label="Print">
+                  <Printer className="h-4 w-4 mr-1" /> Print
+                </Button>
+              )}
               {canDownload && item?.url && (
                 <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex">
                   <Button size="sm" variant="default" aria-label="Download">
@@ -116,6 +137,11 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
                   </Button>
                 </a>
               )}
+              <DialogClose asChild>
+                <Button size="sm" variant="destructive" className="font-bold">
+                  <X className="h-4 w-4 mr-1" /> Close
+                </Button>
+              </DialogClose>
             </div>
           </div>
         </DialogHeader>
@@ -134,11 +160,9 @@ export default function AttachmentPreview({ open, onOpenChange, item, canDownloa
           )}
 
           {contentType === "pdf" && item?.url && (
-            <iframe
-              title={name || "PDF preview"}
-              src={item.url}
-              className="w-full h-full"
-            />
+            <object data={item.url} type="application/pdf" className="w-full h-full">
+              <iframe title={name || "PDF preview"} src={item.url} className="w-full h-full" />
+            </object>
           )}
 
           {contentType === "office" && (
