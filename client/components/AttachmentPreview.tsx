@@ -9,7 +9,7 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Download, ZoomIn, ZoomOut, RotateCcw, FileText, ExternalLink, Printer, X } from "lucide-react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 // Vite will bundle the worker and give us an internal URL
 import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { renderAsync as renderDocx } from "docx-preview";
@@ -57,16 +57,16 @@ function isDoc(mime?: string | null, url?: string) {
 
 function PdfViewer({ url }: { url: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerSizerRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<(HTMLCanvasElement | null)[]>([]);
   const [numPages, setNumPages] = useState<number>(0);
   const [scale, setScale] = useState<number>(1);
   const [containerWidth, setContainerWidth] = useState<number>(800);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
-  const containerSizerRef = useRef<HTMLDivElement>(null);
-  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
+    GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
   }, []);
 
   useEffect(() => {
@@ -78,6 +78,47 @@ function PdfViewer({ url }: { url: string }) {
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setError(null);
+    (async () => {
+      try {
+        const res = await fetch(url, { credentials: "include" });
+        if (!res.ok) throw new Error("fetch-failed");
+        const data = await res.arrayBuffer();
+        if (cancelled) return;
+        const pdf = await getDocument({ data }).promise;
+        if (cancelled) return;
+        setNumPages(pdf.numPages);
+        // Render canvases
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          if (cancelled) return;
+          const baseViewport = page.getViewport({ scale: 1 });
+          const width = (containerSizerRef.current?.clientWidth || 800) * scale;
+          const computedScale = Math.max(0.5, Math.min(3, width / baseViewport.width));
+          const viewport = page.getViewport({ scale: computedScale });
+          let canvas = pageRefs.current[pageNum - 1];
+          if (!canvas) {
+            canvas = document.createElement("canvas");
+            pageRefs.current[pageNum - 1] = canvas;
+          }
+          const ctx = canvas.getContext("2d");
+          if (!ctx) continue;
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          canvas.style.width = viewport.width + "px";
+          canvas.style.height = viewport.height + "px";
+          canvas.className = "mb-4 bg-white shadow rounded block mx-auto";
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        }
+      } catch (e) {
+        if (!cancelled) setError("failed");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [url, scale]);
 
   useEffect(() => {
     const sc = scrollRef.current;
@@ -108,8 +149,6 @@ function PdfViewer({ url }: { url: string }) {
   const zoomOut = () => setScale((s) => Math.max(0.5, s - 0.1));
   const resetZoom = () => setScale(1);
 
-  const pageWidth = Math.floor(containerWidth * scale);
-
   return (
     <div className="w-full h-full flex flex-col">
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b px-3 py-2 flex items-center gap-2">
@@ -131,13 +170,11 @@ function PdfViewer({ url }: { url: string }) {
       )}
       <div ref={scrollRef} className="flex-1 overflow-auto p-4">
         <div ref={containerSizerRef}>
-          <Document file={url} onLoadError={() => setError("failed")} onLoadSuccess={({ numPages }) => { setError(null); setNumPages(numPages); }} loading={<div className="text-sm text-muted-foreground">Loading PDF…</div>}>
-            {Array.from(new Array(numPages), (_el, index) => (
-              <div key={`pwrap_${index}`} ref={(el) => (pageRefs.current[index] = el)} className="mb-4 flex justify-center">
-                <Page pageNumber={index + 1} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} />
-              </div>
-            ))}
-          </Document>
+          {Array.from({ length: numPages }).map((_, index) => (
+            <React.Fragment key={`pwrap_${index}`}>
+              {pageRefs.current[index]}
+            </React.Fragment>
+          ))}
         </div>
       </div>
     </div>
