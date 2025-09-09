@@ -653,13 +653,13 @@ const AdminUsers: React.FC = () => {
                             Activate
                           </Button>
                         )}
-                        <Button
+                        {/* <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleDeleteUser(user.id)}
                         >
                           <Trash2 className="h-3 w-3" />
-                        </Button>
+                        </Button> */}
                       </div>
                     </TableCell>
                   </TableRow>

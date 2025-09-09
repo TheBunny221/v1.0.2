@@ -192,7 +192,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
   };
 
   const getDropdownLabel = () => {
-    if (user?.role === "ADMINISTRATOR") return "Select Ward Officer";
+    if (user?.role === "ADMINISTRATOR") return "Select Ward Officer & Team Member";
     if (user?.role === "WARD_OFFICER") return "Select Maintenance Team Member";
     return "Select User";
   };
@@ -404,7 +404,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             <div>
               <Label htmlFor="status">Status</Label>
               {user?.role === "MAINTENANCE_TEAM" && <p className="text-xs text-gray-500 mb-1">You can update status to In Progress or mark as Resolved</p>}
-              {process.env.NODE_ENV === "development" && <div className="text-xs text-blue-600 mb-1">Debug: Available statuses for {user?.role}: {getAvailableStatusOptions().join(", ")}</div>}
+              {/* {process.env.NODE_ENV === "development" && <div className="text-xs text-blue-600 mb-1">Debug: Available statuses for {user?.role}: {getAvailableStatusOptions().join(", ")}</div>} */}
               <Select value={formData.status} onValueChange={(value) => { setFormData((prev) => ({ ...prev, status: value })); setValidationErrors([]); }}>
                 <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
                 <SelectContent>
@@ -420,7 +420,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
             {user?.role !== "MAINTENANCE_TEAM" && (
               <div>
                 <Label htmlFor="priority">Priority</Label>
-                <p className="text-xs text-gray-500 mb-1">Set complaint priority level</p>
+                {/* <p className="text-xs text-gray-500 mb-1">Set complaint priority level</p> */}
                 <Select value={formData.priority} onValueChange={(value) => setFormData((prev) => ({ ...prev, priority: value }))}>
                   <SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger>
                   <SelectContent>

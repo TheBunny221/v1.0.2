@@ -567,7 +567,8 @@ const ComplaintsList: React.FC = () => {
                   ? "Try adjusting your filters or search terms"
                   : "Submit your first complaint to get started"}
               </p>
-            </div>
+            </div> 
+            
           ) : (
             <>
               <Table>
@@ -592,12 +593,12 @@ const ComplaintsList: React.FC = () => {
                         <TableHead>Registered On</TableHead>
                         <TableHead>Updated</TableHead>
                         <TableHead>Closed</TableHead>
-                        {user?.role === "ADMINISTRATOR" && (
+                        {/* {user?.role === "ADMINISTRATOR" && (
                           <>
                             <TableHead>Maintenance Team ID</TableHead>
                             <TableHead>Ward Officer ID</TableHead>
                           </>
-                        )}
+                        )} */}
                       </>
                     )}
                     <TableHead>Actions</TableHead>
@@ -635,14 +636,14 @@ const ComplaintsList: React.FC = () => {
                           >
                             {complaint.priority}
                           </Badge>
-                          {(complaint as any).needsTeamAssignment &&
+                          {/* {(complaint as any).needsTeamAssignment &&
                             !["RESOLVED", "CLOSED"].includes(
                               complaint.status,
                             ) && (
                               <Badge className="bg-orange-100 text-orange-800 text-xs">
                                 Needs Team Assignment
                               </Badge>
-                            )}
+                            )} */}
                         </div>
                       </TableCell>
                       {(user?.role === "ADMINISTRATOR" ||
@@ -712,7 +713,7 @@ const ComplaintsList: React.FC = () => {
                             )}
                           </TableCell>
 
-                          {user?.role === "ADMINISTRATOR" && (
+                          {/* {user?.role === "ADMINISTRATOR" && (
                             <>
                               <TableCell>
                                 {complaint.maintenanceTeam?.id ||
@@ -725,7 +726,7 @@ const ComplaintsList: React.FC = () => {
                                   "-"}
                               </TableCell>
                             </>
-                          )}
+                          )} */}
                         </>
                       )}
                       <TableCell>

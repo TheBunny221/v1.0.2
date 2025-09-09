@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
+import { useGetComplaintQuery, useUpdateComplaintStatusMutation } from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -25,7 +26,11 @@ import {
   Wrench,
   FileText,
   Upload,
+  Image,
+  Download,
+  File,
 } from "lucide-react";
+import PhotoUploadModal from "../components/PhotoUploadModal";
 
 const TaskDetails: React.FC = () => {
   const { id } = useParams();
@@ -35,41 +40,102 @@ const TaskDetails: React.FC = () => {
 
   const isMaintenanceTeam = user?.role === "MAINTENANCE_TEAM";
 
-  // Mock task data
-  const task = {
-    id: id || "1",
-    title: "Water Pipeline Repair",
-    description:
-      "Main water pipeline burst at MG Road junction affecting water supply to 200+ households in the area. Requires immediate attention and repair.",
-    location: "MG Road, Near Metro Station",
-    coordinates: "9.9312, 76.2673",
-    priority: "HIGH",
-    status: "IN_PROGRESS",
-    estimatedTime: "4 hours",
-    dueDate: "2024-01-15",
-    assignedDate: "2024-01-14",
-    submittedBy: "Ward Officer - Central Zone",
-    contactPhone: "+91 9876543210",
-    materials: ["PVC Pipes (6 inch)", "Pipe Joints", "Sealant", "Sand"],
-    tools: ["Excavator", "Welding Equipment", "Safety Gear"],
-    workLog: [
-      {
-        time: "09:00 AM",
-        note: "Arrived at site, assessed damage",
-        photo: false,
-      },
-      {
-        time: "09:30 AM",
-        note: "Started excavation work",
-        photo: true,
-      },
-      {
-        time: "11:00 AM",
-        note: "Identified leak source, preparing for repair",
-        photo: true,
-      },
-    ],
+  // Fetch complaint dynamically
+  const {
+    data: complaintResponse,
+    isLoading: complaintLoading,
+    error: complaintError,
+    refetch: refetchComplaint,
+  } = useGetComplaintQuery(id ?? "");
+
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isAddingLog, setIsAddingLog] = useState(false);
+  const [updateComplaintStatus] = useUpdateComplaintStatusMutation();
+
+  const raw = complaintResponse?.data?.complaint;
+
+  const addWorkUpdate = async () => {
+    if (!task) return;
+    if (!workNote || workNote.trim().length === 0) return;
+    try {
+      setIsAddingLog(true);
+      await updateComplaintStatus({ id: task.id, status: "IN_PROGRESS", remarks: workNote.trim() }).unwrap();
+      setWorkNote("");
+      // refresh complaint to show new status log
+      refetchComplaint?.();
+    } catch (err) {
+      console.error("Failed to add work log:", err);
+    } finally {
+      setIsAddingLog(false);
+    }
   };
+
+  const task = useMemo(() => {
+    if (!raw) return null;
+
+    const latLng = (() => {
+      let lat = raw.latitude;
+      let lng = raw.longitude;
+      if ((!lat || !lng) && raw.coordinates) {
+        try {
+          const c = typeof raw.coordinates === "string" ? JSON.parse(raw.coordinates) : raw.coordinates;
+          lat = c?.latitude ?? c?.lat ?? lat;
+          lng = c?.longitude ?? c?.lng ?? lng;
+        } catch {
+          // ignore
+        }
+      }
+      return { lat, lng };
+    })();
+
+    return {
+      id: raw.id,
+      complaintId: raw.complaintId,
+      title: raw.title || (raw.type ? `${raw.type} Issue` : "Task"),
+      description: raw.description,
+      location: raw.area || raw.address || raw.location || "",
+      coordinates: `${latLng.lat || ""}, ${latLng.lng || ""}`,
+      priority: raw.priority || "MEDIUM",
+      status: raw.status,
+      estimatedTime: raw.estimatedTime || null,
+      dueDate: raw.deadline ? new Date(raw.deadline).toISOString().split("T")[0] : null,
+      assignedDate: raw.assignedOn || raw.submittedOn,
+      submittedBy: raw.submittedBy?.fullName || raw.submittedBy || "",
+      contactPhone: raw.contactPhone || raw.mobile || "",
+      materials: raw.materials || [],
+      tools: raw.tools || [],
+      workLog: (raw.statusLogs || []).map((s: any) => ({
+        time: s.timestamp,
+        note: s.comment || `${s.toStatus}`,
+        photo: false,
+        user: s.user,
+      })),
+      attachments: [
+        ...(raw.attachments || []),
+        ...((raw.photos || []).map((p: any) => ({
+          id: p.id,
+          fileName: p.fileName || p.originalName || p.photoUrl?.split('/').pop(),
+          mimeType: p.mimeType,
+          uploadedAt: p.uploadedAt,
+          url: p.photoUrl || p.photoUrl || p.url,
+          description: p.description || null,
+          uploadedBy: p.uploadedByTeam?.fullName || null,
+        })) || []),
+      ],
+    } as any;
+  }, [raw]);
+
+  if (complaintLoading) {
+    return <div>Loading task...</div>;
+  }
+
+  if (complaintError || !task) {
+    return (
+      <div className="space-y-6">
+        <p className="text-red-600">Failed to load task details.</p>
+      </div>
+    );
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -110,7 +176,7 @@ const TaskDetails: React.FC = () => {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              Task #{task.id}
+              Task #{task.complaintId || task.id}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
@@ -185,63 +251,148 @@ const TaskDetails: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Work Log */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="h-5 w-5 mr-2" />
-                Work Progress Log
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {task.workLog.map((log, index) => (
-                  <div
-                    key={index}
-                    className="border-l-4 border-blue-500 pl-4 py-2"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{log.time}</p>
-                        <p className="text-sm text-gray-600">{log.note}</p>
-                        {log.photo && (
-                          <Badge variant="secondary" className="mt-1">
-                            📷 Photo Attached
-                          </Badge>
-                        )}
+          {/* Work Log - visible only to Admin, Ward Officer, Maintenance Team */}
+          {(["ADMINISTRATOR","WARD_OFFICER","MAINTENANCE_TEAM"].includes(user?.role)) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Work Progress Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {task.workLog.map((log, index) => (
+                    <div
+                      key={`log-${index}`}
+                      className="border-l-4 border-blue-500 pl-4 py-2"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">{new Date(log.time).toLocaleString ? new Date(log.time).toLocaleString() : log.time}</p>
+                          <p className="text-sm text-gray-600">{log.note}</p>
+                          {log.photo && (
+                            <Badge variant="secondary" className="mt-1">
+                              📷 Photo Attached
+                            </Badge>
+                          )}
+
+                          {/* Attachments inline for log entries if any reference (mock not linking here) */}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
 
-              {/* Add New Log Entry */}
-              <div className="mt-6 pt-4 border-t">
-                <Label htmlFor="workNote">Add Work Update</Label>
-                <div className="flex space-x-2 mt-2">
-                  <Textarea
-                    id="workNote"
-                    value={workNote}
-                    onChange={(e) => setWorkNote(e.target.value)}
-                    placeholder="Describe current work status..."
-                    className="flex-1"
-                    rows={2}
-                  />
-                  <div className="flex flex-col space-y-2">
-                    <Button size="sm">
+                  {/* Render image attachments as part of the work log so uploads appear immediately */}
+                  {task.attachments && task.attachments.filter((a: any) => a.mimeType?.startsWith("image/")).length > 0 && (
+                    <div className="pt-2">
+                      <h4 className="text-sm font-medium mb-2">Photos</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {task.attachments.filter((a: any) => a.mimeType?.startsWith("image/")).map((att: any) => (
+                          <div key={att.id} className="border rounded p-2">
+                            <img src={att.url} alt={att.fileName || att.originalName} className="w-full h-28 object-cover rounded mb-2" />
+                            <div className="text-xs text-gray-600">{att.fileName || att.originalName}</div>
+                            {att.description && (
+                              <div className="text-sm text-gray-700 mt-1">{att.description}</div>
+                            )}
+                            {att.uploadedBy && (
+                              <div className="text-xs text-gray-500 mt-1">Uploaded by: {att.uploadedBy}</div>
+                            )}
+                            <div className="text-xs text-gray-500 mt-1">{new Date(att.uploadedAt).toLocaleString()}</div>
+                            <div className="mt-2">
+                              <a href={att.url} download className="inline-flex items-center">
+                                <Button size="xs">Download</Button>
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Add New Log Entry */}
+                <div className="mt-6 pt-4 border-t">
+                  <Label htmlFor="workNote">Add Work Update</Label>
+                  <div className="flex space-x-2 mt-2">
+                    <Textarea
+                      id="workNote"
+                      value={workNote}
+                      onChange={(e) => setWorkNote(e.target.value)}
+                      placeholder="Describe current work status..."
+                      className="flex-1"
+                      rows={2}
+                    />
+                    <div className="flex flex-col space-y-2">
+                      <Button size="sm" onClick={() => setIsPhotoModalOpen(true)}>
                       <Camera className="h-4 w-4 mr-1" />
                       Photo
                     </Button>
-                    <Button size="sm" variant="outline">
-                      Add Log
-                    </Button>
+                      <Button size="sm" variant="outline" onClick={addWorkUpdate} disabled={isAddingLog || !workNote.trim()}>
+                        {isAddingLog ? "Adding..." : "Add Log"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                {/* Attachments listed here as well (visible to same roles) */}
+                <div className="mt-6 pt-4 border-t">
+                  <h3 className="font-medium mb-3 flex items-center">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Attachments
+                  </h3>
+                  <div className="space-y-3">
+                    {task.attachments.map((att) => {
+                      const isImage = att.mimeType.startsWith("image/");
+                      const canDownload = ["ADMINISTRATOR","WARD_OFFICER","MAINTENANCE_TEAM"].includes(user?.role);
+                      return (
+                        <div key={att.id} className="flex items-center justify-between border rounded p-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 grid place-items-center rounded bg-gray-100">
+                              {isImage ? <Image className="h-5 w-5" /> : <File className="h-5 w-5" />}
+                            </div>
+                            <div>
+                              <div className="font-medium">{att.fileName}</div>
+                              {att.description && <div className="text-sm text-gray-700">{att.description}</div>}
+                              {att.uploadedBy && <div className="text-xs text-gray-500">Uploaded by: {att.uploadedBy}</div>}
+                              <div className="text-xs text-gray-500">{att.mimeType} • {new Date(att.uploadedAt).toLocaleString()}</div>
+                            </div>
+                          </div>
+                          <div>
+                            {canDownload ? (
+                              <a href={att.url} download className="inline-flex items-center">
+                                <Button size="sm">
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button size="sm" disabled>
+                                <Download className="h-4 w-4 mr-2" />
+                                Restricted
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Completion Form */}
+
+          <PhotoUploadModal
+            isOpen={isPhotoModalOpen}
+            onClose={() => setIsPhotoModalOpen(false)}
+            complaintId={task?.id}
+            onSuccess={() => {
+              // refresh complaint data to show new photos
+              refetchComplaint?.();
+            }}
+          />
           {task.status === "IN_PROGRESS" && (
             <Card>
               <CardHeader>
@@ -266,7 +417,7 @@ const TaskDetails: React.FC = () => {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Complete Task
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setIsPhotoModalOpen(true)}>
                     <Camera className="h-4 w-4 mr-2" />
                     Add Completion Photo
                   </Button>

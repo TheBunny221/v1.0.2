@@ -106,11 +106,20 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
         {/* Quick Actions */}
         <div className="flex items-center gap-1">
           {/* View Details */}
-          <Link to={`/complaints/${complaint.id}`}>
-            <Button size="sm" variant="outline" title="View Details">
-              <Eye className="h-3 w-3" />
-            </Button>
-          </Link>
+          {
+            (() => {
+              const to = isMaintenanceTeam
+                ? `/tasks/${complaint.complaintId || complaint.id}`
+                : `/complaints/${complaint.id}`;
+              return (
+                <Link to={to}>
+                  <Button size="sm" variant="outline" title="View Details">
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                </Link>
+              );
+            })()
+          }
 
           {/* Quick Status Change Buttons for Ward Officers */}
           {canManageComplaint && (
@@ -218,7 +227,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                  <Link to={`/complaints/${complaint.id}`}>
+                  <Link to={isMaintenanceTeam ? `/tasks/${complaint.complaintId || complaint.id}` : `/complaints/${complaint.id}`}>
                     <FileText className="h-4 w-4 mr-2" />
                     View Full Details
                   </Link>
