@@ -5,6 +5,7 @@ import { useGetComplaintQuery } from "../store/api/complaintsApi";
 import { useDataManager } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
+import AttachmentPreview from "../components/AttachmentPreview";
 import {
   Card,
   CardContent,
@@ -37,6 +38,8 @@ const ComplaintDetails: React.FC = () => {
 
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<{ url: string; mimeType?: string | null; name?: string | null; size?: number | null } | null>(null);
 
   // Data management hooks
   const { cacheComplaintDetails, getComplaintDetails } = useDataManager();
@@ -721,12 +724,29 @@ const ComplaintDetails: React.FC = () => {
                               </span>
                             </p>
                           </div>
-                          <a href={att.url} target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="outline">
-                              <Download className="h-4 w-4 mr-1" />
-                              Open
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setPreviewItem({
+                                  url: att.url,
+                                  mimeType: att.mimeType,
+                                  name: att.originalName || att.fileName,
+                                  size: att.size,
+                                });
+                                setIsPreviewOpen(true);
+                              }}
+                            >
+                              Preview
                             </Button>
-                          </a>
+                            <a href={att.url} target="_blank" rel="noreferrer">
+                              <Button size="sm" variant="outline">
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </Button>
+                            </a>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -760,12 +780,29 @@ const ComplaintDetails: React.FC = () => {
                               )}
                             </p>
                           </div>
-                          <a href={p.photoUrl} target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="outline">
-                              <Download className="h-4 w-4 mr-1" />
-                              View
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setPreviewItem({
+                                  url: p.photoUrl,
+                                  mimeType: "image/*",
+                                  name: p.originalName || p.fileName,
+                                  size: null,
+                                });
+                                setIsPreviewOpen(true);
+                              }}
+                            >
+                              Preview
                             </Button>
-                          </a>
+                            <a href={p.photoUrl} target="_blank" rel="noreferrer">
+                              <Button size="sm" variant="outline">
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </Button>
+                            </a>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1128,14 +1165,26 @@ const ComplaintDetails: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Button variant="outline" size="sm" onClick={() => window.open(attachment.url, "_blank")}>
-                            <Download className="h-4 w-4" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setPreviewItem({
+                                url: attachment.url,
+                                mimeType: attachment.mimeType,
+                                name: attachment.originalName || attachment.fileName,
+                                size: attachment.size,
+                              });
+                              setIsPreviewOpen(true);
+                            }}
+                          >
+                            Preview
                           </Button>
-                          {attachment.mimeType?.startsWith("image/") && (
-                            <Button variant="outline" size="sm" onClick={() => window.open(attachment.url, "_blank")}>
-                              View
+                          <a href={attachment.url} target="_blank" rel="noreferrer">
+                            <Button variant="outline" size="sm">
+                              <Download className="h-4 w-4" />
                             </Button>
-                          )}
+                          </a>
                         </div>
                       </div>
                     ))}
@@ -1157,9 +1206,13 @@ const ComplaintDetails: React.FC = () => {
                           <div className="text-[11px] text-gray-500">by {p.uploadedByTeam.fullName}</div>
                         )}
                         <div className="text-[11px] text-gray-500">{new Date(p.uploadedAt).toLocaleString()}</div>
-                        <div className="mt-2">
+                        <div className="mt-2 flex items-center gap-2">
+                          <Button size="xs" variant="outline" onClick={() => {
+                            setPreviewItem({ url: p.photoUrl, mimeType: "image/*", name: p.originalName || p.fileName, size: null });
+                            setIsPreviewOpen(true);
+                          }}>Preview</Button>
                           <a href={p.photoUrl} target="_blank" rel="noreferrer">
-                            <Button size="xs" variant="outline"><Download className="h-3 w-3 mr-1" />View</Button>
+                            <Button size="xs" variant="outline"><Download className="h-3 w-3 mr-1" />Download</Button>
                           </a>
                         </div>
                       </div>
@@ -1237,6 +1290,14 @@ const ComplaintDetails: React.FC = () => {
           // The complaint data will be automatically updated by RTK Query
           // due to invalidation tags
         }}
+      />
+
+      {/* Attachment Preview Dialog */}
+      <AttachmentPreview
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        item={previewItem}
+        canDownload={user?.role !== "CITIZEN"}
       />
     </div>
   );
