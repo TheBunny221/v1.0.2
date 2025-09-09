@@ -1207,7 +1207,7 @@ const ComplaintDetails: React.FC = () => {
                         )}
                         <div className="text-[11px] text-gray-500">{new Date(p.uploadedAt).toLocaleString()}</div>
                         <div className="mt-2 flex items-center gap-2">
-                          <Button size="xs" variant="outline" onClick={() => {
+                          <Button size="sm" variant="outline" onClick={() => {
                             setPreviewItem({ url: p.photoUrl, mimeType: "image/*", name: p.originalName || p.fileName, size: null });
                             setIsPreviewOpen(true);
                           }}>Preview</Button>
