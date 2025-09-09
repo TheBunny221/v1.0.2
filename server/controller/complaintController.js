@@ -1028,7 +1028,24 @@ export const getComplaint = asyncHandler(async (req, res) => {
           role: true,
         },
       },
+      wardOfficer: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+        },
+      },
+      maintenanceTeam: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+        },
+      },
       attachments: true,
+      materials: true,
       photos: {
         orderBy: { uploadedAt: "desc" },
         include: {

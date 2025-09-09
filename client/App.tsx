@@ -35,7 +35,7 @@ const MaintenanceDashboard = lazy(() => import("./pages/MaintenanceDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 // Complaint management
-const ComplaintsList = lazy(() => import("./pages/ComplaintsList"));
+import ComplaintsList from "./pages/ComplaintsList";
 const ComplaintDetails = lazy(() => import("./pages/ComplaintDetails"));
 const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
 const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
