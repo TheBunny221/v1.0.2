@@ -9,7 +9,7 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Download, ZoomIn, ZoomOut, RotateCcw, FileText, ExternalLink, Printer, X } from "lucide-react";
-import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
+import { Document, Page, pdfjs } from "react-pdf";
 // Vite will bundle the worker and give us an internal URL
 import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { renderAsync as renderDocx } from "docx-preview";
@@ -56,63 +56,90 @@ function isDoc(mime?: string | null, url?: string) {
 }
 
 function PdfViewer({ url }: { url: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [numPages, setNumPages] = useState<number>(0);
+  const [scale, setScale] = useState<number>(1);
+  const [containerWidth, setContainerWidth] = useState<number>(800);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
+  const containerSizerRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
-    const container = containerRef.current;
-    if (container) container.innerHTML = "";
+    pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
+  }, []);
 
-    (async () => {
-      try {
-        const pdf = await getDocument({ url }).promise;
-        if (cancelled) return;
-        const c = containerRef.current;
-        if (!c) return;
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          if (cancelled) return;
-          const viewport = page.getViewport({ scale: 1 });
-          const width = c.clientWidth || 800;
-          const scale = Math.max(0.75, Math.min(2, width / viewport.width));
-          const vp = page.getViewport({ scale });
-
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) continue;
-          canvas.width = Math.floor(vp.width);
-          canvas.height = Math.floor(vp.height);
-          canvas.style.width = vp.width + "px";
-          canvas.style.height = vp.height + "px";
-          canvas.className = "mb-4 bg-white shadow rounded";
-          c.appendChild(canvas);
-          await page.render({ canvasContext: ctx, viewport: vp }).promise;
-        }
-        if (!cancelled) setLoading(false);
-      } catch (e) {
-        if (!cancelled) {
-          setError("Failed to load PDF");
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      if (containerRef.current) containerRef.current.innerHTML = "";
+  useEffect(() => {
+    const resize = () => {
+      const el = containerSizerRef.current;
+      if (el) setContainerWidth(el.clientWidth);
     };
-  }, [url]);
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  useEffect(() => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const onScroll = () => {
+      const top = sc.scrollTop;
+      let pageIdx = 0;
+      for (let i = 0; i < pageRefs.current.length; i++) {
+        const el = pageRefs.current[i];
+        if (!el) continue;
+        if (el.offsetTop - 16 <= top) pageIdx = i;
+        else break;
+      }
+      setCurrentPage(pageIdx + 1);
+    };
+    sc.addEventListener("scroll", onScroll);
+    return () => sc.removeEventListener("scroll", onScroll);
+  }, [numPages]);
+
+  const goToPage = (n: number) => {
+    if (!scrollRef.current) return;
+    const idx = Math.max(1, Math.min(numPages, n)) - 1;
+    const el = pageRefs.current[idx];
+    if (el) scrollRef.current.scrollTo({ top: el.offsetTop - 8, behavior: "smooth" });
+  };
+
+  const zoomIn = () => setScale((s) => Math.min(3, s + 0.1));
+  const zoomOut = () => setScale((s) => Math.max(0.5, s - 0.1));
+  const resetZoom = () => setScale(1);
+
+  const pageWidth = Math.floor(containerWidth * scale);
 
   return (
-    <div className="w-full h-full overflow-auto p-4">
-      {loading && <div className="text-sm text-muted-foreground px-2 py-1">Loading PDF…</div>}
-      {error && <div className="text-sm text-red-600 px-2 py-1">{error}</div>}
-      <div ref={containerRef} />
+    <div className="w-full h-full flex flex-col">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b px-3 py-2 flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">PDF</span>
+        <Button size="sm" variant="outline" onClick={zoomOut} aria-label="Zoom out"><ZoomOut className="h-4 w-4" /></Button>
+        <span className="text-xs w-12 text-center">{Math.round(scale * 100)}%</span>
+        <Button size="sm" variant="outline" onClick={zoomIn} aria-label="Zoom in"><ZoomIn className="h-4 w-4" /></Button>
+        <Button size="sm" variant="outline" onClick={resetZoom} aria-label="Reset zoom"><RotateCcw className="h-4 w-4" /></Button>
+        <div className="ml-4 flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => goToPage(currentPage - 1)} disabled={currentPage <= 1}>{"<"}</Button>
+          <span className="text-xs">Page {currentPage} / {numPages || "-"}</span>
+          <Button size="sm" variant="outline" onClick={() => goToPage(currentPage + 1)} disabled={currentPage >= numPages}>{">"}</Button>
+        </div>
+      </div>
+      {error && (
+        <div className="p-4 text-center">
+          <p className="text-sm text-red-600 mb-2">This file cannot be previewed. Please download to view.</p>
+        </div>
+      )}
+      <div ref={scrollRef} className="flex-1 overflow-auto p-4">
+        <div ref={containerSizerRef}>
+          <Document file={url} onLoadError={() => setError("failed")} onLoadSuccess={({ numPages }) => { setError(null); setNumPages(numPages); }} loading={<div className="text-sm text-muted-foreground">Loading PDF…</div>}>
+            {Array.from(new Array(numPages), (_el, index) => (
+              <div key={`pwrap_${index}`} ref={(el) => (pageRefs.current[index] = el)} className="mb-4 flex justify-center">
+                <Page pageNumber={index + 1} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} />
+              </div>
+            ))}
+          </Document>
+        </div>
+      </div>
     </div>
   );
 }
