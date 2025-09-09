@@ -64,6 +64,7 @@ function PdfViewer({ url }: { url: string }) {
   const [containerWidth, setContainerWidth] = useState<number>(800);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
+  const pdfRef = useRef<import("pdfjs-dist").PDFDocumentProxy | null>(null);
 
   useEffect(() => {
     GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
@@ -79,46 +80,61 @@ function PdfViewer({ url }: { url: string }) {
     return () => window.removeEventListener("resize", resize);
   }, []);
 
+  // Load PDF when URL changes
   useEffect(() => {
     let cancelled = false;
     setError(null);
+    setNumPages(0);
+    pdfRef.current = null;
     (async () => {
       try {
-        const res = await fetch(url, { credentials: "include" });
-        if (!res.ok) throw new Error("fetch-failed");
-        const data = await res.arrayBuffer();
-        if (cancelled) return;
-        const pdf = await getDocument({ data }).promise;
-        if (cancelled) return;
-        setNumPages(pdf.numPages);
-        // Render canvases
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          if (cancelled) return;
-          const baseViewport = page.getViewport({ scale: 1 });
-          const width = (containerSizerRef.current?.clientWidth || 800) * scale;
-          const computedScale = Math.max(0.5, Math.min(3, width / baseViewport.width));
-          const viewport = page.getViewport({ scale: computedScale });
-          const wrapper = pageRefs.current[pageNum - 1];
-          if (!wrapper) continue;
-          wrapper.innerHTML = "";
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) continue;
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-          canvas.style.width = viewport.width + "px";
-          canvas.style.height = viewport.height + "px";
-          canvas.className = "bg-white shadow rounded";
-          wrapper.appendChild(canvas);
-          await page.render({ canvasContext: ctx, viewport }).promise;
+        GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
+        let pdf;
+        try {
+          pdf = await getDocument({ url, withCredentials: true }).promise;
+        } catch {
+          pdf = await getDocument({ url, withCredentials: false }).promise;
         }
+        if (cancelled) return;
+        pdfRef.current = pdf;
+        setNumPages(pdf.numPages);
       } catch (e) {
         if (!cancelled) setError("failed");
       }
     })();
     return () => { cancelled = true; };
-  }, [url, scale]);
+  }, [url]);
+
+  // Render pages when scale or numPages changes
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const pdf = pdfRef.current;
+      if (!pdf) return;
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        if (cancelled) return;
+        const baseViewport = page.getViewport({ scale: 1 });
+        const width = (containerSizerRef.current?.clientWidth || 800) * scale;
+        const computedScale = Math.max(0.5, Math.min(3, width / baseViewport.width));
+        const viewport = page.getViewport({ scale: computedScale });
+        const wrapper = pageRefs.current[pageNum - 1];
+        if (!wrapper) continue;
+        wrapper.innerHTML = "";
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) continue;
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        canvas.style.width = viewport.width + "px";
+        canvas.style.height = viewport.height + "px";
+        canvas.className = "bg-white shadow rounded";
+        wrapper.appendChild(canvas);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [numPages, scale]);
 
   useEffect(() => {
     const sc = scrollRef.current;
