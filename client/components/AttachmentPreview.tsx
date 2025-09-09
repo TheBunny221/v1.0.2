@@ -99,18 +99,18 @@ function PdfViewer({ url }: { url: string }) {
           const width = (containerSizerRef.current?.clientWidth || 800) * scale;
           const computedScale = Math.max(0.5, Math.min(3, width / baseViewport.width));
           const viewport = page.getViewport({ scale: computedScale });
-          let canvas = pageRefs.current[pageNum - 1];
-          if (!canvas) {
-            canvas = document.createElement("canvas");
-            pageRefs.current[pageNum - 1] = canvas;
-          }
+          const wrapper = pageRefs.current[pageNum - 1];
+          if (!wrapper) continue;
+          wrapper.innerHTML = "";
+          const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
           if (!ctx) continue;
           canvas.width = Math.floor(viewport.width);
           canvas.height = Math.floor(viewport.height);
           canvas.style.width = viewport.width + "px";
           canvas.style.height = viewport.height + "px";
-          canvas.className = "mb-4 bg-white shadow rounded block mx-auto";
+          canvas.className = "bg-white shadow rounded";
+          wrapper.appendChild(canvas);
           await page.render({ canvasContext: ctx, viewport }).promise;
         }
       } catch (e) {
