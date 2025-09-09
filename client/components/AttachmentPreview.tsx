@@ -10,8 +10,8 @@ import {
 import { Button } from "./ui/button";
 import { Download, ZoomIn, ZoomOut, RotateCcw, FileText, ExternalLink, Printer, X } from "lucide-react";
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
-// Vite will bundle the worker and give us an internal URL
-import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+// Use self-hosted worker file (public/assets/pdf.worker.min.mjs)
+const pdfWorkerSrcUrl = "/assets/pdf.worker.min.mjs";
 import { renderAsync as renderDocx } from "docx-preview";
 
 type PreviewItem = {
