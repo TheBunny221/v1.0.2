@@ -171,9 +171,7 @@ function PdfViewer({ url }: { url: string }) {
       <div ref={scrollRef} className="flex-1 overflow-auto p-4">
         <div ref={containerSizerRef}>
           {Array.from({ length: numPages }).map((_, index) => (
-            <React.Fragment key={`pwrap_${index}`}>
-              {pageRefs.current[index]}
-            </React.Fragment>
+            <div key={`pwrap_${index}`} ref={(el) => (pageRefs.current[index] = el)} className="mb-4 flex justify-center" />
           ))}
         </div>
       </div>
