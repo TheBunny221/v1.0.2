@@ -134,11 +134,15 @@ const ComplaintDetails: React.FC = () => {
     if (!Array.isArray(logs)) return null;
     const reopenLogs = logs
       .filter((l) => l?.toStatus === "REOPENED")
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
     return reopenLogs.length ? new Date(reopenLogs[0].timestamp) : null;
   };
 
-  const addHours = (date: Date, hours: number) => new Date(date.getTime() + hours * 60 * 60 * 1000);
+  const addHours = (date: Date, hours: number) =>
+    new Date(date.getTime() + hours * 60 * 60 * 1000);
 
   const computeSla = (c: any) => {
     if (!c) return { status: "N/A", deadline: null } as const;
@@ -146,7 +150,11 @@ const ComplaintDetails: React.FC = () => {
     const typeHours = getTypeSlaHours(c.type);
 
     const reopenAt = getLastReopenAt(c.statusLogs);
-    const registeredAt = c.submittedOn ? new Date(c.submittedOn) : c.createdAt ? new Date(c.createdAt) : null;
+    const registeredAt = c.submittedOn
+      ? new Date(c.submittedOn)
+      : c.createdAt
+        ? new Date(c.createdAt)
+        : null;
     const startAt = reopenAt || registeredAt;
 
     let deadline: Date | null = null;
@@ -160,15 +168,24 @@ const ComplaintDetails: React.FC = () => {
 
     const now = new Date();
     const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
-    const resolvedAt = c.resolvedOn ? new Date(c.resolvedOn) : c.closedOn ? new Date(c.closedOn) : null;
+    const resolvedAt = c.resolvedOn
+      ? new Date(c.resolvedOn)
+      : c.closedOn
+        ? new Date(c.closedOn)
+        : null;
 
     if (isResolved && resolvedAt) {
-      return { status: resolvedAt <= deadline ? "ON_TIME" : "OVERDUE", deadline } as const;
+      return {
+        status: resolvedAt <= deadline ? "ON_TIME" : "OVERDUE",
+        deadline,
+      } as const;
     }
 
-    return { status: now > deadline ? "OVERDUE" : "ON_TIME", deadline } as const;
+    return {
+      status: now > deadline ? "OVERDUE" : "ON_TIME",
+      deadline,
+    } as const;
   };
-
 
   if (isLoading) {
     return (
@@ -359,14 +376,16 @@ const ComplaintDetails: React.FC = () => {
                     )}
                     {/* Show computed deadline and SLA status for admin/ward managers */}
                     {(user?.role === "ADMINISTRATOR" ||
-                      user?.role === "WARD_OFFICER") && (
+                      user?.role === "WARD_OFFICER") &&
                       (() => {
                         const { status, deadline } = computeSla(complaint);
                         return (
                           <>
                             <p className="text-gray-600">
                               <strong>Deadline:</strong>{" "}
-                              {deadline ? new Date(deadline).toLocaleString() : "N/A"}
+                              {deadline
+                                ? new Date(deadline).toLocaleString()
+                                : "N/A"}
                             </p>
                             <p
                               className={`text-sm font-medium ${
@@ -378,12 +397,15 @@ const ComplaintDetails: React.FC = () => {
                               }`}
                             >
                               <strong>SLA Status:</strong>{" "}
-                              {status === "ON_TIME" ? "On Time" : status === "OVERDUE" ? "Overdue" : "N/A"}
+                              {status === "ON_TIME"
+                                ? "On Time"
+                                : status === "OVERDUE"
+                                  ? "Overdue"
+                                  : "N/A"}
                             </p>
                           </>
                         );
-                      })()
-                    )}
+                      })()}
                   </div>
                 </div>
               </div>
@@ -925,15 +947,21 @@ const ComplaintDetails: React.FC = () => {
 
                 {/* Show computed SLA info for admin/ward managers */}
                 {(user?.role === "ADMINISTRATOR" ||
-                  user?.role === "WARD_OFFICER") && (
+                  user?.role === "WARD_OFFICER") &&
                   (() => {
                     const { status, deadline } = computeSla(complaint);
                     return (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm font-medium mb-1">SLA Deadline</p>
-                          <p className={`text-sm ${deadline && new Date() > deadline ? "text-red-600 font-medium" : "text-gray-600"}`}>
-                            {deadline ? new Date(deadline).toLocaleString() : "N/A"}
+                          <p className="text-sm font-medium mb-1">
+                            SLA Deadline
+                          </p>
+                          <p
+                            className={`text-sm ${deadline && new Date() > deadline ? "text-red-600 font-medium" : "text-gray-600"}`}
+                          >
+                            {deadline
+                              ? new Date(deadline).toLocaleString()
+                              : "N/A"}
                           </p>
                         </div>
 
@@ -948,16 +976,21 @@ const ComplaintDetails: React.FC = () => {
                                   : "bg-gray-100 text-gray-800"
                             }
                           >
-                            {status === "ON_TIME" ? "On Time" : status === "OVERDUE" ? "Overdue" : "N/A"}
+                            {status === "ON_TIME"
+                              ? "On Time"
+                              : status === "OVERDUE"
+                                ? "Overdue"
+                                : "N/A"}
                           </Badge>
                           {deadline && (
-                            <p className="text-xs text-gray-500 mt-1">by {new Date(deadline).toLocaleString()}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              by {new Date(deadline).toLocaleString()}
+                            </p>
                           )}
                         </div>
                       </div>
                     );
-                  })()
-                )}
+                  })()}
 
                 {/* Show priority and type for admin/ward managers */}
                 {(user?.role === "ADMINISTRATOR" ||
@@ -1176,7 +1209,6 @@ const ComplaintDetails: React.FC = () => {
                     Provide Feedback
                   </Button>
                 )}
-
             </CardContent>
           </Card>
         </div>
