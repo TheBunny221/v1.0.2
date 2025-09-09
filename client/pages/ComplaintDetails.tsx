@@ -6,6 +6,7 @@ import { useDataManager } from "../hooks/useDataManager";
 import ComplaintFeedbackDialog from "../components/ComplaintFeedbackDialog";
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
 import AttachmentPreview from "../components/AttachmentPreview";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 import {
   Card,
   CardContent,
@@ -35,6 +36,7 @@ const ComplaintDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
+  const { config } = useSystemConfig();
 
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -95,6 +97,76 @@ const ComplaintDetails: React.FC = () => {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  // SLA helpers
+  const getTypeSlaHours = (type?: string): number | null => {
+    if (!type) return null;
+    try {
+      const entries = Object.entries(config || {});
+      let hours: number | null = null;
+      for (const [key, value] of entries) {
+        if (!key.startsWith("COMPLAINT_TYPE_")) continue;
+        try {
+          const parsed = JSON.parse(value as string);
+          const name = (parsed?.name || "").toString().toUpperCase();
+          const slaHours = Number(parsed?.slaHours);
+          if (name === type.toUpperCase() && Number.isFinite(slaHours)) {
+            hours = slaHours;
+            break;
+          }
+          const suffix = key.replace("COMPLAINT_TYPE_", "").toUpperCase();
+          if (suffix === type.toUpperCase() && Number.isFinite(slaHours)) {
+            hours = slaHours;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      return hours;
+    } catch {
+      return null;
+    }
+  };
+
+  const getLastReopenAt = (logs?: any[]): Date | null => {
+    if (!Array.isArray(logs)) return null;
+    const reopenLogs = logs
+      .filter((l) => l?.toStatus === "REOPENED")
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return reopenLogs.length ? new Date(reopenLogs[0].timestamp) : null;
+  };
+
+  const addHours = (date: Date, hours: number) => new Date(date.getTime() + hours * 60 * 60 * 1000);
+
+  const computeSla = (c: any) => {
+    if (!c) return { status: "N/A", deadline: null } as const;
+
+    const typeHours = getTypeSlaHours(c.type);
+
+    const reopenAt = getLastReopenAt(c.statusLogs);
+    const registeredAt = c.submittedOn ? new Date(c.submittedOn) : c.createdAt ? new Date(c.createdAt) : null;
+    const startAt = reopenAt || registeredAt;
+
+    let deadline: Date | null = null;
+    if (startAt && Number.isFinite(typeHours)) {
+      deadline = addHours(startAt, typeHours as number);
+    } else if (c.deadline) {
+      deadline = new Date(c.deadline);
+    }
+
+    if (!deadline) return { status: "N/A", deadline: null } as const;
+
+    const now = new Date();
+    const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+    const resolvedAt = c.resolvedOn ? new Date(c.resolvedOn) : c.closedOn ? new Date(c.closedOn) : null;
+
+    if (isResolved && resolvedAt) {
+      return { status: resolvedAt <= deadline ? "ON_TIME" : "OVERDUE", deadline } as const;
+    }
+
+    return { status: now > deadline ? "OVERDUE" : "ON_TIME", deadline } as const;
   };
 
 
@@ -285,33 +357,32 @@ const ComplaintDetails: React.FC = () => {
                         {new Date(complaint.closedOn).toLocaleString()}
                       </p>
                     )}
-                    {/* Show deadline and SLA status for admin/ward managers */}
+                    {/* Show computed deadline and SLA status for admin/ward managers */}
                     {(user?.role === "ADMINISTRATOR" ||
                       user?.role === "WARD_OFFICER") && (
-                      <>
-                        {complaint.deadline && (
-                          <p className="text-gray-600">
-                            <strong>Deadline:</strong>{" "}
-                            {new Date(complaint.deadline).toLocaleString()}
-                          </p>
-                        )}
-                        {complaint.slaStatus && (
-                          <p
-                            className={`text-sm font-medium ${
-                              complaint.slaStatus === "OVERDUE"
-                                ? "text-red-600"
-                                : complaint.slaStatus === "WARNING"
-                                  ? "text-orange-600"
-                                  : complaint.slaStatus === "ON_TIME"
+                      (() => {
+                        const { status, deadline } = computeSla(complaint);
+                        return (
+                          <>
+                            <p className="text-gray-600">
+                              <strong>Deadline:</strong>{" "}
+                              {deadline ? new Date(deadline).toLocaleString() : "N/A"}
+                            </p>
+                            <p
+                              className={`text-sm font-medium ${
+                                status === "OVERDUE"
+                                  ? "text-red-600"
+                                  : status === "ON_TIME"
                                     ? "text-green-600"
                                     : "text-gray-600"
-                            }`}
-                          >
-                            <strong>SLA Status:</strong>{" "}
-                            {complaint.slaStatus.replace("_", " ")}
-                          </p>
-                        )}
-                      </>
+                              }`}
+                            >
+                              <strong>SLA Status:</strong>{" "}
+                              {status === "ON_TIME" ? "On Time" : status === "OVERDUE" ? "Overdue" : "N/A"}
+                            </p>
+                          </>
+                        );
+                      })()
                     )}
                   </div>
                 </div>
@@ -852,46 +923,40 @@ const ComplaintDetails: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Show deadline information for admin/ward managers */}
+                {/* Show computed SLA info for admin/ward managers */}
                 {(user?.role === "ADMINISTRATOR" ||
                   user?.role === "WARD_OFFICER") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {complaint.deadline && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">Deadline</p>
-                        <p
-                          className={`text-sm ${
-                            new Date(complaint.deadline) < new Date()
-                              ? "text-red-600 font-medium"
-                              : "text-gray-600"
-                          }`}
-                        >
-                          {new Date(complaint.deadline).toLocaleString()}
-                          {new Date(complaint.deadline) < new Date() &&
-                            " (Overdue)"}
-                        </p>
-                      </div>
-                    )}
+                  (() => {
+                    const { status, deadline } = computeSla(complaint);
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-medium mb-1">SLA Deadline</p>
+                          <p className={`text-sm ${deadline && new Date() > deadline ? "text-red-600 font-medium" : "text-gray-600"}`}>
+                            {deadline ? new Date(deadline).toLocaleString() : "N/A"}
+                          </p>
+                        </div>
 
-                    {complaint.slaStatus && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">SLA Status</p>
-                        <Badge
-                          className={
-                            complaint.slaStatus === "OVERDUE"
-                              ? "bg-red-100 text-red-800"
-                              : complaint.slaStatus === "WARNING"
-                                ? "bg-orange-100 text-orange-800"
-                                : complaint.slaStatus === "ON_TIME"
+                        <div>
+                          <p className="text-sm font-medium mb-1">SLA Status</p>
+                          <Badge
+                            className={
+                              status === "OVERDUE"
+                                ? "bg-red-100 text-red-800"
+                                : status === "ON_TIME"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-gray-100 text-gray-800"
-                          }
-                        >
-                          {complaint.slaStatus.replace("_", " ")}
-                        </Badge>
+                            }
+                          >
+                            {status === "ON_TIME" ? "On Time" : status === "OVERDUE" ? "Overdue" : "N/A"}
+                          </Badge>
+                          {deadline && (
+                            <p className="text-xs text-gray-500 mt-1">by {new Date(deadline).toLocaleString()}</p>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()
                 )}
 
                 {/* Show priority and type for admin/ward managers */}
