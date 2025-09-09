@@ -86,23 +86,31 @@ function PdfViewer({ url }: { url: string }) {
     setError(null);
     setNumPages(0);
     pdfRef.current = null;
-    (async () => {
-      try {
-        GlobalWorkerOptions.workerSrc = pdfWorkerSrcUrl as any;
-        let pdf;
+
+    GlobalWorkerOptions.workerSrc = pdfWorkerSrcUrl as any;
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "arraybuffer";
+    xhr.withCredentials = true;
+    xhr.onload = async () => {
+      if (cancelled) return;
+      if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
         try {
-          pdf = await getDocument({ url, withCredentials: true }).promise;
-        } catch {
-          pdf = await getDocument({ url, withCredentials: false }).promise;
+          const pdf = await getDocument({ data: xhr.response }).promise;
+          if (cancelled) return;
+          pdfRef.current = pdf;
+          setNumPages(pdf.numPages);
+        } catch (e) {
+          if (!cancelled) setError("failed");
         }
-        if (cancelled) return;
-        pdfRef.current = pdf;
-        setNumPages(pdf.numPages);
-      } catch (e) {
+      } else {
         if (!cancelled) setError("failed");
       }
-    })();
-    return () => { cancelled = true; };
+    };
+    xhr.onerror = () => { if (!cancelled) setError("failed"); };
+    xhr.send();
+
+    return () => { cancelled = true; xhr.abort(); };
   }, [url]);
 
   // Render pages when scale or numPages changes
