@@ -58,7 +58,7 @@ function isDoc(mime?: string | null, url?: string) {
 function PdfViewer({ url }: { url: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerSizerRef = useRef<HTMLDivElement>(null);
-  const pageRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [numPages, setNumPages] = useState<number>(0);
   const [scale, setScale] = useState<number>(1);
   const [containerWidth, setContainerWidth] = useState<number>(800);
