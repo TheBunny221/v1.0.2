@@ -1353,7 +1353,11 @@ const ComplaintDetails: React.FC = () => {
               <Button
                 variant="outline"
                 className="w-full justify-start"
-                onClick={handleExportDetails}
+                onClick={async () => {
+                if (!complaint) return;
+                const { exportComplaintReport } = await import("../utils/exportReport");
+                await exportComplaintReport(complaint, user?.role || "CITIZEN", { orientation: "p", title: "Complaint Report" });
+              }}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export Details
