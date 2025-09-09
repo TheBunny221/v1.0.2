@@ -37,7 +37,22 @@ function isImage(mime?: string | null, url?: string) {
 export type ExportOptions = {
   orientation?: "p" | "l";
   title?: string;
+  appName?: string;
+  appLogoUrl?: string;
 };
+
+function formatDate(dt?: string | number | Date) {
+  if (!dt) return "-";
+  const d = new Date(dt);
+  const day = String(d.getDate()).padStart(2, "0");
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const mon = months[d.getMonth()];
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${day} ${mon} ${d.getFullYear()}, ${hours}:${minutes} ${ampm}`;
+}
 
 export async function exportComplaintReport(complaint: any, role: string, options: ExportOptions = {}) {
   const jsPDF = _jsPDF as unknown as typeof _jsPDF;
@@ -62,6 +77,8 @@ export async function exportComplaintReport(complaint: any, role: string, option
   };
 
   const headerTitle = options.title || "Complaint Report";
+  const appName = options.appName || "Cochin Smart City";
+  const logoDataUrl = options.appLogoUrl ? await fetchImageDataURL(options.appLogoUrl) : null;
 
   const drawHeaderFooter = () => {
     const total = doc.getNumberOfPages();
@@ -69,11 +86,23 @@ export async function exportComplaintReport(complaint: any, role: string, option
       doc.setPage(i);
       // Header bar
       doc.setFillColor(...gray as any);
-      doc.rect(0, 0, pageWidth, 56, "F");
+      doc.rect(0, 0, pageWidth, 64, "F");
+
+      // Logo (left)
+      if (logoDataUrl) {
+        try {
+          doc.addImage(logoDataUrl, "PNG", margin, 14, 96, 32);
+        } catch {}
+      }
+
+      // Title (center)
       doc.setTextColor(primary[0], primary[1], primary[2]);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
-      doc.text(headerTitle, margin, 34);
+      const titleX = pageWidth / 2 - doc.getTextWidth(headerTitle) / 2;
+      doc.text(headerTitle, titleX, 34);
+
+      // Complaint ID (right)
       const idText = `#${complaint?.complaintId || complaint?.id || "-"}`;
       doc.setFont("helvetica", "normal");
       doc.setTextColor(60, 60, 60);
@@ -88,7 +117,8 @@ export async function exportComplaintReport(complaint: any, role: string, option
       doc.setTextColor(120);
       const pageTxt = `Page ${i} of ${total}`;
       doc.text(pageTxt, pageWidth - margin - doc.getTextWidth(pageTxt), footerY);
-      doc.text(new Date().toLocaleString(), margin, footerY);
+      const genTxt = `Generated ${formatDate(new Date())} • ${appName}`;
+      doc.text(genTxt, margin, footerY);
     }
     doc.setPage(total);
   };
@@ -143,7 +173,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
   if (complaint.type) kv("Type", complaint.type.replace(/_/g, " "));
   if (complaint.priority) kv("Priority", complaint.priority);
   if (complaint.status) kv("Status", complaint.status.replace(/_/g, " "));
-  if (complaint.submittedOn) kv("Submitted", new Date(complaint.submittedOn).toLocaleString());
+  if (complaint.submittedOn) kv("Submitted", formatDate(complaint.submittedOn));
 
   // Role-based: Assigned staff
   const showAssignments = ["ADMINISTRATOR", "WARD_OFFICER", "MAINTENANCE_TEAM"].includes(role);
@@ -152,7 +182,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
     if (complaint.wardOfficer?.fullName) kv("Ward Officer", complaint.wardOfficer.fullName);
     if (complaint.maintenanceTeam?.fullName) kv("Maintenance Team", complaint.maintenanceTeam.fullName);
     if (complaint.assignedTo?.fullName) kv("Assigned To", complaint.assignedTo.fullName);
-    if (complaint.assignedOn) kv("Assigned On", new Date(complaint.assignedOn).toLocaleString());
+    if (complaint.assignedOn) kv("Assigned On", formatDate(complaint.assignedOn));
   }
 
   // Description (all roles)
@@ -167,9 +197,25 @@ export async function exportComplaintReport(complaint: any, role: string, option
     section(role === "CITIZEN" ? "Status History" : "Status & Progress Logs");
     if (complaint.statusLogs && complaint.statusLogs.length > 0) {
       complaint.statusLogs.forEach((log: any, idx: number) => {
-        const label = `${idx + 1}. ${log.fromStatus ? `${log.fromStatus} → ` : ""}${log.toStatus}`;
-        kv(label, new Date(log.timestamp).toLocaleString());
-        if (log.comment && role !== "CITIZEN") paragraph(`Remarks: ${log.comment}`);
+        ensureSpace(28);
+        // Timeline bullet
+        doc.setFillColor(primary[0], primary[1], primary[2]);
+        doc.circle(margin + 4, y - 6, 3, "F");
+        // Status label
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(30);
+        const statusText = `${idx + 1}. ${log.fromStatus ? `${log.fromStatus} → ` : ""}${log.toStatus}`;
+        doc.text(statusText, margin + 14, y);
+        y += 14;
+        // Timestamp & remarks
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80);
+        doc.setFontSize(10);
+        doc.text(formatDate(log.timestamp), margin + 14, y);
+        y += 14;
+        if (log.comment && role !== "CITIZEN") {
+          paragraph(`Remarks: ${log.comment}`);
+        }
       });
     } else {
       paragraph("No status updates available.");
@@ -183,39 +229,52 @@ export async function exportComplaintReport(complaint: any, role: string, option
   }
 
   // Attachments
-  const allImages: { name: string; dataUrl: string }[] = [];
-  const allDocs: { name: string; type: string; url: string }[] = [];
+  const compImages: { name: string; dataUrl: string }[] = [];
+  const compDocs: { name: string; type: string; url: string }[] = [];
+  const teamImages: { name: string; dataUrl: string }[] = [];
+  const teamDocs: { name: string; type: string; url: string }[] = [];
 
-  const pushAttachment = async (name: string, url: string, type?: string | null) => {
+  const pushAttachment = async (bucket: "comp" | "team", name: string, url: string, type?: string | null) => {
     if (isImage(type || undefined, url)) {
       const dataUrl = await fetchImageDataURL(url);
-      if (dataUrl) allImages.push({ name, dataUrl });
+      if (dataUrl) (bucket === "comp" ? compImages : teamImages).push({ name, dataUrl });
     } else {
-      allDocs.push({ name, type: type || "", url });
+      (bucket === "comp" ? compDocs : teamDocs).push({ name, type: type || "", url });
     }
   };
 
   if (complaint.attachments && complaint.attachments.length) {
     for (const a of complaint.attachments) {
-      await pushAttachment(a.originalName || a.fileName, a.url, a.mimeType);
+      await pushAttachment("comp", a.originalName || a.fileName, a.url, a.mimeType);
     }
   }
   if (complaint.photos && complaint.photos.length) {
     for (const p of complaint.photos) {
-      await pushAttachment(p.originalName || p.fileName, p.photoUrl, "image/*");
+      await pushAttachment("team", p.originalName || p.fileName, p.photoUrl, "image/*");
     }
   }
 
   section("Attachments");
-  if (allImages.length === 0 && allDocs.length === 0) {
-    paragraph("No attachments available.");
-  } else {
+  const renderAttachmentGroup = (title: string, images: typeof compImages, docs: typeof compDocs) => {
+    ensureSpace(18);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+    doc.text(title, margin, y);
+    y += 12;
+
+    if (images.length === 0 && docs.length === 0) {
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(70);
+      paragraph("None");
+      return;
+    }
+
     // Image thumbnails
-    for (const img of allImages) {
+    for (const img of images) {
       ensureSpace(140);
       const maxW = pageWidth - margin * 2;
       const thumbW = Math.min(240, maxW);
-      // Add image
       try {
         doc.addImage(img.dataUrl, "JPEG", margin, y, thumbW, thumbW * 0.62, undefined, "FAST");
         y += thumbW * 0.62 + 6;
@@ -228,19 +287,13 @@ export async function exportComplaintReport(complaint: any, role: string, option
     }
 
     // Document links
-    if (allDocs.length) {
-      ensureSpace(18);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.setTextColor(50);
-      doc.text("Documents", margin, y);
-      y += 14;
+    if (docs.length) {
       doc.setFont("helvetica", "normal");
       doc.setTextColor(70);
-      for (const d of allDocs) {
+      for (const d of docs) {
         ensureSpace(14);
-        const label = `${d.name} (${d.type || "file"})`;
-        // Fallback if textWithLink not supported in this build
+        const icon = d.type?.includes("pdf") ? "📄" : "📄";
+        const label = `${icon} ${d.name} (${d.type || "file"})`;
         try {
           // @ts-ignore
           if (doc.textWithLink) {
@@ -255,7 +308,10 @@ export async function exportComplaintReport(complaint: any, role: string, option
         y += 14;
       }
     }
-  }
+  };
+
+  renderAttachmentGroup("Complaint Attachments", compImages, compDocs);
+  renderAttachmentGroup("Maintenance Team Attachments", teamImages, teamDocs);
 
   // Citizen view specific resolution summary
   if (role === "CITIZEN" && complaint.status) {
@@ -265,6 +321,15 @@ export async function exportComplaintReport(complaint: any, role: string, option
         ? "Your complaint has been addressed. Thank you for your patience."
         : "Your complaint is being processed. You will be notified on updates."
     );
+  }
+
+  // Role-based filtering (hide internal notes or assignments for limited roles)
+  if (role === "MAINTENANCE_TEAM") {
+    // Already shows assignments/logs/attachments; avoid extra personal info
+  } else if (role === "WARD_OFFICER") {
+    // Current sections are appropriate
+  } else if (role === "ADMINISTRATOR") {
+    // Full details already included
   }
 
   // Finalize with headers/footers on all pages (already drawn) and save
