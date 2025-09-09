@@ -67,7 +67,7 @@ function PdfViewer({ url }: { url: string }) {
   const pdfRef = useRef<import("pdfjs-dist").PDFDocumentProxy | null>(null);
 
   useEffect(() => {
-    GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
+    GlobalWorkerOptions.workerSrc = pdfWorkerSrcUrl as any;
   }, []);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ function PdfViewer({ url }: { url: string }) {
     pdfRef.current = null;
     (async () => {
       try {
-        GlobalWorkerOptions.workerSrc = pdfWorkerSrc as any;
+        GlobalWorkerOptions.workerSrc = pdfWorkerSrcUrl as any;
         let pdf;
         try {
           pdf = await getDocument({ url, withCredentials: true }).promise;
