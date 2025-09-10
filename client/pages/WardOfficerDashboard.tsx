@@ -476,6 +476,7 @@ const WardOfficerDashboard: React.FC = () => {
                 yAxisLabel: "Sub-zone",
               }
             }
+            className="min-h-[420px]"
           />
           {overviewHeatmapLoading && <div className="mt-2 text-xs text-muted-foreground">Loading heatmap...</div>}
         </CardContent>
