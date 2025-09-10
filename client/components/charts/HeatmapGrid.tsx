@@ -62,14 +62,37 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
         ) : (
           <div className="w-full overflow-x-auto">
             <div className="inline-block min-w-full">
-              {/* Header row */}
-              <div className="grid" style={{ gridTemplateColumns: `160px repeat(${xLabels.length}, minmax(80px, 1fr))` }}>
+              {/* Header row with rotated/truncated labels and tooltips */}
+              <div
+                className="grid items-end"
+                style={{ gridTemplateColumns: `160px repeat(${xLabels.length}, minmax(80px, 1fr))` }}
+              >
                 <div className="p-2 text-xs font-medium text-right pr-3 flex items-end justify-end">
-                  <span className="rotate-0 md:-rotate-90 origin-bottom-left whitespace-nowrap">{yAxisLabel}</span>
+                  <span className="whitespace-nowrap font-medium">{yAxisLabel}</span>
                 </div>
                 {xLabels.map((x, xi) => (
-                  <div key={xi} className="p-2 text-[11px] md:text-xs font-medium text-muted-foreground text-center">
-                    {x}
+                  <div
+                    key={xi}
+                    className="p-2 text-[11px] md:text-xs font-medium text-muted-foreground text-center"
+                    style={{ minHeight: 56 }}
+                  >
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-full flex items-end justify-center">
+                            <span
+                              className="max-w-[80px] md:max-w-[140px] truncate block text-center md:inline-block md:-rotate-45 md:origin-bottom-left"
+                              title={x}
+                            >
+                              {x}
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="text-xs max-w-[220px]">{x}</div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 ))}
               </div>
