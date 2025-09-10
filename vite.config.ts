@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
     envVars.VITE_HOST ||
     envVars.CLIENT_HOST ||
     envVars.HOST ||
-    "0.0.0.0";
+    "::";
   const clientPort = Number(
     envVars.VITE_CLIENT_PORT ||
       envVars.VITE_PORT ||
@@ -31,7 +31,10 @@ export default defineConfig(({ mode }) => {
       3000,
   );
   const hmrPort = Number(
-    envVars.VITE_HMR_PORT || envVars.HMR_PORT || envVars.WS_PORT || clientPort,
+    envVars.VITE_HMR_PORT ||
+      envVars.HMR_PORT ||
+      envVars.WS_PORT ||
+      clientPort + 1,
   );
 
   // Resolve API backend target
