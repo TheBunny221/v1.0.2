@@ -1360,6 +1360,99 @@ const AdminConfig: React.FC = () => {
                   </div>
                 </div>
 
+                {/* General Settings */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Shield className="h-5 w-5 mr-2" />
+                    General Settings
+                  </h3>
+                  <div className="space-y-4">
+                    {(() => {
+                      const keys = [
+                        "DATE_TIME_FORMAT",
+                        "TIME_ZONE",
+                        "DEFAULT_SLA_HOURS",
+                        "OTP_EXPIRY_MINUTES",
+                        "MAX_FILE_SIZE_MB",
+                        "NOTIFICATION_SETTINGS",
+                        "ADMIN_EMAIL",
+                      ];
+                      return keys
+                        .map((k) => systemSettings.find((s) => s.key === k))
+                        .filter(Boolean)
+                        .map((setting) => (
+                          <div key={setting!.key} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-1">
+                                <h4 className="font-medium">{({
+                                  DATE_TIME_FORMAT: "Date & Time Format",
+                                  TIME_ZONE: "Time Zone",
+                                  DEFAULT_SLA_HOURS: "Default SLA (hours)",
+                                  OTP_EXPIRY_MINUTES: "OTP Expiry (minutes)",
+                                  MAX_FILE_SIZE_MB: "Max File Size (MB)",
+                                  NOTIFICATION_SETTINGS: "Notification Settings",
+                                  ADMIN_EMAIL: "Administrator Email",
+                                } as any)[setting!.key] || setting!.key}</h4>
+                                <p className="text-sm text-gray-600">{setting!.description}</p>
+                              </div>
+                            </div>
+
+                            <div className="mt-3">
+                              {setting!.key === "NOTIFICATION_SETTINGS" ? (
+                                <Textarea
+                                  value={setting!.value}
+                                  onChange={(e) =>
+                                    setSystemSettings((prev) =>
+                                      prev.map((s) =>
+                                        s.key === setting!.key
+                                          ? { ...s, value: e.target.value }
+                                          : s,
+                                      ),
+                                    )
+                                  }
+                                  onBlur={(e) => handleUpdateSystemSetting(setting!.key, e.target.value)}
+                                  className="max-w-md"
+                                />
+                              ) : setting!.type === "number" ? (
+                                <Input
+                                  type="number"
+                                  value={setting!.value}
+                                  onChange={(e) =>
+                                    setSystemSettings((prev) =>
+                                      prev.map((s) =>
+                                        s.key === setting!.key
+                                          ? { ...s, value: e.target.value }
+                                          : s,
+                                      ),
+                                    )
+                                  }
+                                  onBlur={(e) => handleUpdateSystemSetting(setting!.key, e.target.value)}
+                                  className="max-w-md"
+                                />
+                              ) : (
+                                <Input
+                                  type="text"
+                                  value={setting!.value}
+                                  onChange={(e) =>
+                                    setSystemSettings((prev) =>
+                                      prev.map((s) =>
+                                        s.key === setting!.key
+                                          ? { ...s, value: e.target.value }
+                                          : s,
+                                      ),
+                                    )
+                                  }
+                                  onBlur={(e) => handleUpdateSystemSetting(setting!.key, e.target.value)}
+                                  className="max-w-md"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        ));
+                    })()}
+                  </div>
+                </div>
+
                 {/* Complaint ID Configuration */}
                 <div>
                   <h3 className="text-lg font-medium mb-4 flex items-center">
