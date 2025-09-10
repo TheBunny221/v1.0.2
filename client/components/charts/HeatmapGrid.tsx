@@ -81,8 +81,9 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
                         <TooltipTrigger asChild>
                           <div className="w-full flex items-end justify-center">
                             <span
-                              className="max-w-[80px] md:max-w-[140px] truncate block text-center md:inline-block md:-rotate-45 md:origin-bottom-left"
+                              className="max-w-[80px] md:max-w-[140px] truncate block text-center md:inline-block md:-rotate-45"
                               title={x}
+                              style={{ transformOrigin: 'bottom left' }}
                             >
                               {x}
                             </span>
