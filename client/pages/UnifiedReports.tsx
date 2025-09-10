@@ -380,7 +380,12 @@ const UnifiedReports: React.FC = () => {
   // Do not auto clear analytics when filters change; wait for Generate Report
 
   // Complaint types for readable labels
-  const { complaintTypes, isLoading: complaintTypesLoading, getComplaintTypeById, getComplaintTypeByName } = useComplaintTypes();
+  const {
+    complaintTypes,
+    isLoading: complaintTypesLoading,
+    getComplaintTypeById,
+    getComplaintTypeByName,
+  } = useComplaintTypes();
 
   // Heatmap fetcher
   async function fetchHeatmapData() {
@@ -398,21 +403,34 @@ const UnifiedReports: React.FC = () => {
         queryParams.set("ward", user.wardId);
       }
       const baseUrl = window.location.origin;
-      const resp = await fetch(`${baseUrl}/api/reports/heatmap?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
+      const resp = await fetch(
+        `${baseUrl}/api/reports/heatmap?${queryParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
-      if (!resp.ok) throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
+      );
+      if (!resp.ok)
+        throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
       const json = await resp.json();
 
       // Use server-provided labels directly (server returns display names)
-      const apiData = json.data as HeatmapData & { xTypeKeys?: string[]; meta?: any };
+      const apiData = json.data as HeatmapData & {
+        xTypeKeys?: string[];
+        meta?: any;
+      };
       setHeatmapData(apiData as HeatmapData);
     } catch (e) {
       console.warn("Heatmap fetch failed", e);
-      setHeatmapData({ xLabels: [], yLabels: [], matrix: [], xAxisLabel: "", yAxisLabel: "" });
+      setHeatmapData({
+        xLabels: [],
+        yLabels: [],
+        matrix: [],
+        xAxisLabel: "",
+        yAxisLabel: "",
+      });
     } finally {
       setHeatmapLoading(false);
     }
@@ -1555,10 +1573,15 @@ const UnifiedReports: React.FC = () => {
             </div>
 
             {/* Heatmap */}
-            {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+            {(user?.role === "ADMINISTRATOR" ||
+              user?.role === "WARD_OFFICER") && (
               <div className="mt-6">
                 <HeatmapGrid
-                  title={user?.role === "ADMINISTRATOR" ? "Complaints × Wards Heatmap" : "Complaints × Sub-zones Heatmap"}
+                  title={
+                    user?.role === "ADMINISTRATOR"
+                      ? "Complaints × Wards Heatmap"
+                      : "Complaints × Sub-zones Heatmap"
+                  }
                   description={
                     user?.role === "ADMINISTRATOR"
                       ? "Distribution of complaints by type across all wards"
@@ -1570,13 +1593,15 @@ const UnifiedReports: React.FC = () => {
                       yLabels: [],
                       matrix: [],
                       xAxisLabel: "Complaint Type",
-                      yAxisLabel: user?.role === "ADMINISTRATOR" ? "Ward" : "Sub-zone",
+                      yAxisLabel:
+                        user?.role === "ADMINISTRATOR" ? "Ward" : "Sub-zone",
                     }
                   }
                 />
                 {heatmapLoading && (
                   <div className="h-8 flex items-center text-xs text-muted-foreground mt-2">
-                    <RefreshCw className="h-3 w-3 mr-2 animate-spin" /> Updating heatmap...
+                    <RefreshCw className="h-3 w-3 mr-2 animate-spin" /> Updating
+                    heatmap...
                   </div>
                 )}
               </div>

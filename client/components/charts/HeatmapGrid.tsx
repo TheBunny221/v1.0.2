@@ -1,6 +1,11 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 import { Badge } from "../ui/badge";
 import { Info } from "lucide-react";
 
@@ -26,7 +31,12 @@ function getOpacity(value: number, min: number, max: number) {
   return Math.max(0.12, Math.min(0.95, ratio * 0.9 + 0.05));
 }
 
-export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, data, className }) => {
+export const HeatmapGrid: React.FC<HeatmapGridProps> = ({
+  title,
+  description,
+  data,
+  className,
+}) => {
   const { xLabels, yLabels, matrix, xAxisLabel, yAxisLabel } = data;
   const flat = matrix.flat();
   const min = Math.min(...flat);
@@ -65,10 +75,14 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
               {/* Header row with rotated/truncated labels and tooltips */}
               <div
                 className="grid items-end"
-                style={{ gridTemplateColumns: `200px repeat(${xLabels.length}, minmax(100px, 1fr))` }}
+                style={{
+                  gridTemplateColumns: `200px repeat(${xLabels.length}, minmax(100px, 1fr))`,
+                }}
               >
                 <div className="p-3 text-xs font-medium text-right pr-4 flex items-end justify-end">
-                  <span className="whitespace-nowrap font-medium">{yAxisLabel}</span>
+                  <span className="whitespace-nowrap font-medium">
+                    {yAxisLabel}
+                  </span>
                 </div>
                 {xLabels.map((x, xi) => (
                   <div
@@ -83,7 +97,10 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
                             <span
                               className="max-w-[140px] block text-center whitespace-normal break-words md:inline-block md:max-w-[180px] md:truncate md:-rotate-45"
                               title={x}
-                              style={{ transformOrigin: 'bottom center', display: 'inline-block' }}
+                              style={{
+                                transformOrigin: "bottom center",
+                                display: "inline-block",
+                              }}
                             >
                               {x}
                             </span>
@@ -100,7 +117,13 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
 
               {/* Grid rows */}
               {yLabels.map((y, yi) => (
-                <div key={yi} className="grid" style={{ gridTemplateColumns: `160px repeat(${xLabels.length}, minmax(80px, 1fr))` }}>
+                <div
+                  key={yi}
+                  className="grid"
+                  style={{
+                    gridTemplateColumns: `160px repeat(${xLabels.length}, minmax(80px, 1fr))`,
+                  }}
+                >
                   {/* Y label */}
                   <div className="p-2 text-xs text-right pr-3 font-medium text-foreground/80 border-t">
                     {y}
@@ -115,7 +138,9 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
                           <TooltipTrigger asChild>
                             <div
                               className="h-10 md:h-12 border-t border-l flex items-center justify-center text-[11px] md:text-xs"
-                              style={{ backgroundColor: `hsl(var(--primary) / ${opacity})` }}
+                              style={{
+                                backgroundColor: `hsl(var(--primary) / ${opacity})`,
+                              }}
                               aria-label={`${y} × ${xLabels[xi]}: ${v}`}
                             >
                               <span className="text-primary-foreground font-medium">
@@ -126,8 +151,12 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
                           <TooltipContent>
                             <div className="space-y-1">
                               <div className="text-xs font-medium">{y}</div>
-                              <div className="text-xs text-muted-foreground">{xLabels[xi]}</div>
-                              <Badge variant="outline" className="text-[11px]">{v} complaints</Badge>
+                              <div className="text-xs text-muted-foreground">
+                                {xLabels[xi]}
+                              </div>
+                              <Badge variant="outline" className="text-[11px]">
+                                {v} complaints
+                              </Badge>
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -138,7 +167,12 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({ title, description, da
               ))}
 
               {/* X axis label */}
-              <div className="grid" style={{ gridTemplateColumns: `160px repeat(${xLabels.length}, minmax(80px, 1fr))` }}>
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `160px repeat(${xLabels.length}, minmax(80px, 1fr))`,
+                }}
+              >
                 <div />
                 <div className="col-span-full p-2 text-xs text-center text-muted-foreground mt-2">
                   {xAxisLabel}

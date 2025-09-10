@@ -737,8 +737,15 @@ router.get(
       if (req.user.role === "ADMINISTRATOR") {
         // Admin: Y-axis wards (all wards), X-axis complaint types present in filtered data
         const [wards, typesGroup] = await Promise.all([
-          prisma.ward.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-          prisma.complaint.groupBy({ by: ["type"], where, _count: { _all: true } }),
+          prisma.ward.findMany({
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+          }),
+          prisma.complaint.groupBy({
+            by: ["type"],
+            where,
+            _count: { _all: true },
+          }),
         ]);
 
         // Original type keys sorted by count
@@ -779,7 +786,9 @@ router.get(
             // ignore parse errors
           }
         }
-        const xLabelsDisplay = xTypeKeys.map((k) => typeNameMap.get(k) || k || "Others");
+        const xLabelsDisplay = xTypeKeys.map(
+          (k) => typeNameMap.get(k) || k || "Others",
+        );
 
         return res.json({
           success: true,
@@ -805,7 +814,11 @@ router.get(
             select: { id: true, name: true },
             orderBy: { name: "asc" },
           }),
-          prisma.complaint.groupBy({ by: ["type"], where: { ...where, wardId }, _count: { _all: true } }),
+          prisma.complaint.groupBy({
+            by: ["type"],
+            where: { ...where, wardId },
+            _count: { _all: true },
+          }),
         ]);
 
         const xTypeKeys = typesGroup
@@ -844,7 +857,9 @@ router.get(
             // ignore parse errors
           }
         }
-        const xLabelsDisplay = xTypeKeys.map((k) => typeNameMap.get(k) || k || "Others");
+        const xLabelsDisplay = xTypeKeys.map(
+          (k) => typeNameMap.get(k) || k || "Others",
+        );
 
         return res.json({
           success: true,

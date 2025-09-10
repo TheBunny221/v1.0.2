@@ -1281,21 +1281,33 @@ const AdminConfig: React.FC = () => {
                   </h3>
                   <div className="space-y-4">
                     {(() => {
-                      const s = systemSettings.find((x) => x.key === "APP_NAME");
+                      const s = systemSettings.find(
+                        (x) => x.key === "APP_NAME",
+                      );
                       if (!s) return null;
                       return (
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2">
                             <h4 className="font-medium">Application Name</h4>
-                            <p className="text-sm text-gray-600">Shown in headers, emails and PDFs.</p>
+                            <p className="text-sm text-gray-600">
+                              Shown in headers, emails and PDFs.
+                            </p>
                           </div>
                           <Input
                             type="text"
                             value={s.value}
                             onChange={(e) =>
-                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
+                              setSystemSettings((prev) =>
+                                prev.map((it) =>
+                                  it.key === s.key
+                                    ? { ...it, value: e.target.value }
+                                    : it,
+                                ),
+                              )
                             }
-                            onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateSystemSetting(s.key, e.target.value)
+                            }
                             placeholder="Enter application name"
                             className="max-w-md"
                           />
@@ -1303,26 +1315,50 @@ const AdminConfig: React.FC = () => {
                       );
                     })()}
                     {(() => {
-                      const s = systemSettings.find((x) => x.key === "APP_LOGO_URL");
+                      const s = systemSettings.find(
+                        (x) => x.key === "APP_LOGO_URL",
+                      );
                       if (!s) return null;
                       return (
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2 flex items-center justify-between">
                             <div>
-                              <h4 className="font-medium">Application Logo URL</h4>
-                              <p className="text-sm text-gray-600">Public URL for the logo shown in the header and PDFs.</p>
+                              <h4 className="font-medium">
+                                Application Logo URL
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                Public URL for the logo shown in the header and
+                                PDFs.
+                              </p>
                             </div>
                             {s.value && (
-                              <img src={s.value} alt="Logo" className="h-10 w-10 object-contain border rounded ml-4" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
+                              <img
+                                src={s.value}
+                                alt="Logo"
+                                className="h-10 w-10 object-contain border rounded ml-4"
+                                onError={(e) =>
+                                  ((
+                                    e.target as HTMLImageElement
+                                  ).style.display = "none")
+                                }
+                              />
                             )}
                           </div>
                           <Input
                             type="text"
                             value={s.value}
                             onChange={(e) =>
-                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
+                              setSystemSettings((prev) =>
+                                prev.map((it) =>
+                                  it.key === s.key
+                                    ? { ...it, value: e.target.value }
+                                    : it,
+                                ),
+                              )
                             }
-                            onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateSystemSetting(s.key, e.target.value)
+                            }
                             placeholder="https://.../logo.png"
                             className="max-w-md"
                           />
@@ -1330,18 +1366,27 @@ const AdminConfig: React.FC = () => {
                       );
                     })()}
                     {(() => {
-                      const s = systemSettings.find((x) => x.key === "APP_LOGO_SIZE");
+                      const s = systemSettings.find(
+                        (x) => x.key === "APP_LOGO_SIZE",
+                      );
                       if (!s) return null;
                       return (
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2">
                             <h4 className="font-medium">Logo Size</h4>
-                            <p className="text-sm text-gray-600">Controls the displayed logo size (small/medium/large).</p>
+                            <p className="text-sm text-gray-600">
+                              Controls the displayed logo size
+                              (small/medium/large).
+                            </p>
                           </div>
                           <Select
                             value={s.value}
                             onValueChange={(value) => {
-                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value } : it)));
+                              setSystemSettings((prev) =>
+                                prev.map((it) =>
+                                  it.key === s.key ? { ...it, value } : it,
+                                ),
+                              );
                               handleUpdateSystemSetting(s.key, value);
                             }}
                           >
@@ -1381,19 +1426,30 @@ const AdminConfig: React.FC = () => {
                         .map((k) => systemSettings.find((s) => s.key === k))
                         .filter(Boolean)
                         .map((setting) => (
-                          <div key={setting!.key} className="border rounded-lg p-4">
+                          <div
+                            key={setting!.key}
+                            className="border rounded-lg p-4"
+                          >
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex-1">
-                                <h4 className="font-medium">{({
-                                  DATE_TIME_FORMAT: "Date & Time Format",
-                                  TIME_ZONE: "Time Zone",
-                                  DEFAULT_SLA_HOURS: "Default SLA (hours)",
-                                  OTP_EXPIRY_MINUTES: "OTP Expiry (minutes)",
-                                  MAX_FILE_SIZE_MB: "Max File Size (MB)",
-                                  NOTIFICATION_SETTINGS: "Notification Settings",
-                                  ADMIN_EMAIL: "Administrator Email",
-                                } as any)[setting!.key] || setting!.key}</h4>
-                                <p className="text-sm text-gray-600">{setting!.description}</p>
+                                <h4 className="font-medium">
+                                  {(
+                                    {
+                                      DATE_TIME_FORMAT: "Date & Time Format",
+                                      TIME_ZONE: "Time Zone",
+                                      DEFAULT_SLA_HOURS: "Default SLA (hours)",
+                                      OTP_EXPIRY_MINUTES:
+                                        "OTP Expiry (minutes)",
+                                      MAX_FILE_SIZE_MB: "Max File Size (MB)",
+                                      NOTIFICATION_SETTINGS:
+                                        "Notification Settings",
+                                      ADMIN_EMAIL: "Administrator Email",
+                                    } as any
+                                  )[setting!.key] || setting!.key}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {setting!.description}
+                                </p>
                               </div>
                             </div>
 
@@ -1410,7 +1466,12 @@ const AdminConfig: React.FC = () => {
                                       ),
                                     )
                                   }
-                                  onBlur={(e) => handleUpdateSystemSetting(setting!.key, e.target.value)}
+                                  onBlur={(e) =>
+                                    handleUpdateSystemSetting(
+                                      setting!.key,
+                                      e.target.value,
+                                    )
+                                  }
                                   className="max-w-md"
                                 />
                               ) : setting!.type === "number" ? (
@@ -1426,7 +1487,12 @@ const AdminConfig: React.FC = () => {
                                       ),
                                     )
                                   }
-                                  onBlur={(e) => handleUpdateSystemSetting(setting!.key, e.target.value)}
+                                  onBlur={(e) =>
+                                    handleUpdateSystemSetting(
+                                      setting!.key,
+                                      e.target.value,
+                                    )
+                                  }
                                   className="max-w-md"
                                 />
                               ) : (
@@ -1442,7 +1508,12 @@ const AdminConfig: React.FC = () => {
                                       ),
                                     )
                                   }
-                                  onBlur={(e) => handleUpdateSystemSetting(setting!.key, e.target.value)}
+                                  onBlur={(e) =>
+                                    handleUpdateSystemSetting(
+                                      setting!.key,
+                                      e.target.value,
+                                    )
+                                  }
                                   className="max-w-md"
                                 />
                               )}
@@ -1474,7 +1545,6 @@ const AdminConfig: React.FC = () => {
                                 {setting.description}
                               </p>
                             </div>
-
                           </div>
                           <div className="mt-3">
                             <Input
@@ -1567,7 +1637,6 @@ const AdminConfig: React.FC = () => {
                                 location
                               </p>
                             </div>
-
                           </div>
                           <div className="mt-3">
                             <Select
@@ -1635,29 +1704,64 @@ const AdminConfig: React.FC = () => {
                     Map & Location Settings
                   </h3>
                   <div className="space-y-4">
-                    {systemSettings.filter((s) => s.key.startsWith("MAP_")).length === 0 && (
+                    {systemSettings.filter((s) => s.key.startsWith("MAP_"))
+                      .length === 0 && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
                         No map settings configured yet.
                       </div>
                     )}
                     {/* Core map settings */}
                     {systemSettings
-                      .filter((s) => ["MAP_SEARCH_PLACE","MAP_DEFAULT_LAT","MAP_DEFAULT_LNG"].includes(s.key))
+                      .filter((s) =>
+                        [
+                          "MAP_SEARCH_PLACE",
+                          "MAP_DEFAULT_LAT",
+                          "MAP_DEFAULT_LNG",
+                        ].includes(s.key),
+                      )
                       .map((setting) => (
-                        <div key={setting.key} className="border rounded-lg p-4">
+                        <div
+                          key={setting.key}
+                          className="border rounded-lg p-4"
+                        >
                           <div className="mb-2">
-                            <h4 className="font-medium">{({MAP_SEARCH_PLACE:"Search Place Context",MAP_DEFAULT_LAT:"Default Latitude",MAP_DEFAULT_LNG:"Default Longitude",MAP_COUNTRY_CODES:"Country Codes (ISO2, comma-separated)",MAP_BBOX_NORTH:"Bounding Box North",MAP_BBOX_SOUTH:"Bounding Box South",MAP_BBOX_EAST:"Bounding Box East",MAP_BBOX_WEST:"Bounding Box West"} as any)[setting.key] || setting.key}</h4>
-                            <p className="text-sm text-gray-600">{setting.description}</p>
+                            <h4 className="font-medium">
+                              {(
+                                {
+                                  MAP_SEARCH_PLACE: "Search Place Context",
+                                  MAP_DEFAULT_LAT: "Default Latitude",
+                                  MAP_DEFAULT_LNG: "Default Longitude",
+                                  MAP_COUNTRY_CODES:
+                                    "Country Codes (ISO2, comma-separated)",
+                                  MAP_BBOX_NORTH: "Bounding Box North",
+                                  MAP_BBOX_SOUTH: "Bounding Box South",
+                                  MAP_BBOX_EAST: "Bounding Box East",
+                                  MAP_BBOX_WEST: "Bounding Box West",
+                                } as any
+                              )[setting.key] || setting.key}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {setting.description}
+                            </p>
                           </div>
                           <Input
                             type={setting.type === "number" ? "number" : "text"}
                             value={setting.value}
                             onChange={(e) =>
                               setSystemSettings((prev) =>
-                                prev.map((s) => (s.key === setting.key ? { ...s, value: e.target.value } : s)),
+                                prev.map((s) =>
+                                  s.key === setting.key
+                                    ? { ...s, value: e.target.value }
+                                    : s,
+                                ),
                               )
                             }
-                            onBlur={(e) => handleUpdateSystemSetting(setting.key, e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateSystemSetting(
+                                setting.key,
+                                e.target.value,
+                              )
+                            }
                             placeholder={`Enter ${setting.type} value`}
                             className="max-w-md"
                           />
@@ -1666,8 +1770,14 @@ const AdminConfig: React.FC = () => {
 
                     {/* Advanced map settings */}
                     <div>
-                      <Button variant="outline" size="sm" onClick={() => setShowAdvancedMap((v) => !v)}>
-                        {showAdvancedMap ? "Hide Advanced Map Settings" : "Show Advanced Map Settings"}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAdvancedMap((v) => !v)}
+                      >
+                        {showAdvancedMap
+                          ? "Hide Advanced Map Settings"
+                          : "Show Advanced Map Settings"}
                       </Button>
                       {showAdvancedMap && (
                         <div className="mt-3 space-y-4">
@@ -1675,23 +1785,60 @@ const AdminConfig: React.FC = () => {
                             .filter(
                               (s) =>
                                 s.key.startsWith("MAP_") &&
-                                !["MAP_SEARCH_PLACE","MAP_DEFAULT_LAT","MAP_DEFAULT_LNG"].includes(s.key),
+                                ![
+                                  "MAP_SEARCH_PLACE",
+                                  "MAP_DEFAULT_LAT",
+                                  "MAP_DEFAULT_LNG",
+                                ].includes(s.key),
                             )
                             .map((setting) => (
-                              <div key={setting.key} className="border rounded-lg p-4">
+                              <div
+                                key={setting.key}
+                                className="border rounded-lg p-4"
+                              >
                                 <div className="mb-2">
-                                  <h4 className="font-medium">{({MAP_SEARCH_PLACE:"Search Place Context",MAP_DEFAULT_LAT:"Default Latitude",MAP_DEFAULT_LNG:"Default Longitude",MAP_COUNTRY_CODES:"Country Codes (ISO2, comma-separated)",MAP_BBOX_NORTH:"Bounding Box North",MAP_BBOX_SOUTH:"Bounding Box South",MAP_BBOX_EAST:"Bounding Box East",MAP_BBOX_WEST:"Bounding Box West"} as any)[setting.key] || setting.key}</h4>
-                            <p className="text-sm text-gray-600">{setting.description}</p>
+                                  <h4 className="font-medium">
+                                    {(
+                                      {
+                                        MAP_SEARCH_PLACE:
+                                          "Search Place Context",
+                                        MAP_DEFAULT_LAT: "Default Latitude",
+                                        MAP_DEFAULT_LNG: "Default Longitude",
+                                        MAP_COUNTRY_CODES:
+                                          "Country Codes (ISO2, comma-separated)",
+                                        MAP_BBOX_NORTH: "Bounding Box North",
+                                        MAP_BBOX_SOUTH: "Bounding Box South",
+                                        MAP_BBOX_EAST: "Bounding Box East",
+                                        MAP_BBOX_WEST: "Bounding Box West",
+                                      } as any
+                                    )[setting.key] || setting.key}
+                                  </h4>
+                                  <p className="text-sm text-gray-600">
+                                    {setting.description}
+                                  </p>
                                 </div>
                                 <Input
-                                  type={setting.type === "number" ? "number" : "text"}
+                                  type={
+                                    setting.type === "number"
+                                      ? "number"
+                                      : "text"
+                                  }
                                   value={setting.value}
                                   onChange={(e) =>
                                     setSystemSettings((prev) =>
-                                      prev.map((s) => (s.key === setting.key ? { ...s, value: e.target.value } : s)),
+                                      prev.map((s) =>
+                                        s.key === setting.key
+                                          ? { ...s, value: e.target.value }
+                                          : s,
+                                      ),
                                     )
                                   }
-                                  onBlur={(e) => handleUpdateSystemSetting(setting.key, e.target.value)}
+                                  onBlur={(e) =>
+                                    handleUpdateSystemSetting(
+                                      setting.key,
+                                      e.target.value,
+                                    )
+                                  }
                                   placeholder={`Enter ${setting.type} value`}
                                   className="max-w-md"
                                 />
@@ -1719,12 +1866,20 @@ const AdminConfig: React.FC = () => {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex-1">
-                              <h4 className="font-medium">{({CONTACT_HELPLINE:"Helpline Number",CONTACT_EMAIL:"Support Email",CONTACT_OFFICE_HOURS:"Office Hours",CONTACT_OFFICE_ADDRESS:"Office Address"} as any)[setting.key] || setting.key}</h4>
+                              <h4 className="font-medium">
+                                {(
+                                  {
+                                    CONTACT_HELPLINE: "Helpline Number",
+                                    CONTACT_EMAIL: "Support Email",
+                                    CONTACT_OFFICE_HOURS: "Office Hours",
+                                    CONTACT_OFFICE_ADDRESS: "Office Address",
+                                  } as any
+                                )[setting.key] || setting.key}
+                              </h4>
                               <p className="text-sm text-gray-600">
                                 {setting.description}
                               </p>
                             </div>
-
                           </div>
                           <div className="mt-3">
                             <Input
@@ -1753,7 +1908,6 @@ const AdminConfig: React.FC = () => {
                       ))}
                   </div>
                 </div>
-
               </div>
             </CardContent>
           </Card>
