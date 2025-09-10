@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import {
@@ -33,6 +33,8 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "../components/ui/tooltip";
+import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   BarChart,
   Bar,
@@ -143,6 +145,38 @@ const AdminDashboard: React.FC = () => {
       systemStats: systemStats,
     });
   }
+
+  // Heatmap overview state
+  const { complaintTypes, getComplaintTypeById, getComplaintTypeByName } =
+    useComplaintTypes();
+  const [overviewHeatmap, setOverviewHeatmap] = useState<HeatmapData | null>(
+    null,
+  );
+  const [overviewHeatmapLoading, setOverviewHeatmapLoading] = useState(false);
+
+  const fetchOverviewHeatmap = useCallback(async () => {
+    setOverviewHeatmapLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      const resp = await fetch(`${baseUrl}/api/reports/heatmap`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (!resp.ok) throw new Error(resp.statusText);
+      const json = await resp.json();
+      const apiData = json.data as HeatmapData & { xTypeKeys?: string[] };
+      // Server returns display names already in xLabels; use directly
+      setOverviewHeatmap(apiData as HeatmapData);
+    } catch (e) {
+      console.warn("Failed to load overview heatmap", e);
+      setOverviewHeatmap(null);
+    } finally {
+      setOverviewHeatmapLoading(false);
+    }
+  }, [getComplaintTypeById, getComplaintTypeByName]);
+
+  useEffect(() => {
+    fetchOverviewHeatmap();
+  }, [fetchOverviewHeatmap]);
 
   // Show loading state
   if (isLoading) {
@@ -393,677 +427,727 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </div>
 
-      {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          {/* <TabsTrigger value="performance">Performance</TabsTrigger> */}
-          {/* <TabsTrigger value="users">Users</TabsTrigger> */}
-          <TabsTrigger value="system">System</TabsTrigger>
-        </TabsList>
+        {/* Main Dashboard Tabs */}
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            {/* <TabsTrigger value="performance">Performance</TabsTrigger> */}
+            {/* <TabsTrigger value="users">Users</TabsTrigger> */}
+            <TabsTrigger value="system">System</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Complaint Trends */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Complaint Trends (Last 6 Months)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {complaintTrends && complaintTrends.length > 0 ? (
-                  <>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={complaintTrends}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                          dataKey="month"
-                          tick={{ fontSize: 12 }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={60}
-                        />
-                        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                        <RechartsTooltip
-                          formatter={(value, name) => [value, name]}
-                          labelFormatter={(label) => `Month: ${label}`}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="complaints"
-                          stroke="#3B82F6"
-                          strokeWidth={2}
-                          name="Complaints"
-                          connectNulls={false}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="resolved"
-                          stroke="#10B981"
-                          strokeWidth={2}
-                          name="Resolved"
-                          connectNulls={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    {process.env.NODE_ENV === "development" && (
-                      <div className="mt-2 text-xs text-gray-400">
-                        Data points: {complaintTrends.length} | Total
-                        complaints:{" "}
-                        {complaintTrends.reduce(
-                          (sum, trend) => sum + (trend.complaints || 0),
-                          0,
-                        )}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-gray-500">
-                    <div className="text-center">
-                      <div className="mb-2">
-                        No complaint trend data available
-                      </div>
-                      {process.env.NODE_ENV === "development" && analytics && (
-                        <div className="text-xs">
-                          Analytics loaded: {analytics ? "Yes" : "No"} | Trends
-                          array length: {complaintTrends?.length || 0}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Complaint Trends */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Complaint Trends (Last 6 Months)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {complaintTrends && complaintTrends.length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={complaintTrends}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="month"
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                          />
+                          <YAxis
+                            allowDecimals={false}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <RechartsTooltip
+                            formatter={(value, name) => [value, name]}
+                            labelFormatter={(label) => `Month: ${label}`}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="complaints"
+                            stroke="#3B82F6"
+                            strokeWidth={2}
+                            name="Complaints"
+                            connectNulls={false}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="resolved"
+                            stroke="#10B981"
+                            strokeWidth={2}
+                            name="Resolved"
+                            connectNulls={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                      {process.env.NODE_ENV === "development" && (
+                        <div className="mt-2 text-xs text-gray-400">
+                          Data points: {complaintTrends.length} | Total
+                          complaints:{" "}
+                          {complaintTrends.reduce(
+                            (sum, trend) => sum + (trend.complaints || 0),
+                            0,
+                          )}
                         </div>
                       )}
+                    </>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-gray-500">
+                      <div className="text-center">
+                        <div className="mb-2">
+                          No complaint trend data available
+                        </div>
+                        {process.env.NODE_ENV === "development" &&
+                          analytics && (
+                            <div className="text-xs">
+                              Analytics loaded: {analytics ? "Yes" : "No"} |
+                              Trends array length:{" "}
+                              {complaintTrends?.length || 0}
+                            </div>
+                          )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
 
-            {/* Complaints by Type */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Complaints by Type</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {complaintsByType && complaintsByType.length > 0 ? (
-                  <>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={complaintsByType}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={100}
-                          paddingAngle={2}
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {complaintsByType.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={entry?.color || "#6B7280"}
-                            />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip
-                          content={({ active, payload }) => {
-                            if (!active || !payload || !payload.length)
-                              return null;
-                            const entry = payload[0];
-                            const typeName =
-                              entry?.payload?.name || entry?.name || "Type";
-                            const count =
-                              entry?.value ?? entry?.payload?.value ?? 0;
-                            return (
-                              <div className="rounded-md border bg-white px-3 py-2 text-sm shadow">
-                                <div className="font-medium">{typeName}</div>
-                                <div className="text-gray-600">
-                                  {count} complaints
+              {/* Complaints by Type */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Complaints by Type</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {complaintsByType && complaintsByType.length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={complaintsByType}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            nameKey="name"
+                          >
+                            {complaintsByType.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry?.color || "#6B7280"}
+                              />
+                            ))}
+                          </Pie>
+                          <RechartsTooltip
+                            content={({ active, payload }) => {
+                              if (!active || !payload || !payload.length)
+                                return null;
+                              const entry = payload[0];
+                              const typeName =
+                                entry?.payload?.name || entry?.name || "Type";
+                              const count =
+                                entry?.value ?? entry?.payload?.value ?? 0;
+                              return (
+                                <div className="rounded-md border bg-white px-3 py-2 text-sm shadow">
+                                  <div className="font-medium">{typeName}</div>
+                                  <div className="text-gray-600">
+                                    {count} complaints
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-h-32 overflow-y-auto">
-                      {complaintsByType.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center space-x-2 text-xs"
-                        >
-                          <div
-                            className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{
-                              backgroundColor: item?.color || "#6B7280",
+                              );
                             }}
-                          ></div>
-                          <span className="truncate">
-                            {item?.name || "Unknown"} ({item?.value || 0})
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {process.env.NODE_ENV === "development" && (
-                      <div className="mt-2 text-xs text-gray-400">
-                        Types: {complaintsByType.length} | Total:{" "}
-                        {complaintsByType.reduce(
-                          (sum, type) => sum + (type.value || 0),
-                          0,
-                        )}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-h-32 overflow-y-auto">
+                        {complaintsByType.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center space-x-2 text-xs"
+                          >
+                            <div
+                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              style={{
+                                backgroundColor: item?.color || "#6B7280",
+                              }}
+                            ></div>
+                            <span className="truncate">
+                              {item?.name || "Unknown"} ({item?.value || 0})
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-gray-500">
-                    <div className="text-center">
-                      <div className="mb-2">
-                        No complaint type data available
-                      </div>
-                      {process.env.NODE_ENV === "development" && analytics && (
-                        <div className="text-xs">
-                          Analytics loaded: {analytics ? "Yes" : "No"} | Types
-                          array length: {complaintsByType?.length || 0}
+                      {process.env.NODE_ENV === "development" && (
+                        <div className="mt-2 text-xs text-gray-400">
+                          Types: {complaintsByType.length} | Total:{" "}
+                          {complaintsByType.reduce(
+                            (sum, type) => sum + (type.value || 0),
+                            0,
+                          )}
                         </div>
                       )}
+                    </>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-gray-500">
+                      <div className="text-center">
+                        <div className="mb-2">
+                          No complaint type data available
+                        </div>
+                        {process.env.NODE_ENV === "development" &&
+                          analytics && (
+                            <div className="text-xs">
+                              Analytics loaded: {analytics ? "Yes" : "No"} |
+                              Types array length:{" "}
+                              {complaintsByType?.length || 0}
+                            </div>
+                          )}
+                      </div>
                     </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Overview Heatmap */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Overview Heatmap</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  High-level view of complaints across wards and types
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full">
+                  <HeatmapGrid
+                    title="Overall Complaints Heatmap"
+                    description="Complaints by type across wards (overview)"
+                    data={
+                      overviewHeatmap || {
+                        xLabels: [],
+                        yLabels: [],
+                        matrix: [],
+                        xAxisLabel: "Complaint Type",
+                        yAxisLabel: "Ward",
+                      }
+                    }
+                    className="min-h-[420px]"
+                  />
+                  {overviewHeatmapLoading && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Loading heatmap...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Activity className="h-5 w-5 mr-2" />
+                  Recent System Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                      >
+                        {getActivityIcon(activity.type)}
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">
+                              {activity.message}
+                            </p>
+                            <span className="text-[10px] uppercase tracking-wide text-gray-400">
+                              {activity.type}
+                            </span>
+                          </div>
+                          {activity.user && (
+                            <p className="text-xs text-gray-600">
+                              {activity.user.name}
+                              {activity.user.email ? (
+                                <>
+                                  {" "}
+                                  ·{" "}
+                                  <span className="text-gray-500">
+                                    {activity.user.email}
+                                  </span>
+                                </>
+                              ) : null}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">
+                            {activity.time}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-gray-500">
+                    No recent activity available
                   </div>
                 )}
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Activity className="h-5 w-5 mr-2" />
-                Recent System Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentActivity.length > 0 ? (
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
-                    >
-                      {getActivityIcon(activity.type)}
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">
-                            {activity.message}
-                          </p>
-                          <span className="text-[10px] uppercase tracking-wide text-gray-400">
-                            {activity.type}
-                          </span>
-                        </div>
-                        {activity.user && (
-                          <p className="text-xs text-gray-600">
-                            {activity.user.name}
-                            {activity.user.email ? (
-                              <>
-                                {" "}
-                                ·{" "}
-                                <span className="text-gray-500">
-                                  {activity.user.email}
-                                </span>
-                              </>
-                            ) : null}
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-500">{activity.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="h-[200px] flex items-center justify-center text-gray-500">
-                  No recent activity available
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="performance" className="space-y-6">
-          {/* Performance KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Response Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {(metrics?.avgResolutionTime || 0).toFixed(1)}d
-                </div>
-                <p className="text-sm text-gray-600">Average resolution time</p>
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-1">
-                    {/* <span>Target: 3d</span> */}
-                    <span>
-                      {(metrics?.avgResolutionTime || 0) <= 3
-                        ? "On target"
-                        : "Needs improvement"}
-                    </span>
+          <TabsContent value="performance" className="space-y-6">
+            {/* Performance KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Response Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {(metrics?.avgResolutionTime || 0).toFixed(1)}d
                   </div>
-                  <Progress
-                    value={Math.min(
-                      (3 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) *
-                        100,
-                      100,
-                    )}
-                    className="h-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Resolution Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-600">
-                  {metrics?.resolutionRate || 0}%
-                </div>
-                <p className="text-sm text-gray-600">Complaints resolved</p>
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Target: 90%</span>
-                    <span>
-                      {(metrics?.resolutionRate || 0) >= 90
-                        ? "Excellent"
-                        : (metrics?.resolutionRate || 0) >= 75
-                          ? "Good"
+                  <p className="text-sm text-gray-600">
+                    Average resolution time
+                  </p>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      {/* <span>Target: 3d</span> */}
+                      <span>
+                        {(metrics?.avgResolutionTime || 0) <= 3
+                          ? "On target"
                           : "Needs improvement"}
-                    </span>
+                      </span>
+                    </div>
+                    <Progress
+                      value={Math.min(
+                        (3 / Math.max(metrics?.avgResolutionTime || 0.1, 0.1)) *
+                          100,
+                        100,
+                      )}
+                      className="h-2"
+                    />
                   </div>
-                  <Progress
-                    value={metrics?.resolutionRate || 0}
-                    className="h-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>SLA Compliance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-purple-600">
-                  {metrics?.slaCompliance || 0}%
-                </div>
-                <p className="text-sm text-gray-600">Meeting deadlines</p>
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Target: 85%</span>
-                    <span>
-                      {(metrics?.slaCompliance || 0) >= 85
-                        ? "Excellent"
-                        : (metrics?.slaCompliance || 0) >= 70
-                          ? "Good"
-                          : "Below target"}
-                    </span>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Resolution Rate</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600">
+                    {metrics?.resolutionRate || 0}%
                   </div>
-                  <Progress
-                    value={metrics?.slaCompliance || 0}
-                    className="h-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Satisfaction Score</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-yellow-600">
-                  {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
-                </div>
-                <p className="text-sm text-gray-600">Citizen feedback</p>
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Target: 4.0</span>
-                    <span>
-                      {(metrics?.citizenSatisfaction || 0) >= 4.0
-                        ? "Above target"
-                        : "Below target"}
-                    </span>
-                  </div>
-                  <Progress
-                    value={((metrics?.citizenSatisfaction || 0) / 5) * 100}
-                    className="h-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Performance Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Performance Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Overall Resolution Rate</span>
-                      <span className="text-lg font-bold text-green-600">
-                        {metrics?.resolutionRate || 0}%
+                  <p className="text-sm text-gray-600">Complaints resolved</p>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Target: 90%</span>
+                      <span>
+                        {(metrics?.resolutionRate || 0) >= 90
+                          ? "Excellent"
+                          : (metrics?.resolutionRate || 0) >= 75
+                            ? "Good"
+                            : "Needs improvement"}
                       </span>
                     </div>
                     <Progress
                       value={metrics?.resolutionRate || 0}
-                      className="h-3"
+                      className="h-2"
                     />
+                  </div>
+                </CardContent>
+              </Card>
 
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">SLA Compliance</span>
-                      <span className="text-lg font-bold text-blue-600">
-                        {metrics?.slaCompliance || 0}%
+              <Card>
+                <CardHeader>
+                  <CardTitle>SLA Compliance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-purple-600">
+                    {metrics?.slaCompliance || 0}%
+                  </div>
+                  <p className="text-sm text-gray-600">Meeting deadlines</p>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Target: 85%</span>
+                      <span>
+                        {(metrics?.slaCompliance || 0) >= 85
+                          ? "Excellent"
+                          : (metrics?.slaCompliance || 0) >= 70
+                            ? "Good"
+                            : "Below target"}
                       </span>
                     </div>
                     <Progress
                       value={metrics?.slaCompliance || 0}
-                      className="h-3"
+                      className="h-2"
                     />
                   </div>
+                </CardContent>
+              </Card>
 
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-orange-600">
-                        {(metrics?.avgResolutionTime || 0).toFixed(1)}d
+              <Card>
+                <CardHeader>
+                  <CardTitle>Satisfaction Score</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-yellow-600">
+                    {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
+                  </div>
+                  <p className="text-sm text-gray-600">Citizen feedback</p>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Target: 4.0</span>
+                      <span>
+                        {(metrics?.citizenSatisfaction || 0) >= 4.0
+                          ? "Above target"
+                          : "Below target"}
+                      </span>
+                    </div>
+                    <Progress
+                      value={((metrics?.citizenSatisfaction || 0) / 5) * 100}
+                      className="h-2"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Performance Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Performance Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Overall Resolution Rate</span>
+                        <span className="text-lg font-bold text-green-600">
+                          {metrics?.resolutionRate || 0}%
+                        </span>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        Average Resolution Time
-                      </p>
-                      {/* <div className="text-xs text-gray-500 mt-1">
+                      <Progress
+                        value={metrics?.resolutionRate || 0}
+                        className="h-3"
+                      />
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">SLA Compliance</span>
+                        <span className="text-lg font-bold text-blue-600">
+                          {metrics?.slaCompliance || 0}%
+                        </span>
+                      </div>
+                      <Progress
+                        value={metrics?.slaCompliance || 0}
+                        className="h-3"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-orange-600">
+                          {(metrics?.avgResolutionTime || 0).toFixed(1)}d
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Average Resolution Time
+                        </p>
+                        {/* <div className="text-xs text-gray-500 mt-1">
                         Target: 3 days
                       </div> */}
-                    </div>
-
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">
-                        {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
                       </div>
-                      <p className="text-sm text-gray-600">
-                        Satisfaction Score
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  <Link to="/reports">
-                    <Button variant="outline" className="w-full">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Detailed Reports
-                    </Button>
-                  </Link>
-                  <Link to="/admin/analytics">
-                    <Button variant="outline" className="w-full">
-                      <TrendingUp className="h-4 w-4 mr-2" />
-                      Analytics
-                    </Button>
-                  </Link>
-                  <Link to="/admin/users/new">
-                    <Button variant="outline" className="w-full">
-                      <Users className="h-4 w-4 mr-2" />
-                      Add User
-                    </Button>
-                  </Link>
-                  <Link to="/admin/config">
-                    <Button variant="outline" className="w-full">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Settings
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to="/admin/users" className="block">
-                  <Button className="w-full justify-start">
-                    <Users className="h-4 w-4 mr-2" />
-                    Manage Users (
-                    {systemStats.wardOfficers + systemStats.maintenanceTeam})
-                  </Button>
-                </Link>
-                <Link to="/admin/users?role=WARD_OFFICER" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <UserCheck className="h-4 w-4 mr-2" />
-                    Ward Officers ({systemStats.wardOfficers})
-                  </Button>
-                </Link>
-                <Link to="/admin/users?role=MAINTENANCE_TEAM" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Maintenance Team ({systemStats.maintenanceTeam})
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>User Activity (Real-time)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {userActivityLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    <span className="ml-2 text-sm">Loading activity...</span>
-                  </div>
-                ) : userActivityError ? (
-                  <div className="text-center py-4 text-red-600">
-                    <p className="text-sm">Failed to load user activity</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Active Users (24h)</span>
-                      <Badge variant="secondary">
-                        {userActivityData?.data?.metrics?.activeUsers || 0}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">New Registrations (24h)</span>
-                      <Badge variant="secondary">
-                        {userActivityData?.data?.metrics?.newRegistrations || 0}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Login Success Rate</span>
-                      <Badge variant="secondary">
-                        {userActivityData?.data?.metrics?.loginSuccessRate || 0}
-                        %
-                      </Badge>
-                    </div>
-                    {userActivityData?.data?.activities &&
-                      userActivityData.data.activities.length > 0 && (
-                        <div className="mt-4">
-                          <h4 className="text-sm font-medium mb-2">
-                            Recent Activity
-                          </h4>
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {userActivityData.data.activities
-                              .slice(0, 3)
-                              .map((activity) => (
-                                <div
-                                  key={activity.id}
-                                  className="text-xs p-2 bg-gray-50 rounded"
-                                >
-                                  <p className="font-medium">
-                                    {activity.message}
-                                  </p>
-                                  <p className="text-gray-500">
-                                    {activity.time}
-                                  </p>
-                                </div>
-                              ))}
-                          </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
                         </div>
-                      )}
+                        <p className="text-sm text-gray-600">
+                          Satisfaction Score
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+                </CardContent>
+              </Card>
 
-        <TabsContent value="system" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Configuration</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to="/admin/config" className="block">
-                  <Button className="w-full justify-start">
-                    <Database className="h-4 w-4 mr-2" />
-                    System Settings
-                  </Button>
-                </Link>
-                <Link to="/admin/config?tab=wards" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Ward Management
-                  </Button>
-                </Link>
-                <Link to="/admin/config?tab=types" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Complaint Types
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link to="/reports">
+                      <Button variant="outline" className="w-full">
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Detailed Reports
+                      </Button>
+                    </Link>
+                    <Link to="/admin/analytics">
+                      <Button variant="outline" className="w-full">
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Analytics
+                      </Button>
+                    </Link>
+                    <Link to="/admin/users/new">
+                      <Button variant="outline" className="w-full">
+                        <Users className="h-4 w-4 mr-2" />
+                        Add User
+                      </Button>
+                    </Link>
+                    <Link to="/admin/config">
+                      <Button variant="outline" className="w-full">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Settings
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>System Health (Real-time)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {systemHealthLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    <span className="ml-2 text-sm">Checking health...</span>
-                  </div>
-                ) : systemHealthError ? (
-                  <div className="text-center py-4 text-red-600">
-                    <p className="text-sm">Failed to load system health</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">System Uptime</span>
-                      <Badge className="bg-blue-100 text-blue-800">
-                        {systemHealthData?.data?.uptime?.formatted || "N/A"}
-                      </Badge>
+          <TabsContent value="users" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Management</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Link to="/admin/users" className="block">
+                    <Button className="w-full justify-start">
+                      <Users className="h-4 w-4 mr-2" />
+                      Manage Users (
+                      {systemStats.wardOfficers + systemStats.maintenanceTeam})
+                    </Button>
+                  </Link>
+                  <Link to="/admin/users?role=WARD_OFFICER" className="block">
+                    <Button variant="outline" className="w-full justify-start">
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Ward Officers ({systemStats.wardOfficers})
+                    </Button>
+                  </Link>
+                  <Link
+                    to="/admin/users?role=MAINTENANCE_TEAM"
+                    className="block"
+                  >
+                    <Button variant="outline" className="w-full justify-start">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Maintenance Team ({systemStats.maintenanceTeam})
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Activity (Real-time)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {userActivityLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-sm">Loading activity...</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Database Status</span>
-                      <Badge
-                        className={
-                          systemHealthData?.data?.services?.database?.status ===
-                          "healthy"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }
-                      >
-                        {systemHealthData?.data?.services?.database?.status ===
-                        "healthy"
-                          ? "Healthy"
-                          : "Unhealthy"}
-                        {systemHealthData?.data?.services?.database
-                          ?.responseTime &&
-                          ` (${systemHealthData.data.services.database.responseTime})`}
-                      </Badge>
+                  ) : userActivityError ? (
+                    <div className="text-center py-4 text-red-600">
+                      <p className="text-sm">Failed to load user activity</p>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Email Service</span>
-                      <Badge
-                        className={
-                          systemHealthData?.data?.services?.emailService
-                            ?.status === "operational"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }
-                      >
-                        {systemHealthData?.data?.services?.emailService
-                          ?.status || "Unknown"}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">File Storage</span>
-                      <Badge
-                        className={
-                          (systemHealthData?.data?.services?.fileStorage
-                            ?.usedPercent || 0) > 90
-                            ? "bg-red-100 text-red-800"
-                            : (systemHealthData?.data?.services?.fileStorage
-                                  ?.usedPercent || 0) > 75
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-green-100 text-green-800"
-                        }
-                      >
-                        {systemHealthData?.data?.services?.fileStorage
-                          ?.usedPercent || 0}
-                        % Used
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">API Response</span>
-                      <Badge className="bg-green-100 text-green-800">
-                        {systemHealthData?.data?.services?.api
-                          ?.averageResponseTime || "N/A"}
-                      </Badge>
-                    </div>
-                    {systemHealthData?.data?.system?.memory && (
+                  ) : (
+                    <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Memory Usage</span>
+                        <span className="text-sm">Active Users (24h)</span>
+                        <Badge variant="secondary">
+                          {userActivityData?.data?.metrics?.activeUsers || 0}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">New Registrations (24h)</span>
+                        <Badge variant="secondary">
+                          {userActivityData?.data?.metrics?.newRegistrations ||
+                            0}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Login Success Rate</span>
+                        <Badge variant="secondary">
+                          {userActivityData?.data?.metrics?.loginSuccessRate ||
+                            0}
+                          %
+                        </Badge>
+                      </div>
+                      {userActivityData?.data?.activities &&
+                        userActivityData.data.activities.length > 0 && (
+                          <div className="mt-4">
+                            <h4 className="text-sm font-medium mb-2">
+                              Recent Activity
+                            </h4>
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                              {userActivityData.data.activities
+                                .slice(0, 3)
+                                .map((activity) => (
+                                  <div
+                                    key={activity.id}
+                                    className="text-xs p-2 bg-gray-50 rounded"
+                                  >
+                                    <p className="font-medium">
+                                      {activity.message}
+                                    </p>
+                                    <p className="text-gray-500">
+                                      {activity.time}
+                                    </p>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Configuration</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Link to="/admin/config" className="block">
+                    <Button className="w-full justify-start">
+                      <Database className="h-4 w-4 mr-2" />
+                      System Settings
+                    </Button>
+                  </Link>
+                  <Link to="/admin/config?tab=wards" className="block">
+                    <Button variant="outline" className="w-full justify-start">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Ward Management
+                    </Button>
+                  </Link>
+                  <Link to="/admin/config?tab=types" className="block">
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Complaint Types
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Health (Real-time)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {systemHealthLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-sm">Checking health...</span>
+                    </div>
+                  ) : systemHealthError ? (
+                    <div className="text-center py-4 text-red-600">
+                      <p className="text-sm">Failed to load system health</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">System Uptime</span>
+                        <Badge className="bg-blue-100 text-blue-800">
+                          {systemHealthData?.data?.uptime?.formatted || "N/A"}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Database Status</span>
                         <Badge
                           className={
-                            systemHealthData.data.system.memory.percentage > 80
+                            systemHealthData?.data?.services?.database
+                              ?.status === "healthy"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }
+                        >
+                          {systemHealthData?.data?.services?.database
+                            ?.status === "healthy"
+                            ? "Healthy"
+                            : "Unhealthy"}
+                          {systemHealthData?.data?.services?.database
+                            ?.responseTime &&
+                            ` (${systemHealthData.data.services.database.responseTime})`}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Email Service</span>
+                        <Badge
+                          className={
+                            systemHealthData?.data?.services?.emailService
+                              ?.status === "operational"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }
+                        >
+                          {systemHealthData?.data?.services?.emailService
+                            ?.status || "Unknown"}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">File Storage</span>
+                        <Badge
+                          className={
+                            (systemHealthData?.data?.services?.fileStorage
+                              ?.usedPercent || 0) > 90
                               ? "bg-red-100 text-red-800"
-                              : systemHealthData.data.system.memory.percentage >
-                                  60
+                              : (systemHealthData?.data?.services?.fileStorage
+                                    ?.usedPercent || 0) > 75
                                 ? "bg-yellow-100 text-yellow-800"
                                 : "bg-green-100 text-green-800"
                           }
                         >
-                          {systemHealthData.data.system.memory.used} (
-                          {systemHealthData.data.system.memory.percentage}%)
+                          {systemHealthData?.data?.services?.fileStorage
+                            ?.usedPercent || 0}
+                          % Used
                         </Badge>
                       </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">API Response</span>
+                        <Badge className="bg-green-100 text-green-800">
+                          {systemHealthData?.data?.services?.api
+                            ?.averageResponseTime || "N/A"}
+                        </Badge>
+                      </div>
+                      {systemHealthData?.data?.system?.memory && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Memory Usage</span>
+                          <Badge
+                            className={
+                              systemHealthData.data.system.memory.percentage >
+                              80
+                                ? "bg-red-100 text-red-800"
+                                : systemHealthData.data.system.memory
+                                      .percentage > 60
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-green-100 text-green-800"
+                            }
+                          >
+                            {systemHealthData.data.system.memory.used} (
+                            {systemHealthData.data.system.memory.percentage}%)
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </TooltipProvider>
   );

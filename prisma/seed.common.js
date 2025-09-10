@@ -66,10 +66,165 @@ export default async function seedCommon(prisma, options = {}) {
       type: "app",
       description: "Logo URL",
     },
+    {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      type: "app",
+      description: "Logo size (small, medium, large)",
+    },
+
+    // Complaint ID settings
+    {
+      key: "COMPLAINT_ID_PREFIX",
+      value: "KSC",
+      type: "complaint",
+      description: "Complaint ID prefix",
+    },
+    {
+      key: "COMPLAINT_ID_START_NUMBER",
+      value: "1",
+      type: "complaint",
+      description: "Starting number for complaint IDs",
+    },
+    {
+      key: "COMPLAINT_ID_LENGTH",
+      value: "4",
+      type: "complaint",
+      description: "Numeric length for complaint IDs",
+    },
+
+    // SLA & timings
+    {
+      key: "DEFAULT_SLA_HOURS",
+      value: "48",
+      type: "system",
+      description: "Default SLA in hours",
+    },
+    {
+      key: "OTP_EXPIRY_MINUTES",
+      value: "5",
+      type: "system",
+      description: "OTP expiry in minutes",
+    },
+
+    // File uploads
+    {
+      key: "MAX_FILE_SIZE_MB",
+      value: "10",
+      type: "system",
+      description: "Max upload size in MB",
+    },
+
+    // Admin & contact
+    {
+      key: "ADMIN_EMAIL",
+      value: "admin@cochinsmart.gov.in",
+      type: "system",
+      description: "Administrator email",
+    },
+    {
+      key: "CONTACT_HELPLINE",
+      value: "1800-XXX-XXXX",
+      type: "system",
+      description: "Help line number",
+    },
+    {
+      key: "CONTACT_EMAIL",
+      value: "support@cochinsmartcity.in",
+      type: "system",
+      description: "Support email",
+    },
+    {
+      key: "CONTACT_OFFICE_HOURS",
+      value: "Monday - Friday: 9 AM - 6 PM",
+      type: "system",
+      description: "Office hours",
+    },
+    {
+      key: "CONTACT_OFFICE_ADDRESS",
+      value: "Cochin Corporation Office",
+      type: "system",
+      description: "Office address",
+    },
+
+    // System controls
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      type: "system",
+      description: "Maintenance mode",
+    },
+    {
+      key: "CITIZEN_REGISTRATION_ENABLED",
+      value: "true",
+      type: "system",
+      description: "Allow citizen sign up",
+    },
+    {
+      key: "AUTO_ASSIGN_COMPLAINTS",
+      value: "true",
+      type: "system",
+      description: "Auto assign complaints to ward officers",
+    },
+
+    // Notifications
+    {
+      key: "NOTIFICATION_SETTINGS",
+      value: '{"email":true,"sms":false}',
+      type: "system",
+      description: "Default notification settings (JSON)",
+    },
+
+    // Priorities & statuses
+    {
+      key: "COMPLAINT_PRIORITIES",
+      value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
+      type: "system",
+      description: "Complaint priorities (JSON)",
+    },
+    {
+      key: "COMPLAINT_STATUSES",
+      value:
+        '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
+      type: "system",
+      description: "Complaint statuses (JSON)",
+    },
+
+    // Date & time
+    {
+      key: "DATE_TIME_FORMAT",
+      value: "DD/MM/YYYY HH:mm",
+      type: "system",
+      description: "Default date/time format",
+    },
+    {
+      key: "TIME_ZONE",
+      value: "Asia/Kolkata",
+      type: "system",
+      description: "Default time zone",
+    },
+
+    // Map defaults
+    {
+      key: "MAP_SEARCH_PLACE",
+      value: "Kochi, Kerala, India",
+      type: "map",
+      description: "Search place bias",
+    },
+    {
+      key: "MAP_COUNTRY_CODES",
+      value: "in",
+      type: "map",
+      description: "Country codes for map search",
+    },
     { key: "MAP_DEFAULT_LAT", value: "9.9312", type: "map" },
     { key: "MAP_DEFAULT_LNG", value: "76.2673", type: "map" },
-    { key: "COMPLAINT_ID_PREFIX", value: "KSC", type: "complaint" },
+    { key: "MAP_BBOX_NORTH", value: "10.05", type: "map" },
+    { key: "MAP_BBOX_SOUTH", value: "9.85", type: "map" },
+    { key: "MAP_BBOX_EAST", value: "76.39", type: "map" },
+    { key: "MAP_BBOX_WEST", value: "76.20", type: "map" },
   ];
+
   for (const cfg of configs) {
     await prisma.systemConfig.upsert({
       where: { key: cfg.key },

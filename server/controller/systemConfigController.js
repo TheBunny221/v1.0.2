@@ -405,6 +405,7 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
 // Helper function to get default system settings
 const getDefaultPublicSettings = () => {
   return [
+    // Branding
     {
       key: "APP_NAME",
       value: "Kochi Smart City",
@@ -423,6 +424,7 @@ const getDefaultPublicSettings = () => {
       description: "Size of the application logo (small, medium, large)",
       type: "string",
     },
+    // Complaint ID configuration
     {
       key: "COMPLAINT_ID_PREFIX",
       value: "KSC",
@@ -430,22 +432,43 @@ const getDefaultPublicSettings = () => {
       type: "string",
     },
     {
+      key: "COMPLAINT_ID_START_NUMBER",
+      value: "1",
+      description: "Starting number for complaint ID sequence",
+      type: "number",
+    },
+    {
+      key: "COMPLAINT_ID_LENGTH",
+      value: "4",
+      description: "Length of the numeric part in complaint IDs",
+      type: "number",
+    },
+    // SLA & timings
+    {
+      key: "DEFAULT_SLA_HOURS",
+      value: "48",
+      description: "Default SLA time in hours",
+      type: "number",
+    },
+    {
+      key: "OTP_EXPIRY_MINUTES",
+      value: "5",
+      description: "OTP expiration time in minutes",
+      type: "number",
+    },
+    // File upload limits
+    {
       key: "MAX_FILE_SIZE_MB",
       value: "10",
       description: "Maximum file upload size in MB",
       type: "number",
     },
+    // Admin & contact
     {
-      key: "CITIZEN_REGISTRATION_ENABLED",
-      value: "true",
-      description: "Allow citizen self-registration",
-      type: "boolean",
-    },
-    {
-      key: "SYSTEM_MAINTENANCE",
-      value: "false",
-      description: "System maintenance mode",
-      type: "boolean",
+      key: "ADMIN_EMAIL",
+      value: "admin@cochinsmart.gov.in",
+      description: "Administrator email address",
+      type: "string",
     },
     {
       key: "CONTACT_HELPLINE",
@@ -471,6 +494,33 @@ const getDefaultPublicSettings = () => {
       description: "Physical address of the office",
       type: "string",
     },
+    // System controls
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      description: "System maintenance mode",
+      type: "boolean",
+    },
+    {
+      key: "CITIZEN_REGISTRATION_ENABLED",
+      value: "true",
+      description: "Allow citizen self-registration",
+      type: "boolean",
+    },
+    {
+      key: "AUTO_ASSIGN_COMPLAINTS",
+      value: "true",
+      description: "Automatically assign complaints to ward officers",
+      type: "boolean",
+    },
+    // Notifications
+    {
+      key: "NOTIFICATION_SETTINGS",
+      value: '{"email":true,"sms":false}',
+      description: "Notification preferences",
+      type: "json",
+    },
+    // Priorities & statuses
     {
       key: "COMPLAINT_PRIORITIES",
       value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
@@ -483,6 +533,19 @@ const getDefaultPublicSettings = () => {
         '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
       description: "Available complaint statuses",
       type: "json",
+    },
+    // Date & time
+    {
+      key: "DATE_TIME_FORMAT",
+      value: "DD/MM/YYYY HH:mm",
+      description: "Default date and time display format",
+      type: "string",
+    },
+    {
+      key: "TIME_ZONE",
+      value: "Asia/Kolkata",
+      description: "Default time zone for the application",
+      type: "string",
     },
     // Map & Location defaults
     {
@@ -620,13 +683,21 @@ export const getPublicSystemSettings = asyncHandler(async (req, res) => {
       "APP_LOGO_URL",
       "APP_LOGO_SIZE",
       "COMPLAINT_ID_PREFIX",
+      "COMPLAINT_ID_START_NUMBER",
+      "COMPLAINT_ID_LENGTH",
       "MAX_FILE_SIZE_MB",
+      "DEFAULT_SLA_HOURS",
+      "OTP_EXPIRY_MINUTES",
+      "DATE_TIME_FORMAT",
+      "TIME_ZONE",
       "CITIZEN_REGISTRATION_ENABLED",
       "SYSTEM_MAINTENANCE",
+      "ADMIN_EMAIL",
       "CONTACT_HELPLINE",
       "CONTACT_EMAIL",
       "CONTACT_OFFICE_HOURS",
       "CONTACT_OFFICE_ADDRESS",
+      "NOTIFICATION_SETTINGS",
       "COMPLAINT_PRIORITIES",
       "COMPLAINT_STATUSES",
       // Map & Location settings

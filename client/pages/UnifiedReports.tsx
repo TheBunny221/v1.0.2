@@ -45,6 +45,8 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "../components/ui/tooltip";
+import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 // Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
@@ -212,6 +214,8 @@ const UnifiedReports: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null);
+  const [heatmapLoading, setHeatmapLoading] = useState(false);
   const [reportProgress, setReportProgress] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportAbortController, setReportAbortController] =
@@ -275,8 +279,16 @@ const UnifiedReports: React.FC = () => {
     if (filters.dateRange.from && filters.dateRange.to) {
       setDidInitialFetch(true);
       fetchAnalyticsData();
+      fetchHeatmapData();
     }
   }, [user, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
+
+  // Update heatmap dynamically on filter changes
+  useEffect(() => {
+    if (!user) return;
+    if (!didInitialFetch) return;
+    fetchHeatmapData();
+  }, [filters, user, didInitialFetch]);
 
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
@@ -366,6 +378,63 @@ const UnifiedReports: React.FC = () => {
   // Disabled auto-fetch on filter changes; use Generate Report button instead
 
   // Do not auto clear analytics when filters change; wait for Generate Report
+
+  // Complaint types for readable labels
+  const {
+    complaintTypes,
+    isLoading: complaintTypesLoading,
+    getComplaintTypeById,
+    getComplaintTypeByName,
+  } = useComplaintTypes();
+
+  // Heatmap fetcher
+  async function fetchHeatmapData() {
+    setHeatmapLoading(true);
+    try {
+      const queryParams = new URLSearchParams({
+        from: filters.dateRange.from,
+        to: filters.dateRange.to,
+        ...(filters.complaintType !== "all" && { type: filters.complaintType }),
+        ...(filters.status !== "all" && { status: filters.status }),
+        ...(filters.priority !== "all" && { priority: filters.priority }),
+      } as Record<string, string>);
+      // Enforce ward scope for Ward Officers
+      if (user?.role === "WARD_OFFICER" && user?.wardId) {
+        queryParams.set("ward", user.wardId);
+      }
+      const baseUrl = window.location.origin;
+      const resp = await fetch(
+        `${baseUrl}/api/reports/heatmap?${queryParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!resp.ok)
+        throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
+      const json = await resp.json();
+
+      // Use server-provided labels directly (server returns display names)
+      const apiData = json.data as HeatmapData & {
+        xTypeKeys?: string[];
+        meta?: any;
+      };
+      setHeatmapData(apiData as HeatmapData);
+    } catch (e) {
+      console.warn("Heatmap fetch failed", e);
+      setHeatmapData({
+        xLabels: [],
+        yLabels: [],
+        matrix: [],
+        xAxisLabel: "",
+        yAxisLabel: "",
+      });
+    } finally {
+      setHeatmapLoading(false);
+    }
+  }
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
@@ -546,6 +615,9 @@ const UnifiedReports: React.FC = () => {
       }
 
       const reportData = await response.json();
+
+      // In parallel, refresh heatmap based on same filters
+      fetchHeatmapData();
 
       // Clear timer
       clearInterval(timer);
@@ -1499,6 +1571,41 @@ const UnifiedReports: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Heatmap */}
+            {(user?.role === "ADMINISTRATOR" ||
+              user?.role === "WARD_OFFICER") && (
+              <div className="mt-6">
+                <HeatmapGrid
+                  title={
+                    user?.role === "ADMINISTRATOR"
+                      ? "Complaints × Wards Heatmap"
+                      : "Complaints × Sub-zones Heatmap"
+                  }
+                  description={
+                    user?.role === "ADMINISTRATOR"
+                      ? "Distribution of complaints by type across all wards"
+                      : `Distribution of complaints by type across sub-zones in ${getWardNameById(user?.wardId)}`
+                  }
+                  data={
+                    heatmapData || {
+                      xLabels: [],
+                      yLabels: [],
+                      matrix: [],
+                      xAxisLabel: "Complaint Type",
+                      yAxisLabel:
+                        user?.role === "ADMINISTRATOR" ? "Ward" : "Sub-zone",
+                    }
+                  }
+                />
+                {heatmapLoading && (
+                  <div className="h-8 flex items-center text-xs text-muted-foreground mt-2">
+                    <RefreshCw className="h-3 w-3 mr-2 animate-spin" /> Updating
+                    heatmap...
+                  </div>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* Trends Tab */}
