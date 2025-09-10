@@ -584,6 +584,9 @@ const UnifiedReports: React.FC = () => {
 
       const reportData = await response.json();
 
+      // In parallel, refresh heatmap based on same filters
+      fetchHeatmapData();
+
       // Clear timer
       clearInterval(timer);
       setReportProgress(100);
