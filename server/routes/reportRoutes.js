@@ -740,10 +740,12 @@ router.get(
           prisma.ward.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
           prisma.complaint.groupBy({ by: ["type"], where, _count: { _all: true } }),
         ]);
-        const xLabels = typesGroup
-          .map((g) => ({ name: g.type || "Others", count: g._count._all }))
+
+        // Original type keys sorted by count
+        const xTypeKeys = typesGroup
+          .map((g) => ({ key: g.type || "Others", count: g._count._all }))
           .sort((a, b) => b.count - a.count)
-          .map((g) => g.name);
+          .map((g) => g.key);
 
         // Counts grouped by wardId + type
         const grouped = await prisma.complaint.groupBy({
@@ -760,14 +762,31 @@ router.get(
         const yLabels = wards.map((w) => w.name);
         const yIds = wards.map((w) => w.id);
         const matrix = yIds.map((wid) =>
-          xLabels.map((t) => countMap.get(`${wid}||${t}`) || 0),
+          xTypeKeys.map((t) => countMap.get(`${wid}||${t}`) || 0),
         );
+
+        // Map type keys to display names using complaint type config
+        const complaintTypeConfigs = await prisma.systemConfig.findMany({
+          where: { key: { startsWith: "COMPLAINT_TYPE_" } },
+        });
+        const typeNameMap = new Map();
+        for (const cfg of complaintTypeConfigs) {
+          try {
+            const data = JSON.parse(cfg.value);
+            const id = cfg.key.replace("COMPLAINT_TYPE_", "");
+            typeNameMap.set(id, data.name);
+          } catch (e) {
+            // ignore parse errors
+          }
+        }
+        const xLabelsDisplay = xTypeKeys.map((k) => typeNameMap.get(k) || k || "Others");
 
         return res.json({
           success: true,
           message: "Heatmap data retrieved successfully",
           data: {
-            xLabels,
+            xLabels: xLabelsDisplay,
+            xTypeKeys,
             yLabels,
             matrix,
             xAxisLabel: "Complaint Type",
