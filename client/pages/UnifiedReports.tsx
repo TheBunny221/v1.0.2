@@ -46,6 +46,7 @@ import {
   TooltipProvider,
 } from "../components/ui/tooltip";
 import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 // Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
