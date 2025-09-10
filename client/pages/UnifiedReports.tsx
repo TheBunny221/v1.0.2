@@ -1548,30 +1548,32 @@ const UnifiedReports: React.FC = () => {
             </div>
 
             {/* Heatmap */}
-            <div className="mt-6">
-              <HeatmapGrid
-                title={user?.role === "ADMINISTRATOR" ? "Complaints × Wards Heatmap" : "Complaints × Sub-zones Heatmap"}
-                description={
-                  user?.role === "ADMINISTRATOR"
-                    ? "Distribution of complaints by type across all wards"
-                    : `Distribution of complaints by type across sub-zones in ${getWardNameById(user?.wardId)}`
-                }
-                data={
-                  heatmapData || {
-                    xLabels: [],
-                    yLabels: [],
-                    matrix: [],
-                    xAxisLabel: "Complaint Type",
-                    yAxisLabel: user?.role === "ADMINISTRATOR" ? "Ward" : "Sub-zone",
+            {(user?.role === "ADMINISTRATOR" || user?.role === "WARD_OFFICER") && (
+              <div className="mt-6">
+                <HeatmapGrid
+                  title={user?.role === "ADMINISTRATOR" ? "Complaints × Wards Heatmap" : "Complaints × Sub-zones Heatmap"}
+                  description={
+                    user?.role === "ADMINISTRATOR"
+                      ? "Distribution of complaints by type across all wards"
+                      : `Distribution of complaints by type across sub-zones in ${getWardNameById(user?.wardId)}`
                   }
-                }
-              />
-              {heatmapLoading && (
-                <div className="h-8 flex items-center text-xs text-muted-foreground mt-2">
-                  <RefreshCw className="h-3 w-3 mr-2 animate-spin" /> Updating heatmap...
-                </div>
-              )}
-            </div>
+                  data={
+                    heatmapData || {
+                      xLabels: [],
+                      yLabels: [],
+                      matrix: [],
+                      xAxisLabel: "Complaint Type",
+                      yAxisLabel: user?.role === "ADMINISTRATOR" ? "Ward" : "Sub-zone",
+                    }
+                  }
+                />
+                {heatmapLoading && (
+                  <div className="h-8 flex items-center text-xs text-muted-foreground mt-2">
+                    <RefreshCw className="h-3 w-3 mr-2 animate-spin" /> Updating heatmap...
+                  </div>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* Trends Tab */}
