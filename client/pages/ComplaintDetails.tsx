@@ -902,7 +902,7 @@ const ComplaintDetails: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div className="bg-blue-50 rounded-lg p-3">
                     <p className="text-sm font-medium mb-1">Ward Officer</p>
                     {complaint.wardOfficer ? (
