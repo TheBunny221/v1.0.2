@@ -160,22 +160,9 @@ const AdminDashboard: React.FC = () => {
       });
       if (!resp.ok) throw new Error(resp.statusText);
       const json = await resp.json();
-      const apiData = json.data as HeatmapData;
-      const originalX = apiData.xLabels || [];
-      const formatLabel = (key: string) => {
-        if (!key) return "Others";
-        const byId = getComplaintTypeById?.(key) || getComplaintTypeById?.(key.toUpperCase()) || getComplaintTypeById?.(key.toLowerCase());
-        if (byId) return byId.name;
-        const byName = getComplaintTypeByName?.(key);
-        if (byName) return byName.name;
-        return key.replace(/[_\-]/g, " ")
-          .toLowerCase()
-          .split(" ")
-          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join(" ");
-      };
-      const mappedX = originalX.map((k) => formatLabel(k));
-      setOverviewHeatmap({ ...apiData, xLabels: mappedX });
+        const apiData = json.data as HeatmapData & { xTypeKeys?: string[] };
+      // Server returns display names already in xLabels; use directly
+      setOverviewHeatmap(apiData as HeatmapData);
     } catch (e) {
       console.warn("Failed to load overview heatmap", e);
       setOverviewHeatmap(null);
