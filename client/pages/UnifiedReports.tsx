@@ -379,6 +379,9 @@ const UnifiedReports: React.FC = () => {
 
   // Do not auto clear analytics when filters change; wait for Generate Report
 
+  // Complaint types for readable labels
+  const { complaintTypes, isLoading: complaintTypesLoading, getComplaintTypeById, getComplaintTypeByName } = useComplaintTypes();
+
   // Heatmap fetcher
   async function fetchHeatmapData() {
     setHeatmapLoading(true);
@@ -403,7 +406,35 @@ const UnifiedReports: React.FC = () => {
       });
       if (!resp.ok) throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
       const json = await resp.json();
-      setHeatmapData(json.data as HeatmapData);
+
+      // Map xLabels (type keys) to readable names using complaint types config
+      const apiData = json.data as HeatmapData & { meta?: any };
+      const originalX = apiData.xLabels || [];
+
+      const formatLabel = (key: string) => {
+        if (!key) return "Others";
+        // Try by id
+        const byId = getComplaintTypeById(key) || getComplaintTypeById(key.toLowerCase()) || getComplaintTypeById(key.toUpperCase());
+        if (byId) return byId.name;
+        // Try by name
+        const byName = getComplaintTypeByName(key);
+        if (byName) return byName.name;
+        // Fallback: prettify
+        return key.replace(/[_\-]/g, " ").replace(/\s+/g, " ")
+          .toLowerCase()
+          .split(" ")
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join(" ");
+      };
+
+      const mappedX = originalX.map((k) => formatLabel(k));
+
+      const transformed: HeatmapData = {
+        ...apiData,
+        xLabels: mappedX,
+      };
+
+      setHeatmapData(transformed);
     } catch (e) {
       console.warn("Heatmap fetch failed", e);
       setHeatmapData({ xLabels: [], yLabels: [], matrix: [], xAxisLabel: "", yAxisLabel: "" });
