@@ -278,6 +278,7 @@ const UnifiedReports: React.FC = () => {
     if (filters.dateRange.from && filters.dateRange.to) {
       setDidInitialFetch(true);
       fetchAnalyticsData();
+      fetchHeatmapData();
     }
   }, [user, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
 
