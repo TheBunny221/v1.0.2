@@ -144,6 +144,48 @@ const WardOfficerDashboard: React.FC = () => {
   // Build complaints filter for the widget
   const complaintsFilter = buildComplaintsFilter();
 
+  // Heatmap overview state for ward officer
+  const { complaintTypes, getComplaintTypeById, getComplaintTypeByName } = useComplaintTypes();
+  const [overviewHeatmap, setOverviewHeatmap] = useState<HeatmapData | null>(null);
+  const [overviewHeatmapLoading, setOverviewHeatmapLoading] = useState(false);
+
+  const fetchOverviewHeatmap = useCallback(async () => {
+    setOverviewHeatmapLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      const resp = await fetch(`${baseUrl}/api/reports/heatmap`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (!resp.ok) throw new Error(resp.statusText);
+      const json = await resp.json();
+      const apiData = json.data as HeatmapData;
+      const originalX = apiData.xLabels || [];
+      const formatLabel = (key: string) => {
+        if (!key) return "Others";
+        const byId = getComplaintTypeById?.(key) || getComplaintTypeById?.(key.toUpperCase()) || getComplaintTypeById?.(key.toLowerCase());
+        if (byId) return byId.name;
+        const byName = getComplaintTypeByName?.(key);
+        if (byName) return byName.name;
+        return key.replace(/[_\-]/g, " ")
+          .toLowerCase()
+          .split(" ")
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join(" ");
+      };
+      const mappedX = originalX.map((k) => formatLabel(k));
+      setOverviewHeatmap({ ...apiData, xLabels: mappedX });
+    } catch (e) {
+      console.warn("Failed to load overview heatmap", e);
+      setOverviewHeatmap(null);
+    } finally {
+      setOverviewHeatmapLoading(false);
+    }
+  }, [getComplaintTypeById, getComplaintTypeByName]);
+
+  useEffect(() => {
+    fetchOverviewHeatmap();
+  }, [fetchOverviewHeatmap]);
+
   const handleMainFilterChange = (value: string) => {
     setFilters((prev) => ({
       ...prev,
