@@ -282,6 +282,13 @@ const UnifiedReports: React.FC = () => {
     }
   }, [user, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
 
+  // Update heatmap dynamically on filter changes
+  useEffect(() => {
+    if (!user) return;
+    if (!didInitialFetch) return;
+    fetchHeatmapData();
+  }, [filters, user, didInitialFetch, fetchHeatmapData]);
+
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true);
