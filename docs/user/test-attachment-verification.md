@@ -12,22 +12,26 @@ Confirm that complaint attachments (images/PDF) upload and preview correctly acr
 
 ## Steps
 
-1) Guest Flow
+1. Guest Flow
+
 - Go to the unified complaint form (/complaint)
 - Add 1–3 images (jpg/png/webp) and 1 PDF
 - Submit and complete OTP
 - Verify: Thumbnails render, PDF shows as file badge, upload size/type validation enforced
 
-2) Citizen Flow
+2. Citizen Flow
+
 - Login as a citizen
 - Create a new complaint with 2 images
 - Verify: Previews show; removing a file updates the list
 
-3) Complaint Details
+3. Complaint Details
+
 - Open the newly created complaint details
 - Verify: Attachment gallery loads; clicking opens full-view modal; PDF downloads
 
-4) Error Cases
+4. Error Cases
+
 - Try uploading >10MB file → expect validation error toast
 - Try uploading unsupported type (.exe) → blocked with message
 

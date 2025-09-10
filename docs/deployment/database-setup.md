@@ -5,7 +5,6 @@ This project has been migrated from MongoDB to PostgreSQL. Follow these steps to
 ## Prerequisites
 
 1. **Install PostgreSQL**: Make sure PostgreSQL is installed and running on your system
-
    - Windows: Download from https://www.postgresql.org/download/windows/
    - macOS: `brew install postgresql` or download from the official site
    - Ubuntu: `sudo apt-get install postgresql postgresql-contrib`

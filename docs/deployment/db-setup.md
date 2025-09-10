@@ -541,7 +541,7 @@ Error: SSL connection required
 1. **Check application logs:** `tail -f logs/application.log`
 2. **Check PostgreSQL logs:** `sudo tail -f /var/log/postgresql/postgresql-*.log`
 3. **Contact system administrator**
-4. **Review this documentation`
+4. \*\*Review this documentation`
 
 ## Production Deployment Checklist
 

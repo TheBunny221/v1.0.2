@@ -500,16 +500,16 @@ npm run db:migrate:rollback
 
 ### **Technical Team Sign-off**
 
-- [ ] **Lead Developer**: ********_******** Date: **___**
-- [ ] **QA Lead**: ********_******** Date: **___**
-- [ ] **DevOps Engineer**: ********_******** Date: **___**
-- [ ] **Security Officer**: ********_******** Date: **___**
+- [ ] **Lead Developer**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] **QA Lead**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] **DevOps Engineer**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] **Security Officer**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
 ### **Business Team Sign-off**
 
-- [ ] **Project Manager**: ********_******** Date: **___**
-- [ ] **Product Owner**: ********_******** Date: **___**
-- [ ] **Operations Manager**: ********_******** Date: **___**
+- [ ] **Project Manager**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] **Product Owner**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] **Operations Manager**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
 ---
 

@@ -222,19 +222,16 @@ FRONTEND_URL="http://localhost:3000"
 ### Implemented Security Measures
 
 1. **JWT Token Security**
-
    - Secure token generation with expiry
    - Automatic logout on 401 responses
    - Token validation on protected endpoints
 
 2. **OTP Security**
-
    - 10-minute expiry for all OTP codes
    - Single-use OTP validation
    - Database cleanup of expired sessions
 
 3. **Password Security**
-
    - Bcrypt hashing with salt rounds
    - Password complexity validation
    - Optional password support (OTP-only accounts)
