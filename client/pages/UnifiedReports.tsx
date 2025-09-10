@@ -371,6 +371,39 @@ const UnifiedReports: React.FC = () => {
 
   // Do not auto clear analytics when filters change; wait for Generate Report
 
+  // Heatmap fetcher
+  const fetchHeatmapData = useCallback(async () => {
+    setHeatmapLoading(true);
+    try {
+      const queryParams = new URLSearchParams({
+        from: filters.dateRange.from,
+        to: filters.dateRange.to,
+        ...(filters.complaintType !== "all" && { type: filters.complaintType }),
+        ...(filters.status !== "all" && { status: filters.status }),
+        ...(filters.priority !== "all" && { priority: filters.priority }),
+      });
+      // Enforce ward scope for Ward Officers
+      if (user?.role === "WARD_OFFICER" && user?.wardId) {
+        queryParams.set("ward", user.wardId);
+      }
+      const baseUrl = window.location.origin;
+      const resp = await fetch(`${baseUrl}/api/reports/heatmap?${queryParams}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!resp.ok) throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
+      const json = await resp.json();
+      setHeatmapData(json.data as HeatmapData);
+    } catch (e) {
+      console.warn("Heatmap fetch failed", e);
+      setHeatmapData({ xLabels: [], yLabels: [], matrix: [], xAxisLabel: "", yAxisLabel: "" });
+    } finally {
+      setHeatmapLoading(false);
+    }
+  }, [filters, user?.role, user?.wardId]);
+
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
     if (!permissions.canExportData) {
