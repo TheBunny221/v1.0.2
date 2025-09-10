@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { store } from '../store';
 import {
   setComplaintsList,
   setComplaintDetails,
@@ -25,7 +26,15 @@ import {
 export const useDataManager = () => {
   const dispatch = useAppDispatch();
 
-  // Data management functions
+  // Read current store slices at top-level (valid hook usage)
+  const complaintsList = useAppSelector(selectComplaintsList);
+  const wards = useAppSelector(selectWards);
+  const complaintTypes = useAppSelector(selectComplaintTypes);
+  const complaintStats = useAppSelector(selectComplaintStats);
+  const activeComplaints = useAppSelector(selectActiveComplaints);
+  const recentUpdates = useAppSelector(selectRecentUpdates);
+
+  // Cache / mutator functions
   const cacheComplaintsList = useCallback((data: any[]) => {
     dispatch(setComplaintsList(data));
   }, [dispatch]);
@@ -62,38 +71,27 @@ export const useDataManager = () => {
     dispatch(clearStaleData());
   }, [dispatch]);
 
-  // Data retrieval functions
-  const getComplaintsList = useCallback(() => {
-    return useAppSelector(selectComplaintsList);
-  }, []);
+  // Getter functions (return current snapshot or derive via selector using store.getState)
+  const getComplaintsList = useCallback(() => complaintsList, [complaintsList]);
 
   const getComplaintDetails = useCallback((id: string) => {
-    return useAppSelector(selectComplaintDetails(id));
+    // selectComplaintDetails is a selector factory: call it with state to get current value
+    return selectComplaintDetails(id)(store.getState());
   }, []);
 
-  const getWards = useCallback(() => {
-    return useAppSelector(selectWards);
-  }, []);
+  const getWards = useCallback(() => wards, [wards]);
 
-  const getComplaintTypes = useCallback(() => {
-    return useAppSelector(selectComplaintTypes);
-  }, []);
+  const getComplaintTypes = useCallback(() => complaintTypes, [complaintTypes]);
 
-  const getComplaintStats = useCallback(() => {
-    return useAppSelector(selectComplaintStats);
-  }, []);
+  const getComplaintStats = useCallback(() => complaintStats, [complaintStats]);
 
-  const getActiveComplaints = useCallback(() => {
-    return useAppSelector(selectActiveComplaints);
-  }, []);
+  const getActiveComplaints = useCallback(() => activeComplaints, [activeComplaints]);
 
-  const getRecentUpdates = useCallback(() => {
-    return useAppSelector(selectRecentUpdates);
-  }, []);
+  const getRecentUpdates = useCallback(() => recentUpdates, [recentUpdates]);
 
-  // Data freshness checking
+  // Data freshness checking using selector factory and store snapshot
   const isDataFresh = useCallback((dataPath: string) => {
-    return useAppSelector(selectIsDataFresh(dataPath));
+    return selectIsDataFresh(dataPath)(store.getState());
   }, []);
 
   return {
@@ -107,7 +105,7 @@ export const useDataManager = () => {
     cacheActiveComplaints,
     cacheRecentUpdates,
     clearStale,
-    
+
     // Getter functions
     getComplaintsList,
     getComplaintDetails,
@@ -116,7 +114,7 @@ export const useDataManager = () => {
     getComplaintStats,
     getActiveComplaints,
     getRecentUpdates,
-    
+
     // Utility functions
     isDataFresh,
   };
@@ -130,9 +128,9 @@ export const useStatusTracking = () => {
 
   const updateStatus = useCallback((complaintId: string, status: string, comment?: string) => {
     // Update the complaint in the centralized store
-    dispatch(updateComplaintInList({ 
-      id: complaintId, 
-      updates: { 
+    dispatch(updateComplaintInList({
+      id: complaintId,
+      updates: {
         status,
         lastUpdated: new Date().toISOString(),
         ...(comment && { latestComment: comment })
@@ -153,7 +151,7 @@ export const useStatusTracking = () => {
   }, [dispatch, recentUpdates]);
 
   const getComplaintStatus = useCallback((complaintId: string) => {
-    const complaint = useAppSelector(selectComplaintDetails(complaintId));
+    const complaint = selectComplaintDetails(complaintId)(store.getState());
     return complaint?.data?.status;
   }, []);
 
@@ -178,7 +176,7 @@ export const useDataSync = () => {
   const syncData = useCallback(async () => {
     // Clear stale data first
     clearStale();
-    
+
     // Could trigger refetch of stale data here
     console.log('Data synchronization completed');
   }, [clearStale]);
