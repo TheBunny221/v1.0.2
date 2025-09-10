@@ -407,34 +407,9 @@ const UnifiedReports: React.FC = () => {
       if (!resp.ok) throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
       const json = await resp.json();
 
-      // Map xLabels (type keys) to readable names using complaint types config
-      const apiData = json.data as HeatmapData & { meta?: any };
-      const originalX = apiData.xLabels || [];
-
-      const formatLabel = (key: string) => {
-        if (!key) return "Others";
-        // Try by id
-        const byId = getComplaintTypeById(key) || getComplaintTypeById(key.toLowerCase()) || getComplaintTypeById(key.toUpperCase());
-        if (byId) return byId.name;
-        // Try by name
-        const byName = getComplaintTypeByName(key);
-        if (byName) return byName.name;
-        // Fallback: prettify
-        return key.replace(/[_\-]/g, " ").replace(/\s+/g, " ")
-          .toLowerCase()
-          .split(" ")
-          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join(" ");
-      };
-
-      const mappedX = originalX.map((k) => formatLabel(k));
-
-      const transformed: HeatmapData = {
-        ...apiData,
-        xLabels: mappedX,
-      };
-
-      setHeatmapData(transformed);
+      // Use server-provided labels directly (server returns display names)
+      const apiData = json.data as HeatmapData & { xTypeKeys?: string[]; meta?: any };
+      setHeatmapData(apiData as HeatmapData);
     } catch (e) {
       console.warn("Heatmap fetch failed", e);
       setHeatmapData({ xLabels: [], yLabels: [], matrix: [], xAxisLabel: "", yAxisLabel: "" });
