@@ -457,6 +457,30 @@ const WardOfficerDashboard: React.FC = () => {
           </CardContent>
         </Card>  */}
 
+      {/* Overview Heatmap */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Overview Heatmap</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">Complaints distribution across sub-zones in your ward</p>
+        </CardHeader>
+        <CardContent>
+          <HeatmapGrid
+            title="Ward Overview Heatmap"
+            description={`Complaints by type within ${user?.ward?.name || "your ward"}`}
+            data={
+              overviewHeatmap || {
+                xLabels: [],
+                yLabels: [],
+                matrix: [],
+                xAxisLabel: "Complaint Type",
+                yAxisLabel: "Sub-zone",
+              }
+            }
+          />
+          {overviewHeatmapLoading && <div className="mt-2 text-xs text-muted-foreground">Loading heatmap...</div>}
+        </CardContent>
+      </Card>
+
       {/* Performance Overview */}
       <Card>
         <CardHeader>
