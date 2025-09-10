@@ -635,6 +635,7 @@ const AdminDashboard: React.FC = () => {
                       yAxisLabel: "Ward",
                     }
                   }
+                  className="min-h-[420px]"
                 />
                 {overviewHeatmapLoading && (
                   <div className="mt-2 text-xs text-muted-foreground">Loading heatmap...</div>
