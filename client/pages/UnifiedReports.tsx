@@ -379,7 +379,7 @@ const UnifiedReports: React.FC = () => {
   // Do not auto clear analytics when filters change; wait for Generate Report
 
   // Heatmap fetcher
-  const fetchHeatmapData = useCallback(async () => {
+  async function fetchHeatmapData() {
     setHeatmapLoading(true);
     try {
       const queryParams = new URLSearchParams({
@@ -388,7 +388,7 @@ const UnifiedReports: React.FC = () => {
         ...(filters.complaintType !== "all" && { type: filters.complaintType }),
         ...(filters.status !== "all" && { status: filters.status }),
         ...(filters.priority !== "all" && { priority: filters.priority }),
-      });
+      } as Record<string, string>);
       // Enforce ward scope for Ward Officers
       if (user?.role === "WARD_OFFICER" && user?.wardId) {
         queryParams.set("ward", user.wardId);
@@ -409,7 +409,7 @@ const UnifiedReports: React.FC = () => {
     } finally {
       setHeatmapLoading(false);
     }
-  }, [filters, user?.role, user?.wardId]);
+  }
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
