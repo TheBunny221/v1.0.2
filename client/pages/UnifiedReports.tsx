@@ -287,7 +287,7 @@ const UnifiedReports: React.FC = () => {
     if (!user) return;
     if (!didInitialFetch) return;
     fetchHeatmapData();
-  }, [filters, user, didInitialFetch, fetchHeatmapData]);
+  }, [filters, user, didInitialFetch]);
 
   // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
