@@ -33,6 +33,8 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "../components/ui/tooltip";
+import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   BarChart,
   Bar,
