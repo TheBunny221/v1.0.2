@@ -213,6 +213,8 @@ const UnifiedReports: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null);
+  const [heatmapLoading, setHeatmapLoading] = useState(false);
   const [reportProgress, setReportProgress] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportAbortController, setReportAbortController] =
