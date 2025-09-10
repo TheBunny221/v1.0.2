@@ -102,88 +102,65 @@ const MaintenanceTasks: React.FC = () => {
   }
 
   // Extract tasks from API response
+  // Helper: normalize a complaint object into a task
+  function mapComplaintToTask(complaint: any) {
+    let lat: number | null = null;
+    let lng: number | null = null;
+
+    // Try parsing coordinates
+    try {
+      const coords =
+        typeof complaint.coordinates === "string"
+          ? JSON.parse(complaint.coordinates)
+          : complaint.coordinates;
+
+      lat = coords?.latitude ?? coords?.lat ?? complaint.latitude ?? null;
+      lng = coords?.longitude ?? coords?.lng ?? complaint.longitude ?? null;
+    } catch {
+      lat = complaint.latitude ?? null;
+      lng = complaint.longitude ?? null;
+    }
+
+    return {
+      id: complaint.id,
+      title: complaint.title || `${complaint.type} Issue`,
+      location: complaint.area,
+      address: [
+        complaint.area,
+        complaint.landmark,
+        complaint.address,
+      ]
+        .filter(Boolean)
+        .join(", "),
+      priority: complaint.priority || "MEDIUM",
+      status: complaint.status,
+      estimatedTime: getPriorityEstimatedTime(complaint.priority),
+      dueDate: complaint.deadline
+        ? new Date(complaint.deadline).toISOString().split("T")[0]
+        : null,
+      isOverdue: complaint.deadline
+        ? new Date(complaint.deadline) < new Date() &&
+        !["RESOLVED", "CLOSED"].includes(complaint.status)
+        : false,
+      description: complaint.description,
+      assignedAt: complaint.assignedOn || complaint.submittedOn,
+      resolvedAt: complaint.resolvedOn,
+      photo: complaint.attachments?.[0]?.url || null,
+      latitude: lat,
+      longitude: lng,
+      complaintId: complaint.complaintId,
+      statusLogs: complaint.statusLogs || [],
+    };
+  }
+
   const tasks = useMemo(() => {
-    if (Array.isArray(complaintsResponse?.data?.complaints)) {
-      return complaintsResponse!.data!.complaints.map((complaint: any) => {
-        let lat = complaint.latitude;
-        let lng = complaint.longitude;
-        if ((!lat || !lng) && complaint.coordinates) {
-          try {
-            const c =
-              typeof complaint.coordinates === "string"
-                ? JSON.parse(complaint.coordinates)
-                : complaint.coordinates;
-            lat = c?.latitude ?? c?.lat ?? lat;
-            lng = c?.longitude ?? c?.lng ?? lng;
-          } catch {}
-        }
-        return {
-          id: complaint.id,
-          title: complaint.title || `${complaint.type} Issue`,
-          location: complaint.area,
-          address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
-          priority: complaint.priority || "MEDIUM",
-          status: complaint.status,
-          estimatedTime: getPriorityEstimatedTime(complaint.priority),
-          dueDate: complaint.deadline
-            ? new Date(complaint.deadline).toISOString().split("T")[0]
-            : null,
-          isOverdue: complaint.deadline
-            ? new Date(complaint.deadline) < new Date() &&
-              ["RESOLVED", "CLOSED"].includes(complaint.status) === false
-            : false,
-          description: complaint.description,
-          assignedAt: complaint.assignedOn || complaint.submittedOn,
-          resolvedAt: complaint.resolvedOn,
-          photo: complaint.attachments?.[0]?.url || null,
-          latitude: lat,
-          longitude: lng,
-          complaintId: complaint.complaintId,
-          statusLogs: complaint.statusLogs || [],
-        };
-      });
-    }
-    if (Array.isArray((complaintsResponse as any)?.data)) {
-      return (complaintsResponse as any).data.map((complaint: any) => {
-        let lat = complaint.latitude;
-        let lng = complaint.longitude;
-        if ((!lat || !lng) && complaint.coordinates) {
-          try {
-            const c =
-              typeof complaint.coordinates === "string"
-                ? JSON.parse(complaint.coordinates)
-                : complaint.coordinates;
-            lat = c?.latitude ?? c?.lat ?? lat;
-            lng = c?.longitude ?? c?.lng ?? lng;
-          } catch {}
-        }
-        return {
-          id: complaint.id,
-          title: complaint.title || `${complaint.type} Issue`,
-          location: complaint.area,
-          address: `${complaint.area}${complaint.landmark ? ", " + complaint.landmark : ""}${complaint.address ? ", " + complaint.address : ""}`,
-          priority: complaint.priority || "MEDIUM",
-          status: complaint.status,
-          estimatedTime: getPriorityEstimatedTime(complaint.priority),
-          dueDate: complaint.deadline
-            ? new Date(complaint.deadline).toISOString().split("T")[0]
-            : null,
-          isOverdue: complaint.deadline
-            ? new Date(complaint.deadline) < new Date() &&
-              ["RESOLVED", "CLOSED"].includes(complaint.status) === false
-            : false,
-          description: complaint.description,
-          assignedAt: complaint.assignedOn || complaint.submittedOn,
-          resolvedAt: complaint.resolvedOn,
-          photo: complaint.attachments?.[0]?.url || null,
-          latitude: lat,
-          longitude: lng,
-          complaintId: complaint.complaintId,
-          statusLogs: complaint.statusLogs || [],
-        };
-      });
-    }
-    return [];
+    const data =
+      complaintsResponse?.data?.complaints ??
+      (Array.isArray(complaintsResponse?.data)
+        ? complaintsResponse.data
+        : []);
+
+    return Array.isArray(data) ? data.map(mapComplaintToTask) : [];
   }, [complaintsResponse]);
 
   // Calculate task counts with mutually exclusive buckets
@@ -329,6 +306,7 @@ const MaintenanceTasks: React.FC = () => {
   // Handle navigation
   const handleNavigate = async (task: any) => {
     try {
+      console.log("Navigating to task:", task.coordinates);
       setNavigatingId(task.id);
       let lat = task.latitude;
       let lng = task.longitude;
@@ -1161,14 +1139,14 @@ const MaintenanceTasks: React.FC = () => {
                       )}
                       {(task.status === "IN_PROGRESS" ||
                         task.status === "REOPENED") && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleMarkResolved(task)}
-                        >
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Mark as Resolved
-                        </Button>
-                      )}
+                          <Button
+                            size="sm"
+                            onClick={() => handleMarkResolved(task)}
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Mark as Resolved
+                          </Button>
+                        )}
                       <Link to={`/tasks/${task.id}`}>
                         <Button variant="outline" size="sm">
                           Details
