@@ -613,6 +613,36 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </div>
 
+          {/* Overview Heatmap */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Overview Heatmap</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                High-level view of complaints across wards and types
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full">
+                <HeatmapGrid
+                  title="Overall Complaints Heatmap"
+                  description="Complaints by type across wards (overview)"
+                  data={
+                    overviewHeatmap || {
+                      xLabels: [],
+                      yLabels: [],
+                      matrix: [],
+                      xAxisLabel: "Complaint Type",
+                      yAxisLabel: "Ward",
+                    }
+                  }
+                />
+                {overviewHeatmapLoading && (
+                  <div className="mt-2 text-xs text-muted-foreground">Loading heatmap...</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Recent Activity */}
           <Card>
             <CardHeader>
