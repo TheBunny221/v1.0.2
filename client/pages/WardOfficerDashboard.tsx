@@ -37,7 +37,6 @@ import {
 } from "lucide-react";
 import StatusOverviewGrid from "@/components/StatusOverviewGrid";
 import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
-import { useComplaintTypes } from "../hooks/useComplaintTypes";
 
 interface FilterState {
   mainFilter:
@@ -145,8 +144,6 @@ const WardOfficerDashboard: React.FC = () => {
   const complaintsFilter = buildComplaintsFilter();
 
   // Heatmap overview state for ward officer
-  const { complaintTypes, getComplaintTypeById, getComplaintTypeByName } =
-    useComplaintTypes();
   const [overviewHeatmap, setOverviewHeatmap] = useState<HeatmapData | null>(
     null,
   );
@@ -170,7 +167,7 @@ const WardOfficerDashboard: React.FC = () => {
     } finally {
       setOverviewHeatmapLoading(false);
     }
-  }, [getComplaintTypeById, getComplaintTypeByName]);
+  }, []);
 
   useEffect(() => {
     fetchOverviewHeatmap();

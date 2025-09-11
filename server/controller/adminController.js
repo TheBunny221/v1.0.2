@@ -610,18 +610,20 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
     .map((cfg) => {
       try {
         const v = JSON.parse(cfg.value || "{}");
-        return { name: v.name, slaHours: Number(v.slaHours) || 48 };
+        const id = cfg.key.replace("COMPLAINT_TYPE_", "");
+        return { id, name: v.name || id, slaHours: Number(v.slaHours) || 48 };
       } catch {
-        return { name: cfg.key.replace("COMPLAINT_TYPE_", ""), slaHours: 48 };
+        const id = cfg.key.replace("COMPLAINT_TYPE_", "");
+        return { id, name: id, slaHours: 48 };
       }
     })
-    .filter((t) => t.name);
+    .filter((t) => t.id);
 
   const nowTs = new Date();
   let typePercentages = [];
   for (const t of complaintTypes) {
     const rows = await prisma.complaint.findMany({
-      where: { type: t.name },
+      where: { type: t.id },
       select: { submittedOn: true, resolvedOn: true, status: true },
     });
     if (rows.length === 0) continue;

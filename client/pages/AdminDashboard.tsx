@@ -34,7 +34,6 @@ import {
   TooltipProvider,
 } from "../components/ui/tooltip";
 import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
-import { useComplaintTypes } from "../hooks/useComplaintTypes";
 import {
   BarChart,
   Bar,
@@ -147,8 +146,6 @@ const AdminDashboard: React.FC = () => {
   }
 
   // Heatmap overview state
-  const { complaintTypes, getComplaintTypeById, getComplaintTypeByName } =
-    useComplaintTypes();
   const [overviewHeatmap, setOverviewHeatmap] = useState<HeatmapData | null>(
     null,
   );
@@ -172,7 +169,7 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setOverviewHeatmapLoading(false);
     }
-  }, [getComplaintTypeById, getComplaintTypeByName]);
+  }, []);
 
   useEffect(() => {
     fetchOverviewHeatmap();

@@ -1,6 +1,7 @@
 import { getPrisma } from "../db/connection.js";
 
 // Build a map of complaint type -> SLA hours from system config
+// Ensure the keys in the returned map match the complaint.type stored in DB (usually the suffix of the config key, e.g. 'WATER_SUPPLY')
 export async function getTypeSlaMap(prisma) {
   const client = prisma || getPrisma();
   const typeConfigs = await client.systemConfig.findMany({
@@ -10,11 +11,21 @@ export async function getTypeSlaMap(prisma) {
   for (const cfg of typeConfigs) {
     try {
       const v = JSON.parse(cfg.value || "{}");
-      const name = v.name || cfg.key.replace("COMPLAINT_TYPE_", "");
+      const id = (cfg.key || "").replace("COMPLAINT_TYPE_", "");
       const slaHours = Number(v.slaHours);
-      if (!name || !Number.isFinite(slaHours) || slaHours <= 0) continue;
-      map.set(name, slaHours);
-    } catch {}
+      if (!id || !Number.isFinite(slaHours) || slaHours <= 0) continue;
+      // Primary key: the config suffix (e.g. WATER_SUPPLY) which matches complaint.type
+      map.set(id, slaHours);
+      // Also set uppercase/lowercase variants and the human-readable name (if present) for resilience
+      if (v.name && typeof v.name === "string") {
+        map.set(v.name.toUpperCase(), slaHours);
+        map.set(v.name.toLowerCase(), slaHours);
+      }
+      map.set(id.toUpperCase(), slaHours);
+      map.set(id.toLowerCase(), slaHours);
+    } catch (e) {
+      // ignore parse errors
+    }
   }
   return map;
 }
@@ -38,7 +49,14 @@ export async function computeSlaComplianceClosed(prisma, where = {}) {
   let total = 0;
   for (const r of rows) {
     if (!r.submittedOn || !r.closedOn) continue;
-    const slaHours = typeSlaMap.get(r.type);
+    const typeKey = r.type || "";
+    // Try multiple fallbacks to find an SLA hours value for the complaint type
+    let slaHours = typeSlaMap.get(typeKey);
+    if (slaHours == null && typeof typeKey === "string") {
+      slaHours =
+        typeSlaMap.get(typeKey.toUpperCase()) ||
+        typeSlaMap.get(typeKey.toLowerCase());
+    }
     if (!slaHours) continue; // skip unknown type config
     total += 1;
     const startTs = new Date(r.submittedOn).getTime();
