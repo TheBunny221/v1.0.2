@@ -24,18 +24,9 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Phone number validation regex (supports international formats)
 const PHONE_REGEX = /^\+?[\d\s-()]{10,}$/;
 
-// Valid complaint types
-const VALID_COMPLAINT_TYPES = [
-  "WATER_SUPPLY",
-  "ELECTRICITY",
-  "ROAD_REPAIR",
-  "GARBAGE_COLLECTION",
-  "STREET_LIGHTING",
-  "SEWERAGE",
-  "PUBLIC_HEALTH",
-  "TRAFFIC",
-  "OTHERS",
-];
+// Valid complaint types: allow uppercase identifiers with optional underscores
+// Actual allowed types are loaded dynamically in the UI via useComplaintTypes hook.
+const VALID_COMPLAINT_TYPES_REGEX = /^[A-Z0-9_]+$/;
 
 // Valid priorities
 const VALID_PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
