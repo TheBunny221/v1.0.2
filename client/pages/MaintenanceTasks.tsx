@@ -186,50 +186,6 @@ const MaintenanceTasks: React.FC = () => {
 
   const showStatCards = false;
 
-  const quickFilters = [
-    {
-      key: "all",
-      label: "All",
-      count: taskCounts.total,
-      icon: <ListTodo className="h-3 w-3" />,
-    },
-    {
-      key: "pending",
-      label: "Pending",
-      count: taskCounts.pending,
-      icon: <Clock className="h-3 w-3" />,
-    },
-    {
-      key: "overdue",
-      label: "Overdue",
-      count: taskCounts.overdue,
-      icon: <AlertCircle className="h-3 w-3" />,
-    },
-    {
-      key: "inProgress",
-      label: "In Progress",
-      count: taskCounts.inProgress,
-      icon: <Clock className="h-3 w-3" />,
-    },
-    {
-      key: "resolved",
-      label: "Resolved",
-      count: taskCounts.resolved,
-      icon: <CheckCircle className="h-3 w-3" />,
-    },
-    {
-      key: "reopened",
-      label: "Reopened",
-      count: taskCounts.reopened,
-      icon: <RotateCcw className="h-3 w-3" />,
-    },
-    {
-      key: "closed",
-      label: "Closed",
-      count: taskCounts.closed,
-      icon: <CheckCircle className="h-3 w-3" />,
-    },
-  ];
 
   // Filter tasks based on active filter
   const filteredTasks = tasks.filter((task) => {
@@ -648,22 +604,6 @@ const MaintenanceTasks: React.FC = () => {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {quickFilters.map((f) => (
-            <Button
-              key={f.key}
-              variant="outline"
-              size="sm"
-              className={`h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-blue-700/30 text-white hover:bg-blue-600/40 hover:border-blue-100/50 ${activeFilter === f.key ? "bg-white text-blue-700 border-transparent shadow-sm" : ""}`}
-              onClick={() => setActiveFilter(f.key)}
-            >
-              <span className="flex items-center gap-1">
-                {f.icon}
-                <span className="text-xs">
-                  {f.label}: {f.count}
-                </span>
-              </span>
-            </Button>
-          ))}
           <Button
             variant="outline"
             size="sm"
@@ -692,7 +632,7 @@ const MaintenanceTasks: React.FC = () => {
 
         {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
         <div className="mt-3">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
             {[
               {
                 id: "all",
