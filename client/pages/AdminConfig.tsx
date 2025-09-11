@@ -225,16 +225,22 @@ const AdminConfig: React.FC = () => {
         }
       } else {
         // Non-JSON response (likely HTML error page)
-        const text = await response.text();
-        console.log(
-          `[AdminConfig] Non-JSON error response for ${url}:`,
-          text.substring(0, 200),
-        );
-        if (text.includes("<!doctype") || text.includes("<html")) {
-          errorMessage =
-            "Server returned an error page. Please check your authentication and try again.";
-        } else {
-          errorMessage = text.substring(0, 100) || errorMessage;
+        try {
+          const text = await response.text();
+          console.log(
+            `[AdminConfig] Non-JSON error response for ${url}:`,
+            text.substring(0, 200),
+          );
+          if (text.includes("<!doctype") || text.includes("<html")) {
+            errorMessage =
+              "Server returned an error page. Please check your authentication and try again.";
+          } else {
+            errorMessage = text.substring(0, 100) || errorMessage;
+          }
+        } catch (readErr) {
+          console.warn(`[AdminConfig] Failed to read error response body for ${url}:`, readErr);
+          // Fallback to generic HTTP message
+          errorMessage = `HTTP ${response.status}`;
         }
       }
 
@@ -242,11 +248,15 @@ const AdminConfig: React.FC = () => {
     }
 
     if (!isJson) {
-      const text = await response.text();
-      console.log(
-        `[AdminConfig] Non-JSON success response for ${url}:`,
-        text.substring(0, 200),
-      );
+      try {
+        const text = await response.text();
+        console.log(
+          `[AdminConfig] Non-JSON success response for ${url}:`,
+          text.substring(0, 200),
+        );
+      } catch (readErr) {
+        console.warn(`[AdminConfig] Failed to read non-JSON success response body for ${url}:`, readErr);
+      }
       throw new Error("Server returned non-JSON response. Expected JSON data.");
     }
 
