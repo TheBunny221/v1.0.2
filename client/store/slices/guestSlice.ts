@@ -321,13 +321,20 @@ export const submitGuestComplaint = createAsyncThunk(
         body: formData,
       });
 
-      // Always read body once via text(), then JSON.parse
-      const raw = await response.text();
+      // Always read body once via text(), then JSON.parse with robust handling
+      let raw: string | null = null;
       let data: any = null;
       try {
-        data = raw ? JSON.parse(raw) : null;
-      } catch (e) {
-        data = null;
+        raw = await response.text();
+        try {
+          data = raw ? JSON.parse(raw) : null;
+        } catch (parseErr) {
+          data = null;
+        }
+      } catch (readErr) {
+        console.warn("Failed to read response body:", readErr);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        throw new Error("Server returned an unreadable response. Please try again.");
       }
 
       if (!response.ok) {
