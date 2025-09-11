@@ -92,53 +92,10 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-const COMPLAINT_TYPES = [
-  {
-    value: "WATER_SUPPLY",
-    label: "Water Supply",
-    description: "Issues with water supply, quality, or pressure",
-  },
-  {
-    value: "ELECTRICITY",
-    label: "Electricity",
-    description: "Power outages, faulty connections, or street lighting",
-  },
-  {
-    value: "ROAD_REPAIR",
-    label: "Road Repair",
-    description: "Potholes, broken roads, or pedestrian issues",
-  },
-  {
-    value: "GARBAGE_COLLECTION",
-    label: "Garbage Collection",
-    description: "Waste management and cleanliness issues",
-  },
-  {
-    value: "STREET_LIGHTING",
-    label: "Street Lighting",
-    description: "Non-functioning or damaged street lights",
-  },
-  {
-    value: "SEWERAGE",
-    label: "Sewerage",
-    description: "Drainage problems, blockages, or overflow",
-  },
-  {
-    value: "PUBLIC_HEALTH",
-    label: "Public Health",
-    description: "Health and sanitation concerns",
-  },
-  {
-    value: "TRAFFIC",
-    label: "Traffic",
-    description: "Traffic management and road safety issues",
-  },
-  {
-    value: "OTHERS",
-    label: "Others",
-    description: "Any other civic issues not listed above",
-  },
-];
+const { complaintTypeOptions: COMPLAINT_TYPES, complaintTypes: DYNAMIC_COMPLAINT_TYPES, getComplaintTypeById } = useComplaintTypes();
+
+// Ensure COMPLAINT_TYPES is an array
+const _COMPLAINT_TYPES = Array.isArray(COMPLAINT_TYPES) ? COMPLAINT_TYPES : [];
 
 const PRIORITIES = [
   {
