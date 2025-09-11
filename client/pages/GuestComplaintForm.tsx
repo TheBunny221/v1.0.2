@@ -709,15 +709,11 @@ const GuestComplaintForm: React.FC = () => {
                           <SelectValue placeholder="Select complaint type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {COMPLAINT_TYPES.map((type) => (
+                          {_COMPLAINT_TYPES.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               <div className="flex flex-col">
-                                <span className="font-medium">
-                                  {type.label}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {type.description}
-                                </span>
+                                <span className="font-medium">{type.label}</span>
+                                <span className="text-xs text-gray-500">{type.description}</span>
                               </div>
                             </SelectItem>
                           ))}
