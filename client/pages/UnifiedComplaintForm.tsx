@@ -1295,11 +1295,7 @@ const UnifiedComplaintForm: React.FC = () => {
                     <CardContent className="space-y-2">
                       <p>
                         <strong>Type:</strong>{" "}
-                        {
-                          COMPLAINT_TYPES.find(
-                            (type) => type.value === formData.type,
-                          )?.label
-                        }
+                        { getComplaintTypeById(formData.type || '')?.name || formData.type }
                       </p>
                       <p>
                         <strong>Priority:</strong>{" "}
