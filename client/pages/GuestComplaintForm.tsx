@@ -92,7 +92,11 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-const { complaintTypeOptions: COMPLAINT_TYPES, complaintTypes: DYNAMIC_COMPLAINT_TYPES, getComplaintTypeById } = useComplaintTypes();
+const {
+  complaintTypeOptions: COMPLAINT_TYPES,
+  complaintTypes: DYNAMIC_COMPLAINT_TYPES,
+  getComplaintTypeById,
+} = useComplaintTypes();
 
 // Ensure COMPLAINT_TYPES is an array
 const _COMPLAINT_TYPES = Array.isArray(COMPLAINT_TYPES) ? COMPLAINT_TYPES : [];
@@ -712,8 +716,12 @@ const GuestComplaintForm: React.FC = () => {
                           {_COMPLAINT_TYPES.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               <div className="flex flex-col">
-                                <span className="font-medium">{type.label}</span>
-                                <span className="text-xs text-gray-500">{type.description}</span>
+                                <span className="font-medium">
+                                  {type.label}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {type.description}
+                                </span>
                               </div>
                             </SelectItem>
                           ))}

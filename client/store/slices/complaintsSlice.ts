@@ -200,7 +200,9 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    throw new Error("Server returned an unreadable response. Please try again.");
+    throw new Error(
+      "Server returned an unreadable response. Please try again.",
+    );
   }
 
   if (!response.ok) {

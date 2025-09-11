@@ -429,7 +429,7 @@ const UnifiedComplaintForm: React.FC = () => {
       if (submissionMode === "citizen" && isAuthenticated) {
         // Citizen flow: Submit directly to authenticated API
         const complaintData = {
-          title: `${getComplaintTypeById(formData.type || '')?.name || formData.type} - ${formData.area}`,
+          title: `${getComplaintTypeById(formData.type || "")?.name || formData.type} - ${formData.area}`,
           description: formData.description,
           type: formData.type as any,
           priority: formData.priority as any,
@@ -1295,7 +1295,8 @@ const UnifiedComplaintForm: React.FC = () => {
                     <CardContent className="space-y-2">
                       <p>
                         <strong>Type:</strong>{" "}
-                        { getComplaintTypeById(formData.type || '')?.name || formData.type }
+                        {getComplaintTypeById(formData.type || "")?.name ||
+                          formData.type}
                       </p>
                       <p>
                         <strong>Priority:</strong>{" "}

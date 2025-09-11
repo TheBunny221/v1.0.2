@@ -334,7 +334,9 @@ export const submitGuestComplaint = createAsyncThunk(
       } catch (readErr) {
         console.warn("Failed to read response body:", readErr);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        throw new Error("Server returned an unreadable response. Please try again.");
+        throw new Error(
+          "Server returned an unreadable response. Please try again.",
+        );
       }
 
       if (!response.ok) {
@@ -539,12 +541,12 @@ const guestSlice = createSlice({
       state.validationErrors = errors;
 
       // Update step completion status
-        const isStepValid = Object.keys(errors).length === 0;
-        const step = state.steps[state.currentStep - 1];
-        if (step) {
-          step.isValid = isStepValid;
-          step.isCompleted = isStepValid;
-        }
+      const isStepValid = Object.keys(errors).length === 0;
+      const step = state.steps[state.currentStep - 1];
+      if (step) {
+        step.isValid = isStepValid;
+        step.isCompleted = isStepValid;
+      }
 
       // Save draft to sessionStorage
       saveDraftToStorage(state.formData);
@@ -579,15 +581,15 @@ const guestSlice = createSlice({
         const index = state.formData.attachments.findIndex(
           (att) => att.id === action.payload.id,
         );
-          if (index !== -1) {
-            const existing = state.formData.attachments[index];
-            if (existing) {
-              state.formData.attachments[index] = {
-                ...existing,
-                ...action.payload.updates,
-              };
-            }
+        if (index !== -1) {
+          const existing = state.formData.attachments[index];
+          if (existing) {
+            state.formData.attachments[index] = {
+              ...existing,
+              ...action.payload.updates,
+            };
           }
+        }
       }
     },
 
@@ -617,21 +619,21 @@ const guestSlice = createSlice({
           };
 
           // Update previous steps' validity
-            const step0 = state.steps[0];
-            const step1 = state.steps[1];
-            const step2 = state.steps[2];
-            if (step0) {
-              step0.isValid = Object.keys(step1Errors).length === 0;
-              step0.isCompleted = step0.isValid;
-            }
-            if (step1) {
-              step1.isValid = Object.keys(step2Errors).length === 0;
-              step1.isCompleted = step1.isValid;
-            }
-            if (step2) {
-              step2.isValid = Object.keys(step3Errors).length === 0;
-              step2.isCompleted = step2.isValid;
-            }
+          const step0 = state.steps[0];
+          const step1 = state.steps[1];
+          const step2 = state.steps[2];
+          if (step0) {
+            step0.isValid = Object.keys(step1Errors).length === 0;
+            step0.isCompleted = step0.isValid;
+          }
+          if (step1) {
+            step1.isValid = Object.keys(step2Errors).length === 0;
+            step1.isCompleted = step1.isValid;
+          }
+          if (step2) {
+            step2.isValid = Object.keys(step3Errors).length === 0;
+            step2.isCompleted = step2.isValid;
+          }
           break;
         case 5:
           // Submit step - validate all previous steps
@@ -645,12 +647,12 @@ const guestSlice = createSlice({
       }
 
       state.validationErrors = errors;
-        const isStepValid = Object.keys(errors).length === 0;
-        const current = state.steps[state.currentStep - 1];
-        if (current) {
-          current.isValid = isStepValid;
-          current.isCompleted = isStepValid;
-        }
+      const isStepValid = Object.keys(errors).length === 0;
+      const current = state.steps[state.currentStep - 1];
+      if (current) {
+        current.isValid = isStepValid;
+        current.isCompleted = isStepValid;
+      }
     },
 
     setImagePreview: (
@@ -810,11 +812,11 @@ const guestSlice = createSlice({
         state.error = null;
 
         // Mark submission step as completed
-          const submission = state.steps[4];
-          if (submission) {
-            submission.isCompleted = true;
-            submission.isValid = true;
-          }
+        const submission = state.steps[4];
+        if (submission) {
+          submission.isCompleted = true;
+          submission.isValid = true;
+        }
       })
       .addCase(submitGuestComplaint.rejected, (state, action) => {
         state.isSubmitting = false;

@@ -238,7 +238,10 @@ const AdminConfig: React.FC = () => {
             errorMessage = text.substring(0, 100) || errorMessage;
           }
         } catch (readErr) {
-          console.warn(`[AdminConfig] Failed to read error response body for ${url}:`, readErr);
+          console.warn(
+            `[AdminConfig] Failed to read error response body for ${url}:`,
+            readErr,
+          );
           // Fallback to generic HTTP message
           errorMessage = `HTTP ${response.status}`;
         }
@@ -255,7 +258,10 @@ const AdminConfig: React.FC = () => {
           text.substring(0, 200),
         );
       } catch (readErr) {
-        console.warn(`[AdminConfig] Failed to read non-JSON success response body for ${url}:`, readErr);
+        console.warn(
+          `[AdminConfig] Failed to read non-JSON success response body for ${url}:`,
+          readErr,
+        );
       }
       throw new Error("Server returned non-JSON response. Expected JSON data.");
     }
