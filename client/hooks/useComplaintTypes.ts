@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useGetComplaintTypesQuery } from "../store/api/complaintTypesApi";
-import { useMemo } from "react";
 
 export interface ComplaintTypeOption {
   value: string;
