@@ -344,6 +344,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
   });
 
   let resolvedTypeName = null;
+  let resolvedTypeId = null;
   let resolvedSlaHours = null;
 
   if (byKey) {
@@ -351,6 +352,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
       const v = JSON.parse(byKey.value || "{}");
       resolvedTypeName = v.name;
       resolvedSlaHours = Number(v.slaHours);
+      resolvedTypeId = (byKey.key || "").replace("COMPLAINT_TYPE_", "").toUpperCase();
     } catch {}
   }
 
@@ -364,6 +366,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
         if (v.name && v.name.toLowerCase() === typeInput.toLowerCase()) {
           resolvedTypeName = v.name;
           resolvedSlaHours = Number(v.slaHours);
+          resolvedTypeId = (cfg.key || "").replace("COMPLAINT_TYPE_", "").toUpperCase();
           break;
         }
       } catch {}
@@ -372,6 +375,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
 
   if (
     !resolvedTypeName ||
+    !resolvedTypeId ||
     !Number.isFinite(resolvedSlaHours) ||
     resolvedSlaHours <= 0
   ) {
