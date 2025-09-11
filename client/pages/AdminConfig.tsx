@@ -1309,23 +1309,72 @@ const AdminConfig: React.FC = () => {
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2 flex items-center justify-between">
                             <div>
-                              <h4 className="font-medium">Application Logo URL</h4>
-                              <p className="text-sm text-gray-600">Public URL for the logo shown in the header and PDFs.</p>
+                              <h4 className="font-medium">Application Logo</h4>
+                              <p className="text-sm text-gray-600">Use a public URL or upload a file. Uploading will automatically update the URL.</p>
                             </div>
                             {s.value && (
                               <img src={s.value} alt="Logo" className="h-10 w-10 object-contain border rounded ml-4" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
                             )}
                           </div>
-                          <Input
-                            type="text"
-                            value={s.value}
-                            onChange={(e) =>
-                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
-                            }
-                            onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
-                            placeholder="https://.../logo.png"
-                            className="max-w-md"
-                          />
+
+                          {/* URL/File mode toggle */}
+                          <div className="flex gap-4 mb-3">
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                value="url"
+                                checked={logoUploadMode === "url"}
+                                onChange={(e) => setLogoUploadMode(e.target.value as "url" | "file")}
+                                className="form-radio"
+                              />
+                              <span>URL</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                value="file"
+                                checked={logoUploadMode === "file"}
+                                onChange={(e) => setLogoUploadMode(e.target.value as "url" | "file")}
+                                className="form-radio"
+                              />
+                              <span>Upload File</span>
+                            </label>
+                          </div>
+
+                          {logoUploadMode === "url" ? (
+                            <Input
+                              type="text"
+                              value={s.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
+                              }
+                              onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
+                              placeholder="https://.../logo.png"
+                              className="max-w-md"
+                            />
+                          ) : (
+                            <div className="space-y-2">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setLogoFile(file);
+                                    const url = await handleLogoFileUpload(file);
+                                    setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: url } : it)));
+                                    resetLogoUploadState();
+                                  }
+                                }}
+                                className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                              />
+                              {logoPreview && (
+                                <div className="mt-2">
+                                  <img src={logoPreview} alt="Logo preview" className="h-16 w-16 object-contain border rounded" />
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
