@@ -98,53 +98,16 @@ import { useToast } from "../hooks/use-toast";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { prewarmMapAssets } from "../utils/mapTilePrefetch";
 
-const COMPLAINT_TYPES = [
-  {
-    value: "WATER_SUPPLY",
-    label: "Water Supply",
-    description: "Issues with water supply, quality, or pressure",
-  },
-  {
-    value: "ELECTRICITY",
-    label: "Electricity",
-    description: "Power outages, faulty connections, or street lighting",
-  },
-  {
-    value: "ROAD_REPAIR",
-    label: "Road Repair",
-    description: "Potholes, broken roads, or pedestrian issues",
-  },
-  {
-    value: "GARBAGE_COLLECTION",
-    label: "Garbage Collection",
-    description: "Waste management and cleanliness issues",
-  },
-  {
-    value: "STREET_LIGHTING",
-    label: "Street Lighting",
-    description: "Non-functioning or damaged street lights",
-  },
-  {
-    value: "SEWERAGE",
-    label: "Sewerage",
-    description: "Drainage problems, blockages, or overflow",
-  },
-  {
-    value: "PUBLIC_HEALTH",
-    label: "Public Health",
-    description: "Health and sanitation concerns",
-  },
-  {
-    value: "TRAFFIC",
-    label: "Traffic",
-    description: "Traffic management and road safety issues",
-  },
-  {
-    value: "OTHERS",
-    label: "Others",
-    description: "Any other civic issues not listed above",
-  },
-];
+// Dynamic complaint types loaded from system config
+const {
+  complaintTypes: DYNAMIC_COMPLAINT_TYPES,
+  complaintTypeOptions,
+  isLoading: complaintTypesLoading,
+  getComplaintTypeById,
+} = useComplaintTypes();
+
+// Fallback to empty array if hook not ready
+const COMPLAINT_TYPES = complaintTypeOptions || [];
 
 const PRIORITIES = [
   {
