@@ -183,7 +183,8 @@ export const isValidPhoneNumber = (phone: string): boolean => {
 
 // Helper function to check if complaint type is valid
 export const isValidComplaintType = (type: string): boolean => {
-  return VALID_COMPLAINT_TYPES.includes(type);
+  if (!type) return false;
+  return VALID_COMPLAINT_TYPES_REGEX.test(String(type).toUpperCase());
 };
 
 // Helper function to check if priority is valid
