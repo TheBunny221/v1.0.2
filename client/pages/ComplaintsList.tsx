@@ -198,9 +198,9 @@ const ComplaintsList: React.FC = () => {
     if (wardFilter !== "all") params.wardId = wardFilter;
     if (subZoneFilter !== "all") params.subZoneId = subZoneFilter;
 
-    // Strictly enforce ward-based filtering for Ward Officers
-    if (user?.role === "WARD_OFFICER" && user?.wardId) {
-      params.wardId = user.wardId;
+    // Enforce officer-based filtering for Ward Officers
+    if (user?.role === "WARD_OFFICER" && user?.id) {
+      params.officerId = user.id;
     }
 
     // Add new filters
@@ -210,9 +210,9 @@ const ComplaintsList: React.FC = () => {
 
     if (debouncedSearchTerm.trim()) params.search = debouncedSearchTerm.trim();
 
-    // For MAINTENANCE_TEAM users, show only complaints assigned to them
+    // For MAINTENANCE_TEAM users, show only complaints assigned to them (new field)
     if (user?.role === "MAINTENANCE_TEAM") {
-      params.assignedToId = user.id;
+      params.maintenanceTeamId = user.id;
     }
 
     return params;
