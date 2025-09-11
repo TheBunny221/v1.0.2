@@ -61,7 +61,7 @@ export const validateStep1 = (data: Partial<FormData>): ValidationResult => {
   // Complaint type validation
   if (!data.type) {
     errors.type = "Complaint type is required";
-  } else if (!VALID_COMPLAINT_TYPES.includes(data.type)) {
+  } else if (!VALID_COMPLAINT_TYPES_REGEX.test(String(data.type).toUpperCase())) {
     errors.type = "Invalid complaint type selected";
   }
 
