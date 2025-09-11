@@ -683,6 +683,211 @@ router.get(
   authorize("ADMINISTRATOR", "WARD_OFFICER", "MAINTENANCE_TEAM"),
   getComprehensiveAnalytics,
 );
+
+// Heatmap data endpoint
+// Returns matrix counts for Complaints × Wards (Admin) or Complaints × Sub-zones (Ward Officer)
+router.get(
+  "/heatmap",
+  authorize("ADMINISTRATOR", "WARD_OFFICER"),
+  asyncHandler(async (req, res) => {
+    const { from, to, type, status, priority } = req.query;
+
+    // Normalizers aligned with analytics endpoint
+    const normalizeStatus = (s) => {
+      if (!s) return undefined;
+      const map = {
+        registered: "REGISTERED",
+        assigned: "ASSIGNED",
+        in_progress: "IN_PROGRESS",
+        inprogress: "IN_PROGRESS",
+        resolved: "RESOLVED",
+        closed: "CLOSED",
+        reopened: "REOPENED",
+      };
+      return map[String(s).toLowerCase()] || undefined;
+    };
+    const normalizePriority = (p) => {
+      if (!p) return undefined;
+      const map = {
+        low: "LOW",
+        medium: "MEDIUM",
+        high: "HIGH",
+        critical: "CRITICAL",
+      };
+      return map[String(p).toLowerCase()] || undefined;
+    };
+
+    // Build base where with strict RBAC
+    const where = {};
+    if (req.user.role === "WARD_OFFICER" && req.user.wardId) {
+      where.wardId = req.user.wardId; // Ward Officer always scoped to own ward
+    }
+    if (from || to) {
+      where.submittedOn = {};
+      if (from) where.submittedOn.gte = new Date(from);
+      if (to) where.submittedOn.lte = new Date(to);
+    }
+    if (type && type !== "all") where.type = type;
+    const st = normalizeStatus(status);
+    if (st) where.status = st;
+    const pr = normalizePriority(priority);
+    if (pr) where.priority = pr;
+
+    try {
+      if (req.user.role === "ADMINISTRATOR") {
+        // Admin: Y-axis wards (all wards), X-axis complaint types present in filtered data
+        const [wards, typesGroup] = await Promise.all([
+          prisma.ward.findMany({
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+          }),
+          prisma.complaint.groupBy({
+            by: ["type"],
+            where,
+            _count: { _all: true },
+          }),
+        ]);
+
+        // Original type keys sorted by count
+        const xTypeKeys = typesGroup
+          .map((g) => ({ key: g.type || "Others", count: g._count._all }))
+          .sort((a, b) => b.count - a.count)
+          .map((g) => g.key);
+
+        // Counts grouped by wardId + type
+        const grouped = await prisma.complaint.groupBy({
+          by: ["wardId", "type"],
+          where,
+          _count: { _all: true },
+        });
+        const countMap = new Map();
+        for (const g of grouped) {
+          const key = `${g.wardId}||${g.type || "Others"}`;
+          countMap.set(key, g._count._all);
+        }
+
+        const yLabels = wards.map((w) => w.name);
+        const yIds = wards.map((w) => w.id);
+        const matrix = yIds.map((wid) =>
+          xTypeKeys.map((t) => countMap.get(`${wid}||${t}`) || 0),
+        );
+
+        // Map type keys to display names using complaint type config
+        const complaintTypeConfigs = await prisma.systemConfig.findMany({
+          where: { key: { startsWith: "COMPLAINT_TYPE_" } },
+        });
+        const typeNameMap = new Map();
+        for (const cfg of complaintTypeConfigs) {
+          try {
+            const data = JSON.parse(cfg.value);
+            const id = cfg.key.replace("COMPLAINT_TYPE_", "");
+            typeNameMap.set(id, data.name);
+          } catch (e) {
+            // ignore parse errors
+          }
+        }
+        const xLabelsDisplay = xTypeKeys.map(
+          (k) => typeNameMap.get(k) || k || "Others",
+        );
+
+        return res.json({
+          success: true,
+          message: "Heatmap data retrieved successfully",
+          data: {
+            xLabels: xLabelsDisplay,
+            xTypeKeys,
+            yLabels,
+            matrix,
+            xAxisLabel: "Complaint Type",
+            yAxisLabel: "Ward",
+            meta: { yIds },
+          },
+        });
+      }
+
+      if (req.user.role === "WARD_OFFICER") {
+        // Ward Officer: Y-axis sub-zones of their ward, X-axis complaint types
+        const wardId = req.user.wardId;
+        const [subZones, typesGroup] = await Promise.all([
+          prisma.subZone.findMany({
+            where: { wardId },
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+          }),
+          prisma.complaint.groupBy({
+            by: ["type"],
+            where: { ...where, wardId },
+            _count: { _all: true },
+          }),
+        ]);
+
+        const xTypeKeys = typesGroup
+          .map((g) => ({ key: g.type || "Others", count: g._count._all }))
+          .sort((a, b) => b.count - a.count)
+          .map((g) => g.key);
+
+        const grouped = await prisma.complaint.groupBy({
+          by: ["subZoneId", "type"],
+          where: { ...where, wardId },
+          _count: { _all: true },
+        });
+        const countMap = new Map();
+        for (const g of grouped) {
+          const key = `${g.subZoneId || "__none"}||${g.type || "Others"}`;
+          countMap.set(key, g._count._all);
+        }
+
+        const yLabels = subZones.map((s) => s.name);
+        const yIds = subZones.map((s) => s.id);
+        const matrix = yIds.map((sid) =>
+          xTypeKeys.map((t) => countMap.get(`${sid}||${t}`) || 0),
+        );
+
+        // Map type keys to display names using complaint type config
+        const complaintTypeConfigs = await prisma.systemConfig.findMany({
+          where: { key: { startsWith: "COMPLAINT_TYPE_" } },
+        });
+        const typeNameMap = new Map();
+        for (const cfg of complaintTypeConfigs) {
+          try {
+            const data = JSON.parse(cfg.value);
+            const id = cfg.key.replace("COMPLAINT_TYPE_", "");
+            typeNameMap.set(id, data.name);
+          } catch (e) {
+            // ignore parse errors
+          }
+        }
+        const xLabelsDisplay = xTypeKeys.map(
+          (k) => typeNameMap.get(k) || k || "Others",
+        );
+
+        return res.json({
+          success: true,
+          message: "Heatmap data retrieved successfully",
+          data: {
+            xLabels: xLabelsDisplay,
+            xTypeKeys,
+            yLabels,
+            matrix,
+            xAxisLabel: "Complaint Type",
+            yAxisLabel: "Sub-zone",
+            meta: { yIds, wardId },
+          },
+        });
+      }
+
+      return res.status(403).json({ success: false, message: "Not allowed" });
+    } catch (error) {
+      console.error("Heatmap error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve heatmap data",
+        error: error.message,
+      });
+    }
+  }),
+);
+
 router.get(
   "/export",
   authorize("ADMINISTRATOR", "WARD_OFFICER"),

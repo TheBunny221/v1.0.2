@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetWardDashboardStatisticsQuery } from "../store/api/complaintsApi";
@@ -36,17 +36,19 @@ import {
   Briefcase,
 } from "lucide-react";
 import StatusOverviewGrid from "@/components/StatusOverviewGrid";
+import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
+import { useComplaintTypes } from "../hooks/useComplaintTypes";
 
 interface FilterState {
   mainFilter:
-  | "none"
-  | "registered"
-  | "assigned"
-  | "inProgress"
-  | "resolved"
-  | "reopened"
-  | "closed"
-  | "total";
+    | "none"
+    | "registered"
+    | "assigned"
+    | "inProgress"
+    | "resolved"
+    | "reopened"
+    | "closed"
+    | "total";
   overdue: boolean;
   urgent: boolean;
 }
@@ -141,6 +143,38 @@ const WardOfficerDashboard: React.FC = () => {
 
   // Build complaints filter for the widget
   const complaintsFilter = buildComplaintsFilter();
+
+  // Heatmap overview state for ward officer
+  const { complaintTypes, getComplaintTypeById, getComplaintTypeByName } =
+    useComplaintTypes();
+  const [overviewHeatmap, setOverviewHeatmap] = useState<HeatmapData | null>(
+    null,
+  );
+  const [overviewHeatmapLoading, setOverviewHeatmapLoading] = useState(false);
+
+  const fetchOverviewHeatmap = useCallback(async () => {
+    setOverviewHeatmapLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      const resp = await fetch(`${baseUrl}/api/reports/heatmap`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (!resp.ok) throw new Error(resp.statusText);
+      const json = await resp.json();
+      const apiData = json.data as HeatmapData & { xTypeKeys?: string[] };
+      // Use server-provided display names
+      setOverviewHeatmap(apiData as HeatmapData);
+    } catch (e) {
+      console.warn("Failed to load overview heatmap", e);
+      setOverviewHeatmap(null);
+    } finally {
+      setOverviewHeatmapLoading(false);
+    }
+  }, [getComplaintTypeById, getComplaintTypeByName]);
+
+  useEffect(() => {
+    fetchOverviewHeatmap();
+  }, [fetchOverviewHeatmap]);
 
   const handleMainFilterChange = (value: string) => {
     setFilters((prev) => ({
@@ -239,10 +273,11 @@ const WardOfficerDashboard: React.FC = () => {
           </p>
         </div>
         <Card
-          className={`w-40 p-1.5 cursor-pointer rounded-xl transition-all duration-300 ${filters.mainFilter === "total"
-            ? "ring-2 ring-primary bg-primary/10 scale-105"
-            : "bg-white/10 hover:bg-white/20"
-            }`}
+          className={`w-40 p-1.5 cursor-pointer rounded-xl transition-all duration-300 ${
+            filters.mainFilter === "total"
+              ? "ring-2 ring-primary bg-primary/10 scale-105"
+              : "bg-white/10 hover:bg-white/20"
+          }`}
           onClick={() =>
             handleMainFilterChange(
               filters.mainFilter === "total" ? "none" : "total",
@@ -263,8 +298,6 @@ const WardOfficerDashboard: React.FC = () => {
             <p className="text-xs text-white/80 text-center">All complaints</p>
           </CardContent>
         </Card>
-
-
       </div>
 
       {/* Statistics Cards with Filters */}
@@ -291,9 +324,6 @@ const WardOfficerDashboard: React.FC = () => {
           filters={filters}
           onMainFilterChange={handleMainFilterChange}
         />
-
-       
-
       </RadioGroup>
 
       {/* Additional Filter Options
@@ -413,6 +443,37 @@ const WardOfficerDashboard: React.FC = () => {
           </CardContent>
         </Card>  */}
 
+      {/* Overview Heatmap */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Overview Heatmap</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Complaints distribution across sub-zones in your ward
+          </p>
+        </CardHeader>
+        <CardContent>
+          <HeatmapGrid
+            title="Ward Overview Heatmap"
+            description={`Complaints by type within ${user?.ward?.name || "your ward"}`}
+            data={
+              overviewHeatmap || {
+                xLabels: [],
+                yLabels: [],
+                matrix: [],
+                xAxisLabel: "Complaint Type",
+                yAxisLabel: "Sub-zone",
+              }
+            }
+            className="min-h-[420px]"
+          />
+          {overviewHeatmapLoading && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              Loading heatmap...
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Performance Overview */}
       <Card>
         <CardHeader>
@@ -428,8 +489,8 @@ const WardOfficerDashboard: React.FC = () => {
               value={
                 stats?.summary.totalComplaints
                   ? (stats.summary.completedWork /
-                    stats.summary.totalComplaints) *
-                  100
+                      stats.summary.totalComplaints) *
+                    100
                   : 0
               }
               className="h-2"

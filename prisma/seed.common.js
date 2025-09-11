@@ -177,6 +177,7 @@ export default async function seedCommon(prisma, options = {}) {
       description: "West longitude of bounding box",
     },
   ];
+
   for (const cfg of configs) {
     await prisma.systemConfig.upsert({
       where: { key: cfg.key },
