@@ -67,7 +67,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
     }
 
     return params;
-  }, [filters, effectiveUserRole, effectiveUser?.wardId]);
+  }, [filters, effectiveUserRole, effectiveUser?.id]);
 
   const {
     data: complaintsResponse,
