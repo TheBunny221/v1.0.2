@@ -690,7 +690,7 @@ router.get(
   "/heatmap",
   authorize("ADMINISTRATOR", "WARD_OFFICER"),
   asyncHandler(async (req, res) => {
-    const { from, to, type, status, priority } = req.query;
+    const { from, to, type, status, priority, ward } = req.query;
 
     // Normalizers aligned with analytics endpoint
     const normalizeStatus = (s) => {
