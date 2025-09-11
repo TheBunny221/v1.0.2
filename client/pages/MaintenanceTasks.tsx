@@ -634,20 +634,20 @@ const MaintenanceTasks: React.FC = () => {
         <div className="mt-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
             {[
-              {
-                id: "all",
-                label: "All",
-                subtitle: "All tasks",
-                icon: ListTodo,
-                value: taskCounts.total,
-                style: {
-                  ring: "ring-blue-500",
-                  text: "text-blue-700",
-                  textSoft: "text-blue-600",
-                  bgSoft: "bg-blue-50",
-                  chipRing: "ring-blue-200",
-                },
-              },
+              // {
+              //   id: "all",
+              //   label: "All",
+              //   subtitle: "All tasks",
+              //   icon: ListTodo,
+              //   value: taskCounts.total,
+              //   style: {
+              //     ring: "ring-blue-500",
+              //     text: "text-blue-700",
+              //     textSoft: "text-blue-600",
+              //     bgSoft: "bg-blue-50",
+              //     chipRing: "ring-blue-200",
+              //   },
+              // },
               {
                 id: "pending",
                 label: "Pending",
