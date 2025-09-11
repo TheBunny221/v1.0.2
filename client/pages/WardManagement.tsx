@@ -56,7 +56,7 @@ const WardManagement: React.FC = () => {
   } = useGetComplaintsQuery({
     page: 1,
     limit: 100,
-    wardId: user?.wardId,
+    officerId: user?.id,
   });
 
   const complaints = Array.isArray(complaintsResponse?.data?.complaints)
