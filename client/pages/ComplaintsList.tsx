@@ -567,8 +567,7 @@ const ComplaintsList: React.FC = () => {
                   ? "Try adjusting your filters or search terms"
                   : "Submit your first complaint to get started"}
               </p>
-            </div> 
-            
+            </div>
           ) : (
             <>
               <Table>
