@@ -722,6 +722,10 @@ router.get(
     if (req.user.role === "WARD_OFFICER" && req.user.wardId) {
       where.wardId = req.user.wardId; // Ward Officer always scoped to own ward
     }
+    // Allow admins to scope to a specific ward via query param
+    if (req.user.role === "ADMINISTRATOR" && ward && ward !== "all") {
+      where.wardId = String(ward);
+    }
     if (from || to) {
       where.submittedOn = {};
       if (from) where.submittedOn.gte = new Date(from);
