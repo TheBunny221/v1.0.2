@@ -673,6 +673,9 @@ export const getComplaints = asyncHandler(async (req, res) => {
     wardId,
     subZoneId,
     assignedToId,
+    maintenanceTeamId,
+    officerId,
+    wardOfficerId,
     submittedById,
     isMaintenanceUnassigned,
     slaStatus,
@@ -700,6 +703,8 @@ export const getComplaints = asyncHandler(async (req, res) => {
       wardId,
       subZoneId,
       assignedToId,
+      maintenanceTeamId,
+      officerId: officerId || wardOfficerId,
       submittedById,
       isMaintenanceUnassigned,
       dateFrom,
@@ -720,8 +725,9 @@ export const getComplaints = asyncHandler(async (req, res) => {
     filters.submittedById = req.user.id;
     enforced.submittedById = req.user.id;
   } else if (req.user.role === "WARD_OFFICER") {
-    filters.wardId = req.user.wardId;
-    enforced.wardId = req.user.wardId;
+    // Prefer officer-based scoping to match new requirement
+    filters.wardOfficerId = req.user.id;
+    enforced.wardOfficerId = req.user.id;
   } else if (req.user.role === "MAINTENANCE_TEAM") {
     roleOr = [
       { assignedToId: req.user.id },
@@ -817,7 +823,10 @@ export const getComplaints = asyncHandler(async (req, res) => {
   if (req.user.role === "ADMINISTRATOR") {
     if (wardId) filters.wardId = wardId;
     if (subZoneId) filters.subZoneId = subZoneId;
-    if (assignedToId) filters.assignedToId = assignedToId;
+    if (assignedToId) filters.assignedToId = assignedToId; // legacy
+    if (maintenanceTeamId) filters.maintenanceTeamId = maintenanceTeamId;
+    if (officerId || wardOfficerId)
+      filters.wardOfficerId = officerId || wardOfficerId;
     if (submittedById) filters.submittedById = submittedById;
   } else if (wardId || subZoneId || assignedToId || submittedById) {
     dbg("ignored query overrides for non-admin", {
