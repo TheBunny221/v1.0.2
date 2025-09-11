@@ -1,6 +1,13 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Users, Settings, CheckCircle, RotateCcw, FileText } from "lucide-react";
+import {
+  Clock,
+  Users,
+  Settings,
+  CheckCircle,
+  RotateCcw,
+  FileText,
+} from "lucide-react";
 
 /**
  * Drop-in replacement for the existing status cards grid.
@@ -34,20 +41,28 @@ interface Filters {
 interface Stats {
   statusBreakdown?: Partial<
     Record<
-      "registered" | "assigned" | "in_progress" | "resolved" | "reopened" | "closed",
+      | "registered"
+      | "assigned"
+      | "in_progress"
+      | "resolved"
+      | "reopened"
+      | "closed",
       number
     >
   >;
 }
 
 // Style tokens per status (avoid dynamic tailwind class strings)
-const STYLE: Record<Exclude<StatusId, "none">, {
-  ring: string; // ring color when active
-  text: string; // number color when active
-  textSoft: string; // icon color when active
-  bgSoft: string; // subtle bg when active
-  chipRing: string; // ring for icon chip
-}> = {
+const STYLE: Record<
+  Exclude<StatusId, "none">,
+  {
+    ring: string; // ring color when active
+    text: string; // number color when active
+    textSoft: string; // icon color when active
+    bgSoft: string; // subtle bg when active
+    chipRing: string; // ring for icon chip
+  }
+> = {
   registered: {
     ring: "ring-amber-500",
     text: "text-amber-700",
@@ -147,7 +162,7 @@ export default function StatusOverviewGrid({
   onMainFilterChange: (next: StatusId) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-3 sm:gap-4">
       {META.map((m) => {
         const active = filters.mainFilter === m.id;
         const style = STYLE[m.id];
@@ -188,7 +203,9 @@ export default function StatusOverviewGrid({
               <div
                 className={[
                   "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
-                  active ? `${style.bgSoft} ${style.textSoft} ${style.chipRing}` : "bg-neutral-50 text-neutral-600 ring-neutral-200",
+                  active
+                    ? `${style.bgSoft} ${style.textSoft} ${style.chipRing}`
+                    : "bg-neutral-50 text-neutral-600 ring-neutral-200",
                 ].join(" ")}
               >
                 <m.icon className="h-5 w-5" />

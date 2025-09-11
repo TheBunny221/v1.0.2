@@ -57,25 +57,131 @@ export default async function seedCommon(prisma, options = {}) {
     {
       key: "APP_NAME",
       value: "Kochi Smart City",
-      type: "app",
       description: "Application name",
     },
     {
       key: "APP_LOGO_URL",
       value: "/logo.png",
-      type: "app",
-      description: "Logo URL",
+      description: "URL for the application logo",
     },
-    { key: "MAP_DEFAULT_LAT", value: "9.9312", type: "map" },
-    { key: "MAP_DEFAULT_LNG", value: "76.2673", type: "map" },
-    { key: "COMPLAINT_ID_PREFIX", value: "KSC", type: "complaint" },
+    {
+      key: "APP_LOGO_SIZE",
+      value: "medium",
+      description: "Size of the application logo (small, medium, large)",
+    },
+    {
+      key: "COMPLAINT_ID_PREFIX",
+      value: "KSC",
+      description: "Prefix for complaint IDs",
+    },
+    {
+      key: "COMPLAINT_ID_START_NUMBER",
+      value: "1",
+      description: "Starting number for complaint ID sequence",
+    },
+    {
+      key: "COMPLAINT_ID_LENGTH",
+      value: "4",
+      description: "Length of the numeric part in complaint IDs",
+    },
+    {
+      key: "OTP_EXPIRY_MINUTES",
+      value: "5",
+      description: "OTP expiration time in minutes",
+    },
+    {
+      key: "MAX_FILE_SIZE_MB",
+      value: "10",
+      description: "Maximum file upload size in MB",
+    },
+    {
+      key: "DEFAULT_SLA_HOURS",
+      value: "48",
+      description: "Default SLA time in hours",
+    },
+    {
+      key: "ADMIN_EMAIL",
+      value: "admin@cochinsmart.gov.in",
+      description: "Administrator email address",
+    },
+    {
+      key: "SYSTEM_MAINTENANCE",
+      value: "false",
+      description: "System maintenance mode",
+    },
+    {
+      key: "NOTIFICATION_SETTINGS",
+      value: '{"email":true,"sms":false}',
+      description: "Notification preferences",
+    },
+    {
+      key: "AUTO_ASSIGN_COMPLAINTS",
+      value: "true",
+      description: "Automatically assign complaints to ward officers",
+    },
+    {
+      key: "CITIZEN_REGISTRATION_ENABLED",
+      value: "true",
+      description: "Allow citizen self-registration",
+    },
+    {
+      key: "COMPLAINT_PRIORITIES",
+      value: '["LOW","MEDIUM","HIGH","CRITICAL"]',
+      description: "Available complaint priorities",
+    },
+    {
+      key: "COMPLAINT_STATUSES",
+      value:
+        '["REGISTERED","ASSIGNED","IN_PROGRESS","RESOLVED","CLOSED","REOPENED"]',
+      description: "Available complaint statuses",
+    },
+    // Map settings
+    {
+      key: "MAP_SEARCH_PLACE",
+      value: "Kochi, Kerala, India",
+      description: "Place context appended to searches",
+    },
+    {
+      key: "MAP_COUNTRY_CODES",
+      value: "in",
+      description: "ISO2 country codes for Nominatim bias (comma-separated)",
+    },
+    {
+      key: "MAP_DEFAULT_LAT",
+      value: "9.9312",
+      description: "Default map center latitude",
+    },
+    {
+      key: "MAP_DEFAULT_LNG",
+      value: "76.2673",
+      description: "Default map center longitude",
+    },
+    {
+      key: "MAP_BBOX_NORTH",
+      value: "10.05",
+      description: "North latitude of bounding box",
+    },
+    {
+      key: "MAP_BBOX_SOUTH",
+      value: "9.85",
+      description: "South latitude of bounding box",
+    },
+    {
+      key: "MAP_BBOX_EAST",
+      value: "76.39",
+      description: "East longitude of bounding box",
+    },
+    {
+      key: "MAP_BBOX_WEST",
+      value: "76.20",
+      description: "West longitude of bounding box",
+    },
   ];
   for (const cfg of configs) {
     await prisma.systemConfig.upsert({
       where: { key: cfg.key },
       update: {
         value: cfg.value,
-        type: cfg.type,
         description: cfg.description ?? null,
         isActive: true,
       },
@@ -587,17 +693,18 @@ export default async function seedCommon(prisma, options = {}) {
           ...complaintData,
           wardOfficerId: previousOfficer?.id || null,
           maintenanceTeamId: previousTeam?.id || null,
-          assignedToId: previousTeam?.id || previousOfficer?.id || null,
+          assignedToId: previousTeam?.id || null,
           assignedOn: assignedDate,
           resolvedOn: resolvedDate,
           closedOn: closedDate,
         };
       } else {
+        const teamId = assignedTeamMember?.id || null;
         complaintData = {
           ...complaintData,
           wardOfficerId: randomOfficer?.id || null,
-          maintenanceTeamId: assignedTeamMember?.id || null,
-          assignedToId: assignedTeamMember?.id || randomOfficer?.id || null,
+          maintenanceTeamId: teamId,
+          assignedToId: teamId, // mirror to legacy for compatibility
           assignedOn: assignedDate,
           resolvedOn:
             status === "RESOLVED" || status === "CLOSED" ? resolvedDate : null,
@@ -857,7 +964,9 @@ export default async function seedCommon(prisma, options = {}) {
   const existingSRCount = await prisma.serviceRequest.count();
   const srNeeded = Math.max(0, targets.serviceRequests - existingSRCount);
   if (srNeeded === 0) {
-    console.log(`ℹ️ Service requests already meet target (${existingSRCount})`);
+    console.log(
+      `ℹ�� Service requests already meet target (${existingSRCount})`,
+    );
   } else {
     const serviceTypes = [
       "BIRTH_CERTIFICATE",

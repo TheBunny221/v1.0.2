@@ -77,7 +77,6 @@ const MaintenanceTasks: React.FC = () => {
     error,
     refetch: refetchComplaints,
   } = useGetComplaintsQuery({
-    assignedToId: user?.id,
     maintenanceTeamId: user?.id,
     page: 1,
     limit: 100,
@@ -125,11 +124,7 @@ const MaintenanceTasks: React.FC = () => {
       id: complaint.id,
       title: complaint.title || `${complaint.type} Issue`,
       location: complaint.area,
-      address: [
-        complaint.area,
-        complaint.landmark,
-        complaint.address,
-      ]
+      address: [complaint.area, complaint.landmark, complaint.address]
         .filter(Boolean)
         .join(", "),
       priority: complaint.priority || "MEDIUM",
@@ -140,7 +135,7 @@ const MaintenanceTasks: React.FC = () => {
         : null,
       isOverdue: complaint.deadline
         ? new Date(complaint.deadline) < new Date() &&
-        !["RESOLVED", "CLOSED"].includes(complaint.status)
+          !["RESOLVED", "CLOSED"].includes(complaint.status)
         : false,
       description: complaint.description,
       assignedAt: complaint.assignedOn || complaint.submittedOn,
@@ -156,9 +151,7 @@ const MaintenanceTasks: React.FC = () => {
   const tasks = useMemo(() => {
     const data =
       complaintsResponse?.data?.complaints ??
-      (Array.isArray(complaintsResponse?.data)
-        ? complaintsResponse.data
-        : []);
+      (Array.isArray(complaintsResponse?.data) ? complaintsResponse.data : []);
 
     return Array.isArray(data) ? data.map(mapComplaintToTask) : [];
   }, [complaintsResponse]);
@@ -185,51 +178,6 @@ const MaintenanceTasks: React.FC = () => {
   };
 
   const showStatCards = false;
-
-  const quickFilters = [
-    {
-      key: "all",
-      label: "All",
-      count: taskCounts.total,
-      icon: <ListTodo className="h-3 w-3" />,
-    },
-    {
-      key: "pending",
-      label: "Pending",
-      count: taskCounts.pending,
-      icon: <Clock className="h-3 w-3" />,
-    },
-    {
-      key: "overdue",
-      label: "Overdue",
-      count: taskCounts.overdue,
-      icon: <AlertCircle className="h-3 w-3" />,
-    },
-    {
-      key: "inProgress",
-      label: "In Progress",
-      count: taskCounts.inProgress,
-      icon: <Clock className="h-3 w-3" />,
-    },
-    {
-      key: "resolved",
-      label: "Resolved",
-      count: taskCounts.resolved,
-      icon: <CheckCircle className="h-3 w-3" />,
-    },
-    {
-      key: "reopened",
-      label: "Reopened",
-      count: taskCounts.reopened,
-      icon: <RotateCcw className="h-3 w-3" />,
-    },
-    {
-      key: "closed",
-      label: "Closed",
-      count: taskCounts.closed,
-      icon: <CheckCircle className="h-3 w-3" />,
-    },
-  ];
 
   // Filter tasks based on active filter
   const filteredTasks = tasks.filter((task) => {
@@ -640,7 +588,9 @@ const MaintenanceTasks: React.FC = () => {
                   </CardTitle>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-extrabold text-white">{taskCounts.total}</div>
+                  <div className="text-3xl font-extrabold text-white">
+                    {taskCounts.total}
+                  </div>
                   <div className="text-xs text-white/80">Total Tasks</div>
                 </div>
               </CardHeader>
@@ -648,22 +598,6 @@ const MaintenanceTasks: React.FC = () => {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {quickFilters.map((f) => (
-            <Button
-              key={f.key}
-              variant="outline"
-              size="sm"
-              className={`h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-blue-700/30 text-white hover:bg-blue-600/40 hover:border-blue-100/50 ${activeFilter === f.key ? "bg-white text-blue-700 border-transparent shadow-sm" : ""}`}
-              onClick={() => setActiveFilter(f.key)}
-            >
-              <span className="flex items-center gap-1">
-                {f.icon}
-                <span className="text-xs">
-                  {f.label}: {f.count}
-                </span>
-              </span>
-            </Button>
-          ))}
           <Button
             variant="outline"
             size="sm"
@@ -692,22 +626,22 @@ const MaintenanceTasks: React.FC = () => {
 
         {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
         <div className="mt-3">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
             {[
-              {
-                id: "all",
-                label: "All",
-                subtitle: "All tasks",
-                icon: ListTodo,
-                value: taskCounts.total,
-                style: {
-                  ring: "ring-blue-500",
-                  text: "text-blue-700",
-                  textSoft: "text-blue-600",
-                  bgSoft: "bg-blue-50",
-                  chipRing: "ring-blue-200",
-                },
-              },
+              // {
+              //   id: "all",
+              //   label: "All",
+              //   subtitle: "All tasks",
+              //   icon: ListTodo,
+              //   value: taskCounts.total,
+              //   style: {
+              //     ring: "ring-blue-500",
+              //     text: "text-blue-700",
+              //     textSoft: "text-blue-600",
+              //     bgSoft: "bg-blue-50",
+              //     chipRing: "ring-blue-200",
+              //   },
+              // },
               {
                 id: "pending",
                 label: "Pending",
@@ -793,7 +727,9 @@ const MaintenanceTasks: React.FC = () => {
                 },
               },
             ].map((m) => {
-              const active = activeFilter === m.id || (m.id === "all" && activeFilter === "total");
+              const active =
+                activeFilter === m.id ||
+                (m.id === "all" && activeFilter === "total");
               const Icon = m.icon as any;
               return (
                 <Card
@@ -812,14 +748,19 @@ const MaintenanceTasks: React.FC = () => {
                   className={[
                     "group relative cursor-pointer select-none rounded-2xl border bg-white shadow-sm transition-all",
                     "hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-                    active ? `ring-2 ${m.style.ring} ${m.style.bgSoft} border-transparent` : "hover:border-neutral-200",
+                    active
+                      ? `ring-2 ${m.style.ring} ${m.style.bgSoft} border-transparent`
+                      : "hover:border-neutral-200",
                   ].join(" ")}
                 >
                   <CardHeader className="flex flex-col items-center justify-center p-3 pb-1">
-                    <div className={[
-                      "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
-                      active ? `${m.style.bgSoft} ${m.style.textSoft} ${m.style.chipRing}` : "bg-neutral-50 text-neutral-600 ring-neutral-200",
-                    ].join(" ")}
+                    <div
+                      className={[
+                        "mb-2 grid h-10 w-10 place-items-center rounded-full ring-1 ring-inset",
+                        active
+                          ? `${m.style.bgSoft} ${m.style.textSoft} ${m.style.chipRing}`
+                          : "bg-neutral-50 text-neutral-600 ring-neutral-200",
+                      ].join(" ")}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
@@ -829,10 +770,17 @@ const MaintenanceTasks: React.FC = () => {
                   </CardHeader>
 
                   <CardContent className="flex flex-col items-center p-2 pt-0">
-                    <div className={["text-2xl font-bold leading-none tracking-tight", active ? m.style.text : "text-neutral-900"].join(" ")}>
+                    <div
+                      className={[
+                        "text-2xl font-bold leading-none tracking-tight",
+                        active ? m.style.text : "text-neutral-900",
+                      ].join(" ")}
+                    >
                       {m.value}
                     </div>
-                    <p className="mt-1 text-xs text-neutral-500">{m.subtitle}</p>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {m.subtitle}
+                    </p>
                   </CardContent>
                 </Card>
               );
@@ -1139,14 +1087,14 @@ const MaintenanceTasks: React.FC = () => {
                       )}
                       {(task.status === "IN_PROGRESS" ||
                         task.status === "REOPENED") && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleMarkResolved(task)}
-                          >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Mark as Resolved
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          onClick={() => handleMarkResolved(task)}
+                        >
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Mark as Resolved
+                        </Button>
+                      )}
                       <Link to={`/tasks/${task.id}`}>
                         <Button variant="outline" size="sm">
                           Details

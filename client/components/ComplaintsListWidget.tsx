@@ -61,13 +61,13 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
       limit: 50,
     };
 
-    // Strictly enforce ward-based filtering for Ward Officers
-    if (effectiveUserRole === "WARD_OFFICER" && effectiveUser?.wardId) {
-      params.wardId = effectiveUser.wardId;
+    // Enforce officer-based filtering for Ward Officers
+    if (effectiveUserRole === "WARD_OFFICER" && effectiveUser?.id) {
+      params.officerId = effectiveUser.id;
     }
 
     return params;
-  }, [filters, effectiveUserRole, effectiveUser?.wardId]);
+  }, [filters, effectiveUserRole, effectiveUser?.id]);
 
   const {
     data: complaintsResponse,
@@ -200,7 +200,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                     <TableHead>Team Assignment</TableHead>
                   )} */}
                   {effectiveUserRole === "WARD_OFFICER" && (
-                    <TableHead >Team </TableHead>
+                    <TableHead>Team </TableHead>
                   )}
                   {effectiveUserRole !== "WARD_OFFICER" && (
                     <TableHead>Rating</TableHead>
