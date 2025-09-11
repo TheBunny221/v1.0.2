@@ -184,20 +184,23 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
     ...options,
   });
 
-  // Read body ONCE and parse
-  const raw = await response.text();
+  // Read body ONCE and parse with robust error handling in case the stream was already consumed
+  let raw = null;
   let data: any = null;
   try {
-    data = raw ? JSON.parse(raw) : null;
-  } catch {
-    // If HTML returned (like login page), surface a clearer error
-    if (raw && (raw.includes("<!doctype") || raw.includes("<html"))) {
-      throw new Error("Authentication required. Please log in and try again.");
+    raw = await response.text();
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch (parseErr) {
+      data = null;
     }
+  } catch (readErr: any) {
+    console.warn("Failed to read response body:", readErr);
+    // If body already read or unreadable, surface a clear error for non-ok responses
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    throw new Error("Server returned unexpected response format");
+    throw new Error("Server returned an unreadable response. Please try again.");
   }
 
   if (!response.ok) {
