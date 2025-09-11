@@ -398,9 +398,11 @@ const UnifiedReports: React.FC = () => {
         ...(filters.status !== "all" && { status: filters.status }),
         ...(filters.priority !== "all" && { priority: filters.priority }),
       } as Record<string, string>);
-      // Enforce ward scope for Ward Officers
+      // Enforce ward scope for Ward Officers; allow Admins to scope to a ward
       if (user?.role === "WARD_OFFICER" && user?.wardId) {
         queryParams.set("ward", user.wardId);
+      } else if (user?.role === "ADMINISTRATOR" && filters.ward && filters.ward !== "all") {
+        queryParams.set("ward", filters.ward);
       }
       const baseUrl = window.location.origin;
       const resp = await fetch(
