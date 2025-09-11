@@ -413,7 +413,8 @@ export const createComplaint = asyncHandler(async (req, res) => {
   const complaint = await createComplaintWithUniqueId({
     title: title || `${resolvedTypeName} complaint`,
     description,
-    type: resolvedTypeName,
+    // Store standardized type id in DB (e.g. ELECTRICITY) for consistency
+    type: resolvedTypeId,
     priority: priority || "MEDIUM",
     status: initialStatus,
     slaStatus: "ON_TIME",
