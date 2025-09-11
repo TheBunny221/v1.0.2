@@ -53,7 +53,9 @@ export async function computeSlaComplianceClosed(prisma, where = {}) {
     // Try multiple fallbacks to find an SLA hours value for the complaint type
     let slaHours = typeSlaMap.get(typeKey);
     if (slaHours == null && typeof typeKey === "string") {
-      slaHours = typeSlaMap.get(typeKey.toUpperCase()) || typeSlaMap.get(typeKey.toLowerCase());
+      slaHours =
+        typeSlaMap.get(typeKey.toUpperCase()) ||
+        typeSlaMap.get(typeKey.toLowerCase());
     }
     if (!slaHours) continue; // skip unknown type config
     total += 1;

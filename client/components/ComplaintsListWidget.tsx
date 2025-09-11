@@ -200,7 +200,7 @@ const ComplaintsListWidget: React.FC<ComplaintsListWidgetProps> = ({
                     <TableHead>Team Assignment</TableHead>
                   )} */}
                   {effectiveUserRole === "WARD_OFFICER" && (
-                    <TableHead >Team </TableHead>
+                    <TableHead>Team </TableHead>
                   )}
                   {effectiveUserRole !== "WARD_OFFICER" && (
                     <TableHead>Rating</TableHead>

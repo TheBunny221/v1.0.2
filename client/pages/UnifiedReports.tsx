@@ -401,7 +401,11 @@ const UnifiedReports: React.FC = () => {
       // Enforce ward scope for Ward Officers; allow Admins to scope to a ward
       if (user?.role === "WARD_OFFICER" && user?.wardId) {
         queryParams.set("ward", user.wardId);
-      } else if (user?.role === "ADMINISTRATOR" && filters.ward && filters.ward !== "all") {
+      } else if (
+        user?.role === "ADMINISTRATOR" &&
+        filters.ward &&
+        filters.ward !== "all"
+      ) {
         queryParams.set("ward", filters.ward);
       }
       const baseUrl = window.location.origin;
