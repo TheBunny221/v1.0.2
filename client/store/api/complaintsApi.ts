@@ -86,9 +86,14 @@ export interface ComplaintFilters {
   ward?: string[];
   dateFrom?: string;
   dateTo?: string;
-  assignedTo?: string;
+  assignedTo?: string; // legacy
   submittedBy?: string;
   search?: string;
+  // precise filters
+  maintenanceTeamId?: string;
+  officerId?: string; // wardOfficerId
+  assignedToId?: string; // legacy compatibility
+  wardId?: string; // explicit when admin filters by ward
 }
 
 export interface ComplaintListParams extends ComplaintFilters {
