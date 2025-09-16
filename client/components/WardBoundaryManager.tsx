@@ -87,7 +87,28 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
     const initializeMap = async () => {
       try {
         // Dynamically import leaflet and plugins
-        const L = await import("leaflet");
+        const leafletModule = await import("leaflet");
+        const L = (leafletModule as any).default ?? leafletModule;
+
+        // Expose L to window since many leaflet plugins expect a global L
+        if (typeof window !== "undefined") {
+          (window as any).L = L;
+        }
+
+        // Import leaflet-draw and its CSS; attach to the global L
+        try {
+          await import("leaflet-draw");
+          try {
+            await import("leaflet-draw/dist/leaflet.draw.css");
+          } catch (cssErr) {
+            console.warn("Could not load leaflet-draw CSS:", cssErr);
+          }
+        } catch (drawError) {
+          console.warn(
+            "Leaflet-draw failed to load, drawing features may be limited:",
+            drawError,
+          );
+        }
 
         // Import leaflet-draw with error handling
         try {
