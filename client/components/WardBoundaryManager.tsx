@@ -545,6 +545,12 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   // Cleanup map when dialog closes
   useEffect(() => {
     if (!isOpen && leafletMapRef.current) {
+      const container = leafletMapRef.current.getContainer?.();
+      if (container) {
+        const toolbar = container.querySelector('.custom-draw-toolbar');
+        if (toolbar && toolbar.parentElement) toolbar.parentElement.removeChild(toolbar);
+      }
+
       leafletMapRef.current.remove();
       leafletMapRef.current = null;
       drawingRef.current = null;
