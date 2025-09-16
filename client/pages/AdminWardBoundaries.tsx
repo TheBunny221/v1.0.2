@@ -13,6 +13,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import WardBoundaryManager from "../components/WardBoundaryManager";
+import { useToast } from "../hooks/use-toast";
 import { Map, MapPin, Info, AlertCircle, RefreshCw } from "lucide-react";
 
 interface Ward {
