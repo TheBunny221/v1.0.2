@@ -501,17 +501,29 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   };
 
   // Save boundaries
+  const toastHook = useToast();
+
   const handleSave = () => {
+    // Validation: ensure at least one boundary exists
+    const hasWard = wardBoundary && wardBoundary.length > 0;
+    const hasSub = Object.keys(subZoneBoundaries).some(
+      (k) => subZoneBoundaries[k] && subZoneBoundaries[k].length > 0,
+    );
+
+    if (!hasWard && !hasSub) {
+      toastHook.toast({
+        title: "No boundaries",
+        description: "Draw a ward or sub-zone boundary before saving.",
+      });
+      return;
+    }
+
     const updatedWard: Ward = {
       ...ward,
-      boundaries:
-        wardBoundary.length > 0 ? JSON.stringify(wardBoundary) : undefined,
+      boundaries: hasWard ? JSON.stringify(wardBoundary) : undefined,
       centerLat: centerCoordinates.lat,
       centerLng: centerCoordinates.lng,
-      boundingBox:
-        wardBoundary.length > 0
-          ? JSON.stringify(calculateBoundingBox(wardBoundary))
-          : undefined,
+      boundingBox: hasWard ? JSON.stringify(calculateBoundingBox(wardBoundary)) : undefined,
     };
 
     const updatedSubZones: SubZone[] = subZones.map((subZone) => {
