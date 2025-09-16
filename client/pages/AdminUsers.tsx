@@ -319,6 +319,8 @@ const AdminUsers: React.FC = () => {
     setIsEditDialogOpen(true);
   };
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const handleCloseDialogs = () => {
     setIsAddDialogOpen(false);
     setIsEditDialogOpen(false);
@@ -331,10 +333,44 @@ const AdminUsers: React.FC = () => {
       wardId: "",
       department: "",
     });
+    setFormErrors({});
+  };
+
+  const validateForm = (): Record<string, string> => {
+    const errors: Record<string, string> = {};
+    if (!formData.fullName || formData.fullName.trim().length < 3) {
+      errors.fullName = "Full name must be at least 3 characters.";
+    }
+    if (!formData.email) {
+      errors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Please enter a valid email address.";
+    }
+    if (!formData.role) {
+      errors.role = "Role is required.";
+    }
+    // If role is maintenance team, department is required
+    if (formData.role === "MAINTENANCE_TEAM" && !formData.department) {
+      errors.department = "Department is required for maintenance team users.";
+    }
+
+    return errors;
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const errors = validateForm();
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      // show a toast as well
+      toast({
+        title: "Validation errors",
+        description: "Please fix the highlighted fields before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       if (editingUser) {
@@ -343,29 +379,23 @@ const AdminUsers: React.FC = () => {
           id: editingUser.id,
           data: formData,
         }).unwrap();
-        toast({
-          title: "Success",
-          description: "User updated successfully",
-        });
+        toast({ title: "Success", description: "User updated successfully" });
       } else {
         // Create user
         await createUser(formData).unwrap();
-        toast({
-          title: "Success",
-          description: "User created successfully",
-        });
+        toast({ title: "Success", description: "User created successfully" });
       }
 
       handleCloseDialogs();
       refetchUsers();
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description:
-          error?.data?.message ||
-          `Failed to ${editingUser ? "update" : "create"} user`,
-        variant: "destructive",
-      });
+      // If backend returns structured field errors, show them
+      const msg = error?.data?.message || error?.message || "Unexpected error";
+      if (error?.data?.errors && typeof error.data.errors === "object") {
+        setFormErrors(error.data.errors);
+      }
+
+      toast({ title: "Error", description: msg, variant: "destructive" });
     }
   };
 
@@ -742,7 +772,13 @@ const AdminUsers: React.FC = () => {
                 }
                 placeholder="Enter full name"
                 required
+                aria-invalid={!!formErrors.fullName}
               />
+              {formErrors.fullName && (
+                <p className="text-sm text-red-600 mt-1">
+                  {formErrors.fullName}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
@@ -755,7 +791,11 @@ const AdminUsers: React.FC = () => {
                 }
                 placeholder="Enter email address"
                 required
+                aria-invalid={!!formErrors.email}
               />
+              {formErrors.email && (
+                <p className="text-sm text-red-600 mt-1">{formErrors.email}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="phoneNumber">Phone Number</Label>
@@ -813,17 +853,26 @@ const AdminUsers: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
-                value={formData.department}
-                onChange={(e) =>
-                  setFormData({ ...formData, department: e.target.value })
-                }
-                placeholder="Enter department (optional)"
-              />
-            </div>
+            {/* Department only visible for Maintenance Team */}
+            {formData.role === "MAINTENANCE_TEAM" && (
+              <div>
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  value={formData.department}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
+                  }
+                  placeholder="Enter department"
+                  aria-invalid={!!formErrors.department}
+                />
+                {formErrors.department && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {formErrors.department}
+                  </p>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"
@@ -911,6 +960,9 @@ const AdminUsers: React.FC = () => {
                   <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
                 </SelectContent>
               </Select>
+              {formErrors.role && (
+                <p className="text-sm text-red-600 mt-1">{formErrors.role}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="editWard">Ward</Label>
@@ -936,17 +988,25 @@ const AdminUsers: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="editDepartment">Department</Label>
-              <Input
-                id="editDepartment"
-                value={formData.department}
-                onChange={(e) =>
-                  setFormData({ ...formData, department: e.target.value })
-                }
-                placeholder="Enter department (optional)"
-              />
-            </div>
+            {formData.role === "MAINTENANCE_TEAM" && (
+              <div>
+                <Label htmlFor="editDepartment">Department</Label>
+                <Input
+                  id="editDepartment"
+                  value={formData.department}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
+                  }
+                  placeholder="Enter department"
+                  aria-invalid={!!formErrors.department}
+                />
+                {formErrors.department && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {formErrors.department}
+                  </p>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"

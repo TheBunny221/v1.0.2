@@ -13,6 +13,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import WardBoundaryManager from "../components/WardBoundaryManager";
+import { useToast } from "../hooks/use-toast";
 import { Map, MapPin, Info, AlertCircle, RefreshCw } from "lucide-react";
 
 interface Ward {
@@ -63,6 +64,8 @@ const AdminWardBoundaries: React.FC = () => {
     setError(null);
   };
 
+  const toastHook = useToast();
+
   const handleSaveBoundaries = async (
     wardData: Ward,
     subZoneData?: SubZone[],
@@ -89,8 +92,15 @@ const AdminWardBoundaries: React.FC = () => {
       await refetch();
       setIsBoundaryManagerOpen(false);
       setSelectedWard(null);
+      toastHook.toast({
+        title: "Saved",
+        description: "Ward boundaries saved successfully",
+      });
     } catch (err: any) {
-      setError(err.data?.message || err.message || "Failed to save boundaries");
+      const msg =
+        err.data?.message || err.message || "Failed to save boundaries";
+      setError(msg);
+      toastHook.toast({ title: "Error", description: msg });
     } finally {
       setIsLoading(false);
     }

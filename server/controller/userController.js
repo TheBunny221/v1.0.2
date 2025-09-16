@@ -167,6 +167,27 @@ export const createUser = asyncHandler(async (req, res) => {
   const { fullName, email, phoneNumber, role, wardId, department, password } =
     req.body;
 
+  // Basic validation - return structured errors
+  const validationErrors = {};
+  if (!fullName || String(fullName).trim().length < 3) {
+    validationErrors.fullName = "Full name must be at least 3 characters.";
+  }
+  if (!email) {
+    validationErrors.email = "Email is required.";
+  }
+  if (!role) {
+    validationErrors.role = "Role is required.";
+  }
+
+  if (Object.keys(validationErrors).length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors: validationErrors,
+      data: null,
+    });
+  }
+
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -176,6 +197,7 @@ export const createUser = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "User already exists with this email",
+      errors: { email: "User already exists with this email" },
       data: null,
     });
   }
