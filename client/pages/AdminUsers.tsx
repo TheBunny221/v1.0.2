@@ -772,7 +772,11 @@ const AdminUsers: React.FC = () => {
                 }
                 placeholder="Enter full name"
                 required
+                aria-invalid={!!formErrors.fullName}
               />
+              {formErrors.fullName && (
+                <p className="text-sm text-red-600 mt-1">{formErrors.fullName}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
@@ -785,7 +789,11 @@ const AdminUsers: React.FC = () => {
                 }
                 placeholder="Enter email address"
                 required
+                aria-invalid={!!formErrors.email}
               />
+              {formErrors.email && (
+                <p className="text-sm text-red-600 mt-1">{formErrors.email}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="phoneNumber">Phone Number</Label>
