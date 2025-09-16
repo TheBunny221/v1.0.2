@@ -64,6 +64,8 @@ const AdminWardBoundaries: React.FC = () => {
     setError(null);
   };
 
+  const toastHook = useToast();
+
   const handleSaveBoundaries = async (
     wardData: Ward,
     subZoneData?: SubZone[],
@@ -90,8 +92,11 @@ const AdminWardBoundaries: React.FC = () => {
       await refetch();
       setIsBoundaryManagerOpen(false);
       setSelectedWard(null);
+      toastHook.toast({ title: "Saved", description: "Ward boundaries saved successfully" });
     } catch (err: any) {
-      setError(err.data?.message || err.message || "Failed to save boundaries");
+      const msg = err.data?.message || err.message || "Failed to save boundaries";
+      setError(msg);
+      toastHook.toast({ title: "Error", description: msg });
     } finally {
       setIsLoading(false);
     }
