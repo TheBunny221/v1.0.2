@@ -79,6 +79,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
       ? { lat: ward.centerLat, lng: ward.centerLng }
       : defaultCenter,
   );
+  const [livePreview, setLivePreview] = useState<[number, number][]>([]);
+  const [livePreviewSub, setLivePreviewSub] = useState<[number, number][]>([]);
 
   // Initialize map when dialog opens
   useEffect(() => {
