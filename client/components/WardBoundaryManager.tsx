@@ -153,87 +153,97 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           const drawnItems = new L.FeatureGroup();
           leafletMapRef.current.addLayer(drawnItems);
 
-          // Add drawing controls
-          const drawControl = new (L as any).Control.Draw({
-            position: "topright",
-            draw: {
-              polygon: {
-                allowIntersection: false,
-                drawError: {
-                  color: "#e1e100",
-                  message: "<strong>Error:</strong> Shape edges cannot cross!",
-                },
-                shapeOptions: {
-                  color: "#2563eb",
-                  weight: 3,
-                  opacity: 0.8,
-                  fillOpacity: 0.2,
-                },
-              },
-              rectangle: {
-                shapeOptions: {
-                  color: "#dc2626",
-                  weight: 3,
-                  opacity: 0.8,
-                  fillOpacity: 0.2,
-                },
-              },
-              circle: false,
-              marker: false,
-              polyline: false,
-              circlemarker: false,
-            },
-            edit: {
-              featureGroup: drawnItems,
-              remove: true,
-            },
-          });
+          // Add drawing controls only if plugin is available
+          const hasDrawControl = !!(L as any).Control && !!(L as any).Control.Draw;
+          let drawControl: any = null;
 
-          leafletMapRef.current.addControl(drawControl);
+          if (hasDrawControl) {
+            drawControl = new (L as any).Control.Draw({
+              position: "topright",
+              draw: {
+                polygon: {
+                  allowIntersection: false,
+                  drawError: {
+                    color: "#e1e100",
+                    message: "<strong>Error:</strong> Shape edges cannot cross!",
+                  },
+                  shapeOptions: {
+                    color: "#2563eb",
+                    weight: 3,
+                    opacity: 0.8,
+                    fillOpacity: 0.2,
+                  },
+                },
+                rectangle: {
+                  shapeOptions: {
+                    color: "#dc2626",
+                    weight: 3,
+                    opacity: 0.8,
+                    fillOpacity: 0.2,
+                  },
+                },
+                circle: false,
+                marker: false,
+                polyline: false,
+                circlemarker: false,
+              },
+              edit: {
+                featureGroup: drawnItems,
+                remove: true,
+              },
+            });
+
+            leafletMapRef.current.addControl(drawControl);
+          } else {
+            console.warn("Leaflet-draw control not available; drawing disabled.");
+          }
+
           drawingRef.current = { drawnItems, drawControl };
 
-          // Handle drawing events
-          // Use plugin's constant if available, otherwise fallback to the string event
-          const drawCreatedEvent = (L as any).Draw?.Event?.CREATED ?? "draw:created";
-          leafletMapRef.current.on(drawCreatedEvent, (e: any) => {
-            const { layer, layerType } = e;
+          // Handle drawing events only if draw plugin is available
+          if (hasDrawControl) {
+            // Use plugin's constant if available, otherwise fallback to the string event
+            const drawCreatedEvent = (L as any).Draw?.Event?.CREATED ?? "draw:created";
+            leafletMapRef.current.on(drawCreatedEvent, (e: any) => {
+              const { layer, layerType } = e;
 
-            if (editingMode === "ward") {
-              // Clear existing ward boundary
-              setWardBoundary([]);
-              drawnItems.clearLayers();
+              if (editingMode === "ward") {
+                // Clear existing ward boundary
+                setWardBoundary([]);
+                drawnItems.clearLayers();
 
-              drawnItems.addLayer(layer);
+                drawnItems.addLayer(layer);
 
-              if (layerType === "polygon" || layerType === "rectangle") {
-                const coords = layer
-                  .getLatLngs()[0]
-                  .map((latlng: any) => [latlng.lat, latlng.lng]);
-                setWardBoundary(coords);
+                if (layerType === "polygon" || layerType === "rectangle") {
+                  const coords = layer
+                    .getLatLngs()[0]
+                    .map((latlng: any) => [latlng.lat, latlng.lng]);
+                  setWardBoundary(coords);
 
-                // Calculate center
-                const center = calculatePolygonCenter(coords);
-                setCenterCoordinates(center);
+                  // Calculate center
+                  const center = calculatePolygonCenter(coords);
+                  setCenterCoordinates(center);
+                }
+              } else if (editingMode === "subzone" && selectedSubZone) {
+                // Clear existing subzone boundary for this subzone
+                const newBoundaries = { ...subZoneBoundaries };
+                delete newBoundaries[selectedSubZone];
+                setSubZoneBoundaries(newBoundaries);
+
+                drawnItems.addLayer(layer);
+
+                if (layerType === "polygon" || layerType === "rectangle") {
+                  const coords = layer
+                    .getLatLngs()[0]
+                    .map((latlng: any) => [latlng.lat, latlng.lng]);
+                  setSubZoneBoundaries((prev) => ({
+                    ...prev,
+                    [selectedSubZone]: coords,
+                  }));
+                }
               }
-            } else if (editingMode === "subzone" && selectedSubZone) {
-              // Clear existing subzone boundary for this subzone
-              const newBoundaries = { ...subZoneBoundaries };
-              delete newBoundaries[selectedSubZone];
-              setSubZoneBoundaries(newBoundaries);
-
-              drawnItems.addLayer(layer);
-
-              if (layerType === "polygon" || layerType === "rectangle") {
-                const coords = layer
-                  .getLatLngs()[0]
-                  .map((latlng: any) => [latlng.lat, latlng.lng]);
-                setSubZoneBoundaries((prev) => ({
-                  ...prev,
-                  [selectedSubZone]: coords,
-                }));
-              }
-            }
-          });
+            });
+          }
 
           // Load existing boundaries
           loadExistingBoundaries(L, drawnItems);
