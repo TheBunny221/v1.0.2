@@ -669,6 +669,17 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                         Points: {subZoneBoundaries[subZone.id].length}
                       </div>
                     )}
+
+                    {/* Live preview for this subzone while drawing */}
+                    {editingMode === "subzone" && selectedSubZone === subZone.id && livePreviewSub && livePreviewSub.length > 0 && (
+                      <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                        <div>Preview Points: {livePreviewSub.length}</div>
+                        <div className="truncate">{livePreviewSub
+                          .slice(0, 3)
+                          .map((c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`)
+                          .join("; ")}{livePreviewSub.length>3?" ...":''}</div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
