@@ -297,11 +297,9 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                 const coords = latlngs.map((latlng: any) => [latlng.lat, latlng.lng]);
                 // Show live preview in ward or subzone state without committing
                 if (editingMode === "ward") {
-                  // don't overwrite committed boundary until created
-                  // but provide a temporary preview - store in a ref
-                  (drawingRef.current as any).preview = coords;
+                  setLivePreview(coords);
                 } else if (editingMode === "subzone" && selectedSubZone) {
-                  (drawingRef.current as any).previewSub = coords;
+                  setLivePreviewSub(coords);
                 }
               } catch (err) {
                 // ignore
@@ -311,10 +309,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
             // Also update states when map is clicked for enabling drawing via custom toolbar
             leafletMapRef.current.on("click", () => {
               // clear any preview when clicking
-              if (drawingRef.current) {
-                (drawingRef.current as any).preview = undefined;
-                (drawingRef.current as any).previewSub = undefined;
-              }
+              setLivePreview([]);
+              setLivePreviewSub([]);
             });
           }
 
