@@ -113,16 +113,6 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           );
         }
 
-        // Import leaflet-draw with error handling
-        try {
-          await import("leaflet-draw");
-        } catch (drawError) {
-          console.warn(
-            "Leaflet-draw failed to load, drawing features may be limited:",
-            drawError,
-          );
-        }
-
         // Set up the default icon
         const DefaultIcon = L.icon({
           iconRetinaUrl:
