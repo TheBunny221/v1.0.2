@@ -147,7 +147,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           leafletMapRef.current.addLayer(drawnItems);
 
           // Add drawing controls only if plugin is available
-          const hasDrawControl = !!(L as any).Control && !!(L as any).Control.Draw;
+          const hasDrawControl =
+            !!(L as any).Control && !!(L as any).Control.Draw;
           let drawControl: any = null;
 
           if (hasDrawControl) {
@@ -158,7 +159,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                   allowIntersection: false,
                   drawError: {
                     color: "#e1e100",
-                    message: "<strong>Error:</strong> Shape edges cannot cross!",
+                    message:
+                      "<strong>Error:</strong> Shape edges cannot cross!",
                   },
                   shapeOptions: {
                     color: "#2563eb",
@@ -188,7 +190,9 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
 
             leafletMapRef.current.addControl(drawControl);
           } else {
-            console.warn("Leaflet-draw control not available; drawing disabled.");
+            console.warn(
+              "Leaflet-draw control not available; drawing disabled.",
+            );
           }
 
           drawingRef.current = { drawnItems, drawControl };
@@ -196,10 +200,14 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           // Handle drawing events only if draw plugin is available
           if (hasDrawControl) {
             // Use plugin's constant if available, otherwise fallback to the string event
-            const drawCreatedEvent = (L as any).Draw?.Event?.CREATED ?? "draw:created";
-            const drawEditedEvent = (L as any).Draw?.Event?.EDITED ?? "draw:edited";
-            const drawDeletedEvent = (L as any).Draw?.Event?.DELETED ?? "draw:deleted";
-            const drawVertexEvent = (L as any).Draw?.Event?.DRAWVERTEX ?? "draw:drawvertex";
+            const drawCreatedEvent =
+              (L as any).Draw?.Event?.CREATED ?? "draw:created";
+            const drawEditedEvent =
+              (L as any).Draw?.Event?.EDITED ?? "draw:edited";
+            const drawDeletedEvent =
+              (L as any).Draw?.Event?.DELETED ?? "draw:deleted";
+            const drawVertexEvent =
+              (L as any).Draw?.Event?.DRAWVERTEX ?? "draw:drawvertex";
 
             leafletMapRef.current.on(drawCreatedEvent, (e: any) => {
               const { layer, layerType } = e;
@@ -283,9 +291,14 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
             // Live preview while drawing
             leafletMapRef.current.on(drawVertexEvent, (e: any) => {
               try {
-                const latlngs = e?.layers?.getLayers?.()[0]?.getLatLngs?.()[0] ??
-                  (e?.layer?.getLatLngs?.()[0] ?? []);
-                const coords = latlngs.map((latlng: any) => [latlng.lat, latlng.lng]);
+                const latlngs =
+                  e?.layers?.getLayers?.()[0]?.getLatLngs?.()[0] ??
+                  e?.layer?.getLatLngs?.()[0] ??
+                  [];
+                const coords = latlngs.map((latlng: any) => [
+                  latlng.lat,
+                  latlng.lng,
+                ]);
                 // Show live preview in ward or subzone state without committing
                 if (editingMode === "ward") {
                   setLivePreview(coords);
@@ -310,50 +323,76 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
 
           // Add a simple custom toolbar overlay in case CSS-based icons are missing
           const mapContainer = leafletMapRef.current.getContainer();
-          if (mapContainer && !mapContainer.querySelector('.custom-draw-toolbar')) {
-            const toolbar = document.createElement('div');
-            toolbar.className = 'custom-draw-toolbar absolute top-4 right-4 z-50 flex flex-col gap-2';
+          if (
+            mapContainer &&
+            !mapContainer.querySelector(".custom-draw-toolbar")
+          ) {
+            const toolbar = document.createElement("div");
+            toolbar.className =
+              "custom-draw-toolbar absolute top-4 right-4 z-50 flex flex-col gap-2";
 
-            const makeButton = (iconHtml: string, title: string, onClick: () => void) => {
-              const btn = document.createElement('button');
+            const makeButton = (
+              iconHtml: string,
+              title: string,
+              onClick: () => void,
+            ) => {
+              const btn = document.createElement("button");
               btn.innerHTML = iconHtml;
               btn.title = title;
-              btn.className = 'p-2 rounded bg-white shadow hover:bg-gray-100';
+              btn.className = "p-2 rounded bg-white shadow hover:bg-gray-100";
               btn.onclick = onClick;
               return btn;
             };
 
             // Polygon button
-            const polyBtn = makeButton('<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l7 4v8l-7 4-7-4V6z"/></svg>', 'Draw Polygon', () => {
-              if (!(L as any).Draw) return;
-              const drawer = new (L as any).Draw.Polygon(leafletMapRef.current, {});
-              drawer.enable();
-            });
+            const polyBtn = makeButton(
+              '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l7 4v8l-7 4-7-4V6z"/></svg>',
+              "Draw Polygon",
+              () => {
+                if (!(L as any).Draw) return;
+                const drawer = new (L as any).Draw.Polygon(
+                  leafletMapRef.current,
+                  {},
+                );
+                drawer.enable();
+              },
+            );
 
             // Rectangle button
-            const rectBtn = makeButton('<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>', 'Draw Rectangle', () => {
-              if (!(L as any).Draw) return;
-              const drawer = new (L as any).Draw.Rectangle(leafletMapRef.current, {});
-              drawer.enable();
-            });
+            const rectBtn = makeButton(
+              '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>',
+              "Draw Rectangle",
+              () => {
+                if (!(L as any).Draw) return;
+                const drawer = new (L as any).Draw.Rectangle(
+                  leafletMapRef.current,
+                  {},
+                );
+                drawer.enable();
+              },
+            );
 
             // Delete/clear button
-            const delBtn = makeButton('<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>', 'Clear All', () => {
-              clearBoundaries();
-            });
+            const delBtn = makeButton(
+              '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+              "Clear All",
+              () => {
+                clearBoundaries();
+              },
+            );
 
             toolbar.appendChild(polyBtn);
             toolbar.appendChild(rectBtn);
             toolbar.appendChild(delBtn);
 
             // Use absolute positioning wrapper
-            const wrapper = document.createElement('div');
-            wrapper.style.position = 'absolute';
-            wrapper.style.top = '8px';
-            wrapper.style.right = '8px';
-            wrapper.style.zIndex = '1000';
+            const wrapper = document.createElement("div");
+            wrapper.style.position = "absolute";
+            wrapper.style.top = "8px";
+            wrapper.style.right = "8px";
+            wrapper.style.zIndex = "1000";
             wrapper.appendChild(toolbar);
-            mapContainer.style.position = 'relative';
+            mapContainer.style.position = "relative";
             mapContainer.appendChild(wrapper);
           }
         }
@@ -513,7 +552,9 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
       boundaries: hasWard ? JSON.stringify(wardBoundary) : undefined,
       centerLat: centerCoordinates.lat,
       centerLng: centerCoordinates.lng,
-      boundingBox: hasWard ? JSON.stringify(calculateBoundingBox(wardBoundary)) : undefined,
+      boundingBox: hasWard
+        ? JSON.stringify(calculateBoundingBox(wardBoundary))
+        : undefined,
     };
 
     const updatedSubZones: SubZone[] = subZones.map((subZone) => {
@@ -547,8 +588,9 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
     if (!isOpen && leafletMapRef.current) {
       const container = leafletMapRef.current.getContainer?.();
       if (container) {
-        const toolbar = container.querySelector('.custom-draw-toolbar');
-        if (toolbar && toolbar.parentElement) toolbar.parentElement.removeChild(toolbar);
+        const toolbar = container.querySelector(".custom-draw-toolbar");
+        if (toolbar && toolbar.parentElement)
+          toolbar.parentElement.removeChild(toolbar);
       }
 
       leafletMapRef.current.remove();
@@ -616,15 +658,20 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                 )}
 
                 {/* Live preview while drawing */}
-                {editingMode === "ward" && livePreview && livePreview.length > 0 && (
-                  <div className="text-xs text-gray-600 bg-white p-2 rounded">
-                    <div>Preview Points: {livePreview.length}</div>
-                    <div className="truncate">{livePreview
-                      .slice(0, 3)
-                      .map((c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`)
-                      .join("; ")}{livePreview.length>3?" ...":''}</div>
-                  </div>
-                )}
+                {editingMode === "ward" &&
+                  livePreview &&
+                  livePreview.length > 0 && (
+                    <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                      <div>Preview Points: {livePreview.length}</div>
+                      <div className="truncate">
+                        {livePreview
+                          .slice(0, 3)
+                          .map((c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`)
+                          .join("; ")}
+                        {livePreview.length > 3 ? " ..." : ""}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Sub-Zone Boundaries */}
@@ -677,15 +724,23 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                     )}
 
                     {/* Live preview for this subzone while drawing */}
-                    {editingMode === "subzone" && selectedSubZone === subZone.id && livePreviewSub && livePreviewSub.length > 0 && (
-                      <div className="text-xs text-gray-600 bg-white p-2 rounded">
-                        <div>Preview Points: {livePreviewSub.length}</div>
-                        <div className="truncate">{livePreviewSub
-                          .slice(0, 3)
-                          .map((c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`)
-                          .join("; ")}{livePreviewSub.length>3?" ...":''}</div>
-                      </div>
-                    )}
+                    {editingMode === "subzone" &&
+                      selectedSubZone === subZone.id &&
+                      livePreviewSub &&
+                      livePreviewSub.length > 0 && (
+                        <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                          <div>Preview Points: {livePreviewSub.length}</div>
+                          <div className="truncate">
+                            {livePreviewSub
+                              .slice(0, 3)
+                              .map(
+                                (c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`,
+                              )
+                              .join("; ")}
+                            {livePreviewSub.length > 3 ? " ..." : ""}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>

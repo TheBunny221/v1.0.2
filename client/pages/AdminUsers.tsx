@@ -775,7 +775,9 @@ const AdminUsers: React.FC = () => {
                 aria-invalid={!!formErrors.fullName}
               />
               {formErrors.fullName && (
-                <p className="text-sm text-red-600 mt-1">{formErrors.fullName}</p>
+                <p className="text-sm text-red-600 mt-1">
+                  {formErrors.fullName}
+                </p>
               )}
             </div>
             <div>
@@ -865,7 +867,9 @@ const AdminUsers: React.FC = () => {
                   aria-invalid={!!formErrors.department}
                 />
                 {formErrors.department && (
-                  <p className="text-sm text-red-600 mt-1">{formErrors.department}</p>
+                  <p className="text-sm text-red-600 mt-1">
+                    {formErrors.department}
+                  </p>
                 )}
               </div>
             )}
@@ -997,7 +1001,9 @@ const AdminUsers: React.FC = () => {
                   aria-invalid={!!formErrors.department}
                 />
                 {formErrors.department && (
-                  <p className="text-sm text-red-600 mt-1">{formErrors.department}</p>
+                  <p className="text-sm text-red-600 mt-1">
+                    {formErrors.department}
+                  </p>
                 )}
               </div>
             )}
