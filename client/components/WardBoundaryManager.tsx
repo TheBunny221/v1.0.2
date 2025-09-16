@@ -21,6 +21,7 @@ import {
   Square,
   AlertCircle,
 } from "lucide-react";
+import { useToast } from "../hooks/use-toast";
 
 interface Ward {
   id: string;
@@ -79,6 +80,8 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
       ? { lat: ward.centerLat, lng: ward.centerLng }
       : defaultCenter,
   );
+  const [livePreview, setLivePreview] = useState<[number, number][]>([]);
+  const [livePreviewSub, setLivePreviewSub] = useState<[number, number][]>([]);
 
   // Initialize map when dialog opens
   useEffect(() => {
@@ -87,11 +90,22 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
     const initializeMap = async () => {
       try {
         // Dynamically import leaflet and plugins
-        const L = await import("leaflet");
+        const leafletModule = await import("leaflet");
+        const L = (leafletModule as any).default ?? leafletModule;
 
-        // Import leaflet-draw with error handling
+        // Expose L to window since many leaflet plugins expect a global L
+        if (typeof window !== "undefined") {
+          (window as any).L = L;
+        }
+
+        // Import leaflet-draw and its CSS; attach to the global L
         try {
           await import("leaflet-draw");
+          try {
+            await import("leaflet-draw/dist/leaflet.draw.css");
+          } catch (cssErr) {
+            console.warn("Could not load leaflet-draw CSS:", cssErr);
+          }
         } catch (drawError) {
           console.warn(
             "Leaflet-draw failed to load, drawing features may be limited:",
@@ -132,88 +146,255 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           const drawnItems = new L.FeatureGroup();
           leafletMapRef.current.addLayer(drawnItems);
 
-          // Add drawing controls
-          const drawControl = new (L as any).Control.Draw({
-            position: "topright",
-            draw: {
-              polygon: {
-                allowIntersection: false,
-                drawError: {
-                  color: "#e1e100",
-                  message: "<strong>Error:</strong> Shape edges cannot cross!",
-                },
-                shapeOptions: {
-                  color: "#2563eb",
-                  weight: 3,
-                  opacity: 0.8,
-                  fillOpacity: 0.2,
-                },
-              },
-              rectangle: {
-                shapeOptions: {
-                  color: "#dc2626",
-                  weight: 3,
-                  opacity: 0.8,
-                  fillOpacity: 0.2,
-                },
-              },
-              circle: false,
-              marker: false,
-              polyline: false,
-              circlemarker: false,
-            },
-            edit: {
-              featureGroup: drawnItems,
-              remove: true,
-            },
-          });
+          // Add drawing controls only if plugin is available
+          const hasDrawControl =
+            !!(L as any).Control && !!(L as any).Control.Draw;
+          let drawControl: any = null;
 
-          leafletMapRef.current.addControl(drawControl);
+          if (hasDrawControl) {
+            drawControl = new (L as any).Control.Draw({
+              position: "topright",
+              draw: {
+                polygon: {
+                  allowIntersection: false,
+                  drawError: {
+                    color: "#e1e100",
+                    message:
+                      "<strong>Error:</strong> Shape edges cannot cross!",
+                  },
+                  shapeOptions: {
+                    color: "#2563eb",
+                    weight: 3,
+                    opacity: 0.8,
+                    fillOpacity: 0.2,
+                  },
+                },
+                rectangle: {
+                  shapeOptions: {
+                    color: "#dc2626",
+                    weight: 3,
+                    opacity: 0.8,
+                    fillOpacity: 0.2,
+                  },
+                },
+                circle: false,
+                marker: false,
+                polyline: false,
+                circlemarker: false,
+              },
+              edit: {
+                featureGroup: drawnItems,
+                remove: true,
+              },
+            });
+
+            leafletMapRef.current.addControl(drawControl);
+          } else {
+            console.warn(
+              "Leaflet-draw control not available; drawing disabled.",
+            );
+          }
+
           drawingRef.current = { drawnItems, drawControl };
 
-          // Handle drawing events
-          leafletMapRef.current.on((L as any).Draw.Event.CREATED, (e: any) => {
-            const { layer, layerType } = e;
+          // Handle drawing events only if draw plugin is available
+          if (hasDrawControl) {
+            // Use plugin's constant if available, otherwise fallback to the string event
+            const drawCreatedEvent =
+              (L as any).Draw?.Event?.CREATED ?? "draw:created";
+            const drawEditedEvent =
+              (L as any).Draw?.Event?.EDITED ?? "draw:edited";
+            const drawDeletedEvent =
+              (L as any).Draw?.Event?.DELETED ?? "draw:deleted";
+            const drawVertexEvent =
+              (L as any).Draw?.Event?.DRAWVERTEX ?? "draw:drawvertex";
 
-            if (editingMode === "ward") {
-              // Clear existing ward boundary
-              setWardBoundary([]);
-              drawnItems.clearLayers();
+            leafletMapRef.current.on(drawCreatedEvent, (e: any) => {
+              const { layer, layerType } = e;
 
+              // Ensure the new layer is added to the drawn items group
               drawnItems.addLayer(layer);
 
-              if (layerType === "polygon" || layerType === "rectangle") {
+              if (editingMode === "ward") {
+                // Replace existing ward boundary
+                setWardBoundary([]);
+                // remove previous layers leaving only the new one
+                drawnItems.clearLayers();
+                drawnItems.addLayer(layer);
+
+                if (layerType === "polygon" || layerType === "rectangle") {
+                  const coords = layer
+                    .getLatLngs()[0]
+                    .map((latlng: any) => [latlng.lat, latlng.lng]);
+                  setWardBoundary(coords);
+
+                  // Calculate center
+                  const center = calculatePolygonCenter(coords);
+                  setCenterCoordinates(center);
+                }
+              } else if (editingMode === "subzone" && selectedSubZone) {
+                // Replace boundary for this subzone
+                const newBoundaries = { ...subZoneBoundaries };
+                newBoundaries[selectedSubZone] = [];
+                setSubZoneBoundaries(newBoundaries);
+
+                drawnItems.addLayer(layer);
+
+                if (layerType === "polygon" || layerType === "rectangle") {
+                  const coords = layer
+                    .getLatLngs()[0]
+                    .map((latlng: any) => [latlng.lat, latlng.lng]);
+                  setSubZoneBoundaries((prev) => ({
+                    ...prev,
+                    [selectedSubZone]: coords,
+                  }));
+                }
+              }
+            });
+
+            // Handle edits
+            leafletMapRef.current.on(drawEditedEvent, (e: any) => {
+              const layers = e.layers;
+              layers.eachLayer((layer: any) => {
                 const coords = layer
                   .getLatLngs()[0]
                   .map((latlng: any) => [latlng.lat, latlng.lng]);
-                setWardBoundary(coords);
+                if (editingMode === "ward") {
+                  setWardBoundary(coords);
+                  setCenterCoordinates(calculatePolygonCenter(coords));
+                } else if (editingMode === "subzone" && selectedSubZone) {
+                  setSubZoneBoundaries((prev) => ({
+                    ...prev,
+                    [selectedSubZone]: coords,
+                  }));
+                }
+              });
+            });
 
-                // Calculate center
-                const center = calculatePolygonCenter(coords);
-                setCenterCoordinates(center);
+            // Handle deletions
+            leafletMapRef.current.on(drawDeletedEvent, (e: any) => {
+              const layers = e.layers;
+              layers.eachLayer((layer: any) => {
+                // if deleted, clear current editing target
+                if (editingMode === "ward") {
+                  setWardBoundary([]);
+                } else if (editingMode === "subzone" && selectedSubZone) {
+                  setSubZoneBoundaries((prev) => {
+                    const copy = { ...prev };
+                    delete copy[selectedSubZone];
+                    return copy;
+                  });
+                }
+              });
+            });
+
+            // Live preview while drawing
+            leafletMapRef.current.on(drawVertexEvent, (e: any) => {
+              try {
+                const latlngs =
+                  e?.layers?.getLayers?.()[0]?.getLatLngs?.()[0] ??
+                  e?.layer?.getLatLngs?.()[0] ??
+                  [];
+                const coords = latlngs.map((latlng: any) => [
+                  latlng.lat,
+                  latlng.lng,
+                ]);
+                // Show live preview in ward or subzone state without committing
+                if (editingMode === "ward") {
+                  setLivePreview(coords);
+                } else if (editingMode === "subzone" && selectedSubZone) {
+                  setLivePreviewSub(coords);
+                }
+              } catch (err) {
+                // ignore
               }
-            } else if (editingMode === "subzone" && selectedSubZone) {
-              // Clear existing subzone boundary for this subzone
-              const newBoundaries = { ...subZoneBoundaries };
-              delete newBoundaries[selectedSubZone];
-              setSubZoneBoundaries(newBoundaries);
+            });
 
-              drawnItems.addLayer(layer);
-
-              if (layerType === "polygon" || layerType === "rectangle") {
-                const coords = layer
-                  .getLatLngs()[0]
-                  .map((latlng: any) => [latlng.lat, latlng.lng]);
-                setSubZoneBoundaries((prev) => ({
-                  ...prev,
-                  [selectedSubZone]: coords,
-                }));
-              }
-            }
-          });
+            // Also update states when map is clicked for enabling drawing via custom toolbar
+            leafletMapRef.current.on("click", () => {
+              // clear any preview when clicking
+              setLivePreview([]);
+              setLivePreviewSub([]);
+            });
+          }
 
           // Load existing boundaries
           loadExistingBoundaries(L, drawnItems);
+
+          // Add a simple custom toolbar overlay in case CSS-based icons are missing
+          const mapContainer = leafletMapRef.current.getContainer();
+          if (
+            mapContainer &&
+            !mapContainer.querySelector(".custom-draw-toolbar")
+          ) {
+            const toolbar = document.createElement("div");
+            toolbar.className =
+              "custom-draw-toolbar absolute top-4 right-4 z-50 flex flex-col gap-2";
+
+            const makeButton = (
+              iconHtml: string,
+              title: string,
+              onClick: () => void,
+            ) => {
+              const btn = document.createElement("button");
+              btn.innerHTML = iconHtml;
+              btn.title = title;
+              btn.className = "p-2 rounded bg-white shadow hover:bg-gray-100";
+              btn.onclick = onClick;
+              return btn;
+            };
+
+            // Polygon button
+            const polyBtn = makeButton(
+              '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l7 4v8l-7 4-7-4V6z"/></svg>',
+              "Draw Polygon",
+              () => {
+                if (!(L as any).Draw) return;
+                const drawer = new (L as any).Draw.Polygon(
+                  leafletMapRef.current,
+                  {},
+                );
+                drawer.enable();
+              },
+            );
+
+            // Rectangle button
+            const rectBtn = makeButton(
+              '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>',
+              "Draw Rectangle",
+              () => {
+                if (!(L as any).Draw) return;
+                const drawer = new (L as any).Draw.Rectangle(
+                  leafletMapRef.current,
+                  {},
+                );
+                drawer.enable();
+              },
+            );
+
+            // Delete/clear button
+            const delBtn = makeButton(
+              '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+              "Clear All",
+              () => {
+                clearBoundaries();
+              },
+            );
+
+            toolbar.appendChild(polyBtn);
+            toolbar.appendChild(rectBtn);
+            toolbar.appendChild(delBtn);
+
+            // Use absolute positioning wrapper
+            const wrapper = document.createElement("div");
+            wrapper.style.position = "absolute";
+            wrapper.style.top = "8px";
+            wrapper.style.right = "8px";
+            wrapper.style.zIndex = "1000";
+            wrapper.appendChild(toolbar);
+            mapContainer.style.position = "relative";
+            mapContainer.appendChild(wrapper);
+          }
         }
 
         setMapError(null);
@@ -349,17 +530,31 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   };
 
   // Save boundaries
+  const toastHook = useToast();
+
   const handleSave = () => {
+    // Validation: ensure at least one boundary exists
+    const hasWard = wardBoundary && wardBoundary.length > 0;
+    const hasSub = Object.keys(subZoneBoundaries).some(
+      (k) => subZoneBoundaries[k] && subZoneBoundaries[k].length > 0,
+    );
+
+    if (!hasWard && !hasSub) {
+      toastHook.toast({
+        title: "No boundaries",
+        description: "Draw a ward or sub-zone boundary before saving.",
+      });
+      return;
+    }
+
     const updatedWard: Ward = {
       ...ward,
-      boundaries:
-        wardBoundary.length > 0 ? JSON.stringify(wardBoundary) : undefined,
+      boundaries: hasWard ? JSON.stringify(wardBoundary) : undefined,
       centerLat: centerCoordinates.lat,
       centerLng: centerCoordinates.lng,
-      boundingBox:
-        wardBoundary.length > 0
-          ? JSON.stringify(calculateBoundingBox(wardBoundary))
-          : undefined,
+      boundingBox: hasWard
+        ? JSON.stringify(calculateBoundingBox(wardBoundary))
+        : undefined,
     };
 
     const updatedSubZones: SubZone[] = subZones.map((subZone) => {
@@ -391,6 +586,13 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
   // Cleanup map when dialog closes
   useEffect(() => {
     if (!isOpen && leafletMapRef.current) {
+      const container = leafletMapRef.current.getContainer?.();
+      if (container) {
+        const toolbar = container.querySelector(".custom-draw-toolbar");
+        if (toolbar && toolbar.parentElement)
+          toolbar.parentElement.removeChild(toolbar);
+      }
+
       leafletMapRef.current.remove();
       leafletMapRef.current = null;
       drawingRef.current = null;
@@ -454,6 +656,22 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* Live preview while drawing */}
+                {editingMode === "ward" &&
+                  livePreview &&
+                  livePreview.length > 0 && (
+                    <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                      <div>Preview Points: {livePreview.length}</div>
+                      <div className="truncate">
+                        {livePreview
+                          .slice(0, 3)
+                          .map((c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`)
+                          .join("; ")}
+                        {livePreview.length > 3 ? " ..." : ""}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Sub-Zone Boundaries */}
@@ -504,6 +722,25 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
                         Points: {subZoneBoundaries[subZone.id].length}
                       </div>
                     )}
+
+                    {/* Live preview for this subzone while drawing */}
+                    {editingMode === "subzone" &&
+                      selectedSubZone === subZone.id &&
+                      livePreviewSub &&
+                      livePreviewSub.length > 0 && (
+                        <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                          <div>Preview Points: {livePreviewSub.length}</div>
+                          <div className="truncate">
+                            {livePreviewSub
+                              .slice(0, 3)
+                              .map(
+                                (c) => `${c[0].toFixed(4)}, ${c[1].toFixed(4)}`,
+                              )
+                              .join("; ")}
+                            {livePreviewSub.length > 3 ? " ..." : ""}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>
