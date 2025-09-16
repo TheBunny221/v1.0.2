@@ -843,17 +843,24 @@ const AdminUsers: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
-                value={formData.department}
-                onChange={(e) =>
-                  setFormData({ ...formData, department: e.target.value })
-                }
-                placeholder="Enter department (optional)"
-              />
-            </div>
+            {/* Department only visible for Maintenance Team */}
+            {formData.role === "MAINTENANCE_TEAM" && (
+              <div>
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  value={formData.department}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
+                  }
+                  placeholder="Enter department"
+                  aria-invalid={!!formErrors.department}
+                />
+                {formErrors.department && (
+                  <p className="text-sm text-red-600 mt-1">{formErrors.department}</p>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"
