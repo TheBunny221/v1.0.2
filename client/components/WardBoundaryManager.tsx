@@ -21,6 +21,7 @@ import {
   Square,
   AlertCircle,
 } from "lucide-react";
+import { useToast } from "../hooks/use-toast";
 
 interface Ward {
   id: string;
