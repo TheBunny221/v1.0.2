@@ -193,7 +193,9 @@ const WardBoundaryManager: React.FC<WardBoundaryManagerProps> = ({
           drawingRef.current = { drawnItems, drawControl };
 
           // Handle drawing events
-          leafletMapRef.current.on((L as any).Draw.Event.CREATED, (e: any) => {
+          // Use plugin's constant if available, otherwise fallback to the string event
+          const drawCreatedEvent = (L as any).Draw?.Event?.CREATED ?? "draw:created";
+          leafletMapRef.current.on(drawCreatedEvent, (e: any) => {
             const { layer, layerType } = e;
 
             if (editingMode === "ward") {
