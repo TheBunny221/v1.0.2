@@ -956,6 +956,9 @@ const AdminUsers: React.FC = () => {
                   <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
                 </SelectContent>
               </Select>
+              {formErrors.role && (
+                <p className="text-sm text-red-600 mt-1">{formErrors.role}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="editWard">Ward</Label>
