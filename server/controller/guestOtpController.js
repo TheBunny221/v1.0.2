@@ -81,7 +81,7 @@ export const requestComplaintOtp = async (req, res) => {
 
     // Generate OTP
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     // Store OTP in OTPSession table (correct table name)
     await prisma.oTPSession.create({
