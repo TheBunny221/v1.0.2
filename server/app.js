@@ -261,9 +261,11 @@ export function createApp() {
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
   app.use("/api/captcha", captchaRoutes);
+  // Guest OTP routes must be public and mounted before any broad "/api" routers
+  app.use("/api/guest-otp", guestOtpRoutes);
+  // Auth-scoped routers mounted under generic "/api" prefixes
   app.use("/api", materialsRoutes);
   app.use("/api", complaintPhotosRoutes);
-  app.use("/api/guest-otp", guestOtpRoutes);
 
   // Serve uploaded files
   const uploadsPath = path.join(__dirname, "../uploads");
