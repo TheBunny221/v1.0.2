@@ -1005,14 +1005,14 @@ const AdminConfig: React.FC = () => {
                           >
                             {ward.isActive ? "Active" : "Inactive"}
                           </Badge>
-                          <Button
+                          {/* <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleOpenBoundaryManager(ward)}
                             title="Set Geographic Boundaries"
                           >
                             <Map className="h-3 w-3" />
-                          </Button>
+                          </Button> */}
                           <Button
                             size="sm"
                             variant="outline"

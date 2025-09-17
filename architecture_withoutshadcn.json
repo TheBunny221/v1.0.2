@@ -1,0 +1,1556 @@
+{
+    "pages": [
+        {
+            "page": "WardTasks.tsx",
+            "components": [],
+            "hooks": [],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "CitizenDashboard.tsx",
+            "components": [
+                "ContactInfoCard",
+                "FeedbackDialog",
+                "QuickComplaintModal"
+            ],
+            "hooks": [
+                "useAppSelector",
+                "useComplaintTypes",
+                "useDocumentTitle"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "ReportsAnalytics.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "uiSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "WardManagement.tsx",
+            "components": [
+                "ComplaintQuickActions",
+                "UpdateComplaintModal"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "complaintsApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "Unauthorized.tsx",
+            "components": [],
+            "hooks": [],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "TokenClearHelper.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useToast"
+            ],
+            "redux_slices": [
+                "authSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "CreateComplaint.tsx",
+            "components": [],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "baseApi",
+                "complaintTypesApi",
+                "complaintsApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "Messages.tsx",
+            "components": [],
+            "hooks": [],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "AdminWardBoundaries.tsx",
+            "components": [
+                "WardBoundaryManager"
+            ],
+            "hooks": [
+                "useToast"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "CitizenComplaintForm.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector",
+                "useComplaintTypes",
+                "useToast"
+            ],
+            "redux_slices": [
+                "authSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "AdminDashboard.tsx",
+            "components": [
+                "HeatmapData",
+                "HeatmapGrid"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "Login.tsx",
+            "components": [
+                "AdminSeeder"
+            ],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector",
+                "useDocumentTitle",
+                "useToast"
+            ],
+            "redux_slices": [
+                "authApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "AdminConfig.tsx",
+            "components": [
+                "WardBoundaryManager"
+            ],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "baseApi",
+                "uiSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "MaintenanceTasks.tsx",
+            "components": [
+                "PhotoUploadModal"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "GuestDashboard.tsx",
+            "components": [
+                "QuickComplaintModal"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "GuestServiceRequest.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useToast"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "QuickComplaintPage.tsx",
+            "components": [
+                "QuickComplaintForm"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "authSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "GuestComplaintForm.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector",
+                "useComplaintTypes",
+                "useToast"
+            ],
+            "redux_slices": [
+                "baseApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "SetPassword.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector",
+                "useToast"
+            ],
+            "redux_slices": [
+                "authApi",
+                "authSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "AdminLanguages.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "uiSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "Index.tsx",
+            "components": [
+                "ContactInfoCard",
+                "QuickComplaintForm",
+                "QuickTrackForm"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "ComplaintsList.tsx",
+            "components": [
+                "ComplaintQuickActions",
+                "QuickComplaintModal",
+                "UpdateComplaintModal"
+            ],
+            "hooks": [
+                "useAppSelector",
+                "useDataManager"
+            ],
+            "redux_slices": [
+                "adminApi",
+                "complaintsApi",
+                "systemConfigApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "NotFound.tsx",
+            "components": [
+                "PlaceholderPage"
+            ],
+            "hooks": [],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "WardOfficerDashboard.tsx",
+            "components": [
+                "ComplaintsListWidget",
+                "HeatmapData",
+                "HeatmapGrid",
+                "StatusOverviewGrid"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "complaintsApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "Register.tsx",
+            "components": [],
+            "hooks": [
+                "useApiErrorHandler",
+                "useAppDispatch",
+                "useAppSelector",
+                "useToast"
+            ],
+            "redux_slices": [
+                "authApi",
+                "baseApi",
+                "guestApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "GuestTrackComplaint.tsx",
+            "components": [
+                "ComplaintDetailsModal",
+                "OtpVerificationModal",
+                "QuickComplaintModal"
+            ],
+            "hooks": [
+                "useAppDispatch"
+            ],
+            "redux_slices": [
+                "authSlice",
+                "guestSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "UnifiedReports.tsx",
+            "components": [
+                "HeatmapData",
+                "HeatmapGrid"
+            ],
+            "hooks": [
+                "useAppSelector",
+                "useComplaintTypes"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "TaskDetails.tsx",
+            "components": [
+                "PhotoUploadModal"
+            ],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "complaintsApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "AdminReports.tsx",
+            "components": [],
+            "hooks": [],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "AdminAnalytics.tsx",
+            "components": [],
+            "hooks": [],
+            "redux_slices": [],
+            "notes": ""
+        },
+        {
+            "page": "Profile.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "authSlice",
+                "baseApi",
+                "uiSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "UnifiedComplaintForm.tsx",
+            "components": [
+                "OtpDialog",
+                "SimpleLocationMapDialog"
+            ],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector",
+                "useComplaintTypes",
+                "useToast"
+            ],
+            "redux_slices": [
+                "complaintsApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "ComplaintDetails.tsx",
+            "components": [
+                "AttachmentPreview",
+                "ComplaintFeedbackDialog",
+                "UpdateComplaintModal"
+            ],
+            "hooks": [
+                "useAppSelector",
+                "useDataManager"
+            ],
+            "redux_slices": [
+                "complaintsApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "Settings.tsx",
+            "components": [],
+            "hooks": [
+                "useAppDispatch",
+                "useAppSelector"
+            ],
+            "redux_slices": [
+                "authSlice",
+                "languageSlice",
+                "uiSlice"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "AdminUsers.tsx",
+            "components": [],
+            "hooks": [],
+            "redux_slices": [
+                "guestApi"
+            ],
+            "notes": ""
+        },
+        {
+            "page": "MaintenanceDashboard.tsx",
+            "components": [],
+            "hooks": [
+                "useAppSelector"
+            ],
+            "redux_slices": [],
+            "notes": ""
+        }
+    ],
+    "components": [
+        {
+            "name": "UpdateComplaintModal",
+            "location": "client/components/UpdateComplaintModal.tsx",
+            "used_in": [
+                "components/ComplaintStatusUpdate.tsx",
+                "components/ComplaintsListWidget.tsx",
+                "pages/ComplaintDetails.tsx",
+                "pages/ComplaintsList.tsx",
+                "pages/WardManagement.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "StatusOverviewGrid",
+            "location": "client/components/StatusOverviewGrid.tsx",
+            "used_in": [
+                "pages/MaintenanceTasks.tsx",
+                "pages/WardOfficerDashboard.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "RoleBasedRoute",
+            "location": "client/components/RoleBasedRoute.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "QuickTrackForm",
+            "location": "client/components/QuickTrackForm.tsx",
+            "used_in": [
+                "pages/Index.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "AttachmentPreview",
+            "location": "client/components/AttachmentPreview.tsx",
+            "used_in": [
+                "pages/ComplaintDetails.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ComplaintStatusUpdate",
+            "location": "client/components/ComplaintStatusUpdate.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "FeedbackDialog",
+            "location": "client/components/FeedbackDialog.tsx",
+            "used_in": [
+                "components/ComplaintFeedbackDialog.tsx",
+                "pages/CitizenDashboard.tsx",
+                "pages/ComplaintDetails.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "WardDashboard",
+            "location": "client/components/WardDashboard.tsx",
+            "used_in": [
+                "components/AllComplaintCard.tsx",
+                "pages/WardOfficerDashboard.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "OtpVerificationModal",
+            "location": "client/components/OtpVerificationModal.tsx",
+            "used_in": [
+                "components/QuickTrackForm.tsx",
+                "pages/GuestTrackComplaint.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "OtpDialog",
+            "location": "client/components/OtpDialog.tsx",
+            "used_in": [
+                "components/QuickComplaintForm.tsx",
+                "pages/UnifiedComplaintForm.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "OptimizedComponents",
+            "location": "client/components/OptimizedComponents.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "OTPVerification",
+            "location": "client/components/OTPVerification.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ErrorBoundary",
+            "location": "client/components/ErrorBoundary.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "SimpleLocationMapDialog",
+            "location": "client/components/SimpleLocationMapDialog.tsx",
+            "used_in": [
+                "components/QuickComplaintForm.tsx",
+                "pages/UnifiedComplaintForm.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "RoleSwitcher",
+            "location": "client/components/RoleSwitcher.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "AdminSeeder",
+            "location": "client/components/AdminSeeder.tsx",
+            "used_in": [
+                "pages/Login.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "AuthErrorHandler",
+            "location": "client/components/AuthErrorHandler.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ComplaintQuickActions",
+            "location": "client/components/ComplaintQuickActions.tsx",
+            "used_in": [
+                "components/ComplaintsListWidget.tsx",
+                "pages/ComplaintsList.tsx",
+                "pages/WardManagement.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ComplaintDetailsModal",
+            "location": "client/components/ComplaintDetailsModal.tsx",
+            "used_in": [
+                "pages/GuestTrackComplaint.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "WardBoundaryManager",
+            "location": "client/components/WardBoundaryManager.tsx",
+            "used_in": [
+                "pages/AdminConfig.tsx",
+                "pages/AdminWardBoundaries.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "GlobalMessageHandler",
+            "location": "client/components/GlobalMessageHandler.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ComplaintsListWidget",
+            "location": "client/components/ComplaintsListWidget.tsx",
+            "used_in": [
+                "pages/WardOfficerDashboard.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "StatusChip",
+            "location": "client/components/StatusChip.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "QuickComplaintModal",
+            "location": "client/components/QuickComplaintModal.tsx",
+            "used_in": [
+                "pages/CitizenDashboard.tsx",
+                "pages/ComplaintsList.tsx",
+                "pages/GuestDashboard.tsx",
+                "pages/GuestTrackComplaint.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "UXComponents",
+            "location": "client/components/UXComponents.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "AppInitializer",
+            "location": "client/components/AppInitializer.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "MaterialsModal",
+            "location": "client/components/MaterialsModal.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ContactInfoCard",
+            "location": "client/components/ContactInfoCard.tsx",
+            "used_in": [
+                "pages/CitizenDashboard.tsx",
+                "pages/Index.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "Navigation",
+            "location": "client/components/Navigation.tsx",
+            "used_in": [
+                "components/AccessibleComponents.tsx",
+                "components/Layout.tsx",
+                "components/LocationMapDialog.tsx",
+                "components/SimpleLocationMapDialog.tsx",
+                "components/WardBoundaryManager.tsx",
+                "components/layouts/DashboardLayout.tsx",
+                "components/layouts/UnifiedLayout.tsx",
+                "components/ui/sidebar-nav.tsx",
+                "components/ui/simplified-sidebar-nav.tsx",
+                "pages/CitizenComplaintForm.tsx",
+                "pages/GuestComplaintForm.tsx",
+                "pages/GuestServiceRequest.tsx",
+                "pages/Login.tsx",
+                "pages/MaintenanceDashboard.tsx",
+                "pages/MaintenanceTasks.tsx",
+                "pages/Register.tsx",
+                "pages/TaskDetails.tsx",
+                "pages/UnifiedComplaintForm.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "Layout",
+            "location": "client/components/Layout.tsx",
+            "used_in": [
+                "components/layouts/DashboardLayout.tsx",
+                "components/layouts/UnifiedLayout.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "LocationMapDialog",
+            "location": "client/components/LocationMapDialog.tsx",
+            "used_in": [
+                "components/QuickComplaintForm.tsx",
+                "components/SimpleLocationMapDialog.tsx",
+                "pages/UnifiedComplaintForm.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "AllComplaintCard",
+            "location": "client/components/AllComplaintCard.tsx",
+            "used_in": [
+                "components/WardDashboard.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "LanguageSwitcher",
+            "location": "client/components/LanguageSwitcher.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "PhotoUploadModal",
+            "location": "client/components/PhotoUploadModal.tsx",
+            "used_in": [
+                "pages/MaintenanceTasks.tsx",
+                "pages/TaskDetails.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "RoleBasedDashboard",
+            "location": "client/components/RoleBasedDashboard.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "StatusTracker",
+            "location": "client/components/StatusTracker.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "AccessibleComponents",
+            "location": "client/components/AccessibleComponents.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "PlaceholderPage",
+            "location": "client/components/PlaceholderPage.tsx",
+            "used_in": [
+                "pages/NotFound.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "QuickComplaintForm",
+            "location": "client/components/QuickComplaintForm.tsx",
+            "used_in": [
+                "components/QuickComplaintModal.tsx",
+                "pages/Index.tsx",
+                "pages/QuickComplaintPage.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "ComplaintFeedbackDialog",
+            "location": "client/components/ComplaintFeedbackDialog.tsx",
+            "used_in": [
+                "pages/ComplaintDetails.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "HeatmapGrid",
+            "location": "client/components/charts/HeatmapGrid.tsx",
+            "used_in": [
+                "pages/AdminDashboard.tsx",
+                "pages/UnifiedReports.tsx",
+                "pages/WardOfficerDashboard.tsx"
+            ],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "DashboardLayout",
+            "location": "client/components/layouts/DashboardLayout.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "UnifiedLayout",
+            "location": "client/components/layouts/UnifiedLayout.tsx",
+            "used_in": [],
+            "props": [],
+            "description": ""
+        },
+        {
+            "name": "FormField",
+            "location": "client/components/forms/FormField.tsx",
+            "used_in": [
+                "components/ui/form.tsx"
+            ],
+            "props": [],
+            "description": ""
+        }
+    ],
+    "unused_components": [
+        {
+            "name": "RoleBasedRoute",
+            "location": "client/components/RoleBasedRoute.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "ComplaintStatusUpdate",
+            "location": "client/components/ComplaintStatusUpdate.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "OptimizedComponents",
+            "location": "client/components/OptimizedComponents.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "OTPVerification",
+            "location": "client/components/OTPVerification.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "ErrorBoundary",
+            "location": "client/components/ErrorBoundary.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "RoleSwitcher",
+            "location": "client/components/RoleSwitcher.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "AuthErrorHandler",
+            "location": "client/components/AuthErrorHandler.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "GlobalMessageHandler",
+            "location": "client/components/GlobalMessageHandler.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "StatusChip",
+            "location": "client/components/StatusChip.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "UXComponents",
+            "location": "client/components/UXComponents.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "AppInitializer",
+            "location": "client/components/AppInitializer.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "MaterialsModal",
+            "location": "client/components/MaterialsModal.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "LanguageSwitcher",
+            "location": "client/components/LanguageSwitcher.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "RoleBasedDashboard",
+            "location": "client/components/RoleBasedDashboard.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "StatusTracker",
+            "location": "client/components/StatusTracker.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "AccessibleComponents",
+            "location": "client/components/AccessibleComponents.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "DashboardLayout",
+            "location": "client/components/layouts/DashboardLayout.tsx",
+            "reason": "Not imported in any page or component"
+        },
+        {
+            "name": "UnifiedLayout",
+            "location": "client/components/layouts/UnifiedLayout.tsx",
+            "reason": "Not imported in any page or component"
+        }
+    ],
+    "redux": [
+        {
+            "slice": "languageSlice",
+            "actions": [
+                "initializeLanguage",
+                "resetLanguage",
+                "setLanguage"
+            ],
+            "used_in": [
+                "components/AppInitializer.tsx",
+                "components/LanguageSwitcher.tsx",
+                "components/Layout.tsx",
+                "components/Navigation.tsx",
+                "components/RoleBasedRoute.tsx",
+                "components/ui/sidebar-nav.tsx",
+                "pages/Settings.tsx"
+            ],
+            "state_shape": ""
+        },
+        {
+            "slice": "authSlice",
+            "actions": [
+                "clearCredentials",
+                "clearError",
+                "resetOTPState",
+                "resetRegistrationState",
+                "setError",
+                "setRequiresPasswordSetup"
+            ],
+            "used_in": [
+                "components/AppInitializer.tsx",
+                "components/AuthErrorHandler.tsx",
+                "components/LanguageSwitcher.tsx",
+                "components/Layout.tsx",
+                "components/Navigation.tsx",
+                "components/OTPVerification.tsx",
+                "components/QuickComplaintForm.tsx",
+                "components/QuickTrackForm.tsx",
+                "components/RoleBasedRoute.tsx",
+                "components/ui/sidebar-nav.tsx",
+                "pages/CitizenComplaintForm.tsx",
+                "pages/GuestComplaintForm.tsx",
+                "pages/GuestTrackComplaint.tsx",
+                "pages/Login.tsx",
+                "pages/Profile.tsx",
+                "pages/QuickComplaintPage.tsx",
+                "pages/Register.tsx",
+                "pages/SetPassword.tsx",
+                "pages/Settings.tsx",
+                "pages/TokenClearHelper.tsx",
+                "pages/UnifiedComplaintForm.tsx"
+            ],
+            "state_shape": ""
+        },
+        {
+            "slice": "dataSlice",
+            "actions": [
+                "clearAllData",
+                "clearStaleData",
+                "markDataAsStale",
+                "setActiveComplaints",
+                "setComplaintDetails",
+                "setComplaintStats",
+                "setComplaintTypes",
+                "setComplaintsList",
+                "setRecentUpdates",
+                "setServiceRequestDetails",
+                "setServiceRequestsList",
+                "setSubZones",
+                "setSystemSettings",
+                "setUserProfile",
+                "setUserStats",
+                "setUsersList",
+                "setWardStats",
+                "setWards",
+                "updateComplaintInList"
+            ],
+            "used_in": [],
+            "state_shape": ""
+        },
+        {
+            "slice": "complaintsSlice",
+            "actions": [
+                "clearCurrentComplaint",
+                "clearError",
+                "clearFilters",
+                "setCurrentComplaint"
+            ],
+            "used_in": [
+                "components/AllComplaintCard.tsx",
+                "components/QuickComplaintForm.tsx"
+            ],
+            "state_shape": ""
+        },
+        {
+            "slice": "uiSlice",
+            "actions": [
+                "clearError",
+                "clearNotifications",
+                "closeDialog",
+                "hideAllModals",
+                "hideAllToasts",
+                "hideModal",
+                "hideToast",
+                "initializeSidebar",
+                "initializeTheme",
+                "markAllNotificationsAsRead",
+                "markNotificationAsRead",
+                "openDialog",
+                "removeNotification",
+                "setCurrentPage",
+                "setFiltersOpen",
+                "setGlobalSearchQuery",
+                "setMobileMenuOpen",
+                "setNotifications",
+                "setOnlineStatus",
+                "setSearchOpen",
+                "setSidebarCollapsed",
+                "setSidebarOpen",
+                "setTheme",
+                "showModal",
+                "showToast",
+                "toggleFilters",
+                "toggleMobileMenu",
+                "toggleSearch",
+                "toggleSidebar",
+                "toggleSidebarCollapsed"
+            ],
+            "used_in": [
+                "components/AppInitializer.tsx",
+                "components/GlobalMessageHandler.tsx",
+                "components/Layout.tsx",
+                "components/OTPVerification.tsx",
+                "components/QuickComplaintForm.tsx",
+                "components/ui/simplified-sidebar-nav.tsx",
+                "pages/AdminConfig.tsx",
+                "pages/AdminLanguages.tsx",
+                "pages/Profile.tsx",
+                "pages/ReportsAnalytics.tsx",
+                "pages/Settings.tsx"
+            ],
+            "state_shape": ""
+        },
+        {
+            "slice": "guestSlice",
+            "actions": [
+                "addAttachment",
+                "clearError",
+                "clearGuestData",
+                "loadSavedFormData",
+                "nextStep",
+                "prevStep",
+                "removeAttachment",
+                "resetOTPState",
+                "setCurrentFormStep",
+                "setCurrentStep",
+                "validateCurrentStep"
+            ],
+            "used_in": [
+                "components/QuickComplaintForm.tsx",
+                "pages/GuestComplaintForm.tsx",
+                "pages/GuestTrackComplaint.tsx",
+                "pages/UnifiedComplaintForm.tsx",
+                "pages/__tests__/GuestComplaintForm.test.tsx"
+            ],
+            "state_shape": ""
+        }
+    ],
+    "server_endpoints": [
+        {
+            "route": "/:filename",
+            "controller": "getAttachment",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/logo/:filename",
+            "controller": "getAttachment",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:id",
+            "controller": "protect",
+            "method": "DELETE",
+            "description": ""
+        },
+        {
+            "route": "/register",
+            "controller": "validateRegistration",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/login",
+            "controller": "authLimiter",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/login-otp",
+            "controller": "authLimiter",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/verify-otp",
+            "controller": "authLimiter",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/verify-registration-otp",
+            "controller": "validateOTP",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/send-password-setup",
+            "controller": "sendPasswordSetup",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/set-password/:token",
+            "controller": "setPassword",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/logout",
+            "controller": "logout",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/me",
+            "controller": "getMe",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/verify-token",
+            "controller": "verifyToken",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/profile",
+            "controller": "updateProfile",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/change-password",
+            "controller": "validatePasswordChange",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/users",
+            "controller": "getAllUsers",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/users",
+            "controller": "validateUser",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/users/:id",
+            "controller": "validateUserUpdate",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/users/:id",
+            "controller": "deleteUser",
+            "method": "DELETE",
+            "description": ""
+        },
+        {
+            "route": "/users/:id/activate",
+            "controller": "activateUser",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/users/:id/deactivate",
+            "controller": "deactivateUser",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/users/bulk",
+            "controller": "bulkUserActions",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/stats/users",
+            "controller": "getUserStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/stats/system",
+            "controller": "getSystemStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/analytics",
+            "controller": "getAnalytics",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/roles",
+            "controller": "manageRoles",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/dashboard/analytics",
+            "controller": "getDashboardAnalytics",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/dashboard/activity",
+            "controller": "getRecentActivity",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/dashboard/stats",
+            "controller": "getDashboardStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/user-activity",
+            "controller": "getUserActivity",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/system-health",
+            "controller": "getSystemHealth",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/test-email",
+            "controller": "async",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/seed-admin",
+            "controller": "async",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/generate",
+            "controller": "generateCaptcha",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/verify",
+            "controller": "verifyCaptcha",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/public",
+            "controller": "getPublicSystemSettings",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/",
+            "controller": "getSystemSettings",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/health",
+            "controller": "getSystemHealth",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/reset",
+            "controller": "resetSystemSettings",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/",
+            "controller": "validateSystemSetting",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/:key",
+            "controller": "validateKeyParam",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:key",
+            "controller": "validateKeyParam",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/:key",
+            "controller": "validateKeyParam",
+            "method": "DELETE",
+            "description": ""
+        },
+        {
+            "route": "/verify-account/:token",
+            "controller": "verifyAccount",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/wards",
+            "controller": "getWards",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/stats",
+            "controller": "getUserStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/sla",
+            "controller": "authorize",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/public/stats",
+            "controller": "getComplaintStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/",
+            "controller": "getComplaints",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/stats",
+            "controller": "getComplaintStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:id",
+            "controller": "getComplaint",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:id/feedback",
+            "controller": "authorize",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/:id/reopen",
+            "controller": "authorize",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/request-complaint-otp",
+            "controller": "requestComplaintOtp",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/verify-complaint-otp",
+            "controller": "verifyComplaintOtp",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/complaint-details",
+            "controller": "getComplaintDetailsWithOtp",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/",
+            "controller": "getComplaintTypes",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:id",
+            "controller": "getComplaintTypeById",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:id",
+            "controller": "authorize",
+            "method": "DELETE",
+            "description": ""
+        },
+        {
+            "route": "/boundaries",
+            "controller": "getAllWardsWithBoundaries",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/:wardId/boundaries",
+            "controller": "protect",
+            "method": "PUT",
+            "description": ""
+        },
+        {
+            "route": "/detect-area",
+            "controller": "detectLocationArea",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/complaint",
+            "controller": "upload.array",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/resend-otp",
+            "controller": "resendOTP",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/track/:complaintId",
+            "controller": "validateComplaintTracking",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/stats",
+            "controller": "getPublicStats",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/wards",
+            "controller": "getPublicWards",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/complaint-types",
+            "controller": "getPublicComplaintTypes",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/service-request",
+            "controller": "submitGuestServiceRequest",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/verify-service-otp",
+            "controller": "verifyServiceRequestOTP",
+            "method": "POST",
+            "description": ""
+        },
+        {
+            "route": "/track-service/:requestId",
+            "controller": "trackServiceRequest",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/service-types",
+            "controller": "getServiceTypes",
+            "method": "GET",
+            "description": ""
+        },
+        {
+            "route": "/ward-dashboard-stats",
+            "controller": "getComplaintSummary",
+            "method": "GET",
+            "description": ""
+        }
+    ]
+}
