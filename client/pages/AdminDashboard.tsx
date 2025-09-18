@@ -230,7 +230,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+         {/* <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg p-3 shadow">
               <div className="text-2xl font-bold text-gray-900">
                 {systemStats.totalComplaints}
@@ -293,6 +293,49 @@ const AdminDashboard: React.FC = () => {
                 </UITooltip>
               </div>
             </div>
+          </div>*/}
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                value: systemStats.totalComplaints,
+                label: "Total Complaints",
+                tooltip: "All complaints in the system."
+              },
+              {
+                value: systemStats.activeUsers || 0,
+                label: "Active Users",
+                tooltip: "Users who have logged in recently."
+              },
+              {
+                value: `${metrics?.slaCompliance || 0}%`,
+                label: "SLA Compliance",
+                tooltip:
+                  "Average on-time performance across complaint types, using each type’s configured SLA hours."
+              },
+              {
+                value: `${(metrics?.citizenSatisfaction || 0).toFixed(1)}/5`,
+                label: "Satisfaction",
+                tooltip: "Average citizen feedback score."
+              }
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="bg-white/70 backdrop-blur-md border border-gray-200/60 
+                 rounded-2xl p-4 shadow-sm transition-all duration-300 
+                 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="text-2xl font-bold text-gray-900">{item.value}</div>
+                <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                  {item.label}
+                  <UITooltip>
+                    <TooltipTrigger>
+                      <Info className="h-3.5 w-3.5 text-gray-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>{item.tooltip}</TooltipContent>
+                  </UITooltip>
+                </div>
+              </div>
+            ))}
           </div>
 
         </div>
