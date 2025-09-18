@@ -61,7 +61,8 @@
     "db:prod": "npx prisma migrate deploy --schema=prisma/schema.prod.prisma && npx prisma generate --schema=prisma/schema.prod.prisma",
     "db:reset": "npx prisma migrate reset --force",
     "setup:dev": "npm run db:dev && npm run dev",
-    "setup:prod": "npm run preserver:prod && npm run server:prod"
+    "setup:prod": "npm run preserver:prod && npm run server:prod",
+    "preserver:dev": "node scripts/validate-db-env.js && npx prisma generate --schema=prisma/schema.dev.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
