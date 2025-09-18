@@ -1112,7 +1112,8 @@ const ComplaintDetails: React.FC = () => {
               {user?.role !== "CITIZEN" && (
                 <div>
                   <h4 className="font-medium mb-2">
-                    Maintenance Team Attachments ({complaint?.photos?.length || 0})
+                    Maintenance Team Attachments (
+                    {complaint?.photos?.length || 0})
                   </h4>
                   {complaint?.photos && complaint.photos.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1159,7 +1160,11 @@ const ComplaintDetails: React.FC = () => {
                             >
                               Preview
                             </Button>
-                            <a href={p.photoUrl} target="_blank" rel="noreferrer">
+                            <a
+                              href={p.photoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
                               <Button size="sm" variant="outline">
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
@@ -1204,14 +1209,14 @@ const ComplaintDetails: React.FC = () => {
                   complaint.status === "CLOSED") &&
                   complaint.submittedById === user?.id &&
                   !complaint.rating && (
-                  <Button
-                    className="w-full justify-start"
-                    onClick={() => setShowFeedbackDialog(true)}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Provide Feedback
-                  </Button>
-                )}
+                    <Button
+                      className="w-full justify-start"
+                      onClick={() => setShowFeedbackDialog(true)}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Provide Feedback
+                    </Button>
+                  )}
               </CardContent>
             </Card>
           )}
