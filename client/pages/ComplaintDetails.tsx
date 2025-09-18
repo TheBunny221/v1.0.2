@@ -1109,44 +1109,19 @@ const ComplaintDetails: React.FC = () => {
                 )}
               </div>
 
-              <div>
-                <h4 className="font-medium mb-2">
-                  Maintenance Team Attachments ({complaint?.photos?.length || 0}
-                  )
-                </h4>
-                {complaint?.photos && complaint.photos.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {complaint.photos.map((p: any) => (
-                      <div key={p.id} className="border rounded-lg p-2">
-                        <img
-                          src={p.photoUrl}
-                          alt={p.originalName || p.fileName}
-                          className="w-full h-28 object-cover rounded mb-2 cursor-pointer"
-                          onClick={() => {
-                            setPreviewItem({
-                              url: p.photoUrl,
-                              mimeType: "image/*",
-                              name: p.originalName || p.fileName,
-                              size: null,
-                            });
-                            setIsPreviewOpen(true);
-                          }}
-                        />
-                        <div className="text-xs text-gray-700 truncate">
-                          {p.originalName || p.fileName}
-                        </div>
-                        {p.uploadedByTeam?.fullName && (
-                          <div className="text-[11px] text-gray-500">
-                            by {p.uploadedByTeam.fullName}
-                          </div>
-                        )}
-                        <div className="text-[11px] text-gray-500">
-                          {new Date(p.uploadedAt).toLocaleString()}
-                        </div>
-                        <div className="mt-2 flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
+              {user?.role !== "CITIZEN" && (
+                <div>
+                  <h4 className="font-medium mb-2">
+                    Maintenance Team Attachments ({complaint?.photos?.length || 0})
+                  </h4>
+                  {complaint?.photos && complaint.photos.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {complaint.photos.map((p: any) => (
+                        <div key={p.id} className="border rounded-lg p-2">
+                          <img
+                            src={p.photoUrl}
+                            alt={p.originalName || p.fileName}
+                            className="w-full h-28 object-cover rounded mb-2 cursor-pointer"
                             onClick={() => {
                               setPreviewItem({
                                 url: p.photoUrl,
@@ -1156,25 +1131,51 @@ const ComplaintDetails: React.FC = () => {
                               });
                               setIsPreviewOpen(true);
                             }}
-                          >
-                            Preview
-                          </Button>
-                          <a href={p.photoUrl} target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="outline">
-                              <Download className="h-3 w-3 mr-1" />
-                              Download
+                          />
+                          <div className="text-xs text-gray-700 truncate">
+                            {p.originalName || p.fileName}
+                          </div>
+                          {p.uploadedByTeam?.fullName && (
+                            <div className="text-[11px] text-gray-500">
+                              by {p.uploadedByTeam.fullName}
+                            </div>
+                          )}
+                          <div className="text-[11px] text-gray-500">
+                            {new Date(p.uploadedAt).toLocaleString()}
+                          </div>
+                          <div className="mt-2 flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setPreviewItem({
+                                  url: p.photoUrl,
+                                  mimeType: "image/*",
+                                  name: p.originalName || p.fileName,
+                                  size: null,
+                                });
+                                setIsPreviewOpen(true);
+                              }}
+                            >
+                              Preview
                             </Button>
-                          </a>
+                            <a href={p.photoUrl} target="_blank" rel="noreferrer">
+                              <Button size="sm" variant="outline">
+                                <Download className="h-3 w-3 mr-1" />
+                                Download
+                              </Button>
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-500">
-                    No maintenance attachments
-                  </div>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      No maintenance attachments
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
