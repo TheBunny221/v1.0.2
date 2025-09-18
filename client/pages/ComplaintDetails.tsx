@@ -1180,7 +1180,7 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Quick Actions */}
-          { user?.role !== "CITIZEN" && {(
+          {user?.role !== "CITIZEN" && (
             <Card>
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
@@ -1190,32 +1190,31 @@ const ComplaintDetails: React.FC = () => {
                 {(user?.role === "WARD_OFFICER" ||
                   user?.role === "ADMINISTRATOR" ||
                   user?.role === "MAINTENANCE_TEAM") && (
-                    <Button
-                      className="w-full justify-start"
-                      onClick={() => setIsUpdateModalOpen(true)}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Update Status
-                    </Button>
-                  )}
+                  <Button
+                    className="w-full justify-start"
+                    onClick={() => setIsUpdateModalOpen(true)}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Update Status
+                  </Button>
+                )}
 
                 {/* Show feedback button for resolved/closed complaints if user is the complainant */}
                 {(complaint.status === "RESOLVED" ||
                   complaint.status === "CLOSED") &&
                   complaint.submittedById === user?.id &&
                   !complaint.rating && (
-                    <Button
-                      className="w-full justify-start"
-                      onClick={() => setShowFeedbackDialog(true)}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Provide Feedback
-                    </Button>
-                  )}
+                  <Button
+                    className="w-full justify-start"
+                    onClick={() => setShowFeedbackDialog(true)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Provide Feedback
+                  </Button>
+                )}
               </CardContent>
             </Card>
-           )}
-          }
+          )}
         </div>
       </div>
 
