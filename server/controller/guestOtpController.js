@@ -334,7 +334,7 @@ export const verifyComplaintOtp = async (req, res) => {
         user: userResponse,
         token, // JWT token for auto-login
         isNewUser,
-        redirectTo: `/complaints/${complaint.id}`, // Redirect path for frontend
+        redirectTo: `/complaint/${complaint.id}`, // Redirect path for frontend
       },
     });
   } catch (error) {
