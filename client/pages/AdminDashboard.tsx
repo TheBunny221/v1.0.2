@@ -231,70 +231,70 @@ const AdminDashboard: React.FC = () => {
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {systemStats.totalComplaints}
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 Total Complaints
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
                   <TooltipContent>All complaints in the system.</TooltipContent>
                 </UITooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {systemStats.activeUsers || 0}
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 Active Users
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    Users who have logged in recently.
-                  </TooltipContent>
+                  <TooltipContent>Users who have logged in recently.</TooltipContent>
                 </UITooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {metrics?.slaCompliance || 0}%
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 SLA Compliance
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    Average on‑time performance across complaint types, using
-                    each type’s configured SLA hours.
+                    Average on-time performance across complaint types, using each
+                    type’s configured SLA hours.
                   </TooltipContent>
                 </UITooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 Satisfaction
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    Average citizen feedback score.
-                  </TooltipContent>
+                  <TooltipContent>Average citizen feedback score.</TooltipContent>
                 </UITooltip>
               </div>
             </div>
           </div>
+
         </div>
 
         {hasError && (
