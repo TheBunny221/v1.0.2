@@ -54,7 +54,15 @@
     "db:stats": "node prisma/migration-utils.js stats",
     "db:cleanup": "node prisma/migration-utils.js cleanup",
     "db:check": "node prisma/migration-utils.js check",
-    "postinstall": "npm run db:generate:dev"
+    "postinstall": "npm run db:generate:dev",
+    "validate:db": "node scripts/validate-db-env.js",
+    "preserver:prod": "node scripts/validate-db-env.js && npx prisma migrate deploy --schema=prisma/schema.prod.prisma && npx prisma generate --schema=prisma/schema.prod.prisma",
+    "db:dev": "npx prisma migrate dev --schema=prisma/schema.dev.prisma --name init && npx prisma generate --schema=prisma/schema.dev.prisma",
+    "db:prod": "npx prisma migrate deploy --schema=prisma/schema.prod.prisma && npx prisma generate --schema=prisma/schema.prod.prisma",
+    "db:reset": "npx prisma migrate reset --force",
+    "setup:dev": "npm run db:dev && npm run dev",
+    "setup:prod": "npm run preserver:prod && npm run server:prod",
+    "preserver:dev": "node scripts/validate-db-env.js && npx prisma generate --schema=prisma/schema.dev.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
@@ -90,6 +98,7 @@
     "clsx": "^2.0.0",
     "cors": "^2.8.5",
     "date-fns": "^3.0.6",
+    "docx-preview": "^0.3.6",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
@@ -102,6 +111,7 @@
     "lucide-react": "^0.303.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.8",
+    "pdfjs-dist": "^5.4.149",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
