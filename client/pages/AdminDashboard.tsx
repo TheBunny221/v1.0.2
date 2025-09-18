@@ -231,7 +231,7 @@ const AdminDashboard: React.FC = () => {
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-purple-700 rounded-lg p-3">
+            <div className="bg-white-700 rounded-lg p-3">
               <div className="text-2xl font-bold">
                 {systemStats.totalComplaints}
               </div>
