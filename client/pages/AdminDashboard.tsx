@@ -294,7 +294,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>*/}
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               {
                 value: systemStats.totalComplaints,
@@ -320,16 +320,17 @@ const AdminDashboard: React.FC = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="bg-white/70 backdrop-blur-md border border-gray-200/60 
-                 rounded-2xl p-4 shadow-sm transition-all duration-300 
-                 hover:scale-105 hover:shadow-lg"
+                className="rounded-3xl p-5 bg-gradient-to-br from-white/80 to-gray-50/40
+                 backdrop-blur-xl border border-white/30 shadow-sm
+                 transition-all duration-300 hover:-translate-y-1 
+                 hover:shadow-xl"
               >
-                <div className="text-2xl font-bold text-gray-900">{item.value}</div>
-                <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                <div className="text-3xl font-semibold text-gray-900">{item.value}</div>
+                <div className="mt-2 text-sm text-gray-700 flex items-center gap-1">
                   {item.label}
                   <UITooltip>
                     <TooltipTrigger>
-                      <Info className="h-3.5 w-3.5 text-gray-500" />
+                      <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent>{item.tooltip}</TooltipContent>
                   </UITooltip>
@@ -337,6 +338,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             ))}
           </div>
+
 
         </div>
 
