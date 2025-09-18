@@ -294,7 +294,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>*/}
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6 relative">
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               {
                 value: systemStats.totalComplaints,
@@ -320,7 +320,7 @@ const AdminDashboard: React.FC = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="relative rounded-3xl p-5 bg-gradient-to-br from-white/80 to-gray-50/40
+                className="relative z-0 rounded-3xl p-5 bg-gradient-to-br from-white/80 to-gray-50/40
                  backdrop-blur-xl border border-white/30 shadow-sm
                  transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
@@ -339,6 +339,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             ))}
           </div>
+
 
 
 
