@@ -28,7 +28,12 @@ const generateJWTToken = (user) => {
 export const requestComplaintOtp = async (req, res) => {
   try {
     const { complaintId } = req.body;
-
+    console.log('🔍 Guest OTP Request Debug:', {
+      body: req.body,
+      headers: req.headers,
+      url: req.url,
+      method: req.method
+    });
     if (!complaintId) {
       return res.status(400).json({
         success: false,
@@ -334,7 +339,7 @@ export const verifyComplaintOtp = async (req, res) => {
         user: userResponse,
         token, // JWT token for auto-login
         isNewUser,
-        redirectTo: `/complaint/${complaint.id}`, // Redirect path for frontend
+        redirectTo: `/complaints/${complaint.id}`, // Redirect path for frontend
       },
     });
   } catch (error) {

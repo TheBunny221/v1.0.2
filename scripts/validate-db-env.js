@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 
+dotenv.config();
+
 const cwd = process.cwd();
 const nodeEnv = process.env.NODE_ENV || 'development';
 
@@ -22,6 +24,7 @@ function info(msg) {
 }
 
 const url = process.env.DATABASE_URL || '';
+console.log('🔍 Validating environment variables...', process.env.DATABASE_URL);
 const port = process.env.PORT || '';
 
 info(`NODE_ENV=${nodeEnv}`);

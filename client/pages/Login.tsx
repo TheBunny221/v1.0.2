@@ -381,7 +381,7 @@ const Login: React.FC = () => {
                 >
                   Submit complaint
                 </Link>
-              </p>
+              </p>*/}
               <p className="text-sm text-gray-600">
                 <Link
                   to="/"
