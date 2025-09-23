@@ -10,6 +10,7 @@ import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ContextErrorBoundary } from "./components/ContextErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
 import AuthErrorHandler from "./components/AuthErrorHandler";
@@ -80,10 +81,13 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <ErrorBoundary>
-        <SystemConfigProvider>
-          <AppInitializer>
-            <OtpProvider>
-              <TooltipProvider>
+        <ContextErrorBoundary contextName="SystemConfig">
+          <SystemConfigProvider>
+            <ContextErrorBoundary contextName="AppInitializer">
+              <AppInitializer>
+                <ContextErrorBoundary contextName="OtpProvider">
+                  <OtpProvider>
+                    <TooltipProvider>
                 <Router>
                   <div className="min-h-screen bg-gray-50">
                     <Suspense fallback={<LoadingFallback />}>
@@ -96,21 +100,25 @@ const App: React.FC = () => {
                           element={<SetPassword />}
                         />
                         <Route
+                          path="/set-password"
+                          element={<SetPassword />}
+                        />
+                        {/* <Route
                           path="/guest/complaint"
                           element={<GuestComplaintForm />}
-                        />
-                        <Route
+                        /> */}
+                        {/* <Route
                           path="/complaint"
                           element={<QuickComplaintPage />}
-                        />
+                        /> */}
                         <Route
                           path="/guest/track"
                           element={<GuestTrackComplaint />}
                         />
-                        <Route
+                        {/* <Route
                           path="/guest/service-request"
                           element={<GuestServiceRequest />}
-                        />
+                        /> */}
                         <Route
                           path="/guest/dashboard"
                           element={<GuestDashboard />}
@@ -409,10 +417,13 @@ const App: React.FC = () => {
                   <GlobalMessageHandler />
                   <AuthErrorHandler />
                 </Router>
-              </TooltipProvider>
-            </OtpProvider>
-          </AppInitializer>
-        </SystemConfigProvider>
+                    </TooltipProvider>
+                  </OtpProvider>
+                </ContextErrorBoundary>
+              </AppInitializer>
+            </ContextErrorBoundary>
+          </SystemConfigProvider>
+        </ContextErrorBoundary>
       </ErrorBoundary>
     </Provider>
   );

@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "/home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/logs/app-audit.json",
+    "files": [
+        {
+            "date": 1758490717587,
+            "name": "/home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/logs/app-2025-09-22.log",
+            "hash": "1d154ab1ee2c8f23a463d9a933744597a0d5f4c2569f4c35ebefcc38ae4e8693"
+        },
+        {
+            "date": 1758568570604,
+            "name": "/home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/logs/app-2025-09-23.log",
+            "hash": "16e097bdeca3f43e9312346affa90a6ded124f1ab8a49b3c2aef694b340a6bdf"
+        }
+    ],
+    "hashType": "sha256"
+}

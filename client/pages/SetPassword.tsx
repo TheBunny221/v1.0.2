@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
-import { clearError, selectAuth } from "../store/slices/authSlice";
-import { useSetPasswordMutation } from "../store/api/authApi";
+import { clearError, selectAuth, setCredentials } from "../store/slices/authSlice";
+import { useSetPasswordMutation, useValidatePasswordSetupTokenMutation, useGetCurrentUserQuery } from "../store/api/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -21,12 +21,18 @@ import { useToast } from "../hooks/use-toast";
 const SetPassword: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { token } = useParams<{ token: string }>();
+  const { token: paramToken } = useParams<{ token: string }>();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const queryToken = searchParams.get("token") || undefined;
+  const token = paramToken || queryToken;
   const { toast } = useToast();
   const { appName } = useSystemConfig();
 
-  const { error, isAuthenticated } = useAppSelector(selectAuth);
+  const { error } = useAppSelector(selectAuth);
   const [setPasswordMutation, { isLoading }] = useSetPasswordMutation();
+  const [validateToken] = useValidatePasswordSetupTokenMutation();
+  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined);
 
   const [formData, setFormData] = useState({
     password: "",
@@ -47,24 +53,52 @@ const SetPassword: React.FC = () => {
     dispatch(clearError());
   }, [dispatch]);
 
-  // Redirect if authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated, navigate]);
+  // Note: Do NOT auto-redirect authenticated users from this page
 
-  // Validate token exists
+  // Validate token exists and is valid (no redirects on error)
+  const [tokenValid, setTokenValid] = useState<null | boolean>(null);
+  const [tokenValidationMessage, setTokenValidationMessage] = useState<string>("");
   useEffect(() => {
-    if (!token) {
-      toast({
-        title: "Invalid Link",
-        description: "The password setup link is invalid or missing.",
-        variant: "destructive",
-      });
-      navigate("/login");
-    }
-  }, [token, navigate, toast]);
+    const run = async () => {
+      if (!token) {
+        setTokenValid(false);
+        setTokenValidationMessage("The password setup link is invalid or missing.");
+        toast({
+          title: "Invalid Link",
+          description: "The password setup link is invalid or missing.",
+          variant: "destructive",
+        });
+        return;
+      }
+      try {
+        const res = await validateToken({ token }).unwrap();
+        setTokenValid(!!res?.data?.valid);
+        if (!res?.data?.valid) {
+          setTokenValidationMessage("This password setup link is invalid or expired. Please request a new link from your profile page.");
+          toast({
+            title: "Invalid or Expired Link",
+            description: "Please request a new setup link.",
+            variant: "destructive",
+          });
+        }
+      } catch (e: any) {
+        // If backend doesn't provide a validation endpoint (404), skip pre-validation gracefully
+        const status = e?.status || e?.originalStatus || e?.data?.status;
+        if (status === 404) {
+          setTokenValid(null); // unknown; allow form submit to validate
+          setTokenValidationMessage("");
+          // Optional: info toast once
+          toast({ title: "Proceeding Without Pre-Validation", description: "We'll validate the link when you submit.", variant: "default" });
+        } else {
+          setTokenValid(false);
+          const msg = e?.data?.message || "Could not validate the link. Please request a new setup link.";
+          setTokenValidationMessage(msg);
+          toast({ title: "Link Validation Failed", description: msg, variant: "destructive" });
+        }
+      }
+    };
+    run();
+  }, [token, validateToken, toast]);
 
   // Password validation
   useEffect(() => {
@@ -113,29 +147,60 @@ const SetPassword: React.FC = () => {
     }
 
     try {
-      await setPasswordMutation({
+      if (tokenValid === false) {
+        // Prevent submit if token invalid
+        return;
+      }
+      const result = await setPasswordMutation({
         token: token!,
         password,
       }).unwrap();
 
+      // Update Redux store with new user data (including hasPassword: true)
+      if (result?.data?.user && result?.data?.token) {
+        dispatch(
+          setCredentials({
+            token: result.data.token,
+            user: result.data.user,
+          }),
+        );
+      } else {
+        // Fallback: refresh profile from backend to get updated hasPassword
+        try {
+          const me = await refetchCurrentUser().unwrap();
+          if (me?.data?.user && me?.data?.token) {
+            dispatch(
+              setCredentials({
+                token: me.data.token,
+                user: me.data.user,
+              }),
+            );
+          }
+        } catch (e) {
+          // If refetch fails, continue with success flow
+          console.warn("Failed to refresh user after password setup:", e);
+        }
+      }
+
       toast({
         title: "Password Set Successfully",
-        description: "You are now logged in and can access your account.",
+        description: "You can now log in using your new password.",
       });
 
-      // Redirect to dashboard
-      navigate("/dashboard");
+      // Redirect to login per flow requirement
+      navigate("/login");
     } catch (error: any) {
       toast({
         title: "Error",
         description:
-          error?.data?.message || "Failed to set password. Please try again.",
+          error?.data?.message ||
+          "Failed to set password. The link may be invalid or expired. Please request a new setup link.",
         variant: "destructive",
       });
     }
   };
 
-  const isFormValid = Object.values(passwordValidation).every(Boolean);
+  const isFormValid = Object.values(passwordValidation).every(Boolean) && tokenValid !== false;
 
   const ValidationItem: React.FC<{ isValid: boolean; text: string }> = ({
     isValid,
@@ -177,7 +242,21 @@ const SetPassword: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Error Alert */}
+            {/* Error Alerts */}
+            {tokenValid === false && (
+              <Alert className="mb-4 border-red-200 bg-red-50">
+                <AlertDescription className="text-red-700">
+                  {tokenValidationMessage || "Invalid or expired link."}
+                </AlertDescription>
+              </Alert>
+            )}
+            {tokenValid === null && (
+              <Alert className="mb-4 border-blue-200 bg-blue-50">
+                <AlertDescription className="text-blue-700">
+                  Unable to pre-validate this link. We will validate it when you submit your new password.
+                </AlertDescription>
+              </Alert>
+            )}
             {error && (
               <Alert className="mb-4 border-red-200 bg-red-50">
                 <AlertDescription className="text-red-700">

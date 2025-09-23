@@ -42,7 +42,7 @@ import {
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
 import QuickComplaintModal from "../components/QuickComplaintModal";
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
-import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -100,11 +100,9 @@ const ComplaintsList: React.FC = () => {
   const selectedWard = wards.find((ward) => ward.id === wardFilter);
   const availableSubZones = selectedWard?.subZones || [];
 
-  // Fetch public system config (for dynamic priorities/statuses)
-  const { data: publicConfig } = useGetPublicSystemConfigQuery();
-  const settings = publicConfig?.data || [];
-  const getSettingValue = (key: string) =>
-    settings.find((s: any) => s.key === key)?.value;
+  // Get system config from context (avoids duplicate API calls)
+  const { getConfig } = useSystemConfig();
+  const getSettingValue = (key: string) => getConfig(key);
 
   const configuredPriorities: string[] = useMemo(() => {
     const raw = getSettingValue("COMPLAINT_PRIORITIES");
@@ -116,7 +114,7 @@ const ComplaintsList: React.FC = () => {
     } catch {
       return ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     }
-  }, [settings]);
+  }, [getSettingValue]);
 
   const configuredStatuses: string[] = useMemo(() => {
     const raw = getSettingValue("COMPLAINT_STATUSES");
@@ -142,7 +140,7 @@ const ComplaintsList: React.FC = () => {
         "REOPENED",
       ];
     }
-  }, [settings]);
+  }, [getSettingValue]);
 
   const prettyLabel = (v: string) =>
     v

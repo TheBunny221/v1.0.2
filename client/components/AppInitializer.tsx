@@ -6,16 +6,15 @@ import { setCredentials, clearCredentials } from "../store/slices/authSlice";
 import { initializeLanguage } from "../store/slices/languageSlice";
 import { initializeTheme, setOnlineStatus } from "../store/slices/uiSlice";
 import { useGetCurrentUserQuery } from "../store/api/authApi";
+// import logger from "../utils/logger"; // Temporarily disabled to fix React useRef issue
 
 // Error logging utility - avoid accessing error.data to prevent response body issues
 const logAuthError = (context: string, error: any) => {
-  console.group(`🔐 Auth Error - ${context}`);
-  console.error("Error:", error);
-  if (error?.status) {
-    console.error("HTTP Status:", error.status);
-  }
-  // Note: Avoiding error.data access to prevent "Response body is already used" errors
-  console.groupEnd();
+  console.error(`Auth Error - ${context}`, {
+    error: error?.message || 'Unknown error',
+    status: error?.status,
+    context,
+  });
 };
 
 interface AppInitializerProps {
@@ -89,12 +88,8 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
             const isUnauthorized = error.status === 401;
 
             if (isServerError) {
-              console.warn(
-                "🚨 Server issue detected - not clearing user credentials",
-              );
-              console.log(
-                "User can continue with cached data until server recovers",
-              );
+              console.warn("Server issue detected - not clearing user credentials");
+              console.log("User can continue with cached data until server recovers");
 
               // Don't clear credentials for server issues - user might be able to continue
               // with cached data until the server recovers
@@ -109,29 +104,24 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
             localStorage.removeItem("token");
 
             // Log specific error types for debugging
+            const errorData = error?.data?.data || error?.data;
+            const errorCode = errorData?.code;
             if (errorCode) {
-              console.log(`📋 Handling auth error: ${errorCode}`);
+              console.log(`Handling auth error: ${errorCode}`);
 
-              switch (errorCode) {
-                case "TOKEN_EXPIRED":
-                  console.log("🕒 Token expired, user needs to login again");
-                  break;
-                case "TOKEN_INVALID":
-                case "TOKEN_MALFORMED":
-                  console.log("🔍 Invalid token format, clearing credentials");
-                  break;
-                case "USER_NOT_FOUND":
-                  console.log("👤 User account no longer exists");
-                  break;
-                case "ACCOUNT_DEACTIVATED":
-                  console.log("🚫 User account has been deactivated");
-                  break;
-                default:
-                  console.log("❓ Unknown authentication error");
-              }
+              const errorMessages = {
+                TOKEN_EXPIRED: "Token expired, user needs to login again",
+                TOKEN_INVALID: "Invalid token format, clearing credentials",
+                TOKEN_MALFORMED: "Invalid token format, clearing credentials",
+                USER_NOT_FOUND: "User account no longer exists",
+                ACCOUNT_DEACTIVATED: "User account has been deactivated",
+              };
+
+              const message = errorMessages[errorCode] || "Unknown authentication error";
+              console.log(message);
             }
 
-            console.log("✅ Invalid token cleared successfully");
+            console.log("Invalid token cleared successfully");
           } else if (token && !reduxAuth.token) {
             // Have token in localStorage but not in Redux - sync it
             console.log("Syncing token from localStorage to Redux");
@@ -144,6 +134,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         const handleOnline = () => {
           try {
             dispatch(setOnlineStatus(true));
+            console.log("Network status: online");
           } catch (error) {
             console.warn("Failed to update online status:", error);
           }
@@ -152,6 +143,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         const handleOffline = () => {
           try {
             dispatch(setOnlineStatus(false));
+            console.warn("Network status: offline");
           } catch (error) {
             console.warn("Failed to update offline status:", error);
           }
@@ -161,10 +153,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           window.addEventListener("online", handleOnline);
           window.addEventListener("offline", handleOffline);
         } catch (listenerError) {
-          console.warn(
-            "Failed to add online/offline listeners:",
-            listenerError,
-          );
+          console.warn("Failed to add online/offline listeners:", listenerError);
         }
 
         // Cleanup function

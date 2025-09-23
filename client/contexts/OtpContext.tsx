@@ -30,12 +30,26 @@ interface OtpContextValue {
   isOpen: boolean;
 }
 
-const OtpContext = createContext<OtpContextValue | null>(null);
+// Default context value to prevent null reference errors
+const DEFAULT_OTP_CONTEXT: OtpContextValue = {
+  openOtpFlow: () => {
+    console.warn("OtpFlow called outside of OtpProvider");
+  },
+  closeOtpFlow: () => {
+    console.warn("OtpFlow called outside of OtpProvider");
+  },
+  isOpen: false,
+};
+
+const OtpContext = createContext<OtpContextValue>(DEFAULT_OTP_CONTEXT);
 
 export const useOtpFlow = () => {
   const context = useContext(OtpContext);
   if (!context) {
-    throw new Error("useOtpFlow must be used within an OtpProvider");
+    console.warn(
+      "useOtpFlow called outside of OtpProvider, using default values"
+    );
+    return DEFAULT_OTP_CONTEXT;
   }
   return context;
 };
@@ -59,6 +73,15 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   const openOtpFlow = useCallback(
     (flowConfig: OtpFlowConfig) => {
       try {
+        if (!flowConfig?.email) {
+          console.error("OTP flow requires email");
+          toast({
+            title: "Error",
+            description: "Email is required for verification",
+            variant: "destructive",
+          });
+          return;
+        }
         setConfig(flowConfig);
         setIsOpen(true);
       } catch (error) {
@@ -90,7 +113,10 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleVerified = useCallback(
     async (data: { token: string; user: any; otpCode?: string }) => {
-      if (!config || !data.otpCode) return;
+      if (!config || !data?.otpCode) {
+        console.error("Invalid verification data", { config: !!config, otpCode: !!data?.otpCode });
+        return;
+      }
 
       try {
         let result: any;
@@ -146,7 +172,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         // Store credentials if we have a token
-        if (result.data?.token && result.data?.user) {
+        if (result?.data?.token && result?.data?.user) {
           dispatch(
             setCredentials({
               token: result.data.token,
@@ -158,7 +184,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         // Call success callback
-        if (config.onSuccess) {
+        if (config?.onSuccess && result?.data) {
           config.onSuccess(result.data);
         }
 
@@ -172,7 +198,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
 
         toast({
           title: "Success",
-          description: contextMessages[config.context],
+          description: contextMessages[config.context] || "Verification successful!",
         });
 
         // Close dialog

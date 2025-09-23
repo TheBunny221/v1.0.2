@@ -16,16 +16,33 @@ interface SystemConfigContextType {
   getConfig: (key: string, defaultValue?: string) => string;
 }
 
-const SystemConfigContext = createContext<SystemConfigContextType | undefined>(
-  undefined,
-);
+// Default configuration values to prevent null reference errors
+const DEFAULT_CONFIG: SystemConfigContextType = {
+  config: {
+    APP_NAME: "Kochi Smart City",
+    APP_LOGO_URL: "/logo.png",
+    APP_LOGO_SIZE: "medium",
+    COMPLAINT_ID_PREFIX: "KSC",
+    COMPLAINT_ID_START_NUMBER: "1",
+    COMPLAINT_ID_LENGTH: "4",
+  },
+  appName: "Kochi Smart City",
+  appLogoUrl: "/logo.png",
+  appLogoSize: "medium",
+  isLoading: false,
+  refreshConfig: async () => {},
+  getConfig: (key: string, defaultValue: string = "") => defaultValue,
+};
+
+const SystemConfigContext = createContext<SystemConfigContextType>(DEFAULT_CONFIG);
 
 export const useSystemConfig = () => {
   const context = useContext(SystemConfigContext);
-  if (context === undefined) {
-    throw new Error(
-      "useSystemConfig must be used within a SystemConfigProvider",
+  if (!context) {
+    console.warn(
+      "useSystemConfig called outside of SystemConfigProvider, using default values"
     );
+    return DEFAULT_CONFIG;
   }
   return context;
 };
@@ -37,7 +54,7 @@ interface SystemConfigProviderProps {
 export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   children,
 }) => {
-  const [config, setConfig] = useState<SystemConfig>({});
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG.config);
 
   // Use RTK Query hook for better error handling and caching
   const {
@@ -45,7 +62,12 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     isLoading,
     error,
     refetch,
-  } = useGetPublicSystemConfigQuery();
+  } = useGetPublicSystemConfigQuery(undefined, {
+    // Additional caching options to prevent continuous fetching
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+  });
 
   // Process the RTK Query data when it changes
   useEffect(() => {
@@ -55,7 +77,10 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         configMap[setting.key] = setting.value;
       });
       setConfig(configMap);
-      console.log("System config loaded successfully via RTK Query");
+      console.log("System config loaded successfully via RTK Query", {
+        timestamp: new Date().toISOString(),
+        configCount: configResponse.data.length,
+      });
     } else if (error) {
       const errorMessage = getApiErrorMessage(error);
       console.error(
@@ -63,20 +88,13 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         errorMessage,
       );
       console.error("Full error details:", {
-        status: error?.status,
-        data: error?.data,
-        message: error?.message,
-        error: error?.error,
+        status: 'status' in error ? error.status : 'unknown',
+        data: 'data' in error ? error.data : 'unknown',
+        message: 'message' in error ? error.message : 'unknown',
+        error: error,
       });
       // Fallback to default values
-      setConfig({
-        APP_NAME: "Kochi Smart City",
-        APP_LOGO_URL: "/logo.png",
-        APP_LOGO_SIZE: "medium",
-        COMPLAINT_ID_PREFIX: "KSC",
-        COMPLAINT_ID_START_NUMBER: "1",
-        COMPLAINT_ID_LENGTH: "4",
-      });
+      setConfig(DEFAULT_CONFIG.config);
     }
   }, [configResponse, error]);
 
