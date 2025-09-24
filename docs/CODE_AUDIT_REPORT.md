@@ -1,351 +1,91 @@
 # CODE AUDIT REPORT - Smart City CMS
 
-**Audit Date:** `${new Date().toISOString()}`  
-**System:** Smart City Complaint Management System  
-**Scope:** Full-stack integration audit (Frontend + Backend)  
-**Auditor:** AI Assistant (Fusion)
+**Audit Date:** 2025-09-24
+**System:** Smart City Complaint Management System
+**Scope:** Frontend ⇄ Backend integration baseline
+**Auditor:** Documentation refresh (automated + manual verification)
 
 ---
 
-## 🚨 CRITICAL FINDINGS SUMMARY
+## Executive Summary
 
-| Severity     | Count | Status         |
-| ------------ | ----- | -------------- |
-| **CRITICAL** | 3     | ✅ FIXED       |
-| **HIGH**     | 5     | 🔄 IN PROGRESS |
-| **MEDIUM**   | 8     | ⏳ PENDING     |
-| **LOW**      | 7     | ⏳ PENDING     |
+The September 2025 review reconciles the documentation set with the current codebase. Earlier blockers—missing RTK Query imports, undefined dashboard utilities, and the complaint attachment mismatch—are no longer reproducible. The platform now ships with a hardened RTK Query base query, dual complaint upload entry points, and shared utility helpers in active use. Remaining integration risks are centered on lifecycle hygiene (refresh token endpoint), the coexistence of legacy thunks with RTK Query slices, and dormant helper components that inflate maintenance overhead.
 
-### Overall System Health: **82%** ✅
+### Health Snapshot
 
----
-
-## 🔥 CRITICAL ISSUES (FIXED)
-
-### 1. ✅ Authentication Infinite Redirect Loop - RESOLVED
-
-**Issue:** Missing imports in `client/store/api/baseApi.ts` causing authentication failures  
-**Impact:** Complete system unusability - users could not authenticate  
-**Root Cause:**
-
-```typescript
-// BROKEN CODE:
-api.dispatch(logout());    // ❌ logout undefined
-toast({...});             // ❌ toast undefined
-api.dispatch(setError()); // ❌ setError undefined
-```
-
-**✅ FIXED:**
-
-```typescript
-// Added imports:
-import { logout, setError } from "../slices/authSlice";
-import { toast } from "../../components/ui/use-toast";
-```
-
-### 2. ✅ Base Query Configuration - RESOLVED
-
-**Issue:** App was using basic `baseQuery` instead of enhanced `baseQueryWithReauth`  
-**Impact:** No automatic logout on 401 responses, broken token refresh handling
-
-**✅ FIXED:**
-
-```typescript
-// Changed from:
-baseQuery: baseQuery,
-// To:
-baseQuery: baseQueryWithReauth,
-```
-
-### 3. ✅ Missing Dependencies - RESOLVED
-
-**Issue:** Test suite completely broken due to missing dependencies  
-**Dependencies Installed:**
-
-- `jsdom` - Required for DOM testing
-- `@vitest/ui` - Required for test UI
-- `msw` - Required for API mocking
-- `@testing-library/dom` - Required for React testing
+| Area                     | Status  | Notes |
+| ------------------------ | ------- | ----- |
+| Authentication           | ✅ Good | Custom `baseQueryWithReauth` handles failures and logout fallbacks. |
+| Complaints & Attachments | ✅ Good | Alias under `/complaints/:id/attachments` points to the same controller as `/uploads/...`. |
+| Guest Flows              | ✅ Good | Guest endpoints map 1:1 with Express routes. |
+| Token Refresh            | ⚠️ Open | No `/api/auth/refresh` route despite generated RTK hook. |
+| State Management         | ⚠️ Open | Legacy `createAsyncThunk` flows (complaints, guest) coexist with RTK Query. |
+| Test Automation          | ⚠️ Open | `npm run typecheck` still reports pre-existing TypeScript errors. |
 
 ---
 
-## ⚠️ HIGH PRIORITY ISSUES
+## Verified Fixes Since Last Audit
 
-### 1. API Endpoint Mismatches
-
-**File Upload Endpoints:**
-
-- Frontend expects: `POST /complaints/:id/attachments`
-- Backend provides: `POST /uploads/complaint/:id/attachment`
-- **Action Required:** Frontend needs URL update OR backend needs route alias
-
-### 2. Missing Utility Functions
-
-**Files:** `CitizenDashboard.tsx`, `ComplaintDetails.tsx`
-**Missing Functions:**
-
-- `formatDate()` - ✅ CREATED in `client/lib/dateUtils.ts`
-- `getComplaintTypeLabel()` - ✅ CREATED in `client/lib/complaintUtils.ts`
-- `isResolved()` - ✅ CREATED in `client/lib/complaintUtils.ts`
-
-### 3. Inconsistent API Patterns
-
-**Mixed Patterns Found:**
-
-- **Modern (RTK Query):** Login.tsx, Register.tsx, CitizenDashboard.tsx
-- **Legacy (Redux Thunks):** AdminDashboard.tsx, MaintenanceDashboard.tsx
-- **Recommendation:** Migrate all to RTK Query for consistency
-
-### 4. Import Path Issues
-
-**Component:** `CitizenDashboard.tsx`
-**Issue:** Incorrect import path for `FeedbackDialog`
-**Status:** Verified component exists, path needs correction
-
-### 5. Refresh Token Endpoint Missing
-
-**Frontend Expects:** `POST /auth/refresh`
-**Backend Status:** Not implemented
-**Impact:** Token refresh will fail silently
+1. **Base API Configuration** – `client/store/api/baseApi.ts` is consolidated around `baseQueryWithReauth`, with redundant imports removed and robust fetch handling in place.
+2. **Complaint Attachments** – `server/routes/complaintRoutes.js` exposes a compatibility alias for `/complaints/:id/attachments`, delegating to the same controller as `/uploads/complaint/:complaintId/attachment` defined in `server/routes/uploadRoutes.js`.
+3. **Dashboard Utilities** – Citizen dashboard components import `formatDate`, `getComplaintTypeLabel`, and `isResolved` from the shared `client/lib` helpers instead of duplicating logic.
+4. **Documentation Sync** – `docs/UNINTEGRATED_FUNCTIONS.md` and architecture artifacts now reflect the actual runtime wiring and component usage.
 
 ---
 
-## 📊 AUTHENTICATION FLOW ANALYSIS
+## Outstanding High-Priority Items
 
-### ✅ AppInitializer Implementation - CORRECT
-
-```typescript
-// GOOD: Proper auth initialization
-const {data, isLoading, error} = useGetCurrentUserQuery(undefined, {
-  skip: !hasValidToken,
-});
-
-// GOOD: Waits for auth completion before rendering
-if (!isInitialized || (hasValidToken && isLoadingUser)) {
-  return <LoadingComponent />;
-}
-```
-
-### ✅ RoleBasedRoute Implementation - CORRECT
-
-```typescript
-// GOOD: Shows loader during auth check
-if (isLoading) {
-  return loadingComponent || <AuthLoadingComponent />;
-}
-
-// GOOD: Only redirects after auth is complete
-if (requiresAuth && (!isAuthenticated || !user)) {
-  return <Navigate to={redirectPath} />;
-}
-```
-
-### ✅ Auth State Management - CORRECT
-
-- Proper token storage in localStorage
-- Correct state management with RTK
-- Valid token expiration handling
+| Item                                   | Impact                                                                 | Suggested Next Step |
+| -------------------------------------- | ---------------------------------------------------------------------- | ------------------- |
+| `/api/auth/refresh` implementation     | Without the route the RTK hook cannot renew sessions automatically.    | Add Express handler or remove unused hook. |
+| Legacy Redux slices (`complaints`, `guest`) | Dual data layers increase code drift and onboarding friction.          | Plan phased migration to RTK Query. |
+| Dormant helper components              | `RoleSwitcher.tsx`, `OptimizedComponents.tsx`, `UXComponents.tsx` add noise to audits. | Remove or document intended usage. |
+| TypeScript regression debt             | `npm run typecheck` fails because of unrelated, existing errors.       | Address failing declarations before enabling automated doc linting. |
 
 ---
 
-## 🔗 API INTEGRATION STATUS
+## Endpoint Coverage Matrix
 
-### ✅ WORKING ENDPOINTS (Backend ↔ Frontend)
-
-| Endpoint                 | Method | Frontend     | Backend                                      | Status     |
-| ------------------------ | ------ | ------------ | -------------------------------------------- | ---------- |
-| **Authentication**       |
-| `/auth/login`            | POST   | ✅ RTK Query | ✅ authController.login                      | ✅ WORKING |
-| `/auth/register`         | POST   | ✅ RTK Query | ✅ authController.register                   | ✅ WORKING |
-| `/auth/me`               | GET    | ✅ RTK Query | ✅ authController.getMe                      | ✅ WORKING |
-| `/auth/logout`           | POST   | ✅ RTK Query | ✅ authController.logout                     | ✅ WORKING |
-| **Complaints**           |
-| `/complaints`            | GET    | ✅ RTK Query | ✅ complaintController.getComplaints         | ✅ WORKING |
-| `/complaints`            | POST   | ✅ RTK Query | ✅ complaintController.createComplaint       | ✅ WORKING |
-| `/complaints/:id/assign` | PUT    | ✅ RTK Query | ✅ complaintController.assignComplaint       | ✅ WORKING |
-| `/complaints/:id/status` | PUT    | ✅ RTK Query | ✅ complaintController.updateComplaintStatus | ✅ WORKING |
-| **Guest Features**       |
-| `/guest/complaint`       | POST   | ✅ RTK Query | ✅ guestController.submitGuestComplaint      | ✅ WORKING |
-| `/guest/track/:id`       | GET    | ✅ RTK Query | ✅ guestController.trackComplaint            | ✅ WORKING |
-| `/guest/stats`           | GET    | ✅ RTK Query | ✅ guestController.getPublicStats            | ✅ WORKING |
-
-### ⚠️ ENDPOINT MISMATCHES
-
-| Issue         | Frontend Expects              | Backend Provides                    | Priority |
-| ------------- | ----------------------------- | ----------------------------------- | -------- |
-| File Upload   | `/complaints/:id/attachments` | `/uploads/complaint/:id/attachment` | HIGH     |
-| Token Refresh | `/auth/refresh`               | Not implemented                     | MEDIUM   |
+| Feature Area        | Frontend Entry Points                                               | Backend Routes Confirmed                    | Status |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| Authentication      | `/auth/login`, `/auth/login-otp`, `/auth/verify-otp`, `/auth/register`, `/auth/me` | `server/routes/authRoutes.js`               | ✅     |
+| Token Refresh       | `/auth/refresh` (RTK mutation only)                                 | _Not implemented_                           | ⚠️     |
+| Complaints          | `/complaints`, `/complaints/:id`, `/complaints/:id/(status|assign)` | `server/routes/complaintRoutes.js`          | ✅     |
+| Complaint Attachments | `/complaints/:id/attachments`, `/uploads/complaint/:id/attachment`  | `server/routes/complaintRoutes.js`, `server/routes/uploadRoutes.js` | ✅ |
+| Ward Dashboard      | `/complaints/ward-dashboard-stats`                                   | `server/routes/complaintRoutes.js`          | ✅     |
+| Guest Portal        | `/guest/complaint`, `/guest/track/:id`, `/guest/stats`               | `server/routes/guestRoutes.js`              | ✅     |
 
 ---
 
-## 🧪 TEST SUITE STATUS
+## Component Health
 
-### Unit Tests
-
-- **Status:** ❌ FAILING (Missing dependencies - FIXED)
-- **Coverage:** 0% (Tests not running)
-- **Test Files:** 7 test suites found
-- **Issues:** Missing `@testing-library/dom`, `msw`, `jsdom` dependencies
-- **Action:** ✅ Dependencies installed, ready for execution
-
-### E2E Tests (Cypress)
-
-- **Status:** ⏳ NOT EXECUTED YET
-- **Test Files Found:** 6 E2E test suites
-- **Coverage:** Auth flow, complaint flow, guest flow
-- **Action Required:** Execute full E2E test suite
+| Component                             | Status  | Notes |
+| ------------------------------------- | ------- | ----- |
+| `client/components/ErrorBoundary.tsx` | ✅ Active | Handles render failures with reload affordance. |
+| `client/components/FeedbackDialog.tsx`| ✅ Active | Imported by `CitizenDashboard.tsx`. |
+| `client/components/RoleSwitcher.tsx`  | ⚠️ Idle  | Not imported by any route. |
+| `client/components/OptimizedComponents.tsx` | ⚠️ Idle | Placeholder with no consumers. |
+| `client/components/UXComponents.tsx`  | ⚠️ Idle  | Placeholder with no consumers. |
 
 ---
 
-## 📋 COMPONENT HEALTH REPORT
+## Testing Status
 
-### ✅ HEALTHY COMPONENTS
-
-- **UI Library:** 36+ Radix UI components (Button, Card, Dialog, etc.)
-- **Auth Components:** AppInitializer, RoleBasedRoute, Login, Register
-- **Core Features:** ComplaintsList, CreateComplaint, GuestComplaintForm
-- **Layout:** Navigation, Layout, ErrorBoundary
-
-### ⚠️ COMPONENTS NEEDING ATTENTION
-
-| Component                  | Issue                          | Priority |
-| -------------------------- | ------------------------------ | -------- |
-| `CitizenDashboard.tsx`     | Missing utilities, import path | HIGH     |
-| `AdminDashboard.tsx`       | Legacy Redux pattern           | MEDIUM   |
-| `MaintenanceDashboard.tsx` | Legacy Redux pattern           | MEDIUM   |
-| `PlaceholderPage.tsx`      | Unused component               | LOW      |
-
-### ❌ PROBLEMATIC COMPONENTS
-
-- None found - all components are functional
+- `npm run typecheck` → Fails because of existing TypeScript declaration issues unrelated to this doc sweep.
+- `npm run lint` → To be executed after documentation updates to ensure repo-wide standards remain intact.
+- No automated regression tests were modified; executing them after the outstanding TypeScript fixes is recommended.
 
 ---
 
-## 🔍 DATABASE INTEGRATION
+## Next Steps
 
-### ✅ Prisma Schema Status
-
-- **Models:** Complete (User, Complaint, Ward, Attachment, etc.)
-- **Relations:** Properly defined
-- **Migrations:** Up to date
-- **Seeds:** Available
-
-### ✅ Backend Controller Status
-
-- **Auth Controllers:** ✅ Complete
-- **Complaint Controllers:** ✅ Complete
-- **Guest Controllers:** ✅ Complete
-- **Admin Controllers:** ✅ Complete
-- **Upload Controllers:** ✅ Complete
+1. Prioritize implementation (or removal) of the refresh-token endpoint to align code with generated client hooks.
+2. Draft a migration plan for the remaining `createAsyncThunk` flows into RTK Query to unify data fetching.
+3. Schedule cleanup of dormant helper components to reduce confusion during future audits.
+4. Resolve failing TypeScript declarations so that type-checking can be part of continuous documentation validation.
 
 ---
 
-## 🚀 PERFORMANCE ANALYSIS
+## Changelog
 
-### Build Performance
-
-- **Status:** ✅ SUCCESS
-- **Bundle Size:** 1.42MB (gzipped: 387KB)
-- **Warnings:** Large chunks detected (>500KB)
-- **Recommendation:** Implement code splitting
-
-### Runtime Performance
-
-- **Auth Flow:** ✅ Optimized with proper loading states
-- **API Calls:** ✅ RTK Query provides caching and optimization
-- **Lazy Loading:** ✅ Implemented for dashboard components
-
----
-
-## 📈 INTEGRATION SCORE BY FEATURE
-
-| Feature Area          | Score | Details                              |
-| --------------------- | ----- | ------------------------------------ |
-| **Authentication**    | 95%   | ✅ Nearly perfect after fixes        |
-| **Guest Complaints**  | 98%   | ✅ Excellent integration             |
-| **Citizen Dashboard** | 85%   | ⚠️ Utility functions needed          |
-| **Admin Features**    | 90%   | ✅ Well integrated                   |
-| **Ward Officer**      | 92%   | ✅ Good integration                  |
-| **Maintenance**       | 88%   | ⚠️ API pattern inconsistency         |
-| **File Handling**     | 75%   | ⚠️ Endpoint mismatch                 |
-| **Testing**           | 60%   | ⚠️ Dependencies fixed, tests pending |
-
-**Overall Integration Score: 85%** - Excellent with targeted fixes needed
-
----
-
-## 🛠️ REMEDIATION PLAN
-
-### Immediate Actions (1-2 days)
-
-1. ✅ **COMPLETED:** Fix authentication infinite loop
-2. ✅ **COMPLETED:** Install missing dependencies
-3. ✅ **COMPLETED:** Create missing utility functions
-4. **TODO:** Fix file upload endpoint mismatch
-5. **TODO:** Run and validate test suite
-
-### Short Term (3-5 days)
-
-1. Migrate AdminDashboard to RTK Query
-2. Migrate MaintenanceDashboard to RTK Query
-3. Implement missing refresh token endpoint
-4. Fix remaining import path issues
-5. Execute full E2E test suite
-
-### Long Term (1-2 weeks)
-
-1. Implement code splitting for large bundles
-2. Add comprehensive test coverage
-3. Performance optimization
-4. Documentation updates
-
----
-
-## 📋 QUALITY METRICS
-
-### Code Quality
-
-- **TypeScript Coverage:** 95%
-- **Component Reusability:** High
-- **Error Handling:** Good
-- **State Management:** Excellent (RTK)
-- **API Patterns:** Mixed (needs standardization)
-
-### Security
-
-- **Authentication:** ✅ JWT with proper validation
-- **Authorization:** ✅ Role-based access control
-- **Input Validation:** ✅ Zod validation implemented
-- **XSS Protection:** ✅ React built-in protection
-- **CSRF Protection:** ✅ SameSite cookies
-
-### Maintainability
-
-- **File Organization:** Excellent
-- **Component Structure:** Good
-- **Documentation:** Good
-- **Testing:** Needs improvement
-- **CI/CD:** Not assessed
-
----
-
-## ✅ CONCLUSION
-
-The Smart City CMS system has **excellent architecture** and **solid implementation**. The critical authentication issues have been resolved, and the system is now fully functional.
-
-**Key Strengths:**
-
-- Modern React + TypeScript stack
-- Comprehensive backend API
-- Proper state management with RTK
-- Good component organization
-- Robust authentication system
-
-**Areas for Improvement:**
-
-- Standardize API patterns (migrate from legacy Redux)
-- Complete test suite execution
-- Fix remaining endpoint mismatches
-- Implement performance optimizations
-
-**Recommendation:** The system is **production-ready** after applying the identified fixes. Priority should be given to completing the test suite and standardizing the API patterns for long-term maintainability.
+- 2025-09-24 – Reconciled audit documentation with live code, updated endpoint mappings, and logged remaining action items.
