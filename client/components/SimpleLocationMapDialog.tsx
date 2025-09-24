@@ -11,7 +11,6 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { MapPin, Navigation, Search, AlertCircle } from "lucide-react";
 import { useDetectLocationAreaMutation } from "../store/api/wardApi";
-import { detectLocationArea } from "../utils/geoUtils";
 import { useSystemConfig } from "../contexts/SystemConfigContext";
 import { toast } from "../hooks/use-toast";
 
@@ -276,7 +275,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         console.log('🗺️ [DEBUG] Map initialization completed successfully');
       } catch (error) {
         if (!cancelled) {
-          console.error('����️ [ERROR] Error initializing map:', error);
+          console.error('🗺️ [ERROR] Error initializing map:', error);
           setMapError(`Failed to load map: ${error instanceof Error ? error.message : 'Unknown error'}. Please refresh and try again.`);
         }
       }
