@@ -467,6 +467,7 @@ c  // Get current location
         const complaintData = {
           title: `${COMPLAINT_TYPES.find((t) => t.value === formData.type)?.label} - ${formData.area}`,
           description: formData.description,
+          complaintTypeId: formData.type as any,
           type: formData.type as any,
           priority: formData.priority as any,
           wardId: formData.wardId,
