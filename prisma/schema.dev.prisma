@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -122,16 +122,30 @@ model SubZone {
   wardId      String
   description String?
   isActive    Boolean @default(true)
-  
+
   // Relations
   ward        Ward        @relation(fields: [wardId], references: [id], onDelete: Cascade)
   complaints  Complaint[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([wardId])
   @@map("sub_zones")
+}
+
+model ComplaintType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  priority    Priority  @default(MEDIUM)
+  slaHours    Int       @default(48)
+  isActive    Boolean   @default(true)
+  complaints  Complaint[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("complaint_types")
 }
 
 model Complaint {
@@ -139,7 +153,9 @@ model Complaint {
   complaintId     String?           @unique  // Human-readable complaint ID like KSC0001
   title           String?
   description     String
-  type            String
+  // Legacy string type retained for backward compatibility
+  type            String?
+  complaintTypeId Int?
   status          ComplaintStatus   @default(REGISTERED)
   priority        Priority          @default(MEDIUM)
   slaStatus       SLAStatus         @default(ON_TIME)
@@ -188,6 +204,7 @@ model Complaint {
   assignedTo      User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
   wardOfficer     User?             @relation("WardOfficer", fields: [wardOfficerId], references: [id])
   maintenanceTeam User?             @relation("MaintenanceTeam", fields: [maintenanceTeamId], references: [id])
+  complaintType   ComplaintType?    @relation(fields: [complaintTypeId], references: [id])
   statusLogs      StatusLog[]
   attachments     Attachment[]
   notifications   Notification[]
@@ -204,6 +221,7 @@ model Complaint {
   @@index([assignedToId, status])
   @@index([maintenanceTeamId, status])
   @@index([type, status])
+  @@index([complaintTypeId, status])
   @@index([priority, status])
   @@index([submittedOn])
   @@index([status, createdAt])
