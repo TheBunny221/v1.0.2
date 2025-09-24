@@ -1,4 +1,4 @@
-import { AnalyticsData, FilterOptions } from "../pages/UnifiedReports";
+import type { AnalyticsData, FilterOptions } from "../types/reports";
 import { HeatmapData } from "../components/charts/HeatmapGrid";
 
 interface User {

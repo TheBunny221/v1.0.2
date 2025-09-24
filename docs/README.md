@@ -44,6 +44,14 @@ Complete setup and deployment instructions:
 - **Known issues** and troubleshooting
 - **Performance optimization** guidelines
 
+### 🔍 [Integration & Audit Reports](CODE_AUDIT_REPORT.md)
+
+Keep operational awareness aligned with the repository state:
+
+- **[Code Audit Report](CODE_AUDIT_REPORT.md)** – Integration health snapshot, outstanding technical debt, and next steps.
+- **[Unintegrated Functions Audit](UNINTEGRATED_FUNCTIONS.md)** – Cross-check of frontend features against backend endpoints and component usage.
+- **[Latest Audit Summary](audit-report-latest.md)** – Rolling changelog describing what was fixed, deferred, or requires manual intervention.
+
 ## 🏗️ Project Structure
 
 ```
