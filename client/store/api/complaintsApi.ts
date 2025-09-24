@@ -55,16 +55,26 @@ export interface Complaint {
 }
 
 export interface CreateComplaintRequest {
-  type: string;
+  // New normalized reference; preferred going forward
+  complaintTypeId?: string;
+  // Legacy field retained for backward compatibility
+  type?: string;
   description: string;
   priority?: "low" | "medium" | "high" | "critical";
-  ward: string;
-  area: string;
-  location: string;
-  address: string;
-  mobile: string;
+  ward?: string;
+  wardId?: string;
+  area?: string;
+  location?: string;
+  address?: string;
+  mobile?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  subZoneId?: string;
+  isAnonymous?: boolean;
   email?: string;
   attachments?: File[];
+  slaHours?: number;
 }
 
 export interface UpdateComplaintRequest {
