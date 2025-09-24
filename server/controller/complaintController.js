@@ -337,13 +337,21 @@ export const createComplaint = asyncHandler(async (req, res) => {
   let resolvedTypeId = null;
 
   // Prefer explicit complaintTypeId when provided
-  if (complaintTypeId !== undefined && complaintTypeId !== null && complaintTypeId !== "") {
+  if (
+    complaintTypeId !== undefined &&
+    complaintTypeId !== null &&
+    complaintTypeId !== ""
+  ) {
     const numericId = Number(complaintTypeId);
     const ct = Number.isFinite(numericId)
       ? await prisma.complaintType.findUnique({ where: { id: numericId } })
-      : await prisma.complaintType.findFirst({ where: { name: String(complaintTypeId) } });
+      : await prisma.complaintType.findFirst({
+          where: { name: String(complaintTypeId) },
+        });
     if (!ct) {
-      return res.status(400).json({ success: false, message: "Invalid complaintTypeId" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid complaintTypeId" });
     }
     resolvedTypeId = ct.id;
     resolvedTypeName = ct.name;
@@ -352,7 +360,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
     // Backward compatibility: accept legacy 'type' string
     const typeInput = String(type || "").trim();
     if (!typeInput) {
-      return res.status(400).json({ success: false, message: "Complaint type is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Complaint type is required" });
     }
 
     // Try new table by name or numeric string
@@ -367,20 +377,25 @@ export const createComplaint = asyncHandler(async (req, res) => {
     } else {
       // Legacy system_config lookup
       const byKey = await prisma.systemConfig.findFirst({
-        where: { key: `COMPLAINT_TYPE_${typeInput.toUpperCase()}`, isActive: true },
+        where: {
+          key: `COMPLAINT_TYPE_${typeInput.toUpperCase()}`,
+          isActive: true,
+        },
       });
       if (byKey) {
         try {
-          const v = JSON.parse(byKey.value || '{}');
+          const v = JSON.parse(byKey.value || "{}");
           resolvedTypeName = v.name;
           resolvedSlaHours = Number(v.slaHours);
         } catch {}
       }
       if (!resolvedTypeName) {
-        const allTypes = await prisma.systemConfig.findMany({ where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true } });
+        const allTypes = await prisma.systemConfig.findMany({
+          where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+        });
         for (const cfg of allTypes) {
           try {
-            const v = JSON.parse(cfg.value || '{}');
+            const v = JSON.parse(cfg.value || "{}");
             if (v.name && v.name.toLowerCase() === typeInput.toLowerCase()) {
               resolvedTypeName = v.name;
               resolvedSlaHours = Number(v.slaHours);
@@ -392,8 +407,17 @@ export const createComplaint = asyncHandler(async (req, res) => {
     }
   }
 
-  if (!resolvedTypeName || !Number.isFinite(resolvedSlaHours) || resolvedSlaHours <= 0) {
-    return res.status(400).json({ success: false, message: "Invalid complaint type or missing SLA configuration" });
+  if (
+    !resolvedTypeName ||
+    !Number.isFinite(resolvedSlaHours) ||
+    resolvedSlaHours <= 0
+  ) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Invalid complaint type or missing SLA configuration",
+      });
   }
 
   const deadline = new Date(Date.now() + resolvedSlaHours * 60 * 60 * 1000);

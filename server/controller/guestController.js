@@ -902,7 +902,10 @@ export const getPublicWards = asyncHandler(async (req, res) => {
 // @access  Public
 export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
   try {
-    const rows = await prisma.complaintType.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+    const rows = await prisma.complaintType.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+    });
     const types = rows.map((t) => ({
       id: String(t.id),
       name: t.name,
@@ -912,14 +915,20 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
       isActive: t.isActive,
       updatedAt: t.updatedAt,
     }));
-    return res.status(200).json({ success: true, message: "Complaint types retrieved successfully", data: types });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint types retrieved successfully",
+        data: types,
+      });
   } catch (e) {
     const complaintTypesData = await prisma.systemConfig.findMany({
       where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
       orderBy: { key: "asc" },
     });
     const complaintTypes = complaintTypesData.map((config) => {
-      const data = JSON.parse(config.value || '{}');
+      const data = JSON.parse(config.value || "{}");
       return {
         id: config.key.replace("COMPLAINT_TYPE_", ""),
         name: data.name,
@@ -930,7 +939,13 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
         updatedAt: config.updatedAt,
       };
     });
-    return res.status(200).json({ success: true, message: "Complaint types retrieved successfully (legacy)", data: complaintTypes });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint types retrieved successfully (legacy)",
+        data: complaintTypes,
+      });
   }
 });
 

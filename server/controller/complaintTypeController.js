@@ -37,7 +37,7 @@ export const getComplaintTypes = asyncHandler(async (req, res) => {
     });
 
     const types = complaintTypes.map((config) => {
-      const data = JSON.parse(config.value || '{}');
+      const data = JSON.parse(config.value || "{}");
       return {
         id: config.key.replace("COMPLAINT_TYPE_", ""),
         name: data.name,
@@ -69,7 +69,7 @@ export const getComplaintTypeById = asyncHandler(async (req, res) => {
       ? await prisma.complaintType.findUnique({ where: { id: numericId } })
       : await prisma.complaintType.findFirst({ where: { name: id } });
 
-    if (!ct) throw new Error('Not found');
+    if (!ct) throw new Error("Not found");
 
     return res.status(200).json({
       success: true,
@@ -86,11 +86,15 @@ export const getComplaintTypeById = asyncHandler(async (req, res) => {
     });
   } catch {
     const key = `COMPLAINT_TYPE_${id}`;
-    const complaintType = await prisma.systemConfig.findUnique({ where: { key } });
+    const complaintType = await prisma.systemConfig.findUnique({
+      where: { key },
+    });
     if (!complaintType) {
-      return res.status(404).json({ success: false, message: "Complaint type not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint type not found" });
     }
-    const data = JSON.parse(complaintType.value || '{}');
+    const data = JSON.parse(complaintType.value || "{}");
     return res.status(200).json({
       success: true,
       message: "Complaint type retrieved successfully (legacy)",
@@ -116,18 +120,42 @@ export const createComplaintType = asyncHandler(async (req, res) => {
 
   // Validate required fields
   if (!name || typeof name !== "string" || name.trim().length === 0) {
-    return res.status(400).json({ success: false, message: "Name is required and must be a non-empty string" });
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Name is required and must be a non-empty string",
+      });
   }
-  if (!description || typeof description !== "string" || description.trim().length === 0) {
-    return res.status(400).json({ success: false, message: "Description is required and must be a non-empty string" });
+  if (
+    !description ||
+    typeof description !== "string" ||
+    description.trim().length === 0
+  ) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Description is required and must be a non-empty string",
+      });
   }
 
   const validPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
   if (priority && !validPriorities.includes(priority)) {
-    return res.status(400).json({ success: false, message: `Priority must be one of: ${validPriorities.join(", ")}` });
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: `Priority must be one of: ${validPriorities.join(", ")}`,
+      });
   }
-  if (slaHours !== undefined && (typeof slaHours !== "number" || slaHours <= 0)) {
-    return res.status(400).json({ success: false, message: "SLA hours must be a positive number" });
+  if (
+    slaHours !== undefined &&
+    (typeof slaHours !== "number" || slaHours <= 0)
+  ) {
+    return res
+      .status(400)
+      .json({ success: false, message: "SLA hours must be a positive number" });
   }
 
   try {
@@ -135,7 +163,7 @@ export const createComplaintType = asyncHandler(async (req, res) => {
       data: {
         name: name.trim(),
         description,
-        priority: (priority || "MEDIUM"),
+        priority: priority || "MEDIUM",
         slaHours: slaHours || 48,
         isActive: isActive !== undefined ? !!isActive : true,
       },
@@ -156,13 +184,28 @@ export const createComplaintType = asyncHandler(async (req, res) => {
     });
   } catch (e) {
     // Fallback to legacy
-    const id = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, "_");
+    const id = name
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "_");
     const key = `COMPLAINT_TYPE_${id}`;
-    const existingType = await prisma.systemConfig.findUnique({ where: { key } });
+    const existingType = await prisma.systemConfig.findUnique({
+      where: { key },
+    });
     if (existingType) {
-      return res.status(400).json({ success: false, message: "Complaint type with this name already exists" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Complaint type with this name already exists",
+        });
     }
-    const typeData = { name, description, priority: priority || "MEDIUM", slaHours: slaHours || 48 };
+    const typeData = {
+      name,
+      description,
+      priority: priority || "MEDIUM",
+      slaHours: slaHours || 48,
+    };
     const legacy = await prisma.systemConfig.create({
       data: {
         key,
@@ -197,10 +240,20 @@ export const updateComplaintType = asyncHandler(async (req, res) => {
 
   const validPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
   if (priority && !validPriorities.includes(priority)) {
-    return res.status(400).json({ success: false, message: `Priority must be one of: ${validPriorities.join(", ")}` });
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: `Priority must be one of: ${validPriorities.join(", ")}`,
+      });
   }
-  if (slaHours !== undefined && (typeof slaHours !== "number" || slaHours <= 0)) {
-    return res.status(400).json({ success: false, message: "SLA hours must be a positive number" });
+  if (
+    slaHours !== undefined &&
+    (typeof slaHours !== "number" || slaHours <= 0)
+  ) {
+    return res
+      .status(400)
+      .json({ success: false, message: "SLA hours must be a positive number" });
   }
 
   const numericId = Number(id);
@@ -208,10 +261,12 @@ export const updateComplaintType = asyncHandler(async (req, res) => {
     const existing = Number.isFinite(numericId)
       ? await prisma.complaintType.findUnique({ where: { id: numericId } })
       : await prisma.complaintType.findFirst({ where: { name: id } });
-    if (!existing) throw new Error('Not found');
+    if (!existing) throw new Error("Not found");
 
     const row = await prisma.complaintType.update({
-      where: Number.isFinite(numericId) ? { id: numericId } : { id: existing.id },
+      where: Number.isFinite(numericId)
+        ? { id: numericId }
+        : { id: existing.id },
       data: {
         name: name !== undefined ? name : undefined,
         description: description !== undefined ? description : undefined,
@@ -237,11 +292,15 @@ export const updateComplaintType = asyncHandler(async (req, res) => {
   } catch (e) {
     // Legacy fallback
     const key = `COMPLAINT_TYPE_${id}`;
-    const existingType = await prisma.systemConfig.findUnique({ where: { key } });
+    const existingType = await prisma.systemConfig.findUnique({
+      where: { key },
+    });
     if (!existingType) {
-      return res.status(404).json({ success: false, message: "Complaint type not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint type not found" });
     }
-    const currentData = JSON.parse(existingType.value || '{}');
+    const currentData = JSON.parse(existingType.value || "{}");
     const updatedData = {
       name: name || currentData.name,
       description: description || currentData.description,
@@ -281,28 +340,53 @@ export const deleteComplaintType = asyncHandler(async (req, res) => {
     const ct = Number.isFinite(numericId)
       ? await prisma.complaintType.findUnique({ where: { id: numericId } })
       : await prisma.complaintType.findFirst({ where: { name: id } });
-    if (!ct) throw new Error('Not found');
+    if (!ct) throw new Error("Not found");
 
-    const complaintsUsingType = await prisma.complaint.count({ where: { complaintTypeId: ct.id } });
+    const complaintsUsingType = await prisma.complaint.count({
+      where: { complaintTypeId: ct.id },
+    });
     if (complaintsUsingType > 0) {
-      return res.status(400).json({ success: false, message: `Cannot delete complaint type. It is being used by ${complaintsUsingType} complaint(s)` });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `Cannot delete complaint type. It is being used by ${complaintsUsingType} complaint(s)`,
+        });
     }
 
     await prisma.complaintType.delete({ where: { id: ct.id } });
-    return res.status(200).json({ success: true, message: "Complaint type deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Complaint type deleted successfully" });
   } catch (e) {
     // Legacy fallback
     const key = `COMPLAINT_TYPE_${id}`;
-    const complaintType = await prisma.systemConfig.findUnique({ where: { key } });
+    const complaintType = await prisma.systemConfig.findUnique({
+      where: { key },
+    });
     if (!complaintType) {
-      return res.status(404).json({ success: false, message: "Complaint type not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint type not found" });
     }
-    const complaintsUsingType = await prisma.complaint.count({ where: { type: id } });
+    const complaintsUsingType = await prisma.complaint.count({
+      where: { type: id },
+    });
     if (complaintsUsingType > 0) {
-      return res.status(400).json({ success: false, message: `Cannot delete complaint type. It is being used by ${complaintsUsingType} complaint(s)` });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `Cannot delete complaint type. It is being used by ${complaintsUsingType} complaint(s)`,
+        });
     }
     await prisma.systemConfig.delete({ where: { key } });
-    return res.status(200).json({ success: true, message: "Complaint type deleted successfully (legacy)" });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint type deleted successfully (legacy)",
+      });
   }
 });
 
@@ -320,17 +404,34 @@ export const getComplaintTypeStats = asyncHandler(async (req, res) => {
     const types = await prisma.complaintType.findMany({});
     const nameById = new Map(types.map((t) => [t.id, t.name]));
     const formatted = rows.map((r) => ({
-      type: nameById.get(r.complaintTypeId) || String(r.complaintTypeId || "Unknown"),
+      type:
+        nameById.get(r.complaintTypeId) ||
+        String(r.complaintTypeId || "Unknown"),
       count: r._count.complaintTypeId,
     }));
-    return res.status(200).json({ success: true, message: "Complaint type statistics retrieved successfully", data: formatted });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint type statistics retrieved successfully",
+        data: formatted,
+      });
   } catch (e) {
     const stats = await prisma.complaint.groupBy({
       by: ["type"],
       _count: { type: true },
       orderBy: { _count: { type: "desc" } },
     });
-    const formattedStats = stats.map((stat) => ({ type: stat.type, count: stat._count.type }));
-    return res.status(200).json({ success: true, message: "Complaint type statistics retrieved successfully (legacy)", data: formattedStats });
+    const formattedStats = stats.map((stat) => ({
+      type: stat.type,
+      count: stat._count.type,
+    }));
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint type statistics retrieved successfully (legacy)",
+        data: formattedStats,
+      });
   }
 });
