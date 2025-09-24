@@ -535,13 +535,24 @@ const ComplaintsList: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {error ? (
+          {!isAuthenticated ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600 mb-2">Please sign in to view complaints.</p>
+              <Link to="/login">
+                <Button>Go to Sign In</Button>
+              </Link>
+            </div>
+          ) : error ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto text-red-400 mb-4" />
-              <p className="text-red-500 mb-2">Failed to load complaints</p>
-              <Button variant="outline" onClick={() => refetch()}>
-                Try Again
-              </Button>
+              <p className="text-red-500 mb-2">{getApiErrorMessage(error as any) || "Failed to load complaints"}</p>
+              <div className="flex items-center justify-center gap-2">
+                <Button variant="outline" onClick={() => refetch()}>Try Again</Button>
+                <Link to="/login">
+                  <Button variant="outline">Sign In</Button>
+                </Link>
+              </div>
             </div>
           ) : isLoading ? (
             <div className="space-y-4">
