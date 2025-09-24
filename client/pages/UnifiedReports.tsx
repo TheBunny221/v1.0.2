@@ -47,6 +47,8 @@ import {
 } from "../components/ui/tooltip";
 import HeatmapGrid, { HeatmapData } from "../components/charts/HeatmapGrid";
 import { useComplaintTypes } from "../hooks/useComplaintTypes";
+import { getAnalyticsData, getHeatmapData } from "../utils/reportUtils";
+import type { AnalyticsData, FilterOptions } from "../types/reports";
 // Recharts components will be loaded dynamically to prevent module loading issues
 import {
   CalendarDays,
@@ -72,57 +74,6 @@ import {
   Info,
 } from "lucide-react";
 // date-fns and export utilities will be loaded dynamically
-
-interface AnalyticsData {
-  complaints: {
-    total: number;
-    resolved: number;
-    pending: number;
-    overdue: number;
-  };
-  sla: {
-    compliance: number;
-    avgResolutionTime: number;
-    target: number;
-  };
-  trends: Array<{
-    date: string;
-    complaints: number;
-    resolved: number;
-    slaCompliance: number;
-  }>;
-  wards: Array<{
-    id: string;
-    name: string;
-    complaints: number;
-    resolved: number;
-    avgTime: number;
-    slaScore: number;
-  }>;
-  categories: Array<{
-    name: string;
-    count: number;
-    avgTime: number;
-    color: string;
-  }>;
-  performance: {
-    userSatisfaction: number;
-    escalationRate: number;
-    firstCallResolution: number;
-    repeatComplaints: number;
-  };
-}
-
-interface FilterOptions {
-  dateRange: {
-    from: string;
-    to: string;
-  };
-  ward: string;
-  complaintType: string;
-  status: string;
-  priority: string;
-}
 
 const UnifiedReports: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -167,10 +118,10 @@ const UnifiedReports: React.FC = () => {
     }
   }, [rechartsLoaded, dateFnsLoaded, exportUtilsLoaded]);
 
-  // Load libraries on component mount
+  // Load libraries on component mount - memoized to prevent infinite loops
   useEffect(() => {
     loadDynamicLibraries();
-  }, [loadDynamicLibraries]);
+  }, []); // Empty dependency array since loadDynamicLibraries is memoized with useCallback
 
   // Date filters are initialized to the current month using native Date APIs
   // This avoids race conditions where the first fetch used only today's date
@@ -271,165 +222,29 @@ const UnifiedReports: React.FC = () => {
     }
   }, [permissions.defaultWard]);
 
-  // First load: fetch analytics for the initialized date range only once
-  useEffect(() => {
-    if (!user) return;
-    if (didInitialFetch) return;
-
-    if (filters.dateRange.from && filters.dateRange.to) {
-      setDidInitialFetch(true);
-      fetchAnalyticsData();
-      fetchHeatmapData();
-    }
-  }, [user, didInitialFetch, filters.dateRange.from, filters.dateRange.to]);
-
-  // Update heatmap dynamically on filter changes
-  useEffect(() => {
-    if (!user) return;
-    if (!didInitialFetch) return;
-    fetchHeatmapData();
-  }, [filters, user, didInitialFetch]);
-
-  // Memoized analytics fetching with debouncing
   const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
-      const queryParams = new URLSearchParams({
-        from: filters.dateRange.from,
-        to: filters.dateRange.to,
-        ...(filters.ward !== "all" && { ward: filters.ward }),
-        ...(filters.complaintType !== "all" && { type: filters.complaintType }),
-        ...(filters.status !== "all" && { status: filters.status }),
-        ...(filters.priority !== "all" && { priority: filters.priority }),
-      });
-
-      // Enforce ward scope for Ward Officers
-      if (user?.role === "WARD_OFFICER" && user?.wardId) {
-        queryParams.set("ward", user.wardId);
-      }
-
-      console.log("Fetching analytics with params:", {
-        filters,
-        queryString: queryParams.toString(),
-        url: `/api/reports/analytics?${queryParams}`,
-      });
-
-      // Use different endpoints based on user role
-      let endpoint = "/api/reports/analytics";
-      if (user?.role === "MAINTENANCE_TEAM") {
-        endpoint = "/api/maintenance/analytics";
-      }
-
-      // Use absolute URL to match the deployed environment
-      const baseUrl = window.location.origin;
-      const response = await fetch(`${baseUrl}${endpoint}?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch analytics data: ${response.statusText}`,
-        );
-      }
-
-      const data = await response.json();
-      console.log("Received analytics data:", data);
-
-      // Transform the API response to match the expected format
-      const transformedData = {
-        complaints: {
-          total: data.data?.complaints?.total || 0,
-          resolved: data.data?.complaints?.resolved || 0,
-          pending: data.data?.complaints?.pending || 0,
-          overdue: data.data?.complaints?.overdue || 0,
-        },
-        sla: {
-          compliance: data.data?.sla?.compliance || 0,
-          avgResolutionTime: data.data?.sla?.avgResolutionTime || 0,
-          target: data.data?.sla?.target || 3,
-        },
-        trends: data.data?.trends || [],
-        wards: data.data?.wards || [],
-        categories: data.data?.categories || [],
-        performance: {
-          userSatisfaction: data.data?.performance?.userSatisfaction || 0,
-          escalationRate: data.data?.performance?.escalationRate || 0,
-          firstCallResolution: data.data?.performance?.firstCallResolution || 0,
-          repeatComplaints: data.data?.performance?.repeatComplaints || 0,
-        },
-      };
-
-      setAnalyticsData(transformedData);
+      const data = await getAnalyticsData(filters, user);
+      setAnalyticsData(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load analytics data",
-      );
+      const errorMessage = err instanceof Error ? err.message : "Failed to load analytics data";
+      setError(errorMessage);
       console.error("Analytics fetch error:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [filters, user?.role]);
+  }, [filters, user]);
 
-  // Disabled auto-fetch on filter changes; use Generate Report button instead
-
-  // Do not auto clear analytics when filters change; wait for Generate Report
-
-  // Complaint types for readable labels
-  const {
-    complaintTypes,
-    isLoading: complaintTypesLoading,
-    getComplaintTypeById,
-    getComplaintTypeByName,
-  } = useComplaintTypes();
-
-  // Heatmap fetcher
-  async function fetchHeatmapData() {
+  const fetchHeatmapData = useCallback(async () => {
     setHeatmapLoading(true);
     try {
-      const queryParams = new URLSearchParams({
-        from: filters.dateRange.from,
-        to: filters.dateRange.to,
-        ...(filters.complaintType !== "all" && { type: filters.complaintType }),
-        ...(filters.status !== "all" && { status: filters.status }),
-        ...(filters.priority !== "all" && { priority: filters.priority }),
-      } as Record<string, string>);
-      // Enforce ward scope for Ward Officers; allow Admins to scope to a ward
-      if (user?.role === "WARD_OFFICER" && user?.wardId) {
-        queryParams.set("ward", user.wardId);
-      } else if (
-        user?.role === "ADMINISTRATOR" &&
-        filters.ward &&
-        filters.ward !== "all"
-      ) {
-        queryParams.set("ward", filters.ward);
-      }
-      const baseUrl = window.location.origin;
-      const resp = await fetch(
-        `${baseUrl}/api/reports/heatmap?${queryParams}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      if (!resp.ok)
-        throw new Error(`Failed to fetch heatmap: ${resp.statusText}`);
-      const json = await resp.json();
-
-      // Use server-provided labels directly (server returns display names)
-      const apiData = json.data as HeatmapData & {
-        xTypeKeys?: string[];
-        meta?: any;
-      };
-      setHeatmapData(apiData as HeatmapData);
-    } catch (e) {
-      console.warn("Heatmap fetch failed", e);
+      const data = await getHeatmapData(filters, user);
+      setHeatmapData(data);
+    } catch (err) {
+      console.warn("Heatmap fetch failed", err);
+      // Set to empty state on failure
       setHeatmapData({
         xLabels: [],
         yLabels: [],
@@ -440,7 +255,36 @@ const UnifiedReports: React.FC = () => {
     } finally {
       setHeatmapLoading(false);
     }
-  }
+  }, [filters, user]);
+
+  // First load: fetch analytics for the initialized date range only once
+  useEffect(() => {
+    if (!user || didInitialFetch) return;
+    
+    console.log("Initial fetch triggered");
+    setDidInitialFetch(true);
+    fetchAnalyticsData();
+    fetchHeatmapData();
+  }, [user, didInitialFetch, fetchAnalyticsData, fetchHeatmapData]);
+
+  // Update heatmap dynamically on filter changes with debouncing
+  useEffect(() => {
+    if (!user || !didInitialFetch) return;
+    
+    const timer = setTimeout(() => {
+      fetchHeatmapData();
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [filters, user, didInitialFetch, fetchHeatmapData]);
+
+  // Complaint types for readable labels
+  const {
+    complaintTypes,
+    isLoading: complaintTypesLoading,
+    getComplaintTypeById,
+    getComplaintTypeByName,
+  } = useComplaintTypes();
 
   // Export functionality with enhanced features
   const handleExport = async (format: "pdf" | "excel" | "csv") => {
@@ -1690,8 +1534,8 @@ const UnifiedReports: React.FC = () => {
 
           {/* Performance Tab */}
           <TabsContent value="performance" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+              {/* <Card>
                 <CardHeader>
                   <CardTitle>Performance Metrics</CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -1730,7 +1574,7 @@ const UnifiedReports: React.FC = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <Card>
                 <CardHeader>

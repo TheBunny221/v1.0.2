@@ -13,6 +13,9 @@ import fs from "fs";
 // Import database connection
 import connectDB from "./db/connection.js";
 
+// Import logger
+import logger from "./utils/logger.js";
+
 // Import routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -30,10 +33,23 @@ import testRoutes from "./routes/testRoutes.js";
 import guestOtpRoutes from "./routes/guestOtpRoutes.js";
 import materialsRoutes from "./routes/materialsRoutes.js";
 import complaintPhotosRoutes from "./routes/complaintPhotosRoutes.js";
+import logRoutes from "./routes/logRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestLogger } from "./middleware/requestLogger.js";
+
+// Enhanced request logging middleware using our logger
+const enhancedRequestLogger = (req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.request(req, res, duration);
+  });
+  
+  next();
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -236,6 +252,7 @@ export function createApp() {
 
   // Request logging
   app.use(requestLogger);
+  app.use(enhancedRequestLogger);
 
   // Swagger UI
   app.use(
@@ -248,7 +265,21 @@ export function createApp() {
     }),
   );
 
-  // API Routes
+  // Debug middleware for guest OTP routes
+  app.use("/api/guest-otp", (req, res, next) => {
+    console.log("🔍 Guest OTP request:", {
+      path: req.path,
+      method: req.method,
+      headers: req.headers,
+    });
+    next();
+  });
+
+  // Public routes first (no auth required)
+  app.use("/api/guest-otp", guestOtpRoutes);
+  app.use("/api/captcha", captchaRoutes);
+  
+  // Other API routes
   app.use("/api/auth", authRoutes);
   app.use("/api/users", userRoutes);
   app.use("/api/complaints", complaintRoutes);
@@ -260,10 +291,9 @@ export function createApp() {
   app.use("/api/uploads", uploadRoutes);
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
-  app.use("/api/captcha", captchaRoutes);
+  app.use("/api/logs", logRoutes);
   app.use("/api", materialsRoutes);
   app.use("/api", complaintPhotosRoutes);
-  app.use("/api/guest-otp", guestOtpRoutes);
 
   // Serve uploaded files
   const uploadsPath = path.join(__dirname, "../uploads");

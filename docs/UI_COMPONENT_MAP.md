@@ -254,16 +254,16 @@ This document provides a comprehensive mapping between frontend components and t
 - Side navigation for admin
 - Breadcrumb navigation
 
-### ⚠️ **ErrorBoundary.tsx**
+### ✅ **ErrorBoundary.tsx**
 
-**API Dependencies:** None
-**Purpose:** Global error handling
-**Features:**
+**API Dependencies:** None  
+**Purpose:** Global error boundary responsible for surfacing fatal UI errors without crashing the SPA.
 
-- Catch JavaScript errors
-- Display user-friendly error messages
-- Error reporting capability
-- Graceful degradation
+**Key Behaviors:**
+
+- Captures render-time exceptions via `componentDidCatch` and logs diagnostics to the console.
+- Presents a fallback screen with error details and a "Reload Page" affordance so users can recover quickly.
+- Stores the last error and stack trace in component state for optional telemetry plumbing.
 
 ---
 

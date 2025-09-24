@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
 import { getApiErrorMessage } from "../store/api/baseApi";
 
@@ -16,16 +16,33 @@ interface SystemConfigContextType {
   getConfig: (key: string, defaultValue?: string) => string;
 }
 
-const SystemConfigContext = createContext<SystemConfigContextType | undefined>(
-  undefined,
-);
+// Default configuration values to prevent null reference errors
+const DEFAULT_CONFIG: SystemConfigContextType = {
+  config: {
+    APP_NAME: "Kochi Smart City",
+    APP_LOGO_URL: "/logo.png",
+    APP_LOGO_SIZE: "medium",
+    COMPLAINT_ID_PREFIX: "KSC",
+    COMPLAINT_ID_START_NUMBER: "1",
+    COMPLAINT_ID_LENGTH: "4",
+  },
+  appName: "Kochi Smart City",
+  appLogoUrl: "/logo.png",
+  appLogoSize: "medium",
+  isLoading: false,
+  refreshConfig: async () => {},
+  getConfig: (key: string, defaultValue: string = "") => defaultValue,
+};
+
+const SystemConfigContext = createContext<SystemConfigContextType>(DEFAULT_CONFIG);
 
 export const useSystemConfig = () => {
   const context = useContext(SystemConfigContext);
-  if (context === undefined) {
-    throw new Error(
-      "useSystemConfig must be used within a SystemConfigProvider",
+  if (!context) {
+    console.warn(
+      "useSystemConfig called outside of SystemConfigProvider, using default values"
     );
+    return DEFAULT_CONFIG;
   }
   return context;
 };
@@ -37,7 +54,7 @@ interface SystemConfigProviderProps {
 export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   children,
 }) => {
-  const [config, setConfig] = useState<SystemConfig>({});
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG.config);
 
   // Use RTK Query hook for better error handling and caching
   const {
@@ -45,7 +62,12 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     isLoading,
     error,
     refetch,
-  } = useGetPublicSystemConfigQuery();
+  } = useGetPublicSystemConfigQuery(undefined, {
+    // Additional caching options to prevent continuous fetching
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+  });
 
   // Process the RTK Query data when it changes
   useEffect(() => {
@@ -55,7 +77,10 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         configMap[setting.key] = setting.value;
       });
       setConfig(configMap);
-      console.log("System config loaded successfully via RTK Query");
+      console.log("System config loaded successfully via RTK Query", {
+        timestamp: new Date().toISOString(),
+        configCount: configResponse.data.length,
+      });
     } else if (error) {
       const errorMessage = getApiErrorMessage(error);
       console.error(
@@ -63,38 +88,53 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         errorMessage,
       );
       console.error("Full error details:", {
-        status: error?.status,
-        data: error?.data,
-        message: error?.message,
-        error: error?.error,
+        status: 'status' in error ? error.status : 'unknown',
+        data: 'data' in error ? error.data : 'unknown',
+        message: 'message' in error ? error.message : 'unknown',
+        error: error,
       });
       // Fallback to default values
-      setConfig({
-        APP_NAME: "Kochi Smart City",
-        APP_LOGO_URL: "/logo.png",
-        APP_LOGO_SIZE: "medium",
-        COMPLAINT_ID_PREFIX: "KSC",
-        COMPLAINT_ID_START_NUMBER: "1",
-        COMPLAINT_ID_LENGTH: "4",
-      });
+      setConfig(DEFAULT_CONFIG.config);
     }
   }, [configResponse, error]);
 
-  const refreshConfig = async () => {
+  // Keep refreshConfig stable - refetch is already stable from RTK Query
+  const refreshConfig = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
 
-  const getConfig = (key: string, defaultValue: string = "") => {
-    return config[key] || defaultValue;
-  };
+  // Use ref to access config without causing getConfig to change
+  const configRef = useRef(config);
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
+
+  // Stable getConfig that uses ref internally
+  const getConfig = useCallback((key: string, defaultValue: string = "") => {
+    return configRef.current[key] || defaultValue;
+  }, []);
 
   // RTK Query handles data fetching automatically, no manual useEffect needed
 
-  const appName = getConfig("APP_NAME", "Kochi Smart City");
-  const appLogoUrl = getConfig("APP_LOGO_URL", "/logo.png");
-  const appLogoSize = getConfig("APP_LOGO_SIZE", "medium");
+  // Memoize derived values to prevent unnecessary recalculations
+  // Depend on config directly since getConfig is now stable
+  const appName = useMemo(() => 
+    config["APP_NAME"] || "Kochi Smart City", 
+    [config]
+  );
+  
+  const appLogoUrl = useMemo(() => 
+    config["APP_LOGO_URL"] || "/logo.png", 
+    [config]
+  );
+  
+  const appLogoSize = useMemo(() => 
+    config["APP_LOGO_SIZE"] || "medium", 
+    [config]
+  );
 
-  const value: SystemConfigContextType = {
+  // Memoize the entire context value to prevent unnecessary re-renders
+  const value: SystemConfigContextType = useMemo(() => ({
     config,
     appName,
     appLogoUrl,
@@ -102,7 +142,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     isLoading,
     refreshConfig,
     getConfig,
-  };
+  }), [config, appName, appLogoUrl, appLogoSize, isLoading, refreshConfig, getConfig]);
 
   return (
     <SystemConfigContext.Provider value={value}>

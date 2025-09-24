@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendEmail } from "../utils/emailService.js";
+import logger from "../utils/logger.js";
 
 const prisma = getPrisma();
 
@@ -30,6 +31,23 @@ const hashPassword = async (password) => {
 // Helper function to compare password
 const comparePassword = async (enteredPassword, hashedPassword) => {
   return await bcrypt.compare(enteredPassword, hashedPassword);
+};
+
+// Helper function to check if password is a valid hashed string
+const isValidPassword = (password) => {
+  if (!password || typeof password !== 'string') {
+    return false;
+  }
+  
+  // Check if password is a JSON object (from password reset flow)
+  try {
+    JSON.parse(password);
+    // If it parses as JSON, it's not a valid password
+    return false;
+  } catch {
+    // If it doesn't parse as JSON, it's likely a valid hashed password
+    return true;
+  }
 };
 
 // @desc    Register user
@@ -231,29 +249,36 @@ export const login = asyncHandler(async (req, res) => {
         updateSuccess = true;
       } catch (updateError) {
         retryCount++;
-        console.warn(
-          `Login update attempt ${retryCount} failed:`,
-          updateError.message,
-        );
+        logger.warn(`Login update attempt ${retryCount} failed`, {
+          module: 'auth',
+          error: updateError.message,
+          retryCount,
+          userId: user.id,
+        });
 
         if (
           updateError.message.includes("readonly") ||
           updateError.message.includes("READONLY")
         ) {
           // For readonly database, continue with login but log the issue
-          console.error(
-            "��� Database is readonly - cannot update last login timestamp",
-          );
-          console.error(
-            "🔧 This indicates a database permission issue that needs immediate attention",
-          );
+          logger.error("Database is readonly - cannot update last login timestamp", {
+            module: 'auth',
+            userId: user.id,
+            error: 'DATABASE_READONLY',
+          });
+          logger.error("Database permission issue needs immediate attention", {
+            module: 'auth',
+            severity: 'critical',
+          });
           break; // Don't retry for readonly errors
         }
 
         if (retryCount >= maxRetries) {
-          console.error(
-            `❌ Failed to update last login after ${maxRetries} attempts`,
-          );
+          logger.error(`Failed to update last login after ${maxRetries} attempts`, {
+            module: 'auth',
+            userId: user.id,
+            maxRetries,
+          });
           // Continue with login even if update fails
         } else {
           // Wait before retry
@@ -265,8 +290,9 @@ export const login = asyncHandler(async (req, res) => {
     // Generate JWT token
     const token = generateJWTToken(user);
 
-    // Remove password from response
+    // Remove password from response and add hasPassword flag
     const { password: _, ...userResponse } = user;
+    userResponse.hasPassword = isValidPassword(user.password);
 
     res.status(200).json({
       success: true,
@@ -280,7 +306,11 @@ export const login = asyncHandler(async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ Login error:", error);
+    logger.error("Login error occurred", {
+      module: 'auth',
+      error: error.message,
+      stack: error.stack,
+    });
 
     // Handle specific database errors
     if (
@@ -454,8 +484,9 @@ export const verifyOTPLogin = asyncHandler(async (req, res) => {
   // Generate JWT token
   const token = generateJWTToken(otpSession.user);
 
-  // Remove password from response
+  // Remove password from response and add hasPassword flag
   const { password: _, ...userResponse } = otpSession.user;
+  userResponse.hasPassword = isValidPassword(otpSession.user.password);
 
   res.status(200).json({
     success: true,
@@ -586,11 +617,22 @@ export const setPassword = asyncHandler(async (req, res) => {
   // Generate JWT token
   const jwtToken = generateJWTToken(user);
 
+  // Get updated user with hasPassword flag
+  const updatedUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      ward: true,
+    },
+  });
+
+  const { password: _, ...userResponse } = updatedUser;
+  userResponse.hasPassword = isValidPassword(updatedUser.password);
+
   res.status(200).json({
     success: true,
     message: "Password set successfully",
     data: {
-      user: { ...user, password: undefined },
+      user: userResponse,
       token: jwtToken,
     },
   });
@@ -627,11 +669,8 @@ export const getMe = asyncHandler(async (req, res) => {
   });
 
   // Add hasPassword field and remove password from response
-  const userResponse = {
-    ...user,
-    hasPassword: !!user.password,
-  };
-  delete userResponse.password;
+  const { password: _, ...userResponse } = user;
+  userResponse.hasPassword = isValidPassword(user.password);
 
   res.status(200).json({
     success: true,
@@ -670,6 +709,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       isActive: true,
       lastLogin: true,
       joinedOn: true,
+      password: true,
       ward: {
         select: {
           id: true,
@@ -680,10 +720,14 @@ export const updateProfile = asyncHandler(async (req, res) => {
     },
   });
 
+  // Add hasPassword flag and remove password from response
+  const { password: _, ...userResponse } = user;
+  userResponse.hasPassword = isValidPassword(user.password);
+
   res.status(200).json({
     success: true,
     message: "Profile updated successfully",
-    data: { user },
+    data: { user: userResponse },
   });
 });
 
@@ -853,8 +897,9 @@ export const verifyRegistrationOTP = asyncHandler(async (req, res) => {
   // Generate JWT token
   const token = generateJWTToken(user);
 
-  // Remove password from response
+  // Remove password from response and add hasPassword flag
   const { password: _, ...userResponse } = user;
+  userResponse.hasPassword = isValidPassword(user.password);
 
   res.status(200).json({
     success: true,

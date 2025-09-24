@@ -23,12 +23,13 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { updateProfile } from "../store/slices/authSlice";
+import { updateProfile, setCredentials } from "../store/slices/authSlice";
 import { addNotification } from "../store/slices/uiSlice";
 import {
   useSendPasswordSetupEmailMutation,
   useSetPasswordMutation,
   useChangePasswordMutation,
+  useGetCurrentUserQuery,
 } from "../store/api/authApi";
 import { getApiErrorMessage } from "../store/api/baseApi";
 import {
@@ -47,13 +48,14 @@ import {
 
 const Profile: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { user, isLoading } = useAppSelector((state) => state.auth);
+  const { user, isLoading, token } = useAppSelector((state) => state.auth);
   const { translations } = useAppSelector((state) => state.language);
 
   // API mutations
   const [sendPasswordSetupEmail] = useSendPasswordSetupEmailMutation();
   const [setPassword] = useSetPasswordMutation();
   const [changePassword] = useChangePasswordMutation();
+  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined);
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
@@ -92,6 +94,22 @@ const Profile: React.FC = () => {
 
   const handleSendPasswordSetupEmail = async () => {
     try {
+      // Always re-check with backend to avoid stale state
+      const me = await refetchCurrentUser().unwrap();
+      const backendHasPassword = !!me?.data?.user?.hasPassword;
+      if (backendHasPassword) {
+        dispatch(
+          addNotification({
+            type: "warning",
+            title: "Password Already Set",
+            message:
+              "You have already set a password. Please use the Change Password option instead.",
+          }),
+        );
+        setActiveTab("security");
+        return;
+      }
+
       const response = await sendPasswordSetupEmail({
         email: user?.email || "",
       }).unwrap();
@@ -105,7 +123,7 @@ const Profile: React.FC = () => {
       );
 
       // In development, show the token for testing
-      if (process.env.NODE_ENV === "development" && response.data?.resetUrl) {
+      if (process.env.NODE_ENV === "development" && response?.data?.resetUrl) {
         const token = response.data.resetUrl.split("/").pop();
         if (token) {
           setSetupToken(token);
@@ -233,6 +251,38 @@ const Profile: React.FC = () => {
               "Password changed successfully",
         }),
       );
+
+      // Immediately refresh profile to update hasPassword flag and store
+      try {
+        const me = await refetchCurrentUser().unwrap();
+        const refreshedUser = me?.data?.user;
+        if (refreshedUser) {
+          dispatch(
+            setCredentials({
+              token: token || localStorage.getItem("token") || "",
+              user: refreshedUser,
+            }),
+          );
+        } else if (user && !user.hasPassword) {
+          // Fallback: optimistically set hasPassword=true if API didn't return user
+          dispatch(
+            setCredentials({
+              token: token || localStorage.getItem("token") || "",
+              user: { ...user, hasPassword: true },
+            }),
+          );
+        }
+      } catch (e) {
+        // As a fallback, optimistically update local state
+        if (user && !user.hasPassword) {
+          dispatch(
+            setCredentials({
+              token: token || localStorage.getItem("token") || "",
+              user: { ...user, hasPassword: true },
+            }),
+          );
+        }
+      }
 
       // Reset form and email state
       setPasswordData({
