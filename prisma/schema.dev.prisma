@@ -6,56 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// Enums for PostgreSQL production deployment
-enum UserRole {
-  CITIZEN
-  WARD_OFFICER
-  MAINTENANCE_TEAM
-  ADMINISTRATOR
-  GUEST
-}
 
-enum ComplaintStatus {
-  REGISTERED
-  ASSIGNED
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-  REOPENED
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum SLAStatus {
-  ON_TIME
-  WARNING
-  OVERDUE
-  COMPLETED
-}
-
-enum ServiceRequestStatus {
-  SUBMITTED
-  VERIFIED
-  PROCESSING
-  APPROVED
-  REJECTED
-  COMPLETED
-}
-
-enum NotificationType {
-  EMAIL
-  SMS
-  IN_APP
-}
 
 // Models
 model User {
@@ -64,7 +19,7 @@ model User {
   fullName    String
   phoneNumber String?
   password    String?
-  role        UserRole @default(CITIZEN)
+  role        String   @default("CITIZEN")
   wardId      String?
   department  String?
   language    String   @default("en")
@@ -138,7 +93,7 @@ model ComplaintType {
   id          Int       @id @default(autoincrement())
   name        String    @unique
   description String?
-  priority    Priority  @default(MEDIUM)
+  priority    String    @default("MEDIUM")
   slaHours    Int       @default(48)
   isActive    Boolean   @default(true)
   complaints  Complaint[]
@@ -156,9 +111,9 @@ model Complaint {
   // Legacy string type retained for backward compatibility
   type            String?
   complaintTypeId Int?
-  status          ComplaintStatus   @default(REGISTERED)
-  priority        Priority          @default(MEDIUM)
-  slaStatus       SLAStatus         @default(ON_TIME)
+  status          String           @default("REGISTERED")
+  priority        String           @default("MEDIUM")
+  slaStatus       String           @default("ON_TIME")
   
   // Location Information
   wardId          String
@@ -269,7 +224,7 @@ model Notification {
   userId      String
   complaintId String?
   serviceRequestId String?
-  type        NotificationType
+  type        String
   title       String
   message     String
   isRead      Boolean  @default(false)
@@ -359,8 +314,8 @@ model ServiceRequest {
   title           String?
   serviceType     String    // Service type identifier
   description     String
-  status          ServiceRequestStatus @default(SUBMITTED)
-  priority        Priority  @default(MEDIUM)
+  status          String @default("SUBMITTED")
+  priority        String  @default("MEDIUM")
 
   // Location Information
   wardId          String
