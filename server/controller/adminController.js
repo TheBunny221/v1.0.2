@@ -700,13 +700,17 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
       complaintTrends: processedTrends,
       complaintsByType:
         complaintsByType.length > 0
-          ? complaintsByType.map((item) => ({
-              name: item.type
+          ? complaintsByType.map((item) => {
+              const rawType = item?.type || "UNKNOWN";
+              const safeName = String(rawType)
                 .replace(/_/g, " ")
-                .replace(/\b\w/g, (l) => l.toUpperCase()),
-              value: item._count,
-              color: getTypeColor(item.type),
-            }))
+                .replace(/\b\w/g, (l) => l.toUpperCase());
+              return {
+                name: safeName,
+                value: item?._count || 0,
+                color: getTypeColor(String(rawType).toUpperCase()),
+              };
+            })
           : generateEmptyComplaintTypes(),
       wardPerformance:
         wardPerformance.length > 0
@@ -826,7 +830,7 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
     activities.push({
       id: `complaint-${complaint.id}`,
       type: "complaint",
-      message: `New ${complaint.type.toLowerCase().replace("_", " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
+      message: `New ${String(complaint.type || "UNKNOWN").toLowerCase().replace(/_/g, " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
       time: formatTimeAgo(complaint.createdAt),
       user: complaint.submittedBy
         ? {
@@ -1049,7 +1053,7 @@ function getActivityType(status) {
 }
 
 function getStatusMessage(status, complaint, user) {
-  const type = complaint.type.toLowerCase().replace("_", " ");
+  const type = String(complaint?.type || "UNKNOWN").toLowerCase().replace(/_/g, " ");
   const ward = complaint.ward?.name || "Unknown Ward";
 
   switch (status) {
