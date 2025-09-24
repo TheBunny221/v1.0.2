@@ -276,7 +276,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         console.log('🗺️ [DEBUG] Map initialization completed successfully');
       } catch (error) {
         if (!cancelled) {
-          console.error('🗺️ [ERROR] Error initializing map:', error);
+          console.error('����️ [ERROR] Error initializing map:', error);
           setMapError(`Failed to load map: ${error instanceof Error ? error.message : 'Unknown error'}. Please refresh and try again.`);
         }
       }
@@ -306,6 +306,143 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       setMapInitialized(false);
     };
   }, [isOpen, mapReloadKey]);
+
+  // Detect administrative area based on coordinates - memoized to prevent infinite loops
+  const detectAdministrativeArea = useCallback(async (coords: {
+    lat: number;
+    lng: number;
+  }) => {
+    try {
+      console.log('🏛️ [DEBUG] Detecting administrative area for:', coords);
+      setIsDetectingArea(true);
+      const seq = detectionSeqRef.current;
+
+      // Validate coordinates
+      if (isNaN(coords.lat) || isNaN(coords.lng)) {
+        console.error('🏛️ [ERROR] Invalid coordinates for area detection');
+        return;
+      }
+
+      // Try API-based detection first
+      try {
+        const result = await detectAreaMutation({
+          latitude: coords.lat,
+          longitude: coords.lng,
+        }).unwrap();
+
+        console.log('🏛️ [DEBUG] Area detection API result:', result);
+
+        if (result.success && result.data) {
+          const { exact, nearest } = result.data;
+
+          // Use exact match if available, otherwise use nearest
+          const ward = exact?.ward || nearest?.ward;
+          const subZone = exact?.subZone || nearest?.subZone;
+
+          if (ward) {
+            console.log('🏛️ [DEBUG] Ward detected:', ward.name);
+            // Only update if this is the latest detection
+            if (seq === detectionSeqRef.current) {
+              setDetectedWard(ward.name);
+              setArea(ward.name);
+              setAreaSource('api');
+            }
+          }
+
+          if (subZone) {
+            console.log('🏛️ [DEBUG] Sub-zone detected:', subZone.name);
+            if (seq === detectionSeqRef.current) {
+              setDetectedSubZone(subZone.name);
+              // Prefer sub-zone as area if available
+              setArea(subZone.name);
+              setAreaSource('api');
+            }
+          }
+
+          if (!ward && !subZone) {
+            console.log('🏛️ [DEBUG] No administrative area found in API response');
+          }
+        } else {
+          console.log('🏛️ [DEBUG] API returned unsuccessful result or no data');
+        }
+      } catch (apiError) {
+        console.log('🏛️ [WARN] API area detection failed, this is normal:', apiError);
+      }
+    } catch (error) {
+      console.error('🏛️ [ERROR] Error in area detection:', error);
+    } finally {
+      setIsDetectingArea(false);
+    }
+  }, [detectAreaMutation]); // Memoize with detectAreaMutation dependency
+
+  // Reverse geocoding to get address from coordinates - memoized to prevent infinite loops
+  const reverseGeocode = useCallback(async (coords: { lat: number; lng: number }) => {
+    try {
+      console.log('🌍 [DEBUG] Reverse geocoding for:', coords);
+      const seq = detectionSeqRef.current;
+
+      // Validate coordinates
+      if (isNaN(coords.lat) || isNaN(coords.lng)) {
+        console.error('🌍 [ERROR] Invalid coordinates for reverse geocoding');
+        return;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+      const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&addressdetails=1&zoom=18`;
+      console.log('🌍 [DEBUG] Geocoding URL:', geocodeUrl);
+
+      const response = await fetch(geocodeUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Fix_Smart_CMS/1.0'
+        }
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Geocoding failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('🌍 [DEBUG] Geocoding result:', data);
+
+      if (data && data.display_name) {
+        setAddress(data.display_name);
+        console.log('🌍 [DEBUG] Address set:', data.display_name);
+
+        // Only use geocoding area if we don't have detected area
+        // Only set area from geocode if API hasn't already set it for this sequence
+        if (seq === detectionSeqRef.current && areaSource !== 'api') {
+          const addressComponents = data.address;
+          if (addressComponents) {
+            const detectedArea =
+              addressComponents.neighbourhood ||
+              addressComponents.suburb ||
+              addressComponents.city_district ||
+              addressComponents.state_district ||
+              addressComponents.city ||
+              "";
+            if (detectedArea) {
+              setArea(detectedArea);
+              setAreaSource('geocode');
+              console.log('🌍 [DEBUG] Area set from geocoding:', detectedArea);
+            }
+          }
+        }
+      } else {
+        console.log('🌍 [WARN] No address found in geocoding response');
+      }
+    } catch (error) {
+      console.error('🌍 [ERROR] Error in reverse geocoding:', error);
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('🌍 [WARN] Reverse geocoding timed out');
+      }
+    }
+  }, [areaSource]);
 
   // On open, populate address/area for initial position (from system-config default or provided initialLocation)
   useEffect(() => {
@@ -435,142 +572,6 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     }
   }, []);
 
-  // Detect administrative area based on coordinates - memoized to prevent infinite loops
-  const detectAdministrativeArea = useCallback(async (coords: {
-    lat: number;
-    lng: number;
-  }) => {
-    try {
-      console.log('🏛️ [DEBUG] Detecting administrative area for:', coords);
-      setIsDetectingArea(true);
-      const seq = detectionSeqRef.current;
-
-      // Validate coordinates
-      if (isNaN(coords.lat) || isNaN(coords.lng)) {
-        console.error('🏛️ [ERROR] Invalid coordinates for area detection');
-        return;
-      }
-
-      // Try API-based detection first
-      try {
-        const result = await detectAreaMutation({
-          latitude: coords.lat,
-          longitude: coords.lng,
-        }).unwrap();
-
-        console.log('🏛️ [DEBUG] Area detection API result:', result);
-
-        if (result.success && result.data) {
-          const { exact, nearest } = result.data;
-
-          // Use exact match if available, otherwise use nearest
-          const ward = exact?.ward || nearest?.ward;
-          const subZone = exact?.subZone || nearest?.subZone;
-
-          if (ward) {
-            console.log('🏛️ [DEBUG] Ward detected:', ward.name);
-            // Only update if this is the latest detection
-            if (seq === detectionSeqRef.current) {
-              setDetectedWard(ward.name);
-              setArea(ward.name);
-              setAreaSource('api');
-            }
-          }
-
-          if (subZone) {
-            console.log('🏛️ [DEBUG] Sub-zone detected:', subZone.name);
-            if (seq === detectionSeqRef.current) {
-              setDetectedSubZone(subZone.name);
-              // Prefer sub-zone as area if available
-              setArea(subZone.name);
-              setAreaSource('api');
-            }
-          }
-
-          if (!ward && !subZone) {
-            console.log('🏛️ [DEBUG] No administrative area found in API response');
-          }
-        } else {
-          console.log('🏛️ [DEBUG] API returned unsuccessful result or no data');
-        }
-      } catch (apiError) {
-        console.log('🏛️ [WARN] API area detection failed, this is normal:', apiError);
-      }
-    } catch (error) {
-      console.error('🏛️ [ERROR] Error in area detection:', error);
-    } finally {
-      setIsDetectingArea(false);
-    }
-  }, [detectAreaMutation]); // Memoize with detectAreaMutation dependency
-
-  // Reverse geocoding to get address from coordinates - memoized to prevent infinite loops
-  const reverseGeocode = useCallback(async (coords: { lat: number; lng: number }) => {
-    try {
-      console.log('🌍 [DEBUG] Reverse geocoding for:', coords);
-      const seq = detectionSeqRef.current;
-      
-      // Validate coordinates
-      if (isNaN(coords.lat) || isNaN(coords.lng)) {
-        console.error('🌍 [ERROR] Invalid coordinates for reverse geocoding');
-        return;
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-      
-      const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&addressdetails=1&zoom=18`;
-      console.log('🌍 [DEBUG] Geocoding URL:', geocodeUrl);
-      
-      const response = await fetch(geocodeUrl, {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'Fix_Smart_CMS/1.0'
-        }
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`Geocoding failed: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('🌍 [DEBUG] Geocoding result:', data);
-
-      if (data && data.display_name) {
-        setAddress(data.display_name);
-        console.log('🌍 [DEBUG] Address set:', data.display_name);
-
-        // Only use geocoding area if we don't have detected area
-        // Only set area from geocode if API hasn't already set it for this sequence
-        if (seq === detectionSeqRef.current && areaSource !== 'api') {
-          const addressComponents = data.address;
-          if (addressComponents) {
-            const detectedArea =
-              addressComponents.neighbourhood ||
-              addressComponents.suburb ||
-              addressComponents.city_district ||
-              addressComponents.state_district ||
-              addressComponents.city ||
-              "";
-            if (detectedArea) {
-              setArea(detectedArea);
-              setAreaSource('geocode');
-              console.log('🌍 [DEBUG] Area set from geocoding:', detectedArea);
-            }
-          }
-        }
-      } else {
-        console.log('🌍 [WARN] No address found in geocoding response');
-      }
-    } catch (error) {
-      console.error('🌍 [ERROR] Error in reverse geocoding:', error);
-      
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.log('🌍 [WARN] Reverse geocoding timed out');
-      }
-    }
-  }, []); // Empty dependency array since this function doesn't depend on any props or state
 
   // Search for a location with improved error handling
   const searchLocation = async () => {
