@@ -319,7 +319,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     detectionSeqRef.current += 1;
     detectAdministrativeArea(coords);
     reverseGeocode(coords);
-  }, [isOpen]);
+  }, [isOpen, position.lat, position.lng, detectAdministrativeArea, reverseGeocode]); // Include memoized functions in dependencies
 
   const getGeoErrorMessage = (err: GeolocationPositionError | any) => {
     const insecure = typeof window !== "undefined" && !window.isSecureContext;
@@ -435,8 +435,8 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     }
   }, []);
 
-  // Detect administrative area based on coordinates
-  const detectAdministrativeArea = async (coords: {
+  // Detect administrative area based on coordinates - memoized to prevent infinite loops
+  const detectAdministrativeArea = useCallback(async (coords: {
     lat: number;
     lng: number;
   }) => {
@@ -501,10 +501,10 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
     } finally {
       setIsDetectingArea(false);
     }
-  };
+  }, [detectAreaMutation]); // Memoize with detectAreaMutation dependency
 
-  // Reverse geocoding to get address from coordinates
-  const reverseGeocode = async (coords: { lat: number; lng: number }) => {
+  // Reverse geocoding to get address from coordinates - memoized to prevent infinite loops
+  const reverseGeocode = useCallback(async (coords: { lat: number; lng: number }) => {
     try {
       console.log('🌍 [DEBUG] Reverse geocoding for:', coords);
       const seq = detectionSeqRef.current;
@@ -570,7 +570,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         console.log('🌍 [WARN] Reverse geocoding timed out');
       }
     }
-  };
+  }, []); // Empty dependency array since this function doesn't depend on any props or state
 
   // Search for a location with improved error handling
   const searchLocation = async () => {

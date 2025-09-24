@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useAppDispatch } from "../store/hooks";
 import { setCredentials } from "../store/slices/authSlice";
 import {
@@ -13,6 +13,7 @@ import {
 } from "../store/api/guestApi";
 import OtpDialog from "../components/OtpDialog";
 import { useToast } from "../hooks/use-toast";
+import { useSafeOptionalContext } from "../hooks/useSafeContext";
 
 export interface OtpFlowConfig {
   context: "login" | "register" | "guestComplaint" | "complaintAuth";
@@ -41,26 +42,37 @@ const DEFAULT_OTP_CONTEXT: OtpContextValue = {
   isOpen: false,
 };
 
-const OtpContext = createContext<OtpContextValue>(DEFAULT_OTP_CONTEXT);
+const OtpContext = createContext<OtpContextValue | undefined>(undefined);
 
-export const useOtpFlow = () => {
+export const useOtpFlow = (): OtpContextValue => {
   const context = useContext(OtpContext);
-  if (!context) {
+  
+  // Enhanced debugging for the specific error
+  if (context === undefined || context === null) {
     console.warn(
-      "useOtpFlow called outside of OtpProvider, using default values"
+      "🔍 [OtpContext Debug] Context is not available. This usually means:",
+      "\n1. Component is being used outside of OtpProvider",
+      "\n2. OtpProvider is not mounted correctly in the component tree",
+      "\n3. There's a timing issue during component initialization",
+      "\n📍 Current route:", window.location.pathname,
+      "\n🔄 Falling back to default context values"
     );
+    
+    // Return safe fallback values
     return DEFAULT_OTP_CONTEXT;
   }
+  
   return context;
 };
 
 export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const dispatch = useAppDispatch();
-  const { toast } = useToast();
-  const [config, setConfig] = useState<OtpFlowConfig | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  try {
+    const dispatch = useAppDispatch();
+    const { toast } = useToast();
+    const [config, setConfig] = useState<OtpFlowConfig | null>(null);
+    const [isOpen, setIsOpen] = useState(false);
 
   // API hooks with error boundaries
   const [verifyLoginOtp] = useVerifyOTPLoginMutation();
@@ -256,11 +268,12 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [config, resendLoginOtp, resendRegisterOtp, resendGuestOtp, toast]);
 
-  const contextValue: OtpContextValue = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue: OtpContextValue = useMemo(() => ({
     openOtpFlow,
     closeOtpFlow,
     isOpen,
-  };
+  }), [openOtpFlow, closeOtpFlow, isOpen]);
 
   return (
     <OtpContext.Provider value={contextValue}>
@@ -284,6 +297,15 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
       )}
     </OtpContext.Provider>
   );
+  } catch (error) {
+    console.error("Error in OtpProvider:", error);
+    // Return a fallback provider with default values
+    return (
+      <OtpContext.Provider value={DEFAULT_OTP_CONTEXT}>
+        {children}
+      </OtpContext.Provider>
+    );
+  }
 };
 
 export default OtpProvider;

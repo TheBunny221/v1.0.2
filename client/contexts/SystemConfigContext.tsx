@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
 import { getApiErrorMessage } from "../store/api/baseApi";
 
@@ -98,21 +98,43 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     }
   }, [configResponse, error]);
 
-  const refreshConfig = async () => {
+  // Keep refreshConfig stable - refetch is already stable from RTK Query
+  const refreshConfig = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
 
-  const getConfig = (key: string, defaultValue: string = "") => {
-    return config[key] || defaultValue;
-  };
+  // Use ref to access config without causing getConfig to change
+  const configRef = useRef(config);
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
+
+  // Stable getConfig that uses ref internally
+  const getConfig = useCallback((key: string, defaultValue: string = "") => {
+    return configRef.current[key] || defaultValue;
+  }, []);
 
   // RTK Query handles data fetching automatically, no manual useEffect needed
 
-  const appName = getConfig("APP_NAME", "Kochi Smart City");
-  const appLogoUrl = getConfig("APP_LOGO_URL", "/logo.png");
-  const appLogoSize = getConfig("APP_LOGO_SIZE", "medium");
+  // Memoize derived values to prevent unnecessary recalculations
+  // Depend on config directly since getConfig is now stable
+  const appName = useMemo(() => 
+    config["APP_NAME"] || "Kochi Smart City", 
+    [config]
+  );
+  
+  const appLogoUrl = useMemo(() => 
+    config["APP_LOGO_URL"] || "/logo.png", 
+    [config]
+  );
+  
+  const appLogoSize = useMemo(() => 
+    config["APP_LOGO_SIZE"] || "medium", 
+    [config]
+  );
 
-  const value: SystemConfigContextType = {
+  // Memoize the entire context value to prevent unnecessary re-renders
+  const value: SystemConfigContextType = useMemo(() => ({
     config,
     appName,
     appLogoUrl,
@@ -120,7 +142,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     isLoading,
     refreshConfig,
     getConfig,
-  };
+  }), [config, appName, appLogoUrl, appLogoSize, isLoading, refreshConfig, getConfig]);
 
   return (
     <SystemConfigContext.Provider value={value}>

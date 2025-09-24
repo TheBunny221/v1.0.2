@@ -1,1 +1,88 @@
-{"numTotalTestSuites":0,"numPassedTestSuites":0,"numFailedTestSuites":0,"numPendingTestSuites":0,"numTotalTests":0,"numPassedTests":0,"numFailedTests":0,"numPendingTests":0,"numTodoTests":0,"snapshot":{"added":0,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0,"didUpdate":false},"startTime":1758568544234,"success":false,"testResults":[]}
+{
+    "numTotalTestSuites": 2,
+    "numPassedTestSuites": 0,
+    "numFailedTestSuites": 2,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 4,
+    "numPassedTests": 2,
+    "numFailedTests": 2,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+    },
+    "startTime": 1758687666025,
+    "success": false,
+    "testResults": [
+        {
+            "assertionResults": [
+                {
+                    "ancestorTitles": [
+                        "WebSocket URL Construction"
+                    ],
+                    "fullName": "WebSocket URL Construction should construct the correct URL for development",
+                    "status": "failed",
+                    "title": "should construct the correct URL for development",
+                    "duration": 27.480494000000363,
+                    "failureMessages": [
+                        "AssertionError: expected 'ws://localhost:3000' to be 'ws://localhost:4005' // Object.is equality\n    at /home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/client/utils/__tests__/websocket.test.ts:35:17\n    at file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at runSuite (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)\n    at runSuite (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)"
+                    ],
+                    "meta": {}
+                },
+                {
+                    "ancestorTitles": [
+                        "WebSocket URL Construction"
+                    ],
+                    "fullName": "WebSocket URL Construction should construct the correct URL for production with a port",
+                    "status": "passed",
+                    "title": "should construct the correct URL for production with a port",
+                    "duration": 1.8624689999996917,
+                    "failureMessages": [],
+                    "meta": {}
+                },
+                {
+                    "ancestorTitles": [
+                        "WebSocket URL Construction"
+                    ],
+                    "fullName": "WebSocket URL Construction should construct the correct URL for production without a port (HTTPS)",
+                    "status": "passed",
+                    "title": "should construct the correct URL for production without a port (HTTPS)",
+                    "duration": 1.431405000000268,
+                    "failureMessages": [],
+                    "meta": {}
+                },
+                {
+                    "ancestorTitles": [
+                        "WebSocket URL Construction"
+                    ],
+                    "fullName": "WebSocket URL Construction should include the token when it exists",
+                    "status": "failed",
+                    "title": "should include the token when it exists",
+                    "duration": 2.532032000000072,
+                    "failureMessages": [
+                        "AssertionError: expected 'ws://localhost:3000' to be 'ws://localhost:4005?token=test-token' // Object.is equality\n    at /home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/client/utils/__tests__/websocket.test.ts:58:17\n    at file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at runSuite (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)\n    at runSuite (file:///home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)"
+                    ],
+                    "meta": {}
+                }
+            ],
+            "startTime": 1758687671607,
+            "endTime": 1758687671639.532,
+            "status": "failed",
+            "message": "",
+            "name": "/home/debian/Harihar/Fix_Smart_CMS2/Fix_Smart_CMS/client/utils/__tests__/websocket.test.ts"
+        }
+    ]
+}

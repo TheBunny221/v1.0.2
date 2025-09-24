@@ -331,10 +331,7 @@ const ComplaintsList: React.FC = () => {
     if (totalPages && currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
-    if (totalItems === 0 && currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [totalPages, totalItems]);
+  }, [totalPages, currentPage]);
 
   const getPageNumbers = () => {
     const pages: number[] = [];

@@ -16,6 +16,7 @@ import GlobalMessageHandler from "./components/GlobalMessageHandler";
 import AuthErrorHandler from "./components/AuthErrorHandler";
 import UnifiedLayout from "./components/layouts/UnifiedLayout";
 import OtpProvider from "./contexts/OtpContext";
+import OtpErrorBoundary from "./components/OtpErrorBoundary";
 import { SystemConfigProvider } from "./contexts/SystemConfigContext";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
@@ -78,7 +79,7 @@ const LoadingFallback: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  return (
+    return (
     <Provider store={store}>
       <ErrorBoundary>
         <ContextErrorBoundary contextName="SystemConfig">
@@ -86,7 +87,8 @@ const App: React.FC = () => {
             <ContextErrorBoundary contextName="AppInitializer">
               <AppInitializer>
                 <ContextErrorBoundary contextName="OtpProvider">
-                  <OtpProvider>
+                  <OtpErrorBoundary>
+                    <OtpProvider>
                     <TooltipProvider>
                 <Router>
                   <div className="min-h-screen bg-gray-50">
@@ -418,7 +420,8 @@ const App: React.FC = () => {
                   <AuthErrorHandler />
                 </Router>
                     </TooltipProvider>
-                  </OtpProvider>
+                    </OtpProvider>
+                  </OtpErrorBoundary>
                 </ContextErrorBoundary>
               </AppInitializer>
             </ContextErrorBoundary>
