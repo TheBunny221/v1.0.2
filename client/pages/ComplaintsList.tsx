@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import { useGetWardsForFilteringQuery } from "../store/api/adminApi";
 import { useDataManager } from "../hooks/useDataManager";
 import {
