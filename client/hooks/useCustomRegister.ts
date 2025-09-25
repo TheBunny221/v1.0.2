@@ -29,13 +29,15 @@ export const useCustomRegister = () => {
         );
         const healthData = await testResponse.json();
         console.log("Health check data:", healthData);
-      } catch (testError) {
+      } catch (testError: unknown) {
         console.error("Health check failed:", testError);
-        console.error(
-          "Health check error details:",
-          testError.name,
-          testError.message,
-        );
+        if (testError instanceof Error) {
+          console.error(
+            "Health check error details:",
+            testError.name,
+            testError.message,
+          );
+        }
       }
 
       console.log(
