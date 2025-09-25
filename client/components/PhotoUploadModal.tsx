@@ -365,15 +365,28 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
             <div>
               <Label>Use Camera</Label>
               {!isCameraActive ? (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start mt-1"
-                  onClick={startCamera}
-                  disabled={isUploading || !cameraSupported}
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Open Camera
-                </Button>
+                <div className="flex gap-2 mt-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1 justify-start"
+                    onClick={startCamera}
+                    disabled={isUploading || !cameraSupported}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Open Camera
+                  </Button>
+                  {photos.length > 0 && cameraSupported && (
+                    <Button
+                      variant="outline"
+                      className="justify-start"
+                      onClick={startCamera}
+                      disabled={isUploading}
+                      aria-label="Retake with Camera"
+                    >
+                      Retake
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <Button
                   variant="outline"
