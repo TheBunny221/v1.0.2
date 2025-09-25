@@ -209,7 +209,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     try {
       // Using OpenStreetMap Nominatim API for reverse geocoding
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${coords[0]}&lon=${coords[1]}&format=json&addressdetails=1`,
+        `/api/geo/reverse?lat=${coords[0]}&lon=${coords[1]}`,
       );
       const data = await response.json();
 
