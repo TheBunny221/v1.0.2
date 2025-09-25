@@ -443,7 +443,11 @@ const AdminUsers: React.FC = () => {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (e) {
-      toast({ title: "Export failed", description: "Could not export users", variant: "destructive" });
+      toast({
+        title: "Export failed",
+        description: "Could not export users",
+        variant: "destructive",
+      });
     }
   };
 
@@ -697,7 +701,9 @@ const AdminUsers: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>Submitted: {user._count?.submittedComplaints || 0}</p>
+                        <p>
+                          Submitted: {user._count?.submittedComplaints || 0}
+                        </p>
                         <p>Assigned: {user._count?.assignedComplaints || 0}</p>
                       </div>
                     </TableCell>

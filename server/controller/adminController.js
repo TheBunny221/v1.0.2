@@ -863,7 +863,12 @@ export const getRecentActivity = asyncHandler(async (req, res) => {
     activities.push({
       id: `complaint-${complaint.id}`,
       type: "complaint",
-      message: `New ${String(complaint.type || "UNKNOWN").toLowerCase().replace(/_/g, " ")} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
+      message: `New ${String(complaint.type || "UNKNOWN")
+        .toLowerCase()
+        .replace(
+          /_/g,
+          " ",
+        )} complaint in ${complaint.ward?.name || "Unknown Ward"}`,
       time: formatTimeAgo(complaint.createdAt),
       user: complaint.submittedBy
         ? {
@@ -1086,7 +1091,9 @@ function getActivityType(status) {
 }
 
 function getStatusMessage(status, complaint, user) {
-  const type = String(complaint?.type || "UNKNOWN").toLowerCase().replace(/_/g, " ");
+  const type = String(complaint?.type || "UNKNOWN")
+    .toLowerCase()
+    .replace(/_/g, " ");
   const ward = complaint.ward?.name || "Unknown Ward";
 
   switch (status) {
