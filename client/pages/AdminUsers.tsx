@@ -399,6 +399,54 @@ const AdminUsers: React.FC = () => {
     }
   };
 
+  // Export users as JSON (respects role/status filters; applies search locally)
+  const handleExportUsers = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (roleFilter !== "all") params.append("role", roleFilter);
+      if (statusFilter) params.append("status", statusFilter);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/users/export?${params.toString()}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const json = await res.json();
+      const allUsers: Array<{
+        id: string;
+        fullName: string;
+        email: string;
+        role: string;
+        isActive: boolean;
+        createdAt: string;
+        updatedAt: string;
+      }> = json?.data?.users || [];
+
+      const searched = searchTerm
+        ? allUsers.filter(
+            (u) =>
+              u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              u.email.toLowerCase().includes(searchTerm.toLowerCase()),
+          )
+        : allUsers;
+
+      const blob = new Blob([JSON.stringify(searched, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `users-${new Date().toISOString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast({ title: "Export failed", description: "Could not export users", variant: "destructive" });
+    }
+  };
+
   // Filter users locally based on search term
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
