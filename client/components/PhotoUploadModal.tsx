@@ -78,7 +78,14 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
     const validFiles: PhotoFile[] = [];
     const errors: string[] = [];
 
-    Array.from(selectedFiles).forEach((file) => {
+    const remaining = Math.max(0, MAX_FILES - photos.length);
+    const incoming = Array.from(selectedFiles).slice(0, remaining);
+
+    if (selectedFiles.length > remaining) {
+      errors.push(`You can upload up to ${MAX_FILES} photos. ${selectedFiles.length - remaining} file(s) were ignored.`);
+    }
+
+    incoming.forEach((file) => {
       const error = validateFile(file);
       if (error) {
         errors.push(`${file.name}: ${error}`);
@@ -92,14 +99,11 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
       }
     });
 
-    if (errors.length > 0) {
-      setUploadError(errors.join(", "));
-    } else {
-      setUploadError(null);
+    setUploadError(errors.length > 0 ? errors.join(", ") : null);
+    if (validFiles.length > 0) {
+      setPhotos((prev) => [...prev, ...validFiles]);
     }
-
-    setPhotos((prev) => [...prev, ...validFiles]);
-  }, []);
+  }, [photos.length]);
 
   // Discover cameras when modal opens
   useEffect(() => {
