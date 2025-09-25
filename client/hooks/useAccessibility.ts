@@ -185,7 +185,7 @@ export function useScreenReader() {
     (message?: string) => {
       const successMessage =
         message ||
-        translations?.messages?.operationSuccess ||
+        translations?.common?.success ||
         "Operation completed successfully";
       announce(successMessage, "polite");
     },
@@ -195,7 +195,7 @@ export function useScreenReader() {
   const announceError = useCallback(
     (message?: string) => {
       const errorMessage =
-        message || translations?.messages?.error || "An error occurred";
+        message || translations?.common?.error || "An error occurred";
       announce(errorMessage, "assertive");
     },
     [announce, translations],
@@ -416,9 +416,9 @@ export function useColorContrast() {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result
           ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
+              r: parseInt(result[1]!, 16),
+              g: parseInt(result[2]!, 16),
+              b: parseInt(result[3]!, 16),
             }
           : null;
       };
