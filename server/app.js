@@ -34,10 +34,12 @@ import guestOtpRoutes from "./routes/guestOtpRoutes.js";
 import materialsRoutes from "./routes/materialsRoutes.js";
 import complaintPhotosRoutes from "./routes/complaintPhotosRoutes.js";
 import logRoutes from "./routes/logRoutes.js";
+import geoRoutes from "./routes/geoRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestLogger } from "./middleware/requestLogger.js";
+import responseFormatter from "./middleware/responseFormatter.js";
 
 // Enhanced request logging middleware using our logger
 const enhancedRequestLogger = (req, res, next) => {
@@ -250,6 +252,9 @@ export function createApp() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+  // Response normalization must come before routes
+  app.use(responseFormatter());
+
   // Request logging
   app.use(requestLogger);
   app.use(enhancedRequestLogger);
@@ -292,6 +297,7 @@ export function createApp() {
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
   app.use("/api/logs", logRoutes);
+  app.use("/api/geo", geoRoutes);
   app.use("/api", materialsRoutes);
   app.use("/api", complaintPhotosRoutes);
 

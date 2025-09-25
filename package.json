@@ -34,7 +34,7 @@
     "db:generate:dev": "npx prisma generate --schema=prisma/schema.dev.prisma",
     "db:generate:prod": "npx prisma generate --schema=prisma/schema.prod.prisma",
     "db:generate": "npx prisma generate",
-    "db:migrate:dev": "npx prisma migrate dev --schema=prisma/schema.dev.prisma",
+    "db:migrate:dev": "node scripts/migrate-dev.js",
     "db:migrate:prod": "npx prisma migrate deploy --schema=prisma/schema.prod.prisma",
     "db:migrate:create": "npx prisma migrate dev --create-only --schema=prisma/schema.dev.prisma",
     "db:migrate:status": "npx prisma migrate status",

@@ -209,7 +209,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
     try {
       // Using OpenStreetMap Nominatim API for reverse geocoding
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${coords[0]}&lon=${coords[1]}&format=json&addressdetails=1`,
+        `/api/geo/reverse?lat=${coords[0]}&lon=${coords[1]}`,
       );
       const data = await response.json();
 
@@ -245,7 +245,7 @@ const LocationMapDialog: React.FC<LocationMapDialogProps> = ({
       const cc = countryCodes ? `&countrycodes=${encodeURIComponent(countryCodes)}` : "";
       const q = `${searchQuery}, ${mapPlace}`;
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1${viewbox}${cc}`,
+        `/api/geo/search?q=${encodeURIComponent(q)}&limit=1&addressdetails=1${viewbox}${cc}`,
       );
       const data = await response.json();
 
