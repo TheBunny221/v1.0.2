@@ -278,7 +278,7 @@ const Navigation: React.FC = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link to="/complaint">
+              {/* <Link to="/complaint">
                 <Button variant="outline" size="sm">
                   <span className="hidden lg:inline">
                     {translations?.complaints?.registerComplaint ||
@@ -286,7 +286,7 @@ const Navigation: React.FC = () => {
                   </span>
                   <span className="lg:hidden">Complaint</span>
                 </Button>
-              </Link>
+              </Link> */}
               <Link to="/login">
                 <Button variant="outline" size="sm">
                   <span className="hidden lg:inline">
@@ -414,7 +414,7 @@ const Navigation: React.FC = () => {
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -461,7 +461,7 @@ const Navigation: React.FC = () => {
                   )}
                 </div>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
 
             {/* Language Selector */}
             <DropdownMenu>

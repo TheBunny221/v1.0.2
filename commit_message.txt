@@ -1,0 +1,16 @@
+feat: Implement unified logging system and fix critical application issues
+
+- Add Winston-based backend logging with daily rotation and performance tracking
+- Implement TypeScript frontend logger with backend submission and global error handling
+- Fix ReferenceError: settings is not defined in ComplaintsList component
+- Fix continuous logo/config fetching by improving SystemConfig caching
+- Add hasPassword field support across all authentication endpoints
+- Install missing PDF preview dependencies (pdfjs-dist, docx-preview)
+- Add comprehensive test suite for logging and authentication flows
+- Enhance error boundaries and context safety patterns
+- Add environment-specific logging configuration
+- Create detailed documentation for logging system and safety improvements
+
+Breaking Changes: None
+Files: 18 modified (+2219/-313), 20+ new files
+Dependencies: Added winston, pdfjs-dist, docx-preview, testing libraries

@@ -127,6 +127,7 @@ const CreateComplaint: React.FC = () => {
       const result = await createComplaint({
         title: formData.title || `${formData.type} complaint`,
         description: formData.description,
+        complaintTypeId: formData.type,
         type: formData.type,
         priority: formData.priority,
         wardId: user?.wardId || "default-ward", // This should be determined by area/location

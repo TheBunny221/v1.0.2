@@ -109,7 +109,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
           {
             (() => {
               const to = isMaintenanceTeam
-                ? `/tasks/${complaint.complaintId || complaint.id}`
+                ? `/tasks/${complaint.id}`
                 : `/complaints/${complaint.id}`;
               return (
                 <Link to={to}>
@@ -227,7 +227,7 @@ const ComplaintQuickActions: React.FC<ComplaintQuickActionsProps> = ({
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                  <Link to={isMaintenanceTeam ? `/tasks/${complaint.complaintId || complaint.id}` : `/complaints/${complaint.id}`}>
+                  <Link to={isMaintenanceTeam ? `/tasks/${complaint.id}` : `/complaints/${complaint.id}`}>
                     <FileText className="h-4 w-4 mr-2" />
                     View Full Details
                   </Link>

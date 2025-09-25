@@ -65,6 +65,17 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
+    // Validate password setup token
+    validatePasswordSetupToken: builder.mutation<
+      ApiResponse<{ valid: boolean }>,
+      { token: string }
+    >({
+      query: ({ token }) => ({
+        url: `/auth/set-password/${token}/validate`,
+        method: "GET",
+      }),
+    }),
+
     // Request OTP for login
     requestOTPLogin: builder.mutation<
       ApiResponse<{ email: string; expiresAt: string }>,
@@ -160,6 +171,24 @@ export const authApi = baseApi.injectEndpoints({
       }),
       // Let RTK Query handle response naturally
       invalidatesTags: ["Auth"],
+      // Update cached user data after successful password setup
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          if (data?.data?.user) {
+            // Update the getCurrentUser cache with hasPassword: true
+            dispatch(
+              authApi.util.updateQueryData("getCurrentUser", undefined, (draft) => {
+                if (draft.data?.user) {
+                  draft.data.user.hasPassword = true;
+                }
+              })
+            );
+          }
+        } catch (error) {
+          // Handle error if needed
+        }
+      },
     }),
 
     // Change password
@@ -255,6 +284,7 @@ export const {
   useResendRegistrationOTPMutation,
   useSendPasswordSetupEmailMutation,
   useSetPasswordMutation,
+  useValidatePasswordSetupTokenMutation,
   useChangePasswordMutation,
   useGetCurrentUserQuery,
   useUpdateProfileMutation,

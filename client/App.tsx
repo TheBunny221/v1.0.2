@@ -10,11 +10,13 @@ import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ContextErrorBoundary } from "./components/ContextErrorBoundary";
 import AppInitializer from "./components/AppInitializer";
 import GlobalMessageHandler from "./components/GlobalMessageHandler";
 import AuthErrorHandler from "./components/AuthErrorHandler";
 import UnifiedLayout from "./components/layouts/UnifiedLayout";
 import OtpProvider from "./contexts/OtpContext";
+import OtpErrorBoundary from "./components/OtpErrorBoundary";
 import { SystemConfigProvider } from "./contexts/SystemConfigContext";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
@@ -77,13 +79,17 @@ const LoadingFallback: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  return (
+    return (
     <Provider store={store}>
       <ErrorBoundary>
-        <SystemConfigProvider>
-          <AppInitializer>
-            <OtpProvider>
-              <TooltipProvider>
+        <ContextErrorBoundary contextName="SystemConfig">
+          <SystemConfigProvider>
+            <ContextErrorBoundary contextName="AppInitializer">
+              <AppInitializer>
+                <ContextErrorBoundary contextName="OtpProvider">
+                  <OtpErrorBoundary>
+                    <OtpProvider>
+                    <TooltipProvider>
                 <Router>
                   <div className="min-h-screen bg-gray-50">
                     <Suspense fallback={<LoadingFallback />}>
@@ -96,21 +102,25 @@ const App: React.FC = () => {
                           element={<SetPassword />}
                         />
                         <Route
+                          path="/set-password"
+                          element={<SetPassword />}
+                        />
+                        {/* <Route
                           path="/guest/complaint"
                           element={<GuestComplaintForm />}
-                        />
-                        <Route
+                        /> */}
+                        {/* <Route
                           path="/complaint"
                           element={<QuickComplaintPage />}
-                        />
+                        /> */}
                         <Route
                           path="/guest/track"
                           element={<GuestTrackComplaint />}
                         />
-                        <Route
+                        {/* <Route
                           path="/guest/service-request"
                           element={<GuestServiceRequest />}
-                        />
+                        /> */}
                         <Route
                           path="/guest/dashboard"
                           element={<GuestDashboard />}
@@ -207,6 +217,23 @@ const App: React.FC = () => {
                         />
                         <Route
                           path="/complaints/:id"
+                          element={
+                            <UnifiedLayout>
+                              <RoleBasedRoute
+                                allowedRoles={[
+                                  "CITIZEN",
+                                  "WARD_OFFICER",
+                                  "MAINTENANCE_TEAM",
+                                  "ADMINISTRATOR",
+                                ]}
+                              >
+                                <ComplaintDetails />
+                              </RoleBasedRoute>
+                            </UnifiedLayout>
+                          }
+                        />
+                        <Route
+                          path="/complaint/:id"
                           element={
                             <UnifiedLayout>
                               <RoleBasedRoute
@@ -392,10 +419,14 @@ const App: React.FC = () => {
                   <GlobalMessageHandler />
                   <AuthErrorHandler />
                 </Router>
-              </TooltipProvider>
-            </OtpProvider>
-          </AppInitializer>
-        </SystemConfigProvider>
+                    </TooltipProvider>
+                    </OtpProvider>
+                  </OtpErrorBoundary>
+                </ContextErrorBoundary>
+              </AppInitializer>
+            </ContextErrorBoundary>
+          </SystemConfigProvider>
+        </ContextErrorBoundary>
       </ErrorBoundary>
     </Provider>
   );

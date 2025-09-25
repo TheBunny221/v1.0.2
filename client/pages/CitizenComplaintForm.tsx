@@ -317,6 +317,8 @@ const CitizenComplaintForm: React.FC = () => {
       const complaintData = {
         title: `${formData.type} complaint`,
         description: formData.description,
+        // Send both during transition; backend prefers complaintTypeId
+        complaintTypeId: formData.type,
         type: formData.type,
         priority: formData.priority,
         slaHours: formData.slaHours,

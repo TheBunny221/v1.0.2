@@ -294,6 +294,7 @@ export const createComplaint = asyncHandler(async (req, res) => {
     title,
     description,
     type,
+    complaintTypeId,
     priority,
     slaHours,
     wardId,
@@ -330,43 +331,79 @@ export const createComplaint = asyncHandler(async (req, res) => {
     });
   }
 
-  // Resolve complaint type from SystemConfig and derive SLA hours strictly from type
-  const typeInput = String(type || "").trim();
-  if (!typeInput) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Complaint type is required" });
-  }
-
-  // Try lookup by key (ID form like WATER_SUPPLY) then by name match
-  const byKey = await prisma.systemConfig.findFirst({
-    where: { key: `COMPLAINT_TYPE_${typeInput.toUpperCase()}`, isActive: true },
-  });
-
+  // Resolve complaint type and SLA hours (new table first, fallback to legacy)
   let resolvedTypeName = null;
   let resolvedSlaHours = null;
+  let resolvedTypeId = null;
 
-  if (byKey) {
-    try {
-      const v = JSON.parse(byKey.value || "{}");
-      resolvedTypeName = v.name;
-      resolvedSlaHours = Number(v.slaHours);
-    } catch {}
-  }
+  // Prefer explicit complaintTypeId when provided
+  if (
+    complaintTypeId !== undefined &&
+    complaintTypeId !== null &&
+    complaintTypeId !== ""
+  ) {
+    const numericId = Number(complaintTypeId);
+    const ct = Number.isFinite(numericId)
+      ? await prisma.complaintType.findUnique({ where: { id: numericId } })
+      : await prisma.complaintType.findFirst({
+          where: { name: String(complaintTypeId) },
+        });
+    if (!ct) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid complaintTypeId" });
+    }
+    resolvedTypeId = ct.id;
+    resolvedTypeName = ct.name;
+    resolvedSlaHours = Number(ct.slaHours) || 48;
+  } else {
+    // Backward compatibility: accept legacy 'type' string
+    const typeInput = String(type || "").trim();
+    if (!typeInput) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Complaint type is required" });
+    }
 
-  if (!resolvedTypeName) {
-    const allTypes = await prisma.systemConfig.findMany({
-      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
-    });
-    for (const cfg of allTypes) {
-      try {
-        const v = JSON.parse(cfg.value || "{}");
-        if (v.name && v.name.toLowerCase() === typeInput.toLowerCase()) {
+    // Try new table by name or numeric string
+    const numMaybe = Number(typeInput);
+    const ct2 = Number.isFinite(numMaybe)
+      ? await prisma.complaintType.findUnique({ where: { id: numMaybe } })
+      : await prisma.complaintType.findFirst({ where: { name: typeInput } });
+    if (ct2) {
+      resolvedTypeId = ct2.id;
+      resolvedTypeName = ct2.name;
+      resolvedSlaHours = Number(ct2.slaHours) || 48;
+    } else {
+      // Legacy system_config lookup
+      const byKey = await prisma.systemConfig.findFirst({
+        where: {
+          key: `COMPLAINT_TYPE_${typeInput.toUpperCase()}`,
+          isActive: true,
+        },
+      });
+      if (byKey) {
+        try {
+          const v = JSON.parse(byKey.value || "{}");
           resolvedTypeName = v.name;
           resolvedSlaHours = Number(v.slaHours);
-          break;
+        } catch {}
+      }
+      if (!resolvedTypeName) {
+        const allTypes = await prisma.systemConfig.findMany({
+          where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+        });
+        for (const cfg of allTypes) {
+          try {
+            const v = JSON.parse(cfg.value || "{}");
+            if (v.name && v.name.toLowerCase() === typeInput.toLowerCase()) {
+              resolvedTypeName = v.name;
+              resolvedSlaHours = Number(v.slaHours);
+              break;
+            }
+          } catch {}
         }
-      } catch {}
+      }
     }
   }
 
@@ -375,10 +412,12 @@ export const createComplaint = asyncHandler(async (req, res) => {
     !Number.isFinite(resolvedSlaHours) ||
     resolvedSlaHours <= 0
   ) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid complaint type or missing SLA configuration",
-    });
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Invalid complaint type or missing SLA configuration",
+      });
   }
 
   const deadline = new Date(Date.now() + resolvedSlaHours * 60 * 60 * 1000);
@@ -409,7 +448,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
   const complaint = await createComplaintWithUniqueId({
     title: title || `${resolvedTypeName} complaint`,
     description,
+    // Keep legacy string field populated
     type: resolvedTypeName,
+    complaintTypeId: resolvedTypeId || null,
     priority: priority || "MEDIUM",
     status: initialStatus,
     slaStatus: "ON_TIME",
@@ -600,6 +641,7 @@ const createComplaintWithUniqueId = async (data) => {
                 },
               }
             : false,
+          complaintType: { select: { id: true, name: true } },
         },
       });
     } catch (err) {
@@ -939,6 +981,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
               role: true,
             },
           },
+          complaintType: { select: { id: true, name: true } },
           attachments: true,
           statusLogs: {
             orderBy: { timestamp: "desc" },
@@ -1053,6 +1096,7 @@ export const getComplaint = asyncHandler(async (req, res) => {
           role: true,
         },
       },
+      complaintType: { select: { id: true, name: true } },
       attachments: true,
       materials: true,
       photos: {

@@ -1,8 +1,8 @@
 import "@testing-library/jest-dom";
-import { expect, vi, beforeEach, afterEach } from "vitest";
+import { expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { setupServer } from "msw/node";
-import { rest } from "msw";
+import { http, HttpResponse } from "msw";
 
 // Global test setup
 beforeEach(() => {
@@ -17,6 +17,21 @@ beforeEach(() => {
 afterEach(() => {
   // Clean up after each test
   cleanup();
+});
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
 });
 
 // Mock IntersectionObserver
@@ -36,132 +51,141 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
-// Mock PerformanceObserver
-global.PerformanceObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-}));
-
-// Mock matchMedia
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: vi.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
-
-// Mock navigator
-Object.defineProperty(navigator, "onLine", {
-  writable: true,
-  value: true,
-});
-
-Object.defineProperty(navigator, "sendBeacon", {
-  writable: true,
+// Mock scrollTo
+Object.defineProperty(window, 'scrollTo', {
   value: vi.fn(),
+  writable: true
 });
 
-// Mock fetch
-global.fetch = vi.fn();
-
-// Mock console methods in tests
-global.console = {
-  ...console,
-  warn: vi.fn(),
-  error: vi.fn(),
-  log: vi.fn(),
-};
-
-// Mock performance
-Object.defineProperty(global, "performance", {
-  writable: true,
+// Mock geolocation
+Object.defineProperty(navigator, 'geolocation', {
   value: {
-    now: vi.fn(() => Date.now()),
-    mark: vi.fn(),
-    measure: vi.fn(),
-    getEntriesByName: vi.fn(() => []),
-    getEntriesByType: vi.fn(() => []),
+    getCurrentPosition: vi.fn((success) => 
+      success({
+        coords: {
+          latitude: 9.9312,
+          longitude: 76.2673,
+          accuracy: 100,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      })
+    ),
+    watchPosition: vi.fn(),
+    clearWatch: vi.fn(),
   },
-});
-
-// Mock window.gtag for analytics
-Object.defineProperty(window, "gtag", {
   writable: true,
-  value: vi.fn(),
 });
 
+// Mock window.location
+Object.defineProperty(window, 'location', {
+  value: {
+    href: 'http://localhost:3000',
+    origin: 'http://localhost:3000',
+    protocol: 'http:',
+    host: 'localhost:3000',
+    hostname: 'localhost',
+    port: '3000',
+    pathname: '/',
+    search: '',
+    hash: '',
+    assign: vi.fn(),
+    replace: vi.fn(),
+    reload: vi.fn(),
+  },
+  writable: true,
+});
+
+// Mock window.isSecureContext
+Object.defineProperty(window, 'isSecureContext', {
+  value: true,
+  writable: true,
+});
 // Setup MSW server for API mocking
 export const server = setupServer(
   // Default handlers
-  rest.post("/api/auth/login", (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        success: true,
-        data: {
-          user: {
-            id: "1",
-            fullName: "Test User",
-            email: "test@example.com",
-            role: "CITIZEN",
-            isActive: true,
-            joinedOn: new Date().toISOString(),
-          },
-          token: "mock-jwt-token",
+  http.post("/api/auth/login", () => {
+    return HttpResponse.json({
+      success: true,
+      data: {
+        user: {
+          id: "1",
+          fullName: "Test User",
+          email: "test@example.com",
+          role: "CITIZEN",
+          isActive: true,
+          joinedOn: new Date().toISOString(),
+          hasPassword: true,
         },
-      }),
-    );
+        token: "mock-jwt-token",
+      },
+    });
   }),
 
-  rest.get("/api/auth/me", (req, res, ctx) => {
-    const authHeader = req.headers.get("authorization");
+  http.get("/api/auth/me", ({ request }) => {
+    const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res(ctx.status(401), ctx.json({ message: "Unauthorized" }));
+      return HttpResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        success: true,
-        data: {
-          user: {
-            id: "1",
-            fullName: "Test User",
-            email: "test@example.com",
-            role: "CITIZEN",
-            isActive: true,
-            joinedOn: new Date().toISOString(),
-          },
+    return HttpResponse.json({
+      success: true,
+      data: {
+        user: {
+          id: "1",
+          fullName: "Test User",
+          email: "test@example.com",
+          role: "CITIZEN",
+          isActive: true,
+          joinedOn: new Date().toISOString(),
+          hasPassword: true,
         },
-      }),
-    );
+      },
+    });
   }),
 
-  rest.get("/api/complaints", (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        success: true,
-        data: [],
-        meta: {
-          total: 0,
-          page: 1,
-          limit: 10,
-          hasMore: false,
+  http.get("/api/complaints", () => {
+    return HttpResponse.json({
+      success: true,
+      data: {
+        complaints: [],
+        pagination: {
+          totalPages: 1,
+          currentPage: 1,
+          totalItems: 0,
         },
-      }),
-    );
+      },
+    });
   }),
 
-  rest.post("/api/analytics", (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ success: true }));
+  http.get("/api/reports/analytics", () => {
+    return HttpResponse.json({
+      success: true,
+      data: {
+        complaints: { total: 0, resolved: 0, pending: 0, overdue: 0 },
+        sla: { compliance: 95, avgResolutionTime: 24, target: 48 },
+        trends: [],
+        wards: [],
+        categories: [],
+        performance: { userSatisfaction: 85, escalationRate: 5, firstCallResolution: 80, repeatComplaints: 10 },
+      },
+    });
+  }),
+
+  http.get("/api/reports/heatmap", () => {
+    return HttpResponse.json({
+      success: true,
+      data: {
+        xLabels: [],
+        yLabels: [],
+        matrix: [],
+        xAxisLabel: "Time",
+        yAxisLabel: "Categories",
+      },
+    });
   }),
 );
 

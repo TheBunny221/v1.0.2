@@ -901,38 +901,52 @@ export const getPublicWards = asyncHandler(async (req, res) => {
 // @route   GET /api/guest/complaint-types
 // @access  Public
 export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
-  // Fetch complaint types from database using the same logic as the main complaint types controller
-  const complaintTypesData = await prisma.systemConfig.findMany({
-    where: {
-      key: {
-        startsWith: "COMPLAINT_TYPE_",
-      },
-      isActive: true, // Only show active complaint types for guests
-    },
-    orderBy: {
-      key: "asc",
-    },
-  });
-
-  // Transform data to match frontend interface
-  const complaintTypes = complaintTypesData.map((config) => {
-    const data = JSON.parse(config.value);
-    return {
-      id: config.key.replace("COMPLAINT_TYPE_", ""),
-      name: data.name,
-      description: data.description,
-      priority: data.priority,
-      slaHours: data.slaHours,
-      isActive: config.isActive,
-      updatedAt: config.updatedAt,
-    };
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Complaint types retrieved successfully",
-    data: complaintTypes,
-  });
+  try {
+    const rows = await prisma.complaintType.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+    });
+    const types = rows.map((t) => ({
+      id: String(t.id),
+      name: t.name,
+      description: t.description,
+      priority: t.priority,
+      slaHours: t.slaHours,
+      isActive: t.isActive,
+      updatedAt: t.updatedAt,
+    }));
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint types retrieved successfully",
+        data: types,
+      });
+  } catch (e) {
+    const complaintTypesData = await prisma.systemConfig.findMany({
+      where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
+      orderBy: { key: "asc" },
+    });
+    const complaintTypes = complaintTypesData.map((config) => {
+      const data = JSON.parse(config.value || "{}");
+      return {
+        id: config.key.replace("COMPLAINT_TYPE_", ""),
+        name: data.name,
+        description: data.description,
+        priority: data.priority,
+        slaHours: data.slaHours,
+        isActive: config.isActive,
+        updatedAt: config.updatedAt,
+      };
+    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Complaint types retrieved successfully (legacy)",
+        data: complaintTypes,
+      });
+  }
 });
 
 // import { getPrisma } from "../db/connection.js";

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { useGetComplaintsQuery } from "../store/api/complaintsApi";
+import { getApiErrorMessage } from "../store/api/baseApi";
 import { useGetWardsForFilteringQuery } from "../store/api/adminApi";
 import { useDataManager } from "../hooks/useDataManager";
 import {
@@ -42,7 +43,7 @@ import {
 import ComplaintQuickActions from "../components/ComplaintQuickActions";
 import QuickComplaintModal from "../components/QuickComplaintModal";
 import UpdateComplaintModal from "../components/UpdateComplaintModal";
-import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
+import { useSystemConfig } from "../contexts/SystemConfigContext";
 
 const ComplaintsList: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -100,11 +101,9 @@ const ComplaintsList: React.FC = () => {
   const selectedWard = wards.find((ward) => ward.id === wardFilter);
   const availableSubZones = selectedWard?.subZones || [];
 
-  // Fetch public system config (for dynamic priorities/statuses)
-  const { data: publicConfig } = useGetPublicSystemConfigQuery();
-  const settings = publicConfig?.data || [];
-  const getSettingValue = (key: string) =>
-    settings.find((s: any) => s.key === key)?.value;
+  // Get system config from context (avoids duplicate API calls)
+  const { getConfig } = useSystemConfig();
+  const getSettingValue = (key: string) => getConfig(key);
 
   const configuredPriorities: string[] = useMemo(() => {
     const raw = getSettingValue("COMPLAINT_PRIORITIES");
@@ -116,7 +115,7 @@ const ComplaintsList: React.FC = () => {
     } catch {
       return ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     }
-  }, [settings]);
+  }, [getSettingValue]);
 
   const configuredStatuses: string[] = useMemo(() => {
     const raw = getSettingValue("COMPLAINT_STATUSES");
@@ -142,7 +141,7 @@ const ComplaintsList: React.FC = () => {
         "REOPENED",
       ];
     }
-  }, [settings]);
+  }, [getSettingValue]);
 
   const prettyLabel = (v: string) =>
     v
@@ -333,10 +332,7 @@ const ComplaintsList: React.FC = () => {
     if (totalPages && currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
-    if (totalItems === 0 && currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [totalPages, totalItems]);
+  }, [totalPages, currentPage]);
 
   const getPageNumbers = () => {
     const pages: number[] = [];
@@ -539,13 +535,24 @@ const ComplaintsList: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {error ? (
+          {!isAuthenticated ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600 mb-2">Please sign in to view complaints.</p>
+              <Link to="/login">
+                <Button>Go to Sign In</Button>
+              </Link>
+            </div>
+          ) : error ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto text-red-400 mb-4" />
-              <p className="text-red-500 mb-2">Failed to load complaints</p>
-              <Button variant="outline" onClick={() => refetch()}>
-                Try Again
-              </Button>
+              <p className="text-red-500 mb-2">{getApiErrorMessage(error as any) || "Failed to load complaints"}</p>
+              <div className="flex items-center justify-center gap-2">
+                <Button variant="outline" onClick={() => refetch()}>Try Again</Button>
+                <Link to="/login">
+                  <Button variant="outline">Sign In</Button>
+                </Link>
+              </div>
             </div>
           ) : isLoading ? (
             <div className="space-y-4">

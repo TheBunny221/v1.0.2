@@ -491,8 +491,10 @@ export default async function seedCommon(prisma, options = {}) {
     citizens.push(citizen);
   }
 
-  // 6. Complaint Types
+  // 6. Complaint Types (normalized table + legacy migration)
   console.log("🏷️ Ensuring complaint types...");
+  const toToken = (s) => String(s || "").trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+
   const complaintTypesData = [
     {
       key: "COMPLAINT_TYPE_WATER_SUPPLY",
@@ -537,26 +539,70 @@ export default async function seedCommon(prisma, options = {}) {
       slaHours: 24,
     },
   ];
+
+  // Upsert canonical complaint types into normalized table
   for (const t of complaintTypesData) {
-    const exists = await prisma.systemConfig.findUnique({
-      where: { key: t.key },
+    await prisma.complaintType.upsert({
+      where: { name: t.name },
+      update: {
+        description: t.description,
+        priority: t.priority,
+        slaHours: t.slaHours,
+        isActive: true,
+      },
+      create: {
+        name: t.name,
+        description: t.description,
+        priority: t.priority,
+        slaHours: t.slaHours,
+        isActive: true,
+      },
     });
-    if (!exists) {
-      await prisma.systemConfig.create({
-        data: {
-          key: t.key,
-          value: JSON.stringify({
-            name: t.name,
-            description: t.description,
-            priority: t.priority,
-            slaHours: t.slaHours,
-          }),
-          description: `Complaint type ${t.name}`,
-          isActive: true,
-        },
+  }
+
+  // Migrate legacy system_config complaint types if present
+  const legacyTypeConfigs = await prisma.systemConfig.findMany({
+    where: { key: { startsWith: "COMPLAINT_TYPE_" } },
+  });
+  if (legacyTypeConfigs.length > 0) {
+    console.log(`📦 Migrating ${legacyTypeConfigs.length} legacy complaint types from system_config...`);
+    for (const cfg of legacyTypeConfigs) {
+      let parsed = {};
+      try {
+        parsed = JSON.parse(cfg.value || "{}");
+      } catch {}
+      const name = parsed.name || cfg.key.replace(/^COMPLAINT_TYPE_/, "").replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      const description = parsed.description || `Complaint type ${name}`;
+      const priority = parsed.priority || "MEDIUM";
+      const slaHours = Number(parsed.slaHours ?? 48);
+      await prisma.complaintType.upsert({
+        where: { name },
+        update: { description, priority, slaHours, isActive: true },
+        create: { name, description, priority, slaHours, isActive: true },
       });
     }
   }
+
+  // Build token->id map for quick lookup
+  const allTypes = await prisma.complaintType.findMany({});
+  const tokenToId = Object.fromEntries(allTypes.map((t) => [toToken(t.name), t.id]));
+  console.log(`✅ Complaint types ready: ${allTypes.map((t) => `${t.name}#${t.id}`).join(", ")}`);
+
+  // Map existing legacy complaints (string type) to complaintTypeId
+  const legacyComplaints = await prisma.complaint.findMany({
+    where: { OR: [{ complaintTypeId: null }, { complaintTypeId: { equals: undefined } }] },
+    select: { id: true, type: true },
+  });
+  let migratedCount = 0;
+  for (const c of legacyComplaints) {
+    const tok = toToken(c.type || "");
+    const cid = tokenToId[tok] || null;
+    if (cid) {
+      await prisma.complaint.update({ where: { id: c.id }, data: { complaintTypeId: cid } });
+      migratedCount++;
+    }
+  }
+  if (migratedCount > 0) console.log(`🔄 Migrated ${migratedCount} complaints to complaintTypeId`);
 
   // 7. Complaints: ensure at least targets.complaints
   console.log(
@@ -651,6 +697,7 @@ export default async function seedCommon(prisma, options = {}) {
         title: `${complaintType.replace("_", " ")} Issue in ${randomWard.name}`,
         description: `Complaint regarding ${complaintType.toLowerCase().replace(/_/g, " ")} submitted by ${randomCitizen.fullName}`,
         type: complaintType,
+        complaintTypeId: tokenToId[toToken(complaintType)] || null,
         status,
         priority,
         slaStatus:
@@ -1121,6 +1168,7 @@ export default async function seedCommon(prisma, options = {}) {
             title: `${type.replace(/_/g, " ")} Issue for Maintenance1`,
             description: `Demo complaint seeded for dashboard validation assigned to ${m1.fullName}.`,
             type,
+            complaintTypeId: tokenToId[toToken(type)] || null,
             status,
             priority: randomFrom(["LOW", "MEDIUM", "HIGH"]),
             slaStatus:
@@ -1242,6 +1290,14 @@ export default async function seedCommon(prisma, options = {}) {
     }
   } catch (e) {
     console.warn("Failed to seed focused maintenance1 complaints:", e?.message);
+  }
+
+  // Validation: ensure all complaints have a valid complaintTypeId
+  const missingCt = await prisma.complaint.count({ where: { complaintTypeId: null } });
+  if (missingCt > 0) {
+    console.warn(`⚠️ ${missingCt} complaints missing complaintTypeId (legacy type strings may remain)`);
+  } else {
+    console.log("🔎 Validation passed: all complaints linked to complaintTypeId");
   }
 
   console.log("✅ Seeding complete.");

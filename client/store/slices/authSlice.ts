@@ -689,7 +689,7 @@ const authSlice = createSlice({
       .addCase(setPassword.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = { ...action.payload.user, hasPassword: true };
         state.token = action.payload.token;
         state.requiresPasswordSetup = false;
         state.error = null;
@@ -708,6 +708,10 @@ const authSlice = createSlice({
       .addCase(changePassword.fulfilled, (state) => {
         state.isLoading = false;
         state.error = null;
+        // Ensure hasPassword is true after successful password change
+        if (state.user) {
+          state.user.hasPassword = true;
+        }
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.isLoading = false;
