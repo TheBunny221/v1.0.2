@@ -2027,7 +2027,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
               </div>
             </div>
 
-            {/* Area Detection Display */}
+            {/* Area Detection Display
             {(detectedWard || detectedSubZone || isDetectingArea) && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -2046,8 +2046,8 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                     <strong>Sub-Zone:</strong> {detectedSubZone}
                   </div>
                 )}
-              </div>
-            )}
+              </div> 
+            )}*/}
 
             {/* Selected coordinates */}
             <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
