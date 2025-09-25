@@ -690,30 +690,6 @@ const AdminUsers: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>User Management Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="w-full">
-              Export Users
-            </Button>
-            <Button variant="outline" className="w-full">
-              Bulk Import
-            </Button>
-            <Button variant="outline" className="w-full">
-              User Reports
-            </Button>
-            <Button variant="outline" className="w-full">
-              Access Logs
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Add User Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
