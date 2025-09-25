@@ -1050,7 +1050,7 @@ const MaintenanceTasks: React.FC = () => {
                       {task.photo ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="h-11 md:h-9">
                               <Camera className="h-3 w-3 mr-1" />
                               Photos
                             </Button>
