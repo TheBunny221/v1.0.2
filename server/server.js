@@ -15,7 +15,7 @@ if (PORT === 3001) {
 const HOST = process.env.HOST || "0.0.0.0";
 
 async function startServer() {
-  console.log("🚀 Starting Cochin Smart City API Server...");
+  console.log("🚀 Starting NLC-CMS API Server...");
   console.log(`📝 Environment: ${env.NODE_ENV}`);
   console.log(`🔧 Node.js version: ${process.version}`);
   console.log(`💾 Database: ${env.isDevelopment ? 'SQLite (Development)' : 'PostgreSQL (Production)'}`);
