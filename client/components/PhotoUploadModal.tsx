@@ -355,7 +355,8 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/jpeg,image/png,image/webp,image/jpg"
+                accept="image/jpeg,image/png"
+                capture="environment"
                 onChange={(e) => handleFileSelect(e.target.files)}
                 className="hidden"
               />
