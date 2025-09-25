@@ -649,45 +649,8 @@ const AdminUsers: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>
-                          Submitted: {user._count?.submittedComplaints || 0}
-                        </p>
+                        <p>Submitted: {user._count?.submittedComplaints || 0}</p>
                         <p>Assigned: {user._count?.assignedComplaints || 0}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleOpenEditDialog(user)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        {user.isActive ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeactivateUser(user.id)}
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleActivateUser(user.id)}
-                          >
-                            Activate
-                          </Button>
-                        )}
-                        {/* <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button> */}
                       </div>
                     </TableCell>
                   </TableRow>
