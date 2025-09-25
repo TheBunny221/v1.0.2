@@ -359,7 +359,7 @@ export function SelectField<T extends FieldValues>({
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
-            disabled={disabled}
+            disabled={!!disabled}
           >
             <FormControl>
               <SelectTrigger
@@ -381,7 +381,7 @@ export function SelectField<T extends FieldValues>({
                   <SelectItem
                     key={option.value}
                     value={option.value}
-                    disabled={option.disabled}
+                    disabled={!!option.disabled}
                   >
                     {option.label}
                   </SelectItem>

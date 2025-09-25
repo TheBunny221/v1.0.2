@@ -284,7 +284,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                 <DropdownMenuTrigger asChild>
                   <DropdownMenuItem className="flex items-center">
                     <Globe className="h-4 w-4 mr-2" />
-                    {translations.nav?.language || "Language"}
+                    {"Language"}
                   </DropdownMenuItem>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="right">

@@ -185,7 +185,7 @@ export function useScreenReader() {
     (message?: string) => {
       const successMessage =
         message ||
-        translations?.messages?.operationSuccess ||
+        translations?.common?.success ||
         "Operation completed successfully";
       announce(successMessage, "polite");
     },
@@ -195,7 +195,7 @@ export function useScreenReader() {
   const announceError = useCallback(
     (message?: string) => {
       const errorMessage =
-        message || translations?.messages?.error || "An error occurred";
+        message || translations?.common?.error || "An error occurred";
       announce(errorMessage, "assertive");
     },
     [announce, translations],
@@ -416,19 +416,22 @@ export function useColorContrast() {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result
           ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
+              r: parseInt(result[1]!, 16),
+              g: parseInt(result[2]!, 16),
+              b: parseInt(result[3]!, 16),
             }
           : null;
       };
 
       // Calculate relative luminance
       const getLuminance = (r: number, g: number, b: number) => {
-        const [rs, gs, bs] = [r, g, b].map((c) => {
+        const mapped = [r, g, b].map((c) => {
           c = c / 255;
           return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
         });
+        const rs = mapped[0]!;
+        const gs = mapped[1]!;
+        const bs = mapped[2]!;
         return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
       };
 
