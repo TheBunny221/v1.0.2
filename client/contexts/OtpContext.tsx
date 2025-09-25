@@ -246,12 +246,9 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "guestComplaint":
-          if (config.complaintId) {
-            await resendGuestOtp({
-              email: config.email,
-              complaintId: config.complaintId,
-            }).unwrap();
-          }
+          await resendGuestOtp({
+            email: config.email,
+          }).unwrap();
           break;
       }
 
@@ -284,7 +281,7 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
           onOpenChange={setIsOpen}
           context={config.context}
           email={config.email}
-          complaintId={config.complaintId}
+          {...(config.complaintId ? { complaintId: config.complaintId } : {})}
           title={config.title}
           description={config.description}
           onVerified={handleVerified}
