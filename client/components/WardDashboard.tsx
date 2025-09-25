@@ -12,12 +12,6 @@ const WardDashboard: React.FC<WardDashboardProps> = ({ wardId }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <AllComplaintCard wardId={wardId} />
-        <NeedToAssignCard wardId={wardId} />
-        {/* Add other status cards here */}
-      </div>
-
-      <div className="mt-8">
-        <RecentComplaints wardId={wardId} />
       </div>
     </div>
   );
