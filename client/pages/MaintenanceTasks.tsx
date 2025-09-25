@@ -31,7 +31,8 @@ import {
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
-import PhotoUploadModal from "../components/PhotoUploadModal";
+import { Collapsible, CollapsibleContent } from "../components/ui/collapsible";
+const PhotoUploadModal = React.lazy(() => import("../components/PhotoUploadModal"));
 import {
   Wrench,
   Calendar,
@@ -69,6 +70,7 @@ const MaintenanceTasks: React.FC = () => {
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [navigatingId, setNavigatingId] = useState<string | null>(null);
   const [triggerGetComplaint] = useLazyGetComplaintQuery();
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Fetch complaints assigned to this maintenance team member
   const {
@@ -351,7 +353,7 @@ const MaintenanceTasks: React.FC = () => {
     if (isLoadingPhotos) {
       return (
         <div className="border-t bg-gray-50 p-4">
-          <div className="animate-pulse">
+          <div className="animate-pulse motion-reduce:animate-none">
             <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
             <div className="h-3 bg-gray-200 rounded w-1/2"></div>
           </div>
@@ -520,7 +522,7 @@ const MaintenanceTasks: React.FC = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="animate-pulse">
+        <div className="animate-pulse motion-reduce:animate-none">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             {[...Array(5)].map((_, i) => (
@@ -601,7 +603,7 @@ const MaintenanceTasks: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            className="h-7 rounded-full px-2.5 py-1 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
+            className="h-11 md:h-9 rounded-full px-4 border border-blue-200/40 bg-white text-blue-700 hover:bg-blue-50"
             onClick={() => refetchComplaints()}
           >
             Refresh
@@ -611,12 +613,13 @@ const MaintenanceTasks: React.FC = () => {
 
       {/* Total card + StatusOverviewGrid (reuse WardOfficer components for consistent UI) */}
       <div className="mt-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="hidden md:flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Filter by Status</h2>
           {activeFilter !== "all" && (
             <Button
               variant="outline"
               size="sm"
+              className="h-11 md:h-9"
               onClick={() => setActiveFilter("all")}
             >
               Clear Filter
@@ -625,7 +628,20 @@ const MaintenanceTasks: React.FC = () => {
         </div>
 
         {/* Modern status grid (All, Pending, Overdue, In Progress, Resolved, Reopened, Closed) */}
-        <div className="mt-3">
+        <div className="md:hidden sticky top-16 z-10 bg-gray-50/80 backdrop-blur border-b rounded-b-lg">
+          <div className="p-2">
+            <Button
+              variant="outline"
+              className="w-full h-11 justify-center"
+              aria-expanded={mobileFiltersOpen}
+              aria-controls="mobile-filters"
+              onClick={() => setMobileFiltersOpen((o) => !o)}
+            >
+              Filter
+            </Button>
+          </div>
+        </div>
+        <div className={["mt-3", mobileFiltersOpen ? "" : "hidden", "md:block"].join(" ")} id="mobile-filters">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
             {[
               // {
@@ -1017,11 +1033,12 @@ const MaintenanceTasks: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-3 items-stretch md:items-center">
                     <div className="flex space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-11 md:h-9"
                         onClick={() => handleNavigate(task)}
                         disabled={navigatingId === task.id}
                       >
@@ -1056,6 +1073,7 @@ const MaintenanceTasks: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
+                          className="h-11 md:h-9"
                           onClick={() => handlePhotoUpload(task)}
                         >
                           <Camera className="h-3 w-3 mr-1" />
@@ -1065,6 +1083,7 @@ const MaintenanceTasks: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-11 md:h-9"
                         onClick={() => toggleTaskExpansion(task.id)}
                       >
                         {expandedTaskId === task.id ? (
@@ -1179,19 +1198,20 @@ const MaintenanceTasks: React.FC = () => {
 
       {/* Photo Upload Modal */}
       {selectedTaskForPhotos && (
-        <PhotoUploadModal
-          isOpen={isPhotoUploadOpen}
-          onClose={() => {
-            setIsPhotoUploadOpen(false);
-            setSelectedTaskForPhotos(null);
-          }}
-          complaintId={selectedTaskForPhotos.id}
-          onSuccess={() => {
-            refetchComplaints();
-            // Keep the progress section expanded to show new photos
-            setExpandedTaskId(selectedTaskForPhotos.id);
-          }}
-        />
+        <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-black/10"><div className="rounded-md bg-white px-4 py-2 text-sm shadow">Loading…</div></div>}>
+          <PhotoUploadModal
+            isOpen={isPhotoUploadOpen}
+            onClose={() => {
+              setIsPhotoUploadOpen(false);
+              setSelectedTaskForPhotos(null);
+            }}
+            complaintId={selectedTaskForPhotos.id}
+            onSuccess={() => {
+              refetchComplaints();
+              setExpandedTaskId(selectedTaskForPhotos.id);
+            }}
+          />
+        </React.Suspense>
       )}
     </div>
   );
