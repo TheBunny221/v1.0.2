@@ -286,12 +286,12 @@ export const createUser = asyncHandler(async (req, res) => {
 
     const emailSent = await sendEmail({
       to: user.email,
-      subject: "Account Verification - Cochin Smart City",
+      subject: "Account Verification - NLC-CMS",
       text: `Your account has been created. Please verify your account and set your password by clicking: ${resetUrl}`,
       html: `
         <h2>Account Created - Verification Required</h2>
         <p>Hello ${user.fullName},</p>
-        <p>Your account has been created for Cochin Smart City E-Governance Portal as a ${role.replace("_", " ").toLowerCase()}.</p>
+        <p>Your account has been created for NLC-CMS E-Governance Portal as a ${role.replace("_", " ").toLowerCase()}.</p>
         <p>Please click the link below to verify your account and set your password:</p>
         <a href="${resetUrl}" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Account</a>
         <p>This link will expire in 24 hours.</p>
