@@ -5,15 +5,14 @@ import {
   FieldValues,
   DefaultValues,
 } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ZodSchema } from "zod";
-import { toast } from "../components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useAppSelector } from "../store/hooks";
 import { selectTranslations } from "../store/slices/languageSlice";
 
 // Enhanced form configuration
 export interface FormConfig<T extends FieldValues> {
-  schema: ZodSchema<T>;
+  schema?: unknown;
+  resolver?: any;
   defaultValues?: DefaultValues<T>;
   mode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" | "all";
   reValidateMode?: "onChange" | "onBlur" | "onSubmit";
@@ -50,10 +49,12 @@ export function useFormValidation<T extends FieldValues>(
     serverErrors: [],
   });
 
-  // Initialize react-hook-form with Zod resolver
-  const form: UseFormReturn<T> = useForm<T>({
-    resolver: zodResolver(config.schema),
-    defaultValues: config.defaultValues,
+  // Initialize react-hook-form
+  const form = useForm<T>({
+    ...(config.resolver ? { resolver: config.resolver } : {}),
+    ...(config.defaultValues !== undefined
+      ? { defaultValues: config.defaultValues }
+      : {}),
     mode: config.mode || "onSubmit",
     reValidateMode: config.reValidateMode || "onChange",
     shouldFocusError: config.shouldFocusError !== false,
@@ -135,7 +136,7 @@ export function useFormValidation<T extends FieldValues>(
 
           // Show success toast
           toast({
-            title: translations?.messages?.operationSuccess || "Success",
+            title: translations?.common?.success || "Success",
             description: result?.message || "Operation completed successfully.",
             variant: "default",
           });
@@ -164,16 +165,17 @@ export function useFormValidation<T extends FieldValues>(
             setServerErrors(error.message);
           } else {
             setServerErrors(
-              translations?.messages?.operationFailed || "An error occurred",
+              translations?.messages?.errorOccurred || translations?.common?.error || "An error occurred",
             );
           }
 
           // Show error toast
           toast({
-            title: translations?.messages?.error || "Error",
+            title: translations?.common?.error || "Error",
             description:
               error?.message ||
-              translations?.messages?.operationFailed ||
+              translations?.messages?.errorOccurred ||
+              translations?.common?.error ||
               "An error occurred",
             variant: "destructive",
           });
@@ -284,12 +286,12 @@ export function useFormValidation<T extends FieldValues>(
 
 // Hook for dynamic form validation
 export function useDynamicValidation<T extends FieldValues>(
-  schema: ZodSchema<T>,
+  schema: unknown,
   dependencies: any[] = [],
 ) {
   const [currentSchema, setCurrentSchema] = useState(schema);
 
-  const updateSchema = useCallback((newSchema: ZodSchema<T>) => {
+  const updateSchema = useCallback((newSchema: unknown) => {
     setCurrentSchema(newSchema);
   }, []);
 
