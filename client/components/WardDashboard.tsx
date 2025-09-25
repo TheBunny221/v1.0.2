@@ -1,7 +1,5 @@
 import React from 'react';
 import AllComplaintCard from './AllComplaintCard';
-import NeedToAssignCard from './NeedToAssignCard';
-import RecentComplaints from './RecentComplaints';
 
 interface WardDashboardProps {
   wardId: string;
