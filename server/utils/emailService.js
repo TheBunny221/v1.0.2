@@ -106,8 +106,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_FROM ||
-        "NLC-CMS <no-reply@cochinsmartcity.local>",
+        process.env.EMAIL_FROM || "NLC-CMS <no-reply@cochinsmartcity.local>",
       to,
       subject,
       text,
@@ -147,9 +146,7 @@ export const sendOTPEmail = async (
   purpose = "verification",
 ) => {
   const subject =
-    purpose === "login"
-      ? "Login OTP - NLC-CMS"
-      : "Verification OTP - NLC-CMS";
+    purpose === "login" ? "Login OTP - NLC-CMS" : "Verification OTP - NLC-CMS";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

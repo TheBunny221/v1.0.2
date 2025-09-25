@@ -3,12 +3,14 @@
 Audience: QA engineers, developers, and DevOps.
 
 This guide covers local development, staging, and production deployments for the full-stack application:
+
 - client/ – React + Vite SPA (TypeScript)
 - server/ – Node.js + Express API
 - prisma/ – Prisma ORM schemas, migrations, and seeders
 - shared/ – Shared types/utilities between client and server
 
 Key defaults in development:
+
 - Frontend: http://localhost:3000 (Vite)
 - Backend API: http://localhost:4005 (Express)
 - Frontend proxies /api to the backend (configured in vite.config.ts)
@@ -38,7 +40,7 @@ The server loads base .env and then .env.<NODE_ENV> (see server/config/environme
      - .env (base)
      - .env.development (dev overrides)
      - .env.production (prod overrides)
-   - Optionally create client/.env for client-only overrides (remember that Vite exposes variables prefixed with VITE_ only).
+   - Optionally create client/.env for client-only overrides (remember that Vite exposes variables prefixed with VITE\_ only).
 
 2. Minimum required variables (root .env or environment)
    - DATABASE_URL
@@ -48,19 +50,21 @@ The server loads base .env and then .env.<NODE_ENV> (see server/config/environme
    - PORT=4005 (recommended) and HOST=0.0.0.0
    - CORS_ORIGIN="http://localhost:3000,http://localhost:8080" (comma-separated; set to your staging/prod domains)
    - Email (production): EMAIL_SERVICE, EMAIL_USER, EMAIL_PASS, EMAIL_PORT, EMAIL_FROM
-     - In development, an Ethereal test account is auto-created if EMAIL_* are not set. Preview URLs are printed in logs.
+     - In development, an Ethereal test account is auto-created if EMAIL\_\* are not set. Preview URLs are printed in logs.
 
 3. Client-side variables (client/.env or injected at build time)
    - VITE_API_URL or VITE_PROXY_TARGET (optional; the dev server already proxies /api to 4005)
    - VITE_HMR_PORT (if your proxy needs a fixed HMR port; defaults to 3001)
-   - Any feature flags consumed by the SPA must be VITE_* prefixed
+   - Any feature flags consumed by the SPA must be VITE\_\* prefixed
 
 4. Install dependencies
+
 ```bash
 npm install
 ```
 
 5. Validate DB env
+
 ```bash
 npm run validate:db
 ```
@@ -70,6 +74,7 @@ npm run validate:db
 ## 3) Database Management (Prisma)
 
 Useful scripts from package.json:
+
 - Generate Prisma client
   - Development: npm run db:generate:dev
   - Production: npm run db:generate:prod
@@ -84,6 +89,7 @@ Useful scripts from package.json:
   - Generic: npm run seed
 
 Quick setup examples:
+
 ```bash
 # SQLite dev setup (clean slate)
 rm -f dev.db dev.db-journal
@@ -102,14 +108,17 @@ npm run seed:prod    # only if your seed is safe for prod
 ## 4) Local Development
 
 Start both servers concurrently (frontend @ 3000, backend @ 4005):
+
 ```bash
 npm run dev
 ```
+
 - Frontend: http://localhost:3000
 - Backend Health: http://localhost:4005/api/health and /api/health/detailed
 - API Docs (Swagger): http://localhost:4005/api-docs
 
 Common checks before QA handoff:
+
 ```bash
 npm run typecheck
 npm run test
@@ -117,28 +126,34 @@ npm run test
 ```
 
 Notes:
+
 - The Vite dev server proxies /api to the backend (vite.config.ts). If your environment uses a reverse proxy, adjust VITE_CLIENT_HOST / VITE_CLIENT_PORT / VITE_HMR_PORT as needed.
-- Nodemon watches server/* files (see nodemon.json). Client code changes hot-reload via Vite.
+- Nodemon watches server/\* files (see nodemon.json). Client code changes hot-reload via Vite.
 
 ---
 
 ## 5) Building for Production
 
 Root production build compiles the SPA to dist/spa and TypeScript to dist types (server is mostly JS):
+
 ```bash
 npm run build
 ```
+
 Artifacts:
+
 - SPA bundle: dist/spa (served by Express in production if present)
 - Server remains server/server.js; pm2 config points to it (ecosystem.prod.config.cjs)
 
 Smoke test locally with production server:
+
 ```bash
 npm run server:prod
 # Visit http://localhost:4005/api/health and ensure dist/spa is served for non-API routes
 ```
 
 If you prefer a separate SPA build step only (for static hosting):
+
 ```bash
 # SPA only
 vite build    # runs with vite.config.ts -> output dist/spa
@@ -150,25 +165,31 @@ vite build    # runs with vite.config.ts -> output dist/spa
 
 ### A) Single host (Express serves SPA + API)
 
-1) Prepare environment on the server
+1. Prepare environment on the server
+
 ```bash
 # On the target host
 export NODE_ENV=production
 # Provide DATABASE_URL, JWT_SECRET, EMAIL_* and CORS_ORIGIN appropriately
 ```
-2) Copy source or CI artifacts, then build and migrate
+
+2. Copy source or CI artifacts, then build and migrate
+
 ```bash
 npm ci --omit=dev
 npm run db:generate:prod
 npm run db:migrate:prod
 npm run build
 ```
-3) Start with PM2 (recommended)
+
+3. Start with PM2 (recommended)
+
 ```bash
 pm2 start ecosystem.prod.config.cjs --only cochin-api
 pm2 save
 pm2 status
 ```
+
 - Express will serve dist/spa for non-API routes automatically (see server/app.js).
 
 ### B) Split hosting (Static SPA + API)
@@ -176,7 +197,7 @@ pm2 status
 - Frontend (Netlify/Vercel/S3+CDN)
   - Build command: npm run build
   - Publish directory: dist/spa
-  - Configure environment vars for the SPA as needed (VITE_* only).
+  - Configure environment vars for the SPA as needed (VITE\_\* only).
 - Backend (VM/Container/PM2)
   - Follow the steps from option A but skip serving the SPA.
   - Ensure CORS_ORIGIN includes the exact SPA domain(s).
@@ -209,7 +230,7 @@ pm2 status
 
 - Vite 403 or file access errors
   - Cause: Vite fs.allow denies paths by default
-  - Fix: update vite.config.ts server.fs.allow to include required directories; avoid exposing server/** in dev.
+  - Fix: update vite.config.ts server.fs.allow to include required directories; avoid exposing server/\*\* in dev.
 
 - Database connection errors (Prisma P1001/P1000)
   - Verify DATABASE_URL, network ACLs, and credentials; run npm run db:migrate:status
@@ -229,23 +250,27 @@ pm2 status
   - Confirm Express serves dist/spa and the SPA fallback route (server/app.js). Rebuild and redeploy if dist/spa is missing.
 
 - Email not sending in development
-  - Dev uses Ethereal if EMAIL_* are not provided. Check server logs for preview URLs. In prod, configure EMAIL_SERVICE/USER/PASS/PORT correctly.
+  - Dev uses Ethereal if EMAIL\_\* are not provided. Check server logs for preview URLs. In prod, configure EMAIL_SERVICE/USER/PASS/PORT correctly.
 
 ---
 
 ## 9) Test and Health Gates before Handoff
 
 Run automated checks:
+
 ```bash
 npm run typecheck
 npm run test
 # Optional: npm run test:coverage and npm run cypress:run
 ```
+
 Verify health endpoints:
+
 ```bash
 curl -s http://localhost:4005/api/health | jq .
 curl -s http://localhost:4005/api/health/detailed | jq .
 ```
+
 If deploying split hosting, validate CORS and that the SPA calls /api successfully.
 
 ---
@@ -253,12 +278,15 @@ If deploying split hosting, validate CORS and that the SPA calls /api successful
 ## 10) Quick Commands Reference
 
 - Local dev (first run)
+
 ```bash
 npm install
 npm run db:setup:dev   # or: db:generate:dev + db:push:dev + seed:dev
 npm run dev
 ```
+
 - Staging/Prod
+
 ```bash
 npm ci --omit=dev
 npm run db:generate:prod

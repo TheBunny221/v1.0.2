@@ -915,13 +915,11 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
       isActive: t.isActive,
       updatedAt: t.updatedAt,
     }));
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Complaint types retrieved successfully",
-        data: types,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Complaint types retrieved successfully",
+      data: types,
+    });
   } catch (e) {
     const complaintTypesData = await prisma.systemConfig.findMany({
       where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
@@ -939,13 +937,11 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
         updatedAt: config.updatedAt,
       };
     });
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Complaint types retrieved successfully (legacy)",
-        data: complaintTypes,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Complaint types retrieved successfully (legacy)",
+      data: complaintTypes,
+    });
   }
 });
 

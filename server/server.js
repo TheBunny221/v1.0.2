@@ -1,4 +1,8 @@
-import { loadEnvironmentConfig, getDatabaseConnection, env } from "./config/environment.js";
+import {
+  loadEnvironmentConfig,
+  getDatabaseConnection,
+  env,
+} from "./config/environment.js";
 import createApp from "./app.js";
 import { initializeDatabase } from "./scripts/initDatabase.js";
 
@@ -7,7 +11,8 @@ loadEnvironmentConfig();
 
 // Resolve backend port; avoid conflict with Vite HMR (3001)
 const configuredPort = Number(process.env.PORT);
-let PORT = Number.isFinite(configuredPort) && configuredPort > 0 ? configuredPort : 4005;
+let PORT =
+  Number.isFinite(configuredPort) && configuredPort > 0 ? configuredPort : 4005;
 if (PORT === 3001) {
   console.warn("⚠️ PORT 3001 conflicts with Vite HMR; using 4005 instead");
   PORT = 4005;
@@ -18,7 +23,9 @@ async function startServer() {
   console.log("🚀 Starting NLC-CMS API Server...");
   console.log(`📝 Environment: ${env.NODE_ENV}`);
   console.log(`🔧 Node.js version: ${process.version}`);
-  console.log(`💾 Database: ${env.isDevelopment ? 'SQLite (Development)' : 'PostgreSQL (Production)'}`);
+  console.log(
+    `💾 Database: ${env.isDevelopment ? "SQLite (Development)" : "PostgreSQL (Production)"}`,
+  );
 
   let databaseConnected = false;
   let app;
@@ -32,7 +39,7 @@ async function startServer() {
       await connectDB();
 
       // Initialize database (only for production or when needed)
-      if (env.isProduction || process.env.INIT_DB === 'true') {
+      if (env.isProduction || process.env.INIT_DB === "true") {
         const dbInitSuccess = await initializeDatabase();
         if (!dbInitSuccess && env.isProduction) {
           throw new Error("Database initialization failed in production");
@@ -40,7 +47,9 @@ async function startServer() {
       }
 
       databaseConnected = true;
-      console.log(`✅ Database connected successfully (${env.isDevelopment ? 'SQLite' : 'PostgreSQL'})`);
+      console.log(
+        `✅ Database connected successfully (${env.isDevelopment ? "SQLite" : "PostgreSQL"})`,
+      );
     } catch (dbError) {
       console.error("❌ Database connection failed:", dbError.message);
 
@@ -49,7 +58,9 @@ async function startServer() {
       } else {
         console.warn("⚠️ Starting server in development mode without database");
         console.warn("   API endpoints requiring database will return errors");
-        console.warn("   Run 'npm run dev:setup' to set up the development database");
+        console.warn(
+          "   Run 'npm run dev:setup' to set up the development database",
+        );
         databaseConnected = false;
       }
     }
@@ -120,7 +131,9 @@ async function startServer() {
           console.log("\n⚠️ Database Connection Issues:");
           console.log("   • Some API endpoints will return errors");
           console.log("   • Run 'npm run dev:setup' to set up SQLite database");
-          console.log("   • Or run 'npm run db:setup:dev' to reset the database");
+          console.log(
+            "   • Or run 'npm run db:setup:dev' to reset the database",
+          );
         }
       }
 

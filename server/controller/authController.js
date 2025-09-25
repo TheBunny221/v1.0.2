@@ -35,10 +35,10 @@ const comparePassword = async (enteredPassword, hashedPassword) => {
 
 // Helper function to check if password is a valid hashed string
 const isValidPassword = (password) => {
-  if (!password || typeof password !== 'string') {
+  if (!password || typeof password !== "string") {
     return false;
   }
-  
+
   // Check if password is a JSON object (from password reset flow)
   try {
     JSON.parse(password);
@@ -250,7 +250,7 @@ export const login = asyncHandler(async (req, res) => {
       } catch (updateError) {
         retryCount++;
         logger.warn(`Login update attempt ${retryCount} failed`, {
-          module: 'auth',
+          module: "auth",
           error: updateError.message,
           retryCount,
           userId: user.id,
@@ -261,24 +261,30 @@ export const login = asyncHandler(async (req, res) => {
           updateError.message.includes("READONLY")
         ) {
           // For readonly database, continue with login but log the issue
-          logger.error("Database is readonly - cannot update last login timestamp", {
-            module: 'auth',
-            userId: user.id,
-            error: 'DATABASE_READONLY',
-          });
+          logger.error(
+            "Database is readonly - cannot update last login timestamp",
+            {
+              module: "auth",
+              userId: user.id,
+              error: "DATABASE_READONLY",
+            },
+          );
           logger.error("Database permission issue needs immediate attention", {
-            module: 'auth',
-            severity: 'critical',
+            module: "auth",
+            severity: "critical",
           });
           break; // Don't retry for readonly errors
         }
 
         if (retryCount >= maxRetries) {
-          logger.error(`Failed to update last login after ${maxRetries} attempts`, {
-            module: 'auth',
-            userId: user.id,
-            maxRetries,
-          });
+          logger.error(
+            `Failed to update last login after ${maxRetries} attempts`,
+            {
+              module: "auth",
+              userId: user.id,
+              maxRetries,
+            },
+          );
           // Continue with login even if update fails
         } else {
           // Wait before retry
@@ -307,7 +313,7 @@ export const login = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logger.error("Login error occurred", {
-      module: 'auth',
+      module: "auth",
       error: error.message,
       stack: error.stack,
     });

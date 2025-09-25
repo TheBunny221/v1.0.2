@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useGetPublicSystemConfigQuery } from "../store/api/systemConfigApi";
 import { getApiErrorMessage } from "../store/api/baseApi";
 
@@ -34,13 +42,14 @@ const DEFAULT_CONFIG: SystemConfigContextType = {
   getConfig: (key: string, defaultValue: string = "") => defaultValue,
 };
 
-const SystemConfigContext = createContext<SystemConfigContextType>(DEFAULT_CONFIG);
+const SystemConfigContext =
+  createContext<SystemConfigContextType>(DEFAULT_CONFIG);
 
 export const useSystemConfig = () => {
   const context = useContext(SystemConfigContext);
   if (!context) {
     console.warn(
-      "useSystemConfig called outside of SystemConfigProvider, using default values"
+      "useSystemConfig called outside of SystemConfigProvider, using default values",
     );
     return DEFAULT_CONFIG;
   }
@@ -88,9 +97,9 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         errorMessage,
       );
       console.error("Full error details:", {
-        status: 'status' in error ? error.status : 'unknown',
-        data: 'data' in error ? error.data : 'unknown',
-        message: 'message' in error ? error.message : 'unknown',
+        status: "status" in error ? error.status : "unknown",
+        data: "data" in error ? error.data : "unknown",
+        message: "message" in error ? error.message : "unknown",
         error: error,
       });
       // Fallback to default values
@@ -118,31 +127,39 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
 
   // Memoize derived values to prevent unnecessary recalculations
   // Depend on config directly since getConfig is now stable
-  const appName = useMemo(() => 
-    config["APP_NAME"] || "NLC-CMS", 
-    [config]
+  const appName = useMemo(() => config["APP_NAME"] || "NLC-CMS", [config]);
+
+  const appLogoUrl = useMemo(
+    () => config["APP_LOGO_URL"] || "/logo.png",
+    [config],
   );
-  
-  const appLogoUrl = useMemo(() => 
-    config["APP_LOGO_URL"] || "/logo.png", 
-    [config]
-  );
-  
-  const appLogoSize = useMemo(() => 
-    config["APP_LOGO_SIZE"] || "medium", 
-    [config]
+
+  const appLogoSize = useMemo(
+    () => config["APP_LOGO_SIZE"] || "medium",
+    [config],
   );
 
   // Memoize the entire context value to prevent unnecessary re-renders
-  const value: SystemConfigContextType = useMemo(() => ({
-    config,
-    appName,
-    appLogoUrl,
-    appLogoSize,
-    isLoading,
-    refreshConfig,
-    getConfig,
-  }), [config, appName, appLogoUrl, appLogoSize, isLoading, refreshConfig, getConfig]);
+  const value: SystemConfigContextType = useMemo(
+    () => ({
+      config,
+      appName,
+      appLogoUrl,
+      appLogoSize,
+      isLoading,
+      refreshConfig,
+      getConfig,
+    }),
+    [
+      config,
+      appName,
+      appLogoUrl,
+      appLogoSize,
+      isLoading,
+      refreshConfig,
+      getConfig,
+    ],
+  );
 
   return (
     <SystemConfigContext.Provider value={value}>

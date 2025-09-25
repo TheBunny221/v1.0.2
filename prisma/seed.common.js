@@ -493,7 +493,12 @@ export default async function seedCommon(prisma, options = {}) {
 
   // 6. Complaint Types (normalized table + legacy migration)
   console.log("🏷️ Ensuring complaint types...");
-  const toToken = (s) => String(s || "").trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+  const toToken = (s) =>
+    String(s || "")
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "_")
+      .replace(/^_|_$/g, "");
 
   const complaintTypesData = [
     {
@@ -565,13 +570,20 @@ export default async function seedCommon(prisma, options = {}) {
     where: { key: { startsWith: "COMPLAINT_TYPE_" } },
   });
   if (legacyTypeConfigs.length > 0) {
-    console.log(`📦 Migrating ${legacyTypeConfigs.length} legacy complaint types from system_config...`);
+    console.log(
+      `📦 Migrating ${legacyTypeConfigs.length} legacy complaint types from system_config...`,
+    );
     for (const cfg of legacyTypeConfigs) {
       let parsed = {};
       try {
         parsed = JSON.parse(cfg.value || "{}");
       } catch {}
-      const name = parsed.name || cfg.key.replace(/^COMPLAINT_TYPE_/, "").replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      const name =
+        parsed.name ||
+        cfg.key
+          .replace(/^COMPLAINT_TYPE_/, "")
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (m) => m.toUpperCase());
       const description = parsed.description || `Complaint type ${name}`;
       const priority = parsed.priority || "MEDIUM";
       const slaHours = Number(parsed.slaHours ?? 48);
@@ -585,12 +597,21 @@ export default async function seedCommon(prisma, options = {}) {
 
   // Build token->id map for quick lookup
   const allTypes = await prisma.complaintType.findMany({});
-  const tokenToId = Object.fromEntries(allTypes.map((t) => [toToken(t.name), t.id]));
-  console.log(`✅ Complaint types ready: ${allTypes.map((t) => `${t.name}#${t.id}`).join(", ")}`);
+  const tokenToId = Object.fromEntries(
+    allTypes.map((t) => [toToken(t.name), t.id]),
+  );
+  console.log(
+    `✅ Complaint types ready: ${allTypes.map((t) => `${t.name}#${t.id}`).join(", ")}`,
+  );
 
   // Map existing legacy complaints (string type) to complaintTypeId
   const legacyComplaints = await prisma.complaint.findMany({
-    where: { OR: [{ complaintTypeId: null }, { complaintTypeId: { equals: undefined } }] },
+    where: {
+      OR: [
+        { complaintTypeId: null },
+        { complaintTypeId: { equals: undefined } },
+      ],
+    },
     select: { id: true, type: true },
   });
   let migratedCount = 0;
@@ -598,11 +619,15 @@ export default async function seedCommon(prisma, options = {}) {
     const tok = toToken(c.type || "");
     const cid = tokenToId[tok] || null;
     if (cid) {
-      await prisma.complaint.update({ where: { id: c.id }, data: { complaintTypeId: cid } });
+      await prisma.complaint.update({
+        where: { id: c.id },
+        data: { complaintTypeId: cid },
+      });
       migratedCount++;
     }
   }
-  if (migratedCount > 0) console.log(`🔄 Migrated ${migratedCount} complaints to complaintTypeId`);
+  if (migratedCount > 0)
+    console.log(`🔄 Migrated ${migratedCount} complaints to complaintTypeId`);
 
   // 7. Complaints: ensure at least targets.complaints
   console.log(
@@ -1293,11 +1318,17 @@ export default async function seedCommon(prisma, options = {}) {
   }
 
   // Validation: ensure all complaints have a valid complaintTypeId
-  const missingCt = await prisma.complaint.count({ where: { complaintTypeId: null } });
+  const missingCt = await prisma.complaint.count({
+    where: { complaintTypeId: null },
+  });
   if (missingCt > 0) {
-    console.warn(`⚠️ ${missingCt} complaints missing complaintTypeId (legacy type strings may remain)`);
+    console.warn(
+      `⚠️ ${missingCt} complaints missing complaintTypeId (legacy type strings may remain)`,
+    );
   } else {
-    console.log("🔎 Validation passed: all complaints linked to complaintTypeId");
+    console.log(
+      "🔎 Validation passed: all complaints linked to complaintTypeId",
+    );
   }
 
   console.log("✅ Seeding complete.");
