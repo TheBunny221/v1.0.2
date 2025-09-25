@@ -349,10 +349,10 @@ export const verifyServiceRequestOTP = asyncHandler(async (req, res) => {
   if (isNewUser) {
     await sendEmail({
       to: user.email,
-      subject: "Welcome to Cochin Smart City - Service Request Verified",
+      subject: "Welcome to NLC-CMS - Service Request Verified",
       text: `Welcome! Your service request has been verified and you have been registered as a citizen.`,
       html: `
-        <h2>Welcome to Cochin Smart City!</h2>
+        <h2>Welcome to NLC-CMS!</h2>
         <p>Your service request has been successfully verified and you have been automatically registered as a citizen.</p>
         <p>Service Request ID: <strong>${serviceRequest.id}</strong></p>
         <p>You can now track your service request progress and submit future requests more easily.</p>
