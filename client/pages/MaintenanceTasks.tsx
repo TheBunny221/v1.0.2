@@ -1117,7 +1117,7 @@ const MaintenanceTasks: React.FC = () => {
                         </Button>
                       )}
                       <Link to={`/tasks/${task.id}`}>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="h-11 md:h-9">
                           Details
                         </Button>
                       </Link>
