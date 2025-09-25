@@ -389,14 +389,11 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-      const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&addressdetails=1&zoom=18`;
+      const geocodeUrl = `/api/geo/reverse?lat=${coords.lat}&lon=${coords.lng}&zoom=18`;
       console.log('🌍 [DEBUG] Geocoding URL:', geocodeUrl);
 
       const response = await fetch(geocodeUrl, {
         signal: controller.signal,
-        headers: {
-          'User-Agent': 'Fix_Smart_CMS/1.0'
-        }
       });
 
       clearTimeout(timeoutId);
