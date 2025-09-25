@@ -375,8 +375,16 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
   }, [detectAreaMutation]); // Memoize with detectAreaMutation dependency
 
   // Reverse geocoding to get address from coordinates - memoized to prevent infinite loops
+  const lastGeocodeAtRef = useRef<number>(0);
+
   const reverseGeocode = useCallback(async (coords: { lat: number; lng: number }) => {
     try {
+      const now = Date.now();
+      if (now - lastGeocodeAtRef.current < 1500) {
+        return; // debounce to respect external rate limits
+      }
+      lastGeocodeAtRef.current = now;
+
       console.log('🌍 [DEBUG] Reverse geocoding for:', coords);
       const seq = detectionSeqRef.current;
 
@@ -387,19 +395,27 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
 
       const geocodeUrl = `/api/geo/reverse?lat=${coords.lat}&lon=${coords.lng}&zoom=18`;
       console.log('🌍 [DEBUG] Geocoding URL:', geocodeUrl);
 
-      const response = await fetch(geocodeUrl, {
-        signal: controller.signal,
-      });
+      const response = await fetch(geocodeUrl, { signal: controller.signal });
 
       clearTimeout(timeoutId);
 
+      if (response.status === 429) {
+        const payload = await response.json().catch(() => null);
+        const retryAfter = payload?.data?.retryAfter || response.headers.get('retry-after') || 'a few';
+        setMapError(`Geocoding is busy. Please try again in ${retryAfter} seconds.`);
+        console.warn('🌍 [WARN] Rate limited by geocoding service');
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error(`Geocoding failed: ${response.status} ${response.statusText}`);
+        const text = await response.text().catch(() => '');
+        console.warn('🌍 [WARN] Geocoding failed:', response.status, text);
+        return;
       }
 
       const data = await response.json();
@@ -409,8 +425,6 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
         setAddress(data.display_name);
         console.log('🌍 [DEBUG] Address set:', data.display_name);
 
-        // Only use geocoding area if we don't have detected area
-        // Only set area from geocode if API hasn't already set it for this sequence
         if (seq === detectionSeqRef.current && areaSource !== 'api') {
           const addressComponents = data.address;
           if (addressComponents) {
@@ -431,12 +445,12 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       } else {
         console.log('🌍 [WARN] No address found in geocoding response');
       }
-    } catch (error) {
-      console.error('🌍 [ERROR] Error in reverse geocoding:', error);
-
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.log('🌍 [WARN] Reverse geocoding timed out');
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        console.warn('🌍 [WARN] Reverse geocoding timed out');
+        return;
       }
+      console.error('🌍 [ERROR] Error in reverse geocoding:', error);
     }
   }, [areaSource]);
 
