@@ -282,8 +282,8 @@ export const OtpProvider: React.FC<{ children: React.ReactNode }> = ({
           context={config.context}
           email={config.email}
           {...(config.complaintId ? { complaintId: config.complaintId } : {})}
-          title={config.title}
-          description={config.description}
+          {...(config.title ? { title: config.title } : {})}
+          {...(config.description ? { description: config.description } : {})}
           onVerified={handleVerified}
           onResend={handleResend}
           // These will be managed by the mutations
