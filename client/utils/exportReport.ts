@@ -77,7 +77,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
   };
 
   const headerTitle = options.title || "Complaint Report";
-  const appName = options.appName || "Cochin Smart City";
+  const appName = options.appName || "NLC-CMS";
   const logoDataUrl = options.appLogoUrl ? await fetchImageDataURL(options.appLogoUrl) : null;
 
   const drawHeaderFooter = () => {
