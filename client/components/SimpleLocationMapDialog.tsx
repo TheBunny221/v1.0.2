@@ -587,17 +587,14 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       const cc = countryCodes ? `&countrycodes=${encodeURIComponent(countryCodes)}` : "";
       const q = `${query}, ${mapPlace}`;
       
-      const searchUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1${viewbox}${cc}`;
+      const searchUrl = `/api/geo/search?q=${encodeURIComponent(q)}&limit=5&addressdetails=1${viewbox}${cc}`;
       console.log('🔍 [DEBUG] Search URL:', searchUrl);
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
+
       const response = await fetch(searchUrl, {
         signal: controller.signal,
-        headers: {
-          'User-Agent': 'Fix_Smart_CMS/1.0'
-        }
       });
       
       clearTimeout(timeoutId);
