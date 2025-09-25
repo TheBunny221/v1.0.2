@@ -492,9 +492,9 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
               <span className="font-medium">Requirements:</span>
             </div>
             <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>Supported formats: JPEG, PNG, WebP</li>
+              <li>Supported formats: JPEG, PNG</li>
               <li>Maximum file size: 5MB per image</li>
-              <li>Maximum 10 photos at once</li>
+              <li>Maximum {MAX_FILES} photos at once</li>
             </ul>
           </div>
 
