@@ -34,6 +34,7 @@ import guestOtpRoutes from "./routes/guestOtpRoutes.js";
 import materialsRoutes from "./routes/materialsRoutes.js";
 import complaintPhotosRoutes from "./routes/complaintPhotosRoutes.js";
 import logRoutes from "./routes/logRoutes.js";
+import geoRoutes from "./routes/geoRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -296,6 +297,7 @@ export function createApp() {
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
   app.use("/api/logs", logRoutes);
+  app.use("/api/geo", geoRoutes);
   app.use("/api", materialsRoutes);
   app.use("/api", complaintPhotosRoutes);
 
