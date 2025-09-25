@@ -168,7 +168,7 @@ const baseQueryWithReauth: BaseQueryFn<
     }
 
     // Parse response only once
-    let data;
+    let data: any;
     try {
       const text = await response.text();
       data = text ? JSON.parse(text) : null;
@@ -176,14 +176,37 @@ const baseQueryWithReauth: BaseQueryFn<
       data = null;
     }
 
+    // Normalize standardized API shape: if success === false, treat as error
     if (response.ok) {
+      if (data && typeof data === "object" && "success" in data) {
+        if (data.success === false) {
+          const errorObj: FetchBaseQueryError = {
+            status: response.status,
+            data,
+          } as any;
+          try {
+            const { toast } = await import("../../hooks/use-toast");
+            const { getFriendlyApiMessage } = await import("../../lib/apiHandler");
+            const msg = getFriendlyApiMessage({ status: response.status, data });
+            toast({ title: "Request failed", description: msg, variant: "destructive" });
+          } catch {}
+          return { error: errorObj };
+        }
+      }
       return { data };
     } else {
+      const errorObj: FetchBaseQueryError = {
+        status: response.status,
+        data: data,
+      } as any;
+      try {
+        const { toast } = await import("../../hooks/use-toast");
+        const { getFriendlyApiMessage } = await import("../../lib/apiHandler");
+        const msg = getFriendlyApiMessage(errorObj);
+        toast({ title: "Request failed", description: msg, variant: "destructive" });
+      } catch {}
       return {
-        error: {
-          status: response.status,
-          data: data,
-        } as FetchBaseQueryError,
+        error: errorObj,
       };
     }
   } catch (error) {
