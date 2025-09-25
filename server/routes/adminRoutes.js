@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAllUsers,
+  exportUsers,
   createUser,
   updateUser,
   deleteUser,
@@ -115,6 +116,7 @@ router.use(authorize("ADMINISTRATOR"));
  *                           type: integer
  */
 router.get("/users", getAllUsers);
+router.get("/users/export", exportUsers);
 
 /**
  * @swagger

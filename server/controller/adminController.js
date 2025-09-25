@@ -58,6 +58,39 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Export users (Admin only)
+// @route   GET /api/admin/users/export
+// @access  Private (Admin only)
+export const exportUsers = asyncHandler(async (req, res) => {
+  const { role, ward, status = "all" } = req.query;
+
+  const whereClause = {
+    ...(role && { role }),
+    ...(ward && { wardId: ward }),
+    ...(status !== "all" && { isActive: status === "active" }),
+  };
+
+  const users = await prisma.user.findMany({
+    where: whereClause,
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Users export generated",
+    data: { users },
+  });
+});
+
 // @desc    Create new user
 // @route   POST /api/admin/users
 // @access  Private (Admin only)
