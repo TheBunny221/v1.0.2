@@ -57,7 +57,7 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
   // Validate file type and size
   const validateFile = (file: File): string | null => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    const allowedTypes = ["image/jpeg", "image/png"];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
