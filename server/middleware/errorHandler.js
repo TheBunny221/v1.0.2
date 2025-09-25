@@ -1,88 +1,95 @@
-// Error handler middleware
-export const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
+import logger from "../utils/logger.js";
 
-  // Log error
-  console.error(err);
+// Map internal errors to safe error codes and user-friendly messages
+const mapErrorToResponse = (err) => {
+  // Default
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Internal server error";
+  let errorCode = err.errorCode || "SERVER_ERROR";
 
-  // Mongoose bad ObjectId
+  // Known cases
   if (err.name === "CastError") {
-    const message = "Resource not found";
-    error = {
-      statusCode: 404,
-      message,
-    };
+    statusCode = 404;
+    message = "Resource not found";
+    errorCode = "RESOURCE_NOT_FOUND";
   }
 
-  // Mongoose duplicate key
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
-    const message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
-    error = {
-      statusCode: 400,
-      message,
-    };
+    const field = err.keyValue ? Object.keys(err.keyValue)[0] : "resource";
+    statusCode = 400;
+    message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
+    errorCode = "DUPLICATE_RESOURCE";
   }
 
-  // Mongoose validation error
   if (err.name === "ValidationError") {
-    const message = Object.values(err.errors)
-      .map((val) => val.message)
-      .join(", ");
-    error = {
-      statusCode: 400,
-      message,
-    };
+    statusCode = 422;
+    try {
+      const details = Object.values(err.errors).map((val) => val.message);
+      message = details.join(", ");
+    } catch {}
+    errorCode = "VALIDATION_ERROR";
   }
 
-  // JWT errors
   if (err.name === "JsonWebTokenError") {
-    const message = "Invalid token";
-    error = {
-      statusCode: 401,
-      message,
-    };
+    statusCode = 401;
+    message = "Invalid authentication token";
+    errorCode = "TOKEN_INVALID";
   }
 
   if (err.name === "TokenExpiredError") {
-    const message = "Token expired";
-    error = {
-      statusCode: 401,
-      message,
-    };
+    statusCode = 401;
+    message = "Session expired. Please login again.";
+    errorCode = "TOKEN_EXPIRED";
   }
 
-  // File upload errors
   if (err.code === "LIMIT_FILE_SIZE") {
-    const message = "File too large";
-    error = {
-      statusCode: 400,
-      message,
-    };
+    statusCode = 400;
+    message = "File too large";
+    errorCode = "FILE_TOO_LARGE";
   }
 
   if (err.code === "LIMIT_FILE_COUNT") {
-    const message = "Too many files";
-    error = {
-      statusCode: 400,
-      message,
-    };
+    statusCode = 400;
+    message = "Too many files";
+    errorCode = "TOO_MANY_FILES";
   }
 
-  // Network errors
   if (err.code === "ENOTFOUND" || err.code === "ECONNREFUSED") {
-    const message = "Service temporarily unavailable";
-    error = {
-      statusCode: 503,
-      message,
-    };
+    statusCode = 503;
+    message = "Service temporarily unavailable";
+    errorCode = "SERVICE_UNAVAILABLE";
   }
 
-  res.status(error.statusCode || 500).json({
+  return { statusCode, message, errorCode };
+};
+
+// Error handler middleware
+export const errorHandler = (err, req, res, next) => {
+  const { statusCode, message, errorCode } = mapErrorToResponse(err);
+
+  // Log full error details for developers
+  try {
+    logger.error(message, {
+      module: "errorHandler",
+      statusCode,
+      errorCode,
+      path: req.originalUrl,
+      method: req.method,
+      stack: err.stack,
+      headers: req.headers,
+      query: req.query,
+      body: req.body,
+    });
+  } catch (logErr) {
+    console.error("Logging failed:", logErr);
+    console.error(err);
+  }
+
+  res.status(statusCode).json({
     success: false,
-    message: error.message || "Server Error",
+    message,
     data: null,
+    errorCode,
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
@@ -90,7 +97,8 @@ export const errorHandler = (err, req, res, next) => {
 // 404 handler
 export const notFound = (req, res, next) => {
   const error = new Error(`Not found - ${req.originalUrl}`);
-  res.status(404);
+  error.statusCode = 404;
+  error.errorCode = "NOT_FOUND";
   next(error);
 };
 
