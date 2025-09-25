@@ -1034,7 +1034,7 @@ const MaintenanceTasks: React.FC = () => {
                   </div>
 
                   <div className="flex flex-col md:flex-row md:justify-between gap-3 items-stretch md:items-center">
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
                       <Button
                         variant="outline"
                         size="sm"
