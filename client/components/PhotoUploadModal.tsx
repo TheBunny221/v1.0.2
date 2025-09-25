@@ -72,38 +72,43 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   };
 
   // Handle file selection
-  const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
-    if (!selectedFiles) return;
+  const handleFileSelect = useCallback(
+    (selectedFiles: FileList | null) => {
+      if (!selectedFiles) return;
 
-    const validFiles: PhotoFile[] = [];
-    const errors: string[] = [];
+      const validFiles: PhotoFile[] = [];
+      const errors: string[] = [];
 
-    const remaining = Math.max(0, MAX_FILES - photos.length);
-    const incoming = Array.from(selectedFiles).slice(0, remaining);
+      const remaining = Math.max(0, MAX_FILES - photos.length);
+      const incoming = Array.from(selectedFiles).slice(0, remaining);
 
-    if (selectedFiles.length > remaining) {
-      errors.push(`You can upload up to ${MAX_FILES} photos. ${selectedFiles.length - remaining} file(s) were ignored.`);
-    }
-
-    incoming.forEach((file) => {
-      const error = validateFile(file);
-      if (error) {
-        errors.push(`${file.name}: ${error}`);
-      } else {
-        const photoFile: PhotoFile = {
-          file,
-          preview: URL.createObjectURL(file),
-          id: Math.random().toString(36).substr(2, 9),
-        };
-        validFiles.push(photoFile);
+      if (selectedFiles.length > remaining) {
+        errors.push(
+          `You can upload up to ${MAX_FILES} photos. ${selectedFiles.length - remaining} file(s) were ignored.`,
+        );
       }
-    });
 
-    setUploadError(errors.length > 0 ? errors.join(", ") : null);
-    if (validFiles.length > 0) {
-      setPhotos((prev) => [...prev, ...validFiles]);
-    }
-  }, [photos.length]);
+      incoming.forEach((file) => {
+        const error = validateFile(file);
+        if (error) {
+          errors.push(`${file.name}: ${error}`);
+        } else {
+          const photoFile: PhotoFile = {
+            file,
+            preview: URL.createObjectURL(file),
+            id: Math.random().toString(36).substr(2, 9),
+          };
+          validFiles.push(photoFile);
+        }
+      });
+
+      setUploadError(errors.length > 0 ? errors.join(", ") : null);
+      if (validFiles.length > 0) {
+        setPhotos((prev) => [...prev, ...validFiles]);
+      }
+    },
+    [photos.length],
+  );
 
   // Discover cameras when modal opens
   useEffect(() => {
@@ -442,7 +447,11 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
           {/* Camera Error */}
           {cameraError && (
-            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg" role="alert" aria-live="assertive">
+            <div
+              className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg"
+              role="alert"
+              aria-live="assertive"
+            >
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{cameraError}</span>
             </div>
@@ -451,7 +460,9 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
           {/* Selected Photos */}
           {photos.length > 0 && (
             <div>
-              <Label>Selected Photos ({photos.length}/{MAX_FILES})</Label>
+              <Label>
+                Selected Photos ({photos.length}/{MAX_FILES})
+              </Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
                 {photos.map((photo) => (
                   <div key={photo.id} className="relative group">
@@ -493,7 +504,11 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
           {/* Upload Error */}
           {uploadError && (
-            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg" role="alert" aria-live="assertive">
+            <div
+              className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg"
+              role="alert"
+              aria-live="assertive"
+            >
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{uploadError}</span>
             </div>

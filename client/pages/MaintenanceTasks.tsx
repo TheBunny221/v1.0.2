@@ -31,7 +31,9 @@ import {
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
-const PhotoUploadModal = React.lazy(() => import("../components/PhotoUploadModal"));
+const PhotoUploadModal = React.lazy(
+  () => import("../components/PhotoUploadModal"),
+);
 import {
   Wrench,
   Calendar,
@@ -640,7 +642,14 @@ const MaintenanceTasks: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className={["mt-3", mobileFiltersOpen ? "" : "hidden", "md:block"].join(" ")} id="mobile-filters">
+        <div
+          className={[
+            "mt-3",
+            mobileFiltersOpen ? "" : "hidden",
+            "md:block",
+          ].join(" ")}
+          id="mobile-filters"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
             {[
               // {
@@ -1049,7 +1058,11 @@ const MaintenanceTasks: React.FC = () => {
                       {task.photo ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-11 md:h-9">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-11 md:h-9"
+                            >
                               <Camera className="h-3 w-3 mr-1" />
                               Photos
                             </Button>
@@ -1116,7 +1129,11 @@ const MaintenanceTasks: React.FC = () => {
                         </Button>
                       )}
                       <Link to={`/tasks/${task.id}`}>
-                        <Button variant="outline" size="sm" className="h-11 md:h-9">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-11 md:h-9"
+                        >
                           Details
                         </Button>
                       </Link>
@@ -1199,7 +1216,15 @@ const MaintenanceTasks: React.FC = () => {
 
       {/* Photo Upload Modal */}
       {selectedTaskForPhotos && (
-        <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-black/10"><div className="rounded-md bg-white px-4 py-2 text-sm shadow">Loading…</div></div>}>
+        <React.Suspense
+          fallback={
+            <div className="fixed inset-0 z-50 grid place-items-center bg-black/10">
+              <div className="rounded-md bg-white px-4 py-2 text-sm shadow">
+                Loading…
+              </div>
+            </div>
+          }
+        >
           <PhotoUploadModal
             isOpen={isPhotoUploadOpen}
             onClose={() => {
