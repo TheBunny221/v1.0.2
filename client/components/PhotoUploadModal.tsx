@@ -28,6 +28,8 @@ interface PhotoFile {
   id: string;
 }
 
+const MAX_FILES = 10;
+
 const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   isOpen,
   onClose,
@@ -55,11 +57,11 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
   // Validate file type and size
   const validateFile = (file: File): string | null => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    const allowedTypes = ["image/jpeg", "image/png"];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      return "Only JPEG, PNG, and WebP images are allowed";
+      return "Only JPEG and PNG images are allowed";
     }
 
     if (file.size > maxSize) {
@@ -70,34 +72,43 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   };
 
   // Handle file selection
-  const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
-    if (!selectedFiles) return;
+  const handleFileSelect = useCallback(
+    (selectedFiles: FileList | null) => {
+      if (!selectedFiles) return;
 
-    const validFiles: PhotoFile[] = [];
-    const errors: string[] = [];
+      const validFiles: PhotoFile[] = [];
+      const errors: string[] = [];
 
-    Array.from(selectedFiles).forEach((file) => {
-      const error = validateFile(file);
-      if (error) {
-        errors.push(`${file.name}: ${error}`);
-      } else {
-        const photoFile: PhotoFile = {
-          file,
-          preview: URL.createObjectURL(file),
-          id: Math.random().toString(36).substr(2, 9),
-        };
-        validFiles.push(photoFile);
+      const remaining = Math.max(0, MAX_FILES - photos.length);
+      const incoming = Array.from(selectedFiles).slice(0, remaining);
+
+      if (selectedFiles.length > remaining) {
+        errors.push(
+          `You can upload up to ${MAX_FILES} photos. ${selectedFiles.length - remaining} file(s) were ignored.`,
+        );
       }
-    });
 
-    if (errors.length > 0) {
-      setUploadError(errors.join(", "));
-    } else {
-      setUploadError(null);
-    }
+      incoming.forEach((file) => {
+        const error = validateFile(file);
+        if (error) {
+          errors.push(`${file.name}: ${error}`);
+        } else {
+          const photoFile: PhotoFile = {
+            file,
+            preview: URL.createObjectURL(file),
+            id: Math.random().toString(36).substr(2, 9),
+          };
+          validFiles.push(photoFile);
+        }
+      });
 
-    setPhotos((prev) => [...prev, ...validFiles]);
-  }, []);
+      setUploadError(errors.length > 0 ? errors.join(", ") : null);
+      if (validFiles.length > 0) {
+        setPhotos((prev) => [...prev, ...validFiles]);
+      }
+    },
+    [photos.length],
+  );
 
   // Discover cameras when modal opens
   useEffect(() => {
@@ -349,7 +360,8 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/jpeg,image/png,image/webp,image/jpg"
+                accept="image/jpeg,image/png"
+                capture="environment"
                 onChange={(e) => handleFileSelect(e.target.files)}
                 className="hidden"
               />
@@ -358,15 +370,28 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
             <div>
               <Label>Use Camera</Label>
               {!isCameraActive ? (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start mt-1"
-                  onClick={startCamera}
-                  disabled={isUploading || !cameraSupported}
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Open Camera
-                </Button>
+                <div className="flex gap-2 mt-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1 justify-start"
+                    onClick={startCamera}
+                    disabled={isUploading || !cameraSupported}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Open Camera
+                  </Button>
+                  {photos.length > 0 && cameraSupported && (
+                    <Button
+                      variant="outline"
+                      className="justify-start"
+                      onClick={startCamera}
+                      disabled={isUploading}
+                      aria-label="Retake with Camera"
+                    >
+                      Retake
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <Button
                   variant="outline"
@@ -422,7 +447,11 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
           {/* Camera Error */}
           {cameraError && (
-            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+            <div
+              className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg"
+              role="alert"
+              aria-live="assertive"
+            >
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{cameraError}</span>
             </div>
@@ -431,7 +460,9 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
           {/* Selected Photos */}
           {photos.length > 0 && (
             <div>
-              <Label>Selected Photos ({photos.length})</Label>
+              <Label>
+                Selected Photos ({photos.length}/{MAX_FILES})
+              </Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
                 {photos.map((photo) => (
                   <div key={photo.id} className="relative group">
@@ -445,6 +476,7 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                       size="sm"
                       className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() => removePhoto(photo.id)}
+                      aria-label="Remove photo"
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -472,7 +504,11 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
           {/* Upload Error */}
           {uploadError && (
-            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+            <div
+              className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg"
+              role="alert"
+              aria-live="assertive"
+            >
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{uploadError}</span>
             </div>
@@ -485,9 +521,9 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
               <span className="font-medium">Requirements:</span>
             </div>
             <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>Supported formats: JPEG, PNG, WebP</li>
+              <li>Supported formats: JPEG, PNG</li>
               <li>Maximum file size: 5MB per image</li>
-              <li>Maximum 10 photos at once</li>
+              <li>Maximum {MAX_FILES} photos at once</li>
             </ul>
           </div>
 
