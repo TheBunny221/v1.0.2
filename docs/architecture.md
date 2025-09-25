@@ -1,4 +1,4 @@
-# Cochin Smart City Complaint Management System - Architecture
+# NLC-CMS Complaint Management System - Architecture
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@
 
 ## High-level System Overview
 
-The Cochin Smart City Complaint Management System is a comprehensive full-stack web application designed to streamline civic complaint handling between citizens and municipal authorities. The system follows a modern microservice-inspired architecture with clear separation of concerns.
+The NLC-CMS Complaint Management System is a comprehensive full-stack web application designed to streamline civic complaint handling between citizens and municipal authorities. The system follows a modern microservice-inspired architecture with clear separation of concerns.
 
 ### Core Architecture Principles
 
@@ -61,7 +61,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 │  • Ward Officers                                           │
 │  • Maintenance Teams                                       │
 │  • System Administrators                                   │
-└─────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────��──────────────┘
 ```
 
 ---
@@ -333,7 +333,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 ### Entity Relationship Diagram
 
 ```
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+┌──���──────────┐       ┌─────────────┐       ┌─────────────┐
 │    Ward     │       │    User     │       │ SubZone     │
 ├─────────────┤       ├─────────────┤       ├─────────────┤
 │ id (PK)     │◄─────┤│ wardId (FK) │       │ id (PK)     │
@@ -368,7 +368,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
                       │ id (PK)     │
                       │ complaintId │
                       │ fileName    │
-                      │ mimeType    │
+                      ��� mimeType    │
                       │ size        │
                       └─────────────┘
 ```
@@ -649,7 +649,7 @@ router.use(authorize("ADMINISTRATOR")); // Role authorization
 ### Production Environment
 
 ```
-┌─────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────���──────────────┐
 │                   PRODUCTION SETUP                     │
 ├─────────────────────────────────────────────────────────┤
 │                        Nginx                            │
@@ -833,7 +833,7 @@ cochin-smart-city/
 ├── 📄 vite.config.server.ts           # Server-side Vite config
 ├── 📄 tsconfig.json                   # TypeScript configuration
 ├── 📄 vitest.config.ts                # Vitest testing configuration
-├── 📄 cypress.config.ts               # Cypress E2E configuration
+├─�� 📄 cypress.config.ts               # Cypress E2E configuration
 ├── 📄 postcss.config.js               # PostCSS configuration
 ├── 📄 components.json                 # UI components registry
 ├── 📄 index.html                      # HTML entry point
@@ -1025,6 +1025,6 @@ const cachedWards = await redis.get("wards:all");
 
 ---
 
-This architecture document provides a comprehensive overview of the Cochin Smart City Complaint Management System. It serves as a reference for developers, system administrators, and stakeholders to understand the system's design, implementation, and operational characteristics.
+This architecture document provides a comprehensive overview of the NLC-CMS Complaint Management System. It serves as a reference for developers, system administrators, and stakeholders to understand the system's design, implementation, and operational characteristics.
 
 For specific implementation details, refer to the individual documentation files in the `/docs` folder and the inline code comments throughout the codebase.

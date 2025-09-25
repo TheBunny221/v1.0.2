@@ -1,4 +1,4 @@
-# Cochin Smart City Complaint Management System - Architecture
+# NLC-CMS Complaint Management System - Architecture
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@
 
 ## High-level System Overview
 
-The Cochin Smart City Complaint Management System is a comprehensive full-stack web application designed to streamline civic complaint handling between citizens and municipal authorities. The system follows a modern microservice-inspired architecture with clear separation of concerns.
+The NLC-CMS Complaint Management System is a comprehensive full-stack web application designed to streamline civic complaint handling between citizens and municipal authorities. The system follows a modern microservice-inspired architecture with clear separation of concerns.
 
 ### Core Architecture Principles
 
@@ -48,7 +48,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
 │  │   FRONTEND      │  │    BACKEND      │  │   DATABASE   │ │
 │  │   (React SPA)   │◄─┤   (Express.js)  │◄─┤  (SQLite/    │ │
-│  │                 │  │                 │  │  PostgreSQL) │ │
+│  │                 │  │                 ��  │  PostgreSQL) │ │
 │  └─────────────────┘  └─────────────────┘  └──────────────┘ │
 └───��──────��──────────────────────────────────────────────────┘
                               │
@@ -61,7 +61,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
 │  • Ward Officers                                           │
 │  • Maintenance Teams                                       │
 │  • System Administrators                                   │
-└─────────────────────────────────────────────────────────────┘
+└───────────────────────���─────────────────────────────────────┘
 ```
 
 ---
@@ -366,7 +366,7 @@ The Cochin Smart City Complaint Management System is a comprehensive full-stack 
                       │ Attachment  │
                       ├─────────────┤
                       │ id (PK)     │
-                      │ complaintId │
+                      │ complaintId ���
                       │ fileName    │
                       │ mimeType    │
                       │ size        │
@@ -755,7 +755,7 @@ cochin-smart-city/
 │   │   │   ├── 📄 authSlice.ts        # Authentication state
 │   │   │   ├── 📄 complaintsSlice.ts  # Complaints state
 │   │   │   ├── 📄 guestSlice.ts       # Guest user state
-│   │   │   ├── 📄 uiSlice.ts          # UI state
+│   │   │   ��── 📄 uiSlice.ts          # UI state
 │   │   │   └── 📄 dataSlice.ts        # General data state
 │   │   ├── 📁 resources/              # Static resources
 │   │   │   └── 📄 translations.ts     # i18n translations
@@ -832,7 +832,7 @@ cochin-smart-city/
 ├── 📄 vite.config.ts                  # Vite build configuration
 ├── 📄 vite.config.server.ts           # Server-side Vite config
 ├── 📄 tsconfig.json                   # TypeScript configuration
-├── 📄 vitest.config.ts                # Vitest testing configuration
+├��─ 📄 vitest.config.ts                # Vitest testing configuration
 ├── 📄 cypress.config.ts               # Cypress E2E configuration
 ├── 📄 postcss.config.js               # PostCSS configuration
 ├─�� 📄 components.json                 # UI components registry
@@ -1025,6 +1025,6 @@ const cachedWards = await redis.get("wards:all");
 
 ---
 
-This architecture document provides a comprehensive overview of the Cochin Smart City Complaint Management System. It serves as a reference for developers, system administrators, and stakeholders to understand the system's design, implementation, and operational characteristics.
+This architecture document provides a comprehensive overview of the NLC-CMS Complaint Management System. It serves as a reference for developers, system administrators, and stakeholders to understand the system's design, implementation, and operational characteristics.
 
 For specific implementation details, refer to the individual documentation files in the `/docs` folder and the inline code comments throughout the codebase.

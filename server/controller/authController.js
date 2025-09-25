@@ -35,10 +35,10 @@ const comparePassword = async (enteredPassword, hashedPassword) => {
 
 // Helper function to check if password is a valid hashed string
 const isValidPassword = (password) => {
-  if (!password || typeof password !== 'string') {
+  if (!password || typeof password !== "string") {
     return false;
   }
-  
+
   // Check if password is a JSON object (from password reset flow)
   try {
     JSON.parse(password);
@@ -139,10 +139,10 @@ export const register = asyncHandler(async (req, res) => {
   // Send OTP email
   const emailSent = await sendEmail({
     to: user.email,
-    subject: "Complete Your Registration - Cochin Smart City",
+    subject: "Complete Your Registration - NLC-CMS",
     text: `Welcome! Please verify your email to complete registration. Your OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
-      <h2>Welcome to Cochin Smart City!</h2>
+      <h2>Welcome to NLC-CMS!</h2>
       <p>Thank you for registering. To complete your registration, please verify your email with the OTP below:</p>
       <h3 style="color: #2563eb; font-size: 24px; letter-spacing: 2px;">${otpCode}</h3>
       <p>This OTP will expire in 10 minutes.</p>
@@ -250,7 +250,7 @@ export const login = asyncHandler(async (req, res) => {
       } catch (updateError) {
         retryCount++;
         logger.warn(`Login update attempt ${retryCount} failed`, {
-          module: 'auth',
+          module: "auth",
           error: updateError.message,
           retryCount,
           userId: user.id,
@@ -261,24 +261,30 @@ export const login = asyncHandler(async (req, res) => {
           updateError.message.includes("READONLY")
         ) {
           // For readonly database, continue with login but log the issue
-          logger.error("Database is readonly - cannot update last login timestamp", {
-            module: 'auth',
-            userId: user.id,
-            error: 'DATABASE_READONLY',
-          });
+          logger.error(
+            "Database is readonly - cannot update last login timestamp",
+            {
+              module: "auth",
+              userId: user.id,
+              error: "DATABASE_READONLY",
+            },
+          );
           logger.error("Database permission issue needs immediate attention", {
-            module: 'auth',
-            severity: 'critical',
+            module: "auth",
+            severity: "critical",
           });
           break; // Don't retry for readonly errors
         }
 
         if (retryCount >= maxRetries) {
-          logger.error(`Failed to update last login after ${maxRetries} attempts`, {
-            module: 'auth',
-            userId: user.id,
-            maxRetries,
-          });
+          logger.error(
+            `Failed to update last login after ${maxRetries} attempts`,
+            {
+              module: "auth",
+              userId: user.id,
+              maxRetries,
+            },
+          );
           // Continue with login even if update fails
         } else {
           // Wait before retry
@@ -307,7 +313,7 @@ export const login = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logger.error("Login error occurred", {
-      module: 'auth',
+      module: "auth",
       error: error.message,
       stack: error.stack,
     });
@@ -393,7 +399,7 @@ export const loginWithOTP = asyncHandler(async (req, res) => {
   // Send OTP email
   const emailSent = await sendEmail({
     to: user.email,
-    subject: "Login OTP - Cochin Smart City",
+    subject: "Login OTP - NLC-CMS",
     text: `Your login OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `<p>Your login OTP is: <strong>${otpCode}</strong></p><p>This OTP will expire in 10 minutes.</p>`,
   });
@@ -540,7 +546,7 @@ export const sendPasswordSetup = asyncHandler(async (req, res) => {
 
   const emailSent = await sendEmail({
     to: user.email,
-    subject: "Set Your Password - Cochin Smart City",
+    subject: "Set Your Password - NLC-CMS",
     text: `Click the following link to set your password: ${resetUrl}`,
     html: `<p>Click <a href="${resetUrl}">here</a> to set your password.</p><p>This link will expire in 10 minutes.</p>`,
   });
@@ -968,7 +974,7 @@ export const resendRegistrationOTP = asyncHandler(async (req, res) => {
   // Send OTP email
   const emailSent = await sendEmail({
     to: user.email,
-    subject: "Complete Your Registration - Cochin Smart City (Resent)",
+    subject: "Complete Your Registration - NLC-CMS (Resent)",
     text: `Your new verification OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
       <h2>New Verification OTP</h2>
