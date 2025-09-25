@@ -1094,7 +1094,7 @@ const MaintenanceTasks: React.FC = () => {
                         Progress
                       </Button>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto md:justify-end">
                       {task.status === "ASSIGNED" && (
                         <Button
                           size="sm"
