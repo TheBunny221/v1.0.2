@@ -479,7 +479,7 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
           {/* Upload Error */}
           {uploadError && (
-            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg" role="alert" aria-live="assertive">
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{uploadError}</span>
             </div>
