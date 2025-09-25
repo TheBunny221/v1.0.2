@@ -101,7 +101,7 @@ class FrontendLogger {
       if (line && !line.includes('logger.ts') && !line.includes('node_modules')) {
         // Try to extract component/module name from the stack trace
         const match = line.match(/at\s+(?:.*\.)?(\w+)/);
-        if (match) {
+        if (match && match[1]) {
           return { component: match[1] };
         }
       }
@@ -251,13 +251,13 @@ class FrontendLogger {
   withUser(userId: string, sessionId?: string) {
     return {
       error: (message: string, meta: LogMeta = {}) => 
-        this.error(message, { ...meta, userId, sessionId }),
+        this.error(message, { ...meta, userId, ...(sessionId ? { sessionId } : {}) }),
       warn: (message: string, meta: LogMeta = {}) => 
-        this.warn(message, { ...meta, userId, sessionId }),
+        this.warn(message, { ...meta, userId, ...(sessionId ? { sessionId } : {}) }),
       info: (message: string, meta: LogMeta = {}) => 
-        this.info(message, { ...meta, userId, sessionId }),
+        this.info(message, { ...meta, userId, ...(sessionId ? { sessionId } : {}) }),
       debug: (message: string, meta: LogMeta = {}) => 
-        this.debug(message, { ...meta, userId, sessionId }),
+        this.debug(message, { ...meta, userId, ...(sessionId ? { sessionId } : {}) }),
     };
   }
 

@@ -31,21 +31,21 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Unauthorized = lazy(() => import("./pages/Unauthorized"));
 
 // Role-specific dashboards
-const CitizenDashboard = lazy(() => import("./pages/CitizenDashboard"));
-const WardOfficerDashboard = lazy(() => import("./pages/WardOfficerDashboard"));
-const MaintenanceDashboard = lazy(() => import("./pages/MaintenanceDashboard"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+// const CitizenDashboard = lazy(() => import("./pages/CitizenDashboard"));
+// const WardOfficerDashboard = lazy(() => import("./pages/WardOfficerDashboard"));
+// const MaintenanceDashboard = lazy(() => import("./pages/MaintenanceDashboard"));
+// const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 // Complaint management
 const ComplaintsList = lazy(() => import("./pages/ComplaintsList"));
 const ComplaintDetails = lazy(() => import("./pages/ComplaintDetails"));
-const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
-const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
-const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
-const UnifiedComplaintForm = lazy(() => import("./pages/UnifiedComplaintForm"));
-const QuickComplaintPage = lazy(() => import("./pages/QuickComplaintPage"));
+// const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
+// const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
+// const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
+// const UnifiedComplaintForm = lazy(() => import("./pages/UnifiedComplaintForm"));
+// const QuickComplaintPage = lazy(() => import("./pages/QuickComplaintPage"));
 const GuestTrackComplaint = lazy(() => import("./pages/GuestTrackComplaint"));
-const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
+// const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
 const GuestDashboard = lazy(() => import("./pages/GuestDashboard"));
 
 // Ward Officer pages
@@ -66,7 +66,7 @@ const AdminLanguages = lazy(() => import("./pages/AdminLanguages"));
 const Messages = lazy(() => import("./pages/Messages"));
 
 // Settings
-const Settings = lazy(() => import("./pages/Settings"));
+// const Settings = lazy(() => import("./pages/Settings"));
 
 // Loading component
 const LoadingFallback: React.FC = () => (
@@ -178,7 +178,7 @@ const App: React.FC = () => {
                             </UnifiedLayout>
                           }
                         />
-                        <Route
+                       {/* <Route
                           path="/complaints/create"
                           element={
                             <UnifiedLayout>
@@ -214,7 +214,7 @@ const App: React.FC = () => {
                               </RoleBasedRoute>
                             </UnifiedLayout>
                           }
-                        />
+                        />*/}
                         <Route
                           path="/complaints/:id"
                           element={
@@ -298,7 +298,7 @@ const App: React.FC = () => {
                           }
                         />
 
-                        {/* Communication routes */}
+                        {/* Communication routes
                         <Route
                           path="/messages"
                           element={
@@ -313,7 +313,7 @@ const App: React.FC = () => {
                               </RoleBasedRoute>
                             </UnifiedLayout>
                           }
-                        />
+                        /> */}
 
                         {/* Unified Reports route */}
                         <Route
@@ -392,7 +392,7 @@ const App: React.FC = () => {
                             </UnifiedLayout>
                           }
                         />
-                        <Route
+                        {/* <Route
                           path="/settings"
                           element={
                             <UnifiedLayout>
@@ -408,7 +408,7 @@ const App: React.FC = () => {
                               </RoleBasedRoute>
                             </UnifiedLayout>
                           }
-                        />
+                        /> */}
 
                         {/* Catch all route */}
                         <Route path="*" element={<Navigate to="/" replace />} />

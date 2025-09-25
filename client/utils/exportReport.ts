@@ -64,9 +64,9 @@ export async function exportComplaintReport(complaint: any, role: string, option
   const margin = 40;
   let y = margin;
 
-  const gray = [245, 247, 250];
-  const primary = [28, 100, 242];
-  const muted = [100, 116, 139];
+  const gray: [number, number, number] = [245, 247, 250];
+  const primary: [number, number, number] = [28, 100, 242];
+  const muted: [number, number, number] = [100, 116, 139];
 
   const ensureSpace = (needed = 24) => {
     if (y + needed > pageHeight - margin) {
@@ -85,7 +85,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
     for (let i = 1; i <= total; i++) {
       doc.setPage(i);
       // Header bar
-      doc.setFillColor(...gray as any);
+      doc.setFillColor(...gray);
       doc.rect(0, 0, pageWidth, 64, "F");
 
       // Logo (left)
@@ -125,7 +125,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
 
   const section = (title: string) => {
     ensureSpace(36);
-    doc.setFillColor(...gray as any);
+    doc.setFillColor(...gray);
     doc.roundedRect(margin, y, pageWidth - margin * 2, 28, 6, 6, "F");
     doc.setTextColor(30);
     doc.setFont("helvetica", "bold");

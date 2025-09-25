@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import en from "../resources/en.json";
 import hi from "../resources/hi.json";
 import ml from "../resources/ml.json";
-import { mergeWithFallback } from "@/utils/translationHelpers";
+import { mergeWithFallback } from "../../utils/translationHelpers";
 
 // Language type
 export type Language = "en" | "hi" | "ml";
@@ -241,6 +241,27 @@ export interface Translation {
     table: string;
     summary: string;
     details: string;
+  };
+  profile: {
+    personalInfo: string;
+    security: string;
+    preferences: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    language: string;
+    ward: string;
+    department: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+    changePassword: string;
+    passwordSetup: string;
+    sendSetupEmail: string;
+    passwordRequirements: string;
+    editProfile: string;
+    saveChanges: string;
+    cancel: string;
   };
   messages: {
     complaintRegistered: string;

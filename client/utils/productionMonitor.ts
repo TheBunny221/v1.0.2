@@ -2,6 +2,7 @@
  * Production-Grade Monitoring Utility
  * Tracks context initialization, API calls, and performance metrics
  */
+import { useEffect } from 'react';
 
 interface MonitoringMetrics {
   contextInitializations: Map<string, number>;
@@ -261,7 +262,7 @@ export const productionMonitor = new ProductionMonitor();
 
 // React hook for component render tracking
 export const useRenderTracking = (componentName: string): void => {
-  React.useEffect(() => {
+  useEffect(() => {
     productionMonitor.trackRender(componentName);
   });
 };

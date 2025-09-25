@@ -50,7 +50,9 @@ const isTokenExpired = (token: string): boolean => {
   try {
     // Simple JWT expiration check without verification
     // Just decode the payload to check exp claim
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const parts = token.split(".");
+    if (parts.length !== 3 || !parts[1]) return true;
+    const payload = JSON.parse(atob(parts[1]));
     const now = Math.floor(Date.now() / 1000);
     return payload.exp && payload.exp < now;
   } catch {
@@ -92,7 +94,6 @@ const initialState: AuthState = {
   otpStep: "none",
   requiresPasswordSetup: false,
   registrationStep: "none",
-  registrationData: undefined,
 };
 
 // Helper function to handle API errors with user-friendly messages
@@ -541,8 +542,8 @@ const authSlice = createSlice({
     resetAuth: () => initialState,
     resetOTPState: (state) => {
       state.otpStep = "none";
-      state.otpEmail = undefined;
-      state.otpExpiresAt = undefined;
+      delete state.otpEmail;
+      delete state.otpExpiresAt;
       state.requiresPasswordSetup = false;
     },
     setRequiresPasswordSetup: (state, action: PayloadAction<boolean>) => {
@@ -550,7 +551,7 @@ const authSlice = createSlice({
     },
     resetRegistrationState: (state) => {
       state.registrationStep = "none";
-      state.registrationData = undefined;
+      delete state.registrationData;
     },
     setCredentials: (
       state,
@@ -566,20 +567,23 @@ const authSlice = createSlice({
 
       // Set up token expiration warning
       try {
-        const payload = JSON.parse(atob(action.payload.token.split(".")[1]));
-        if (payload.exp) {
-          const expiresAt = payload.exp * 1000; // Convert to milliseconds
-          const now = Date.now();
-          const timeToExpiry = expiresAt - now;
+        const parts = action.payload.token.split(".");
+        if (parts.length === 3 && parts[1]) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.exp) {
+            const expiresAt = payload.exp * 1000; // Convert to milliseconds
+            const now = Date.now();
+            const timeToExpiry = expiresAt - now;
 
-          // Warn 5 minutes before expiration
-          if (timeToExpiry > 5 * 60 * 1000) {
-            setTimeout(
-              () => {
-                console.warn("🕒 Token will expire in 5 minutes");
-              },
-              timeToExpiry - 5 * 60 * 1000,
-            );
+            // Warn 5 minutes before expiration
+            if (timeToExpiry > 5 * 60 * 1000) {
+              setTimeout(
+                () => {
+                  console.warn("🕒 Token will expire in 5 minutes");
+                },
+                timeToExpiry - 5 * 60 * 1000,
+              );
+            }
           }
         }
       } catch (error) {
@@ -595,7 +599,7 @@ const authSlice = createSlice({
       state.otpStep = "none";
       state.requiresPasswordSetup = false;
       state.registrationStep = "none";
-      state.registrationData = undefined;
+      delete state.registrationData;
       // Remove token from localStorage
       localStorage.removeItem("token");
     },

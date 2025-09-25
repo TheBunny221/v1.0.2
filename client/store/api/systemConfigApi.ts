@@ -24,10 +24,6 @@ export const systemConfigApi = baseApi.injectEndpoints({
         providesTags: ["SystemConfig"],
         // Cache for 5 minutes to prevent continuous fetching
         keepUnusedDataFor: 300, // 5 minutes
-        // Only refetch when explicitly invalidated
-        refetchOnMountOrArgChange: false,
-        refetchOnFocus: false,
-        refetchOnReconnect: false,
       },
     ),
 

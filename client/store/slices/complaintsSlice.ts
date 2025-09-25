@@ -152,10 +152,13 @@ export const fetchWardDashboardStats = createAsyncThunk(
 // Initial state
 const initialState: ComplaintsState = {
   complaints: [],
-  currentComplaint: null,
-  isLoading: false,
+  loading: false,
   error: null,
+  selectedComplaint: null,
+  wardDashboardStats: null,
+  currentComplaint: null,
   filters: {},
+  isLoading: false,
   pagination: {
     currentPage: 1,
     totalPages: 0,
@@ -621,21 +624,16 @@ const complaintsSlice = createSlice({
 
         // Update complaint in list
         const index = state.complaints.findIndex((c) => c.id === complaintId);
-        if (index !== -1) {
-          state.complaints[index] = {
-            ...state.complaints[index],
-            citizenFeedback: feedback.comment,
-            rating: feedback.rating,
-          };
+        if (index !== -1 && state.complaints[index]) {
+          const complaint = state.complaints[index];
+          complaint.citizenFeedback = feedback.comment;
+          complaint.rating = feedback.rating;
         }
 
         // Update current complaint
         if (state.currentComplaint?.id === complaintId) {
-          state.currentComplaint = {
-            ...state.currentComplaint,
-            citizenFeedback: feedback.comment,
-            rating: feedback.rating,
-          };
+          state.currentComplaint.citizenFeedback = feedback.comment;
+          state.currentComplaint.rating = feedback.rating;
         }
 
         state.error = null;
