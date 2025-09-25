@@ -38,6 +38,7 @@ import logRoutes from "./routes/logRoutes.js";
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestLogger } from "./middleware/requestLogger.js";
+import responseFormatter from "./middleware/responseFormatter.js";
 
 // Enhanced request logging middleware using our logger
 const enhancedRequestLogger = (req, res, next) => {
