@@ -165,7 +165,9 @@ export function useFormValidation<T extends FieldValues>(
             setServerErrors(error.message);
           } else {
             setServerErrors(
-              translations?.messages?.errorOccurred || translations?.common?.error || "An error occurred",
+              translations?.messages?.errorOccurred ||
+                translations?.common?.error ||
+                "An error occurred",
             );
           }
 
