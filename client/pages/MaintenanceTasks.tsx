@@ -1098,6 +1098,7 @@ const MaintenanceTasks: React.FC = () => {
                       {task.status === "ASSIGNED" && (
                         <Button
                           size="sm"
+                          className="h-11 md:h-9"
                           onClick={() => handleStartWork(task.id)}
                         >
                           <Play className="h-3 w-3 mr-1" />
