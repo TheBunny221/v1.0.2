@@ -29,7 +29,9 @@ function isImage(mime?: string | null, url?: string) {
   if (mime && mime.startsWith("image/")) return true;
   if (!mime && url) {
     const lower = url.toLowerCase();
-    return [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"].some((ext) => lower.endsWith(ext));
+    return [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"].some((ext) =>
+      lower.endsWith(ext),
+    );
   }
   return false;
 }
@@ -45,7 +47,20 @@ function formatDate(dt?: string | number | Date) {
   if (!dt) return "-";
   const d = new Date(dt);
   const day = String(d.getDate()).padStart(2, "0");
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const mon = months[d.getMonth()];
   let hours = d.getHours();
   const minutes = String(d.getMinutes()).padStart(2, "0");
@@ -54,7 +69,11 @@ function formatDate(dt?: string | number | Date) {
   return `${day} ${mon} ${d.getFullYear()}, ${hours}:${minutes} ${ampm}`;
 }
 
-export async function exportComplaintReport(complaint: any, role: string, options: ExportOptions = {}) {
+export async function exportComplaintReport(
+  complaint: any,
+  role: string,
+  options: ExportOptions = {},
+) {
   const jsPDF = _jsPDF as unknown as typeof _jsPDF;
   const orientation = options.orientation || "p";
   const doc = new jsPDF({ orientation, unit: "pt", format: "a4" });
@@ -77,15 +96,17 @@ export async function exportComplaintReport(complaint: any, role: string, option
   };
 
   const headerTitle = options.title || "Complaint Report";
-  const appName = options.appName || "Cochin Smart City";
-  const logoDataUrl = options.appLogoUrl ? await fetchImageDataURL(options.appLogoUrl) : null;
+  const appName = options.appName || "NLC-CMS";
+  const logoDataUrl = options.appLogoUrl
+    ? await fetchImageDataURL(options.appLogoUrl)
+    : null;
 
   const drawHeaderFooter = () => {
     const total = doc.getNumberOfPages();
     for (let i = 1; i <= total; i++) {
       doc.setPage(i);
       // Header bar
-      doc.setFillColor(...gray);
+      doc.setFillColor(...(gray as any));
       doc.rect(0, 0, pageWidth, 64, "F");
 
       // Logo (left)
@@ -116,7 +137,11 @@ export async function exportComplaintReport(complaint: any, role: string, option
       doc.setFontSize(9);
       doc.setTextColor(120);
       const pageTxt = `Page ${i} of ${total}`;
-      doc.text(pageTxt, pageWidth - margin - doc.getTextWidth(pageTxt), footerY);
+      doc.text(
+        pageTxt,
+        pageWidth - margin - doc.getTextWidth(pageTxt),
+        footerY,
+      );
       const genTxt = `Generated ${formatDate(new Date())} • ${appName}`;
       doc.text(genTxt, margin, footerY);
     }
@@ -125,7 +150,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
 
   const section = (title: string) => {
     ensureSpace(36);
-    doc.setFillColor(...gray);
+    doc.setFillColor(...(gray as any));
     doc.roundedRect(margin, y, pageWidth - margin * 2, 28, 6, 6, "F");
     doc.setTextColor(30);
     doc.setFont("helvetica", "bold");
@@ -176,13 +201,21 @@ export async function exportComplaintReport(complaint: any, role: string, option
   if (complaint.submittedOn) kv("Submitted", formatDate(complaint.submittedOn));
 
   // Role-based: Assigned staff
-  const showAssignments = ["ADMINISTRATOR", "WARD_OFFICER", "MAINTENANCE_TEAM"].includes(role);
+  const showAssignments = [
+    "ADMINISTRATOR",
+    "WARD_OFFICER",
+    "MAINTENANCE_TEAM",
+  ].includes(role);
   if (showAssignments) {
     section("Assignments");
-    if (complaint.wardOfficer?.fullName) kv("Ward Officer", complaint.wardOfficer.fullName);
-    if (complaint.maintenanceTeam?.fullName) kv("Maintenance Team", complaint.maintenanceTeam.fullName);
-    if (complaint.assignedTo?.fullName) kv("Assigned To", complaint.assignedTo.fullName);
-    if (complaint.assignedOn) kv("Assigned On", formatDate(complaint.assignedOn));
+    if (complaint.wardOfficer?.fullName)
+      kv("Ward Officer", complaint.wardOfficer.fullName);
+    if (complaint.maintenanceTeam?.fullName)
+      kv("Maintenance Team", complaint.maintenanceTeam.fullName);
+    if (complaint.assignedTo?.fullName)
+      kv("Assigned To", complaint.assignedTo.fullName);
+    if (complaint.assignedOn)
+      kv("Assigned On", formatDate(complaint.assignedOn));
   }
 
   // Description (all roles)
@@ -192,7 +225,8 @@ export async function exportComplaintReport(complaint: any, role: string, option
   }
 
   // Status history / progress logs
-  const showStatus = role !== "CITIZEN" || (complaint.statusLogs && complaint.statusLogs.length);
+  const showStatus =
+    role !== "CITIZEN" || (complaint.statusLogs && complaint.statusLogs.length);
   if (showStatus) {
     section(role === "CITIZEN" ? "Status History" : "Status & Progress Logs");
     if (complaint.statusLogs && complaint.statusLogs.length > 0) {
@@ -234,28 +268,52 @@ export async function exportComplaintReport(complaint: any, role: string, option
   const teamImages: { name: string; dataUrl: string }[] = [];
   const teamDocs: { name: string; type: string; url: string }[] = [];
 
-  const pushAttachment = async (bucket: "comp" | "team", name: string, url: string, type?: string | null) => {
+  const pushAttachment = async (
+    bucket: "comp" | "team",
+    name: string,
+    url: string,
+    type?: string | null,
+  ) => {
     if (isImage(type || undefined, url)) {
       const dataUrl = await fetchImageDataURL(url);
-      if (dataUrl) (bucket === "comp" ? compImages : teamImages).push({ name, dataUrl });
+      if (dataUrl)
+        (bucket === "comp" ? compImages : teamImages).push({ name, dataUrl });
     } else {
-      (bucket === "comp" ? compDocs : teamDocs).push({ name, type: type || "", url });
+      (bucket === "comp" ? compDocs : teamDocs).push({
+        name,
+        type: type || "",
+        url,
+      });
     }
   };
 
   if (complaint.attachments && complaint.attachments.length) {
     for (const a of complaint.attachments) {
-      await pushAttachment("comp", a.originalName || a.fileName, a.url, a.mimeType);
+      await pushAttachment(
+        "comp",
+        a.originalName || a.fileName,
+        a.url,
+        a.mimeType,
+      );
     }
   }
   if (complaint.photos && complaint.photos.length) {
     for (const p of complaint.photos) {
-      await pushAttachment("team", p.originalName || p.fileName, p.photoUrl, "image/*");
+      await pushAttachment(
+        "team",
+        p.originalName || p.fileName,
+        p.photoUrl,
+        "image/*",
+      );
     }
   }
 
   section("Attachments");
-  const renderAttachmentGroup = (title: string, images: typeof compImages, docs: typeof compDocs) => {
+  const renderAttachmentGroup = (
+    title: string,
+    images: typeof compImages,
+    docs: typeof compDocs,
+  ) => {
     ensureSpace(18);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
@@ -276,7 +334,16 @@ export async function exportComplaintReport(complaint: any, role: string, option
       const maxW = pageWidth - margin * 2;
       const thumbW = Math.min(240, maxW);
       try {
-        doc.addImage(img.dataUrl, "JPEG", margin, y, thumbW, thumbW * 0.62, undefined, "FAST");
+        doc.addImage(
+          img.dataUrl,
+          "JPEG",
+          margin,
+          y,
+          thumbW,
+          thumbW * 0.62,
+          undefined,
+          "FAST",
+        );
         y += thumbW * 0.62 + 6;
         doc.setFontSize(9);
         doc.setTextColor(90);
@@ -319,7 +386,7 @@ export async function exportComplaintReport(complaint: any, role: string, option
     paragraph(
       complaint.status === "CLOSED" || complaint.status === "RESOLVED"
         ? "Your complaint has been addressed. Thank you for your patience."
-        : "Your complaint is being processed. You will be notified on updates."
+        : "Your complaint is being processed. You will be notified on updates.",
     );
   }
 

@@ -106,8 +106,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_FROM ||
-        "Cochin Smart City <no-reply@cochinsmartcity.local>",
+        process.env.EMAIL_FROM || "NLC-CMS <no-reply@cochinsmartcity.local>",
       to,
       subject,
       text,
@@ -147,14 +146,12 @@ export const sendOTPEmail = async (
   purpose = "verification",
 ) => {
   const subject =
-    purpose === "login"
-      ? "Login OTP - Cochin Smart City"
-      : "Verification OTP - Cochin Smart City";
+    purpose === "login" ? "Login OTP - NLC-CMS" : "Verification OTP - NLC-CMS";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">Cochin Smart City</h1>
+        <h1 style="color: white; margin: 0;">NLC-CMS</h1>
         <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
       </div>
       
@@ -193,7 +190,7 @@ export const sendOTPEmail = async (
       </div>
       
       <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
-        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 0;">This is an automated message from NLC-CMS E-Governance Portal.</p>
         <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
       </div>
     </div>
@@ -212,7 +209,7 @@ export const sendPasswordSetupEmail = async (email, fullName, resetUrl) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">Cochin Smart City</h1>
+        <h1 style="color: white; margin: 0;">NLC-CMS</h1>
         <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
       </div>
       
@@ -224,7 +221,7 @@ export const sendPasswordSetupEmail = async (email, fullName, resetUrl) => {
         </p>
         
         <p style="color: #666; font-size: 16px; line-height: 1.5;">
-          Welcome to Cochin Smart City E-Governance Portal! Your account has been created successfully.
+          Welcome to NLC-CMS E-Governance Portal! Your account has been created successfully.
           To secure your account and enable password-based login, please set your password by clicking the button below:
         </p>
         
@@ -250,7 +247,7 @@ export const sendPasswordSetupEmail = async (email, fullName, resetUrl) => {
       </div>
       
       <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
-        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 0;">This is an automated message from NLC-CMS E-Governance Portal.</p>
         <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
       </div>
     </div>
@@ -258,8 +255,8 @@ export const sendPasswordSetupEmail = async (email, fullName, resetUrl) => {
 
   return await sendEmail({
     to: email,
-    subject: "Set Your Password - Cochin Smart City",
-    text: `Hello ${fullName}, Please set your password for Cochin Smart City E-Governance Portal by clicking this link: ${resetUrl}. This link will expire in 10 minutes.`,
+    subject: "Set Your Password - NLC-CMS",
+    text: `Hello ${fullName}, Please set your password for NLC-CMS E-Governance Portal by clicking this link: ${resetUrl}. This link will expire in 10 minutes.`,
     html,
   });
 };
@@ -284,7 +281,7 @@ export const sendComplaintStatusEmail = async (
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">Cochin Smart City</h1>
+        <h1 style="color: white; margin: 0;">NLC-CMS</h1>
         <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
       </div>
       
@@ -314,7 +311,7 @@ export const sendComplaintStatusEmail = async (
       </div>
       
       <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
-        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 0;">This is an automated message from NLC-CMS E-Governance Portal.</p>
         <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
       </div>
     </div>
@@ -333,7 +330,7 @@ export const sendWelcomeEmail = async (email, fullName, complaintId) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">Welcome to Cochin Smart City!</h1>
+        <h1 style="color: white; margin: 0;">Welcome to NLC-CMS!</h1>
         <p style="color: white; margin: 5px 0 0 0;">E-Governance Portal</p>
       </div>
       
@@ -345,7 +342,7 @@ export const sendWelcomeEmail = async (email, fullName, complaintId) => {
         </p>
         
         <p style="color: #666; font-size: 16px; line-height: 1.5;">
-          Welcome to Cochin Smart City E-Governance Portal! Your complaint has been verified and you have been automatically registered as a citizen.
+          Welcome to NLC-CMS E-Governance Portal! Your complaint has been verified and you have been automatically registered as a citizen.
         </p>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4ade80;">
@@ -373,12 +370,12 @@ export const sendWelcomeEmail = async (email, fullName, complaintId) => {
         </ul>
         
         <p style="color: #666; font-size: 14px; margin-top: 30px;">
-          Thank you for choosing Cochin Smart City E-Governance Portal for your civic needs.
+          Thank you for choosing NLC-CMS E-Governance Portal for your civic needs.
         </p>
       </div>
       
       <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
-        <p style="margin: 0;">This is an automated message from Cochin Smart City E-Governance Portal.</p>
+        <p style="margin: 0;">This is an automated message from NLC-CMS E-Governance Portal.</p>
         <p style="margin: 5px 0 0 0;">Please do not reply to this email.</p>
       </div>
     </div>
@@ -386,8 +383,8 @@ export const sendWelcomeEmail = async (email, fullName, complaintId) => {
 
   return await sendEmail({
     to: email,
-    subject: "Welcome to Cochin Smart City - Account Created",
-    text: `Hello ${fullName}, Welcome to Cochin Smart City E-Governance Portal! Your complaint ${complaintId} has been verified and you have been registered as a citizen. You can now access your dashboard and track your complaint progress.`,
+    subject: "Welcome to NLC-CMS - Account Created",
+    text: `Hello ${fullName}, Welcome to NLC-CMS E-Governance Portal! Your complaint ${complaintId} has been verified and you have been registered as a citizen. You can now access your dashboard and track your complaint progress.`,
     html,
   });
 };

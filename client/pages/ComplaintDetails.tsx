@@ -388,13 +388,12 @@ const ComplaintDetails: React.FC = () => {
                                 : "N/A"}
                             </p>
                             <p
-                              className={`text-sm font-medium ${
-                                status === "OVERDUE"
+                              className={`text-sm font-medium ${status === "OVERDUE"
                                   ? "text-red-600"
                                   : status === "ON_TIME"
                                     ? "text-green-600"
                                     : "text-gray-600"
-                              }`}
+                                }`}
                             >
                               <strong>SLA Status:</strong>{" "}
                               {status === "ON_TIME"
@@ -553,135 +552,135 @@ const ComplaintDetails: React.FC = () => {
           {/* Attachment Logs (Admin & Ward Officer) */}
           {(user?.role === "ADMINISTRATOR" ||
             user?.role === "WARD_OFFICER") && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Upload className="h-5 w-5 mr-2" />
-                  Attachment Logs ({complaint?.attachments?.length || 0} files +{" "}
-                  {complaint?.photos?.length || 0} photos)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* File Attachments */}
-                <div>
-                  <h4 className="text-sm font-medium mb-2">
-                    Files ({complaint?.attachments?.length || 0})
-                  </h4>
-                  {complaint.attachments && complaint.attachments.length > 0 ? (
-                    <div className="space-y-2">
-                      {complaint.attachments.map((att: any) => (
-                        <div
-                          key={att.id}
-                          className="border-l-4 border-blue-300 pl-4 py-2 flex items-start justify-between"
-                        >
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              {new Date(att.uploadedAt).toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-800">
-                              {att.originalName || att.fileName}
-                              <span className="text-xs text-gray-500">
-                                {" "}
-                                • {att.mimeType} •{" "}
-                                {(att.size / 1024).toFixed(1)} KB
-                              </span>
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setPreviewItem({
-                                  url: att.url,
-                                  mimeType: att.mimeType,
-                                  name: att.originalName || att.fileName,
-                                  size: att.size,
-                                });
-                                setIsPreviewOpen(true);
-                              }}
-                            >
-                              Preview
-                            </Button>
-                            <a href={att.url} target="_blank" rel="noreferrer">
-                              <Button size="sm" variant="outline">
-                                <Download className="h-4 w-4 mr-1" />
-                                Download
-                              </Button>
-                            </a>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-gray-500">
-                      No file attachments.
-                    </div>
-                  )}
-                </div>
-
-                {/* Photo Attachments */}
-                <div>
-                  <h4 className="text-sm font-medium mb-2">
-                    Photos ({complaint?.photos?.length || 0})
-                  </h4>
-                  {complaint.photos && complaint.photos.length > 0 ? (
-                    <div className="space-y-2">
-                      {complaint.photos.map((p: any) => (
-                        <div
-                          key={p.id}
-                          className="border-l-4 border-emerald-300 pl-4 py-2 flex items-start justify-between"
-                        >
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              {new Date(p.uploadedAt).toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-800">
-                              {p.originalName || p.fileName}
-                              {p.uploadedByTeam?.fullName && (
-                                <span className="ml-2 text-xs text-gray-500">
-                                  by {p.uploadedByTeam.fullName}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Upload className="h-5 w-5 mr-2" />
+                    Attachment Logs ({complaint?.attachments?.length || 0} files +{" "}
+                    {complaint?.photos?.length || 0} photos)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* File Attachments */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">
+                      Files ({complaint?.attachments?.length || 0})
+                    </h4>
+                    {complaint.attachments && complaint.attachments.length > 0 ? (
+                      <div className="space-y-2">
+                        {complaint.attachments.map((att: any) => (
+                          <div
+                            key={att.id}
+                            className="border-l-4 border-blue-300 pl-4 py-2 flex items-start justify-between"
+                          >
+                            <div>
+                              <p className="text-xs text-gray-500">
+                                {new Date(att.uploadedAt).toLocaleString()}
+                              </p>
+                              <p className="text-sm text-gray-800">
+                                {att.originalName || att.fileName}
+                                <span className="text-xs text-gray-500">
+                                  {" "}
+                                  • {att.mimeType} •{" "}
+                                  {(att.size / 1024).toFixed(1)} KB
                                 </span>
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setPreviewItem({
-                                  url: p.photoUrl,
-                                  mimeType: "image/*",
-                                  name: p.originalName || p.fileName,
-                                  size: null,
-                                });
-                                setIsPreviewOpen(true);
-                              }}
-                            >
-                              Preview
-                            </Button>
-                            <a
-                              href={p.photoUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <Button size="sm" variant="outline">
-                                <Download className="h-4 w-4 mr-1" />
-                                Download
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setPreviewItem({
+                                    url: att.url,
+                                    mimeType: att.mimeType,
+                                    name: att.originalName || att.fileName,
+                                    size: att.size,
+                                  });
+                                  setIsPreviewOpen(true);
+                                }}
+                              >
+                                Preview
                               </Button>
-                            </a>
+                              <a href={att.url} target="_blank" rel="noreferrer">
+                                <Button size="sm" variant="outline">
+                                  <Download className="h-4 w-4 mr-1" />
+                                  Download
+                                </Button>
+                              </a>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-gray-500">No photos.</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-500">
+                        No file attachments.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Photo Attachments */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">
+                      Photos ({complaint?.photos?.length || 0})
+                    </h4>
+                    {complaint.photos && complaint.photos.length > 0 ? (
+                      <div className="space-y-2">
+                        {complaint.photos.map((p: any) => (
+                          <div
+                            key={p.id}
+                            className="border-l-4 border-emerald-300 pl-4 py-2 flex items-start justify-between"
+                          >
+                            <div>
+                              <p className="text-xs text-gray-500">
+                                {new Date(p.uploadedAt).toLocaleString()}
+                              </p>
+                              <p className="text-sm text-gray-800">
+                                {p.originalName || p.fileName}
+                                {p.uploadedByTeam?.fullName && (
+                                  <span className="ml-2 text-xs text-gray-500">
+                                    by {p.uploadedByTeam.fullName}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setPreviewItem({
+                                    url: p.photoUrl,
+                                    mimeType: "image/*",
+                                    name: p.originalName || p.fileName,
+                                    size: null,
+                                  });
+                                  setIsPreviewOpen(true);
+                                }}
+                              >
+                                Preview
+                              </Button>
+                              <a
+                                href={p.photoUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                <Button size="sm" variant="outline">
+                                  <Download className="h-4 w-4 mr-1" />
+                                  Download
+                                </Button>
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-500">No photos.</div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Administrative Information - Only for system admin */}
           {user?.role === "ADMINISTRATOR" && (
@@ -843,7 +842,7 @@ const ComplaintDetails: React.FC = () => {
                     user?.role === "WARD_OFFICER") &&
                     complaint.submittedBy?.phoneNumber &&
                     complaint.submittedBy.phoneNumber !==
-                      complaint.contactPhone && (
+                    complaint.contactPhone && (
                       <span className="text-xs text-gray-500">
                         User Phone: {complaint.submittedBy.phoneNumber}
                       </span>
@@ -860,7 +859,7 @@ const ComplaintDetails: React.FC = () => {
                       user?.role === "WARD_OFFICER") &&
                       complaint.submittedBy?.email &&
                       complaint.submittedBy.email !==
-                        complaint.contactEmail && (
+                      complaint.contactEmail && (
                         <span className="text-xs text-gray-500">
                           User Email: {complaint.submittedBy.email}
                         </span>
@@ -884,136 +883,136 @@ const ComplaintDetails: React.FC = () => {
           </Card>
 
           {/* Assignment Information */}
-          {(complaint.wardOfficer ||
+          {((complaint.wardOfficer ||
             complaint.maintenanceTeam ||
             user?.role === "ADMINISTRATOR" ||
             user?.role === "WARD_OFFICER" ||
-            user?.role === "MAINTENANCE_TEAM") && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  Assignment & Status Information
-                  <span className="ml-2 text-xs">
-                    <Badge className={getStatusColor(complaint.status)}>
-                      {complaint.status.replace("_", " ")}
-                    </Badge>
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    {console.log("Ward Officer:", complaint)}
-                    <p className="text-sm font-medium mb-1">Ward Officer</p>
-                    {complaint.wardOfficer ? (
-                      <>
-                        <p className="text-blue-800 font-medium">
-                          {complaint.wardOfficer.fullName}
-                        </p>
-                        {complaint.wardOfficer.email && (
-                          <p className="text-blue-600 text-sm">
-                            {complaint.wardOfficer.email}
+            user?.role === "MAINTENANCE_TEAM") && user?.role !== "CITIZEN") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Assignment & Status Information
+                    <span className="ml-2 text-xs">
+                      <Badge className={getStatusColor(complaint.status)}>
+                        {complaint.status.replace("_", " ")}
+                      </Badge>
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      {console.log("Ward Officer:", complaint)}
+                      <p className="text-sm font-medium mb-1">Ward Officer</p>
+                      {complaint.wardOfficer ? (
+                        <>
+                          <p className="text-blue-800 font-medium">
+                            {complaint.wardOfficer.fullName}
                           </p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-blue-700 text-sm">Not assigned</p>
-                    )}
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <p className="text-sm font-medium mb-1">Maintenance Team</p>
-                    {complaint.maintenanceTeam ? (
-                      <>
-                        <p className="text-green-800 font-medium">
-                          {complaint.maintenanceTeam.fullName}
-                        </p>
-                        {complaint.maintenanceTeam.email && (
-                          <p className="text-green-700 text-sm">
-                            {complaint.maintenanceTeam.email}
-                          </p>
-                        )}
-                        {complaint.assignedOn && (
-                          <p className="text-green-700 text-xs mt-1">
-                            Assigned on:{" "}
-                            {new Date(complaint.assignedOn).toLocaleString()}
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-green-700 text-sm">Unassigned</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Show computed SLA info for admin/ward managers */}
-                {(user?.role === "ADMINISTRATOR" ||
-                  user?.role === "WARD_OFFICER") &&
-                  (() => {
-                    const { status, deadline } = computeSla(complaint);
-                    return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium mb-1">
-                            SLA Deadline
-                          </p>
-                          <p
-                            className={`text-sm ${deadline && new Date() > deadline ? "text-red-600 font-medium" : "text-gray-600"}`}
-                          >
-                            {deadline
-                              ? new Date(deadline).toLocaleString()
-                              : "N/A"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium mb-1">SLA Status</p>
-                          <Badge
-                            className={
-                              status === "OVERDUE"
-                                ? "bg-red-100 text-red-800"
-                                : status === "ON_TIME"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100 text-gray-800"
-                            }
-                          >
-                            {status === "ON_TIME"
-                              ? "On Time"
-                              : status === "OVERDUE"
-                                ? "Overdue"
-                                : "N/A"}
-                          </Badge>
-                          {deadline && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              by {new Date(deadline).toLocaleString()}
+                          {complaint.wardOfficer.email && (
+                            <p className="text-blue-600 text-sm">
+                              {complaint.wardOfficer.email}
                             </p>
                           )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                {/* Show priority and type for admin/ward managers */}
-                {(user?.role === "ADMINISTRATOR" ||
-                  user?.role === "WARD_OFFICER") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
-                    <div>
-                      <p className="text-sm font-medium mb-1">Priority Level</p>
-                      <Badge className={getPriorityColor(complaint.priority)}>
-                        {complaint.priority} Priority
-                      </Badge>
+                        </>
+                      ) : (
+                        <p className="text-blue-700 text-sm">Not assigned</p>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium mb-1">Complaint Type</p>
-                      <Badge variant="outline">
-                        {complaint.type?.replace("_", " ")}
-                      </Badge>
+                    <div className="bg-green-50 rounded-lg p-3">
+                      <p className="text-sm font-medium mb-1">Maintenance Team</p>
+                      {complaint.maintenanceTeam ? (
+                        <>
+                          <p className="text-green-800 font-medium">
+                            {complaint.maintenanceTeam.fullName}
+                          </p>
+                          {complaint.maintenanceTeam.email && (
+                            <p className="text-green-700 text-sm">
+                              {complaint.maintenanceTeam.email}
+                            </p>
+                          )}
+                          {complaint.assignedOn && (
+                            <p className="text-green-700 text-xs mt-1">
+                              Assigned on:{" "}
+                              {new Date(complaint.assignedOn).toLocaleString()}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-green-700 text-sm">Unassigned</p>
+                      )}
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+
+                  {/* Show computed SLA info for admin/ward managers */}
+                  {(user?.role === "ADMINISTRATOR" ||
+                    user?.role === "WARD_OFFICER") &&
+                    (() => {
+                      const { status, deadline } = computeSla(complaint);
+                      return (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium mb-1">
+                              SLA Deadline
+                            </p>
+                            <p
+                              className={`text-sm ${deadline && new Date() > deadline ? "text-red-600 font-medium" : "text-gray-600"}`}
+                            >
+                              {deadline
+                                ? new Date(deadline).toLocaleString()
+                                : "N/A"}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-sm font-medium mb-1">SLA Status</p>
+                            <Badge
+                              className={
+                                status === "OVERDUE"
+                                  ? "bg-red-100 text-red-800"
+                                  : status === "ON_TIME"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {status === "ON_TIME"
+                                ? "On Time"
+                                : status === "OVERDUE"
+                                  ? "Overdue"
+                                  : "N/A"}
+                            </Badge>
+                            {deadline && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                by {new Date(deadline).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                  {/* Show priority and type for admin/ward managers */}
+                  {(user?.role === "ADMINISTRATOR" ||
+                    user?.role === "WARD_OFFICER") && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
+                        <div>
+                          <p className="text-sm font-medium mb-1">Priority Level</p>
+                          <Badge className={getPriorityColor(complaint.priority)}>
+                            {complaint.priority} Priority
+                          </Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-1">Complaint Type</p>
+                          <Badge variant="outline">
+                            {complaint.type?.replace("_", " ")}
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+                </CardContent>
+              </Card>
+            )}
 
           {/* Attachments */}
           <Card>
@@ -1054,20 +1053,20 @@ const ComplaintDetails: React.FC = () => {
                               </p>
                               {(user?.role === "ADMINISTRATOR" ||
                                 user?.role === "WARD_OFFICER") && (
-                                <>
-                                  <p>Type: {attachment.mimeType}</p>
-                                  {attachment.fileName !==
-                                    attachment.originalName && (
-                                    <p>Stored as: {attachment.fileName}</p>
-                                  )}
-                                  <p>
-                                    Uploaded:{" "}
-                                    {new Date(
-                                      attachment.uploadedAt,
-                                    ).toLocaleString()}
-                                  </p>
-                                </>
-                              )}
+                                  <>
+                                    <p>Type: {attachment.mimeType}</p>
+                                    {attachment.fileName !==
+                                      attachment.originalName && (
+                                        <p>Stored as: {attachment.fileName}</p>
+                                      )}
+                                    <p>
+                                      Uploaded:{" "}
+                                      {new Date(
+                                        attachment.uploadedAt,
+                                      ).toLocaleString()}
+                                    </p>
+                                  </>
+                                )}
                             </div>
                           </div>
                         </div>
@@ -1195,14 +1194,14 @@ const ComplaintDetails: React.FC = () => {
                 {(user?.role === "WARD_OFFICER" ||
                   user?.role === "ADMINISTRATOR" ||
                   user?.role === "MAINTENANCE_TEAM") && (
-                  <Button
-                    className="w-full justify-start"
-                    onClick={() => setIsUpdateModalOpen(true)}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Update Status
-                  </Button>
-                )}
+                    <Button
+                      className="w-full justify-start"
+                      onClick={() => setIsUpdateModalOpen(true)}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Update Status
+                    </Button>
+                  )}
 
                 {/* Show feedback button for resolved/closed complaints if user is the complainant */}
                 {(complaint.status === "RESOLVED" ||

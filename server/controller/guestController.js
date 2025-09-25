@@ -322,7 +322,7 @@ export const submitGuestComplaintWithAttachments = asyncHandler(
     // Send OTP email
     const emailSent = await sendEmail({
       to: email,
-      subject: "Verify Your Complaint - Cochin Smart City",
+      subject: "Verify Your Complaint - NLC-CMS",
       text: `Your complaint has been registered with ID: ${complaint.complaintId}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
       html: `
       <h2>Complaint Registered Successfully</h2>
@@ -424,7 +424,7 @@ export const submitGuestComplaint = asyncHandler(async (req, res) => {
 
   const emailSent = await sendEmail({
     to: email,
-    subject: "Verify Your Email to Submit Complaint - Cochin Smart City",
+    subject: "Verify Your Email to Submit Complaint - NLC-CMS",
     text: `Your OTP for complaint submission is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
       <h2>Email Verification Required</h2>
@@ -642,10 +642,10 @@ export const verifyOTPAndRegister = asyncHandler(async (req, res) => {
   if (isNewUser) {
     await sendEmail({
       to: user.email,
-      subject: "Welcome to Cochin Smart City - Set Your Password",
+      subject: "Welcome to NLC-CMS - Set Your Password",
       text: "Welcome! Your complaint has been verified and you have been registered as a citizen. You can set your password from your profile.",
       html: `
-        <h2>Welcome to Cochin Smart City!</h2>
+        <h2>Welcome to NLC-CMS!</h2>
         <p>Your complaint has been successfully verified and you have been automatically registered as a citizen.</p>
         <p>Your complaint ID: <strong>${complaint.complaintId}</strong></p>
         <p>You are now logged in and can track your complaint progress.</p>
@@ -722,7 +722,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
 
   const emailSent = await sendEmail({
     to: email,
-    subject: "Verify Your Email - Cochin Smart City (Resent)",
+    subject: "Verify Your Email - NLC-CMS (Resent)",
     text: `Your new verification OTP is: ${otpCode}. This OTP will expire in 10 minutes.`,
     html: `
       <h2>New Verification OTP</h2>
@@ -915,13 +915,11 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
       isActive: t.isActive,
       updatedAt: t.updatedAt,
     }));
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Complaint types retrieved successfully",
-        data: types,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Complaint types retrieved successfully",
+      data: types,
+    });
   } catch (e) {
     const complaintTypesData = await prisma.systemConfig.findMany({
       where: { key: { startsWith: "COMPLAINT_TYPE_" }, isActive: true },
@@ -939,13 +937,11 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
         updatedAt: config.updatedAt,
       };
     });
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Complaint types retrieved successfully (legacy)",
-        data: complaintTypes,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Complaint types retrieved successfully (legacy)",
+      data: complaintTypes,
+    });
   }
 });
 
@@ -1359,7 +1355,7 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
 //   // Send OTP email
 //   const emailSent = await sendEmail({
 //     to: email,
-//     subject: "Verify Your Complaint - Cochin Smart City",
+//     subject: "Verify Your Complaint - NLC-CMS",
 //     text: `Your complaint has been registered with ID: ${complaint.id}. To complete the process, please verify your email with OTP: ${otpCode}. This OTP will expire in 10 minutes.`,
 //     html: `
 //       <h2>Complaint Registered Successfully</h2>
@@ -1601,7 +1597,7 @@ export const getPublicComplaintTypes = asyncHandler(async (req, res) => {
 //   // Send OTP email
 //   const emailSent = await sendEmail({
 //     to: email,
-//     subject: "Verify Your Complaint - Cochin Smart City (Resent)",
+//     subject: "Verify Your Complaint - NLC-CMS (Resent)",
 //     text: `Your new verification OTP for complaint ${complaintId} is: ${otpCode}. This OTP will expire in 10 minutes.`,
 //     html: `
 //       <h2>New Verification OTP</h2>

@@ -308,7 +308,7 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
   const defaultSettings = [
     {
       key: "APP_NAME",
-      value: "Kochi Smart City",
+      value: "NLC-CMS",
       description: "Application name displayed across the system",
     },
     {
@@ -324,7 +324,7 @@ export const resetSystemSettings = asyncHandler(async (req, res) => {
     {
       key: "COMPLAINT_ID_PREFIX",
       value: "KSC",
-      description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+      description: "Prefix for complaint IDs (e.g., KSC for NLC-CMS)",
     },
     {
       key: "COMPLAINT_ID_START_NUMBER",
@@ -408,7 +408,7 @@ const getDefaultPublicSettings = () => {
     // Branding
     {
       key: "APP_NAME",
-      value: "Kochi Smart City",
+      value: "NLC-CMS",
       description: "Application name displayed across the system",
       type: "string",
     },
@@ -428,7 +428,7 @@ const getDefaultPublicSettings = () => {
     {
       key: "COMPLAINT_ID_PREFIX",
       value: "KSC",
-      description: "Prefix for complaint IDs (e.g., KSC for Kochi Smart City)",
+      description: "Prefix for complaint IDs (e.g., KSC for NLC-CMS)",
       type: "string",
     },
     {

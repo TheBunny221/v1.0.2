@@ -1,8 +1,8 @@
 {
-  "name": "cochin-smart-city",
+  "name": "nlc-cms",
   "private": true,
   "version": "1.0.0",
-  "description": "Cochin Smart City Complaint Management System",
+  "description": "NLC-CMS Complaint Management System",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",

@@ -1266,7 +1266,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           showBoundaryError("Selected location");
         }
 
-        // create map
+        // create map with custom panes for proper z-index layering
         leafletMapRef.current = new L.Map(mapRef.current, {
           center: [effectiveCenter.lat, effectiveCenter.lng],
           zoom: 13,
@@ -1274,6 +1274,10 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           zoomControl: true,
           attributionControl: true,
         });
+
+        // Create a custom pane for boundary polygons with lower z-index
+        leafletMapRef.current.createPane('boundaryPane');
+        leafletMapRef.current.getPane('boundaryPane')!.style.zIndex = '400'; // Lower than default overlay pane (600)
 
         // tile layer
         const tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -1304,6 +1308,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           fillColor: "#2563eb",
           fillOpacity: 0.08,
           dashArray: "6,6",
+          pane: 'boundaryPane', // Use custom pane with lower z-index
         }).addTo(leafletMapRef.current);
         boundaryPolygon.bindPopup("Service Area Boundary");
 
@@ -1370,6 +1375,27 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             }
           }, 100);
         });
+
+        // Add resize observer for responsive behavior
+        const resizeObserver = new ResizeObserver(() => {
+          if (leafletMapRef.current) {
+            // Debounce the resize to avoid excessive calls
+            setTimeout(() => {
+              try {
+                leafletMapRef.current?.invalidateSize();
+              } catch {
+                // ignore
+              }
+            }, 100);
+          }
+        });
+
+        if (mapRef.current) {
+          resizeObserver.observe(mapRef.current);
+        }
+
+        // Store resize observer for cleanup
+        (leafletMapRef.current as any)._resizeObserver = resizeObserver;
       } catch (err) {
         if (!cancelled) {
           console.error("Error initializing map:", err);
@@ -1392,6 +1418,12 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       }
       // cleanup
       try {
+        // Clean up resize observer
+        const resizeObserver = (leafletMapRef.current as any)?._resizeObserver;
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+        
         leafletMapRef.current?.off();
         leafletMapRef.current?.remove();
       } catch {
@@ -1908,15 +1940,15 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
             {/* Map */}
             <div className="h-64 sm:h-80 lg:h-96 w-full rounded-lg overflow-hidden border relative bg-gray-100">
               {mapError ? (
-                <div className="h-full flex items-center justify-center bg-gray-50 relative z-40">
-                  <div className="text-center p-4 max-w-md">
+                <div className="h-full flex items-center justify-center bg-gray-50 relative z-[9999]">
+                  <div className="text-center p-4 max-w-md bg-white rounded-lg shadow-lg border border-red-200 z-[9999]">
                     <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                     <p className="text-red-600 text-sm mb-3 font-medium">{mapError}</p>
                     <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                      <Button onClick={getCurrentLocation} variant="outline" size="sm" disabled={isLoadingLocation}>
+                      <Button onClick={getCurrentLocation} variant="outline" size="sm" disabled={isLoadingLocation} className="z-[9999] relative">
                         {isLoadingLocation ? "Getting Location..." : "Try Current Location"}
                       </Button>
-                      <Button onClick={handleRetryMap} variant="outline" size="sm">
+                      <Button onClick={handleRetryMap} variant="outline" size="sm" className="z-[9999] relative">
                         Retry Map
                       </Button>
                     </div>
@@ -1925,8 +1957,8 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
               ) : (
                 <>
                   {(!mapInitialized || configLoading) && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-40">
-                      <div className="text-center">
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-[9999]">
+                      <div className="text-center bg-white rounded-lg shadow-lg p-4 border">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
                         <p className="text-sm text-gray-600">
                           {configLoading ? "Loading configuration..." : "Loading map..."}
@@ -1946,29 +1978,48 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
                     aria-label="Map container"
                   />
 
-                  {/* Center crosshair */}
+                  {/* Enhanced Center Crosshair Cursor */}
                   {mapInitialized && (
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-20">
-                      <svg width="28" height="28" viewBox="0 0 28 28" className="text-gray-600 opacity-70 drop-shadow-sm">
-                        <circle cx="14" cy="14" r="4" fill="white" fillOpacity="0.8" />
-                        <circle cx="14" cy="14" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                        <line x1="14" y1="0" x2="14" y2="6" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="14" y1="22" x2="14" y2="28" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="0" y1="14" x2="6" y2="14" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="22" y1="14" x2="28" y2="14" stroke="currentColor" strokeWidth="1.5" />
-                      </svg>
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-[1000]">
+                      <div className="relative">
+                        {/* Outer ring with pulse animation */}
+                        <div className="absolute inset-0 rounded-full border-2 border-blue-400 opacity-30 animate-ping" style={{ width: '32px', height: '32px', top: '-2px', left: '-2px' }}></div>
+                        
+                        {/* Main crosshair */}
+                        <svg width="32" height="32" viewBox="0 0 32 32" className="text-gray-700 drop-shadow-lg">
+                          {/* White background circle for contrast */}
+                          <circle cx="16" cy="16" r="6" fill="white" fillOpacity="0.9" stroke="#e5e7eb" strokeWidth="1" />
+                          
+                          {/* Center dot */}
+                          <circle cx="16" cy="16" r="2" fill="currentColor" />
+                          
+                          {/* Crosshair lines */}
+                          <line x1="16" y1="2" x2="16" y2="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <line x1="16" y1="24" x2="16" y2="30" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <line x1="2" y1="16" x2="8" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <line x1="24" y1="16" x2="30" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          
+                          {/* Inner circle outline */}
+                          <circle cx="16" cy="16" r="5" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.8" />
+                        </svg>
+                        
+                        {/* Tooltip */}
+                        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-75">
+                          Click to place pin here
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {/* Map hints */}
+                  {/* Map hints with enhanced z-index */}
                   {mapInitialized && (
-                    <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs text-gray-600 shadow-sm z-30">
+                    <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm rounded-md px-3 py-2 text-xs text-gray-700 shadow-lg border z-[1001]">
                       📍 Click map or drag marker to select location
                     </div>
                   )}
 
                   {mapInitialized && (
-                    <div className="absolute bottom-2 left-2 bg-blue-50/90 backdrop-blur-sm rounded px-2 py-1 text-xs text-blue-700 shadow-sm z-30 border border-blue-200">
+                    <div className="absolute bottom-2 left-2 bg-blue-50/95 backdrop-blur-sm rounded-md px-3 py-2 text-xs text-blue-700 shadow-lg border border-blue-200 z-[1001]">
                       🗺️ Service area: Kochi boundaries
                     </div>
                   )}
@@ -1976,23 +2027,25 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
               )}
             </div>
 
-            {/* Status Messages */}
-            <div className="space-y-2">
+            {/* Status Messages with enhanced z-index */}
+            <div className="space-y-2 relative z-[1002]">
               {isLoadingLocation && (
-                <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-lg border border-blue-200 shadow-sm relative z-[1002]">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                   Getting your current location...
                 </div>
               )}
               {isDetectingArea && (
-                <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-2 rounded">
+                <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg border border-orange-200 shadow-sm relative z-[1002]">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
                   Detecting administrative area...
                 </div>
               )}
-              <p className="text-xs text-gray-500">
-                💡 <strong>Tips:</strong> Click anywhere on the map, drag the marker, use "Drop Pin Here" to place the pin at the map center, or use your current location.
-              </p>
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 relative z-[1002]">
+                <p className="text-xs text-gray-600">
+                  💡 <strong>Tips:</strong> Click anywhere on the map, drag the marker, use "Drop Pin Here" to place the pin at the map center, or use your current location.
+                </p>
+              </div>
             </div>
 
             {/* Location Details */}
