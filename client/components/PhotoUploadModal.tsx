@@ -61,7 +61,7 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      return "Only JPEG, PNG, and WebP images are allowed";
+      return "Only JPEG and PNG images are allowed";
     }
 
     if (file.size > maxSize) {
