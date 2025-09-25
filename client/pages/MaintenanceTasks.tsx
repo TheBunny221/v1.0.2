@@ -1109,6 +1109,7 @@ const MaintenanceTasks: React.FC = () => {
                         task.status === "REOPENED") && (
                         <Button
                           size="sm"
+                          className="h-11 md:h-9"
                           onClick={() => handleMarkResolved(task)}
                         >
                           <CheckCircle className="h-3 w-3 mr-1" />
