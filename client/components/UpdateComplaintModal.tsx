@@ -301,11 +301,11 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
 
       toast({ title: "Success", description: "Complaint updated successfully. You can see the updated assignment below." });
 
-      if (updatedComplaintResponse?.data?.complaint) {
-        const updatedComplaint = updatedComplaintResponse.data.complaint;
-        const wardOfficerId = typeof updatedComplaint.wardOfficer === "object" && updatedComplaint.wardOfficer?.id ? updatedComplaint.wardOfficer.id : updatedComplaint.wardOfficer || "none";
-        const assignedToId = typeof updatedComplaint.assignedTo === "object" && updatedComplaint.assignedTo?.id ? updatedComplaint.assignedTo.id : updatedComplaint.assignedTo || "none";
-        const maintenanceTeamId = typeof updatedComplaint.maintenanceTeam === "object" && updatedComplaint.maintenanceTeam?.id ? updatedComplaint.maintenanceTeam.id : updatedComplaint.maintenanceTeam || "none";
+      if (updatedComplaintResponse?.data) {
+        const updatedComplaint = updatedComplaintResponse.data;
+        const wardOfficerId = typeof updatedComplaint.wardOfficer === "object" && (updatedComplaint.wardOfficer as any)?.id ? (updatedComplaint.wardOfficer as any).id : (updatedComplaint as any).wardOfficer || "none";
+        const assignedToId = typeof updatedComplaint.assignedTo === "object" && (updatedComplaint.assignedTo as any)?.id ? (updatedComplaint.assignedTo as any).id : (updatedComplaint as any).assignedTo || "none";
+        const maintenanceTeamId = typeof updatedComplaint.maintenanceTeam === "object" && (updatedComplaint.maintenanceTeam as any)?.id ? (updatedComplaint.maintenanceTeam as any).id : (updatedComplaint as any).maintenanceTeam || "none";
 
         setFormData({ status: updatedComplaint.status, priority: updatedComplaint.priority, wardOfficerId, assignedToId, maintenanceTeamId, remarks: "" });
       }
@@ -408,7 +408,7 @@ const UpdateComplaintModal: React.FC<UpdateComplaintModalProps> = ({
               <Select value={formData.status} onValueChange={(value) => { setFormData((prev) => ({ ...prev, status: value })); setValidationErrors([]); }}>
                 <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
                 <SelectContent>
-                  {getAvailableStatusOptions().map((status) => {
+                  {getAvailableStatusOptions().map((status: string) => {
                     const statusConfig: Record<string, any> = { REGISTERED: { icon: Clock, label: "Registered" }, ASSIGNED: { icon: User, label: "Assigned" }, IN_PROGRESS: { icon: Settings, label: "In Progress" }, RESOLVED: { icon: CheckCircle, label: "Resolved" }, CLOSED: { icon: FileText, label: "Closed" }, REOPENED: { icon: RotateCcw, label: "Reopened" } };
                     const config = statusConfig[status]; if (!config) return null; const IconComponent = config.icon;
                     return (<SelectItem key={status} value={status}><div className="flex items-center"><IconComponent className="h-4 w-4 mr-2" />{config.label}</div></SelectItem>);
