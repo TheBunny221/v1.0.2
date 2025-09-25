@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
     envVars.VITE_HOST ||
     envVars.CLIENT_HOST ||
     envVars.HOST ||
-    "::";
+    "0.0.0.0";
   const clientPort = Number(
     envVars.VITE_CLIENT_PORT ||
       envVars.VITE_PORT ||
