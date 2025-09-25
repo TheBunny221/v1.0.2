@@ -1,4 +1,4 @@
-# Cochin Smart City Complaint Management – Deployment Guide
+# NLC-CMS Complaint Management – Deployment Guide
 
 Audience: QA engineers, developers, and DevOps.
 

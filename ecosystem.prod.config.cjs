@@ -5,7 +5,7 @@ const logDir = path.join(__dirname, 'logs', 'prod');
 module.exports = {
   apps: [
     {
-      name: 'cochin-api',
+      name: 'NLC-CMS',
       script: 'server/server.js',
       exec_mode: 'cluster',
       instances: 4,

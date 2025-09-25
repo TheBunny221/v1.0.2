@@ -29,7 +29,7 @@ const respectGlobalRateLimit = async () => {
 };
 
 const buildHeaders = (req) => {
-  const ua = `Cochin Smart City/1.0 (${process.env.CONTACT_EMAIL || "support@cochinsmartcity.in"})`;
+  const ua = `NLC-CMS/1.0 (${process.env.CONTACT_EMAIL || "support@cochinsmartcity.in"})`;
   return {
     "User-Agent": ua,
     Accept: "application/json",

@@ -56,7 +56,7 @@ export default async function seedCommon(prisma, options = {}) {
   const configs = [
     {
       key: "APP_NAME",
-      value: "Kochi Smart City",
+      value: "NLC-CMS",
       description: "Application name",
     },
     {
@@ -1069,7 +1069,7 @@ export default async function seedCommon(prisma, options = {}) {
     const exists = await prisma.notification.findFirst({
       where: {
         userId: c.id,
-        title: { contains: "Welcome to Kochi Smart City" },
+        title: { contains: "Welcome to NLC-CMS" },
       },
     });
     if (!exists) {
@@ -1077,7 +1077,7 @@ export default async function seedCommon(prisma, options = {}) {
         data: {
           userId: c.id,
           type: "IN_APP",
-          title: "Welcome to Kochi Smart City",
+          title: "Welcome to NLC-CMS",
           message: "Thank you for registering with our platform.",
           sentAt: new Date(),
         },

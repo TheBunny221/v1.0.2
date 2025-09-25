@@ -5,7 +5,7 @@ const logDir = path.join(__dirname, 'logs', 'dev');
 module.exports = {
   apps: [
     {
-      name: 'cochin-api-dev',
+      name: 'NLC-CMS',
       script: 'server/server.js',
       exec_mode: 'cluster',
       instances: 4,
@@ -22,7 +22,7 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
     },
     {
-      name: 'cochin-client-dev',
+      name: 'NLC-CMS-client',
       script: 'npm',
       args: 'run client:dev',
       exec_mode: 'fork',

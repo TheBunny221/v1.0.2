@@ -19,14 +19,14 @@ interface SystemConfigContextType {
 // Default configuration values to prevent null reference errors
 const DEFAULT_CONFIG: SystemConfigContextType = {
   config: {
-    APP_NAME: "Kochi Smart City",
+    APP_NAME: "NLC-CMS",
     APP_LOGO_URL: "/logo.png",
     APP_LOGO_SIZE: "medium",
     COMPLAINT_ID_PREFIX: "KSC",
     COMPLAINT_ID_START_NUMBER: "1",
     COMPLAINT_ID_LENGTH: "4",
   },
-  appName: "Kochi Smart City",
+  appName: "NLC-CMS",
   appLogoUrl: "/logo.png",
   appLogoSize: "medium",
   isLoading: false,
@@ -119,7 +119,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   // Memoize derived values to prevent unnecessary recalculations
   // Depend on config directly since getConfig is now stable
   const appName = useMemo(() => 
-    config["APP_NAME"] || "Kochi Smart City", 
+    config["APP_NAME"] || "NLC-CMS", 
     [config]
   );
   
