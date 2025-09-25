@@ -607,7 +607,6 @@ const AdminUsers: React.FC = () => {
                   <TableHead>Ward</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Complaints</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
