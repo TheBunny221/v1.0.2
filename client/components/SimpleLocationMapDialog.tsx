@@ -153,7 +153,7 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
           return;
         }
         leafletLibRef.current = L;
-        console.log('🗺️ [DEBUG] Leaflet library loaded successfully');
+        console.log('���️ [DEBUG] Leaflet library loaded successfully');
 
         // Set up the default icon with fallback
         const DefaultIcon = L.icon({
@@ -613,10 +613,21 @@ const SimpleLocationMapDialog: React.FC<SimpleLocationMapDialogProps> = ({
       
       clearTimeout(timeoutId);
       
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+      if (response.status === 429) {
+        const payload = await response.json().catch(() => null);
+        const retryAfter = payload?.data?.retryAfter || response.headers.get('retry-after') || 'a few';
+        setMapError(`Search is busy. Please try again in ${retryAfter} seconds.`);
+        console.warn('🔍 [WARN] Rate limited by geocoding search');
+        return;
       }
-      
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        setMapError('Search failed. Please try again.');
+        console.warn('🔍 [WARN] Search failed:', response.status, text);
+        return;
+      }
+
       const data = await response.json();
       console.log('🔍 [DEBUG] Search results:', data);
 
