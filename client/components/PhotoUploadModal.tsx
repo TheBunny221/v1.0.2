@@ -451,7 +451,7 @@ const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
           {/* Selected Photos */}
           {photos.length > 0 && (
             <div>
-              <Label>Selected Photos ({photos.length})</Label>
+              <Label>Selected Photos ({photos.length}/{MAX_FILES})</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
                 {photos.map((photo) => (
                   <div key={photo.id} className="relative group">
