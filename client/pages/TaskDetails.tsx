@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
-import { useGetComplaintQuery, useUpdateComplaintStatusMutation } from "../store/api/complaintsApi";
+import {
+  useGetComplaintQuery,
+  useUpdateComplaintStatusMutation,
+} from "../store/api/complaintsApi";
 import {
   Card,
   CardContent,
@@ -29,8 +32,10 @@ import {
   Image,
   Download,
   File,
+  Mail,
 } from "lucide-react";
 import PhotoUploadModal from "../components/PhotoUploadModal";
+import AttachmentPreview from "../components/AttachmentPreview";
 
 const TaskDetails: React.FC = () => {
   const { id } = useParams();
@@ -51,6 +56,13 @@ const TaskDetails: React.FC = () => {
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [updateComplaintStatus] = useUpdateComplaintStatusMutation();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<{
+    url: string;
+    mimeType?: string | null;
+    name?: string | null;
+    size?: number | null;
+  } | null>(null);
 
   const raw = complaintResponse?.data?.complaint;
 
@@ -59,7 +71,11 @@ const TaskDetails: React.FC = () => {
     if (!workNote || workNote.trim().length === 0) return;
     try {
       setIsAddingLog(true);
-      await updateComplaintStatus({ id: task.id, status: "IN_PROGRESS", remarks: workNote.trim() }).unwrap();
+      await updateComplaintStatus({
+        id: task.id,
+        status: "IN_PROGRESS",
+        remarks: workNote.trim(),
+      }).unwrap();
       setWorkNote("");
       // refresh complaint to show new status log
       refetchComplaint?.();
@@ -78,7 +94,10 @@ const TaskDetails: React.FC = () => {
       let lng = raw.longitude;
       if ((!lat || !lng) && raw.coordinates) {
         try {
-          const c = typeof raw.coordinates === "string" ? JSON.parse(raw.coordinates) : raw.coordinates;
+          const c =
+            typeof raw.coordinates === "string"
+              ? JSON.parse(raw.coordinates)
+              : raw.coordinates;
           lat = c?.latitude ?? c?.lat ?? lat;
           lng = c?.longitude ?? c?.lng ?? lng;
         } catch {
@@ -98,7 +117,9 @@ const TaskDetails: React.FC = () => {
       priority: raw.priority || "MEDIUM",
       status: raw.status,
       estimatedTime: raw.estimatedTime || null,
-      dueDate: raw.deadline ? new Date(raw.deadline).toISOString().split("T")[0] : null,
+      dueDate: raw.deadline
+        ? new Date(raw.deadline).toISOString().split("T")[0]
+        : null,
       assignedDate: raw.assignedOn || raw.submittedOn,
       submittedBy: raw.submittedBy?.fullName || raw.submittedBy || "",
       contactPhone: raw.contactPhone || raw.mobile || "",
@@ -114,7 +135,8 @@ const TaskDetails: React.FC = () => {
         ...(raw.attachments || []),
         ...((raw.photos || []).map((p: any) => ({
           id: p.id,
-          fileName: p.fileName || p.originalName || p.photoUrl?.split('/').pop(),
+          fileName:
+            p.fileName || p.originalName || p.photoUrl?.split("/").pop(),
           mimeType: p.mimeType,
           uploadedAt: p.uploadedAt,
           url: p.photoUrl || p.photoUrl || p.url,
@@ -227,10 +249,40 @@ const TaskDetails: React.FC = () => {
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
-                    Location
+                    Location Information
                   </h3>
-                  <p className="text-gray-600">{task.location}</p>
-                  <p className="text-sm text-gray-500">{task.coordinates}</p>
+                  <div className="space-y-1 text-sm">
+                    {raw?.area && (
+                      <p className="text-gray-600">
+                        <strong>Area:</strong> {raw.area}
+                      </p>
+                    )}
+                    {raw?.ward?.name && (
+                      <p className="text-gray-600">
+                        <strong>Ward:</strong> {raw.ward.name}
+                      </p>
+                    )}
+                    {raw?.subZone?.name && (
+                      <p className="text-gray-600">
+                        <strong>Sub-Zone:</strong> {raw.subZone.name}
+                      </p>
+                    )}
+                    {raw?.landmark && (
+                      <p className="text-gray-600">
+                        <strong>Landmark:</strong> {raw.landmark}
+                      </p>
+                    )}
+                    {raw?.address && (
+                      <p className="text-gray-600">
+                        <strong>Address:</strong> {raw.address}
+                      </p>
+                    )}
+                    {(raw?.latitude || raw?.longitude || raw?.coordinates) && (
+                      <p className="text-gray-500 text-xs">
+                        <strong>Coordinates:</strong> {task.coordinates}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
@@ -238,13 +290,21 @@ const TaskDetails: React.FC = () => {
                     Timeline
                   </h3>
                   <div className="space-y-1 text-sm">
-                    <p className="text-gray-600">
-                      Assigned: {task.assignedDate}
-                    </p>
-                    <p className="text-gray-600">Due: {task.dueDate}</p>
-                    <p className="text-gray-600">
-                      Est. Time: {task.estimatedTime}
-                    </p>
+                    {task.assignedDate && (
+                      <p className="text-gray-600">
+                        Assigned:{" "}
+                        {new Date(task.assignedDate).toLocaleString?.() ||
+                          task.assignedDate}
+                      </p>
+                    )}
+                    {task.dueDate && (
+                      <p className="text-gray-600">Due: {task.dueDate}</p>
+                    )}
+                    {task.estimatedTime && (
+                      <p className="text-gray-600">
+                        Est. Time: {task.estimatedTime}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -252,7 +312,9 @@ const TaskDetails: React.FC = () => {
           </Card>
 
           {/* Work Log - visible only to Admin, Ward Officer, Maintenance Team */}
-          {(["ADMINISTRATOR","WARD_OFFICER","MAINTENANCE_TEAM"].includes(user?.role)) && (
+          {["ADMINISTRATOR", "WARD_OFFICER", "MAINTENANCE_TEAM"].includes(
+            user?.role,
+          ) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -269,7 +331,11 @@ const TaskDetails: React.FC = () => {
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-medium">{new Date(log.time).toLocaleString ? new Date(log.time).toLocaleString() : log.time}</p>
+                          <p className="font-medium">
+                            {new Date(log.time).toLocaleString
+                              ? new Date(log.time).toLocaleString()
+                              : log.time}
+                          </p>
                           <p className="text-sm text-gray-600">{log.note}</p>
                           {log.photo && (
                             <Badge variant="secondary" className="mt-1">
@@ -284,31 +350,78 @@ const TaskDetails: React.FC = () => {
                   ))}
 
                   {/* Render image attachments as part of the work log so uploads appear immediately */}
-                  {task.attachments && task.attachments.filter((a: any) => a.mimeType?.startsWith("image/")).length > 0 && (
-                    <div className="pt-2">
-                      <h4 className="text-sm font-medium mb-2">Photos</h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {task.attachments.filter((a: any) => a.mimeType?.startsWith("image/")).map((att: any) => (
-                          <div key={att.id} className="border rounded p-2">
-                            <img src={att.url} alt={att.fileName || att.originalName} className="w-full h-28 object-cover rounded mb-2" />
-                            <div className="text-xs text-gray-600">{att.fileName || att.originalName}</div>
-                            {att.description && (
-                              <div className="text-sm text-gray-700 mt-1">{att.description}</div>
-                            )}
-                            {att.uploadedBy && (
-                              <div className="text-xs text-gray-500 mt-1">Uploaded by: {att.uploadedBy}</div>
-                            )}
-                            <div className="text-xs text-gray-500 mt-1">{new Date(att.uploadedAt).toLocaleString()}</div>
-                            <div className="mt-2">
-                              <a href={att.url} download className="inline-flex items-center">
-                                <Button size="xs">Download</Button>
-                              </a>
-                            </div>
-                          </div>
-                        ))}
+                  {task.attachments &&
+                    task.attachments.filter((a: any) =>
+                      a.mimeType?.startsWith("image/"),
+                    ).length > 0 && (
+                      <div className="pt-2">
+                        <h4 className="text-sm font-medium mb-2">Photos</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {task.attachments
+                            .filter((a: any) =>
+                              a.mimeType?.startsWith("image/"),
+                            )
+                            .map((att: any) => (
+                              <div key={att.id} className="border rounded p-2">
+                                <img
+                                  src={att.url}
+                                  alt={att.fileName || att.originalName}
+                                  className="w-full h-28 object-cover rounded mb-2 cursor-pointer"
+                                  onClick={() => {
+                                    setPreviewItem({
+                                      url: att.url,
+                                      mimeType: att.mimeType || "image/*",
+                                      name: att.fileName || att.originalName,
+                                      size: null,
+                                    });
+                                    setIsPreviewOpen(true);
+                                  }}
+                                />
+                                <div className="text-xs text-gray-600">
+                                  {att.fileName || att.originalName}
+                                </div>
+                                {att.description && (
+                                  <div className="text-sm text-gray-700 mt-1">
+                                    {att.description}
+                                  </div>
+                                )}
+                                {att.uploadedBy && (
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Uploaded by: {att.uploadedBy}
+                                  </div>
+                                )}
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {new Date(att.uploadedAt).toLocaleString()}
+                                </div>
+                                <div className="mt-2 flex items-center gap-2">
+                                  <Button
+                                    size="xs"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setPreviewItem({
+                                        url: att.url,
+                                        mimeType: att.mimeType || "image/*",
+                                        name: att.fileName || att.originalName,
+                                        size: null,
+                                      });
+                                      setIsPreviewOpen(true);
+                                    }}
+                                  >
+                                    Preview
+                                  </Button>
+                                  <a
+                                    href={att.url}
+                                    download
+                                    className="inline-flex items-center"
+                                  >
+                                    <Button size="xs">Download</Button>
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* Add New Log Entry */}
@@ -324,11 +437,19 @@ const TaskDetails: React.FC = () => {
                       rows={2}
                     />
                     <div className="flex flex-col space-y-2">
-                      <Button size="sm" onClick={() => setIsPhotoModalOpen(true)}>
-                      <Camera className="h-4 w-4 mr-1" />
-                      Photo
-                    </Button>
-                      <Button size="sm" variant="outline" onClick={addWorkUpdate} disabled={isAddingLog || !workNote.trim()}>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsPhotoModalOpen(true)}
+                      >
+                        <Camera className="h-4 w-4 mr-1" />
+                        Photo
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={addWorkUpdate}
+                        disabled={isAddingLog || !workNote.trim()}
+                      >
                         {isAddingLog ? "Adding..." : "Add Log"}
                       </Button>
                     </div>
@@ -343,24 +464,67 @@ const TaskDetails: React.FC = () => {
                   </h3>
                   <div className="space-y-3">
                     {task.attachments.map((att) => {
-                      const isImage = att.mimeType.startsWith("image/");
-                      const canDownload = ["ADMINISTRATOR","WARD_OFFICER","MAINTENANCE_TEAM"].includes(user?.role);
+                      const isImage = att.mimeType?.startsWith("image/");
+                      const canDownload = [
+                        "ADMINISTRATOR",
+                        "WARD_OFFICER",
+                        "MAINTENANCE_TEAM",
+                      ].includes(user?.role);
                       return (
-                        <div key={att.id} className="flex items-center justify-between border rounded p-2">
+                        <div
+                          key={att.id}
+                          className="flex items-center justify-between border rounded p-2"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 grid place-items-center rounded bg-gray-100">
-                              {isImage ? <Image className="h-5 w-5" /> : <File className="h-5 w-5" />}
+                              {isImage ? (
+                                <Image className="h-5 w-5" />
+                              ) : (
+                                <File className="h-5 w-5" />
+                              )}
                             </div>
                             <div>
-                              <div className="font-medium">{att.fileName}</div>
-                              {att.description && <div className="text-sm text-gray-700">{att.description}</div>}
-                              {att.uploadedBy && <div className="text-xs text-gray-500">Uploaded by: {att.uploadedBy}</div>}
-                              <div className="text-xs text-gray-500">{att.mimeType} • {new Date(att.uploadedAt).toLocaleString()}</div>
+                              <div className="font-medium">
+                                {att.fileName || att.originalName}
+                              </div>
+                              {att.description && (
+                                <div className="text-sm text-gray-700">
+                                  {att.description}
+                                </div>
+                              )}
+                              {att.uploadedBy && (
+                                <div className="text-xs text-gray-500">
+                                  Uploaded by: {att.uploadedBy}
+                                </div>
+                              )}
+                              <div className="text-xs text-gray-500">
+                                {att.mimeType} •{" "}
+                                {new Date(att.uploadedAt).toLocaleString()}
+                              </div>
                             </div>
                           </div>
-                          <div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setPreviewItem({
+                                  url: att.url,
+                                  mimeType: att.mimeType,
+                                  name: att.originalName || att.fileName,
+                                  size: att.size,
+                                });
+                                setIsPreviewOpen(true);
+                              }}
+                            >
+                              Preview
+                            </Button>
                             {canDownload ? (
-                              <a href={att.url} download className="inline-flex items-center">
+                              <a
+                                href={att.url}
+                                download
+                                className="inline-flex items-center"
+                              >
                                 <Button size="sm">
                                   <Download className="h-4 w-4 mr-2" />
                                   Download
@@ -389,9 +553,18 @@ const TaskDetails: React.FC = () => {
             onClose={() => setIsPhotoModalOpen(false)}
             complaintId={task?.id}
             onSuccess={() => {
-              // refresh complaint data to show new photos
               refetchComplaint?.();
             }}
+          />
+          <AttachmentPreview
+            open={isPreviewOpen}
+            onOpenChange={setIsPreviewOpen}
+            item={previewItem}
+            canDownload={[
+              "ADMINISTRATOR",
+              "WARD_OFFICER",
+              "MAINTENANCE_TEAM",
+            ].includes(user?.role)}
           />
           {task.status === "IN_PROGRESS" && (
             <Card>
@@ -417,7 +590,10 @@ const TaskDetails: React.FC = () => {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Complete Task
                   </Button>
-                  <Button variant="outline" onClick={() => setIsPhotoModalOpen(true)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsPhotoModalOpen(true)}
+                  >
                     <Camera className="h-4 w-4 mr-2" />
                     Add Completion Photo
                   </Button>
@@ -438,25 +614,33 @@ const TaskDetails: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm font-medium">Assigned By</p>
-                <p className="text-gray-600">
-                  {typeof task.submittedBy === "object" && task.submittedBy
-                    ? task.submittedBy.fullName ||
-                      task.submittedBy.name ||
-                      "Unknown"
-                    : task.submittedBy}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Contact Phone</p>
-                <div className="flex items-center space-x-2">
-                  <p className="text-gray-600">{task.contactPhone}</p>
-                  <Button size="sm" variant="outline">
-                    <Phone className="h-3 w-3" />
-                  </Button>
+              {raw?.contactName && (
+                <div className="flex items-center">
+                  <User className="h-4 w-4 mr-2 text-gray-400" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">{raw.contactName}</span>
+                    {raw?.submittedBy?.fullName && (
+                      <span className="text-xs text-gray-500">
+                        Registered User: {raw.submittedBy.fullName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center">
+                <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                <div className="flex flex-col">
+                  <span>{raw?.contactPhone || task.contactPhone}</span>
                 </div>
               </div>
+              {raw?.contactEmail && (
+                <div className="flex items-center">
+                  <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                  <div className="flex flex-col">
+                    <span>{raw.contactEmail}</span>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -399,6 +399,58 @@ const AdminUsers: React.FC = () => {
     }
   };
 
+  // Export users as JSON (respects role/status filters; applies search locally)
+  const handleExportUsers = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (roleFilter !== "all") params.append("role", roleFilter);
+      if (statusFilter) params.append("status", statusFilter);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/users/export?${params.toString()}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const json = await res.json();
+      const allUsers: Array<{
+        id: string;
+        fullName: string;
+        email: string;
+        role: string;
+        isActive: boolean;
+        createdAt: string;
+        updatedAt: string;
+      }> = json?.data?.users || [];
+
+      const searched = searchTerm
+        ? allUsers.filter(
+            (u) =>
+              u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              u.email.toLowerCase().includes(searchTerm.toLowerCase()),
+          )
+        : allUsers;
+
+      const blob = new Blob([JSON.stringify(searched, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `users-${new Date().toISOString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast({
+        title: "Export failed",
+        description: "Could not export users",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Filter users locally based on search term
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -434,9 +486,8 @@ const AdminUsers: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600">Manage all users in the system</p>
         </div>
-        <Button onClick={handleOpenAddDialog}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add New User
+        <Button onClick={handleExportUsers} variant="outline">
+          Export Users
         </Button>
       </div>
 
@@ -608,7 +659,6 @@ const AdminUsers: React.FC = () => {
                   <TableHead>Ward</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Complaints</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -657,41 +707,6 @@ const AdminUsers: React.FC = () => {
                         <p>Assigned: {user._count?.assignedComplaints || 0}</p>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleOpenEditDialog(user)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        {user.isActive ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeactivateUser(user.id)}
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleActivateUser(user.id)}
-                          >
-                            Activate
-                          </Button>
-                        )}
-                        {/* <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button> */}
-                      </div>
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -729,30 +744,6 @@ const AdminUsers: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>User Management Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="w-full">
-              Export Users
-            </Button>
-            <Button variant="outline" className="w-full">
-              Bulk Import
-            </Button>
-            <Button variant="outline" className="w-full">
-              User Reports
-            </Button>
-            <Button variant="outline" className="w-full">
-              Access Logs
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Add User Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
