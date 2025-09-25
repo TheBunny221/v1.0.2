@@ -28,6 +28,8 @@ interface PhotoFile {
   id: string;
 }
 
+const MAX_FILES = 10;
+
 const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   isOpen,
   onClose,
